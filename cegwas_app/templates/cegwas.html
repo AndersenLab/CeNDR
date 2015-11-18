@@ -1,0 +1,95 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="/static/css/bootstrap.css" />
+<!--     <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet"> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - microblog</title>
+  </head>
+    <body>
+
+<header>
+
+
+<nav class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/"> cegwas </a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+      <ul class="nav navbar-nav navbar-right">
+
+  <li class="dropdown">
+          <a href="/Research/" class="dropdown-toggle" data-toggle="dropdown">Research <b class="caret hidden-xs"></b></a>
+          <ul class="dropdown-menu hidden-xs">
+            <li><a href="/Research">Projects</a></li>
+            <li class="divider"></li>
+            <li><a href="/Research/Data">Data</a></li>
+            <li><a href="/Research/Software">Software</a></li>
+            <li><a href="/Research/Reagents">Reagents</a></li>
+            <li><a href="/Research/Protocols">Protocols</a></li>
+            <li class="divider"></li>
+            <li><a href="/Research/Funding">Funding</a></li>
+            <li><a href="/Research/Lab">The Laboratory</a></li>
+          </ul>
+          <ul class="visible-xs navbar-nav" style="width:150px">
+            <li><a href="/Research">Projects</a></li>
+            <li class="divider"></li>
+            <li><a href="/Research/Data/">Data</a></li>
+            <li class="divider"></li>
+            <li><a href="/Research/Software">Software</a></li>
+            <li class="divider"></li>
+            <li><a href="/Research/Reagents/">Reagents</a></li>
+            <li class="divider"></li>
+            <li><a href="/Research/Protocols/">Protocols</a></li>
+            <li class="divider"></li>
+            <li><a href="/Research/Funding/">Funding</a></li>
+            <li class="divider"></li>
+            <li><a href="/Research/Lab/">The Laboratory</a></li>
+          </ul>
+        </li>
+
+      <li><a href="/People/">People</a></li>
+      <li><a href="/Publications/">Publications</a></li>
+      <li><a href="/Outreach/">Outreach</a></li>           
+      <li><a href="/Contact/">Contact</a></li>
+
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+
+      
+</header>
+
+    <div class="page-content">
+      <div class="wrap">
+
+
+
+<div class="row">
+<div class="col-md-8">
+asdf
+    {% block content %}{% endblock content %}
+  </div>
+    {% block sidebar %}{% endblock sidebar %}
+</div>
+
+ 
+
+  </div>
+  </div>
+
+
+    </body>
+</html>
