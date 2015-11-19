@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  {% include "_includes/head.html" %}
+    <body>
+  {% include "_includes/navbar.html" %}
+     <div class="page-content">
+      <div class="wrap">
+
+
+
+<div class="container-fluid">
+  
+{% block content %}{% endblock %}
+
+  {% include "_includes/footer.html" %} 
+</div>
+  
+  </div><!-- closes wrap-->
+  </div><!-- closes page-content-->
+    </body>
+</html>

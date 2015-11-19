@@ -7,8 +7,8 @@ app = Flask(__name__)
 @app.route('/')
 def hello():
     user = {'nickname': 'Miguel'}  # fake user
-    return render_template('cegwas.html',
-      title='Home',
+    return render_template('home.html',
+      title='Cegwas',
       user=user)
 
 if __name__ == '__main__':
