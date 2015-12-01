@@ -6,6 +6,15 @@ body {
   text-align:left;
 }
 
+
+#map {
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  left:0;
+}
+
 .pub-img, .lab-member-photo {
   width:150px;
   float:left;

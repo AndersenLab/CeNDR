@@ -14,6 +14,18 @@
             <p class="hidden-xs" ><em>C. elegans</em> genome-wide association portal</p>
             <p class="visible-xs" style="text-align:center"><em>C. elegans</em> genome-wide association portal</p>
           </div>
+          <div>
+            {% if data1 %}
+            
+              <table>
+                {% for row in data1 %}
+                   <tr>
+                      {{ row }}
+                   </tr>
+                {% endfor %}
+              </table>
+            {% endif %}
+          </div>
       </div>
       </div>
   </div>

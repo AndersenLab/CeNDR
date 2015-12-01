@@ -4,3 +4,4 @@ Werkzeug
 distribute
 wsgiref
 flask-appconfig
+folium
