@@ -1,0 +1,33 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+<div class="row">
+      <div class="col-md-8">
+              <div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">Panel heading without title</div>
+            <div class="panel-body">
+              Panel content
+            </div>
+        </div>
+      </div>
+  </div>
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+var map = L.map('map').setView([51.505, -0.09], 13);
+
+L.tileLayer('https://api.tiles.mapbox.com/v1/{id}/cihqn0njh004v9nkpr55fl2q7.png?title=true&access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+    id: 'jpr7',
+    accessToken: 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg'
+}).addTo(map);
+</script>
+
+{% endblock %}
+https://api.mapbox.com/styles/v1/jpr7/cihqn0njh004v9nkpr55fl2q7.html?title=true&access_token=pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg#1.3777409364904711/24.470658181903005/-27.43916504817338/0

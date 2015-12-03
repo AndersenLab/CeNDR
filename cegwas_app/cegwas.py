@@ -5,6 +5,7 @@ import logging
 from flask import render_template
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
+import pandas as pd
 import sys
 
 app = Flask(__name__)
@@ -14,31 +15,41 @@ def main():
     title = "Cegwas"
     return render_template('home.html', **locals())
 
-def data(text_file):
-  with open(text_file, 'rU') as tsvin, open(text_file.rpartition('.')[0]+"_new.tsv", 'wb') as tsvout:
-    tsvin = csv.reader(tsvin, delimiter='\t')
-    count = 0
-    arr = []
-    elegans_map = folium.Map(location=[45.5236, -122.6750], tiles = 'Stamen Terrain')
-    elegans_map.create_map(path='home.html')
-    app.logger.info(elegans_map)
-    for row in tsvin:
-      if count == 0:
-        app.logger.info(row)
-        count += 1
+def data():
+  # with open(text_file, 'rU') as tsvin, open(text_file.rpartition('.')[0]+"_new.tsv", 'wb') as tsvout:
+  #   tsvin = csv.reader(tsvin, delimiter='\t')
+  countries_geo = r'/countries.json'
+  c_elegans= r'strains/processed/strain_info.tsv'
 
-      if count > 0:
-          arr.append(row)
-          elegans_map.simple_marker([row[1], row[2]], popup='Strain: {row[0]}, Isolation: {row[3]}, Location: {row[4]}')
+  c_elegans_data = pd.read_csv(c_elegans, sep='\t')
+
+  map = folium.Map(location=[48, -102], zoom_start=3)
+  map.geo_json(geo_path=countries_geo, data=c_elegans_data,
+             columns=['strain','longitude','latitude'],
+             key_on='feature.id',
+             fill_color='YlGn', fill_opacity=0.7, line_opacity=0.2,
+             legend_name='Strains')
+  map.create_map(path='map.html')
+  # count = 0
+  # arr = []
+
+  # for row in tsvin:
+  #   if count == 0:
+  #     app.logger.info(row)
+  #     count += 1
+
+  #   if count > 0:
+  #       arr.append(row)
+  #       elegans_map.simple_marker([row[1], row[2]], popup='Strain: {row[0]}, Isolation: {row[3]}, Location: {row[4]}')
 
 
-    return arr
+  return c_elegans_data
 
 @app.route('/map/')
 def map():
     title = "Map"
-    data1 = data('strains/processed/strain_info.tsv')
-    return render_template('home.html',
+    data()
+    return render_template('map.html',
       **locals())
 
             # tsvot.writerows([fixed_row])
