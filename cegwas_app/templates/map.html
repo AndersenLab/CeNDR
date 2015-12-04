@@ -13,21 +13,33 @@
             </div>
         </div>
       </div>
-  </div>
+</div>
 {% endblock %}
 
 
 {% block script %}
 
 <script>
-var map = L.map('map').setView([51.505, -0.09], 13);
 
-L.tileLayer('https://api.tiles.mapbox.com/v1/{id}/cihqn0njh004v9nkpr55fl2q7.png?title=true&access_token={accessToken}', {
-    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-    id: 'jpr7',
-    accessToken: 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg'
-}).addTo(map);
+  
+
+    ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
+    MB_ATTR = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+      '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="http://mapbox.com">Mapbox</a>';
+    MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
+    OSM_URL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+    var map = L.map('map').setView([60, -10], 2);
+
+  L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets'}).addTo(map);
+
+  L.marker([51.5, -0.09]).addTo(map)
+  L.marker([51.5, -0.29]).addTo(map)
+  L.marker([51.5, -0.19]).addTo(map)
+
+
 </script>
 
 {% endblock %}
-https://api.mapbox.com/styles/v1/jpr7/cihqn0njh004v9nkpr55fl2q7.html?title=true&access_token=pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg#1.3777409364904711/24.470658181903005/-27.43916504817338/0
