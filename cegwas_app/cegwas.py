@@ -2,13 +2,13 @@ import os
 import csv
 import folium
 import logging
-from flask import render_template
+from flask import render_template,request,send_from_directory
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import pandas as pd
 import sys
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='')
 
 @app.route('/')
 def main():
@@ -21,6 +21,11 @@ def map():
     title = "Map"
     return render_template('map.html',
       **locals())
+
+@app.route('/strain_info.tsv')
+def strain_locations():
+    title = "Locations"
+    # return send_from_directory(app.static_folder,request.path[1:], as_attachment=False)
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.

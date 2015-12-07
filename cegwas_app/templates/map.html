@@ -20,15 +20,17 @@
 {% block script %}
 
 <script>
-  d3.tsv("/strains/processed/strain_info.tsv").get(function(error, d) {
-    console.log(d);
-    // if (error) throw error;
-    // d.forEach(function(d) {
-    //   d.start = +d.start;
-    //   d.end = +d.end;
-    //   console.log(d.end);
-    // });
+  d3.tsv("strain_info.tsv", function(data) {
+    console.log(data);
   });
+  //   console.debug(d);
+  //   // if (error) throw error;
+  //   // d.forEach(function(d) {
+  //   //   d.start = +d.start;
+  //   //   d.end = +d.end;
+  //   //   console.log(d.end);
+  //   // });
+  // });
     ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
     MB_ATTR = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
