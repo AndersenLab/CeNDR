@@ -8,7 +8,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 import pandas as pd
 import sys
 
-app = Flask(__name__, static_folder='')
+app = Flask(__name__)
 
 @app.route('/')
 def main():
