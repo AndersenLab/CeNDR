@@ -7,10 +7,14 @@
       </div>
       <div class="col-md-4">
         <div class="panel panel-default">
-          <div class="panel-heading">Panel heading without title</div>
-            <div class="panel-body">
-              Panel content
-            </div>
+          <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Strain</strong> <div class="strain_name pull-right"></li>
+                <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right"></li>
+                <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right"></li>
+                <li class="list-group-item" style="height:150px;"><strong>Isolation</strong><br /> <div class="isolation"></li>
+                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></li>
+              </ul>
         </div>
       </div>
 </div>
@@ -20,17 +24,65 @@
 {% block script %}
 
 <script>
-  d3.tsv("strain_info.tsv", function(data) {
-    console.log(data);
-  });
-  //   console.debug(d);
-  //   // if (error) throw error;
-  //   // d.forEach(function(d) {
-  //   //   d.start = +d.start;
-  //   //   d.end = +d.end;
-  //   //   console.log(d.end);
-  //   // });
-  // });
+
+// Icons
+var icon_norm = L.icon({
+    iconUrl: '/static/img/icons/marker.png',
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [-3, -76],
+    shadowSize: [68, 95],
+    shadowAnchor: [22, 94]
+});
+
+var icon_hover = L.icon({
+    iconUrl: '/static/img/icons/selected.png',
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [-3, -76],
+    shadowSize: [68, 95],
+    shadowAnchor: [22, 94]
+});
+
+// Default click_s
+var click_s = {
+  target: {
+    options: {strain: "", loc: "", isolation: ""},
+    setIcon: function(){},
+  },
+  latlng: { lat: "", lon: ""},
+}
+
+function set_panel_content(m) {
+  // Propogates side panel with strain information
+  click_s.target.setIcon(icon_norm)
+  s = m.target.options;
+  m.target.setIcon(icon_hover)
+  strain = s.strain;
+  loc = s.location;
+  isolation = s.isolation;
+
+  $(".strain_name").text(strain);
+  $(".location").text(loc);
+  $(".lat").text(m.latlng.lat);
+  $(".lng").text(m.latlng.lng);
+  $(".isolation").text(isolation);
+}
+
+function set_click_locked_content(m) {
+  // Propogates side panel with click-locked content.
+  click_s.target.setIcon(icon_norm)
+  click_s = m;
+  set_panel_content(click_s)
+}
+
+function restore_click_locked_content(m) {
+  // Propogates side panel with click-locked content.
+  m.target.setIcon(icon_norm)
+  click_s.target.setIcon(icon_norm)
+  set_panel_content(click_s)
+}
+
     ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
     MB_ATTR = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
       '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
@@ -39,17 +91,26 @@
     OSM_URL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-    var map = L.map('map').setView([60, -10], 2);
+    var map = L.map('map').setView([30, -35], 2);
 
   L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets'}).addTo(map);
-  // d3.tsv("/strains/processed/straing_info.tsv").get(function(error, d) {
-  //   if (error) throw error;
-  //   d.forEach(function(d) {
-  //     d.start = +d.start;
-  //     d.end = +d.end;
-  //   });
-  //   data = d;
-  //   // window.alert(d);
+  strain_info = [];
+   d3.tsv("/static/data/strain_info.tsv").get(function(error, data) {
+     if (error) throw error;
+     strain_info = data;
+     data.forEach(function(d) {
+     if (d.latitude != "NA" & d.latitude != "") {
+       L.marker([d.latitude, d.longitude], { icon: icon_norm, 
+                                             strain: d.strain,
+                                             isolation : d.isolation,
+                                             loc : d.location }).addTo(map)
+                                            .on("click", set_click_locked_content)
+                                            .on('mouseover', set_panel_content)
+                                            .on('mouseout', restore_click_locked_content)
+     }
+     });
+
+   });
 
 
 </script>
