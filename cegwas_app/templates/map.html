@@ -57,7 +57,7 @@ var click_s = {
 function set_panel_from_search(m) {
   click_s.target.setIcon(icon_norm)
   s = m.layer.options
-  $(".strain").text(s.title);
+  $(".strain").html("<a href='/strain/" + s.title + "'>" + s.title + "</a>");
   $(".location").text(s.loc);
   $(".lat").text(m.latlng.lat);
   $(".lng").text(m.latlng.lng);
@@ -73,7 +73,7 @@ function set_panel_content(m) {
   loc = s.loc;
   isolation = s.isolation;
 
-  $(".strain").text(strain);
+  $(".strain").html("<a href='/strain/" + s.title + "'>" + s.title + "</a>");
   $(".location").text(loc);
   $(".lat").text(m.latlng.lat);
   $(".lng").text(m.latlng.lng);
