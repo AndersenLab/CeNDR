@@ -20,6 +20,14 @@ def map():
     title = "Map"
     return render_template('map.html', **locals())
 
+
+@app.route('/strain/<strain_name>/')
+def strain(strain_name):
+    title = strain_name
+    print(strain_name)
+    return render_template('strain.html', **locals())
+
+
 @app.route('/variants/<chrom>/<start>/<end>/')
 def variants(chrom, start, end):
     vcf = VCF("static/vcf/union_merged.vcf.gz")
