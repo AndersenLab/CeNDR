@@ -1,0 +1,24 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+<div class="row">
+      <div class="col-md-8">
+              <h2>{{ strain_name }}</h2><hr />
+      </div>
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
+              <ul class="list-group">
+                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div></li>
+                <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right"></div></li>
+                <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right"></div></li>
+                <li class="list-group-item" style="height:150px;"><strong>Isolation</strong><br /> <div class="isolation"></div></li>
+                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div></li>
+              </ul>
+        </div>
+      </div>
+</div>
+{% endblock %}
+
+
+{% block script %}{% endblock %}
