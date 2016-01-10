@@ -1,0 +1,146 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+<script src="/static/js/handsontable.full.min.js"></script>
+<link rel="stylesheet" media="screen" href="/static/css/handsontable.full.min.css">
+{% endblock %}
+
+{% block content %}
+<form method="POST">
+
+<div class="row">
+
+<div class="col-md-6">
+<h2>Form</h2>
+
+
+  <fieldset class="form-group">
+    <label for="Email">Email address</label>
+    <input type="email" class="form-control" id="Email" placeholder="Enter email">
+    <small class="text-muted">We'll never share your email with anyone else.</small>
+  </fieldset>
+  <fieldset class="form-group">
+    <label for="Email">Report Name</label>
+    <input type="text" class="form-control" id="ReportName" placeholder="">
+    <small class="text-muted">Your report will be available at /(report name)/</small>
+  </fieldset>
+
+  
+  <label>Release</label>
+  <div class="radio">
+    <label>
+      <input type="radio" name="Release" value="public">
+      Public <small class="text-muted" checked>Your report will be publicly available.</small>
+    </label>
+  </div>
+
+  <div class="radio">
+    <label>
+      <input type="radio" name="Release" value="embargo">
+      Embargo for 6 months
+    </label>
+  </div>
+
+  <div class="radio">
+    <label>
+      <input type="radio" name="Release" value="embargo">
+      Embargo for 1 year
+    </label>
+  </div>
+
+    <div class="radio">
+    <label>
+      <input type="radio" name="Release" value="private">
+      Private <small class="text-muted">Your report will be deleted after 30 days.</small>
+    </label>
+  </div>
+
+  <label>Data</label>
+
+
+
+</div>
+
+<div class="col-md-6">
+<h2>Submit Data</h2>
+</div>
+
+</div>
+<div class="row">
+      <div class="col-md-12">
+            <div id="entry"></div>
+            <div class="pull-right">
+            <br />
+            <button type="submit" class="btn btn-primary btn-lg submit">Submit</button>
+            </div>
+      </div>
+
+</div>
+</form>
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+
+
+  var data = [
+    ["STRAIN", "trait1", "trait2", "trait3"],
+  ];
+
+var render_bold = function (instance, td, row, col, prop, value, cellProperties) {
+  Handsontable.renderers.TextRenderer.apply(this, arguments);
+  td.style.fontWeight = 'bold';
+};
+
+var render_header = function (instance, td, row, col, prop, value, cellProperties) {
+  Handsontable.renderers.TextRenderer.apply(this, arguments);
+  td.style.fontWeight = 'bold';
+  td.style.backgroundColor = '#EAEAEA';
+};
+
+
+var container = document.getElementById('entry');
+var hot = new Handsontable(container,
+ {
+   data: data,
+   height: 200,
+   colHeaders: false,
+   stretchH: 'all',
+   columnSorting: true,
+   contextMenu: true,
+   fixedRowsTop: 1,
+   minSpareRows: 5,
+   minSpareCols: 1,
+
+   cells: function (row, col, prop) {
+      var cellProperties = {};
+      
+      if (row === 0) {
+        cellProperties.renderer = render_header;
+      }
+      if (col === 0) {
+        cellProperties.renderer = render_bold;
+      }
+      if (col === 0 && row == 0) {
+        cellProperties.readOnly = true;
+        cellProperties.renderer = render_header;
+      }
+    return cellProperties
+  }
+  });
+
+$("form").submit(function(e) {
+  e.preventDefault();
+  $(".submit").addClass("disabled")
+  console.log(e);
+  data = hot.getData();
+})
+
+
+
+
+</script>
+
+{% endblock %}

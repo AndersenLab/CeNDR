@@ -20,6 +20,11 @@ def map():
     title = "Map"
     return render_template('map.html', **locals())
 
+@app.route('/gwa/')
+def gwa():
+    title = "Run Association"
+    return render_template('gwa.html', **locals())
+
 @app.route('/variants/<chrom>/<start>/<end>/')
 def variants(chrom, start, end):
     vcf = VCF("static/vcf/union_merged.vcf.gz")
