@@ -58,3 +58,6 @@ credentials.csv
 
 # PyBuilder
 target/
+
+#Random
+*.DS_Store

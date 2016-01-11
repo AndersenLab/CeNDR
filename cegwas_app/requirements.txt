@@ -1,7 +1,11 @@
-Flask
-Jinja2
-Werkzeug
+boto3
+cyvcf2
 distribute
-wsgiref
+Flask
 flask-appconfig
 folium
+Jinja2
+re
+requests
+Werkzeug
+wsgiref
