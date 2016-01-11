@@ -11,7 +11,7 @@
 <div class="row">
 
 <div class="col-md-6">
-<h2>Form</h2>
+<h2>Perform Mapping</h2>
 
 
   <fieldset class="form-group">
@@ -21,16 +21,16 @@
   </fieldset>
   <fieldset class="form-group">
     <label for="Email">Report Name</label>
-    <input type="text" class="form-control" id="ReportName" placeholder="">
-    <small class="text-muted">Your report will be available at /(report name)/</small>
+    <input type="text" class="form-control" id="ReportName" placeholder=""  autocomplete='off'>
+    <small class="text-muted avail_url"></small>
   </fieldset>
 
   
   <label>Release</label>
   <div class="radio">
     <label>
-      <input type="radio" name="Release" value="public">
-      Public <small class="text-muted" checked>Your report will be publicly available.</small>
+      <input type="radio" name="Release" value="public" checked>
+      Public <small class="text-muted">Your report will be publicly available.</small>
     </label>
   </div>
 
@@ -38,20 +38,20 @@
     <label>
       <input type="radio" name="Release" value="embargo">
       Embargo for 6 months
-    </label>
+    </label> <small class="text-muted embargo6"></small>
   </div>
 
   <div class="radio">
     <label>
       <input type="radio" name="Release" value="embargo">
       Embargo for 1 year
-    </label>
+    </label> <small class="text-muted embargo12"></small>
   </div>
 
     <div class="radio">
     <label>
       <input type="radio" name="Release" value="private">
-      Private <small class="text-muted">Your report will be deleted after 30 days.</small>
+      Private <small class="text-muted">Your report will be kept private.</small>
     </label>
   </div>
 
@@ -69,6 +69,7 @@
 <div class="row">
       <div class="col-md-12">
             <div id="entry"></div>
+            <small class="text-muted">Copy and Paste your dataset into the table above. You can modify trait names.</small>
             <div class="pull-right">
             <br />
             <button type="submit" class="btn btn-primary btn-lg submit">Submit</button>
@@ -84,6 +85,17 @@
 
 <script>
 
+
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr, len;
+  if (this.length === 0) return hash;
+  for (i = 0, len = this.length; i < len; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 10) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+};
 
   var data = [
     ["STRAIN", "trait1", "trait2", "trait3"],
@@ -129,13 +141,59 @@ var hot = new Handsontable(container,
       }
     return cellProperties
   }
+
+
   });
+
+var update_url_message = function(e) {
+  report_name = $("#ReportName").val();
+  release = $("input[name=Release]:checked").val()
+  if (report_name.length > 0) {
+    if (release == "public") {
+      report_url = "/report/" + report_name + "/";
+    } else {
+      report_url = "/report/" + report_name.hashCode() + "/";
+    }
+    $(".avail_url").html("Your report will be available at " + report_url)
+  } else {
+    $(".avail_url").html("")
+  }
+}
+
+$("form").on('change', update_url_message);
+$("form").on('keyup', update_url_message);
+
 
 $("form").submit(function(e) {
   e.preventDefault();
-  $(".submit").addClass("disabled")
+  //$(".submit").addClass("disabled")
   console.log(e);
+
+  user_email = $("#Email").val()
+  report_name = $("#ReportName").val()
+  release = $("input[name=Release]:checked").val()
+
   data = hot.getData();
+  $.ajax({
+     url:"/process_gwa/",
+     data: JSON.stringify({"email":user_email,
+            "report_name": report_name,
+            "release": release,
+            "trait_data": hot.getData(),
+            "report_hash": report_name.hashCode() }),
+     method: "POST",
+     contentType: 'application/json;charset=UTF-8'
+     }
+     ).done(function(msg) {
+        $(".alert_row").css("display:Visible")
+        $(".alert").addClass("alert-success")
+        $(".content").prepend("<div class='row'><div class='col-md-12'><div class='alert alert-success' role='alert'><strong>Success!</strong> Now mapping. Your report will be available at <a href='" + report_url + "'>" + report_url + "</a>. Redirecting you there now.</div></div></div>")
+        setTimeout(
+        function() 
+        {
+          window.location.href = report_url;
+        }, 5000);
+  });
 })
 
 

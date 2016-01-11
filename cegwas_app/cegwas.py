@@ -1,7 +1,7 @@
 import os
 import csv
 import logging
-from flask import render_template, request, send_from_directory, url_for
+from flask import render_template, request, send_from_directory, url_for, request
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
@@ -26,6 +26,18 @@ def gwa():
     title = "Run Association"
     return render_template('gwa.html', **locals())
 
+
+@app.route('/process_gwa/', methods=['POST'])
+def process_gwa():
+    title = "Run Association"
+    req = request.get_json()
+    print req
+    return 'success'
+
+@app.route("/report/<name>/")
+def report(name):
+    title = name
+    return name
 
 @app.route('/strain/<strain_name>/')
 def strain(strain_name):
