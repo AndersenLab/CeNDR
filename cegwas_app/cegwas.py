@@ -24,7 +24,6 @@ def map():
 @app.route('/gwa/')
 def gwa():
     title = "Run Association"
-    print(strain_name)
     return render_template('gwa.html', **locals())
 
 
