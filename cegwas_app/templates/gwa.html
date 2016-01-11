@@ -103,6 +103,16 @@ String.prototype.hashCode = function() {
   return Math.abs(hash);
 };
 
+function slugify(text)
+{
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start of text
+    .replace(/-+$/, '');            // Trim - from end of text
+}
+
   var data = [
     ["STRAIN", "trait1", "trait2", "trait3"],
   ];
@@ -152,7 +162,7 @@ var hot = new Handsontable(container,
   });
 
 var update_url_message = function(e) {
-  report_name = $("#ReportName").val();
+  report_name = slugify($("#ReportName").val());
   release = $("input[name=Release]:checked").val()
   if (report_name.length > 0) {
     if (release == "public") {
@@ -183,7 +193,8 @@ $("form").submit(function(e) {
   $.ajax({
      url:"/process_gwa/",
      data: JSON.stringify({"email":user_email,
-            "report_name": report_name,
+            "report_name": $("#ReportName").val(),
+            "report_slug": slugify(report_name),
             "release": release,
             "trait_data": hot.getData(),
             "report_hash": report_name.hashCode() }),
