@@ -5,46 +5,48 @@
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/"> cegwas-web </a>
+      <a class="navbar-brand" href="#">Cegwas-Web</a>
     </div>
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
+
+<!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
-      <ul class="nav navbar-nav navbar-right">
 
-          <li class="dropdown">
-                <a href="/Research/" class="dropdown-toggle" data-toggle="dropdown">Research <span class="caret hidden-xs"></span></a>
-                  <ul class="dropdown-menu hidden-xs">
-                    <li><a href="/Research">Projects</a></li>
-                  </ul>
-                  <ul class="visible-xs navbar-nav" style="width:150px">
-                    <li><a href="/Research">Projects</a></li>
-                  </ul>
-          </li>
-
-          <li class="dropdown">
-                <a href="/Strains/" class="dropdown-toggle" data-toggle="dropdown">Strains <b class="caret hidden-xs"></b></a>
-                  <!---There's two for each link for when the website is skinny the links are hidden inside the hamburger icon -->
-                  <ul class="dropdown-menu hidden-xs"> 
-                    <li><a href="/map/">Map</a></li>
-                 </ul>
-                  <ul class="visible-xs navbar-nav" style="width:150px">
-                    <li><a href="/map/">Map</a></li>
-                  </ul>
-          </li>
-                 
-          <li><a href="/gwa/">Perform Mapping</a></li>
-          <li><a href="/Contact/">Contact</a></li>
-
+      <ul class="nav navbar-nav navbar-right" >
+        <li class="dropdown">
+          <a href="/gwa/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">GWA <span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a href="/gwa/">Perform Mapping</a></li>
+            <li><a href="/strains/">Public Mappings</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Strains <span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a href="/map/">Strain Map</a></li>
+            <li><a href="/strains/">Strain List</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Submit Strains</a></li>
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Data <span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href="#">Sequence Data</a></li>
+            <li><a href="#">Variant Browser</a></li>
+            <li><a href="#">Application Programming Interface (API)</a></li>
+          </ul>
+        </li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>
+
 </header>
