@@ -1,10 +1,11 @@
-boto3
 cyvcf2
 distribute
 Flask
 flask-appconfig
 folium
 Jinja2
+peewee
+psycopg2
 re
 requests
 Werkzeug
