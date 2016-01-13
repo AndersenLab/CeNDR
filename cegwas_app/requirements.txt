@@ -6,7 +6,7 @@ folium
 Jinja2
 peewee
 psycopg2
-re
 requests
 Werkzeug
 wsgiref
+awesome-slugify

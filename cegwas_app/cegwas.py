@@ -28,7 +28,7 @@ def map():
 def gwa():
     title = "Run Association"
 
-    strain_list = json.dumps([x.strain for x in strain.select().filter(strain.isotype != None).execute()])
+    strain_list = json.dumps([x.strain for x in strain.select(strain.isotype).filter(strain.isotype != None).execute()])
     print(strain_list)
     return render_template('gwa.html', **locals())
 
@@ -58,15 +58,28 @@ def validate_url():
     else:
         return json.dumps({'report_name': report_out})
 
+
 @app.route("/report/<name>/")
 def report(name):
     title = name
     return name
 
+
+@app.route('/strain/')
+def strain_listing_page():
+    title = "Strain List"
+    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
+    return render_template('strain_listing.html', **locals())
+
+
+# [ ] - change URL schema to be "/isotype/strain/"; Use url-for!
+# [ ] - Add breadcrumbs to strain page.
+# [ ] - Highlight isotype using ?=isotype get param
+
 @app.route('/strain/<strain_name>/')
 def strain_page(strain_name):
     title = strain_name
-    print(strain_name)
+    strain_isotype = strain.get(strain.strain == strain_name).isotype
     return render_template('strain.html', **locals())
 
 
@@ -82,7 +95,7 @@ def variants(chrom, start, end):
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
-    port = int(os.environ.get('PORT', 5001))
+    port = int(os.environ.get('PORT', 5000))
     app.debug=True
     app.config['SECRET_KEY'] = '<123>'
     toolbar = DebugToolbarExtension(app)
