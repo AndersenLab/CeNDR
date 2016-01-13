@@ -77,6 +77,7 @@ DISCLAIMER: Lorem ipsum dolor sit amet, consectetur adipiscing elit. Plane idem,
 <div class="row">
       <div class="col-md-12">
             <div id="entry"></div>
+            <div class="small">
             <div class="pull-right">
             <br />
             <button type="submit" class="btn btn-primary btn-lg submit">Submit</button>
@@ -129,6 +130,19 @@ var render_header = function (instance, td, row, col, prop, value, cellPropertie
   td.style.backgroundColor = '#EAEAEA';
 };
 
+strain_list = {{strain_list| safe }};
+incorrect_strains = [];
+// Strain Validator
+strainValidator = function (value, callback) {
+    setTimeout(function(){
+      if (strain_list.includes(value)) {
+        callback(true);
+      }
+      else {
+        callback(false);
+      }
+    }, 1);
+  };
 
 var container = document.getElementById('entry');
 var hot = new Handsontable(container,
@@ -151,6 +165,7 @@ var hot = new Handsontable(container,
       }
       if (col === 0) {
         cellProperties.renderer = render_bold;
+        cellProperties.validator = strainValidator;
       }
       if (col === 0 && row == 0) {
         cellProperties.readOnly = true;

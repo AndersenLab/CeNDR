@@ -6,6 +6,7 @@ from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
 from cyvcf2 import VCF
+from models import *
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -24,6 +25,9 @@ def map():
 @app.route('/gwa/')
 def gwa():
     title = "Run Association"
+
+    strain_list = json.dumps([x.strain for x in strain.select().filter(strain.isotype != None).execute()])
+    print(strain_list)
     return render_template('gwa.html', **locals())
 
 
@@ -40,7 +44,7 @@ def report(name):
     return name
 
 @app.route('/strain/<strain_name>/')
-def strain(strain_name):
+def strain_page(strain_name):
     title = strain_name
     print(strain_name)
     return render_template('strain.html', **locals())
@@ -58,7 +62,7 @@ def variants(chrom, start, end):
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 5001))
     app.debug=True
     app.config['SECRET_KEY'] = '<123>'
     toolbar = DebugToolbarExtension(app)
