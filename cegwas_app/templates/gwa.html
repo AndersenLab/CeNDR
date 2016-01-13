@@ -135,7 +135,7 @@ incorrect_strains = [];
 // Strain Validator
 strainValidator = function (value, callback) {
     setTimeout(function(){
-      if (strain_list.includes(value)) {
+      if (strain_list.includes(value) || value == "") {
         callback(true);
       }
       else {
@@ -166,6 +166,7 @@ var hot = new Handsontable(container,
       if (col === 0) {
         cellProperties.renderer = render_bold;
         cellProperties.validator = strainValidator;
+        cellProperties.autoComplete = strain_list;
       }
       if (col === 0 && row == 0) {
         cellProperties.readOnly = true;
