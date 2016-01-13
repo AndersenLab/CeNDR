@@ -54,6 +54,7 @@ class report(Model):
     """
     release = IntegerField(choices=((0, "public"), (1, "embargo6"), (2, "embargo12"), (3, "private")))
     report_name = CharField(index=True, max_length=50, unique=True)
+    report_slug = CharField(index=True)
     email = CharField(index=True)
     submission_date = DateTimeField(default=datetime.datetime.now)
     submission_complete = DateTimeField()
