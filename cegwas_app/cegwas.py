@@ -6,6 +6,8 @@ from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
 from cyvcf2 import VCF
+from slugify import slugify
+import hashlib
 from models import *
 
 app = Flask(__name__, static_url_path='/static')
@@ -37,6 +39,24 @@ def process_gwa():
     req = request.get_json()
     print req
     return 'success'
+
+
+@app.route('/validate_url/', methods=['POST'])
+def validate_url():
+    """
+        Generates URLs from report names and validates them.
+    """
+    req = request.get_json()
+
+    # [ ] - Add Code to check against database that report (slug) is not already taken.
+
+    report_out = slugify(req["report_name"])
+    if req["release"] != "public":
+        report_out = str(hashlib.sha224(req["report_name"]).hexdigest()[0:20])
+    if len(req["report_name"]) > 40:
+        return json.dumps({'error': "Report name may not be > 40 characters."})
+    else:
+        return json.dumps({'report_name': report_out})
 
 @app.route("/report/<name>/")
 def report(name):

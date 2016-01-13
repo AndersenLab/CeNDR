@@ -19,9 +19,10 @@
     <input type="email" class="form-control" id="Email" placeholder="Enter email">
     <small class="text-muted">We'll never share your email with anyone else.</small>
   </fieldset>
-  <fieldset class="form-group">
-    <label for="Email">Report Name</label>
+  <fieldset class="form-group has-feedback">
+    <label for="ReportName">Report Name</label>
     <input type="text" class="form-control" id="ReportName" placeholder=""  autocomplete='off'>
+    <span class="glyphicon glyphicon-remove form-control-feedback report_name_error has-error" style="display: None;" aria-hidden="true"></span>
     <small class="text-muted avail_url"></small>
   </fieldset>
 
@@ -181,15 +182,37 @@ var hot = new Handsontable(container,
 var update_url_message = function(e) {
   report_name = slugify($("#ReportName").val());
   release = $("input[name=Release]:checked").val()
+
+
+  // Validate report name.
   if (report_name.length > 0) {
-    if (release == "public") {
-      report_url = "/report/" + report_name + "/";
-    } else {
-      report_url = "/report/" + report_name.hashCode() + "/";
+  $.ajax({
+   url:"/validate_url/",
+   data: JSON.stringify(
+          {"report_name": $("#ReportName").val(),
+           "release": release }),
+   method: "POST",
+   contentType: 'application/json;charset=UTF-8'
+   }).done(function(msg) {
+      msg = JSON.parse(msg);
+      m = msg;
+      console.log(m);
+      if ("error" in msg) {
+        // Error - report name is too long.
+        $("#ReportName").parent().addClass("has-error");
+        $(".report_name_error").fadeIn();
+        $(".avail_url").html(msg["error"]).addClass("has-error");
+      } else {
+        $(".report_name_error").fadeOut();
+        $("#ReportName").parent().removeClass("has-error");
+      report_url = "/report/" + msg["report_name"] + "/";
+      $(".avail_url").html("Your report will be available at " + report_url)
     }
-    $(".avail_url").html("Your report will be available at " + report_url)
-  } else {
-    $(".avail_url").html("")
+   });
+ } else {
+    $("#ReportName").parent().removeClass("has-error");
+    $(".report_name_error").fadeOut();
+    $(".avail_url").html("");
   }
 }
 
