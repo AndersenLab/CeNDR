@@ -3,8 +3,17 @@ from peewee import *
 import re
 import requests
 import json
+import datetime
 
+#=======#
+# Setup #
+#=======#
 credentials = json.loads(open("credentials.json", 'r').read())
+reset_db = True
+
+#==========#
+# Database #
+#==========#
 
 db = PostgresqlDatabase(
     'andersen',
@@ -22,8 +31,9 @@ booldict = {"TRUE": True, "FALSE": False}
 
 
 class strain(Model):
-
-    """C Elegans strain complete info database"""
+    """
+        C. Elegans strain information database
+    """
     strain = CharField(index=True)
     isotype = CharField(null=True, index=True)
     longitude = FloatField(null=True)
@@ -39,26 +49,73 @@ class strain(Model):
 
 
 class report(Model):
-
-    """C Elegans strain complete info database"""
-    submission = DateTimeField(default=datetime.datetime.now)
-    report_name = CharField(index=True)
+    """
+        Reports
+    """
+    release = IntegerField(choices=((0, "public"), (1, "embargo6"), (2, "embargo12"), (3, "private")))
+    report_name = CharField(index=True, max_length=50, unique=True)
     email = CharField(index=True)
+    submission_date = DateTimeField(default=datetime.datetime.now)
+    submission_complete = DateTimeField()
+    version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
+
+    class Meta:
+        database = db
+
+
+class snp(Model):
+    """
+        Table of strain genotypes
+    """
+    strain = ForeignKeyField(strain)
+    chrom = CharField(index=True)
+    pos = IntegerField(index=True)
+    allele = IntegerField()
+    allele_base = CharField()
+    version = IntegerField(choices=((0, "snps 2.0")))  # Version of Snpset
 
     class Meta:
         database = db
 
 
 class trait(Model):
-
-    """ Model for representing trait data """
-    report = ForeignKeyField(report, related_name='report')
+    """ 
+        Initially, trait data only contains:
+          -report
+          -strain
+          -name (trait name)
+          -value (value of trait)
+    """
+    report = ForeignKeyField(report)
     strain = ForeignKeyField(strain)
+    name = CharField(index=True)
     value = DecimalField()
 
+    class Meta:
+        database = db
+
+
+class mapping(Model):
+
+    """ Results of mappings. Unique on peak IDs and markers. """
+    trait = ForeignKeyField(trait)
+    snp = ForeignKeyField(snp)
+    variance_explained = DecimalField()
+    log10p = DecimalField()
+    BF = DecimalField()
+    significant = BooleanField()
+    interval_start = IntegerField()
+    interval_end = IntegerField()
+
+    class Meta:
+        database = db
+
+
+if reset_db:
+    db.drop_tables([trait, report, mapping, snp], safe=True, cascade=True)
 
 db.drop_tables([strain], safe=True)
-db.create_tables([strain, report, trait], safe=True)
+db.create_tables([strain, report, trait, mapping, snp], safe=True)
 
 header = ["strain", "isotype", "longitude", "latitude", "isolation", "location", "prev_names",
           "warning_msg", "sequenced"]
