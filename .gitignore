@@ -61,3 +61,5 @@ target/
 
 #Random
 *.DS_Store
+
+credentials.json
