@@ -195,10 +195,8 @@ var update_url_message = function(e) {
    contentType: 'application/json;charset=UTF-8'
    }).done(function(msg) {
       msg = JSON.parse(msg);
-      m = msg;
-      console.log(m);
       if ("error" in msg) {
-        // Error - report name is too long.
+        // Error
         $("#ReportName").parent().addClass("has-error");
         $(".report_name_error").fadeIn();
         $(".avail_url").html(msg["error"]).addClass("has-error");
@@ -249,7 +247,7 @@ $("form").submit(function(e) {
         function() 
         {
           window.location.href = report_url;
-        }, 5000);
+        }, 50);
   });
 })
 
