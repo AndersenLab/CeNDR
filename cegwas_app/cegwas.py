@@ -8,7 +8,9 @@ import sys
 from cyvcf2 import VCF
 from slugify import slugify
 import hashlib
+import IPython
 from models import *
+
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -28,7 +30,7 @@ def map():
 def gwa():
     title = "Run Association"
 
-    strain_list = json.dumps([x.strain for x in strain.select(strain.isotype).filter(strain.isotype != None).execute()])
+    strain_list = json.dumps([x.strain for x in strain.select(strain.strain).filter(strain.isotype.is_null() == False).execute()])
     print(strain_list)
     return render_template('gwa.html', **locals())
 
@@ -100,3 +102,4 @@ if __name__ == '__main__':
     app.config['SECRET_KEY'] = '<123>'
     toolbar = DebugToolbarExtension(app)
     app.run(host='0.0.0.0', port=port)
+
