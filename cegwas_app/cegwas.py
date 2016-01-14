@@ -69,19 +69,30 @@ def report(name):
 
 @app.route('/strain/')
 def strain_listing_page():
-    title = "Strain List"
+    title = "Wild Isolates"
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('strain_listing.html', **locals())
 
 
-# [ ] - change URL schema to be "/isotype/strain/"; Use url-for!
-# [ ] - Add breadcrumbs to strain page.
+# [X] - change URL schema to be "/isotype/strain/"; Use url-for!
+# [X] - Add breadcrumbs to strain page.
+# [ ] - Add 'sister strains (shared isotypes)' to strain page.
 # [ ] - Highlight isotype using ?=isotype get param
 
-@app.route('/strain/<strain_name>/')
-def strain_page(strain_name):
-    title = strain_name
-    strain_isotype = strain.get(strain.strain == strain_name).isotype
+@app.route('/strain/<isotype_name>/')
+def isotype_page(isotype_name):
+    title = isotype_name + " | isotype"
+    page_type = "isotype"
+    obj = isotype_name
+    records = strain.get(strain.isotype == isotype_name)
+    return render_template('strain.html', **locals())
+
+@app.route('/strain/<isotype_name>/<strain_name>/')
+def strain_page(isotype_name, strain_name):
+    title = strain_name + " | strain"
+    page_type = "strain"
+    obj = strain_name
+    rec = strain.get(strain.strain == strain_name)
     return render_template('strain.html', **locals())
 
 

@@ -1,19 +1,51 @@
 {% extends "_layouts/default.html" %}
 
+{% block style %}
+.tab-pane {
+
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-radius: 0px 0px 5px 5px;
+    padding: 5px;
+}
+
+.nav-tabs {
+    margin-bottom: 0;
+}
+{% endblock %}
+
 {% block content %}
 <div class="row">
       <div class="col-md-8">
-              <h2>{{ strain_isotype }} > {{ strain_name }}</h2><hr />
+          <h2>{{ obj }}<small>&nbsp;&nbsp;{% if page_type == "strain" %}strain{% else %}isotype{% endif %}</small></h2>
+          <ol class="breadcrumb">
+            <li><a href="{{ url_for('main') }}">Home</a></li>
+            <li><a href="{{ url_for('strain_listing_page') }}">strain</a></li>
+            {% if page_type == "strain" %}
+            <li><a href="{{ url_for('isotype_page', isotype_name=rec.isotype) }}" data-toggle="tooltip" data-placement="bottom" title="Isotype">{{ rec.isotype }}</a></li>
+            {% endif %}
+            <li class="active" data-toggle="tooltip"  data-placement="bottom" title="{{ page_type }}">{{ obj }}</li>
+          </ol>
+
+<h4>Data</h4>
+<p>Instructions for Downloading.../accessing in different ways</p>
+
+<h4>Mappings / Phenotypes</h4>
+<p>Show users mapping results</p>
+
       </div>
       <div class="col-md-4">
         <div class="panel panel-default">
-          <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
+          <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>{{ page_type }} Information</strong></div>
               <ul class="list-group">
                 <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div></li>
+                {% if page_type == "strain" %}
                 <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right"></div></li>
                 <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right"></div></li>
                 <li class="list-group-item" style="height:150px;"><strong>Isolation</strong><br /> <div class="isolation"></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div></li>
+                {% endif %}
               </ul>
         </div>
       </div>
@@ -21,4 +53,13 @@
 {% endblock %}
 
 
-{% block script %}{% endblock %}
+{% block script %}
+<script>
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
+</script>
+
+{% endblock %}
