@@ -24,6 +24,9 @@ class strain(Model):
     warning_msg = CharField(null=True)
     sequenced = BooleanField()
 
+    def __repr__(self):
+        return ':'.join([self.isotype, self.strain])
+
     class Meta:
         database = db
 

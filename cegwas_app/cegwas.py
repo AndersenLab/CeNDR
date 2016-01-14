@@ -23,6 +23,7 @@ def main():
 @app.route('/map/')
 def map():
     title = "Map"
+    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).execute())
     return render_template('map.html', **locals())
 
 
