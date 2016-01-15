@@ -63,7 +63,7 @@ var click_s = {
 function set_panel_from_search(m) {
   click_s.target.setIcon(icon_norm)
   s = m.layer.options
-  $(".strain").html("<a href='/strain/" + s.title + "'>" + s.title + "</a>");
+  $(".strain").html("<a href='/strain/" + s.isotype + "/" + s.strain + "'>" + s.strain + "</a>");
   $(".location").text(s.loc);
   $(".lat").text(m.latlng.lat);
   $(".lng").text(m.latlng.lng);
@@ -75,11 +75,11 @@ function set_panel_content(m) {
   click_s.target.setIcon(icon_norm)
   s = m.target.options;
   m.target.setIcon(icon_hover)
-  strain = s.title;
+  strain = s.strain;
   loc = s.loc;
   isolation = s.isolation;
 
-  $(".strain").html("<a href='/strain/" + s.title + "'>" + s.title + "</a>");
+  $(".strain").html("<a href='/strain/" + s.isotype + "/" + s.strain + "'>" + s.strain + "</a>");
   $(".location").text(loc);
   $(".lat").text(m.latlng.lat);
   $(".lng").text(m.latlng.lng);
@@ -114,21 +114,20 @@ function restore_click_locked_content(m) {
   strain_info = [];
   strain_names = [];
   markers = [];
-   d3.tsv("/static/data/strain_info.tsv").get(function(error, data) {
-     if (error) throw error;
+
+     data = {{ strain_listing|safe }}
      strain_info = data;
      data.forEach(function(d) {
-     if (d.latitude != "NA" & d.latitude != "") {
       strain_names.push(d.strain);
        m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
-                                             title: d.strain,
+                                             strain: d.strain,
+                                             isotype: d.isotype,
                                              isolation : d.isolation,
                                              loc : d.location }).addTo(map)
                                             .on("click", set_click_locked_content)
                                             .on('mouseover', set_panel_content)
                                             .on('mouseout', restore_click_locked_content)
       markers.push(m);
-     }
      });
     var strain_layer = L.layerGroup(markers);
     var search_control = new L.Control.Search({layer: strain_layer,
@@ -142,7 +141,7 @@ function restore_click_locked_content(m) {
                                           markerIcon: icon_hover });
     search_control.on('search_locationfound', set_panel_from_search);
     map.addControl( search_control );
-   });
+
 
 
 </script>

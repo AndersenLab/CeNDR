@@ -1,5 +1,12 @@
 {% extends "_layouts/default.html" %}
 
+
+{% block custom_head %}
+  <script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
+  <script src="/static/js/leaflet-search.js"></script>
+{% endblock %}
+
+
 {% block style %}
 .tab-pane {
 
@@ -39,12 +46,15 @@
         <div class="panel panel-default">
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>{{ page_type }} Information</strong></div>
               <ul class="list-group">
-                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div></li>
+                <li class="list-group-item" style="padding:0px;">
+                  <div id="map" style="height: 200px; width:100%"></div>
+                </li>
+                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right">{{ rec.strain }}</div></li>
                 {% if page_type == "strain" %}
-                <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right"></div></li>
-                <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right"></div></li>
-                <li class="list-group-item" style="height:150px;"><strong>Isolation</strong><br /> <div class="isolation"></div></li>
-                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div></li>
+                <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right">{{ rec.latitude }}</div></li>
+                <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right">{{ rec.longitude }}</div></li>
+                <li class="list-group-item" style="height:150px;"><strong>Isolation</strong><br /> <div class="isolation">{{ rec.isolation }}</div></li>
+                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ rec.location }}</div></li>
                 {% endif %}
               </ul>
         </div>
@@ -56,9 +66,60 @@
 {% block script %}
 <script>
 
+var icon_norm = L.icon({
+    iconUrl: '/static/img/icons/selected.png',
+    iconSize: [48, 48],
+    iconAnchor: [24, 48],
+    popupAnchor: [-3, -76],
+    shadowSize: [68, 95],
+    shadowAnchor: [22, 94]
+});
+
+
+
+   ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
+    MB_ATTR = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+      '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="http://mapbox.com">Mapbox</a>';
+    MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
+    OSM_URL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+  var map = L.map('map');
+
+  L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets'}).addTo(map);
+  strain_info = [];
+  strain_names = [];
+  markers = [];
+
+  data = {{ strain_json_output|safe }}
+  if ([data].length == 1) {
+    m = L.marker([data.latitude, data.longitude], { icon: icon_norm, 
+                                           strain: data.strain,
+                                           isotype: data.isotype,
+                                           isolation : data.isolation,
+                                           loc : data.location }).addTo(map);
+    markers.push(m);
+    map.setView([data.latitude, data.longitude], 4);
+  }
+  else {
+    [data].forEach(function(d) {
+      strain_names.push(d.strain);
+       m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
+                                             strain: d.strain,
+                                             isotype: d.isotype,
+                                             isolation : d.isolation,
+                                             loc : d.location }).addTo(map).set_panel_content
+      markers.push(m);
+    });
+  }
+  var strain_layer = L.layerGroup(markers);
+
+
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
+
 
 </script>
 

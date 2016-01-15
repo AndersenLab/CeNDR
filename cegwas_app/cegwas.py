@@ -1,11 +1,13 @@
 import os
 import csv
 import logging
-from flask import render_template, request, send_from_directory, url_for, request
+from flask import render_template, request, send_from_directory, url_for, request,jsonify
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
 from cyvcf2 import VCF
+from peewee import *
+from playhouse import *
 from slugify import slugify
 import hashlib
 import IPython
@@ -21,18 +23,18 @@ def main():
 
 
 @app.route('/map/')
-def map():
+def map_page():
     title = "Map"
-    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).execute())
+    strain_list_dicts = []
+    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).filter(strain.latitude.is_null() == False).execute())
+    strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing])
     return render_template('map.html', **locals())
 
 
 @app.route('/gwa/')
 def gwa():
     title = "Run Association"
-
     strain_list = json.dumps([x.strain for x in strain.select(strain.strain).filter(strain.isotype.is_null() == False).execute()])
-    print(strain_list)
     return render_template('gwa.html', **locals())
 
 
@@ -85,7 +87,9 @@ def isotype_page(isotype_name):
     title = isotype_name + " | isotype"
     page_type = "isotype"
     obj = isotype_name
-    records = strain.get(strain.isotype == isotype_name)
+    rec = list(strain.filter(strain.isotype == isotype_name).execute())
+    print rec
+    #strain_json_output = json.dumps(map(dict,rec))
     return render_template('strain.html', **locals())
 
 @app.route('/strain/<isotype_name>/<strain_name>/')
@@ -94,6 +98,7 @@ def strain_page(isotype_name, strain_name):
     page_type = "strain"
     obj = strain_name
     rec = strain.get(strain.strain == strain_name)
+    strain_json_output = json.dumps(rec.__dict__['_data'])
     return render_template('strain.html', **locals())
 
 
