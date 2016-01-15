@@ -58,13 +58,28 @@ def process_gwa():
     req = request.get_json()
 
 
-    # If ok to process:
+    # Add Validation
     req["report_slug"] = valid_url(req["report_name"], req["release"] != 'public')
     data = req["trait_data"]
     del req["trait_data"]
     req["release"] = release_dict[req["release"]]
     req["version"] = 0.1
-    report(**req).save()
+    trait_names = data[0][1:]
+    with db.atomic():
+        report_rec = report(**req)
+        report_rec.save()
+        trait_data = []
+        for row in data[1:]:
+            if row[0] is not None and row[0] != "":
+                strain_name = strain.get(strain.strain == row[0])
+                for k, v in zip(trait_names, row[1:]):
+                    if v != None:
+                        trait_data.append({"report": report_rec.id,
+                                           "strain":strain_name.id,
+                                           "name": k,
+                                           "value": autoconvert(v)})
+        print trait_data
+        trait.insert_many(trait_data).execute()
     return 'success'
 
 
@@ -80,7 +95,6 @@ def validate_url():
         return json.dumps({'error': url_out["error"]})
     else:
         return json.dumps({'report_name': url_out})
-
 
 
 @app.route("/report/<name>/")
