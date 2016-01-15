@@ -37,11 +37,48 @@ def gwa():
     return render_template('gwa.html', **locals())
 
 
+def valid_url(url, encrypt):
+    url_out = slugify(url)
+    if encrypt:
+        url_out = str(hashlib.sha224(url_out).hexdigest()[0:20])
+    else:
+        if report.filter(report.report_slug == url_out).count() > 0:
+            return {'error': "Report name reserved."}
+    if len(url_out) > 40:
+        return {'error': "Report name may not be > 40 characters."}
+    else:
+        return url_out
+
+
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
+    release_dict = {"public":0, "embargo6":1,  "embargo12":2,  "private":3}
     title = "Run Association"
     req = request.get_json()
-    print req
+
+
+    # Add Validation
+    req["report_slug"] = valid_url(req["report_name"], req["release"] != 'public')
+    data = req["trait_data"]
+    del req["trait_data"]
+    req["release"] = release_dict[req["release"]]
+    req["version"] = 0.1
+    trait_names = data[0][1:]
+    with db.atomic():
+        report_rec = report(**req)
+        report_rec.save()
+        trait_data = []
+        for row in data[1:]:
+            if row[0] is not None and row[0] != "":
+                strain_name = strain.get(strain.strain == row[0])
+                for k, v in zip(trait_names, row[1:]):
+                    if v != None:
+                        trait_data.append({"report": report_rec.id,
+                                           "strain":strain_name.id,
+                                           "name": k,
+                                           "value": autoconvert(v)})
+        print trait_data
+        trait.insert_many(trait_data).execute()
     return 'success'
 
 
@@ -51,20 +88,16 @@ def validate_url():
         Generates URLs from report names and validates them.
     """
     req = request.get_json()
-
     # [ ] - Add Code to check against database that report (slug) is not already taken.
-
-    report_out = slugify(req["report_name"])
-    if req["release"] != "public":
-        report_out = str(hashlib.sha224(req["report_name"]).hexdigest()[0:20])
-    if len(req["report_name"]) > 40:
-        return json.dumps({'error': "Report name may not be > 40 characters."})
+    url_out = valid_url(req["report_name"], req["release"] != 'public')
+    if 'error' in url_out:
+        return json.dumps({'error': url_out["error"]})
     else:
-        return json.dumps({'report_name': report_out})
+        return json.dumps({'report_name': url_out})
 
 
 @app.route("/report/<name>/")
-def report(name):
+def report_view(name):
     title = name
     return name
 
@@ -86,9 +119,8 @@ def isotype_page(isotype_name):
     title = isotype_name + " | isotype"
     page_type = "isotype"
     obj = isotype_name
-    rec = list(strain.filter(strain.isotype == isotype_name).execute())
-    print rec
-    #strain_json_output = json.dumps(map(dict,rec))
+    rec = list(strain.filter(strain.isotype == isotype_name).order_by(strain.latitude).dicts().execute())
+    strain_json_output = json.dumps([x for x in rec if x["latitude"] != None])
     return render_template('strain.html', **locals())
 
 @app.route('/strain/<isotype_name>/<strain_name>/')
@@ -96,8 +128,8 @@ def strain_page(isotype_name, strain_name):
     title = strain_name + " | strain"
     page_type = "strain"
     obj = strain_name
-    rec = strain.get(strain.strain == strain_name)
-    strain_json_output = json.dumps(rec.__dict__['_data'])
+    rec = list(strain.filter(strain.strain == strain_name).dicts().execute())
+    strain_json_output = json.dumps([x for x in rec if x["latitude"] != None])
     return render_template('strain.html', **locals())
 
 
