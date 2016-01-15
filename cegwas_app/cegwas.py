@@ -42,6 +42,9 @@ def valid_url(url, encrypt):
     url_out = slugify(url)
     if encrypt:
         url_out = str(hashlib.sha224(url_out).hexdigest()[0:20])
+    else:
+        if report.filter(report.report_slug == url_out).count() > 0:
+            return {'error': "Report name reserved."}
     if len(url_out) > 40:
         return {'error': "Report name may not be > 40 characters."}
     else:
@@ -74,7 +77,7 @@ def validate_url():
     # [ ] - Add Code to check against database that report (slug) is not already taken.
     url_out = valid_url(req["report_name"], req["release"] != 'public')
     if 'error' in url_out:
-        return json.dumps({'error': "Report name may not be > 40 characters."})
+        return json.dumps({'error': url_out["error"]})
     else:
         return json.dumps({'report_name': url_out})
 
@@ -103,9 +106,8 @@ def isotype_page(isotype_name):
     title = isotype_name + " | isotype"
     page_type = "isotype"
     obj = isotype_name
-    rec = list(strain.filter(strain.isotype == isotype_name).execute())
-    print rec
-    #strain_json_output = json.dumps(map(dict,rec))
+    rec = list(strain.filter(strain.isotype == isotype_name).order_by(strain.latitude).dicts().execute())
+    strain_json_output = json.dumps([x for x in rec if x["latitude"] != None])
     return render_template('strain.html', **locals())
 
 @app.route('/strain/<isotype_name>/<strain_name>/')
@@ -113,8 +115,8 @@ def strain_page(isotype_name, strain_name):
     title = strain_name + " | strain"
     page_type = "strain"
     obj = strain_name
-    rec = strain.get(strain.strain == strain_name)
-    strain_json_output = json.dumps(rec.__dict__['_data'])
+    rec = list(strain.filter(strain.strain == strain_name).dicts().execute())
+    strain_json_output = json.dumps([x for x in rec if x["latitude"] != None])
     return render_template('strain.html', **locals())
 
 

@@ -23,6 +23,14 @@
 {% endblock %}
 
 {% block content %}
+
+{% if page_type == "strain" %}
+  {% set rec = rec.0 %}
+  {% set name = rec.strain %}
+{% else %}
+  {% set name = rec.0.isotype %}
+{% endif %}
+
 <div class="row">
       <div class="col-md-8">
           <h2>{{ obj }}<small>&nbsp;&nbsp;{% if page_type == "strain" %}strain{% else %}isotype{% endif %}</small></h2>
@@ -47,9 +55,14 @@
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>{{ page_type }} Information</strong></div>
               <ul class="list-group">
                 <li class="list-group-item" style="padding:0px;">
+                {% if rec.latitude != None %}
                   <div id="map" style="height: 200px; width:100%"></div>
+                {% else %}
+                  <div style="height: 200px; background-color: #73AFE4; width:100%; text-align: center; line-height: 195px; "><strong>No Location</strong></div>
+                {% endif %}
+                
                 </li>
-                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right">{{ rec.strain }}</div></li>
+                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right">{{ name }}</div></li>
                 {% if page_type == "strain" %}
                 <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right">{{ rec.latitude }}</div></li>
                 <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right">{{ rec.longitude }}</div></li>
@@ -85,34 +98,34 @@ var icon_norm = L.icon({
     OSM_URL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-  var map = L.map('map');
+  data = {{ strain_json_output|safe }}
+  view_set = false;
+
+  var map = L.map('map', {"dragging": false,
+                          "boxZoom": false,
+                          "scrollWheelZoom": false,
+                          "doubleClickZoom": true,
+                          "tap":false,
+                          "zoomControl": true});
 
   L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets'}).addTo(map);
   strain_info = [];
   strain_names = [];
   markers = [];
 
-  data = {{ strain_json_output|safe }}
-  if ([data].length == 1) {
-    m = L.marker([data.latitude, data.longitude], { icon: icon_norm, 
-                                           strain: data.strain,
-                                           isotype: data.isotype,
-                                           isolation : data.isolation,
-                                           loc : data.location }).addTo(map);
+  data.forEach(function(d) {
+    m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
+                                           strain: d.strain,
+                                           isotype: d.isotype,
+                                           isolation : d.isolation,
+                                           loc : d.location }).addTo(map);
     markers.push(m);
-    map.setView([data.latitude, data.longitude], 4);
-  }
-  else {
-    [data].forEach(function(d) {
-      strain_names.push(d.strain);
-       m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
-                                             strain: d.strain,
-                                             isotype: d.isotype,
-                                             isolation : d.isolation,
-                                             loc : d.location }).addTo(map).set_panel_content
-      markers.push(m);
-    });
-  }
+    if (view_set == false) {
+    map.setView([d.latitude, d.longitude], 9);
+    view_set = true;
+    }
+  });
+  
   var strain_layer = L.layerGroup(markers);
 
 

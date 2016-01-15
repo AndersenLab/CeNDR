@@ -19,7 +19,7 @@
         <tbody>
         {% for line in strain_listing %}
         <tr>
-          <td><a href = "{{ url_for('isotype_page', isotype_name=line.isotype) }}">{{ line.strain }}</a></td>
+          <td><a href = "{{ url_for('isotype_page', isotype_name=line.isotype) }}">{{ line.isotype }}</a></td>
           <td><a href = "{{ url_for('strain_page', isotype_name=line.isotype, strain_name=line.strain) }}">{{ line.strain }}</a></td>
         </tr>
         {% endfor %}
