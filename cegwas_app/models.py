@@ -40,7 +40,7 @@ class report(Model):
     report_slug = CharField(index=True)
     email = CharField(index=True)
     submission_date = DateTimeField(default=datetime.datetime.now)
-    submission_complete = DateTimeField()
+    submission_complete = DateTimeField(null = True)
     version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
 
     class Meta:

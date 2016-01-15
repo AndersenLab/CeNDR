@@ -37,14 +37,14 @@
 
   <div class="radio">
     <label>
-      <input type="radio" name="Release" value="embargo">
+      <input type="radio" name="Release" value="embargo6">
       Embargo for 6 months
     </label> <small class="text-muted embargo6"></small>
   </div>
 
   <div class="radio">
     <label>
-      <input type="radio" name="Release" value="embargo">
+      <input type="radio" name="Release" value="embargo12">
       Embargo for 1 year
     </label> <small class="text-muted embargo12"></small>
   </div>
@@ -106,15 +106,6 @@ String.prototype.hashCode = function() {
   return Math.abs(hash);
 };
 
-function slugify(text)
-{
-  return text.toString().toLowerCase()
-    .replace(/\s+/g, '-')           // Replace spaces with -
-    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
-    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
-    .replace(/^-+/, '')             // Trim - from start of text
-    .replace(/-+$/, '');            // Trim - from end of text
-}
 
   var data = [
     ["STRAIN", "trait1", "trait2", "trait3"],
@@ -180,7 +171,7 @@ var hot = new Handsontable(container,
   });
 
 var update_url_message = function(e) {
-  report_name = slugify($("#ReportName").val());
+  report_name = $("#ReportName").val();
   release = $("input[name=Release]:checked").val()
 
 
@@ -214,8 +205,8 @@ var update_url_message = function(e) {
   }
 }
 
-$("form").on('change', update_url_message);
-$("form").on('keyup', update_url_message);
+$("#ReportName,input[name=Release]").on('change', update_url_message);
+$("#ReportName,input[name=Release]").on('keyup', update_url_message);
 
 
 $("form").submit(function(e) {
@@ -232,10 +223,8 @@ $("form").submit(function(e) {
      url:"/process_gwa/",
      data: JSON.stringify({"email":user_email,
             "report_name": $("#ReportName").val(),
-            "report_slug": slugify(report_name),
             "release": release,
-            "trait_data": hot.getData(),
-            "report_hash": report_name.hashCode() }),
+            "trait_data": hot.getData() }),
      method: "POST",
      contentType: 'application/json;charset=UTF-8'
      }
@@ -247,7 +236,7 @@ $("form").submit(function(e) {
         function() 
         {
           window.location.href = report_url;
-        }, 5000);
+        }, 500000);
   });
 })
 

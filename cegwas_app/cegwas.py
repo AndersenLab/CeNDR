@@ -38,11 +38,30 @@ def gwa():
     return render_template('gwa.html', **locals())
 
 
+def valid_url(url, encrypt):
+    url_out = slugify(url)
+    if encrypt:
+        url_out = str(hashlib.sha224(url_out).hexdigest()[0:20])
+    if len(url_out) > 40:
+        return {'error': "Report name may not be > 40 characters."}
+    else:
+        return url_out
+
+
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
+    release_dict = {"public":0, "embargo6":1,  "embargo12":2,  "private":3}
     title = "Run Association"
     req = request.get_json()
-    print req
+
+
+    # If ok to process:
+    req["report_slug"] = valid_url(req["report_name"], req["release"] != 'public')
+    data = req["trait_data"]
+    del req["trait_data"]
+    req["release"] = release_dict[req["release"]]
+    req["version"] = 0.1
+    report(**req).save()
     return 'success'
 
 
@@ -52,20 +71,17 @@ def validate_url():
         Generates URLs from report names and validates them.
     """
     req = request.get_json()
-
     # [ ] - Add Code to check against database that report (slug) is not already taken.
-
-    report_out = slugify(req["report_name"])
-    if req["release"] != "public":
-        report_out = str(hashlib.sha224(req["report_name"]).hexdigest()[0:20])
-    if len(req["report_name"]) > 40:
+    url_out = valid_url(req["report_name"], req["release"] != 'public')
+    if 'error' in url_out:
         return json.dumps({'error': "Report name may not be > 40 characters."})
     else:
-        return json.dumps({'report_name': report_out})
+        return json.dumps({'report_name': url_out})
+
 
 
 @app.route("/report/<name>/")
-def report(name):
+def report_view(name):
     title = name
     return name
 
