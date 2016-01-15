@@ -5,7 +5,6 @@ from flask import render_template, request, send_from_directory, url_for, reques
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
-from cyvcf2 import VCF
 from peewee import *
 from playhouse import *
 from slugify import slugify
@@ -100,15 +99,6 @@ def strain_page(isotype_name, strain_name):
     rec = strain.get(strain.strain == strain_name)
     strain_json_output = json.dumps(rec.__dict__['_data'])
     return render_template('strain.html', **locals())
-
-
-@app.route('/variants/<chrom>/<start>/<end>/')
-def variants(chrom, start, end):
-    vcf = VCF("static/vcf/union_merged.vcf.gz")
-    region = "{chrom}:{start}-{end}".format(**locals())
-    for var in vcf(region):
-        x = var
-    return dict(x)
 
 
 
