@@ -25,7 +25,7 @@ class strain(Model):
     sequenced = BooleanField()
 
     def __repr__(self):
-        return ':'.join([self.isotype, self.strain])
+        return self.strain
 
     class Meta:
         database = db

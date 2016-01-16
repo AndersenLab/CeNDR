@@ -24,22 +24,12 @@
 
 {% block content %}
 
-{% if page_type == "strain" %}
-  {% set rec = rec.0 %}
-  {% set name = rec.strain %}
-{% else %}
-  {% set name = rec.0.isotype %}
-{% endif %}
-
 <div class="row">
       <div class="col-md-8">
-          <h2>{{ obj }}<small>&nbsp;&nbsp;{% if page_type == "strain" %}strain{% else %}isotype{% endif %}</small></h2>
+          <h2>{{ obj }}<small>&nbsp;&nbsp;isotype</small></h2>
           <ol class="breadcrumb">
             <li><a href="{{ url_for('main') }}">Home</a></li>
             <li><a href="{{ url_for('strain_listing_page') }}">strain</a></li>
-            {% if page_type == "strain" %}
-            <li><a href="{{ url_for('isotype_page', isotype_name=rec.isotype) }}" data-toggle="tooltip" data-placement="bottom" title="Isotype">{{ rec.isotype }}</a></li>
-            {% endif %}
             <li class="active" data-toggle="tooltip"  data-placement="bottom" title="{{ page_type }}">{{ obj }}</li>
           </ol>
 
@@ -62,17 +52,16 @@
                 {% endif %}
                 
                 </li>
-                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right">{{ name }}</div></li>
-                {% if page_type == "strain" %}
-                <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right">{{ rec.latitude }}</div></li>
-                <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right">{{ rec.longitude }}</div></li>
-                <li class="list-group-item" style="height:150px;"><strong>Isolation</strong><br /> <div class="isolation">{{ rec.isolation }}</div></li>
-                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ rec.location }}</div></li>
-                {% endif %}
+                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right">{{ ref_strain["isotype"] }}</div></li>
+                <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right">{{ ref_strain["latitude"] }}</div></li>
+                <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right">{{ ref_strain["longitude"] }}</div></li>
+                <li class="list-group-item" style="height:150px;"><strong>Isolation</strong><br /> <div class="isolation">{{ ref_strain["isolation"] }}</div></li>
+                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ ref_strain["location"] }}</div></li>
               </ul>
         </div>
       </div>
 </div>
+
 {% endblock %}
 
 
@@ -121,7 +110,7 @@ var icon_norm = L.icon({
                                            loc : d.location }).addTo(map);
     markers.push(m);
     if (view_set == false) {
-    map.setView([d.latitude, d.longitude], 9);
+    map.setView([d.latitude, d.longitude], 7);
     view_set = true;
     }
   });

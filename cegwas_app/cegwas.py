@@ -120,6 +120,7 @@ def isotype_page(isotype_name):
     page_type = "isotype"
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name).order_by(strain.latitude).dicts().execute())
+    ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
     strain_json_output = json.dumps([x for x in rec if x["latitude"] != None])
     return render_template('strain.html', **locals())
 

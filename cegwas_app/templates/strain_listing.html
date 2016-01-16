@@ -3,24 +3,35 @@
 {% block content %}
 <div class="row">
       <div class="col-md-12">
-              <h2>{{ title }}</h2><hr />
+              <h2>{{ title }}</h2>
+
+          <ol class="breadcrumb">
+            <li><a href="{{ url_for('main') }}">Home</a></li>
+            <li class = "active">strain</li>
+          </ol>
+
       </div>
 </div>
 
 <div class="row">
       <div class="col-md-12">
+
+      <input id="filter" type="text" class="form-control" placeholder="Type here...">
       <table class="table table-hover table-striped">
         <thead>
           <tr>
-            <th>Isotype</th>
-            <th>Strain</th>
+            <th style = "width: 20px;"><input type="checkbox" id="checkAll" /></th>
+            <th style = "width: 200px;">Isotype</th>
+            <th>Strains</th>
           </tr>
         </thead>
-        <tbody>
-        {% for line in strain_listing %}
+        <tbody class = "searchable">
+
+        {% for isotype, strains in strain_listing|groupby('isotype') %}
         <tr>
-          <td><a href = "{{ url_for('isotype_page', isotype_name=line.isotype) }}">{{ line.isotype }}</a></td>
-          <td><a href = "{{ url_for('strain_page', isotype_name=line.isotype, strain_name=line.strain) }}">{{ line.strain }}</a></td>
+          <td><input type="checkbox" name="strain" /></td>
+          <td><a href = "{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
+          <td>{{ strains|join(" ") }}</td>
         </tr>
         {% endfor %}
         </tbody>
@@ -28,7 +39,44 @@
       </div>
 </div>
 
+<form action="" method="POST">
+  <script
+    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="pk_test_fM3QofdBu9WCRvCkFIx8wgPl"
+    data-amount="2000"
+    data-name="Demo Site"
+    data-description="2 widgets ($20.00)"
+    <!--data-image="/128x128.png"-->
+    data-locale="auto">
+  </script>
+</form>
+
 {% endblock %}
 
 
-{% block script %}{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function () {
+
+    (function ($) {
+
+        $('#filter').keyup(function () {
+
+            var rex = new RegExp($(this).val(), 'i');
+            $('.searchable tr').hide();
+            $('.searchable tr').filter(function () {
+                return rex.test($(this).text());
+            }).show();
+
+        })
+
+    }(jQuery));
+
+});
+
+$("#checkAll").click(function(){
+    $('input:checkbox:visible').not(this).prop('checked', this.checked);
+});
+
+</script>
+{% endblock %}
