@@ -1,8 +1,9 @@
 {% extends "_layouts/default.html" %} {% block custom_head %}
 <style>
+
 #checkout.affix {
     position: fixed;
-    top: 70px;
+    top: 20px;
     width: 228px;
 }
 </style>
@@ -14,7 +15,7 @@
                 <h2>{{ title }}</h2>
             </div>
             <div class="col-md-2">
-                <div id="checkout" style="z-index:10000;" data-spy="affix">
+                <div id="checkout" style="z-index:10000;" data-offset-top="70" data-spy="affix">
                     <button type="button" class="btn btn-primary btn-lg">
                         <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Checkout
                     </button>
