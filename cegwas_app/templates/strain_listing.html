@@ -1,9 +1,35 @@
 {% extends "_layouts/default.html" %}
 
+{% block custom_head %}
+<style>
+
+
+#checkout.affix { 
+    position: fixed;
+    top:70px;
+    width:228px;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row">
       <div class="col-md-12">
-              <h2>{{ title }}</h2>
+<div class="row">
+<div class="col-md-10">
+  <h2>{{ title }}</h2>
+</div>
+<div class="col-md-2">
+<div id="checkout" style="z-index:10000;" data-spy="affix">
+<button type="button" class="btn btn-primary btn-lg">
+  <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Checkout
+</button>
+</div>
+</div>
+
+
+</div>
+       
 
           <ol class="breadcrumb">
             <li><a href="{{ url_for('main') }}">Home</a></li>
@@ -39,17 +65,39 @@
       </div>
 </div>
 
-<form action="" method="POST">
-  <script
-    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="pk_test_fM3QofdBu9WCRvCkFIx8wgPl"
-    data-amount="2000"
-    data-name="Demo Site"
-    data-description="2 widgets ($20.00)"
-    <!--data-image="/128x128.png"-->
-    data-locale="auto">
-  </script>
-</form>
+
+
+
+
+<div class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Checkout</h4>
+      </div>
+      <div class="modal-body">
+        <h2>Summary</h2>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <form action="" method="POST">
+          <script
+            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="pk_test_fM3QofdBu9WCRvCkFIx8wgPl"
+            data-amount="2000"
+            data-name="Demo Site"
+            data-description="2 widgets ($20.00)"
+            <!--data-image="/128x128.png"-->
+            data-locale="auto">
+          </script>
+        </form>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
 
 {% endblock %}
 
@@ -77,6 +125,13 @@ $(document).ready(function () {
 $("#checkAll").click(function(){
     $('input:checkbox:visible').not(this).prop('checked', this.checked);
 });
+
+
+$('#checkout').on('click', function() {
+$('.modal').modal('show')
+});
+
+
 
 </script>
 {% endblock %}
