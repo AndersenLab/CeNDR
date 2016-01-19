@@ -98,7 +98,7 @@ $(document).ready(function() {
 
         $('#filter').keyup(function() {
 
-            var rex = new RegExp($(this).val(), 'i');
+            var rex = new ($(this).val(), 'i');
             $('.searchable tr').hide();
             $('.searchable tr').filter(function() {
                 return rex.test($(this).text());
@@ -115,8 +115,23 @@ $("#checkAll").click(function() {
 });
 
 
-$('#checkout').on('click', function() {
-    $('.modal').modal('show')
-});
+
+set1 = ["AB1", "AB4", "AF16"];
+set2 = ["BRC20067", "CB4851", "CB4852"];
+set3 = ["CB4853", "CB4854", "CB4855"];
+set4 = ["CB4856", "CB4857", "CB4858"];
+
+$("button[id^='set']").click(function () {
+    $.each(window[$(this).attr('id')], 
+        function(index,strain) {
+            $('td').filter(function() {
+                if ($(this).text() === strain){
+                    $(this).prev().children().prop('checked', true);
+                }
+        })
+    })
+})
+
+
 </script>
 {% endblock %}
