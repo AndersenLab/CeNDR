@@ -8,61 +8,36 @@
 }
 </style>
 {% endblock %} {% block content %}
-<form method="POST" action="/strain/order">
+<form method="POST" action="/strains/order">
 <div class="row">
     <div class="col-md-12">
         <div class="row">
             <div class="col-md-10">
                 <h2>{{ title }}</h2>
             </div>
-            <div class="col-md-2">
-                <div id="checkout" style="z-index:10000;" data-offset-top="70" data-spy="affix">
-                    <button type="submit" value = "Checkout" class="btn btn-primary btn-lg" id="checkout">
-                        <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Checkout
-                    </button>
-                </div>
-            </div>
+            <div class="col-md-2"></div>
         </div>
         <ol class="breadcrumb">
             <li><a href="{{ url_for('main') }}">Home</a></li>
-            <li class="active">strain</li>
+            <li><a href="{{ url_for('strain_listing_page') }}">strain</a></li>
+            <li class="active">order</li>
         </ol>
     </div>
 </div>
 <div class="row">
     <div class="col-md-12">
-        <div class="row">
-
-            <div class="col-md-8">
-                <button type="button"  class="btn btn-primary" id="heritability">Heritability Set</button>
-                <button type="button"  class="btn btn-success" id="set1">Set 1</button>
-                <button type="button"  class="btn btn-success" id="set2">Set 2</button>
-                <button type="button"  class="btn btn-success" id="set3">Set 3</button>
-                <button type="button"  class="btn btn-success" id="set4">Set 4</button>
-            </div>
-            <div class="col-md-4">
-                <input id="filter" type="text" class="form-control" placeholder="Filter Here...">
-            </div>
-        </div>
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
-                    <th style="width: 20px;">
-                        <input type="checkbox" id="checkAll" />
-                    </th>
-                    <th style="width: 200px;">Isotype</th>
+                    <th style="width 200px;">Isotype</th>
                     <th>Strains</th>
                 </tr>
             </thead>
             <tbody class="searchable">
-                {% for isotype, strains in strain_listing|groupby('isotype') %}
+                {% for isotypes in ordered %}
                 <tr>
-                    <td>
-                        <input type="checkbox" name="strain" value=
-                        "{{ [isotype, strains|join(" ")] }}"/>
-                    </td>
-                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-                    <td>{{ strains|join(" ") }}</td>
+                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotypes[3:6] }}</a></td>
+                    <td>{{ isotypes[6:] }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

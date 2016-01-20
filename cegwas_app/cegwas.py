@@ -108,6 +108,15 @@ def strain_listing_page():
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('strain_listing.html', **locals())
 
+@app.route('/strain/order', methods=['POST'])
+def order_page():
+    title = "Order"
+    ordered = list(request.form.getlist('strain'))
+    upto = len(ordered)-2
+    print ordered
+    return render_template('order.html',**locals())
+
+
 
 # [X] - change URL schema to be "/isotype/strain/"; Use url-for!
 # [X] - Add breadcrumbs to strain page.
