@@ -59,7 +59,7 @@
                 <tr>
                     <td>
                         <input type="checkbox" name="strain" value=
-                        "{{ [isotype, strains|join(" ")] }}"/>
+                        "{{ isotype }}"/>
                     </td>
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{{ strains|join(" ") }}</td>

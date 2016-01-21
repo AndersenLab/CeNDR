@@ -30,20 +30,24 @@
             <thead>
                 <tr>
                     <th style="width 200px;">Isotype</th>
-                    <th>Strains</th>
+                    <th>Price</th>
                 </tr>
             </thead>
             <tbody class="searchable">
-                {% for isotypes in ordered %}
+                {% for isotype in list_of_strains %}
                 <tr>
-                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotypes[3:6] }}</a></td>
-                    <td>{{ isotypes[6:] }}</td>
+                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
+                    <td>{{ 15*3 }}</td>
                 </tr>
                 {% endfor %}
+                <tr>
+                    <td><strong>Total</strong></td>
+                    <td>$$$$$</td>
+                </tr>
             </tbody>
         </table>
     </div>
-</div>
+    </div>
         </form>
 {% endblock %} {% block script %}
 <script>

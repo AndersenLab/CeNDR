@@ -111,9 +111,8 @@ def strain_listing_page():
 @app.route('/strain/order', methods=['POST'])
 def order_page():
     title = "Order"
-    ordered = list(request.form.getlist('strain'))
-    upto = len(ordered)-2
-    print ordered
+    ordered = request.form.getlist('strain')
+    list_of_strains = strain.select().filter(strain.isotype << ordered).order_by(strain.isotype).execute()
     return render_template('order.html',**locals())
 
 
