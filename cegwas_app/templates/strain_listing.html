@@ -34,7 +34,7 @@
         <div class="row">
 
             <div class="col-md-8">
-                <button type="button"  class="btn btn-primary" id="heritability">Heritability Set</button>
+                <button type="button"  class="btn btn-primary" id="set0">Heritability Set</button>
                 <button type="button"  class="btn btn-success" id="set1">Set 1</button>
                 <button type="button"  class="btn btn-success" id="set2">Set 2</button>
                 <button type="button"  class="btn btn-success" id="set3">Set 3</button>
@@ -59,7 +59,7 @@
                 <tr>
                     <td>
                         <input type="checkbox" name="strain" value=
-                        "{{ [isotype, strains|join(" ")] }}"/>
+                        "{{ isotype }}"/>
                     </td>
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{{ strains|join(" ") }}</td>
@@ -94,8 +94,8 @@ $("#checkAll").click(function() {
     $('input:checkbox:visible').not(this).prop('checked', this.checked);
 });
 
-
-
+//set0 is the heritability set
+set0 = ["N2", "CB4856", "JU258", "DL238", "JU775", "MY16", "MY23", "LKC34", "JU1580", "PB306", "EG4724", "CX11307"]
 set1 = ["AB1", "AB4", "AF16"];
 set2 = ["BRC20067", "CB4851", "CB4852"];
 set3 = ["CB4853", "CB4854", "CB4855"];

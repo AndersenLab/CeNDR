@@ -41,7 +41,7 @@
                 <tr>
                     <td><strong>{{ isotype }}</strong></td>
                     <td>{{ strains|join(" ") }}</td>
-                    <td class="price">$15</td>
+                    <td class="price">${{'%0.2f'| format(1500/100|float)}}</td>
                 </tr>
                 {% endfor %}
                 <tr>
@@ -56,7 +56,6 @@
   <script
     src="https://checkout.stripe.com/checkout.js" class="stripe-button"
     data-key="pk_test_fM3QofdBu9WCRvCkFIx8wgPl"
-    data-image="/img/documentation/checkout/marketplace.png"
     data-name="CENDR Resource"
     data-description="2 widgets"
     data-shipping-address=true

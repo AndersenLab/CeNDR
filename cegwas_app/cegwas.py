@@ -104,13 +104,14 @@ def report_view(name):
 
 @app.route('/strain/')
 def strain_listing_page():
-    title = "Wild Isolates"
+    title = "Strain Catalog"
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('strain_listing.html', **locals())
 
 @app.route('/strain/order', methods=['POST'])
 def order_page():
     title = "Order"
+    print request.form
     if 'strip_token' in request.form:
         amount = 500
 
@@ -125,12 +126,12 @@ def order_page():
             currency='usd',
             description='Flask Charge'
         )
-    else:
-        ordered = request.form.getlist('strain')
-        # Calculate total
-        ind_strains = len(ordered)*1500
-        total = ind_strains
-        strain_listing = strain.select().where(strain.isotype << ordered).order_by(strain.isotype).execute()
+    ordered = request.form.getlist('strain')
+    print ordered
+    # Calculate total
+    ind_strains = len(ordered)*1500
+    total = ind_strains
+    strain_listing = strain.select().where(strain.isotype << ordered).order_by(strain.isotype).execute()
     return render_template('order.html',**locals())
 
 
