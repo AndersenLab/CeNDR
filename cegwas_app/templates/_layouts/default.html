@@ -12,8 +12,30 @@
 
 <div class="container-fluid">
   <div class='content'>
-{% block content %}
-{% endblock %}
+    <div class="row">
+      <div class="col-md-12">
+      {% if title %}
+  <h2>{{ title }}</h2>
+      {% endif %}
+      {% if warning %}
+
+      {% endif %}
+      {% if  bcs %}
+      <ol class="breadcrumb">
+        {% for k,v in bcs.items() %}
+        {% if v %}
+          LINK
+        {% else %}
+          <li>{{ k }}</li>
+        {% endif %}
+        {% endfor %}
+            <li><a href="/">Home</a></li>
+            <li class="active">strain</li>
+        </ol>
+      {% endif %}
+        </div>
+    </div>
+{% block content %}{% endblock %}
 </div>
 {% block script %}{% endblock %}
 

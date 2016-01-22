@@ -10,6 +10,7 @@ from playhouse import *
 from slugify import slugify
 import hashlib
 import IPython
+from collections import OrderedDict
 from models import *
 
 
@@ -24,6 +25,7 @@ def main():
 @app.route('/map/')
 def map_page():
     title = "Map"
+    bcs = OrderedDict([("strain", None), ("map", None)])
     strain_list_dicts = []
     strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).filter(strain.latitude.is_null() == False).execute())
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing])
