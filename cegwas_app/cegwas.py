@@ -111,8 +111,26 @@ def strain_listing_page():
 @app.route('/strain/order', methods=['POST'])
 def order_page():
     title = "Order"
-    ordered = request.form.getlist('strain')
-    list_of_strains = strain.select().filter(strain.isotype << ordered).order_by(strain.isotype).execute()
+    if 'strip_token' in request.form:
+        amount = 500
+
+        customer = stripe.Customer.create(
+            email=request.form['stripeEmail'],
+            card=request.form['stripeToken']
+        )
+
+        charge = stripe.Charge.create(
+            customer=customer.id,
+            amount=1500,
+            currency='usd',
+            description='Flask Charge'
+        )
+    else:
+        ordered = request.form.getlist('strain')
+        # Calculate total
+        ind_strains = len(ordered)*1500
+        total = ind_strains
+        strain_listing = strain.select().where(strain.isotype << ordered).order_by(strain.isotype).execute()
     return render_template('order.html',**locals())
 
 

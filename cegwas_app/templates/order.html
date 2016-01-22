@@ -6,9 +6,11 @@
     top: 20px;
     width: 228px;
 }
+.price {
+    text-align: right;
+}
 </style>
 {% endblock %} {% block content %}
-<form method="POST" action="/strains/order">
 <div class="row">
     <div class="col-md-12">
         <div class="row">
@@ -30,25 +32,41 @@
             <thead>
                 <tr>
                     <th style="width 200px;">Isotype</th>
-                    <th>Price</th>
+                    <th>Strain</th>
+                    <th class="price">Price</th>
                 </tr>
             </thead>
             <tbody class="searchable">
-                {% for isotype in list_of_strains %}
+                {% for isotype, strains in strain_listing|groupby('isotype') %}
                 <tr>
-                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-                    <td>{{ 15*3 }}</td>
+                    <td><strong>{{ isotype }}</strong></td>
+                    <td>{{ strains|join(" ") }}</td>
+                    <td class="price">$15</td>
                 </tr>
                 {% endfor %}
                 <tr>
-                    <td><strong>Total</strong></td>
-                    <td>$$$$$</td>
+                <td><strong>Total</strong></td>
+                <td></td>
+                <td class="price"><strong>${{'%0.2f'| format(total/100|float)}}</strong></td>
                 </tr>
             </tbody>
         </table>
+<div class="pull-right">
+<form action="/strain/order" method="POST">
+  <script
+    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+    data-key="pk_test_fM3QofdBu9WCRvCkFIx8wgPl"
+    data-image="/img/documentation/checkout/marketplace.png"
+    data-name="CENDR Resource"
+    data-description="2 widgets"
+    data-shipping-address=true
+    data-amount="{{ total }}"
+    data-locale="auto">
+  </script>
+</form>
+</div>
     </div>
     </div>
-        </form>
 {% endblock %} {% block script %}
 <script>
 $(document).ready(function() {
