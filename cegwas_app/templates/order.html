@@ -52,11 +52,11 @@
             </tbody>
         </table>
 <div class="pull-right">
-<form action="/strain/order" method="POST">
+<form action="/order/" method="POST">
   <script
     src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="pk_test_fM3QofdBu9WCRvCkFIx8wgPl"
-    data-name="CENDR Resource"
+    data-key="{{ key }}"
+    data-name="CNDR Resource"
     data-description="2 widgets"
     data-shipping-address=true
     data-amount="{{ total }}"

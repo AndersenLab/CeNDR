@@ -12,6 +12,15 @@ import hashlib
 import IPython
 from collections import OrderedDict
 from models import *
+import stripe
+
+
+stripe_keys = {
+    'secret_key': "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9",
+    'publishable_key': "pk_test_fM3QofdBu9WCRvCkFIx8wgPl"
+}
+
+stripe.api_key = "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9"
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -112,38 +121,42 @@ def strain_listing_page():
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('strain_listing.html', **locals())
 
-@app.route('/strain/order', methods=['POST'])
+@app.route('/order/', methods=['POST'])
 def order_page():
     title = "Order"
+    key = stripe_keys["publishable_key"]
     print request.form
-    if 'strip_token' in request.form:
-        amount = 500
+    if 'stripeToken' in request.form:
+        try:
+            total = 500
 
-        customer = stripe.Customer.create(
-            email=request.form['stripeEmail'],
-            card=request.form['stripeToken']
-        )
+            customer = stripe.Customer.create(
+                email=request.form['stripeEmail'],
+                card=request.form['stripeToken']
+            )
 
-        charge = stripe.Charge.create(
-            customer=customer.id,
-            amount=1500,
-            currency='usd',
-            description='Flask Charge'
-        )
-    ordered = request.form.getlist('strain')
-    print ordered
-    # Calculate total
-    ind_strains = len(ordered)*1500
-    total = ind_strains
-    strain_listing = strain.select().where(strain.isotype << ordered).order_by(strain.isotype).execute()
+            charge = stripe.Charge.create(
+                customer=customer.id,
+                amount=total,
+                currency='usd',
+                description='Flask Charge'
+            )
+
+            stripe.Order.create()
+        except:
+            print "order failed"
+    else:
+        ordered = request.form.getlist('strain')
+        print ordered
+        # Calculate total
+        ind_strains = len(ordered)*1500
+        total = ind_strains
+        strain_listing = strain.select().where(strain.isotype << ordered).order_by(strain.isotype).execute()
     return render_template('order.html',**locals())
 
-
-
-# [X] - change URL schema to be "/isotype/strain/"; Use url-for!
-# [X] - Add breadcrumbs to strain page.
-# [ ] - Add 'sister strains (shared isotypes)' to strain page.
-# [ ] - Highlight isotype using ?=isotype get param
+@app.route("/order/<order_id>/")
+def order_confirmation():
+    pass
 
 @app.route('/strain/<isotype_name>/')
 def isotype_page(isotype_name):
