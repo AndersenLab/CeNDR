@@ -123,6 +123,7 @@ def strain_listing_page():
 
 @app.route('/order/', methods=['POST'])
 def order_page():
+    bcs = OrderedDict([("strain","/strain/"), ("order","")])
     title = "Order"
     key = stripe_keys["publishable_key"]
     print request.form
@@ -167,6 +168,14 @@ def isotype_page(isotype_name):
     ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
     strain_json_output = json.dumps([x for x in rec if x["latitude"] != None])
     return render_template('strain.html', **locals())
+
+
+@app.route("/strain/protocols/")
+def protocols():
+    title = "Protocols"
+    bcs = OrderedDict([("strain","/strain/"), ("protocols","")])
+    return render_template('protocols.html', **locals())
+
 
 @app.route('/strain/<isotype_name>/<strain_name>/')
 def strain_page(isotype_name, strain_name):
