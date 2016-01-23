@@ -122,7 +122,7 @@ header = ["strain", "isotype", "longitude", "latitude", "isolation", "location",
           "warning_msg", "sequenced"]
 
 strain_info_join = requests.get(
-    "https://raw.githubusercontent.com/AndersenLab/Andersen-Lab-Strains/master/processed/strain_info_join.tsv")
+    "https://raw.githubusercontent.com/AndersenLab/Andersen-Lab-Strains/master/processed/strain_isotype.tsv")
 
 lines = strain_info_join.text.splitlines()
 

@@ -22,15 +22,14 @@
       {% endif %}
       {% if  bcs %}
       <ol class="breadcrumb">
+          <li><a href="/">Home</a></li>
         {% for k,v in bcs.items() %}
         {% if v %}
-          LINK
+          <li><a href="{{ v }}">{{ k }}</a></li>
         {% else %}
-          <li>{{ k }}</li>
+          <li class="active">{{ k }}</li>
         {% endif %}
         {% endfor %}
-            <li><a href="/">Home</a></li>
-            <li class="active">strain</li>
         </ol>
       {% endif %}
         </div>

@@ -34,7 +34,8 @@ def map_page():
 
 @app.route('/gwa/')
 def gwa():
-    title = "Run Association"
+    title = "Perform Mapping"
+    bcs = OrderedDict([("Genetic Mapping", None), ("Perform Mapping", None)])
     strain_list = json.dumps([x.strain for x in strain.select(strain.strain).filter(strain.isotype.is_null() == False).execute()])
     return render_template('gwa.html', **locals())
 
@@ -106,6 +107,7 @@ def report_view(name):
 
 @app.route('/strain/')
 def strain_listing_page():
+    bcs = OrderedDict([("strain", None), ("catalog", None)])
     title = "Strain Catalog"
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('strain_listing.html', **locals())

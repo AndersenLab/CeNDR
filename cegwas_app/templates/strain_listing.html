@@ -4,7 +4,7 @@
 #checkout.affix {
     position: fixed;
     top: 20px;
-    width: 228px;
+    width: 136px;
 }
 </style>
 {% endblock %} {% block content %}
@@ -12,28 +12,8 @@
 <div class="row">
     <div class="col-md-12">
         <div class="row">
-            <div class="col-md-10">
-                <h2>{{ title }}</h2>
-            </div>
-            <div class="col-md-2">
-                <div id="checkout" style="z-index:10000;" data-offset-top="70" data-spy="affix">
-                    <button type="submit" value = "Checkout" class="btn btn-primary btn-lg" id="checkout">
-                        <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Checkout
-                    </button>
-                </div>
-            </div>
-        </div>
-        <ol class="breadcrumb">
-            <li><a href="{{ url_for('main') }}">Home</a></li>
-            <li class="active">strain</li>
-        </ol>
-    </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <div class="row">
 
-            <div class="col-md-8">
+            <div class="col-md-6">
                 <button type="button"  class="btn btn-primary" id="set0">Heritability Set</button>
                 <button type="button"  class="btn btn-success" id="set1">Set 1</button>
                 <button type="button"  class="btn btn-success" id="set2">Set 2</button>
@@ -41,7 +21,14 @@
                 <button type="button"  class="btn btn-success" id="set4">Set 4</button>
             </div>
             <div class="col-md-4">
-                <input id="filter" type="text" class="form-control" placeholder="Filter Here...">
+                <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
+            </div>
+            <div class="col-md-2">
+            <div id="checkout" style="z-index:10000;" data-offset-top="170" data-spy="affix">
+             <button type="submit" value = "Checkout" class="btn btn-primary btn-block" id="checkout">
+                        <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Checkout
+                </button>
+              </div>
             </div>
         </div>
         <table class="table table-hover table-striped">
@@ -118,6 +105,15 @@ $("button[id^='checkout']").click(function() {
         return $(this).next();
     }).get();
     console.log(checkedValues);
+});
+
+$(document).ready(function() {
+  $(window).keydown(function(event){
+    if(event.keyCode == 13) {
+      event.preventDefault();
+      return false;
+    }
+  });
 });
 
 
