@@ -1,7 +1,7 @@
 import os
 import csv
 import logging
-from flask import render_template, request, send_from_directory, url_for, request,jsonify
+from flask import render_template, request, send_from_directory, url_for, request, jsonify, redirect
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
@@ -164,6 +164,7 @@ def order_page():
     bcs = OrderedDict([("strain","/strain/"), ("order","")])
     title = "Order"
     key = stripe_keys["publishable_key"]
+    print request.form
     if 'stripeToken' in request.form:
         total = 500
 
@@ -178,10 +179,10 @@ def order_page():
             currency='usd',
             description='Flask Charge'
         )
-        print request.form
         order_formatted = {k:autoconvert(v) for k,v in request.form.items()}
         order_formatted["price"] = total
-        order.create(**order_formatted).save()
+        order_id = order.create(**order_formatted).save()
+        return redirect(url_for("order_confirmation", order_id = request.form["stripeToken"][20:]), code=302)
     else:
         ordered = request.form.getlist('strain')
         print ordered
@@ -189,11 +190,15 @@ def order_page():
         ind_strains = len(ordered)*1500
         total = ind_strains
         strain_listing = strain.select().where(strain.isotype << ordered).order_by(strain.isotype).execute()
-    return render_template('order.html',**locals())
+        return render_template('order.html',**locals())
 
 @app.route("/order/<order_id>/")
-def order_confirmation():
-    pass
+def order_confirmation(order_id):
+    title = "Order: " + order_id
+    query = "%" + order_id
+    record = order.get(order.stripeToken ** query)
+    print record
+    return render_template('order_confirm.html',**locals())
 
 @app.route('/strain/<isotype_name>/')
 def isotype_page(isotype_name):

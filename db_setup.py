@@ -85,7 +85,7 @@ class order(Model):
     stripeBillingAddressState = CharField(null = False)
     stripeBillingAddressZip = IntegerField(null = False)
     stripeBillingAddressCountry = CharField(null = False)
-    stripeBillingAddressCounryCode = CharField(null = False)
+    stripeBillingAddressCountryCode = CharField(null = False)
 
     order_time = DateTimeField(default=datetime.datetime.now)
 
