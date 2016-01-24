@@ -12,13 +12,17 @@
 <div class="row">
     <div class="col-md-12">
         <div class="row">
-
             <div class="col-md-6">
-                <button type="button"  class="btn btn-primary" id="set0">Heritability Set</button>
-                <button type="button"  class="btn btn-success" id="set1">Set 1</button>
-                <button type="button"  class="btn btn-success" id="set2">Set 2</button>
-                <button type="button"  class="btn btn-success" id="set3">Set 3</button>
-                <button type="button"  class="btn btn-success" id="set4">Set 4</button>
+                <button type="button"  class="btn btn-primary" id="set_heritability">Heritability</button>
+              <div class="btn-group" role="group" aria-label="...">
+                <button type="button" class="btn btn-default" id="set_1">1</button>
+                <button type="button" class="btn btn-default" id="set_2">2</button>
+                <button type="button" class="btn btn-default" id="set_3">3</button>
+                <button type="button" class="btn btn-default" id="set_4">4</button>
+            </div>
+
+
+
             </div>
             <div class="col-md-4">
                 <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
@@ -38,7 +42,7 @@
                         <input type="checkbox" id="checkAll" />
                     </th>
                     <th style="width: 200px;">Isotype</th>
-                    <th>Strains</th>
+                    <th>Strains<div class="pull-right"><a href="https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?output=tsv">Download Strain Information (.tsv)</a></div></th>
                 </tr>
             </thead>
             <tbody class="searchable">
@@ -46,7 +50,7 @@
                 <tr>
                     <td>
                         <input type="checkbox" name="strain" value=
-                        "{{ isotype }}"/>
+                        "{{ isotype }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
                     </td>
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{{ strains|join(" ") }}</td>
@@ -57,7 +61,9 @@
     </div>
 </div>
         </form>
-{% endblock %} {% block script %}
+{% endblock %} 
+
+{% block script %}
 <script>
 $(document).ready(function() {
 
@@ -77,27 +83,34 @@ $(document).ready(function() {
 
 });
 
+highlight_set_buttons = function() {
+  set_names = ["set_heritability", "set_1", "set_2", "set_3", "set_4"];
+  for(i in set_names) {
+    if ($("." + set_names[i] + ":checkbox:checked").length == $("." + set_names[i] ).length) {
+      $("#" + set_names[i]).addClass("btn-success");
+    } else {
+      $("#" + set_names[i]).removeClass("btn-success");
+    }
+  }
+}
+
 $("#checkAll").click(function() {
     $('input:checkbox:visible').not(this).prop('checked', this.checked);
 });
 
-//set0 is the heritability set
-set0 = ["N2", "CB4856", "JU258", "DL238", "JU775", "MY16", "MY23", "LKC34", "JU1580", "PB306", "EG4724", "CX11307"]
-set1 = ["AB1", "AB4", "AF16"];
-set2 = ["BRC20067", "CB4851", "CB4852"];
-set3 = ["CB4853", "CB4854", "CB4855"];
-set4 = ["CB4856", "CB4857", "CB4858"];
+$("input:checkbox").click(function(x) {
+    highlight_set_buttons();
+});
+
 
 $("button[id^='set']").click(function () {
-    $.each(window[$(this).attr('id')], 
-        function(index,strain) {
-            $('td').filter(function() {
-                if ($(this).text() === strain){
-                    $(this).prev().children().prop('checked', true);
-                    //pick the previous td element (this is where the checkbox is)
-                }
-        })
-    })
+    set_name = $(this).attr("id");
+    if ($("." + set_name).first().prop("checked") == false) {
+      $("." + set_name).prop("checked", true);
+    } else {
+      $("." + set_name).prop("checked", false);
+    }
+    highlight_set_buttons();
 })
 
 $("button[id^='checkout']").click(function() {

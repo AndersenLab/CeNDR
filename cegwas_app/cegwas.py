@@ -13,6 +13,15 @@ import IPython
 from collections import OrderedDict
 from models import *
 import stripe
+from datetime import date
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, date):
+        serial = obj.isoformat()
+        return serial
+    raise TypeError ("Type not serializable")
 
 
 stripe_keys = {
@@ -34,10 +43,10 @@ def main():
 @app.route('/map/')
 def map_page():
     title = "Map"
-    bcs = OrderedDict([("strain", None), ("map", None)])
+    bcs = OrderedDict([("strain", "/strain/"), ("map", None)])
     strain_list_dicts = []
     strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).filter(strain.latitude.is_null() == False).execute())
-    strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing])
+    strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
     return render_template('map.html', **locals())
 
 
@@ -114,11 +123,40 @@ def report_view(name):
     return name
 
 
+@app.route('/about/')
+def about():
+    title = "About"
+    bcs = OrderedDict([("about", "/about/")])
+    return render_template('about.html', **locals())
+
+@app.route('/about/staff/')
+def staff():
+    title = "Staff"
+    bcs = OrderedDict([("about", "/about/"), ("staff", "")])
+    return render_template('staff.html', **locals())
+
+@app.route('/about/panel/')
+def panel():
+    title = "Scientific Advisory Panel"
+    bcs = OrderedDict([("about", "/about/"), ("panel", "")])
+    return render_template('panel.html', **locals())
+
+@app.route('/about/statistics/')
+def statistics():
+    title = "Site Statistics"
+    bcs = OrderedDict([("about", "/about/"), ("statistics", None)])
+
+    # Collection dates
+    collection_dates = list(strain.select().filter(strain.isotype != None).order_by(strain.isolation_date).execute())
+
+    return render_template('statistics.html', **locals())
+
+
 @app.route('/strain/')
 def strain_listing_page():
-    bcs = OrderedDict([("strain", None), ("catalog", None)])
+    bcs = OrderedDict([("strain", None)])
     title = "Strain Catalog"
-    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
+    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()  
     return render_template('strain_listing.html', **locals())
 
 @app.route('/order/', methods=['POST'])
@@ -142,8 +180,6 @@ def order_page():
                 currency='usd',
                 description='Flask Charge'
             )
-
-            stripe.Order.create()
         except:
             print "order failed"
     else:
@@ -161,12 +197,11 @@ def order_confirmation():
 
 @app.route('/strain/<isotype_name>/')
 def isotype_page(isotype_name):
-    title = isotype_name + " | isotype"
     page_type = "isotype"
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name).order_by(strain.latitude).dicts().execute())
     ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
-    strain_json_output = json.dumps([x for x in rec if x["latitude"] != None])
+    strain_json_output = json.dumps([x for x in rec if x["latitude"] != None],  default=json_serial)
     return render_template('strain.html', **locals())
 
 
@@ -175,16 +210,6 @@ def protocols():
     title = "Protocols"
     bcs = OrderedDict([("strain","/strain/"), ("protocols","")])
     return render_template('protocols.html', **locals())
-
-
-@app.route('/strain/<isotype_name>/<strain_name>/')
-def strain_page(isotype_name, strain_name):
-    title = strain_name + " | strain"
-    page_type = "strain"
-    obj = strain_name
-    rec = list(strain.filter(strain.strain == strain_name).dicts().execute())
-    strain_json_output = json.dumps([x for x in rec if x["latitude"] != None])
-    return render_template('strain.html', **locals())
 
 
 

@@ -4,6 +4,7 @@ import re
 import requests
 import json
 import datetime
+from dateutil.parser import parse
 
 #=======#
 # Setup #
@@ -23,12 +24,11 @@ db = PostgresqlDatabase(
 db.connect()
 
 
-booldict = {"TRUE": True, "FALSE": False}
+booldict = {"TRUE": True, "FALSE": False, "NA": None, "":None}
 
 #=======================#
 # Generate strain table #
 #=======================#
-
 
 class strain(Model):
     """
@@ -36,16 +36,66 @@ class strain(Model):
     """
     strain = CharField(index=True)
     isotype = CharField(null=True, index=True)
-    longitude = FloatField(null=True)
+    reference_strain = CharField(index=True, null=True)
+    warning_message = CharField(null=True)
+    use = BooleanField()
+    sequenced = BooleanField()
+    previous_names = CharField(null=True)
+    source_lab = CharField(null=True)
     latitude = FloatField(null=True)
+    longitude = FloatField(null=True)
+    landscape = CharField(null=True)
+    substrate = CharField(null=True)
+    isolated_by = CharField(null=True)
+    isolation_date = DateField(null=True)
+    isolation_date_comment = CharField(null=True)
     isolation = CharField(null=True)
     location = CharField(null=True)
-    prev_names = CharField(null=True)
-    warning_msg = CharField(null=True)
-    sequenced = BooleanField()
+    address = CharField(null=True)
+    city = CharField(null=True)
+    state = CharField(null=True)
+    country = CharField(null=True)
+    set_heritability = BooleanField(null=True)
+    set_1 = BooleanField(null=True)
+    set_2 = BooleanField(null=True)
+    set_3 = BooleanField(null=True)
+    set_4 = BooleanField(null=True)
 
     class Meta:
         database = db
+
+
+
+class order(Model):
+    price = FloatField()
+    stripeToken = CharField(index = True)
+    stripeShippingName = CharField(null = False)
+    stripeEmail = CharField(null = False)
+    stripeShippingAddressLine1 = CharField(null = False)
+    stripeShippingAddressCity = CharField(null = False)
+    stripeShippingAddressState = CharField(null = False)
+    stripeShippingAddressZip = IntegerField(null = False)
+    stripeShippingAddressCountry = CharField(null = False)
+    stripeShippingAddressCountryCode = CharField(null = False)
+
+    # Billing
+    stripeBillingName = CharField(null = False)
+    stripeBillingAddressLine1 = CharField(null = False)
+    stripeBillingAddressCity = CharField(null = False)
+    stripeBillingAddressState = CharField(null = False)
+    stripeBillingAddressZip = IntegerField(null = False)
+    stripeBillingAddressCountry = CharField(null = False)
+    stripeBillingAddressCounryCode = CharField(null = False)
+
+    order_time = DateTimeField(default=datetime.datetime.now)
+
+    class Meta:
+        database = db
+
+
+class order_strain(Model):
+    order = ForeignKeyField(order)
+    strain = ForeignKeyField(strain)
 
 
 class report(Model):
@@ -113,13 +163,11 @@ class mapping(Model):
 
 
 if reset_db:
-    db.drop_tables([trait, report, mapping, snp], safe=True, cascade=True)
+    db.drop_tables([strain, trait, report, mapping, snp, order, order_strain], safe=True)
 
 db.drop_tables([strain], safe=True)
-db.create_tables([strain, report, trait, mapping, snp], safe=True)
+db.create_tables([strain, report, trait, mapping, snp, order, order_strain], safe=True)
 
-header = ["strain", "isotype", "longitude", "latitude", "isolation", "location", "prev_names",
-          "warning_msg", "sequenced"]
 
 strain_info_join = requests.get(
     "https://raw.githubusercontent.com/AndersenLab/Andersen-Lab-Strains/master/processed/strain_isotype.tsv")
@@ -128,15 +176,28 @@ lines = strain_info_join.text.splitlines()
 
 strain_data = []
 with db.atomic():
+    header = lines[0].split("\t")
     for line in lines[1:]:
         strain_info = re.split('\t', line)
         l = OrderedDict(zip(header, strain_info))
         l = {k: v for k, v in l.items()}
+        l["use"] = booldict[l["use"]]
         l["sequenced"] = booldict[l["sequenced"]]
+        l["set_heritability"] = booldict[l["set_heritability"]]
+        l["set_1"] = booldict[l["set_1"]]
+        l["set_2"] = booldict[l["set_2"]]
+        l["set_3"] = booldict[l["set_3"]]
+        l["set_4"] = booldict[l["set_4"]]
+        if l["latitude"] == "":
+            l["latitude"] = None
+            l["longitude"] = None
+        if l["isolation_date"] is not None:
+            l["isolation_date"] = parse(l["isolation_date"])
         for k in l.keys():
             if l[k] == "NA":
                 l[k] = None
-        strain_data.append(l)
+        if l["isotype"] != "":
+            strain_data.append(l)
 
 with db.atomic():
     strain.insert_many(strain_data).execute()

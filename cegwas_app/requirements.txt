@@ -12,3 +12,4 @@ psycopg2
 requests
 Werkzeug
 wsgiref
+stripe

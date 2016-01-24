@@ -16,19 +16,83 @@ class strain(Model):
     """
     strain = CharField(index=True)
     isotype = CharField(null=True, index=True)
-    longitude = FloatField(null=True)
+    reference_strain = CharField(index=True, null=True)
+    warning_message = CharField(null=True)
+    use = BooleanField()
+    sequenced = BooleanField()
+    previous_names = CharField(null=True)
+    source_lab = CharField(null=True)
     latitude = FloatField(null=True)
+    longitude = FloatField(null=True)
+    landscape = CharField(null=True)
+    substrate = CharField(null=True)
+    isolated_by = CharField(null=True)
+    isolation_date = DateField(null=True)
+    isolation_date_comment = CharField(null=True)
     isolation = CharField(null=True)
     location = CharField(null=True)
-    prev_names = CharField(null=True)
-    warning_msg = CharField(null=True)
-    sequenced = BooleanField()
+    address = CharField(null=True)
+    city = CharField(null=True)
+    state = CharField(null=True)
+    country = CharField(null=True)
+    set_heritability = BooleanField(null=True)
+    set_1 = BooleanField(null=True)
+    set_2 = BooleanField(null=True)
+    set_3 = BooleanField(null=True)
+    set_4 = BooleanField(null=True)
 
     def __repr__(self):
         return self.strain
 
+    def list_sets(self):
+        set_list = []
+        if self.set_heritability == True:
+            set_list.append("set_heritability")
+        if self.set_1 == True:
+            set_list.append("set_1")
+        if self.set_2 == True:
+            set_list.append("set_2")
+        if self.set_3 == True:
+            set_list.append("set_3")
+        if self.set_4 == True:
+            set_list.append("set_4")
+        return set_list
+        
     class Meta:
         database = db
+
+
+
+class order(Model):
+    price = FloatField()
+    stripeToken = CharField(index = True)
+    stripeShippingName = CharField(null = False)
+    stripeEmail = CharField(null = False)
+    stripeShippingAddressLine1 = CharField(null = False)
+    stripeShippingAddressCity = CharField(null = False)
+    stripeShippingAddressState = CharField(null = False)
+    stripeShippingAddressZip = IntegerField(null = False)
+    stripeShippingAddressCountry = CharField(null = False)
+    stripeShippingAddressCountryCode = CharField(null = False)
+
+    # Billing
+    stripeBillingName = CharField(null = False)
+    stripeBillingAddressLine1 = CharField(null = False)
+    stripeBillingAddressCity = CharField(null = False)
+    stripeBillingAddressState = CharField(null = False)
+    stripeBillingAddressZip = IntegerField(null = False)
+    stripeBillingAddressCountry = CharField(null = False)
+    stripeBillingAddressCounryCode = CharField(null = False)
+
+    order_time = DateTimeField(default=datetime.datetime.now)
+
+    class Meta:
+        database = db
+
+
+class order_strain(Model):
+    order = ForeignKeyField(order)
+    strain = ForeignKeyField(strain)
 
 
 class report(Model):
