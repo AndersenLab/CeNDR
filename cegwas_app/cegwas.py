@@ -164,24 +164,24 @@ def order_page():
     bcs = OrderedDict([("strain","/strain/"), ("order","")])
     title = "Order"
     key = stripe_keys["publishable_key"]
-    print request.form
     if 'stripeToken' in request.form:
-        try:
-            total = 500
+        total = 500
 
-            customer = stripe.Customer.create(
-                email=request.form['stripeEmail'],
-                card=request.form['stripeToken']
-            )
+        customer = stripe.Customer.create(
+            email=request.form['stripeEmail'],
+            card=request.form['stripeToken']
+        )
 
-            charge = stripe.Charge.create(
-                customer=customer.id,
-                amount=total,
-                currency='usd',
-                description='Flask Charge'
-            )
-        except:
-            print "order failed"
+        charge = stripe.Charge.create(
+            customer=customer.id,
+            amount=total,
+            currency='usd',
+            description='Flask Charge'
+        )
+        print request.form
+        order_formatted = {k:autoconvert(v) for k,v in request.form.items()}
+        order_formatted["price"] = total
+        order.create(**order_formatted).save()
     else:
         ordered = request.form.getlist('strain')
         print ordered
