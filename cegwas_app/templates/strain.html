@@ -45,7 +45,7 @@
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>{{ page_type }} Information</strong></div>
               <ul class="list-group">
                 <li class="list-group-item" style="padding:0px;">
-                {% if rec.latitude != None %}
+                {% if rec[0].latitude %}
                   <div id="map" style="height: 200px; width:100%"></div>
                 {% else %}
                   <div style="height: 200px; background-color: #73AFE4; width:100%; text-align: center; line-height: 195px; "><strong>No Location</strong></div>
