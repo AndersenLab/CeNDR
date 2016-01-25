@@ -127,7 +127,16 @@ $("input:checkbox").click(function(x) {
 });
 
 $("#submitPaste").click(function(){
-    console.log($("#copyPasteStrains").val().split(" "));
+    pastedStrains = $("#copyPasteStrains").val().split(/[\s,\n,\t]+/);
+    console.log(pastedStrains);
+    for (i in pastedStrains){
+        pasted = $("[info^='"+pastedStrains[i]+"']").prop("checked", true);
+    }
+    checkedValues = $('input:checkbox:checked').length;
+    console.log(checkedValues);
+    if (checkedValues < 1){
+        window.alert("No matching strains were found")
+    }
 })
 
 
@@ -151,7 +160,7 @@ $("button[id^='checkout']").click(function() {
 
 
 $(document).ready(function() {
-  $(window).keydown(function(event){
+  $('#filter').keydown(function(event){
     if(event.keyCode == 13) {
       event.preventDefault();
       return false;
