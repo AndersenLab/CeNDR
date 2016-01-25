@@ -50,7 +50,7 @@
                 <tr>
                     <td>
                         <input type="checkbox" name="strain" value=
-                        "{{ isotype }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
+                        "{{ isotype }}" info="{{ strains|join(" ") }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
                     </td>
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{{ strains|join(" ") }}</td>
