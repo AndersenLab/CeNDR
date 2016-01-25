@@ -29,7 +29,7 @@
             </div>
             <div class="col-md-2">
             <div id="checkout" style="z-index:10000;" data-offset-top="170" data-spy="affix">
-             <button type="submit" value = "Checkout" class="btn btn-primary btn-block" id="checkout">
+             <button type="submit" value = "Checkout" class="btn btn-primary btn-block" id="checkoutBox">
                         <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Checkout
                 </button>
               </div>
@@ -94,12 +94,17 @@ highlight_set_buttons = function() {
   }
 }
 
+
+$('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
+
 $("#checkAll").click(function() {
     $('input:checkbox:visible').not(this).prop('checked', this.checked);
 });
 
 $("input:checkbox").click(function(x) {
     highlight_set_buttons();
+    $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
+    // console.log(test)
 });
 
 
@@ -110,6 +115,7 @@ $("button[id^='set']").click(function () {
     } else {
       $("." + set_name).prop("checked", false);
     }
+    $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
     highlight_set_buttons();
 })
 
@@ -119,6 +125,7 @@ $("button[id^='checkout']").click(function() {
     }).get();
     console.log(checkedValues);
 });
+
 
 $(document).ready(function() {
   $(window).keydown(function(event){
