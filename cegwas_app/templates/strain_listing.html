@@ -20,10 +20,29 @@
                 <button type="button" class="btn btn-default" id="set_3">3</button>
                 <button type="button" class="btn btn-default" id="set_4">4</button>
             </div>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Paste File</button>
 
 
 
             </div>
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                  </div>
+                  <div class="modal-body">
+                        <textarea style="width: 500px; height: 150px;" id="copyPasteStrains" placeholder="Paste your strains here"></textarea>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="submitPaste">Send</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            </form>
             <div class="col-md-4">
                 <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
             </div>
@@ -50,7 +69,7 @@
                 <tr>
                     <td>
                         <input type="checkbox" name="strain" value=
-                        "{{ isotype }}" info="{{ strains|join(" ") }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
+                        "{{ isotype }}" info="{{ isotype + " " +strains|join(" ") }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
                     </td>
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{{ strains|join(" ") }}</td>
@@ -106,6 +125,10 @@ $("input:checkbox").click(function(x) {
     $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
     // console.log(test)
 });
+
+$("#submitPaste").click(function(){
+    console.log($("#copyPasteStrains").val().split(" "));
+})
 
 
 $("button[id^='set']").click(function () {
