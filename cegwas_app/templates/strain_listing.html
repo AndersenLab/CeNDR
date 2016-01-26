@@ -37,7 +37,7 @@
                   </div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="submitPaste">Send</button>
+                    <button type="button" class="btn btn-primary" id="submitPaste">Submit</button>
                   </div>
                 </div>
               </div>
@@ -130,14 +130,20 @@ $("#submitPaste").click(function(){
     pastedStrains = $("#copyPasteStrains").val().split(/[\s,\n,\t]+/);
     console.log(pastedStrains);
     for (i in pastedStrains){
-        pasted = $("[info^='"+pastedStrains[i]+"']").prop("checked", true);
+        upperCaseStrain = pastedStrains[i].toUpperCase(); // Just in case users submit lower case
+        pasted = $("[info*='"+upperCaseStrain+"']").prop("checked", true); //I have to fix for when strains share substrings at the beginning (eg: NIC1 vs NIC166) 
     }
     checkedValues = $('input:checkbox:checked').length;
     console.log(checkedValues);
     if (checkedValues < 1){
         window.alert("No matching strains were found")
     }
+    else {
+        $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
+        $('#myModal').modal('hide');
+    }
 })
+
 
 
 $("button[id^='set']").click(function () {
