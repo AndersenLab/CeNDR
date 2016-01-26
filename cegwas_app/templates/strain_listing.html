@@ -35,6 +35,7 @@
                   <div class="modal-body">
                         <textarea style="width: 500px; height: 150px;" id="copyPasteStrains" placeholder="Paste your strains here"></textarea>
                   </div>
+                  <div id='alert-modal'></div>
                   <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="submitPaste">Submit</button>
@@ -136,7 +137,7 @@ $("#submitPaste").click(function(){
     checkedValues = $('input:checkbox:checked').length;
     console.log(checkedValues);
     if (checkedValues < 1){
-        window.alert("No matching strains were found")
+               $("#alert-modal").html('<div class="alert alert-danger" id="alert" role="alert"><strong>Error</strong>: None of our strains match your request! Please try different ones or submit your own <a href="/gwa/">here</a>!</div>');
     }
     else {
         $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
