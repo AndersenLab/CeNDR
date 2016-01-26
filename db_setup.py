@@ -24,7 +24,7 @@ db = PostgresqlDatabase(
 db.connect()
 
 
-booldict = {"TRUE": True, "FALSE": False, "NA": None, "":None}
+booldict = {"TRUE": True, "FALSE": False, "NA": None, "":None, None: None}
 
 #=======================#
 # Generate strain table #
@@ -96,6 +96,10 @@ class order(Model):
 class order_strain(Model):
     order = ForeignKeyField(order)
     strain = ForeignKeyField(strain)
+
+
+    class Meta:
+        database = db
 
 
 class report(Model):
@@ -175,29 +179,29 @@ strain_info_join = requests.get(
 lines = strain_info_join.text.splitlines()
 
 strain_data = []
-with db.atomic():
-    header = lines[0].split("\t")
-    for line in lines[1:]:
-        strain_info = re.split('\t', line)
-        l = OrderedDict(zip(header, strain_info))
-        l = {k: v for k, v in l.items()}
-        l["use"] = booldict[l["use"]]
-        l["sequenced"] = booldict[l["sequenced"]]
-        l["set_heritability"] = booldict[l["set_heritability"]]
-        l["set_1"] = booldict[l["set_1"]]
-        l["set_2"] = booldict[l["set_2"]]
-        l["set_3"] = booldict[l["set_3"]]
-        l["set_4"] = booldict[l["set_4"]]
-        if l["latitude"] == "":
-            l["latitude"] = None
-            l["longitude"] = None
-        if l["isolation_date"] is not None:
-            l["isolation_date"] = parse(l["isolation_date"])
-        for k in l.keys():
-            if l[k] == "NA":
-                l[k] = None
-        if l["isotype"] != "":
-            strain_data.append(l)
+header = lines[0].split("\t")
+for line in lines[1:]:
+    strain_info = re.split('\t', line)
+    strain_info = [None if x == "NA" else x for x in strain_info]
+    l = OrderedDict(zip(header, strain_info))
+    l = {k: v for k, v in l.items()}
+    l["use"] = booldict[l["use"]]
+    l["sequenced"] = booldict[l["sequenced"]]
+    l["set_heritability"] = booldict[l["set_heritability"]]
+    l["set_1"] = booldict[l["set_1"]]
+    l["set_2"] = booldict[l["set_2"]]
+    l["set_3"] = booldict[l["set_3"]]
+    l["set_4"] = booldict[l["set_4"]]
+    if l["latitude"] == "":
+        l["latitude"] = None
+        l["longitude"] = None
+    if l["isolation_date"] is not None:
+        l["isolation_date"] = parse(l["isolation_date"])
+    for k in l.keys():
+        if l[k] == "NA":
+            l[k] = None
+    if l["isotype"] != "":
+        strain_data.append(l)
 
 with db.atomic():
     strain.insert_many(strain_data).execute()
