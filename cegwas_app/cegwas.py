@@ -147,7 +147,7 @@ def statistics():
     bcs = OrderedDict([("about", "/about/"), ("statistics", None)])
 
     # Collection dates
-    collection_dates = list(strain.select().filter(strain.isotype != None).order_by(strain.isolation_date).execute())
+    collection_dates = list(strain.select().filter(strain.isotype != None, strain.isolation_date != None).order_by(strain.isolation_date).execute())
 
     return render_template('statistics.html', **locals())
 
