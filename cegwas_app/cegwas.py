@@ -47,6 +47,7 @@ def map_page():
     strain_list_dicts = []
     strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).filter(strain.latitude.is_null() == False).execute())
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
+    print strain_listing
     return render_template('map.html', **locals())
 
 
@@ -206,6 +207,7 @@ def isotype_page(isotype_name):
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name).order_by(strain.latitude).dicts().execute())
     ref_strain = [x for x in rec if x["reference_strain"] == isotype_name][0]
+    print ref_strain[0]
     strain_json_output = json.dumps([x for x in rec if x["latitude"] != None],  default=json_serial)
     return render_template('strain.html', **locals())
 
