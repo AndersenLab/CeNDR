@@ -1,88 +1,81 @@
 {% extends "_layouts/default.html" %} {% block custom_head %}
 <style>
-
 #checkout.affix {
     position: fixed;
     top: 20px;
     width: 136px;
 }
 </style>
-{% endblock %} {% block content %}
+{% endblock %} 
+{% block content %}
 <form method="POST" action="/order/">
-<div class="row">
-    <div class="col-md-12">
-        <div class="row">
-            <div class="col-md-6">
-                <button type="button"  class="btn btn-primary" id="set_heritability">Heritability</button>
-              <div class="btn-group" role="group" aria-label="...">
-                <button type="button" class="btn btn-default" id="set_1">1</button>
-                <button type="button" class="btn btn-default" id="set_2">2</button>
-                <button type="button" class="btn btn-default" id="set_3">3</button>
-                <button type="button" class="btn btn-default" id="set_4">4</button>
-            </div>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">Paste File</button>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-primary" id="set_heritability">Heritability</button>
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button type="button" class="btn btn-default" id="set_1">1</button>
+                        <button type="button" class="btn btn-default" id="set_2">2</button>
+                        <button type="button" class="btn btn-default" id="set_3">3</button>
+                        <button type="button" class="btn btn-default" id="set_4">4</button>
+                    </div>
+                    <button style = "margin-left: auto;" type="button" class="btn btn-link" data-toggle="modal" tooltip data-target="#myModal" data-placement="top" title="Paste a list of strains to select">Paste File</button>
 
-
-
-            </div>
-            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                  </div>
-                  <div class="modal-body">
-                        <textarea style="width: 500px; height: 150px;" id="copyPasteStrains" placeholder="Paste your strains here"></textarea>
-                  </div>
-                  <div id='alert-modal'></div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="submitPaste">Submit</button>
-                  </div>
                 </div>
-              </div>
+                <div class="col-md-4">
+                    <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
+                </div>
+                <div class="col-md-2">
+                    <div id="checkout" style="z-index:10000;" data-offset-top="170" data-spy="affix">
+                        <button type="submit" value="Checkout" class="btn btn-primary btn-block" id="checkoutBox">
+                            <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Checkout
+                        </button>
+                    </div>
+                </div>
             </div>
-            </form>
-            <div class="col-md-4">
-                <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th style="width: 20px;">
+                            <input type="checkbox" id="checkAll" />
+                        </th>
+                        <th style="width: 200px;">Isotype</th>
+                        <th>Strains
+                            <div class="pull-right"><a href="https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?output=tsv">Download Strain Information (.tsv)</a></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="searchable">
+                    {% for isotype, strains in strain_listing|groupby('isotype') %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="strain" value="{{ isotype }}" info="{{ isotype + " " +strains|join(" ") }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
+                        </td>
+                        <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
+                        <td>{{ strains|join(" ") }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <textarea style="width: 500px; height: 150px;" id="copyPasteStrains"  class="form-control" placeholder="Paste a tab, comma, or newline delimited list of strains here"></textarea>
             </div>
-            <div class="col-md-2">
-            <div id="checkout" style="z-index:10000;" data-offset-top="170" data-spy="affix">
-             <button type="submit" value = "Checkout" class="btn btn-primary btn-block" id="checkoutBox">
-                        <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Checkout
-                </button>
-              </div>
+            <div id='alert-modal'></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="submitPaste">Submit</button>
             </div>
         </div>
-        <table class="table table-hover table-striped">
-            <thead>
-                <tr>
-                    <th style="width: 20px;">
-                        <input type="checkbox" id="checkAll" />
-                    </th>
-                    <th style="width: 200px;">Isotype</th>
-                    <th>Strains<div class="pull-right"><a href="https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?output=tsv">Download Strain Information (.tsv)</a></div></th>
-                </tr>
-            </thead>
-            <tbody class="searchable">
-                {% for isotype, strains in strain_listing|groupby('isotype') %}
-                <tr>
-                    <td>
-                        <input type="checkbox" name="strain" value=
-                        "{{ isotype }}" info="{{ isotype + " " +strains|join(" ") }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
-                    </td>
-                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-                    <td>{{ strains|join(" ") }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 </div>
-        </form>
 {% endblock %} 
-
 {% block script %}
 <script>
 $(document).ready(function() {
@@ -104,14 +97,14 @@ $(document).ready(function() {
 });
 
 highlight_set_buttons = function() {
-  set_names = ["set_heritability", "set_1", "set_2", "set_3", "set_4"];
-  for(i in set_names) {
-    if ($("." + set_names[i] + ":checkbox:checked").length == $("." + set_names[i] ).length) {
-      $("#" + set_names[i]).addClass("btn-success");
-    } else {
-      $("#" + set_names[i]).removeClass("btn-success");
+    set_names = ["set_heritability", "set_1", "set_2", "set_3", "set_4"];
+    for (i in set_names) {
+        if ($("." + set_names[i] + ":checkbox:checked").length == $("." + set_names[i]).length) {
+            $("#" + set_names[i]).addClass("btn-success");
+        } else {
+            $("#" + set_names[i]).removeClass("btn-success");
+        }
     }
-  }
 }
 
 
@@ -127,32 +120,34 @@ $("input:checkbox").click(function(x) {
     // console.log(test)
 });
 
-$("#submitPaste").click(function(){
+$("#submitPaste").click(function() {
     pastedStrains = $("#copyPasteStrains").val().split(/[\s,\n,\t]+/);
-    console.log(pastedStrains);
-    for (i in pastedStrains){
+    lost_strains = [];
+    for (i in pastedStrains) {
         upperCaseStrain = pastedStrains[i].toUpperCase(); // Just in case users submit lower case
-        pasted = $("[info*='"+upperCaseStrain+"']").prop("checked", true); //I have to fix for when strains share substrings at the beginning (eg: NIC1 vs NIC166) 
+        found_strain = $("[info~='" + upperCaseStrain + "']");
+
+        if (found_strain.length > 0) {
+            pasted = found_strain.prop("checked", true); // Use the word selector (~=)
+        } else {
+            lost_strains.push(pastedStrains[i])
+        }
     }
-    checkedValues = $('input:checkbox:checked').length;
-    console.log(checkedValues);
-    if (checkedValues < 1){
-               $("#alert-modal").html('<div class="alert alert-danger" id="alert" role="alert"><strong>Error</strong>: None of our strains match your request! Please try different ones or submit your own <a href="/gwa/">here</a>!</div>');
+    if (lost_strains.length > 0) {
+        set_alert("warning", "The following strain(s) were not found", lost_strains.join(", "));
     }
-    else {
-        $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
-        $('#myModal').modal('hide');
-    }
+    $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
+    $('#myModal').modal('hide');
 })
 
 
 
-$("button[id^='set']").click(function () {
+$("button[id^='set']").click(function() {
     set_name = $(this).attr("id");
     if ($("." + set_name).first().prop("checked") == false) {
-      $("." + set_name).prop("checked", true);
+        $("." + set_name).prop("checked", true);
     } else {
-      $("." + set_name).prop("checked", false);
+        $("." + set_name).prop("checked", false);
     }
     $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
     highlight_set_buttons();
@@ -167,14 +162,12 @@ $("button[id^='checkout']").click(function() {
 
 
 $(document).ready(function() {
-  $('#filter').keydown(function(event){
-    if(event.keyCode == 13) {
-      event.preventDefault();
-      return false;
-    }
-  });
+    $('#filter').keydown(function(event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
 });
-
-
 </script>
 {% endblock %}
