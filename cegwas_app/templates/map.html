@@ -16,10 +16,12 @@
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
               <ul class="list-group">
                 <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div></li>
-                <li class="list-group-item"><strong>Latitude</strong> <div class="lat pull-right"></div></li>
-                <li class="list-group-item"><strong>Longitude</strong> <div class="lng pull-right"></div></li>
-                <li class="list-group-item" style="height:150px;"><strong>Isolation</strong><br /> <div class="isolation"></div></li>
+                <li class="list-group-item"><strong>Isolation Date</strong> <div class="date pull-right"></div></li>
+                <li class="list-group-item"><strong>Lat/Lon</strong> <div class="lat pull-right"></div><div class="comma pull-right"></div> <div class="lng pull-right"></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div></li>
+                <li class="list-group-item"><strong>Landscape</strong> <div class="landscape pull-right"></div></li>
+                <li class="list-group-item"><strong>Substrate</strong> <div class="substrate pull-right"></div></li>
+                <li class="list-group-item"><strong>Isolated By</strong> <div class="isolation pull-right"></div></li>
               </ul>
         </div>
       </div>
@@ -53,7 +55,7 @@ var icon_hover = L.icon({
 // Default click_s
 var click_s = {
   target: {
-    options: {strain: "", title: "", loc: "", isolation: "", location: ""},
+    options: {strain: "", title: "", landscape: "", loc: "", isolation: "", location: "", substrate: ""},
     setIcon: function(){},
   },
   latlng: { lat: "", lng: ""},
@@ -64,9 +66,12 @@ function set_panel_from_search(m) {
   click_s.target.setIcon(icon_norm)
   s = m.layer.options
   $(".strain").html("<a href='/strain/" + s.isotype + "/'>" + s.strain + "</a>");
-  $(".location").text(s.loc);
+  $(".date").text(s.isolation_date);
   $(".lat").text(m.latlng.lat);
   $(".lng").text(m.latlng.lng);
+  $(".location").text(s.loc);
+  $(".landscape").text(s.landscape);
+  $(".substrate").text(s.substrate);
   $(".isolation").text(s.isolation);
 }
 
@@ -80,10 +85,13 @@ function set_panel_content(m) {
   isolation = s.isolation;
 
   $(".strain").html("<a href='/strain/" + s.isotype + "/'>" + s.strain + "</a>");
-  $(".location").text(loc);
+  $(".date").text(s.isolation_date);
   $(".lat").text(m.latlng.lat);
   $(".lng").text(m.latlng.lng);
-  $(".isolation").text(isolation);
+  $(".location").text(s.loc);
+  $(".landscape").text(s.landscape);
+  $(".substrate").text(s.substrate);
+  $(".isolation").text(s.isolation);
 }
 
 function set_click_locked_content(m) {
