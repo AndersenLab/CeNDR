@@ -61,6 +61,13 @@ def map_page():
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
     return render_template('map.html', **locals())
 
+@app.route('/data/')
+def data_page():
+    bcs = OrderedDict([("data", None)])
+    title = "Data"
+    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()  
+    return render_template('data.html', **locals())
+
 
 @app.route('/gwa/')
 def gwa():

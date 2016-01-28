@@ -1,0 +1,97 @@
+{% extends "_layouts/default.html" %} {% block custom_head %}
+<style>
+#checkout.affix {
+    position: fixed;
+    top: 20px;
+    width: 136px;
+}
+</style>
+{% endblock %} 
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="row">
+<!--             <div class="col-md-6">
+                <button type="button" class="btn btn-primary" id="set_heritability">Heritability</button>
+                <div class="btn-group" role="group" aria-label="...">
+                    <button type="button" class="btn btn-default" id="set_1">1</button>
+                    <button type="button" class="btn btn-default" id="set_2">2</button>
+                    <button type="button" class="btn btn-default" id="set_3">3</button>
+                    <button type="button" class="btn btn-default" id="set_4">4</button>
+                </div>
+
+            </div> -->
+            <div class="col-md-4">
+                <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
+            </div>
+        </div>
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th style="width: 200px;">Isotype</th>
+                    <th style="width: 200px;">Strains</th>
+                    <th style="width: 200px;">BAM</th>
+                    <th>
+                        <div class="pull-right"><a href="https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?output=tsv">Download Strain Information (.tsv)</a></div>
+                    </th>
+                </tr>
+            </thead>
+            <div style="height: 30px;" ></div>
+            <tbody class="searchable">
+                {% for isotype, strains in strain_listing|groupby('isotype') %}
+                <tr>
+                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
+                    <td>{{ strains|join(" ") }}</td>
+                    <td><a href="#">link</a></td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %} 
+{% block script %}
+<script>
+$(document).ready(function() {
+
+    (function($) {
+
+        $('#filter').keyup(function() {
+
+            var rex = new RegExp($(this).val(), 'i');
+            $('.searchable tr').hide();
+            $('.searchable tr').filter(function() {
+                return rex.test($(this).text());
+            }).show();
+
+        })
+
+    }(jQuery));
+
+});
+
+// highlight_set_buttons = function() {
+//     set_names = ["set_heritability", "set_1", "set_2", "set_3", "set_4"];
+//     for (i in set_names) {
+//         if ($("." + set_names[i] + ":checkbox:checked").length == $("." + set_names[i]).length) {
+//             $("#" + set_names[i]).addClass("btn-success");
+//         } else {
+//             $("#" + set_names[i]).removeClass("btn-success");
+//         }
+//     }
+// }
+
+
+
+$(document).ready(function() {
+    $('#filter').keydown(function(event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}
+
