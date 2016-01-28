@@ -1,7 +1,7 @@
 import os
 import csv
 import logging
-from flask import render_template, request, send_from_directory, url_for, request, jsonify, redirect
+from flask import render_template, request, send_from_directory, url_for, request, jsonify, redirect, Markup
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
@@ -14,7 +14,9 @@ from collections import OrderedDict
 from models import *
 import stripe
 import itertools
+import mistune
 from datetime import date
+
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -34,6 +36,15 @@ stripe.api_key = "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9"
 
 
 app = Flask(__name__, static_url_path='/static')
+
+@app.context_processor
+def utility_processor():
+    def render_markdown(filename):
+        with open("content/" + filename) as f:
+            markdown = mistune.Markdown()
+            return Markup(markdown(f.read()))
+    return dict(render_markdown=render_markdown)
+
 
 @app.route('/')
 def main():

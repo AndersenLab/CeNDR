@@ -16,12 +16,12 @@
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
               <ul class="list-group">
                 <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div></li>
-                <li class="list-group-item"><strong>Isolation Date</strong> <div class="date pull-right"></div></li>
+                <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div></li>
                 <li class="list-group-item"><strong>Lat/Lon</strong> <div class="lat pull-right"></div><div class="comma pull-right"></div> <div class="lng pull-right"></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div></li>
                 <li class="list-group-item"><strong>Landscape</strong> <div class="landscape pull-right"></div></li>
                 <li class="list-group-item"><strong>Substrate</strong> <div class="substrate pull-right"></div></li>
-                <li class="list-group-item"><strong>Isolated By</strong> <div class="isolation pull-right"></div></li>
+                <li class="list-group-item"><strong>Isolated By</strong> <div class="isolated_by pull-right"></div></li>
               </ul>
         </div>
       </div>
@@ -66,13 +66,13 @@ function set_panel_from_search(m) {
   click_s.target.setIcon(icon_norm)
   s = m.layer.options
   $(".strain").html("<a href='/strain/" + s.isotype + "/'>" + s.strain + "</a>");
-  $(".date").text(s.isolation_date);
+  $(".isolation_date").text(s.isolation_date);
   $(".lat").text(m.latlng.lat);
   $(".lng").text(m.latlng.lng);
   $(".location").text(s.loc);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
-  $(".isolation").text(s.isolation);
+  $(".isolated_by").text(s.isolated_by);
 }
 
 function set_panel_content(m) {
@@ -83,15 +83,15 @@ function set_panel_content(m) {
   strain = s.strain;
   loc = s.loc;
   isolation = s.isolation;
-
+  console.log(s);
   $(".strain").html("<a href='/strain/" + s.isotype + "/'>" + s.strain + "</a>");
-  $(".date").text(s.isolation_date);
+  $(".isolation_date").text(s.isolation_date);
   $(".lat").text(m.latlng.lat);
   $(".lng").text(m.latlng.lng);
   $(".location").text(s.loc);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
-  $(".isolation").text(s.isolation);
+  $(".isolated_by").text(s.isolated_by);
 }
 
 function set_click_locked_content(m) {
@@ -131,8 +131,11 @@ function restore_click_locked_content(m) {
                                          strain: d.strain,
                                          title: d.strain,
                                          isotype: d.isotype,
-                                         isolation : d.isolation,
-                                         loc : d.location }).addTo(map)
+                                         isolation_date : d.isolation_date,
+                                         loc : d.location,
+                                         landscape: d.landscape,
+                                         substrate: d.substrate,
+                                         isolated_by: d.isolated_by }).addTo(map)
                                         .on("click", set_click_locked_content)
                                         .on('mouseover', set_panel_content)
                                         .on('mouseout', restore_click_locked_content)
@@ -149,7 +152,6 @@ var search_control = new L.Control.Search({layer: strain_layer,
                                       markerLocation: false,
                                       markerIcon: icon_hover });
 search_control.on('search_locationfound', set_panel_from_search);
-console.log(strain_layer.properties);
 map.addControl(search_control);
 
 
