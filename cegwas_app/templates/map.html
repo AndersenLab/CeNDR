@@ -17,7 +17,7 @@
               <ul class="list-group">
                 <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div></li>
                 <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div></li>
-                <li class="list-group-item"><strong>Lat/Lon</strong> <div class="lat pull-right"></div><div class="comma pull-right"></div> <div class="lng pull-right"></div></li>
+                <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div></li>
                 <li class="list-group-item"><strong>Landscape</strong> <div class="landscape pull-right"></div></li>
                 <li class="list-group-item"><strong>Substrate</strong> <div class="substrate pull-right"></div></li>
@@ -55,7 +55,7 @@ var icon_hover = L.icon({
 // Default click_s
 var click_s = {
   target: {
-    options: {strain: "", title: "", landscape: "", loc: "", isolation: "", location: "", substrate: ""},
+    options: {strain: "", title: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: ""},
     setIcon: function(){},
   },
   latlng: { lat: "", lng: ""},
@@ -67,8 +67,7 @@ function set_panel_from_search(m) {
   s = m.layer.options
   $(".strain").html("<a href='/strain/" + s.isotype + "/'>" + s.strain + "</a>");
   $(".isolation_date").text(s.isolation_date);
-  $(".lat").text(m.latlng.lat);
-  $(".lng").text(m.latlng.lng);
+  $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
   $(".location").text(s.loc);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
@@ -82,12 +81,14 @@ function set_panel_content(m) {
   m.target.setIcon(icon_hover)
   strain = s.strain;
   loc = s.loc;
-  isolation = s.isolation;
-  console.log(s);
+  isolation_date = s.isolation_date;
+  isolated_by = s.isolated_by;
+  comma = s.comma;
+  latlng = m.latlng.lat + comma + m.latlng;
   $(".strain").html("<a href='/strain/" + s.isotype + "/'>" + s.strain + "</a>");
   $(".isolation_date").text(s.isolation_date);
-  $(".lat").text(m.latlng.lat);
-  $(".lng").text(m.latlng.lng);
+  $(".comma").text(s.comma)
+  $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
   $(".location").text(s.loc);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
@@ -135,6 +136,7 @@ function restore_click_locked_content(m) {
                                          loc : d.location,
                                          landscape: d.landscape,
                                          substrate: d.substrate,
+                                         comma: ",  ",
                                          isolated_by: d.isolated_by }).addTo(map)
                                         .on("click", set_click_locked_content)
                                         .on('mouseover', set_panel_content)
