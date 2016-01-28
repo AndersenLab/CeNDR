@@ -13,6 +13,7 @@ import IPython
 from collections import OrderedDict
 from models import *
 import stripe
+import itertools
 from datetime import date
 
 def json_serial(obj):
@@ -54,7 +55,16 @@ def map_page():
 def gwa():
     title = "Perform Mapping"
     bcs = OrderedDict([("Genetic Mapping", None), ("Perform Mapping", None)])
-    strain_list = json.dumps([x.strain for x in strain.select(strain.strain).filter(strain.isotype.is_null() == False).execute()])
+
+    # Generate list of allowable strains
+    query = strain.select(strain.strain, 
+            strain.isotype, 
+            strain.previous_names).filter(strain.isotype.is_null() == False).execute()
+    qresults = list(itertools.chain(*[[x.strain, x.isotype, x.previous_names] for x in query]))
+    qresults = set([x for x in qresults if x != None])
+    qresults = list(itertools.chain(*[x.split("|") for x in qresults]))
+
+    strain_list = json.dumps(qresults)
     return render_template('gwa.html', **locals())
 
 
