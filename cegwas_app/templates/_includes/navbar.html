@@ -33,8 +33,8 @@
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Strains <span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="/map/">Strain Map</a></li>
-            <li><a href="/strain/">Strain Catalog</a></li>
+            <li><a href="{{ url_for("map_page")}}">Strain Map</a></li>
+            <li><a href="{{ url_for("strain_listing_page")}}">Strain Catalog</a></li>
             <li><a href="{{ url_for("protocols") }}">Protocols</a></li>
             <li role="separator" class="divider"></li>
             <li><a href="#">Submit Strains</a></li>
@@ -48,8 +48,8 @@
         <li class="dropdown">
           <a href="/gwa/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Genetic Mapping<span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="/gwa/">Perform Mapping</a></li>
-            <li><a href="/strain/">Public Mappings</a></li>
+            <li><a href="{{ url_for("gwa")}}">Perform Mapping</a></li>
+            <li><a href="{{ url_for("strain_listing_page")}}">Public Mappings</a></li>
           </ul>
         </li>
 
