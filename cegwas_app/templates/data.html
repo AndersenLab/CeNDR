@@ -11,18 +11,10 @@
 <div class="row">
     <div class="col-md-12">
         <div class="row">
-<!--             <div class="col-md-6">
-                <button type="button" class="btn btn-primary" id="set_heritability">Heritability</button>
-                <div class="btn-group" role="group" aria-label="...">
-                    <button type="button" class="btn btn-default" id="set_1">1</button>
-                    <button type="button" class="btn btn-default" id="set_2">2</button>
-                    <button type="button" class="btn btn-default" id="set_3">3</button>
-                    <button type="button" class="btn btn-default" id="set_4">4</button>
-                </div>
-
-            </div> -->
-            <div class="col-md-4">
-                <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
+             <div class="col-md-9">
+            </div> 
+            <div class="col-md-3">
+            <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
             </div>
         </div>
         <table class="table table-hover table-striped">
@@ -31,9 +23,7 @@
                     <th style="width: 200px;">Isotype</th>
                     <th style="width: 200px;">Strains</th>
                     <th style="width: 200px;">BAM</th>
-                    <th>
-                        <div class="pull-right"><a href="https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?output=tsv">Download Strain Information (.tsv)</a></div>
-                    </th>
+                    <th style="width: 200px;">Variants</th>
                 </tr>
             </thead>
             <div style="height: 30px;" ></div>
@@ -42,8 +32,8 @@
                 <tr>
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{{ strains|join(" ") }}</td>
-                    <td><a href="#">link</a></td>
-                    <td></td>
+                    <td><a href="#">{{ isotype }}.bam</a></td>
+                    <td><a href="#">{{ isotype }}.variants.tsv</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
