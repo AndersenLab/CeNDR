@@ -40,7 +40,7 @@ app = Flask(__name__, static_url_path='/static')
 @app.context_processor
 def utility_processor():
     def render_markdown(filename):
-        with open("content/" + filename) as f:
+        with open("markdown/" + filename) as f:
             markdown = mistune.Markdown()
             return Markup(markdown(f.read()))
     return dict(render_markdown=render_markdown)
@@ -243,6 +243,12 @@ def protocols():
     title = "Protocols"
     bcs = OrderedDict([("strain","/strain/"), ("protocols","")])
     return render_template('protocols.html', **locals())
+
+@app.route('/outreach/')
+def outreach():
+    title = "Outreach"
+    bcs = OrderedDict([("outreach", "/outreach/")])
+    return render_template('outreach.html', **locals())
 
 
 
