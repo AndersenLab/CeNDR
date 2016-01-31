@@ -8,4 +8,5 @@ RUN pip install -qr /tmp/requirements.txt
 ADD ./cegwas_app /opt/cegwas_app/		
 WORKDIR /opt/cegwas_app		
 EXPOSE 5000		
-CMD ["python", "cegwas.py"] 		
+ENTRYPOINT ["python"]
+CMD ["cegwas.py"]		

@@ -254,9 +254,9 @@ def outreach():
 
 if __name__ == '__main__':
     # Bind to PORT if defined, otherwise default to 5000.
-    port = int(os.environ.get('PORT', 5000))
+    #port = int(os.environ.get('PORT', 5000))
     app.debug=True
     app.config['SECRET_KEY'] = '<123>'
     toolbar = DebugToolbarExtension(app)
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0')
 

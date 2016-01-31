@@ -10,7 +10,7 @@ except:
     credentials["password"] =  os.environ['password']
     credentials["host"] = os.environ['host']
 
-db = PostgsresqlDatabase(
+db = PostgresqlDatabase(
   'andersen',
   **credentials
   )
