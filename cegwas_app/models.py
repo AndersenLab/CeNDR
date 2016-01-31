@@ -1,9 +1,16 @@
 from peewee import *
 import json
 import datetime
-credentials = json.loads(open("../credentials.json",'r').read())
+import os
+try:
+    credentials = json.loads(open("../credentials.json",'r').read())
+except:
+    credentials = {}
+    credentials["user"] = os.environ['user']
+    credentials["password"] =  os.environ['password']
+    credentials["host"] = os.environ['host']
 
-db = PostgresqlDatabase(
+db = PostgsresqlDatabase(
   'andersen',
   **credentials
   )
