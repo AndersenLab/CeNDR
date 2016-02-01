@@ -49,6 +49,8 @@ def utility_processor():
 @app.route('/')
 def main():
     title = "Cegwas"
+    files = os.listdir("news/")
+    files.reverse()
     return render_template('home.html', **locals())
 
 
@@ -243,6 +245,14 @@ def protocols():
     title = "Protocols"
     bcs = OrderedDict([("strain","/strain/"), ("protocols","")])
     return render_template('protocols.html', **locals())
+
+@app.route("/news/")
+def news():
+    title = "Andersen Lab News"
+    files = os.listdir("news/")
+    files.reverse()
+    bcs = OrderedDict([("News", "")])
+    return render_template('news.html', **locals())
 
 @app.route('/outreach/')
 def outreach():
