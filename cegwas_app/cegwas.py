@@ -39,8 +39,8 @@ app = Flask(__name__, static_url_path='/static')
 
 @app.context_processor
 def utility_processor():
-    def render_markdown(filename):
-        with open("markdown/" + filename) as f:
+    def render_markdown(filename, directory = "markdown/"):
+        with open(directory + filename) as f:
             markdown = mistune.Markdown()
             return Markup(markdown(f.read()))
     return dict(render_markdown=render_markdown)
@@ -253,6 +253,13 @@ def news():
     files.reverse()
     bcs = OrderedDict([("News", "")])
     return render_template('news.html', **locals())
+
+@app.route("/news/<filename>/")
+def news_item(filename):
+    title = "Andersen Lab News"
+    print filename
+    return render_template('news_item.html', **locals())
+
 
 @app.route('/outreach/')
 def outreach():

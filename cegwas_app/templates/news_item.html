@@ -1,0 +1,12 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block content %}
+<div class="row">
+      <div class="col-md-12">
+    <h4>News &amp; Updates</h4>
+    {{ filename }}
+    {{ render_markdown(filename, directory = "news/") }}
+
+  </div>
+{% endblock %}

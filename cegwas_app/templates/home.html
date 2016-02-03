@@ -34,12 +34,12 @@
     {% if files %}
       <br>
       <br>
-      <h3>News & Updates</h3>
+      <h3>News &amp; Updates</h3>
       <ul class="list-group">
         {% for f in files %}
 
         <li class="list-group-item">
-            <h4 class="list-group-item-heading"><small class="pull-right">{{ f[:10] }}</small><a href="news/{{ f }}">{{ f[11:].strip(".md").replace("-", " ") }}</a></h4>
+            <h4 class="list-group-item-heading"><small class="pull-right">{{ f[:10] }}</small><a href="{{ url_for('news_item', filename = f) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a></h4>
           </a>
 
         </li>
@@ -47,7 +47,7 @@
         {% endfor %}
 
       </ul>
-    <button type="button" class="btn btn-primary pull-right" id="archive">Archive</button>
+    <button type="button" class="btn btn-primary btn-small pull-right" id="archive">Archive</button>
     {% endif %}
 </div>
 {% endblock %}
