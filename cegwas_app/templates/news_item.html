@@ -6,7 +6,7 @@
       <div class="col-md-12">
     <h4>News &amp; Updates</h4>
     {{ filename }}
-    {{ render_markdown(filename, directory = "news/") }}
+    {{ render_markdown(filename + ".md", directory = "news/") }}
 
   </div>
 {% endblock %}

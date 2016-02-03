@@ -256,8 +256,7 @@ def news():
 
 @app.route("/news/<filename>/")
 def news_item(filename):
-    title = "Andersen Lab News"
-    print filename
+    title = filename[11:].strip(".md").replace("-"," ")
     return render_template('news_item.html', **locals())
 
 
