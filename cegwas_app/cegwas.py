@@ -15,7 +15,14 @@ from models import *
 import stripe
 import itertools
 import mistune
-from datetime import date
+from datetime import date, datetime
+from werkzeug.contrib.atom import AtomFeed
+from urlparse import urljoin
+
+def make_external(url):
+    return urljoin(request.url_root, url)
+
+
 
 
 def json_serial(obj):
@@ -36,6 +43,11 @@ stripe.api_key = "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9"
 
 
 app = Flask(__name__, static_url_path='/static')
+
+def render_markdown(filename, directory = "markdown/"):
+        with open(directory + filename) as f:
+            markdown = mistune.Markdown()
+            return Markup(markdown(f.read()))
 
 @app.context_processor
 def utility_processor():
@@ -258,6 +270,27 @@ def news():
 def news_item(filename):
     title = filename[11:].strip(".md").replace("-"," ")
     return render_template('news_item.html', **locals())
+
+
+@app.route('/feed.atom')
+def feed():
+    feed = AtomFeed('CNDR News',
+                    feed_url=request.url, url=request.url_root)
+    files = os.listdir("news/")
+    files.reverse()
+    for filename in files:
+        filename[11:]
+        title = filename[11:].strip(".md").replace("-"," ")
+        content = render_markdown(filename, "news/")
+        date_published = datetime.strptime(filename[:10], "%Y-%m-%d")
+        feed.add(title, unicode(content),
+                 content_type='html',
+                 author="CNDR News",
+                 url=make_external(url_for("news_item", filename = filename.strip(".md"))),
+                 updated=date_published,
+                 published=date_published)
+    return feed.get_response()
+
 
 
 @app.route('/outreach/')
