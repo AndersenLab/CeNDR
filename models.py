@@ -4,7 +4,6 @@ import datetime
 import os
 import MySQLdb
 import _mysql
-from google.appengine.api import rdbms
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
