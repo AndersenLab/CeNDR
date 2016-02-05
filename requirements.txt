@@ -10,5 +10,5 @@ stripe
 regex
 gcloud
 google-api-python-client
-MySQL-python
+MySQL-python==1.2.5
 Markdown==2.5.2

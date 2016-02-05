@@ -2,8 +2,9 @@ from peewee import *
 import json
 import datetime
 import os
+import MySQLdb
+import _mysql
 from google.appengine.api import rdbms
-import pymysql
 credentials = json.loads(open("credentials.json",'r').read())
 
 class AppEngineDatabase(MySQLDatabase):
@@ -12,12 +13,14 @@ class AppEngineDatabase(MySQLDatabase):
             raise ImproperlyConfigured('Missing "instance" keyword to connect to database')
         return rdbms.connect(database=database, **kwargs)
 
-
-db =  MySQLDatabase(
-  'cegwas',
-  **credentials
-  )
-db = MySQLDatabase('cegwas', unix_socket='/cloudsql/cegwas-db', user='root')
+if (os.getenv('SERVER_SOFTWARE') and
+        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
+    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-db', user='root')
+else:
+    db =  MySQLDatabase(
+      'cegwas',
+      **credentials
+      )
 
 db.connect()
 
