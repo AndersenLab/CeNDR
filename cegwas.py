@@ -21,9 +21,6 @@ from urlparse import urljoin
 def make_external(url):
     return urljoin(request.url_root, url)
 
-
-
-
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
 
@@ -42,9 +39,12 @@ stripe.api_key = "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9"
 
 
 app = Flask(__name__, static_url_path='/static')
-app.debug=True
+if os.getenv('SERVER_SOFTWARE'):
+    app.debug=False
+else:
+    app.debug = True
+    toolbar = DebugToolbarExtension(app)
 app.config['SECRET_KEY'] = '<123>'
-toolbar = DebugToolbarExtension(app)
 
 def render_markdown(filename, directory = "markdown/"):
         with open(directory + filename) as f:
