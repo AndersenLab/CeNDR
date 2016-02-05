@@ -45,6 +45,7 @@ if os.getenv('SERVER_SOFTWARE') and \
     app.debug=False
 else:
     app.debug = True
+    app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
 
 
