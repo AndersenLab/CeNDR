@@ -14,7 +14,7 @@ class AppEngineDatabase(MySQLDatabase):
         return rdbms.connect(database=database, **kwargs)
 
 if (os.getenv('SERVER_SOFTWARE') and
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
+        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')) and 1 == 0:
     db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-db', user='root')
 else:
     db =  MySQLDatabase(
