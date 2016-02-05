@@ -15,7 +15,6 @@
             <p class="visible-xs" style="text-align:center"><em>C. elegans</em> genome-wide association portal</p>
           </div>
           <div>
-          {{ render_markdown("home.md") }}
             {% if data1 %}
             
               <table>
@@ -27,10 +26,42 @@
               </table>
             {% endif %}
           </div>
+            <div class="row">
+    <div class="col-md-4">
+      <div class="thumbnail">
+        <img src="/static/img/main/tedcruz.png" >
+        <div class="caption">
+          <h3>Strains</h3>
+          <p>Strains</p>
+          <p><a href="#" class="btn btn-primary" role="button">To Strains!</a></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="thumbnail">
+        <img src="/static/img/main/danAtAGame.jpg" alt="...">
+        <div class="caption">
+          <h3>Data</h3>
+          <p>Data</p>
+          <p><a href="#" class="btn btn-primary" role="button">To Data!</a></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="thumbnail">
+        <img src="/static/img/main/Trump.png" alt="...">
+        <div class="caption">
+          <h3>Map</h3>
+          <p>Map</p>
+          <p><a href="u" class="btn btn-primary" role="button">To Map!</a></p>
+        </div>
+      </div>
+    </div>
+</div>
       </div>
       </div>
   </div>
-  <div class="col-md-4 pull-right" style="padding:0px;">
+  <div class="col-md-6 pull-right" style="padding:0px;">
     {% if files %}
       <br>
       <br>
@@ -45,18 +76,14 @@
         </li>
 
         {% endfor %}
-
       </ul>
-    <button type="button" class="btn btn-primary btn-small pull-right" id="archive">Archive</button>
+    <div class="pull-right">
+      <a href = "{{ url_for('feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a>
+      <a href = "{{ url_for('news') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
+    </div>
     {% endif %}
 </div>
 {% endblock %}
 
 {% block script%}
-<script>
-  $("#archive").click(function() {
-    console.log("in here")
-    window.location.href = "/news/"
-  })
-</script>
 {% endblock %}
