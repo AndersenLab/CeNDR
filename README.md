@@ -1,3 +1,3 @@
 # cegwas-web
 
-* test
+pip install -r requirements.txt -t lib/
