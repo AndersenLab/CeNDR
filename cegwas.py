@@ -39,12 +39,14 @@ stripe.api_key = "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9"
 
 
 app = Flask(__name__, static_url_path='/static')
-if os.getenv('SERVER_SOFTWARE'):
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+if os.getenv('SERVER_SOFTWARE') and \
+            os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/'):
     app.debug=False
 else:
     app.debug = True
     toolbar = DebugToolbarExtension(app)
-app.config['SECRET_KEY'] = '<123>'
+
 
 def render_markdown(filename, directory = "markdown/"):
         with open(directory + filename) as f:
