@@ -13,7 +13,7 @@ from collections import OrderedDict
 from models import *
 import stripe
 import itertools
-import mistune
+import markdown
 from datetime import date, datetime
 from werkzeug.contrib.atom import AtomFeed
 from urlparse import urljoin
@@ -48,15 +48,13 @@ toolbar = DebugToolbarExtension(app)
 
 def render_markdown(filename, directory = "markdown/"):
         with open(directory + filename) as f:
-            markdown = mistune.Markdown()
-            return Markup(markdown(f.read()))
+            return Markup(markdown.markdown(f.read()))
 
 @app.context_processor
 def utility_processor():
     def render_markdown(filename, directory = "markdown/"):
         with open(directory + filename) as f:
-            markdown = mistune.Markdown()
-            return Markup(markdown(f.read()))
+            return Markup(markdown.markdown(f.read()))
     return dict(render_markdown=render_markdown)
 
 
