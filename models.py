@@ -5,18 +5,12 @@ import os
 import MySQLdb
 import _mysql
 from google.appengine.api import rdbms
-credentials = json.loads(open("credentials.json",'r').read())
-
-class AppEngineDatabase(MySQLDatabase):
-    def _connect(self, database, **kwargs):
-        if 'instance' not in kwargs:
-            raise ImproperlyConfigured('Missing "instance" keyword to connect to database')
-        return rdbms.connect(database=database, **kwargs)
 
 if (os.getenv('SERVER_SOFTWARE') and
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')) and 1 == 0:
-    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-db', user='root')
+        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
+    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-sql', user='root')
 else:
+    credentials = json.loads(open("credentials.json",'r').read())
     db =  MySQLDatabase(
       'cegwas',
       **credentials
@@ -26,6 +20,7 @@ db.connect()
 
 class strain(Model):
     """
+    
         C. Elegans strain information database
     """
     strain = CharField(index=True)

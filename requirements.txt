@@ -8,7 +8,6 @@ requests
 Werkzeug
 stripe
 regex
-gcloud
 google-api-python-client
 MySQL-python==1.2.4
 Markdown==2.5.2

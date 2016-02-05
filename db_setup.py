@@ -5,6 +5,10 @@ import requests
 import json
 import datetime
 from dateutil.parser import parse
+import os
+import MySQLdb
+import _mysql
+
 
 #=======#
 # Setup #
@@ -12,17 +16,18 @@ from dateutil.parser import parse
 credentials = json.loads(open("credentials.json", 'r').read())
 reset_db = True
 
-#==========#
-# Database #
-#==========#
+if (os.getenv('SERVER_SOFTWARE') and
+        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
+    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-sql', user='root')
+else:
+    credentials = json.loads(open("credentials.json",'r').read())
+    db =  MySQLDatabase(
+      'cegwas',
+      **credentials
+      )
 
-db = PostgresqlDatabase(
-    'andersen',
-    **credentials
-)
 
 db.connect()
-
 
 booldict = {"TRUE": True, "FALSE": False, "NA": None, "":None, None: None}
 
