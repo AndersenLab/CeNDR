@@ -6,6 +6,10 @@ body {
   text-align:left;
 }
 
+p {
+  text-align: justify;
+  padding: 5px 15px;
+}
 
 .legend {
     padding: 0px 0px;

@@ -210,3 +210,8 @@ for line in lines[1:]:
 
 with db.atomic():
     strain.insert_many(strain_data).execute()
+
+db.execute_sql("""
+CREATE VIEW report_trait AS SELECT report.report_name, report.report_slug, report.email, report.submission_date, report.submission_complete, report.release, trait.strain_id, trait.name, trait.value FROM report JOIN trait ON trait.report_id = report.id;
+CREATE VIEW report_trait_strain AS (SELECT * FROM strain JOIN report_trait ON report_trait.strain_id = strain.id)
+""")

@@ -17,6 +17,8 @@ import markdown
 from datetime import date, datetime
 from werkzeug.contrib.atom import AtomFeed
 from urlparse import urljoin
+from message import *
+
 
 def make_external(url):
     return urljoin(request.url_root, url)
@@ -63,9 +65,13 @@ def utility_processor():
 
 @app.route('/')
 def main():
-    title = "Cegwas"
+    #title = "Cegwas"
     files = os.listdir("news/")
     files.reverse()
+
+    # latest mappings
+    latest_mappings = report.filter(report.release == 0).order_by(report.submission_date.desc()).limit(5).select(report, trait).join(trait, on=report).execute()
+
     return render_template('home.html', **locals())
 
 
@@ -120,11 +126,12 @@ def valid_url(url, encrypt):
 
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
-    release_dict = {"public":0, "embargo6":1,  "embargo12":2,  "private":3}
+    release_dict = {"public":0, "embargo12":1,  "private":3}
     title = "Run Association"
     req = request.get_json()
 
-
+    # Setup queue
+    tasks = []
 
     # Add Validation
     req["report_slug"] = valid_url(req["report_name"], req["release"] != 'public')
@@ -133,6 +140,7 @@ def process_gwa():
     req["release"] = release_dict[req["release"]]
     req["version"] = 0.1
     trait_names = data[0][1:]
+    trait_keep = []
     with db.atomic():
         report_rec = report(**req)
         report_rec.save()
@@ -142,12 +150,14 @@ def process_gwa():
                 strain_name = strain.get(strain.strain == row[0])
                 for k, v in zip(trait_names, row[1:]):
                     if v != None:
+                        trait_keep.append(k)
                         trait_data.append({"report": report_rec.id,
                                            "strain":strain_name.id,
                                            "name": k,
                                            "value": autoconvert(v)})
-        print trait_data
         trait.insert_many(trait_data).execute()
+        for trait_name in trait_keep:
+            resp = queue_message({"trait_name":trait_name, "report_slug": req})
     return 'success'
 
 
@@ -165,11 +175,15 @@ def validate_url():
         return json.dumps({'report_name': url_out})
 
 
-@app.route("/report/<name>/")
-def report_view(name):
-    title = name
-    return name
+@app.route("/report/<report_name>/<trait_name>/")
+def trait_view(report_name, trait_name):
+    title = report_name
+    return report_name + " " + trait
 
+@app.route("/report/<report_name>/")
+def report_view(report_name):
+    title = report_name
+    return report_name
 
 @app.route('/about/')
 def about():

@@ -9,6 +9,7 @@ if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-sql', user='root')
 else:
+    print "connect"
     credentials = json.loads(open("credentials.json",'r').read())
     db =  MySQLDatabase(
       'cegwas',
@@ -114,6 +115,9 @@ class report(Model):
     submission_date = DateTimeField(default=datetime.datetime.now)
     submission_complete = DateTimeField(null = True)
     version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
+
+    def __repr__(self):
+        return self.report_name
 
     class Meta:
         database = db
