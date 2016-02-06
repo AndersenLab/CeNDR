@@ -1,0 +1,34 @@
+- first_name: Erik
+  last_name: Andersen
+  title: Principal Investigator
+  group: Principal Investigator
+  # Specify names here to highlight within publications
+  pub_names: ["EC Andersen", "Andersen EC", "Erik C. Andersen", "Erik C Andersen"]
+  photo: Erik_C_Andersen.jpg
+  cv: https://github.com/AndersenLab/cv/blob/master/Andersen_CV.pdf?raw=true
+  email: Erik.Andersen@northwestern.edu
+  website: "http://www.andersenlab.org"
+  github: synmuv
+
+- first_name: Robyn
+  last_name: Tanny
+  title: Strain Management
+  photo: Robyn.jpg
+  email: Robyn.Tanny@northwestern.edu
+
+- first_name: Daniel
+  last_name: Cook
+  title: Graduate Student/Developer
+  group: Graduate Students
+  pub_names: ["Cook DE"]
+  photo: Daniel_E_Cook.jpg
+  website: http://www.danielecook.com
+  email: Dec@u.northwestern.edu
+  github: danielecook
+
+- first_name: Stefan
+  last_name: Zdraljevic
+  title: Graduate Student/Developer
+  photo: Stefan_Zdraljevic.jpg
+  github: Thatguy027
+  email: StefanZdraljevic2018@u.northwestern.edu

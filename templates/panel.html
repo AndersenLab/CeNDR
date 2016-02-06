@@ -4,8 +4,16 @@
 {% block content %}
 <div class="row">
       <div class="col-md-12">
-      {{ render_markdown("panel.md") }}
-      
+      {% for m in panel_data %}
+      	<h4>{{ m.first_name }} {{ m.last_name }} <small>{{m.title}}</small></h4>
+      	<ul>
+      		{% for i in m.education %}
+      			<li>{{ i }}</li>
+      		{% endfor %}
+      	</ul>
+      	
+
+      {% endfor %}
       </div>
   </div>
 {% endblock %}

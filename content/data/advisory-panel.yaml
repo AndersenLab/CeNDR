@@ -1,0 +1,23 @@
+- first_name: Erik
+  last_name: Andersen
+  title: Assistant Professor, Northwestern University
+  email: Erik.Andersen@northwestern.edu
+  education:
+    - Ph.D. 2008 (Biology), Massachusetts Institute of Technology
+    - B.S. 2000 (Biological Sciences), Stanford
+  website: http://www.andersenlab.org
+
+- first_name: Matthew
+  last_name: Rockman
+  title: Associate Professor, NYU
+  education: 
+    - Ph.D. 2004 (Biology), Duke
+    - B.S. 1997 (Organismal Biology, Geology and Geophysics), Yale
+  website: https://files.nyu.edu/mr176/public/
+
+- first_name: Marie-Anne 
+  last_name: Félix
+  title: Professor
+  website: http://www.ibens.ens.fr/spip.php?rubrique29&lang=en
+  education:
+    - Ph.D. 1991 European Molecular Biology Laboratory, Heidelberg, Germany
