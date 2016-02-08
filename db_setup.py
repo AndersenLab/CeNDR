@@ -18,7 +18,7 @@ reset_db = True
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-sql', user='root')
+    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
     credentials = json.loads(open("credentials.json",'r').read())
     db =  MySQLDatabase(
