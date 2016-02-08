@@ -15,13 +15,13 @@
         <div class="panel panel-default">
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
               <ul class="list-group">
-                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div></li>
-                <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div></li>
-                <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div></li>
-                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div></li>
-                <li class="list-group-item"><strong>Landscape</strong> <div class="landscape pull-right"></div></li>
-                <li class="list-group-item"><strong>Substrate</strong> <div class="substrate pull-right"></div></li>
-                <li class="list-group-item"><strong>Isolated By</strong> <div class="isolated_by pull-right"></div></li>
+                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Landscape</strong> <div class="landscape pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Substrate</strong> <div class="substrate pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Isolated By</strong> <div class="isolated_by pull-right"></div><div style="clear:both;"></div></li>
               </ul>
         </div>
       </div>
@@ -36,20 +36,16 @@
 // Icons
 var icon_norm = L.icon({
     iconUrl: '/static/img/icons/marker.png',
-    iconSize: [48, 48],
-    iconAnchor: [24, 48],
-    popupAnchor: [-3, -76],
-    shadowSize: [68, 95],
-    shadowAnchor: [22, 94]
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
 });
 
 var icon_hover = L.icon({
     iconUrl: '/static/img/icons/selected.png',
-    iconSize: [48, 48],
-    iconAnchor: [24, 48],
-    popupAnchor: [-3, -76],
-    shadowSize: [68, 95],
-    shadowAnchor: [22, 94]
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
 });
 
 // Default click_s

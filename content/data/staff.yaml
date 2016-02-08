@@ -1,7 +1,6 @@
 - first_name: Erik
   last_name: Andersen
-  title: Principal Investigator
-  group: Principal Investigator
+  title: Director
   # Specify names here to highlight within publications
   pub_names: ["EC Andersen", "Andersen EC", "Erik C. Andersen", "Erik C Andersen"]
   photo: Erik_C_Andersen.jpg
@@ -26,9 +25,34 @@
   email: Dec@u.northwestern.edu
   github: danielecook
 
+- first_name: Joshua
+  last_name: Roberts
+  title: Undergraduate Student/Developer
+  photo: joshua_roberts.jpg
+  github: jpr71
+  email: joshuaroberts2016@u.northwestern.edu
+
 - first_name: Stefan
   last_name: Zdraljevic
   title: Graduate Student/Developer
   photo: Stefan_Zdraljevic.jpg
   github: Thatguy027
   email: StefanZdraljevic2018@u.northwestern.edu
+
+- first_name: Sarah
+  last_name: Bier
+  title: Reagent preparation and stock keeper
+  photo: Sarah_undergrad.jpg
+  former: false
+
+- first_name: Ian
+  last_name: Kuo
+  title: Reagent preparation and stock keeper
+  photo: Ian.jpg
+  former: false
+
+- first_name: Selina
+  last_name: Deiparine
+  title: Reagent preparation and stock keeper
+  photo: Selina.jpg
+  former: false

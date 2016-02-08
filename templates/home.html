@@ -8,47 +8,43 @@
               <img src="/static/img/logo.png" alt="Andersen Lab Logo" class="pull-left hidden-xs" style="margin-right:20px; width: 150px; margin-bottom:20px;"/>
               <p style="text-align:center; position:relative; left:10px;" class="visible-xs"><img src="/static/img/logo.png" alt="Andersen Lab Logo"  style="margin-right:20px; max-height:150px; margin: auto; display: inline; margin-bottom:20px;" class=" img-responsive"/></p>
           </div>
-            <div class="hidden-xs" style="font-size: 20px;"><em>C. elegans</em> Natural Diversity Resource</div>
-            <div class="visible-xs" style="text-align:center; font-size: 20px;">cegwas-web</div>
-            <p>Adipiscing dis cursus consequat commodo quam arcu, odio urna in integer odio dapibus aenean, ullamcorper varius praesent pede. Sodales dapibus donec consectetuer eu, condimentum sagittis porta magnis eget, vulputate molestie ridiculus nullam, duis cubilia mollis velit elit, penatibus senectus enim. Primis elementum mauris auctor tempus sociosqu, dictumst mus nascetur auctor neque quis habitant, habitasse sit dapibus. Rhoncus bibendum tincidunt hendrerit sapien, nonummy ridiculus nostra tristique sollicitudin, urna tempus commodo diam et vitae nam, dignissim. Praesent.</p>
+          <div class="col-md-9">
+            <div class="hidden-xs lead" style="font-size: 20px;">Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</div>
+            <div class="visible-xs lead" style="text-align:center; font-size: 20px;">Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</div>
+            <p>The Caenorhabditis elegans Natural Diversity Resource (CeNDR) at Northwestern University provides three major services: </p>
+            <ol style="margin-left:20px;">
+              <li>collection, maintenance, and distribution of wild <em>C. elegans</em> strains</li>
+              <li>organization and dissemination of whole-genome sequences for wild <em>C. elegans</em> strains</li>
+              <li>facilitation of genetic mappings to empower individual researchers in gene discovery</li>
+            </ol>
           </div>
-          <div>
-            {% if data1 %}
-            
-              <table>
-                {% for row in data1 %}
-                   <tr>
-                      {{ row }}
-                   </tr>
-                {% endfor %}
-              </table>
-            {% endif %}
-          </div>
-            <div class="row">
+        </div>
+
+  <div class="row">
     <div class="col-md-4">
-      <div class="thumbnail img-responsive" style="border: 1px solid black; padding: 0; border-radius: 5px;" >
+      <div class="thumbnail img-responsive" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px" >
         <a href="{{ url_for("map_page") }}" ><img src="/static/img/main/strain_map.png" style="border-radius: 5px 5px 0px 0px;"></a>
         <div class="caption">
           <p><a href="{{ url_for("map_page") }}" class="btn btn-primary btn-block" role="button">Strains</a></p>
-          <p>We have collected and can distribute 152 wild isolates that are genetically unique ("isotypes").</p>
+          <p>Wild <em>C. elegans</em> isolates and information are available for download.</p>
         </div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="thumbnail" style="border: 1px solid black; padding: 0; border-radius: 5px;" >
-        <a href="{{ url_for("data_page") }}"><img src="/static/img/main/variant-calling.png" style="border-radius: 5px 5px 0px 0px;"></a>
+      <div class="thumbnail" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px" >
+        <a href="{{ url_for("data_page") }}"><img src="/static/img/main/variant-calling.png" style="border-radius: 5px 5px 0px 0px; "></a>
         <div class="caption">
           <p><a href="{{ url_for("data_page") }}" class="btn btn-primary btn-block" role="button">Data</a></p>
-            <p>Raw sequence data (fastq), aligned sequence data, and variant data are available for download.</p>
+            <p>Aligned sequence data for <em>C. elegans</em> wild isolates is available. Variant data will be available soon.</p>
         </div>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="thumbnail" style="border: 1px solid black; padding: 0; border-radius: 5px;">
+      <div class="thumbnail" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px">
         <a href="{{ url_for("gwa") }}" ><img src="/static/img/main/map_data.png" alt="perform gwa" style="border-radius: 5px 5px 0px 0px;"></a>
         <div class="caption">
           <p><a href="{{ url_for("gwa") }}" class="btn btn-primary btn-block" role="button">Perform Mapping</a></p>
-          <p>Following phenotyping, genome-wide association (GWA) analysis can be performed.</p>
+          <p>Map your own traits using genome-wide association.</p>
         </div>
       </div>
     </div>
@@ -66,7 +62,7 @@
 
 {% for i in latest_mappings %}
 <tr>
-<td><a href="{{ url_for('trait_view', report_name=i.report_slug, trait_name=i.trait) }}">{{ i.trait.name }}</a>
+<td><a href="{{ url_for('trait_view', report_name=i.report_slug, trait_name=i.trait.name ) }}">{{ i.trait.name }}</a>
 <div class='pull-right'><small>{{ i.submission_date.strftime('%Y-%m-%d') }}</small></div></td>
 </tr>
 {% endfor %}

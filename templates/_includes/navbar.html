@@ -1,7 +1,7 @@
 <header>
 
 
-<nav class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation">
+<nav class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation" style="z-index:10000">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
@@ -11,7 +11,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">CENDR</a>
+      <a class="navbar-brand" href="/">CeNDR</a>
     </div>
 
 
@@ -24,8 +24,8 @@
           <a href="/about_us/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">About Us<span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
             <li><a href="{{ url_for("about") }}">About <em>C. elegans</em></a></li>
-            <li><a href="{{ url_for("panel") }}">Scientific Advisory Panel</a></li>
             <li><a href="{{ url_for("staff") }}">Staff</a></li>
+            <li><a href="{{ url_for("panel") }}">Scientific Advisory Panel</a></li>
             <li><a href="{{ url_for("statistics") }}">Site Statistics</a></li>
           </ul>
         </li>
@@ -37,7 +37,7 @@
             <li><a href="{{ url_for("strain_listing_page")}}">Strain Catalog</a></li>
             <li><a href="{{ url_for("protocols") }}">Protocols</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="#">Submit Strains</a></li>
+            <li><a href="{{ url_for('strain_submission_page') }}">Submit Strains</a></li>
           </ul>
         </li>
 
@@ -49,7 +49,7 @@
           <a href="/gwa/" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Genetic Mapping<span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
             <li><a href="{{ url_for("gwa")}}">Perform Mapping</a></li>
-            <li><a href="{{ url_for("strain_listing_page")}}">Public Mappings</a></li>
+            <li><a href="{{ url_for("public_mapping")}}">Public Mappings</a></li>
           </ul>
         </li>
 

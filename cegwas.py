@@ -96,10 +96,10 @@ def data_page():
 
 
 
-@app.route('/gwa/')
+@app.route('/genetic-mapping/submit/')
 def gwa():
     title = "Perform Mapping"
-    bcs = OrderedDict([("Genetic Mapping", None), ("Perform Mapping", None)])
+    bcs = OrderedDict([("genetic-mapping", None), ("perform-mapping", None)])
 
     # Generate list of allowable strains
     query = strain.select(strain.strain, 
@@ -149,17 +149,21 @@ def process_gwa():
         trait_data = []
         for row in data[1:]:
             if row[0] is not None and row[0] != "":
-                strain_name = strain.get(strain.strain == row[0])
+                strain_name = strain.filter(strain.strain == row[0] |
+                                            strain.isotype == row[0] |
+                                            strain.previous_names.regexp("\b" + row[0] + "\b"))
+                strain_name = list(strain_name.execute())[0]
                 for k, v in zip(trait_names, row[1:]):
-                    if v != None:
+                    if v is not None:
                         trait_keep.append(k)
                         trait_data.append({"report": report_rec.id,
-                                           "strain":strain_name.id,
+                                           "strain": strain_name.id,
                                            "name": k,
                                            "value": autoconvert(v)})
         trait.insert_many(trait_data).execute()
-        for trait_name in trait_keep:
-            resp = queue_message({"trait_name":trait_name, "report_info": req})
+    for trait_name in set(trait_keep):
+        resp = queue_message({"trait_name": trait_name, "report_info": req})
+        print resp
     return 'success'
 
 
@@ -177,15 +181,27 @@ def validate_url():
         return json.dumps({'report_name': url_out})
 
 
+
+@app.route('/Genetic-Mapping/public/')
+def public_mapping():
+    title = "Perform Mapping"
+    bcs = OrderedDict([("genetic-mapping", None), ("public", None)])
+    title = "Public Mappings"
+    return render_template('public_mapping.html', **locals())
+
+
 @app.route("/report/<report_name>/<trait_name>/")
 def trait_view(report_name, trait_name):
-    title = report_name
-    return report_name + " " + trait
+    report_data = report.get(report.report_slug == report_name)
+    title = report_data.report_name
+    return render_template('report.html', **locals())
 
 @app.route("/report/<report_name>/")
 def report_view(report_name):
-    title = report_name
-    return report_name
+    report_data = report.get(report.report_slug == report_name)
+    title = report_data.report_name
+
+    return render_template('report.html', **locals())
 
 @app.route('/about/')
 def about():
@@ -224,6 +240,13 @@ def strain_listing_page():
     title = "Strain Catalog"
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()  
     return render_template('strain_listing.html', **locals())
+
+@app.route('/strain/submit/')
+def strain_submission_page():
+    bcs = OrderedDict([("strain", "submission")])
+    title = "Strain Submission"
+    return render_template('strain_submission.html', **locals())
+  
 
 @app.route('/order/', methods=['POST'])
 def order_page():

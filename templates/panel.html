@@ -5,14 +5,7 @@
 <div class="row">
       <div class="col-md-12">
       {% for m in panel_data %}
-      	<h4>{{ m.first_name }} {{ m.last_name }} <small>{{m.title}}</small></h4>
-      	<ul>
-      		{% for i in m.education %}
-      			<li>{{ i }}</li>
-      		{% endfor %}
-      	</ul>
-      	
-
+      	<h4><a href="{{ m.website }}">{{ m.first_name }} {{ m.last_name }}</a> <small>{{m.title}}</small></h4>
       {% endfor %}
       </div>
   </div>
