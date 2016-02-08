@@ -239,7 +239,7 @@ def strain_listing_page():
     bcs = OrderedDict([("strain", None)])
     title = "Strain Catalog"
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()  
-    return render_template('strain_listing.html', **locals())
+    return render_template('strain_catalog.html', **locals())
 
 @app.route('/strain/submit/')
 def strain_submission_page():
