@@ -53,13 +53,13 @@ else:
     toolbar = DebugToolbarExtension(app)
 
 
-def render_markdown(filename, directory = "content/markdown/"):
+def render_markdown(filename, directory = "static/content/markdown/"):
         with open(directory + filename) as f:
             return Markup(markdown.markdown(f.read()))
 
 @app.context_processor
 def utility_processor():
-    def render_markdown(filename, directory = "content/markdown/"):
+    def render_markdown(filename, directory = "static/content/markdown/"):
         with open(directory + filename) as f:
             return Markup(markdown.markdown(f.read()))
     return dict(render_markdown=render_markdown)
@@ -68,7 +68,7 @@ def utility_processor():
 @app.route('/')
 def main():
     #title = "Cegwas"
-    files = os.listdir("content/news/")
+    files = [x for x in os.listdir("static/content/news/") if x.startswith(".") is False]
     files.reverse()
 
     # latest mappings
@@ -213,14 +213,14 @@ def about():
 def staff():
     title = "Staff"
     bcs = OrderedDict([("about", "/about/"), ("staff", "")])
-    staff_data = yaml.load(open("content/data/staff.yaml", 'r'))
+    staff_data = yaml.load(open("static/content/data/staff.yaml", 'r'))
     return render_template('staff.html', **locals())
 
 @app.route('/about/panel/')
 def panel():
     title = "Scientific Advisory Panel"
     bcs = OrderedDict([("about", "/about/"), ("panel", "")])
-    panel_data = yaml.load(open("content/data/advisory-panel.yaml", 'r'))
+    panel_data = yaml.load(open("static/content/data/advisory-panel.yaml", 'r'))
     return render_template('panel.html', **locals())
 
 @app.route('/about/statistics/')
@@ -303,12 +303,13 @@ def isotype_page(isotype_name):
 def protocols():
     title = "Protocols"
     bcs = OrderedDict([("strain","/strain/"), ("protocols","")])
+    protocols = yaml.load(open("static/content/data/protocols.yaml", 'r'))
     return render_template('protocols.html', **locals())
 
 @app.route("/news/")
 def news():
     title = "Andersen Lab News"
-    files = os.listdir("content/news/")
+    files = os.listdir("static/content/news/")
     files.reverse()
     bcs = OrderedDict([("News", "")])
     return render_template('news.html', **locals())
@@ -323,12 +324,12 @@ def news_item(filename):
 def feed():
     feed = AtomFeed('CNDR News',
                     feed_url=request.url, url=request.url_root)
-    files = os.listdir("content/news/")
+    files = os.listdir("static/content/news/")
     files.reverse()
     for filename in files:
         filename[11:]
         title = filename[11:].strip(".md").replace("-"," ")
-        content = render_markdown(filename, "content/news/")
+        content = render_markdown(filename, "static/content/news/")
         date_published = datetime.strptime(filename[:10], "%Y-%m-%d")
         feed.add(title, unicode(content),
                  content_type='html',
