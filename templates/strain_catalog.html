@@ -84,9 +84,9 @@ $(document).ready(function() {
     (function($) {
         var patterns = [];
         $('#filter').keyup(function() {
+            $('.searchable tr').hide();
             $(this).val().split(',').forEach(function(r) {
                 var rex = new RegExp(r, "i");
-                $('.searchable tr').hide();
                 $('.searchable tr').filter(function() {
                     return rex.test($(this).text());
                 }).show();
