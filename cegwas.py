@@ -19,6 +19,7 @@ from werkzeug.contrib.atom import AtomFeed
 from urlparse import urljoin
 from message import *
 import yaml
+from iron_worker import *
 
 
 
@@ -72,8 +73,7 @@ def main():
     files.reverse()
 
     # latest mappings
-    latest_mappings = report.filter(report.release == 0).order_by(report.submission_date.desc()).limit(5).select(report, trait).join(trait, on=report).execute()
-
+    latest_mappings = report.filter(report.release == 0).order_by(report.submission_date.desc()).join(trait, on=report).limit(5).select(report.report_name, report.report_slug, trait.name).distinct().execute()
     return render_template('home.html', **locals())
 
 
@@ -149,9 +149,14 @@ def process_gwa():
         trait_data = []
         for row in data[1:]:
             if row[0] is not None and row[0] != "":
-                strain_name = strain.filter(strain.strain == row[0] |
-                                            strain.isotype == row[0] |
-                                            strain.previous_names.regexp("\b" + row[0] + "\b"))
+                row[0] = row[0].replace("(", "\(").replace(")", "\)")
+                print row
+                strain_name = strain.filter( (strain.strain == row[0]) |
+                                             (strain.isotype == row[0]) |
+                                             (strain.previous_names.regexp('^(' + row[0] + ')\|')) |
+                                             (strain.previous_names.regexp('\|(' + row[0] + ')$')) |
+                                             (strain.previous_names.regexp('\|(' + row[0] + ')\|'))|
+                                             (strain.previous_names == row[0]))
                 strain_name = list(strain_name.execute())[0]
                 for k, v in zip(trait_names, row[1:]):
                     if v is not None:
@@ -163,7 +168,10 @@ def process_gwa():
         trait.insert_many(trait_data).execute()
     for trait_name in set(trait_keep):
         resp = queue_message({"trait_name": trait_name, "report_info": req})
-        print resp
+        # Submit job to iron worker
+        worker = IronWorker()
+        response = worker.queue(code_name="map", payload={"trait_name": trait_name, "report_info": req})
+        print response
     return 'success'
 
 

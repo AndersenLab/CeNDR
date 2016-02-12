@@ -44,3 +44,6 @@ libraries:
 
 - name: yaml
   version: "latest"
+
+- name: ssl
+  version: "latest"
