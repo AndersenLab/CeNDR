@@ -1,1 +1,0 @@
-## General C.Elegans Methods ##
