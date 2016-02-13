@@ -20,6 +20,7 @@ from urlparse import urljoin
 from message import *
 import yaml
 from iron_worker import *
+import requests
 
 
 
@@ -202,6 +203,10 @@ def public_mapping():
 def trait_view(report_name, trait_name):
     report_data = report.get(report.report_slug == report_name)
     title = report_data.report_name
+    base_url = "https://storage.googleapis.com/cendr/" + report_name + "/" + trait_name
+    report_url = base_url + "/report.html"
+    print report_url
+    report_html = requests.get(report_url).text.replace('src="','src="' + base_url + "/" )
     return render_template('report.html', **locals())
 
 @app.route("/report/<report_name>/")
