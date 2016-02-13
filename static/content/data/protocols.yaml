@@ -1,9 +1,9 @@
-- name: Plate Pouring UPDATED 2015
+- name: Plate Pouring
   link: content/protocols/PlatePouringUPDATED2015.pdf
 - name: Chunking Worms
   link: content/protocols/ChunkingWorms.pdf
 
-- name: Freezing Thawing Web
+- name: Freezing / Thawing Worms
   link: content/protocols/FreezingThawingWeb.pdf
 
 - name: Cleaning Worms
