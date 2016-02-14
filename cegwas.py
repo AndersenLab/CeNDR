@@ -20,12 +20,13 @@ from urlparse import urljoin
 from message import *
 import yaml
 from iron_worker import *
+from iron_mq import *
 import requests
-
 
 
 def make_external(url):
     return urljoin(request.url_root, url)
+
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
@@ -33,7 +34,7 @@ def json_serial(obj):
     if isinstance(obj, date):
         serial = obj.isoformat()
         return serial
-    raise TypeError ("Type not serializable")
+    raise TypeError("Type not serializable")
 
 
 stripe_keys = {
@@ -47,21 +48,22 @@ stripe.api_key = "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9"
 app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 if os.getenv('SERVER_SOFTWARE') and \
-            os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/'):
-    app.debug=False
+        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/'):
+    app.debug = False
 else:
     app.debug = True
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
 
 
-def render_markdown(filename, directory = "static/content/markdown/"):
-        with open(directory + filename) as f:
-            return Markup(markdown.markdown(f.read()))
+def render_markdown(filename, directory="static/content/markdown/"):
+    with open(directory + filename) as f:
+        return Markup(markdown.markdown(f.read()))
+
 
 @app.context_processor
 def utility_processor():
-    def render_markdown(filename, directory = "static/content/markdown/"):
+    def render_markdown(filename, directory="static/content/markdown/"):
         with open(directory + filename) as f:
             return Markup(markdown.markdown(f.read()))
     return dict(render_markdown=render_markdown)
@@ -74,27 +76,28 @@ def main():
     files.reverse()
 
     # latest mappings
-    latest_mappings = report.filter(report.release == 0).order_by(report.submission_date.desc()).join(trait, on=report).limit(5).select(report.report_name, report.report_slug, trait.name).distinct().execute()
+    latest_mappings = report.filter(report.release == 0).order_by(report.submission_date.desc()).join(
+        trait, on=report).limit(5).select(report.report_name, report.report_slug, trait.name).distinct().execute()
     return render_template('home.html', **locals())
 
 
-@app.route('/map/')
+@app.route('/strain/global-strain-map/')
 def map_page():
-    title = "Map"
-    bcs = OrderedDict([("strain", "/strain/"), ("map", None)])
+    title = "Global Strain Map"
+    bcs = OrderedDict([("strain", "/strain/"), ("global-strain-map", None)])
     strain_list_dicts = []
-    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).filter(strain.latitude.is_null() == False).execute())
+    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).filter(
+        strain.latitude.is_null() == False).execute())
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
     return render_template('map.html', **locals())
+
 
 @app.route('/data/')
 def data_page():
     bcs = OrderedDict([("data", None)])
     title = "Data"
-    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()  
+    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('data.html', **locals())
-
-
 
 
 @app.route('/genetic-mapping/submit/')
@@ -102,10 +105,12 @@ def gwa():
     title = "Perform Mapping"
     bcs = OrderedDict([("genetic-mapping", None), ("perform-mapping", None)])
 
+    queue = IronMQ().queue("cegwas-map")
+
     # Generate list of allowable strains
-    query = strain.select(strain.strain, 
-            strain.isotype, 
-            strain.previous_names).filter(strain.isotype.is_null() == False).execute()
+    query = strain.select(strain.strain,
+                          strain.isotype,
+                          strain.previous_names).filter(strain.isotype.is_null() == False).execute()
     qresults = list(itertools.chain(*[[x.strain, x.isotype, x.previous_names] for x in query]))
     qresults = set([x for x in qresults if x != None])
     qresults = list(itertools.chain(*[x.split("|") for x in qresults]))
@@ -116,11 +121,10 @@ def gwa():
 
 def valid_url(url, encrypt):
     url_out = slugify(url)
+    if report.filter(report.report_slug == url_out).count() > 0:
+        return {'error': "Report name reserved."}
     if encrypt:
         url_out = str(hashlib.sha224(url_out).hexdigest()[0:20])
-    else:
-        if report.filter(report.report_slug == url_out).count() > 0:
-            return {'error': "Report name reserved."}
     if len(url_out) > 40:
         return {'error': "Report name may not be > 40 characters."}
     else:
@@ -129,12 +133,11 @@ def valid_url(url, encrypt):
 
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
-    release_dict = {"public":0, "embargo12":1,  "private":3}
+    release_dict = {"public": 0, "embargo12": 1,  "private": 2}
     title = "Run Association"
     req = request.get_json()
 
-    # Setup queue
-    tasks = []
+    queue = IronMQ().queue("cegwas-map")
 
     # Add Validation
     req["report_slug"] = valid_url(req["report_name"], req["release"] != 'public')
@@ -151,13 +154,12 @@ def process_gwa():
         for row in data[1:]:
             if row[0] is not None and row[0] != "":
                 row[0] = row[0].replace("(", "\(").replace(")", "\)")
-                print row
-                strain_name = strain.filter( (strain.strain == row[0]) |
-                                             (strain.isotype == row[0]) |
-                                             (strain.previous_names.regexp('^(' + row[0] + ')\|')) |
-                                             (strain.previous_names.regexp('\|(' + row[0] + ')$')) |
-                                             (strain.previous_names.regexp('\|(' + row[0] + ')\|'))|
-                                             (strain.previous_names == row[0]))
+                strain_name = strain.filter((strain.strain == row[0]) |
+                                            (strain.isotype == row[0]) |
+                                            (strain.previous_names.regexp('^(' + row[0] + ')\|')) |
+                                            (strain.previous_names.regexp('\|(' + row[0] + ')$')) |
+                                            (strain.previous_names.regexp('\|(' + row[0] + ')\|')) |
+                                            (strain.previous_names == row[0]))
                 strain_name = list(strain_name.execute())[0]
                 for k, v in zip(trait_names, row[1:]):
                     if v is not None:
@@ -168,11 +170,9 @@ def process_gwa():
                                            "value": autoconvert(v)})
         trait.insert_many(trait_data).execute()
     for trait_name in set(trait_keep):
-        resp = queue_message({"trait_name": trait_name, "report_info": req})
+        req["trait_name"] = trait_name
+        resp = queue.post(str(json.dumps(req)))
         # Submit job to iron worker
-        worker = IronWorker()
-        response = worker.queue(code_name="map", payload={"trait_name": trait_name, "report_info": req})
-        print response
     return 'success'
 
 
@@ -190,7 +190,6 @@ def validate_url():
         return json.dumps({'report_name': url_out})
 
 
-
 @app.route('/Genetic-Mapping/public/')
 def public_mapping():
     title = "Perform Mapping"
@@ -206,8 +205,10 @@ def trait_view(report_name, trait_name):
     base_url = "https://storage.googleapis.com/cendr/" + report_name + "/" + trait_name
     report_url = base_url + "/report.html"
     print report_url
-    report_html = requests.get(report_url).text.replace('src="','src="' + base_url + "/" )
+    report_html = requests.get(report_url).text.replace('src="', 'src="' + base_url + "/")
+    report_html = report_html[report_html.find('<div id="phenotype'):report_html.find("</body>")]
     return render_template('report.html', **locals())
+
 
 @app.route("/report/<report_name>/")
 def report_view(report_name):
@@ -216,11 +217,13 @@ def report_view(report_name):
 
     return render_template('report.html', **locals())
 
+
 @app.route('/about/')
 def about():
     title = "About"
     bcs = OrderedDict([("about", "/about/")])
     return render_template('about.html', **locals())
+
 
 @app.route('/about/staff/')
 def staff():
@@ -229,6 +232,7 @@ def staff():
     staff_data = yaml.load(open("static/content/data/staff.yaml", 'r'))
     return render_template('staff.html', **locals())
 
+
 @app.route('/about/panel/')
 def panel():
     title = "Scientific Advisory Panel"
@@ -236,13 +240,21 @@ def panel():
     panel_data = yaml.load(open("static/content/data/advisory-panel.yaml", 'r'))
     return render_template('panel.html', **locals())
 
+
 @app.route('/about/statistics/')
 def statistics():
     title = "Site Statistics"
     bcs = OrderedDict([("about", "/about/"), ("statistics", None)])
 
     # Collection dates
-    collection_dates = list(strain.select().filter(strain.isotype != None, strain.isolation_date != None).order_by(strain.isolation_date).execute())
+    collection_dates = list(strain.select().filter(
+        strain.isotype != None, strain.isolation_date != None).order_by(strain.isolation_date).execute())
+
+
+    # queue
+    queue = IronMQ().queue("cegwas-map")
+    ql = [json.loads(x["body"]) for x in queue.peek(max=20)["messages"]]
+    qsize = queue.size()
 
     return render_template('statistics.html', **locals())
 
@@ -251,19 +263,20 @@ def statistics():
 def strain_listing_page():
     bcs = OrderedDict([("strain", None)])
     title = "Strain Catalog"
-    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()  
+    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('strain_catalog.html', **locals())
+
 
 @app.route('/strain/submit/')
 def strain_submission_page():
     bcs = OrderedDict([("strain", "submission")])
     title = "Strain Submission"
     return render_template('strain_submission.html', **locals())
-  
+
 
 @app.route('/order/', methods=['POST'])
 def order_page():
-    bcs = OrderedDict([("strain","/strain/"), ("order","")])
+    bcs = OrderedDict([("strain", "/strain/"), ("order", "")])
     title = "Order"
     key = stripe_keys["publishable_key"]
     print request.form
@@ -281,18 +294,19 @@ def order_page():
             currency='usd',
             description='Flask Charge'
         )
-        order_formatted = {k:autoconvert(v) for k,v in request.form.items()}
+        order_formatted = {k: autoconvert(v) for k, v in request.form.items()}
         order_formatted["price"] = total
         order_id = order.create(**order_formatted).save()
-        return redirect(url_for("order_confirmation", order_id = request.form["stripeToken"][20:]), code=302)
+        return redirect(url_for("order_confirmation", order_id=request.form["stripeToken"][20:]), code=302)
     else:
         ordered = request.form.getlist('strain')
         print ordered
         # Calculate total
-        ind_strains = len(ordered)*1500
+        ind_strains = len(ordered) * 1500
         total = ind_strains
         strain_listing = strain.select().where(strain.isotype << ordered).order_by(strain.isotype).execute()
-        return render_template('order.html',**locals())
+        return render_template('order.html', **locals())
+
 
 @app.route("/order/<order_id>/")
 def order_confirmation(order_id):
@@ -300,7 +314,8 @@ def order_confirmation(order_id):
     query = "%" + order_id
     record = order.get(order.stripeToken ** query)
     print record
-    return render_template('order_confirm.html',**locals())
+    return render_template('order_confirm.html', **locals())
+
 
 @app.route('/strain/<isotype_name>/')
 def isotype_page(isotype_name):
@@ -315,9 +330,10 @@ def isotype_page(isotype_name):
 @app.route("/strain/protocols/")
 def protocols():
     title = "Protocols"
-    bcs = OrderedDict([("strain","/strain/"), ("protocols","")])
+    bcs = OrderedDict([("strain", "/strain/"), ("protocols", "")])
     protocols = yaml.load(open("static/content/data/protocols.yaml", 'r'))
     return render_template('protocols.html', **locals())
+
 
 @app.route("/news/")
 def news():
@@ -327,9 +343,10 @@ def news():
     bcs = OrderedDict([("News", "")])
     return render_template('news.html', **locals())
 
+
 @app.route("/news/<filename>/")
 def news_item(filename):
-    title = filename[11:].strip(".md").replace("-"," ")
+    title = filename[11:].strip(".md").replace("-", " ")
     return render_template('news_item.html', **locals())
 
 
@@ -341,17 +358,16 @@ def feed():
     files.reverse()
     for filename in files:
         filename[11:]
-        title = filename[11:].strip(".md").replace("-"," ")
+        title = filename[11:].strip(".md").replace("-", " ")
         content = render_markdown(filename, "static/content/news/")
         date_published = datetime.strptime(filename[:10], "%Y-%m-%d")
         feed.add(title, unicode(content),
                  content_type='html',
                  author="CNDR News",
-                 url=make_external(url_for("news_item", filename = filename.strip(".md"))),
+                 url=make_external(url_for("news_item", filename=filename.strip(".md"))),
                  updated=date_published,
                  published=date_published)
     return feed.get_response()
-
 
 
 @app.route('/outreach/')
@@ -359,6 +375,3 @@ def outreach():
     title = "Outreach"
     bcs = OrderedDict([("outreach", "/outreach/")])
     return render_template('outreach.html', **locals())
-
-
-
