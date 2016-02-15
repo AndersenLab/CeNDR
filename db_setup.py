@@ -65,6 +65,11 @@ class strain(Model):
     set_2 = BooleanField(null=True)
     set_3 = BooleanField(null=True)
     set_4 = BooleanField(null=True)
+    bam_file = CharField(null=True)
+    bam_index = CharField(null=True)
+    cram_file = CharField(null=True)
+    cram_index = CharField(null=True)
+    variant_file = CharField(null=True)
 
     class Meta:
         database = db
