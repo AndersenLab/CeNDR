@@ -21,6 +21,7 @@ from message import *
 import yaml
 from iron_mq import *
 import requests
+from flask.ext.cors import cross_origin
 
 
 def make_external(url):
@@ -55,6 +56,8 @@ else:
     toolbar = DebugToolbarExtension(app)
 
 
+
+
 def render_markdown(filename, directory="static/content/markdown/"):
     with open(directory + filename) as f:
         return Markup(markdown.markdown(f.read()))
@@ -70,7 +73,8 @@ def utility_processor():
 
 @app.route('/')
 def main():
-    #title = "Cegwas"
+    page_title = "C. elegans Natural Diversity Resource"
+
     files = [x for x in os.listdir("static/content/news/") if x.startswith(".") is False]
     files.reverse()
 
@@ -98,6 +102,13 @@ def data_page():
     current_variant_set = "20160106"
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('data.html', **locals())
+
+
+@app.route('/data/browser')
+def genome_browser():
+    bcs = OrderedDict([("data", 'Browser')])
+    title = "Browser"
+    return render_template('browser.html', **locals())
 
 
 @app.route('/data/download/<filetype>.sh')
@@ -331,7 +342,7 @@ def isotype_page(isotype_name):
     page_type = "isotype"
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name).order_by(strain.latitude).dicts().execute())
-    ref_strain = [x for x in rec if x["reference_strain"] == isotype_name][0]
+    ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
     strain_json_output = json.dumps([x for x in rec if x["latitude"] != None],  default=json_serial)
     return render_template('strain.html', **locals())
 
