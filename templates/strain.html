@@ -44,8 +44,15 @@
 </div>
 <div class="col-md-6">
 <h4>Data</h4>
-  <li><a href = "#">{{ obj }}.bam</a></li>
+{% if ref_strain.bam_file -%}
+  <li><a href = "{{ ref_strain.bam_file }}">{{ obj }}.bam</a> <strong> / </strong> <a href="{{ ref_strain.bam_index }}">.bai</a> </li>
+  {% endif %}
+{% if ref_strain.cram_file -%}
+  <li><a href = "{{ ref_strain.cram_file }}">{{ obj }}.cram</a> <strong> / </strong> <a href="{{ ref_strain.cram_index }}">.crai</a> </li>
+{% endif %}
+{% if ref_strain.variant_file %}
   <li><a href = "#">{{ obj }}.variants.tsv</a></li>
+{% endif %}
 </div>
 </div>
 <h4>Mappings / Phenotypes</h4>
