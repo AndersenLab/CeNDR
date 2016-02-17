@@ -7,6 +7,8 @@
 }
 </style>
 {% endblock %} 
+
+
 {% block content %}
 <div class="row">
     <div class="col-md-12">
@@ -15,23 +17,24 @@
         <div class="col-md-4">
             <h4>Alignment Data</h4>
 
-            <p>Sequence alignment data and variant data are available.</p>
-
-            <p>Alignment data is stored using the <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> and <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> formats.</p>
+            <p>Alignment data is stored using the <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> and <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> formats and is available below.</p>
 
             <p><a href="http://biobits.org/samtools_primer.html"  target="_blank">Learn about how to access alignment data</a></p>
+
+            <p>CRAM files are substantially smaller than BAM files, but require the reference to be converted to BAM files. We are currently using WS245 (<strong><a href="https://northwestern.box.com/shared/static/ijlhhd1hwlbr5vvasjg35yjux1p5n01g.gz">Download</a></strong>).
         </div>
 
 
         <div class="col-md-4">
             <h4>Variant Data</h4>
+            <p>Download SNV data:</p>
             <p><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
             <strong style="line-height:50px;"><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz">WI.{{ current_variant_set }}.snpeff.vcf.gz</a></strong></p>
             <div style = "clear:both;"></div>
             
             <p>Variant data is provided as a <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> which contains genotype calls for all isotypes and variant annotations. <a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat" >Learn more about VCF files here</a></p>
 
-            <p>You can also access specific regions of VCF files (rather then the entire file!) from the command line. <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
+            <p>You can also access specific regions of VCF files (rather then the entire file!) from the command line: <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
               See Example
             </button></p>
 
@@ -39,27 +42,24 @@
 
 
         <div class="col-md-4">
-            <h4>Download Script</h4>
-            <p>Interested in automating the download process? Use these scripts!</p>
+            <h4>Downloading All Data</h4>
+            <p>Interested in downloading everything? Use these scripts!</p>
             
             <ul>
                 <li><a href="{{ url_for("download_script", filetype="bam") }}">Download bams</a></li>
                 <li><a href="{{ url_for("download_script", filetype="cram") }}">Download crams</a></li>
             </ul>
+            <br /><br />
+            <h4>Methods</h4>
+            <p>Information regarding alignment, variant calling, and annotation are available <a href="#">here</a>.</p>
 
         </div>
 
 
 
         </div>
+        <input id="filter" type="text" class="form-control pull-right" style = "width:200px;" placeholder="Filter Here..." action="#">
         <hr />
-        <div class="row">
-             <div class="col-md-9">
-            </div> 
-            <div class="col-md-3">
-            <input id="filter" type="text" class="form-control" placeholder="Filter Here..." action="#">
-            </div>
-        </div>
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
@@ -108,11 +108,27 @@
       </div>
       <div class="modal-body">
         <p>Variant data can be fetched remotely using <strong>bcftools</strong>. If you don't have bcftools installed, you can learn how to install it <a href="https://github.com/samtools/bcftools/wiki/HOWTOs" target="_blank">here</a>.</p>
-        <p><strong>bcftools</strong> will download the index file and use it to only obtain that region. Examples:</p>
+        <p><strong>bcftools</strong> will download the index file and use it to fetch the specified region. Below are some examples.</p>
+
         <strong>Query a the first 10kb on chromosome II</strong>
 <pre>
 bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz II:1-10000
 </pre>
+
+<strong>Output a tab-delimited file of genotypes</strong>
+<pre>
+bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz II:1-10000 | \
+bcftools query --print-header -f '%CHROM\t%POS\t[%TGT\t]\n'
+</pre>
+
+<strong>Look for deleterious variants within a region in CB4856.</strong>
+<pre>
+bcftools view --samples CB4856 http://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz II:804000-807000 | \
+egrep '^#|HIGH' -  | \
+egrep '^#|1\/1' -  | \
+bcftools query -f '%CHROM\t%POS\t[%TGT\t%GT\t]%ANN\n' -
+</pre>
+
 
       </div>
     </div><!-- /.modal-content -->

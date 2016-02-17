@@ -1,0 +1,73 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+
+<link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+<link rel="stylesheet" type="text/css" href="https:/maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv-beta.css">
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+<script type="text/javascript" src="https://igv.org/web/beta/igv-beta.js"></script>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/pileup.css') }}">
+<script type="text/javascript" src="{{ url_for('static', filename = 'js/pileup.min.js') }}"></script>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+      <div class="col-md-12">
+
+
+<div id="browser2"></div>
+<div id="browser"></div>
+
+      
+      </div>
+  </div>
+{% endblock %}
+
+{% block script %}
+
+
+<script type="text/javascript">
+var div = document.getElementById('browser2');
+
+var bamSource = pileup.formats.bam({
+  url: 'https://northwestern.box.com/shared/static/y7isf0i7ax9nvtx27708epr39x91faij.bam',
+  indexUrl: 'https://northwestern.box.com/shared/static/txlquwgibqjsbnul9gwfvykat02ttlcq.bai'
+});
+
+var p = pileup.create(div, {
+  range: {contig: 'I', start: 7512384, stop: 7512544},
+  tracks: [
+    {
+      viz: pileup.viz.genome(),
+      isReference: true,
+      data: pileup.formats.twoBit({
+        url: "{{ url_for('static', filename = 'content/reference/WS245.2bit') }}"
+      }),
+      name: 'Reference'
+    },
+  	{
+    viz: pileup.viz.scale(),
+    name: 'Scale'
+    },
+    {
+    viz: pileup.viz.location(),
+    name: 'Location'
+  	},
+  	  {
+    viz: pileup.viz.coverage(),
+    data: bamSource,
+    cssClass: 'normal',
+    name: 'Coverage'
+  }
+  ]
+});
+</script>
+
+
+
+
+
+{% endblock %}
