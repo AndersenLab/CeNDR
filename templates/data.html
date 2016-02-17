@@ -11,6 +11,49 @@
 <div class="row">
     <div class="col-md-12">
         <div class="row">
+
+        <div class="col-md-4">
+            <h4>Alignment Data</h4>
+
+            <p>Sequence alignment data and variant data are available.</p>
+
+            <p>Alignment data is stored using the <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> and <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</cram> formats.</p>
+
+            <p><a href="http://biobits.org/samtools_primer.html"  target="_blank">Learn about how to access alignment data</a></p>
+        </div>
+
+
+        <div class="col-md-4">
+            <h4>Variant Data</h4>
+            <p><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
+            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz">WI.{{ current_variant_set }}.snpeff.vcf.gz</a></strong></p>
+            <div style = "clear:both;"></div>
+            
+            <p>Variant data is provided as a <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> which contains genotype calls for all isotypes and variant annotations. <a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat" >Learn more about VCF files here</a></p>
+
+            <p>You can also access specific regions of VCF files (rather then the entire file!) from the command line. <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
+              See Example
+            </button></p>
+
+        </div>
+
+
+        <div class="col-md-4">
+            <h4>Download Script</h4>
+            <p>Interested in automating the download process? Use these scripts!</p>
+            
+            <ul>
+                <li><a href="{{ url_for("download_script", filetype="bam") }}">Download bams</a></li>
+                <li><a href="{{ url_for("download_script", filetype="cram") }}">Download crams</a></li>
+            </ul>
+
+        </div>
+
+
+
+        </div>
+        <hr />
+        <div class="row">
              <div class="col-md-9">
             </div> 
             <div class="col-md-3">
@@ -22,8 +65,8 @@
                 <tr>
                     <th style="width: 200px;">Isotype</th>
                     <th style="width: 200px;">Strains</th>
-                    <th style="width: 200px;">BAM</th>
-                    <th style="width: 200px;">Variants</th>
+                    <th style="width: 200px;">bam</th>
+                    <th style="width: 200px;">CRAM</th>
                 </tr>
             </thead>
             <div style="height: 30px;" ></div>
@@ -32,14 +75,52 @@
                 <tr>
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{{ strains|join(" ") }}</td>
-                    <td><a href="#">{{ isotype }}.bam</a></td>
-                    <td><a href="#">{{ isotype }}.variants.tsv</a></td>
+                    <td>
+                        {% if strains[0].bam_file %}
+                            <a href="{{ strains[0].bam_file }}">{{ isotype }}.bam</a>
+                            <strong>/</strong> <a href="{{ strains[0].bam_index }}">.bai</a> 
+                        {% endif %}
+                    </td>
+                    <td>
+
+                        {% if strains[0].cram_file %}
+                            <a href="{{ strains[0].cram_file }}">{{ isotype }}.cram</a>
+                            <strong>/</strong> <a href="{{ strains[0].cram_index }}">.crai</a> 
+                        {% endif %}
+
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+
+<!-- VCF Modal Example -->
+
+<div id="cli_example" class="modal fade" style="z-index:1000000" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Fetching variant data from the command line</h4>
+      </div>
+      <div class="modal-body">
+        <p>Variant data can be fetched remotely using <strong>bcftools</strong>. If you don't have bcftools installed, you can learn how to install it <a href="https://github.com/samtools/bcftools/wiki/HOWTOs" target="_blank">here</a>.</p>
+        <p><strong>bcftools</strong> will download the index file and use it to only obtain that region. Examples:</p>
+        <strong>Query a the first 10kb on chromosome II</strong>
+<pre>
+bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz II:1-10000
+</pre>
+
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
 {% endblock %} 
 {% block script %}
 <script>
@@ -81,7 +162,14 @@ $(document).ready(function() {
             return false;
         }
     });
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
 });
+
+
 </script>
 {% endblock %}
 

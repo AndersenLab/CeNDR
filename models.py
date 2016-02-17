@@ -25,7 +25,6 @@ class strain(Model):
     """
     strain = CharField(index=True)
     isotype = CharField(null=True, index=True)
-    reference_strain = CharField(index=True, null=True)
     warning_message = CharField(null=True)
     use = BooleanField()
     sequenced = BooleanField()
@@ -119,6 +118,7 @@ class report(Model):
     email = CharField(index=True)
     submission_date = DateTimeField(default=datetime.datetime.now)
     submission_complete = DateTimeField(null = True)
+    status = CharField(null = False)
     version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
 
     def __repr__(self):
