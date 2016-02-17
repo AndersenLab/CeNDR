@@ -1,7 +1,7 @@
 import os
 import csv
 import logging
-from flask import render_template, request, send_from_directory, url_for, request, jsonify, redirect, Markup
+from flask import *
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
@@ -19,7 +19,6 @@ from werkzeug.contrib.atom import AtomFeed
 from urlparse import urljoin
 from message import *
 import yaml
-from iron_worker import *
 from iron_mq import *
 import requests
 
@@ -96,8 +95,18 @@ def map_page():
 def data_page():
     bcs = OrderedDict([("data", None)])
     title = "Data"
+    current_variant_set = "20160106"
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('data.html', **locals())
+
+
+@app.route('/data/download/<filetype>.sh')
+def download_script(filetype):
+    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
+    download_page = render_template('download_script.sh', **locals())
+    response= make_response(download_page)
+    response.headers["Content-Type"] = "text/plain" 
+    return response
 
 
 @app.route('/genetic-mapping/submit/')
@@ -375,3 +384,5 @@ def outreach():
     title = "Outreach"
     bcs = OrderedDict([("outreach", "/outreach/")])
     return render_template('outreach.html', **locals())
+
+
