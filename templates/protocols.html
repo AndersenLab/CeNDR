@@ -6,7 +6,10 @@
       <div class="col-md-12">
         <div class="col-md-8">
           {% for p in protocols %}
-            <h5><a href="{{ url_for('static', filename=p.link) }}">{{ p.name }}</a></h5>
+            <h5>
+              <a href="{{ url_for('static', filename=p.link) }}"><img src="{{ url_for('static', filename='img/logos/pdf.png') }}"></a> &nbsp; 
+              <a href="{{ url_for('static', filename=p.link) }}">{{ p.name }}</a>
+            </h5>
           {% endfor %}
         </div>
       </div>
