@@ -1,7 +1,7 @@
 import os
 import csv
 import logging
-from flask import render_template, request, send_from_directory, url_for, request, jsonify, redirect, Markup
+from flask import *
 from flask import Flask
 from flask_debugtoolbar import DebugToolbarExtension
 import sys
@@ -98,6 +98,22 @@ def data_page():
     title = "Data"
     strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('data.html', **locals())
+
+
+@app.route('/data/browser')
+def genome_browser():
+    bcs = OrderedDict([("data", 'Browser')])
+    title = "Browser"
+    return render_template('browser.html', **locals())
+
+
+@app.route('/data/download/<filetype>.sh')
+def download_script(filetype):
+    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
+    download_page = render_template('download_script.sh', **locals())
+    response= make_response(download_page)
+    response.headers["Content-Type"] = "text/plain" 
+    return response
 
 
 @app.route('/genetic-mapping/submit/')
@@ -322,7 +338,7 @@ def isotype_page(isotype_name):
     page_type = "isotype"
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name).order_by(strain.latitude).dicts().execute())
-    ref_strain = [x for x in rec if x["reference_strain"] == isotype_name][0]
+    ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
     strain_json_output = json.dumps([x for x in rec if x["latitude"] != None],  default=json_serial)
     return render_template('strain.html', **locals())
 
