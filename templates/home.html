@@ -72,9 +72,8 @@
   <div class="col-md-6">
     {% if files %}
       <div>
-      <h4>News &amp; Updates
-        <br>
-        <a href = "{{ url_for('feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a>
+      <h4>News &amp; Updates        <a href = "{{ url_for('feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a>
+        
         <a href = "{{ url_for('news') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
       </h4>
         {% for f in files %}
