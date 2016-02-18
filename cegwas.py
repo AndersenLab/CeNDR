@@ -73,7 +73,7 @@ def utility_processor():
             return Markup(markdown.markdown(f.read()))
     return dict(render_markdown=render_markdown)
 
-sender="Example.com Support <support@example.com>"
+sender="Example.com Support <no-reply@elegansvariation.org>"
 to= "Daniel E Cook <danielecook@gmail.com>"
 subject="Iowa"
 body="Iowa footbal is meh"
