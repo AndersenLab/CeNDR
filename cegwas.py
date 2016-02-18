@@ -19,13 +19,18 @@ from werkzeug.contrib.atom import AtomFeed
 from urlparse import urljoin
 from message import *
 import yaml
+import webapp2
+from google.appengine.api import mail
+import smtplib
 from iron_worker import *
 from iron_mq import *
 import requests
-
+from google.appengine.api import mail
 
 def make_external(url):
     return urljoin(request.url_root, url)
+
+
 
 
 def json_serial(obj):
@@ -68,13 +73,18 @@ def utility_processor():
             return Markup(markdown.markdown(f.read()))
     return dict(render_markdown=render_markdown)
 
+sender="Example.com Support <support@example.com>"
+to= "Daniel E Cook <danielecook@gmail.com>"
+subject="Iowa"
+body="Iowa footbal is meh"
+
 
 @app.route('/')
 def main():
     #title = "Cegwas"
     files = [x for x in os.listdir("static/content/news/") if x.startswith(".") is False]
     files.reverse()
-
+    mail.send_mail(sender=sender,to=to,subject=subject, body=body)
     # latest mappings
     latest_mappings = report.filter(report.release == 0).order_by(report.submission_date.desc()).join(
         trait, on=report).limit(5).select(report.report_name, report.report_slug, trait.name).distinct().execute()
