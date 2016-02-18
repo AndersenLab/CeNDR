@@ -21,7 +21,6 @@ from message import *
 import yaml
 from iron_mq import *
 import requests
-from flask.ext.cors import cross_origin
 
 
 def make_external(url):
