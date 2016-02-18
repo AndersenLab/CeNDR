@@ -13,5 +13,4 @@ Markdown==2.5.2
 pyyaml
 iron-worker
 iron-mq
-flask_mail
 flask-cors
