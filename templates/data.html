@@ -24,6 +24,20 @@
             <p>CRAM files are substantially smaller than BAM files, but require the reference to be converted to BAM files. We are currently using WS245 (<strong><a href="https://northwestern.box.com/shared/static/ijlhhd1hwlbr5vvasjg35yjux1p5n01g.gz">Download</a></strong>).
         </div>
 
+        <div class="col-md-4">
+            <h4>Downloading All Alignment Data</h4>
+            <p>Interested in downloading everything? Use these scripts!</p>
+            
+            <ul>
+                <li><a href="{{ url_for("download_script", filetype="bam") }}">Download bams</a></li>
+                <li><a href="{{ url_for("download_script", filetype="cram") }}">Download crams</a></li>
+            </ul>
+            <br /><br />
+            <h4>Methods</h4>
+            <p>Information regarding alignment, variant calling, and annotation are available <a href="#">here</a>.</p>
+
+        </div>
+
 
         <div class="col-md-4">
             <h4>Variant Data</h4>
@@ -40,20 +54,6 @@
 
         </div>
 
-
-        <div class="col-md-4">
-            <h4>Downloading All Data</h4>
-            <p>Interested in downloading everything? Use these scripts!</p>
-            
-            <ul>
-                <li><a href="{{ url_for("download_script", filetype="bam") }}">Download bams</a></li>
-                <li><a href="{{ url_for("download_script", filetype="cram") }}">Download crams</a></li>
-            </ul>
-            <br /><br />
-            <h4>Methods</h4>
-            <p>Information regarding alignment, variant calling, and annotation are available <a href="#">here</a>.</p>
-
-        </div>
 
 
 
