@@ -25,7 +25,6 @@ import smtplib
 from iron_worker import *
 from iron_mq import *
 import requests
-from google.appengine.api import mail
 
 def make_external(url):
     return urljoin(request.url_root, url)
