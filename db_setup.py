@@ -35,10 +35,10 @@ from models import *
 
 with db.atomic():
     if reset_db:
-        db.drop_tables([strain, trait, report, mapping, snp, order, order_strain], safe = True)
+        db.drop_tables([strain, report, trait, trait_value, mapping, snp, order, order_strain], safe = True)
     else:
         db.drop_tables([strain], safe = True)
-    db.create_tables([strain, report, trait, mapping, snp, order, order_strain], safe=True)
+    db.create_tables([strain, report, trait, trait_value, mapping, snp, order, order_strain], safe=True)
 
 
 strain_info_join = requests.get(
@@ -76,8 +76,10 @@ with db.atomic():
 
 try:
     db.execute_sql("""
-    CREATE VIEW report_trait AS SELECT report.report_name, report.report_slug, report.email, report.submission_date, report.submission_complete, report.release, trait.strain_id, trait.name, trait.value FROM report JOIN trait ON trait.report_id = report.id;
-    CREATE VIEW report_trait_strain AS (SELECT * FROM strain JOIN report_trait ON report_trait.strain_id = strain.id)
+    CREATE VIEW report_trait AS SELECT report.id AS report_id, report.report_name, report.report_slug, trait.id AS traitID , trait.trait_name, trait.trait_slug, report.email, trait.submission_date, trait.submission_complete, report.release FROM report JOIN trait ON trait.report_id = report.id;
+    CREATE VIEW report_trait_value AS (SELECT *  FROM trait_value JOIN report_trait ON report_trait.traitID = trait_value.trait_id)
+    CREATE VIEW report_trait_strain_value AS (SELECT report_name, report_slug, trait_name, trait_slug, strain_id, value, email, submission_date, submission_complete, `release`, strain.* FROM report_trait_value JOIN strain ON strain_id = strain.id);
+
     """)
 except:
     pass

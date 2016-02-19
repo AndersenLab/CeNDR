@@ -112,13 +112,11 @@ class report(Model):
     """
         Reports
     """
-    release = IntegerField(choices=((0, "public"), (1, "embargo6"), (2, "embargo12"), (3, "private")))
+    release = IntegerField(choices=((0, "public"), (1, "embargo12"), (3, "private")))
+    report_hash = CharField(index=True)
     report_name = CharField(index=True, max_length=50, unique=True)
     report_slug = CharField(index=True)
     email = CharField(index=True)
-    submission_date = DateTimeField(default=datetime.datetime.now)
-    submission_complete = DateTimeField(null = True)
-    status = CharField(null = False)
     version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
 
     def __repr__(self):
@@ -152,13 +150,22 @@ class trait(Model):
           -value (value of trait)
     """
     report = ForeignKeyField(report)
-    strain = ForeignKeyField(strain)
-    name = CharField(index=True)
-    value = DecimalField()
+    trait_name = CharField(index = True)
+    trait_slug = CharField(index = True)
+    status = CharField(null = False)
+    submission_date = DateTimeField(default=datetime.datetime.now)
+    submission_complete = DateTimeField(null = True)
 
     class Meta:
         database = db
 
+class trait_value(Model):
+    trait = ForeignKeyField(trait)
+    strain = ForeignKeyField(strain)
+    value = DecimalField()
+
+    class Meta:
+        database = db
 
 class mapping(Model):
 

@@ -12,7 +12,14 @@
 
 <div class="row">
       <div class="col-md-12">
-        
+
+      <div class="btn-group" role="group" aria-label="...">
+      	{% for trait in report_data %} 
+
+        	<a href="{{ url_for('trait_view', report_name= trait.report_slug, trait_name = trait.trait_slug) }}" type="button" class="btn btn-default btn-sm">{{ trait.trait_name }}</a>
+      		
+      	{% endfor %}
+      	</div>
       </div>
 </div>
 
