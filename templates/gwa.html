@@ -218,6 +218,8 @@ $("form").submit(function(e) {
      contentType: 'application/json;charset=UTF-8'
      }
      ).done(function(msg) {
+      console.log(msg);
+      if(msg == 'success') {
         $(".alert_row").css("display:Visible")
         $(".alert").addClass("alert-success")
         $(".content").prepend("<div class='row'><div class='col-md-12'><div class='alert alert-success' role='alert'><strong>Success!</strong> Now mapping. Your report will be available at <a href='" + report_url + "'>" + report_url + "</a>. Redirecting you there now.</div></div></div>")
@@ -226,6 +228,7 @@ $("form").submit(function(e) {
         {
           window.location.href = report_url;
         }, 5000);
+      }
   });
 })
 
