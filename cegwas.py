@@ -78,7 +78,7 @@ def main():
     files = [x for x in os.listdir("static/content/news/") if x.startswith(".") is False]
     files.reverse()
     # latest mappings
-    latest_mappings = report.filter(report.release == 0).join(trait, on=report).order_by(trait.submission_date.desc()).limit(5).select(report.report_name, report.report_slug, trait.trait_name).distinct().execute()
+    latest_mappings = list(report.filter(report.release == 0).join(trait).order_by(trait.submission_date.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('home.html', **locals())
 
 
