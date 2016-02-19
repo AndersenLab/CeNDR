@@ -186,6 +186,7 @@ def process_gwa():
         for n, t in enumerate(trait_set):
             trait_vals = [row[n+1] for row in data[1:] if row[n+1] is not None]
             if t is not None and len(trait_vals) > 0:
+                trait_keep.append(t)
                 trait_set[n] = trait.insert(report = report_rec, 
                 trait_name = t,
                 trait_slug = slugify(t),
@@ -200,11 +201,11 @@ def process_gwa():
                                "strain": s,
                                "value": autoconvert(data[1:][row][col+1])})
         trait_value.insert_many(trait_data).execute()
-    for trait_name in trait_set:
-        if trait_name is not None:
-            req["trait_name"] = trait_name
-            # Submit job to iron worker
-            resp = queue.post(str(json.dumps(req)))
+    for t in trait_keep:
+        print trait_keep
+        req["trait_slug"] = slugify(t)
+        # Submit job to iron worker
+        resp = queue.post(str(json.dumps(req)))
     return 'success2'
 
 @app.route('/validate_url/', methods=['POST'])
