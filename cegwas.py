@@ -78,11 +78,6 @@ def main():
     #title = "Cegwas"
     files = [x for x in os.listdir("static/content/news/") if x.startswith(".") is False]
     files.reverse()
-    sender="Example.com Support <no-reply@elegansvariation.org>"
-    to= "Daniel E Cook <danielecook@gmail.com>"
-    subject="Iowa"
-    body="Iowa footbal is meh"
-    mail.send_mail(sender=sender,to=to,subject=subject, body=body)
     # latest mappings
     latest_mappings = report.filter(report.release == 0).order_by(report.submission_date.desc()).join(
         trait, on=report).limit(5).select(report.report_name, report.report_slug, trait.name).distinct().execute()
