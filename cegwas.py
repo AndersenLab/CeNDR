@@ -78,8 +78,7 @@ def main():
     files = [x for x in os.listdir("static/content/news/") if x.startswith(".") is False]
     files.reverse()
     # latest mappings
-    latest_mappings = report.filter(report.release == 0).order_by(report.submission_date.desc()).join(
-        trait, on=report).limit(5).select(report.report_name, report.report_slug, trait.name).distinct().execute()
+    latest_mappings = report.filter(report.release == 0).join(trait, on=report).order_by(trait.submission_date.desc()).limit(5).select(report.report_name, report.report_slug, trait.trait_name).distinct().execute()
     return render_template('home.html', **locals())
 
 
@@ -165,11 +164,13 @@ def process_gwa():
     req["release"] = release_dict[req["release"]]
     req["version"] = 0.1
     trait_names = data[0][1:]
+    strain_set = []
     trait_keep = []
     with db.atomic():
         report_rec = report(**req)
         report_rec.save()
         trait_data = []
+
         for row in data[1:]:
             if row[0] is not None and row[0] != "":
                 row[0] = row[0].replace("(", "\(").replace(")", "\)")
@@ -179,21 +180,31 @@ def process_gwa():
                                             (strain.previous_names.regexp('\|(' + row[0] + ')$')) |
                                             (strain.previous_names.regexp('\|(' + row[0] + ')\|')) |
                                             (strain.previous_names == row[0]))
-                strain_name = list(strain_name.execute())[0]
-                for k, v in zip(trait_names, row[1:]):
-                    if v is not None:
-                        trait_keep.append(k)
-                        trait_data.append({"report": report_rec.id,
-                                           "strain": strain_name.id,
-                                           "name": k,
-                                           "value": autoconvert(v)})
-        trait.insert_many(trait_data).execute()
+                strain_set.append(list(strain_name)[0])
+
+        trait_set = data[0][1:]
+        for n, t in enumerate(trait_set):
+            trait_vals = [row[n+1] for row in data[1:] if row[n+1] is not None]
+            if t is not None and len(trait_set) > 0:
+                trait_set[n] = trait.insert(report = report_rec, 
+                trait_name = t,
+                trait_slug = slugify(t),
+                status = "",
+                submission_date = datetime.now()).execute()
+            else:
+                trait_set[n] = None
+        for col, t in enumerate(trait_set):
+            for row, s in enumerate(strain_set):
+                if t is not None and s is not None and data[1:][row][col+1]:
+                    trait_data.append({"trait": t,
+                               "strain": s,
+                               "value": autoconvert(data[1:][row][col+1])})
+        trait_value.insert_many(trait_data).execute()
     for trait_name in set(trait_keep):
         req["trait_name"] = trait_name
-        resp = queue.post(str(json.dumps(req)))
         # Submit job to iron worker
+        resp = queue.post(str(json.dumps(req)))
     return 'success'
-
 
 @app.route('/validate_url/', methods=['POST'])
 def validate_url():
@@ -217,23 +228,15 @@ def public_mapping():
     return render_template('public_mapping.html', **locals())
 
 
-@app.route("/report/<report_name>/<trait_name>/")
-def trait_view(report_name, trait_name):
-    report_data = report.get(report.report_slug == report_name)
-    title = report_data.report_name
+@app.route("/report/<report_name>/<trait_name>")
+def trait_view(report_name, trait_name = ""):
+    report_data = list(trait.select(trait, report).join(report).where(report.report_slug == report_name).dicts().execute())
+    trait_data = [x for x in report_data if x["trait_slug"] == trait_name]
+    title = report_name
     base_url = "https://storage.googleapis.com/cendr/" + report_name + "/" + trait_name
     report_url = base_url + "/report.html"
-    print report_url
     report_html = requests.get(report_url).text.replace('src="', 'src="' + base_url + "/")
     report_html = report_html[report_html.find('<div id="phenotype'):report_html.find("</body>")]
-    return render_template('report.html', **locals())
-
-
-@app.route("/report/<report_name>/")
-def report_view(report_name):
-    report_data = report.get(report.report_slug == report_name)
-    title = report_data.report_name
-
     return render_template('report.html', **locals())
 
 

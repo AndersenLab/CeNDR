@@ -44,7 +44,8 @@ def authenticate():
         auth_code['state'] = bottle.request.query.state
         auth_code_is_available.set()
 
-    local_server = StoppableWSGIServer(host='localhost', port=5003)
+    port = 8002
+    local_server = StoppableWSGIServer(host='localhost', port=port)
     server_thread = Thread(target=lambda: local_oauth_redirect.run(server=local_server))
     server_thread.start()
 
@@ -52,7 +53,7 @@ def authenticate():
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
     )
-    auth_url, csrf_token = oauth.get_authorization_url('http://localhost:8080')
+    auth_url, csrf_token = oauth.get_authorization_url('http://localhost:' + str(port))
     webbrowser.open(auth_url)
 
     auth_code_is_available.wait()
