@@ -66,7 +66,7 @@
 
 {% for i in latest_mappings %}
 <tr>
-<td><a href="{{ url_for('trait_view', report_name=i.report_slug, trait_name=i.trait.name ) }}">{{ i.report_name }} → {{ i.trait.name }}</a>
+<td><a href="{{ url_for('trait_view', report_name=i.report_slug, trait_name=i.trait_slug ) }}">{{ i.report_name }} → {{ i.trait_name }}</a>
 <div class='pull-right'><small>{{ i.submission_date.strftime('%Y-%m-%d') }}</small></div></td>
 </tr>
 {% endfor %}
