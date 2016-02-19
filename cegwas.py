@@ -185,7 +185,7 @@ def process_gwa():
         trait_set = data[0][1:]
         for n, t in enumerate(trait_set):
             trait_vals = [row[n+1] for row in data[1:] if row[n+1] is not None]
-            if t is not None and len(trait_set) > 0:
+            if t is not None and len(trait_vals) > 0:
                 trait_set[n] = trait.insert(report = report_rec, 
                 trait_name = t,
                 trait_slug = slugify(t),
@@ -200,11 +200,12 @@ def process_gwa():
                                "strain": s,
                                "value": autoconvert(data[1:][row][col+1])})
         trait_value.insert_many(trait_data).execute()
-    for trait_name in set(trait_keep):
-        req["trait_name"] = trait_name
-        # Submit job to iron worker
-        resp = queue.post(str(json.dumps(req)))
-    return 'success'
+    for trait_name in trait_set:
+        if trait_name is not None:
+            req["trait_name"] = trait_name
+            # Submit job to iron worker
+            resp = queue.post(str(json.dumps(req)))
+    return 'success2'
 
 @app.route('/validate_url/', methods=['POST'])
 def validate_url():
@@ -212,7 +213,7 @@ def validate_url():
         Generates URLs from report names and validates them.
     """
     req = request.get_json()
-    # [ ] - Add Code to check against database that report (slug) is not already taken.
+    # [ ] - Add Code t`o check against database that report (slug) is not already taken.
     url_out = valid_url(req["report_name"], req["release"] != 'public')
     if 'error' in url_out:
         return json.dumps({'error': url_out["error"]})
@@ -228,6 +229,7 @@ def public_mapping():
     return render_template('public_mapping.html', **locals())
 
 
+@app.route("/report/<report_name>/")
 @app.route("/report/<report_name>/<trait_name>")
 def trait_view(report_name, trait_name = ""):
     report_data = list(trait.select(trait, report).join(report).where(report.report_slug == report_name).dicts().execute())
