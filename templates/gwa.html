@@ -183,7 +183,13 @@ var update_url_message = function(e) {
       } else {
         $(".report_name_error").fadeOut();
         $("#ReportName").parent().removeClass("has-error");
-      report_url = "/report/" + msg["report_name"] + "/";
+
+      if ($("[name='Release']:checked").val() == "public") {
+      report_url = "/report/" + msg["report_slug"];
+      } else {
+      report_url = "/report/" + msg["report_hash"];
+      }
+
       $(".avail_url").html("Your report will be available at " + report_url)
     }
    });
@@ -201,7 +207,6 @@ $("#ReportName,input[name=Release]").on('keyup', update_url_message);
 $("form").submit(function(e) {
   e.preventDefault();
   //$(".submit").addClass("disabled")
-  console.log(e);
 
   user_email = $("#Email").val()
   report_name = $("#ReportName").val()
@@ -218,8 +223,16 @@ $("form").submit(function(e) {
      contentType: 'application/json;charset=UTF-8'
      }
      ).done(function(msg) {
-      console.log(msg);
-      if(msg == 'success') {
+      msg = JSON.parse(msg);
+      if(msg["success"]) {
+        console.log("Great");
+      }
+      if(msg["success"]) {
+        if ($("[name='Release']:checked").val() == "public") {
+          report_url = "/report/" + msg["report_slug"];
+        } else {
+          report_url = "/report/" + msg["report_hash"];
+        }
         $(".alert_row").css("display:Visible")
         $(".alert").addClass("alert-success")
         $(".content").prepend("<div class='row'><div class='col-md-12'><div class='alert alert-success' role='alert'><strong>Success!</strong> Now mapping. Your report will be available at <a href='" + report_url + "'>" + report_url + "</a>. Redirecting you there now.</div></div></div>")

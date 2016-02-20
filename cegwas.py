@@ -29,9 +29,6 @@ import requests
 def make_external(url):
     return urljoin(request.url_root, url)
 
-
-
-
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
 
@@ -74,7 +71,7 @@ def utility_processor():
 
 @app.route('/')
 def main():
-    #title = "Cegwas"
+    page_title = "Caenorhabditis elegans Natural Diversity Resource"
     files = [x for x in os.listdir("static/content/news/") if x.startswith(".") is False]
     files.reverse()
     # latest mappings
@@ -148,6 +145,16 @@ def valid_url(url, encrypt):
     else:
         return url_out
 
+def report_namecheck(report_name):
+    report_slug = slugify(report_name)
+    report_hash = str(hashlib.sha224(report_slug).hexdigest()[0:20])
+    if report.filter(report.report_slug == report_slug).count() > 0:
+        return {'error': "Report name reserved."}
+    if len(report_slug) > 40:
+        return {'error': "Report name may not be > 40 characters."}
+    else:
+        return {"report_slug": report_slug, "report_hash": report_hash}
+
 
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
@@ -158,7 +165,9 @@ def process_gwa():
     queue = IronMQ().queue("cegwas-map")
 
     # Add Validation
-    req["report_slug"] = valid_url(req["report_name"], req["release"] != 'public')
+    rep_names = report_namecheck(req["report_name"])
+    req["report_slug"] = rep_names["report_slug"]
+    req["report_hash"] = rep_names["report_hash"]
     data = req["trait_data"]
     del req["trait_data"]
     req["release"] = release_dict[req["release"]]
@@ -202,11 +211,11 @@ def process_gwa():
                                "value": autoconvert(data[1:][row][col+1])})
         trait_value.insert_many(trait_data).execute()
     for t in trait_keep:
-        print trait_keep
         req["trait_slug"] = slugify(t)
         # Submit job to iron worker
         resp = queue.post(str(json.dumps(req)))
-    return 'success2'
+        req["success"] = True
+    return str(json.dumps(req))
 
 @app.route('/validate_url/', methods=['POST'])
 def validate_url():
@@ -214,12 +223,18 @@ def validate_url():
         Generates URLs from report names and validates them.
     """
     req = request.get_json()
-    # [ ] - Add Code t`o check against database that report (slug) is not already taken.
-    url_out = valid_url(req["report_name"], req["release"] != 'public')
-    if 'error' in url_out:
-        return json.dumps({'error': url_out["error"]})
-    else:
-        return json.dumps({'report_name': url_out})
+    return json.dumps(report_namecheck(req["report_name"]))
+
+
+@app.route('/report_progress/', methods=['POST'])
+def report_progress():
+    """
+        Generates URLs from report names and validates them.
+    """
+    req = request.get_json()
+    #trait.join(report).filter(trait.trait_slug == req["trait_slug"], report.report_slug = req["report_slug"])
+    return json.dumps()
+
 
 
 @app.route('/Genetic-Mapping/public/')
