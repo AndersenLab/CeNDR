@@ -11,6 +11,10 @@ p {
   padding: 5px 15px;
 }
 
+.container-fluid img {
+  max-width: 970px;
+}
+
 .legend {
     padding: 0px 0px;
     font: 10px sans-serif;
