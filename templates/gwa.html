@@ -5,6 +5,14 @@
 <link rel="stylesheet" media="screen" href="/static/css/handsontable.full.min.css">
 {% endblock %}
 
+{% block title_right %}
+
+<a href="{{ url_for('status_page') }}" class="btn btn-link pull-right">Status</a>
+
+{% endblock %}
+
+
+
 {% block content %}
 <form method="POST">
 

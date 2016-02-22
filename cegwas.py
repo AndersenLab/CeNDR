@@ -211,6 +211,7 @@ def process_gwa():
                                "value": autoconvert(data[1:][row][col+1])})
         trait_value.insert_many(trait_data).execute()
     for t in trait_keep:
+        req["trait_name"] = t
         req["trait_slug"] = slugify(t)
         # Submit job to iron worker
         resp = queue.post(str(json.dumps(req)))
@@ -281,6 +282,14 @@ def panel():
     return render_template('panel.html', **locals())
 
 
+@app.route('/genetic-mapping/status/')
+def status_page():
+    # queue
+    queue = IronMQ().queue("cegwas-map")
+    ql = [json.loads(x["body"]) for x in queue.peek(max=20)["messages"]]
+    qsize = queue.size()
+    return render_template('status.html', **locals())
+
 @app.route('/about/statistics/')
 def statistics():
     title = "Site Statistics"
@@ -289,12 +298,6 @@ def statistics():
     # Collection dates
     collection_dates = list(strain.select().filter(
         strain.isotype != None, strain.isolation_date != None).order_by(strain.isolation_date).execute())
-
-
-    # queue
-    queue = IronMQ().queue("cegwas-map")
-    ql = [json.loads(x["body"]) for x in queue.peek(max=20)["messages"]]
-    qsize = queue.size()
 
     return render_template('statistics.html', **locals())
 
