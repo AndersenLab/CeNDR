@@ -113,9 +113,9 @@ function restore_click_locked_content(m) {
     OSM_URL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-    var map = L.map('map').setView([30, -35], 2);
-
-  L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets'}).addTo(map);
+ 
+  var map = L.map('map', {minZoom:2}).setView([20, -5], 2);
+  L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
   strain_info = [];
   strain_names = [];
   markers = [];
@@ -151,8 +151,6 @@ var search_control = new L.Control.Search({layer: strain_layer,
                                       markerIcon: icon_hover });
 search_control.on('search_locationfound', set_panel_from_search);
 map.addControl(search_control);
-
-
 
 </script>
 
