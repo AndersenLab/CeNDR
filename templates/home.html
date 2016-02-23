@@ -23,7 +23,7 @@
                      <img src="/static/img/logos/NU.png" class="pull-right hidden-xs hidden-sm img-responsive" style="width: 140px; margin-top:15px;"/>
           </div>
         </div>
-
+  </div>
   <div class="row">
     <div class="col-md-4 col-sm-4">
       <div class="thumbnail img-responsive" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px" >
@@ -55,6 +55,12 @@
 </div>
       </div>
       </div>
+
+  <div class="row">
+    <div class="col-md-14">
+      <p><a class="btn btn-primary btn-block" href="{{ url_for("strain_submission_page") }}" role="button" onclick="">Submit Strains</a></p>
+    </div>
+  </div>
 <div class="row">
 <div class="col-md-6">
 
@@ -73,7 +79,7 @@
 </table>
 </div>
 </div>
-  <div class="col-md-6">
+  <div class="col-md-4">
     {% if files %}
       <div>
       <h4>News &amp; Updates        <a href = "{{ url_for('feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a>
