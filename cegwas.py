@@ -26,6 +26,7 @@ from iron_worker import *
 from iron_mq import *
 import requests
 
+
 def make_external(url):
     return urljoin(request.url_root, url)
 
@@ -227,17 +228,6 @@ def validate_url():
     return json.dumps(report_namecheck(req["report_name"]))
 
 
-@app.route('/report_progress/', methods=['POST'])
-def report_progress():
-    """
-        Generates URLs from report names and validates them.
-    """
-    req = request.get_json()
-    #trait.join(report).filter(trait.trait_slug == req["trait_slug"], report.report_slug = req["report_slug"])
-    return json.dumps()
-
-
-
 @app.route('/Genetic-Mapping/public/')
 def public_mapping():
     title = "Perform Mapping"
@@ -246,18 +236,36 @@ def public_mapping():
     return render_template('public_mapping.html', **locals())
 
 
-@app.route("/report/<report_name>/")
-@app.route("/report/<report_name>/<trait_name>")
-def trait_view(report_name, trait_name = ""):
-    report_data = list(trait.select(trait, report).join(report).where(report.report_slug == report_name).dicts().execute())
-    trait_data = [x for x in report_data if x["trait_slug"] == trait_name]
-    title = report_name
-    base_url = "https://storage.googleapis.com/cendr/" + report_name + "/" + trait_name
+@app.route("/report/<report_slug>/")
+@app.route("/report/<report_slug>/<trait_slug>")
+def trait_view(report_slug, trait_slug = ""):
+    report_data = list(trait.select(trait, report).join(report).where(report.report_slug == report_slug).dicts().execute())
+    title = report_slug
+    if trait_slug:
+        trait_data = [x for x in report_data if x["trait_slug"] == trait_slug][0]
+        subtitle = trait_data["trait_name"]
+    base_url = "https://storage.googleapis.com/cendr/" + report_slug + "/" + trait_slug
     report_url = base_url + "/report.html"
     report_html = requests.get(report_url).text.replace('src="', 'src="' + base_url + "/")
-    report_html = report_html[report_html.find('<div id="phenotype'):report_html.find("</body>")]
+    if not report_html.startswith("<?xml"):
+        report_html = "<div>" + report_html[report_html.find('<div id="phenotype'):report_html.find("</body>")].replace("</body>", "") 
+    else:
+        report_html = ""
     return render_template('report.html', **locals())
 
+
+@app.route('/report_progress/', methods=['POST'])
+def report_progress():
+    """
+        Generates URLs from report names and validates them.
+    """
+    req = request.get_json()
+    current_status = list(trait.select(trait.status)
+         .join(report)
+         .filter(trait.trait_slug == req["trait_slug"], report.report_slug == req["report_slug"])
+         .dicts()
+         .execute())[0]["status"]
+    return json.dumps(current_status)
 
 @app.route('/about/')
 def about():

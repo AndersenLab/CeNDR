@@ -1,13 +1,13 @@
 from peewee import *
 import json
 import datetime
-import os
+import os, sys
 import MySQLdb
 import _mysql
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='andersen')
 else:
     print "connect"
     credentials = json.loads(open("credentials.json",'r').read())
@@ -15,6 +15,7 @@ else:
       'cegwas',
       **credentials
       )
+
 
 db.connect()
 

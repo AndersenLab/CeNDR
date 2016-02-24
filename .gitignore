@@ -53,8 +53,6 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
-# AWS Credentials
-credentials.csv
 
 # PyBuilder
 target/
@@ -62,6 +60,4 @@ target/
 #Random
 *.DS_Store
 
-credentials.json
-iron.json
-box.json
+*.json
