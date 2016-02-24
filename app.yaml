@@ -47,3 +47,9 @@ libraries:
 
 - name: ssl
   version: "latest"
+
+- name: pycrypto
+  version: "latest"
+
+builtins:
+- remote_api: on

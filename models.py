@@ -1,7 +1,7 @@
 from peewee import *
 import json
 import datetime
-import os
+import os, sys
 import MySQLdb
 import _mysql
 
@@ -15,6 +15,7 @@ else:
       'cegwas',
       **credentials
       )
+
 
 db.connect()
 
