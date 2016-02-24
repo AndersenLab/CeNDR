@@ -233,9 +233,6 @@ $("form").submit(function(e) {
      ).done(function(msg) {
       msg = JSON.parse(msg);
       if(msg["success"]) {
-        console.log("Great");
-      }
-      if(msg["success"]) {
         if ($("[name='Release']:checked").val() == "public") {
           report_url = "/report/" + msg["report_slug"];
         } else {

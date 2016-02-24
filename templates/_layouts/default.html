@@ -18,7 +18,7 @@
 
       <div id="alert"></div>
       {% if title %}
-  <h2>{{ title }}        {% block title_right %}{% endblock %}</h2>
+  <h2>{{ title }}        {% if subtitle %}<small>{{subtitle}}</small>{% endif %}{% block title_right %}{% endblock %}</h2>
       {% endif %}
       {% if warning %}
 
