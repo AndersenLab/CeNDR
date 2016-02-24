@@ -168,7 +168,6 @@ class trait_value(Model):
         database = db
 
 class mapping(Model):
-
     """ Results of mappings. Unique on peak IDs and markers. """
     trait = ForeignKeyField(trait)
     snp = ForeignKeyField(snp)
@@ -182,6 +181,10 @@ class mapping(Model):
     class Meta:
         database = db
 
+class worker_status(Model):
+    machine_id = CharField()
+    machine_name = CharField()
+    status = CharField(null = True)
 
 def autoconvert(s):
     for fn in (int, float):
