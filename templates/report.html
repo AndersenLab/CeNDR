@@ -38,8 +38,32 @@
 </div>
 {% endif %}
 
-<div class="well">
-
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{ trait_data["trait_name"] }}</h3>
+  </div>
+  <div class="panel-body">
+  <div class="row">
+  <div class='col-md-6'>
+  <strong>Data</strong>
+    <ul>
+      <li><strong><a href="">raw_phenotype.tsv</a></strong> - Data submission</li>
+      <li><strong><a href="">processed_phenotype.tsv</a></strong> - Processed phenotype data</li>
+      <li><strong><a href="">processed_sig_mapping.tsv</a></strong> - Processed mapping data.</li>
+      <li><strong><a href="">raw_phenotype.tsv</a></strong> - Data submission</li>
+    </ul>
+    </div>
+    <div class='col-md-6'>
+    <strong>Info</strong>
+    <ul>
+      <li><strong><a href="">raw_phenotype.tsv</a></strong> - Data submission</li>
+      <li><strong><a href="">processed_phenotype.tsv</a></strong> - Processed phenotype data</li>
+      <li><strong><a href="">processed_sig_mapping.tsv</a></strong> - Processed mapping data.</li>
+      <li><strong><a href="">raw_phenotype.tsv</a></strong> - Data submission</li>
+    </ul>
+    </div>
+    </div>
+  </div>
 </div>
 
   </div>
@@ -48,9 +72,6 @@
 
 <div class="row">
       <div class="col-md-12">
-          <ul>
-            <li><strong>Submitted By: </strong></li>
-           </ul>
             {{ report_html|safe }}
        </div>
 </div>

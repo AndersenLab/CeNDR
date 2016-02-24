@@ -244,6 +244,10 @@ def trait_view(report_slug, trait_slug = ""):
     if trait_slug:
         trait_data = [x for x in report_data if x["trait_slug"] == trait_slug][0]
         subtitle = trait_data["trait_name"]
+    else:
+        # Redirect to first trait always.
+        first_trait = list(report_data)[0]
+        return redirect(url_for("trait_view", report_slug = report_slug, trait_slug = first_trait["trait_slug"]))
     base_url = "https://storage.googleapis.com/cendr/" + report_slug + "/" + trait_slug
     report_url = base_url + "/report.html"
     report_html = requests.get(report_url).text.replace('src="', 'src="' + base_url + "/")
