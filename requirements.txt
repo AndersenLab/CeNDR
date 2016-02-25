@@ -1,5 +1,6 @@
 python-slugify
 pytz
+dateutil
 Flask==0.10
 flask-appconfig
 flask-debugtoolbar
@@ -12,6 +13,5 @@ regex
 google-api-python-client
 Markdown==2.5.2
 pyyaml
-iron-mq
 gcloud
 PyCrypto

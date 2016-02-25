@@ -1,0 +1,31 @@
+Metadata-Version: 2.0
+Name: iron-core
+Version: 1.2.0
+Summary: Universal classes and methods for Iron.io API wrappers to build on.
+Home-page: https://www.github.com/iron-io/iron_core_python
+Author: Iron.io
+Author-email: thirdparty@iron.io
+License: UNKNOWN
+Keywords: Iron.io
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 3
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Natural Language :: English
+Classifier: Topic :: Internet
+Classifier: Topic :: Internet :: WWW/HTTP
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Dist: python-dateutil
+Requires-Dist: requests (>=1.1.0)
+
+Iron.io common library
+----------------------
+
+This package offers common functions for Iron.io APIs and services. It does not wrap 
+any APIs or contain API-specific features, but serves as a common base that wrappers
+may be built on. Users looking for API wrappers should instead look at 
+iron_worker_python and iron_worker_mq.
+
