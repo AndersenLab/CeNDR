@@ -22,10 +22,16 @@ import yaml
 import webapp2
 from google.appengine.api import mail
 import smtplib
-from iron_worker import *
 from iron_mq import *
 import requests
 
+# Fetch credentials
+from gcloud import datastore
+ds = datastore.Client(project = "andersen-lab")
+
+def get_queue():
+    iron_credentials = ds.get(ds.key("credential", "iron"))
+    return IronMQ(**dict(iron_credentials)).queue("cegwas-map")
 
 def make_external(url):
     return urljoin(request.url_root, url)
@@ -121,7 +127,7 @@ def gwa():
     title = "Perform Mapping"
     bcs = OrderedDict([("genetic-mapping", None), ("perform-mapping", None)])
 
-    queue = IronMQ().queue("cegwas-map")
+    queue = get_queue()
 
     # Generate list of allowable strains
     query = strain.select(strain.strain,
@@ -163,7 +169,7 @@ def process_gwa():
     title = "Run Association"
     req = request.get_json()
 
-    queue = IronMQ().queue("cegwas-map")
+    queue = get_queue()
 
     # Add Validation
     rep_names = report_namecheck(req["report_name"])
@@ -200,7 +206,7 @@ def process_gwa():
                 trait_set[n] = trait.insert(report = report_rec, 
                 trait_name = t,
                 trait_slug = slugify(t),
-                status = "",
+                status = "queue",
                 submission_date = datetime.now()).execute()
             else:
                 trait_set[n] = None
@@ -297,7 +303,7 @@ def panel():
 @app.route('/genetic-mapping/status/')
 def status_page():
     # queue
-    queue = IronMQ().queue("cegwas-map")
+    queue = get_queue()
     ql = [json.loads(x["body"]) for x in queue.peek(max=20)["messages"]]
     qsize = queue.size()
     return render_template('status.html', **locals())
