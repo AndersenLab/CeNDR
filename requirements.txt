@@ -12,6 +12,5 @@ regex
 google-api-python-client
 Markdown==2.5.2
 pyyaml
-iron-mq
 gcloud
 PyCrypto

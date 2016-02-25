@@ -1,0 +1,10 @@
+LICENSE.txt
+MANIFEST.in
+iron_core.py
+setup.cfg
+setup.py
+iron_core.egg-info/PKG-INFO
+iron_core.egg-info/SOURCES.txt
+iron_core.egg-info/dependency_links.txt
+iron_core.egg-info/requires.txt
+iron_core.egg-info/top_level.txt
