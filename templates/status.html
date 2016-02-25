@@ -17,8 +17,13 @@
       <tbody>
 
       {% for w in workers %}
+      {% if w["status"] == "running" %}
       <tr class="success">
       <td><i class="glyphicon glyphicon-refresh"></i></td>
+      {% else %}
+      <tr>
+      <td><i class="glyphicon glyphicon-stop"></i></td>
+      {% endif %}
       <td>
       {{ w["status"] }}
       </td>
@@ -68,4 +73,15 @@
       </table>
 </div>
   </div>
+{% endblock %}
+
+{% block script %}
+<script>
+
+window.setInterval(function() {
+location.reload();
+}, 10000);
+
+
+</script>
 {% endblock %}
