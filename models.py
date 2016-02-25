@@ -127,21 +127,6 @@ class report(Model):
         database = db
 
 
-class snp(Model):
-    """
-        Table of strain genotypes
-    """
-    strain = ForeignKeyField(strain)
-    chrom = CharField(index=True)
-    pos = IntegerField(index=True)
-    allele = IntegerField()
-    allele_base = CharField()
-    version = IntegerField(choices=((0, "snps 2.0")))  # Version of Snpset
-
-    class Meta:
-        database = db
-
-
 class trait(Model):
     """
         Initially, trait data only contains:
@@ -160,6 +145,7 @@ class trait(Model):
     class Meta:
         database = db
 
+
 class trait_value(Model):
     trait = ForeignKeyField(trait)
     strain = ForeignKeyField(strain)
@@ -168,24 +154,23 @@ class trait_value(Model):
     class Meta:
         database = db
 
+
 class mapping(Model):
     """ Results of mappings. Unique on peak IDs and markers. """
+    chrom = CharField(index = True)
+    pos = CharField(index = True)
     trait = ForeignKeyField(trait)
-    snp = ForeignKeyField(snp)
     variance_explained = DecimalField()
     log10p = DecimalField()
     BF = DecimalField()
-    significant = BooleanField()
     interval_start = IntegerField()
     interval_end = IntegerField()
+    version = CharField()
+    reference = CharField()
 
     class Meta:
         database = db
 
-class worker_status(Model):
-    machine_id = CharField()
-    machine_name = CharField()
-    status = CharField(null = True)
 
 def autoconvert(s):
     for fn in (int, float):

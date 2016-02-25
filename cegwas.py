@@ -335,8 +335,25 @@ def status_page():
     ql = [json.loads(x["body"]) for x in queue.peek(max=20)["messages"]]
     qsize = queue.size()
 
-    # Lookup workers
-    workers = list(datastore.Query(ds, "Worker").fetch())
+
+
+    from googleapiclient import discovery
+    from oauth2client.client import GoogleCredentials
+    credentials = GoogleCredentials.get_application_default()
+    compute = discovery.build('compute', 'v1', credentials=credentials)
+
+    # Get instance list
+    instances = compute.instances().list(project = "andersen-lab", zone = "us-central1-a", filter="status eq RUNNING").execute()
+    if 'items' in instances:
+        instances = [x["name"] for x in instances["items"]]
+    else:
+        instances = []
+    workers = []
+    for w in instances:
+        print("WORKER:" + w)
+        query = ds.query(kind="Worker")
+        query.add_filter('full_name', '=', w + ".c.andersen-lab.internal")
+        workers.append(list(query.fetch())[0])
 
     return render_template('status.html', **locals())
 
@@ -466,5 +483,5 @@ def feed():
 @app.route('/outreach/')
 def outreach():
     title = "Outreach"
-    bcs = OrderedDict([("outreach", "/outreach/")])
+    bcs = OrderedDict([("outreach", "")])
     return render_template('outreach.html', **locals())
