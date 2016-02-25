@@ -1,5 +1,5 @@
 mapping_submission = """
-You have submitted a genome-wide association mapping to <a href="http://www.elegansvariation.org">CeNDR</a> successfully.
+You have submitted a genome-wide association mapping to CeNDR successfully.
 You can monitor progress of your report here:
 
 http://www.elegansvariation.org/report/{report_slug}/
