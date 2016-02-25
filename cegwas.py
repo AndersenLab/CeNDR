@@ -491,3 +491,7 @@ def contact():
     title = "Contact Us"
     bcs = OrderedDict([("Contact Us", "/contact-us/")])
     return render_template('contact.html', **locals())
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
