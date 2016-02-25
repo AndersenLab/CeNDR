@@ -15,6 +15,7 @@ import stripe
 import itertools
 import markdown
 from datetime import date, datetime
+import dateutil
 from werkzeug.contrib.atom import AtomFeed
 from urlparse import urljoin
 from message import *
@@ -22,11 +23,13 @@ import yaml
 import webapp2
 from google.appengine.api import mail
 import smtplib
+import pytz
 from iron_mq import *
 import requests
 
 # Fetch credentials
 from gcloud import datastore
+from gcloud import storage
 ds = datastore.Client(project = "andersen-lab")
 
 def get_queue():
@@ -75,6 +78,14 @@ def utility_processor():
         with open(directory + filename) as f:
             return Markup(markdown.markdown(f.read()))
     return dict(render_markdown=render_markdown)
+
+@app.template_filter('format_datetime')
+def format_datetime(value):
+    try:
+        return dateutil.parser.parse(value).strftime('%Y-%m-%d / %I:%M %p')
+    except:
+        pass
+
 
 @app.route('/')
 def main():
@@ -202,12 +213,13 @@ def process_gwa():
         for n, t in enumerate(trait_set):
             trait_vals = [row[n+1] for row in data[1:] if row[n+1] is not None]
             if t is not None and len(trait_vals) > 0:
+                submit_time = datetime.now(pytz.timezone("America/Chicago"))
                 trait_keep.append(t)
                 trait_set[n] = trait.insert(report = report_rec, 
                 trait_name = t,
                 trait_slug = slugify(t),
                 status = "queue",
-                submission_date = datetime.now()).execute()
+                submission_date = submit_time).execute()
             else:
                 trait_set[n] = None
         for col, t in enumerate(trait_set):
@@ -220,6 +232,7 @@ def process_gwa():
     for t in trait_keep:
         req["trait_name"] = t
         req["trait_slug"] = slugify(t)
+        req["submission_date"] = datetime.now(pytz.timezone("America/Chicago")).isoformat()
         # Submit job to iron worker
         resp = queue.post(str(json.dumps(req)))
         req["success"] = True
@@ -255,6 +268,11 @@ def trait_view(report_slug, trait_slug = ""):
         first_trait = list(report_data)[0]
         return redirect(url_for("trait_view", report_slug = report_slug, trait_slug = first_trait["trait_slug"]))
     base_url = "https://storage.googleapis.com/cendr/" + report_slug + "/" + trait_slug
+
+    # List available datasets
+    report_files = list(storage.Client().get_bucket("cendr").list_blobs(prefix = report_slug + "/" + trait_slug + "/tables"))
+    report_files = [os.path.split(x.name)[1] for x in report_files]
+
     report_url = base_url + "/report.html"
     report_html = requests.get(report_url).text.replace('src="', 'src="' + base_url + "/")
     if not report_html.startswith("<?xml"):
@@ -303,9 +321,15 @@ def panel():
 @app.route('/genetic-mapping/status/')
 def status_page():
     # queue
+    bcs = OrderedDict([("genetic-mapping", None), ("status", None)])
+    title = "Status"
     queue = get_queue()
     ql = [json.loads(x["body"]) for x in queue.peek(max=20)["messages"]]
     qsize = queue.size()
+
+    # Lookup workers
+    workers = list(datastore.Query(ds, "Worker").fetch())
+
     return render_template('status.html', **locals())
 
 @app.route('/about/statistics/')
