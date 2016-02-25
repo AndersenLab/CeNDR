@@ -1,0 +1,31 @@
+Metadata-Version: 2.0
+Name: iron-mq
+Version: 0.8
+Summary: Client library for IronMQ, a message queue in the cloud
+Home-page: https://github.com/iron-io/iron_mq_python
+Author: Iron.io
+Author-email: thirdparty@iron.io
+License: UNKNOWN
+Keywords: Iron.io,IronMQ,message,queue,MQ
+Platform: UNKNOWN
+Classifier: Programming Language :: Python
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Natural Language :: English
+Classifier: Topic :: Internet
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Dist: iron-core
+
+IronMQ client library
+---------------------
+
+This package wraps the IronMQ API. It provides a simple and intuitive way
+to interact with the IronMQ service.
+
+IronMQ is a service provided by Iron.io. A flexible, scalable,
+and durable messaging system lets different parts of a cloud app
+connect with and scale independently from other internal and external
+processes. IronMQ offers developers ready-to-use messaging with reliable
+delivery and cloud-optimized performance.
+
