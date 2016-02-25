@@ -1,5 +1,6 @@
 python-slugify
 pytz
+dateutil
 Flask==0.10
 flask-appconfig
 flask-debugtoolbar
