@@ -1,4 +1,5 @@
 python-slugify
+pytz
 Flask==0.10
 flask-appconfig
 flask-debugtoolbar

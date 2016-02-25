@@ -32,11 +32,11 @@
 
 {% if trait_slug and report_html == "" %}
 <div class="progress">
-  <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
+  <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
   aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:0%">
   </div>
 </div>
-{% endif %}
+{% else %}
 
 <div class="panel panel-default">
   <div class="panel-heading">
@@ -47,10 +47,29 @@
   <div class='col-md-6'>
   <strong>Data</strong>
     <ul>
-      <li><strong><a href="">raw_phenotype.tsv</a></strong> - Data submission</li>
-      <li><strong><a href="">processed_phenotype.tsv</a></strong> - Processed phenotype data</li>
-      <li><strong><a href="">processed_sig_mapping.tsv</a></strong> - Processed mapping data.</li>
-      <li><strong><a href="">raw_phenotype.tsv</a></strong> - Data submission</li>
+      {% if 'raw_phenotype.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/raw_phenotype.tsv">Raw Phenotype Data</a></strong></li>
+      {% endif %}
+
+      {% if 'processed_phenotype.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/processed_phenotype.tsv">Processed Phenotype Data</a></strong></li>
+      {% endif %}
+
+      {% if 'interval_variants.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/interval_variants.tsv">Interval Variants</a></strong></li>
+      {% endif %}
+
+      {% if 'raw_mapping.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/raw_mapping.tsv">Raw Mappings</a></strong></li>
+      {% endif %}
+
+      {% if 'processed_sig_mapping.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/processed_sig_mapping.tsv">Processed Significant Mappings</a></strong></li>
+      {% endif %}
+
+      {% if 'non_sig_mapping.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/non_sig_mapping.tsv">Nonsignificant Mappings</a></strong></li>
+      {% endif %}
     </ul>
     </div>
     <div class='col-md-6'>
@@ -65,6 +84,8 @@
     </div>
   </div>
 </div>
+
+{% endif %}
 
   </div>
 </div>
@@ -87,7 +108,7 @@
 
 {% if trait_slug and report_html == "" %}
 prog = Array()
-prog[""] = "0%"
+prog["queue"] = ""
 prog["Processing Phenotype Data"] = "10%"
 prog["Performing Mapping"] = "20%"
 prog["Processing Mapping"] = "60%"
@@ -99,13 +120,15 @@ prog["error"] = "100%"
 
 
 var update_status = function(status) {
-  $(".progress-bar").css("width", prog[status]).html(prog[status] + " (" + status + ")");
   if (status == "complete") {
     $(".progress").fadeOut();
     location.reload();
-  }
-  if (status == "error") {
+  } else if (status == "error") {
     $(".progress-bar").addClass("progress-bar-danger").html("error");
+  } else if (status == "queue") {
+    $(".progress-bar").css("width", "100%").addClass("progress-bar-info").html("Queued")
+  } else {
+    $(".progress-bar").removeClass("progress-bar-info").css("width", prog[status]).html(prog[status] + " (" + status + ")");
   }
 }
 
@@ -126,7 +149,7 @@ function check_status() {
 
 check_status();
 
-window.setInterval(check_status, 5000);
+window.setInterval(check_status, 1000);
 {% endif %}
 
 </script>
