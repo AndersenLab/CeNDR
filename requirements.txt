@@ -13,4 +13,4 @@ Markdown==2.5.2
 pyyaml
 iron-mq
 gcloud
-PyOpenSSL
+PyCrypto
