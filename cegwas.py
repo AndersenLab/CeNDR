@@ -26,6 +26,8 @@ import smtplib
 import pytz
 from iron_mq import *
 import requests
+from google.appengine.api import mail
+from emails import *
 
 # Fetch credentials
 from gcloud import datastore
@@ -58,6 +60,7 @@ stripe.api_key = "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9"
 
 app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 if os.getenv('SERVER_SOFTWARE') and \
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/'):
     app.debug = False
@@ -93,7 +96,7 @@ def main():
     files = [x for x in os.listdir("static/content/news/") if x.startswith(".") is False]
     files.reverse()
     # latest mappings
-    latest_mappings = list(report.filter(report.release == 0).join(trait).order_by(trait.submission_date.desc()).limit(5).select(report, trait).distinct().dicts().execute())
+    latest_mappings = list(report.filter(report.release == 0).join(trait).order_by(trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('home.html', **locals())
 
 
@@ -137,8 +140,6 @@ def download_script(filetype):
 def gwa():
     title = "Perform Mapping"
     bcs = OrderedDict([("genetic-mapping", None), ("perform-mapping", None)])
-
-    queue = get_queue()
 
     # Generate list of allowable strains
     query = strain.select(strain.strain,
@@ -189,7 +190,8 @@ def process_gwa():
     data = req["trait_data"]
     del req["trait_data"]
     req["release"] = release_dict[req["release"]]
-    req["version"] = 0.1
+    req["version"] = 1
+    print(req)
     trait_names = data[0][1:]
     strain_set = []
     trait_keep = []
@@ -236,6 +238,12 @@ def process_gwa():
         # Submit job to iron worker
         resp = queue.post(str(json.dumps(req)))
         req["success"] = True
+        # Send user email
+    mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+              to=req["email"],
+              subject="CeNDR Mapping Report - " + req["report_slug"],
+              body=mapping_submission.format(report_slug=req["report_slug"]))
+
     return str(json.dumps(req))
 
 @app.route('/validate_url/', methods=['POST'])
