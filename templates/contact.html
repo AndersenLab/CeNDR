@@ -1,0 +1,14 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block content %}
+<div class="row">
+      <div class="col-md-12">
+        <a class="btn btn-primary btn-primary" href="{{ url_for("strain_submission_page") }}" role="button">Submit Strains</a>
+        </p>
+        {{render_markdown("contact.md")}}
+        <iframe src="http://goo.gl/forms/FHBp2n0pOF"
+        width="950" style="min-height:900px" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+      </div>
+  </div>
+{% endblock %}

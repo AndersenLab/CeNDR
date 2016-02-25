@@ -468,3 +468,9 @@ def outreach():
     title = "Outreach"
     bcs = OrderedDict([("outreach", "/outreach/")])
     return render_template('outreach.html', **locals())
+
+@app.route('/contact-us/')
+def contact():
+    title = "Contact Us"
+    bcs = OrderedDict([("Contact Us", "/contact-us/")])
+    return render_template('contact.html', **locals())
