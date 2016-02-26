@@ -3,7 +3,6 @@ from cendr import ds
 from cendr import autoconvert
 from cendr.models import db, report, strain, trait, trait_value
 from cendr.emails import mapping_submission
-
 from google.appengine.api import mail
 from datetime import date, datetime
 import pytz
@@ -164,8 +163,11 @@ def trait_view(report_slug, trait_slug=""):
     report_data = list(trait.select(trait, report).join(report).where(((report.report_slug == report_slug) & (
         report.release == 0)) | (report.report_hash == report_slug)).dicts().execute())
     if trait_slug:
-        trait_data = [x for x in report_data if x[
-            "trait_slug"] == trait_slug][0]
+        try:
+            trait_data = [x for x in report_data if x["trait_slug"] == trait_slug][0]
+        except:
+            # Trait report not found:
+            return render_template('404.html'), 404
         title = trait_data["report_name"]
         subtitle = trait_data["trait_name"]
         if trait_data["release"] == 0:
@@ -174,8 +176,11 @@ def trait_view(report_slug, trait_slug=""):
             report_url_slug = trait_data["report_hash"]
     else:
         # Redirect to first trait always.
-        first_trait = list(report_data)[0]
-        return redirect(url_for("trait_view", report_slug=report_slug, trait_slug=first_trait["trait_slug"]))
+        try:
+            first_trait = list(report_data)[0]
+            return redirect(url_for("trait_view", report_slug=report_slug, trait_slug=first_trait["trait_slug"]))
+        except:
+            return render_template('404.html'), 404
     base_url = "https://storage.googleapis.com/cendr/" + report_slug + "/" + trait_slug
 
     # List available datasets

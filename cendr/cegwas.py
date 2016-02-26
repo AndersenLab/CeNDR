@@ -2,6 +2,7 @@ from cendr import app
 from models import trait, report
 from flask import render_template
 import os
+from collections import OrderedDict
 import dateutil
 from werkzeug.contrib.atom import AtomFeed
 
