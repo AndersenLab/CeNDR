@@ -191,7 +191,6 @@ def process_gwa():
     del req["trait_data"]
     req["release"] = release_dict[req["release"]]
     req["version"] = 1
-    print(req)
     trait_names = data[0][1:]
     strain_set = []
     trait_keep = []
@@ -266,11 +265,15 @@ def public_mapping():
 @app.route("/report/<report_slug>/")
 @app.route("/report/<report_slug>/<trait_slug>")
 def trait_view(report_slug, trait_slug = ""):
-    report_data = list(trait.select(trait, report).join(report).where(report.report_slug == report_slug).dicts().execute())
-    title = report_slug
+    report_data = list(trait.select(trait, report).join(report).where(((report.report_slug == report_slug) & (report.release == 0)) | (report.report_hash == report_slug)).dicts().execute())
     if trait_slug:
         trait_data = [x for x in report_data if x["trait_slug"] == trait_slug][0]
+        title = trait_data["report_name"]
         subtitle = trait_data["trait_name"]
+        if trait_data["release"] == 0:
+            report_url_slug = trait_data["report_slug"]
+        else:
+            report_url_slug = trait_data["report_hash"]
     else:
         # Redirect to first trait always.
         first_trait = list(report_data)[0]
@@ -335,8 +338,6 @@ def status_page():
     ql = [json.loads(x["body"]) for x in queue.peek(max=20)["messages"]]
     qsize = queue.size()
 
-
-
     from googleapiclient import discovery
     from oauth2client.client import GoogleCredentials
     credentials = GoogleCredentials.get_application_default()
@@ -350,10 +351,13 @@ def status_page():
         instances = []
     workers = []
     for w in instances:
-        print("WORKER:" + w)
         query = ds.query(kind="Worker")
         query.add_filter('full_name', '=', w + ".c.andersen-lab.internal")
-        workers.append(list(query.fetch())[0])
+        worker_list = list(query.fetch())
+        if len(worker_list) > 0:
+            workers.append(worker_list[0])
+
+    recently_complete = list(report.select(report, trait).join(trait).order_by(trait.submission_complete.desc()).limit(10).dicts().execute())
 
     return render_template('status.html', **locals())
 
@@ -389,7 +393,6 @@ def order_page():
     bcs = OrderedDict([("strain", "/strain/"), ("order", "")])
     title = "Order"
     key = stripe_keys["publishable_key"]
-    print request.form
     if 'stripeToken' in request.form:
         total = 500
 
@@ -410,7 +413,6 @@ def order_page():
         return redirect(url_for("order_confirmation", order_id=request.form["stripeToken"][20:]), code=302)
     else:
         ordered = request.form.getlist('strain')
-        print ordered
         # Calculate total
         ind_strains = len(ordered) * 1500
         total = ind_strains
@@ -423,7 +425,6 @@ def order_confirmation(order_id):
     title = "Order: " + order_id
     query = "%" + order_id
     record = order.get(order.stripeToken ** query)
-    print record
     return render_template('order_confirm.html', **locals())
 
 

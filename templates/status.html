@@ -20,6 +20,9 @@
       {% if w["status"] == "running" %}
       <tr class="success">
       <td><i class="glyphicon glyphicon-refresh"></i></td>
+      {% elif w["status"].startswith("uploading") %}
+      <tr class="info">
+      <td><i class="glyphicon glyphicon-arrow-up"></i></td>
       {% else %}
       <tr>
       <td><i class="glyphicon glyphicon-stop"></i></td>
@@ -31,10 +34,14 @@
         {{ w["full_name"].replace(".c.andersen-lab.internal", "")}}
       </td>
       <td>
+      {% if w.release == 0 %}
         {{ w["report_slug"]}}
+      {% endif %}
       </td>
       <td>
+      {% if w.release == 0 %}
         <a href="{{ url_for('trait_view', report_slug=w["report_slug"], trait_slug=w["trait_slug"]) }}">{{ w["trait_slug"] }}</a>
+        {% endif %}
       </td>
       <td>
         {{ w["last_update"] | format_datetime }}
@@ -51,6 +58,41 @@
           -
           </td>
           <td>
+          {% if i.release == 0 %}
+            {{ i["report_name"] }}
+          {% else %}
+          -
+          {% endif %}
+          </td>
+          <td>
+          {% if i.release == 0 %}
+            <a href="{{ url_for('trait_view', report_slug=i["report_slug"], trait_slug=i["trait_slug"]) }}">{{ i["trait_name"]}}</a>
+          {% else %}
+          -
+          {% endif %}
+          </td>
+          <td>
+            {{ i["submission_date"] | format_datetime }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      </table>
+
+      <h4>Recently Complete</h4>
+
+      <table class = "table table-striped table-hover">
+      <thead>
+        <th>Status</th>
+        <th>Report Name</th>
+        <th>Trait Name</th>
+        <th>Completed</th>
+      </thead>
+      <tbody>
+            {% for i in recently_complete %}
+        <tr {% if i.status == "error" %} class="danger" {% endif %}>
+        <td>{{ i.status }}</td>
+          <td>
           {% if i["release"] == 0 %}
             {{ i["report_name"] }}
           {% else %}
@@ -65,7 +107,7 @@
           {% endif %}
           </td>
           <td>
-            {{ i["submission_date"] | format_datetime }}
+            {{ i.submission_complete.isoformat() | format_datetime }}
           </td>
         </tr>
       {% endfor %}
