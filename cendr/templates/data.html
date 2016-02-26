@@ -74,7 +74,16 @@
                 {% for isotype, strains in strain_listing|groupby('isotype') %}
                 <tr>
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-                    <td>{{ strains|join(" ") }}</td>
+                    <td>{% for s in strains %}
+                            {% if s.sequenced == 1 %}
+                                <strong>
+                                {{ s }}
+                                </strong>
+                            {% else %}
+                                {{ s }}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
                     <td>
                         {% if strains[0].bam_file %}
                             <a href="{{ strains[0].bam_file }}">{{ isotype }}.bam</a>

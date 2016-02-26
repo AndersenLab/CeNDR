@@ -1,6 +1,6 @@
 from cendr import app
 from cendr import json_serial
-from flask import render_template, request
+from flask import render_template, request, url_for
 from cendr.models import strain
 from collections import OrderedDict
 import json
@@ -21,7 +21,7 @@ stripe.api_key = "sk_test_1fmlHofOFzwqoxkPoP3E4RQ9"
 @app.route('/strain/global-strain-map/')
 def map_page():
     title = "Global Strain Map"
-    bcs = OrderedDict([("strain", "/strain/"), ("global-strain-map", None)])
+    bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("global-strain-map", "")])
     strain_list_dicts = []
     strain_listing = list(strain.select().filter(strain.isotype.is_null() == False).filter(
         strain.latitude.is_null() == False).execute())
@@ -60,7 +60,7 @@ def strain_listing_page():
 
 @app.route('/strain/submit/')
 def strain_submission_page():
-    bcs = OrderedDict([("strain", "submission")])
+    bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("Strain Submission", "")])
     title = "Strain Submission"
     return render_template('strain_submission.html', **locals())
 
@@ -72,7 +72,7 @@ def strain_submission_page():
 @app.route("/strain/protocols/")
 def protocols():
     title = "Protocols"
-    bcs = OrderedDict([("strain", "/strain/"), ("protocols", "")])
+    bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("protocols", "")])
     protocols = yaml.load(open("cendr/static/content/data/protocols.yaml", 'r'))
     return render_template('protocols.html', **locals())
 

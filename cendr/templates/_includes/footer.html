@@ -3,46 +3,39 @@
 <br />
 <br />
 <footer>
-<div class="row">
-  <div class="col-md-12">
-
-
-<div class="panel panel-default">
-  <div class="panel-body text-center">
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
-</div>
-</div>
-<div class="row">
-
-  <div class="col-sm-12">
-    <div class="text-center">
-              <a href="http://www.northwestern.edu/"><img src="/static/img/logos/NU.jpg" /></a>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body text-center">
+                  <a href="{{ url_for("strain_submission_page") }}" class='btn btn-xs'>Submit Strains</a>
+                </div>
+            </div>
+        </div>
     </div>
-    <br /><br />
-</div>
-
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="text-center">
+                <a href="http://www.northwestern.edu/"><img src="/static/img/logos/NU.jpg" /></a>
+            </div>
+            <br />
+            <br />
+        </div>
 </footer>
-</div><!--Closes Container -->
-
+</div>
+<!--Closes Container -->
 <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+(function(i, s, o, g, r, a, m) {
+    i['GoogleAnalyticsObject'] = r;
+    i[r] = i[r] || function() {
+        (i[r].q = i[r].q || []).push(arguments)
+    }, i[r].l = 1 * new Date();
+    a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0];
+    a.async = 1;
+    a.src = g;
+    m.parentNode.insertBefore(a, m)
+})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-  ga('create', 'UA-24677584-4', 'auto');
-  ga('send', 'pageview');
-
+ga('create', 'UA-24677584-4', 'auto');
+ga('send', 'pageview');
 </script>
-

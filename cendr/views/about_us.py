@@ -1,9 +1,8 @@
 from cendr import app
-from flask import render_template
-from flask import Markup
+from flask import render_template, url_for, Markup
 import markdown
 import yaml
-from cendr.models import strain, report
+from cendr.models import strain, report, mapping, trait
 from collections import OrderedDict
 
 @app.context_processor
@@ -18,7 +17,7 @@ def utility_processor():
 def about():
 	# About us Page - directs to other pages.
     title = "About"
-    bcs = OrderedDict([("about", "/about/")])
+    bcs = OrderedDict([("about", None)])
     return render_template('about.html', **locals())
 
 
@@ -26,7 +25,7 @@ def about():
 def panel():
 	# Scientific Panel Page
     title = "Scientific Advisory Panel"
-    bcs = OrderedDict([("about", "/about/"), ("panel", "")])
+    bcs = OrderedDict([("about", url_for("about")), ("panel", "")])
     panel_data = yaml.load(open("cendr/static/content/data/advisory-panel.yaml", 'r'))
     return render_template('panel.html', **locals())
 
@@ -35,7 +34,7 @@ def panel():
 def staff():
 	# Staff Page
     title = "Staff"
-    bcs = OrderedDict([("about", "/about/"), ("staff", "")])
+    bcs = OrderedDict([("about", url_for("about") ), ("staff", "")])
     staff_data = yaml.load(open("cendr/static/content/data/staff.yaml", 'r'))
     return render_template('staff.html', **locals())
 
@@ -43,7 +42,14 @@ def staff():
 @app.route('/about/statistics/')
 def statistics():
     title = "Site Statistics"
-    bcs = OrderedDict([("about", "/about/"), ("statistics", None)])
+    bcs = OrderedDict([("about", url_for("about")), ("statistics", None)])
+
+    # Number of reports
+    n_reports = report.select().count()
+    n_traits = trait.select().count()
+    n_significant_mappings = mapping.select().count()
+    n_distinct_strains = strain.select(strain.strain).distinct().count()
+    n_distinct_isotypes = strain.select(strain.isotype).filter(strain.isotype != None).distinct().count()
 
     # Collection dates
     collection_dates = list(strain.select().filter(

@@ -3,10 +3,21 @@
 
 {% block content %}
 <div class="row">
-      <div class="col-md-12">
-    <h4>News &amp; Updates</h4>
-    {{ filename }}
-    {{ render_markdown(filename + ".md", directory = "static/content/news/") }}
+    <div class="col-md-8">
+    	{{ render_markdown(filename + ".md", directory = "cendr/static/content/news/") }}
+  	</div>
+  	<div class = 'col-md-4'>
 
-  </div>
+      <ul class="list-group">
+        {% for f in files %}
+        <a class="list-group-item {% if f.strip(".md") == filename %}active{% endif %}" href="{{ url_for('news_item', filename = f.strip('.md')) }}">
+            <small class="pull-right">{{ f[:10] }}</small><strong>{{ f[11:].strip(".md").replace("-", " ") }}</strong>
+          </a>
+
+        </li>
+
+        {% endfor %}
+      </ul>
+
+  	</div>
 {% endblock %}
