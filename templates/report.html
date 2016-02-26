@@ -17,7 +17,7 @@
       <div class="btn-group" role="group">
         {% for trait in report_data %} 
 
-          <a href="{{ url_for('trait_view', report_slug= trait.report_slug, trait_slug = trait.trait_slug) }}" type="button" class="btnbtn-secondary btn-sm {% if trait.trait_slug == trait_slug %} btn-primary {% endif %}">{{ trait.trait_name }}</a>
+          <a href="{{ url_for('trait_view', report_slug = report_url_slug, trait_slug = trait.trait_slug) }}" type="button" class="btnbtn-secondary btn-sm {% if trait.trait_slug == trait_slug %} btn-primary {% endif %}">{{ trait.trait_name }}</a>     
           
         {% endfor %}
 
@@ -83,8 +83,6 @@
                                          {% else %}
                                             Private
                                          {% endif %}</li>
-      <li><strong><a href="">processed_sig_mapping.tsv</a></strong> - Processed mapping data.</li>
-      <li><strong><a href="">raw_phenotype.tsv</a></strong> - Data submission</li>
     </ul>
     </div>
     </div>

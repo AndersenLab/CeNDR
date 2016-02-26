@@ -12,7 +12,7 @@ p {
 }
 
 #report-container img {
-  max-width: 970px;
+  max-width: 100%;
 }
 
 .legend {
