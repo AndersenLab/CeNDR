@@ -34,14 +34,10 @@
         {{ w["full_name"].replace(".c.andersen-lab.internal", "")}}
       </td>
       <td>
-      {% if w.release == 0 %}
         {{ w["report_slug"]}}
-      {% endif %}
       </td>
       <td>
-      {% if w.release == 0 %}
         <a href="{{ url_for('trait_view', report_slug=w["report_slug"], trait_slug=w["trait_slug"]) }}">{{ w["trait_slug"] }}</a>
-        {% endif %}
       </td>
       <td>
         {{ w["last_update"] | format_datetime }}
