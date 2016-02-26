@@ -16,9 +16,9 @@ threadsafe: yes
 handlers:
 - url: /order/.*
   secure: always
-  script: cegwas.app  
+  script: run.app  
 - url: /.*
-  script: cegwas.app  # a WSGI application in the main module's global scope
+  script: run.app  # a WSGI application in the main module's global scope
 
 # App Engine serves and caches static files contained in the listed directories
 # (and subdirectories). Uncomment and set the directory as needed.
