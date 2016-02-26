@@ -25,7 +25,22 @@
 {% block content %}
 <div class="row">
       <div class="col-md-6">
-     
+              
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Summary</h3>
+        </div>
+        
+        <ul class='list-group'>
+          <li class='list-group-item'><strong>Reports Submitted</strong> <div class='pull-right'>{{ n_reports }}</div></li>
+          <li class='list-group-item'><strong>Traits Submitted</strong><div class='pull-right'>{{ n_traits }}</div></li>
+          <li class='list-group-item'><strong>Significant Mappings</strong><div class='pull-right'>{{ n_significant_mappings}}</div></li>
+          <li class='list-group-item'><strong>Strains</strong><div class='pull-right'>{{ n_distinct_strains }}</div></li>
+          <li class='list-group-item'><strong>Isotypes</strong><div class='pull-right'>{{ n_distinct_isotypes }}</div></li>
+        </ul>
+        
+      </div>
+
       </div>
       <div class="col-md-6" style="text-align: center;">
           <div class="timeline_strain_growth" style="height:250px;"></div>

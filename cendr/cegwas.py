@@ -1,17 +1,20 @@
 from cendr import app
 from models import trait, report
-from flask import render_template
+from flask import render_template, request, Markup, url_for
+import markdown
+from datetime import datetime
 import os
 from collections import OrderedDict
 import dateutil
 from werkzeug.contrib.atom import AtomFeed
+from urlparse import urljoin
 
 def make_external(url):
     return urljoin(request.url_root, url)
 
 
-def render_markdown(filename, directory="static/content/markdown/"):
-    with open(directory + filename) as f:
+def render_markdown(filename, directory="cendr/static/content/markdown/"):
+    with open(directory + filename + ".md") as f:
         return Markup(markdown.markdown(f.read()))
 
 
@@ -26,8 +29,7 @@ def format_datetime(value):
 @app.route('/')
 def main():
     page_title = "Caenorhabditis elegans Natural Diversity Resource"
-    files = [x for x in os.listdir(
-        "cendr/static/content/news/") if x.startswith(".") is False]
+    files = [x for x in os.listdir("cendr/static/content/news/") if x.startswith(".") is False]
     files.reverse()
     # latest mappings
     latest_mappings = list(report.filter(report.release == 0).join(trait).order_by(
@@ -36,17 +38,14 @@ def main():
 
 
 @app.route("/news/")
-def news():
-    title = "Andersen Lab News"
-    files = os.listdir("static/content/news/")
-    files.reverse()
-    bcs = OrderedDict([("News", "")])
-    return render_template('news.html', **locals())
-
-
 @app.route("/news/<filename>/")
-def news_item(filename):
+def news_item(filename = ""):
+    files = os.listdir("cendr/static/content/news/")
+    files.reverse()
+    if not filename:
+        filename = files[0].strip(".md")
     title = filename[11:].strip(".md").replace("-", " ")
+    bcs = OrderedDict([("news", None), (title, None)])
     return render_template('news_item.html', **locals())
 
 
@@ -54,16 +53,15 @@ def news_item(filename):
 def feed():
     feed = AtomFeed('CNDR News',
                     feed_url=request.url, url=request.url_root)
-    files = os.listdir("static/content/news/")
+    files = os.listdir("cendr/static/content/news/")
     files.reverse()
     for filename in files:
-        filename[11:]
         title = filename[11:].strip(".md").replace("-", " ")
-        content = render_markdown(filename, "static/content/news/")
+        content = render_markdown(filename.strip(".md"), "cendr/static/content/news/")
         date_published = datetime.strptime(filename[:10], "%Y-%m-%d")
         feed.add(title, unicode(content),
                  content_type='html',
-                 author="CNDR News",
+                 author="CeNDR News",
                  url=make_external(
                      url_for("news_item", filename=filename.strip(".md"))),
                  updated=date_published,
