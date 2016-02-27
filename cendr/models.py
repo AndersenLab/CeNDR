@@ -108,6 +108,9 @@ class order_strain(Model):
     order = ForeignKeyField(order)
     strain = ForeignKeyField(strain)
 
+    class Meta:
+        database = db
+
 
 class report(Model):
     """

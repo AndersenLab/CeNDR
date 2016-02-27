@@ -4,7 +4,54 @@
 {% block content %}
 <div class="row">
       <div class="col-md-12">
-      	{{ record.stripeEmail }}
+
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">{{ page_title }}</h3>
+  </div>
+  <div class="panel-body">
+  <ul>
+  <li><strong>Order Email</strong> {{ record.stripeEmail }}</li>
+    <li><strong>Number of Strains</strong> {{ record.stripeEmail }}</li>
+  </ul>
+  </div>
+  </div>
+
+
+      </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+	<table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <th style="width 200px;">Isotype</th>
+                    <th>Strain</th>
+                    <th class="price">Price</th>
+                </tr>
+            </thead>
+            <tbody class="searchable">
+                {% for isotype, strains in strain_listing|groupby('isotype') %}
+                <tr>
+                    <td><strong>{{ isotype }}</strong></td>
+                    <td>
+                    {% for s in strains %}
+                    {{ s.strain }}
+                    {% endfor %}
+                    </td>
+
+                    <td class="price">${{'%0.2f'| format(1500/100|float)}}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                <td><strong>Total</strong></td>
+                <td></td>
+                <td class="price"><strong>${{'%0.2f'| format(total/100|float)}}</strong></td>
+                </tr>
+            </tbody>
+        </table>
       </div>
   </div>
 {% endblock %}
