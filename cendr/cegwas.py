@@ -51,7 +51,7 @@ def news_item(filename = ""):
 
 @app.route('/feed.atom')
 def feed():
-    feed = AtomFeed('CNDR News',
+    feed = AtomFeed('CeNDR News',
                     feed_url=request.url, url=request.url_root)
     files = os.listdir("cendr/static/content/news/")
     files.reverse()
