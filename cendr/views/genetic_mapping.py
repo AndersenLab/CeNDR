@@ -1,7 +1,7 @@
 from cendr import app
 from cendr import ds
 from cendr import autoconvert
-from cendr.models import db, report, strain, trait, trait_value
+from cendr.models import db, report, strain, trait, trait_value, mapping
 from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
@@ -154,6 +154,7 @@ def public_mapping():
     title = "Perform Mapping"
     bcs = OrderedDict([("genetic-mapping", None), ("public", None)])
     title = "Public Mappings"
+    pub_mappings = list(mapping.select(mapping, report, trait).join(trait).join(report).filter(report.release == 0).dicts().execute())
     return render_template('public_mapping.html', **locals())
 
 
