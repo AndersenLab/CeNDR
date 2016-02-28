@@ -258,7 +258,7 @@ def status_page():
         if len(worker_list) > 0:
             workers.append(worker_list[0])
 
-    recently_complete = list(report.select(report, trait).join(trait).order_by(
+    recently_complete = list(report.select(report, trait).filter(trait.submission_complete != None).join(trait).order_by(
         trait.submission_complete.desc()).limit(10).dicts().execute())
 
     return render_template('status.html', **locals())

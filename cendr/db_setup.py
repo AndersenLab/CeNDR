@@ -35,10 +35,10 @@ from models import *
 
 with db.atomic():
     if reset_db:
-        db.drop_tables([strain, report, trait, trait_value, mapping, snp, order, order_strain], safe = True)
+        db.drop_tables([strain, report, trait, trait_value, mapping, order, order_strain], safe = True)
     else:
         db.drop_tables([strain], safe = True)
-    db.create_tables([strain, report, trait, trait_value, mapping, snp, order, order_strain], safe=True)
+    db.create_tables([strain, report, trait, trait_value, mapping, order, order_strain], safe=True)
 
 
 strain_info_join = requests.get(
