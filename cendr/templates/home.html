@@ -60,7 +60,16 @@
 
 <div class="panel panel-default">
 
- <div class="panel-heading"><h4>Latest Mappings</h4></div>
+ <div class="panel-heading">
+ <form class="pull-right" action ="{{ url_for('public_mapping') }}" method="get" name="login">
+  <div class="form-group">
+    <input type="search" class="form-control" name="query" placeholder="Find Mappings" value="{% if query %}{{ query }}{% endif %}">
+  </div>
+</form>
+
+<h4>Latest Mappings</h4>
+
+</div>
 
   <table class="table table-striped table-hover">
 
