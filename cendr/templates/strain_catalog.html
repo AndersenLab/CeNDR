@@ -51,7 +51,7 @@
                     {% for isotype, strains in strain_listing|groupby('isotype') %}
                     <tr>
                         <td>
-                            <input type="checkbox" name="strain" value="{{ isotype }}" info="{{ isotype + " " +strains|join(" ") }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
+                            <input type="checkbox" name="isotype" value="{{ isotype }}" info="{{ isotype + " " +strains|join(" ") }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
                         </td>
                         <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                         <td>{{ strains|join(" ") }}</td>
