@@ -79,6 +79,7 @@ class strain(Model):
 
 class order(Model):
     price = FloatField()
+    charge = CharField(null = False)
     stripeToken = CharField(index = True)
     stripeShippingName = CharField(null = False)
     stripeEmail = CharField(null = False)
@@ -162,6 +163,7 @@ class mapping(Model):
     """ Results of mappings. Unique on peak IDs and markers. """
     chrom = CharField(index = True)
     pos = CharField(index = True)
+    report = ForeignKeyField(report)
     trait = ForeignKeyField(trait)
     variance_explained = DecimalField()
     log10p = DecimalField()

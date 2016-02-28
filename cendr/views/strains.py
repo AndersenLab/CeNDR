@@ -6,6 +6,8 @@ from collections import OrderedDict
 import json
 import yaml
 import stripe
+from google.appengine.api import mail
+from cendr.emails import order_submission
 
 stripe_keys = ds.get(ds.key("credential", "stripe_test"))
 
@@ -35,7 +37,10 @@ def isotype_page(isotype_name):
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name)
                 .order_by(strain.latitude).dicts().execute())
-    ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
+    try:
+        ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
+    except:
+        ref_strain = rec[0]
     strain_json_output = json.dumps([x for x in rec if x["latitude"] != None],  default=json_serial)
     return render_template('strain.html', **locals())
 
@@ -81,12 +86,11 @@ def protocols():
 
 def calculate_total(strain_list):
     price_adjustment = 0
-    strain_sets = list(strain.select(strain.strain, strain.set_1, strain.set_2, strain.set_3, strain.set_4).dicts().execute())
+    strain_list = [x["isotype"] for x in strain.select(strain.isotype).where(strain.isotype << strain_list).distinct(strain.isotype).dicts().execute()]
+    strain_sets = list(strain.select(strain.isotype, strain.set_1, strain.set_2, strain.set_3, strain.set_4).distinct().dicts().execute())
     added_sets = []
     for i in range(1,5):
-        print i
-        set_test = [x["strain"] for x in strain_sets if x["set_" + str(i)] is not None]
-        print set_test
+        set_test = [x["isotype"] for x in strain_sets if x["set_" + str(i)] is not None]
         if all([x in strain_list for x in set_test]):
             price_adjustment += 5000
             added_sets.append("set_" + str(i))     
@@ -96,17 +100,13 @@ def calculate_total(strain_list):
 def order_page():
     bcs = OrderedDict([("strain", "/strain/"), ("order", "")])
     title = "Order"
-    strain_listing = request.form.getlist('strain')
+    strain_listing = list(set(request.form.getlist('isotype')))
 
     # Calculate total
     total, price_adjustment, added_sets = calculate_total(strain_listing)
 
     key = stripe_keys["public_key"]
     if 'stripeToken' in request.form:
-        metadata = {}
-        #metadata["strain_sets"] = ",".join(metadata["strain_sets"])
-
-        total = len(strain_listing) * 15 - price_adjustment
         stripe.api_key = stripe_keys["secret_key"]
         customer = stripe.Customer.create(
             email=request.form['stripeEmail'],
@@ -118,14 +118,25 @@ def order_page():
             amount=total,
             currency='usd',
             description='Flask Charge',
-            metadata=metadata
+            metadata={"strain_sets" : ", ".join(added_sets)}
         )
+
         order_formatted = {k: autoconvert(v) for k, v in request.form.items()}
         order_formatted["price"] = total
+        order_formatted["charge"] = charge["id"]
         with db.atomic():
             order_created = order.create(**order_formatted)
-            order_strain_insert = [{"order": order_created.id, "strain": strain.get(strain=x)} for x in strain_list]
+            # NEED TO FILTER HERE FOR REFERENCE STRAINS
+            order_strain_insert = [{"order": order_created.id, "strain": strain.get(isotype=x)} for x in strain_listing]
             order_strain.insert_many(order_strain_insert).execute()
+
+        # Send user email
+        mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+                to=order_formatted["stripeEmail"],
+                subject="CeNDR Order Submission " + order_formatted["stripeToken"][20:],
+                body=order_submission.format(order_slug=order_formatted["stripeToken"][20:]))
+
+
         return redirect(url_for("order_confirmation", order_id=request.form["stripeToken"][20:]), code=302)
     else:
         n_strains = len(strain_listing)
@@ -139,6 +150,6 @@ def order_confirmation(order_id):
     page_title = "Order: " + order_id
     query = "%" + order_id
     record = order.get(order.stripeToken ** query)
+    total = record.price
     strain_listing = order.select(strain.strain, strain.isotype, order.stripeToken).join(order_strain).switch(order_strain).join(strain).filter(order.stripeToken ** query).dicts().execute()
-    total = calculate_total()
     return render_template('order_confirm.html', **locals())

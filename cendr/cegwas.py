@@ -29,7 +29,7 @@ def format_datetime(value):
 @app.route('/')
 def main():
     page_title = "Caenorhabditis elegans Natural Diversity Resource"
-    files = [x for x in os.listdir("cendr/static/content/news/") if x.startswith(".") is False]
+    files = [x for x in os.listdir("cendr/static/content/news/") if not x.startswith(".")]
     files.reverse()
     # latest mappings
     latest_mappings = list(report.filter(report.release == 0).join(trait).order_by(
@@ -40,7 +40,7 @@ def main():
 @app.route("/news/")
 @app.route("/news/<filename>/")
 def news_item(filename = ""):
-    files = os.listdir("cendr/static/content/news/")
+    files = [x for x in os.listdir("cendr/static/content/news/") if not x.startswith(".")]
     files.reverse()
     if not filename:
         filename = files[0].strip(".md")
