@@ -80,7 +80,7 @@ DISCLAIMER: {{ lipsum(n=1) }}</div>
                         <br />
             <div id="errors" class="text-danger"></div>
             <div class="pull-right">
-            <button type="submit" style="margin-top: 5px;" class="btn btn-primary btn submit">Submit</button>
+            <button type="submit" style="margin-top: 5px;" class="btn btn-primary btn submit" disabled>Submit</button>
             </div>
       </div>
 
@@ -212,7 +212,7 @@ var update_url_message = function(e) {
       report_url = "/report/" + msg["report_hash"];
       }
 
-      $(".avail_url").html("Your report will be available at " + report_url)
+      $(".avail_url").html("Your report will be available at elegansvariation.org" + report_url)
     }
    });
  } else {
@@ -241,7 +241,7 @@ function error_checking() {
   }
 
   // No more than 10 traits
-  if (col_names.length > 10) {
+  if (col_names.length > 11) {
     error_list.push("Maximum of 10 traits.");
   }
 
@@ -251,19 +251,33 @@ function error_checking() {
     row_names.push(data[i][0])
   }
   row_names = row_names.filter(validInput);
-  console.log(row_names);
-  console.log(row_names.filter(onlyUnique));
+
   if (row_names.filter(onlyUnique).length != row_names.length) {
-     error_list.push("Duplicated strain Names");
+     error_list.push("You have duplicated strain names");
+  }
+
+  // At least 5 strains
+  if (row_names.length < 5) {
+    error_list.push("A minimum of 5 strains required");
+  }
+
+  // report email required
+  if ($("#Email").val() == 0) {
+    error_list.push("Report email required");
+  }
+
+  // report name required
+  if ($("#ReportName").val() == 0) {
+    error_list.push("Report Name required");
   }
 
   // Correct Strain Names
   if (row_names.every(strainValidatorfunc) == false) {
-    error_list.push("Incorrect strain Names");
+    error_list.push("Incorrect strain names");
   }
 
   if (error_list.length > 0) {
-    $("#errors").html("<h3>Errors</h3><ul><li class='warning'>" + error_list.join("</li><li>") + "</li></ul>")
+    $("#errors").html("<h4>Before you can submit:</h4><ul><li class='warning'>" + error_list.join("</li><li>") + "</li></ul>")
     $(".submit").attr("disabled", true);
   } else {
      $("#errors").html("")
@@ -274,6 +288,9 @@ function error_checking() {
 
 $("#ReportName,input[name=Release]").on('change', update_url_message);
 $("#ReportName,input[name=Release]").on('keyup', update_url_message);
+$("input").on('change', error_checking);
+$("input").on('keyup', error_checking);
+
 
 
 $("form").submit(function(e) {

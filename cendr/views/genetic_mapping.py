@@ -68,6 +68,13 @@ def report_namecheck(report_name):
     else:
         return {"report_slug": report_slug, "report_hash": report_hash}
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
 
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
@@ -107,8 +114,8 @@ def process_gwa():
         trait_set = data[0][1:]
         for n, t in enumerate(trait_set):
             trait_vals = [row[n + 1]
-                          for row in data[1:] if row[n + 1] is not None]
-            if t is not None and len(trait_vals) > 0:
+                          for row in data[1:] if row[n + 1]]
+            if t and len(trait_vals) > 0:
                 submit_time = datetime.now(pytz.timezone("America/Chicago"))
                 trait_keep.append(t)
                 trait_set[n] = trait.insert(report=report_rec,
@@ -120,7 +127,7 @@ def process_gwa():
                 trait_set[n] = None
         for col, t in enumerate(trait_set):
             for row, s in enumerate(strain_set):
-                if t is not None and s is not None and data[1:][row][col + 1]:
+                if t and s and is_number(data[1:][row][col + 1]):
                     trait_data.append({"trait": t,
                                        "strain": s,
                                        "value": autoconvert(data[1:][row][col + 1])})
