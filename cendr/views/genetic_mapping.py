@@ -6,6 +6,8 @@ from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
 import pytz
+from peewee import fn
+
 from flask import render_template, request, redirect, url_for
 from collections import OrderedDict
 import hashlib
@@ -149,9 +151,22 @@ def validate_url():
     return json.dumps(report_namecheck(req["report_name"]))
 
 
-@app.route('/Genetic-Mapping/public/')
+@app.route('/Genetic-Mapping/public/', methods=['GET'])
 def public_mapping():
+    query = request.args.get("query")
+    if query is not None:
+        bcs = OrderedDict([("genetic-mapping", None), ("Public Mappings", url_for('public_mapping')), ("Search", None)])
+        title = "Search: " + query
+        subtitle = "results"
+        q = "%" + query + "%"
+        results = mapping.select(report, trait, mapping).join(trait).join(report).dicts().filter((trait.trait_slug % q) |
+                                    (trait.trait_name % q) |
+                                    (report.report_name % q) |
+                                    (report.report_slug % q)).order_by(mapping.log10p.desc())
+        search_results = list(results.dicts().execute())
+        return render_template('public_mapping.html', **locals())
     title = "Perform Mapping"
+    random_results = mapping.select(report, trait, mapping).join(trait).join(report).dicts().order_by(fn.Rand()).limit(5).execute()
     bcs = OrderedDict([("genetic-mapping", None), ("public", None)])
     title = "Public Mappings"
     pub_mappings = list(mapping.select(mapping, report, trait).join(trait).join(report).filter(report.release == 0).dicts().execute())
