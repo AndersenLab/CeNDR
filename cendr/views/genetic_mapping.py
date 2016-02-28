@@ -166,14 +166,15 @@ def public_mapping():
         title = "Search: " + query
         subtitle = "results"
         q = "%" + query + "%"
-        results = mapping.select(report, trait, mapping).join(trait).join(report).dicts().filter((trait.trait_slug % q) |
+        results = mapping.select(report, trait, mapping).filter(trait.status == "complete").join(trait).join(report).dicts().filter((trait.trait_slug % q) |
                                     (trait.trait_name % q) |
                                     (report.report_name % q) |
                                     (report.report_slug % q)).order_by(mapping.log10p.desc())
         search_results = list(results.dicts().execute())
+        search = True
         return render_template('public_mapping.html', **locals())
     title = "Perform Mapping"
-    random_results = mapping.select(report, trait, mapping).join(trait).join(report).dicts().order_by(fn.Rand()).limit(5).execute()
+    random_results = mapping.select(report, trait, mapping).filter(trait.status == "complete").join(trait).join(report).dicts().order_by(fn.Rand()).limit(5).execute()
     bcs = OrderedDict([("genetic-mapping", None), ("public", None)])
     title = "Public Mappings"
     pub_mappings = list(mapping.select(mapping, report, trait).join(trait).join(report).filter(report.release == 0).dicts().execute())
@@ -242,7 +243,7 @@ def status_page():
     bcs = OrderedDict([("genetic-mapping", None), ("status", None)])
     title = "Status"
     queue = get_queue()
-    ql = [json.loads(x["body"]) for x in queue.peek(max=20)["messages"]]
+    ql = [json.loads(x["body"]) for x in queue.peek(max=100)["messages"]]
     qsize = queue.size()
 
     from googleapiclient import discovery
