@@ -1,16 +1,103 @@
 {% extends "_layouts/default.html" %} 
 {% block custom_head %}
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 {% endblock %} 
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
+
+	<div id="container" style="min-width: 310px; height: 500px; max-width: 100%; margin: 0 auto"></div>
+
     There doesn't seem to be much here just yet!
     </div>
 </div>
 {% endblock %} 
+
 {% block script %}
 <script>
+
+{% for chrom in pub_mappings|groupby('chrom') %}
+var c{{ chrom[0] }} = {
+	name: "{{ chrom[0] }}",
+	text: [{% for marker in chrom[1] %} "{{ marker['report_slug'] }}/{{ marker['trait_slug'] }}",{% endfor %}],
+	x: [{% for marker in chrom[1] %} {{ marker["pos"] }},{% endfor %}],
+	y: [{% for marker in chrom[1] %} {{ marker["log10p"] }},{%endfor%}],
+	mode: 'markers',
+	type: 'scatter',
+	xaxis: 'x{{ loop.index  }}',
+	yaxis: 'y'
+}
+{% endfor %}
+
+var data = [{% for chrom in pub_mappings|groupby('chrom') %}c{{ chrom[0] }},{% endfor %}];
+
+var layout = {
+	margin: {
+		t: 20,
+		l: 3,
+		r: 3
+	},
+  showlegend: false,
+  hovermode: 'closest',
+  xaxis: {
+  	domain: [0, 0.137367182],
+  	title: "I",
+  	range: [ 0, 15072434 ],
+  	fixedrange: true,
+  	anchor: "x1"
+  },
+  xaxis2: {
+  	domain: [0.169390948, 0.28675813],
+  	title: "II",
+  	range: [ 0, 15279421 ],
+  	fixedrange: true,
+  	anchor: "x2"
+  },
+  xaxis3: {
+  	domain: [0.31675813, 0.421526005],
+    title: "III",
+    range: [ 0, 13783801 ],
+    fixedrange: true,
+    anchor: "x3"
+  },
+  xaxis4: {
+  	domain: [0.441526005, 0.592567807],
+    title: "IV",
+    range: [ 0, 17493829 ],
+    fixedrange: true,
+    anchor: "x4"
+  },
+  xaxis5: {
+  	domain: [0.612567807, 0.79714906],
+    title: "V",
+    range: [ 0 , 20924180 ],
+    fixedrange: true,
+    anchor: "x5"
+  },
+  xaxis6: {
+  	domain: [0.81714906, 1.00],
+    title: "X",
+    range: [ 0, 17718942 ],
+    fixedrange: true,
+    anchor: "x6"
+  },
+  yaxis: {
+	range: [0, 20],
+	anchor: "y",
+	fixedrange: true
+  }
+};
+
+
+Plotly.newPlot('container', data, layout);
+manhattan = document.getElementById('container')
+//myPlot.on('plotly_click', function(data){
+//    console.log(data);
+//});
+manhattan.on("plotly_click", function(data) { 
+	window.location.href = "/report/" + data.points[0].data.text[0];
+})
 
 </script>
 {% endblock %}

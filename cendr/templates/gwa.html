@@ -75,8 +75,10 @@ DISCLAIMER: {{ lipsum(n=1) }}</div>
 <div class="row">
       <div class="col-md-12">
             <div id="entry"></div>
-                        <small class="text-muted">Copy and Paste your dataset into the table above. You can modify trait names.</small>
-
+                        <small class="text-muted">Copy and Paste your dataset into the table above.</small>
+                        <br />
+                        <br />
+            <div id="errors" class="text-danger"></div>
             <div class="pull-right">
             <button type="submit" style="margin-top: 5px;" class="btn btn-primary btn submit">Submit</button>
             </div>
@@ -121,6 +123,7 @@ var render_header = function (instance, td, row, col, prop, value, cellPropertie
 
 strain_list = {{strain_list| safe }};
 incorrect_strains = [];
+
 // Strain Validator
 strainValidator = function (value, callback) {
     setTimeout(function(){
@@ -133,6 +136,17 @@ strainValidator = function (value, callback) {
     }, 1);
   };
 
+strainValidatorfunc = function (value) {
+  console.log(value);
+      if (strain_list.includes(value) || value == "") {
+        return true;
+      }
+      else {
+        return false;
+      }
+    };
+
+
 var container = document.getElementById('entry');
 var hot = new Handsontable(container,
  {
@@ -144,6 +158,7 @@ var hot = new Handsontable(container,
    fixedRowsTop: 1,
    minSpareRows: 5,
    minSpareCols: 1,
+   afterChange: error_checking,
 
    cells: function (row, col, prop) {
       var cellProperties = {};
@@ -207,19 +222,71 @@ var update_url_message = function(e) {
   }
 }
 
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
+
+function validInput(val) {
+  return val !== null && val !== ""
+}
+
+function error_checking() {
+  // Error Checking
+
+  // Unique Column Names
+  var error_list = Array();
+  col_names = data[0].filter(validInput);
+  if (col_names.filter(onlyUnique).length != col_names.length) {
+    error_list.push("Duplicated column names");
+  }
+
+  // No more than 10 traits
+  if (col_names.length > 10) {
+    error_list.push("Maximum of 10 traits.");
+  }
+
+  // Unique Strain Names
+  var row_names = Array();
+  for (i = 1; i < data.length; i++) { 
+    row_names.push(data[i][0])
+  }
+  row_names = row_names.filter(validInput);
+  console.log(row_names);
+  console.log(row_names.filter(onlyUnique));
+  if (row_names.filter(onlyUnique).length != row_names.length) {
+     error_list.push("Duplicated strain Names");
+  }
+
+  // Correct Strain Names
+  if (row_names.every(strainValidatorfunc) == false) {
+    error_list.push("Incorrect strain Names");
+  }
+
+  if (error_list.length > 0) {
+    $("#errors").html("<h3>Errors</h3><ul><li class='warning'>" + error_list.join("</li><li>") + "</li></ul>")
+    $(".submit").attr("disabled", true);
+  } else {
+     $("#errors").html("")
+    $(".submit").attr("disabled", false);
+  }
+}
+
+
 $("#ReportName,input[name=Release]").on('change', update_url_message);
 $("#ReportName,input[name=Release]").on('keyup', update_url_message);
 
 
 $("form").submit(function(e) {
   e.preventDefault();
-  //$(".submit").addClass("disabled")
-
+  $(".submit").attr("disabled", true);
+  $(".submit").html('Processing<div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>');
   user_email = $("#Email").val()
   report_name = $("#ReportName").val()
   release = $("input[name=Release]:checked").val()
 
   data = hot.getData();
+
+
   $.ajax({
      url:"/process_gwa/",
      data: JSON.stringify({"email":user_email,
@@ -239,7 +306,10 @@ $("form").submit(function(e) {
         }
         $(".alert_row").css("display:Visible")
         $(".alert").addClass("alert-success")
-        $(".content").prepend("<div class='row'><div class='col-md-12'><div class='alert alert-success' role='alert'><strong>Success!</strong> Now mapping. Your report will be available at <a href='" + report_url + "'>" + report_url + "</a>. Redirecting you there now.</div></div></div>")
+        $(".content").prepend("<div class='row'><div class='col-md-12'><div class='alert alert-success' role='alert'><strong>Success!</strong> Now mapping. Your report will be available at <a href='" + report_url + "'>" + report_url + "</a>. Redirecting you there now.</div></div></div>");
+        // Remove submit button
+        $(".submit").remove();
+        window.scrollTo(500, 0);
         setTimeout(
         function() 
         {

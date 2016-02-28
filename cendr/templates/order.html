@@ -19,6 +19,7 @@
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
+                    <th style="width: 40px">#</th>
                     <th style="width 200px;">Isotype</th>
                     <th>Strain</th>
                     <th class="price">Price</th>
@@ -27,6 +28,7 @@
             <tbody class="searchable">
                 {% for isotype, strains in strain_listing|groupby('isotype') %}
                 <tr>
+                    <td>{{ loop.index }}</td>
                     <td><strong>{{ isotype }}</strong></td>
                     <td>{{ strains|join(" ") }}</td>
                     <td class="price">${{'%0.2f'| format(1500/100|float)}}</td>
@@ -36,11 +38,13 @@
                 <tr  style="color:red">
                 <td>Bulk Discount</td>
                 <td></td>
+                <td>{{ ', '.join(added_sets).replace("_", " ") }}</td>
                 <td class="price"><strong>${{'%0.2f'| format(price_adjustment/100|float)}}</strong></td>
                 </tr>
                 {% endif %}
                 <tr>
                 <td><strong>Total</strong></td>
+                <td></td>
                 <td></td>
                 <td class="price"><strong>${{'%0.2f'| format(total/100|float)}}</strong></td>
                 </tr>
@@ -49,7 +53,7 @@
 <div class="pull-right">
 <form action="/order/" method="POST">
 {% for isotype, strains in strain_listing|groupby('isotype') %}
-<input type="hidden" name="strain" value="{{ isotype }}">
+<input type="hidden" name="isotype" value="{{ isotype }}">
 {% endfor %}
   <script
     src="https://checkout.stripe.com/checkout.js" class="stripe-button"
@@ -89,12 +93,6 @@ $("#checkAll").click(function() {
     $('input:checkbox:visible').not(this).prop('checked', this.checked);
 });
 
-
-
-set1 = ["AB1", "AB4", "AF16"];
-set2 = ["BRC20067", "CB4851", "CB4852"];
-set3 = ["CB4853", "CB4854", "CB4855"];
-set4 = ["CB4856", "CB4857", "CB4858"];
 
 $("button[id^='set']").click(function () {
     $.each(window[$(this).attr('id')], 

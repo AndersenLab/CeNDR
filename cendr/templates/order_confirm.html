@@ -11,15 +11,40 @@
     <h3 class="panel-title">{{ page_title }}</h3>
   </div>
   <div class="panel-body">
+  <div class="row">
+  
+  <div class="col-md-4">
   <ul>
-  <li><strong>Order Email</strong> {{ record.stripeEmail }}</li>
-    <li><strong>Number of Strains</strong> {{ record.stripeEmail }}</li>
+  <li>{{ record.stripeEmail }}</li>
   </ul>
+  </div>
+<div class="col-md-4">
+<h4>Shipping</h4>
+<address>
+  <strong>{{ record.stripeShippingName }}</strong><br>
+  {{ record.stripeShippingAddressLine1 }}<br>
+  {{ record.stripeShippingAddressCity }}, {{ record.stripeShippingAddressState }}. {{ record.stripeShippingAddressZip }}<br>
+</address>
+
+</div>
+
+<div class="col-md-4">
+<h4>Billing</h4>
+<address>
+  <strong>{{ record.stripeBillingName }}</strong><br>
+  {{ record.stripeBillingAddressLine1 }}<br>
+  {{ record.stripeBillingAddressCity }}, {{ record.stripeBillingAddressState }}. {{ record.stripeBillingAddressZip }}<br>
+</address>
+
+</div>
+
+
   </div>
   </div>
 
 
       </div>
+</div>
 </div>
 
 <div class="row">
@@ -27,6 +52,7 @@
 	<table class="table table-hover table-striped">
             <thead>
                 <tr>
+                	<th style="width 40px;">#</th>
                     <th style="width 200px;">Isotype</th>
                     <th>Strain</th>
                     <th class="price">Price</th>
@@ -35,6 +61,7 @@
             <tbody class="searchable">
                 {% for isotype, strains in strain_listing|groupby('isotype') %}
                 <tr>
+                	<td>{{ loop.index }}</td>
                     <td><strong>{{ isotype }}</strong></td>
                     <td>
                     {% for s in strains %}
@@ -46,7 +73,9 @@
                 </tr>
                 {% endfor %}
                 <tr>
+
                 <td><strong>Total</strong></td>
+                <td></td>
                 <td></td>
                 <td class="price"><strong>${{'%0.2f'| format(total/100|float)}}</strong></td>
                 </tr>

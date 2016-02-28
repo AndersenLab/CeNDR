@@ -15,7 +15,8 @@
         <div class="panel panel-default">
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
               <ul class="list-group">
-                <li class="list-group-item"><strong>Name</strong> <div class="strain pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Isotype Name</strong> <div class="isotype pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Strain Name</strong> <div class="strain pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div><div style="clear:both;"></div></li>
@@ -52,7 +53,7 @@ var icon_hover = L.icon({
 // Default click_s
 var click_s = {
   target: {
-    options: {strain: "", title: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: ""},
+    options: {strain: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: ""},
     setIcon: function(){},
   },
   latlng: { lat: "", lng: ""},
@@ -62,7 +63,8 @@ var click_s = {
 function set_panel_from_search(m) {
   click_s.target.setIcon(icon_norm)
   s = m.layer.options
-  $(".strain").html("<a href='/strain/" + s.isotype + "/'>" + s.strain + "</a>");
+  $(".strain").text(s.strain);
+  $(".isotype").html("<strong><a href='/strain/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
   $(".isolation_date").text(s.isolation_date);
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
   $(".location").text(s.loc);
@@ -82,7 +84,8 @@ function set_panel_content(m) {
   isolated_by = s.isolated_by;
   comma = s.comma;
   latlng = m.latlng.lat + comma + m.latlng;
-  $(".strain").html("<a href='/strain/" + s.isotype + "/'>" + s.strain + "</a>");
+  $(".strain").text(s.strain);
+  $(".isotype").html("<strong><a href='/strain/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
   $(".isolation_date").text(s.isolation_date);
   $(".comma").text(s.comma)
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
