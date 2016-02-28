@@ -32,7 +32,7 @@ def main():
     files = [x for x in os.listdir("cendr/static/content/news/") if not x.startswith(".")]
     files.reverse()
     # latest mappings
-    latest_mappings = list(report.filter(report.release == 0).join(trait).order_by(
+    latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
         trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('home.html', **locals())
 
