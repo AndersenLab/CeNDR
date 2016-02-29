@@ -1,6 +1,7 @@
 import csv
 import logging
 from flask import Flask
+from flask_restful import Api
 from flask_debugtoolbar import DebugToolbarExtension
 from models import *
 from datetime import date, datetime
@@ -30,6 +31,7 @@ def autoconvert(s):
 
 
 app = Flask(__name__, static_url_path='/static')
+api = Api(app)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 if os.getenv('SERVER_SOFTWARE') and \
