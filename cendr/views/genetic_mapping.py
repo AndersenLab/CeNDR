@@ -7,6 +7,7 @@ from google.appengine.api import mail
 from datetime import date, datetime
 import pytz
 from peewee import fn
+from dateutil.relativedelta import relativedelta
 
 from flask import render_template, request, redirect, url_for
 from collections import OrderedDict
@@ -41,6 +42,9 @@ def gwa():
         *[[x.strain, x.isotype, x.previous_names] for x in query]))
     qresults = set([x for x in qresults if x != None])
     qresults = list(itertools.chain(*[x.split("|") for x in qresults]))
+
+    embargo_release = (datetime.now(
+            pytz.timezone("America/Chicago")) + relativedelta(years = 1)).strftime("%m/%d/%Y")
 
     strain_list = json.dumps(qresults)
     return render_template('gwa.html', **locals())

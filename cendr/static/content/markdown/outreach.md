@@ -1,5 +1,5 @@
 ## Collect Nematodes As A Citizen Scientist! ##
-The Caenorhabditis research community is looking for new wild strains from throughout the world! **If you would like to help us**, please feel free to [contact us](http://elegansvariation.org/about/staff/).
+The <em>Caenorhabditis</em> research community is looking for new wild strains from throughout the world! **If you would like to help us**, please feel free to [contact us](http://elegansvariation.org/about/staff/).
 
 We will send you everything you need to isolate your own nematodes. After you mail the samples back to us, we will tell you (as much as we can) about what species you found.
 
