@@ -23,7 +23,7 @@
   <fieldset class="form-group">
     <label for="Email">Email address</label>
     <input type="email" class="form-control" id="Email" placeholder="Enter email">
-    <small class="text-muted">We'll never share your email with anyone else.</small>
+    <small class="text-muted">We will never share your email with anyone else.</small>
   </fieldset>
   <fieldset class="form-group has-feedback">
     <label for="ReportName">Report Name</label>
@@ -33,7 +33,7 @@
   </fieldset>
 
   
-  <label>Release</label>
+  <label for="Release">Release</label>
   <div class="radio">
     <label>
       <input type="radio" name="Release" value="public" checked>
@@ -44,8 +44,8 @@
   <div class="radio">
     <label>
       <input type="radio" name="Release" value="embargo12">
-      Embargo for 1 year
-    </label> <small class="text-muted embargo12"></small>
+      Embargo for one year
+    </label> <small class="text-muted embargo12">Your report will be publicly available on {{ embargo_release }}.</small>
   </div>
 
     <div class="radio">
@@ -55,18 +55,25 @@
     </label>
   </div>
 
-  <label>Data</label><br />
 
 </div>
 
 
 <div class="col-md-6">
 <div class="panel panel-default">
-<div class="panel-heading">INFO</div>
+<div class="panel-heading"><em>C. elegans</em> association mapping</div>
 <div class="panel-body">
-Explanation of how this works; directions...<br /><br />
-
-DISCLAIMER: {{ lipsum(n=1) }}</div>
+<h4>Directions</h4>
+<ol>
+  <li>Enter the required information to the left. </li>
+  <li>Enter strain name and phenotype data below by dragging and dropping from your favorite spreadsheet. Strain names must be approved names from this site. Names in red need to be edited to match strains in the collection.</li>
+  <li>Click submit to map your trait</li>
+  <li>Mappings can take up to 15 minutes. Please be patient. Up to five traits can be mapped in parallel at this time.</li>
+  <li><a href="{{url_for('contact') }}">Contact us</a> with problems, questions, or suggestions.</li>
+</ol>
+<hr />
+<h4>DISCLAIMER</h4>
+ <p>Although strains from other sources might have the same name as strains used in this resource, genotypes might be confused or names altered. For best association mapping results, please use the strains created as a part of this resource. All sequenced strains are the same as those sent through this resource. Additionally, association mapping results need to be analyzed with care. Allele frequency skews, small sample sizes, or phenotypes similar to genomic positions can cause spurious mapping results, among other issues. Please be critical of mapping data.</p></div>
 </div>
 </div>
 </div>
@@ -74,6 +81,7 @@ DISCLAIMER: {{ lipsum(n=1) }}</div>
 
 <div class="row">
       <div class="col-md-12">
+        <label>Data</label><br />
             <div id="entry"></div>
                         <small class="text-muted">Copy and Paste your dataset into the table above.</small>
                         <br />
@@ -171,7 +179,7 @@ var hot = new Handsontable(container,
         cellProperties.validator = strainValidator;
         cellProperties.autoComplete = strain_list;
       }
-      if (col === 0 && row == 0) {
+      if (col === 0 && row === 0) {
         cellProperties.readOnly = true;
         cellProperties.renderer = render_header;
       }
@@ -258,7 +266,7 @@ function error_checking() {
 
   // At least 5 strains
   if (row_names.length < 5) {
-    error_list.push("A minimum of 5 strains required");
+    error_list.push("A minimum of five strains are required");
   }
 
   // report email required
