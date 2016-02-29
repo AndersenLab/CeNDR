@@ -1,14 +1,16 @@
-- name: Chunking Worms
-  link: content/protocols/ChunkingWorms.pdf
+Maintenance:
+  - name: Freezing / Thawing Worms
+    link: content/protocols/FreezingThawingWeb.pdf
 
-- name: Freezing / Thawing Worms
-  link: content/protocols/FreezingThawingWeb.pdf
+  - name: Cleaning Worms
+    link: content/protocols/CleaningWorms.pdf
 
-- name: Cleaning Worms
-  link: content/protocols/CleaningWorms.pdf
+  - name: Chunking Worms
+    link: content/protocols/ChunkingWorms.pdf
 
-- name: Isolating Wild Isolates
-  link: content/protocols/IsolatingWildIsolates.pdf
+Nematode Isolation:
+  - name: Isolating Wild Isolates
+    link: content/protocols/IsolatingWildIsolates.pdf
 
-- name: Shipping Strains
-  link: content/protocols/ShippingStrains.pdf
+  - name: Shipping Strains
+    link: content/protocols/ShippingStrains.pdf
