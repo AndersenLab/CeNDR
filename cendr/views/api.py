@@ -43,6 +43,13 @@ class strain_api(Resource):
         dat = json.dumps(strain_data, cls=CustomEncoder, indent = 4)
         return Response(response=dat, status=200, mimetype="application/json")
 
+
+class strain_ind_api(Resource):
+    def get(self, strain_name):
+        strain_data = strain.select().filter(strain.strain == strain_name).dicts().execute()
+        dat = json.dumps(strain_data.next(), cls=CustomEncoder, indent = 4)
+        return Response(response=dat, status=200, mimetype="application/json")
+
 class isotype_ind_api(Resource):
     def get(self, isotype_name):
         strain_data = list(strain.select().filter(strain.isotype == isotype_name).dicts().execute())
@@ -50,12 +57,6 @@ class isotype_ind_api(Resource):
         dat = json.dumps(strain_data, cls=CustomEncoder, indent = 4)
         return Response(response=dat, status=200, mimetype="application/json")
 
-
-class strain_ind_api(Resource):
-    def get(self, strain_name):
-        strain_data = strain.select().filter(strain.strain == strain_name).dicts().execute()
-        dat = json.dumps(strain_data.next(), cls=CustomEncoder, indent = 4)
-        return Response(response=dat, status=200, mimetype="application/json")
 
 
 api.add_resource(mapping_api, '/api/mapping/')
