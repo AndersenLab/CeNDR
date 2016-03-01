@@ -162,7 +162,7 @@ class trait_value(Model):
 class mapping(Model):
     """ Results of mappings. Unique on peak IDs and markers. """
     chrom = CharField(index = True)
-    pos = CharField(index = True)
+    pos = IntegerField(index = True)
     report = ForeignKeyField(report)
     trait = ForeignKeyField(trait)
     variance_explained = DecimalField()
