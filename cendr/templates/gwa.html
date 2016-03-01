@@ -86,6 +86,12 @@
                         <small class="text-muted">Copy and Paste your dataset into the table above.</small>
                         <br />
                         <br />
+      </div>
+</div>
+<div class="row">
+<div class="col-md-6">
+</div>
+<div class="col-md-6">
             <div id="errors" class="text-danger"></div>
             <div class="pull-right">
             <button type="submit" style="margin-top: 5px;" class="btn btn-primary btn submit" disabled>Submit</button>
@@ -276,7 +282,7 @@ function error_checking() {
 
   // report name required
   if ($("#ReportName").val() == 0) {
-    error_list.push("Report Name required");
+    error_list.push("Report name required");
   }
 
   // Correct Strain Names
@@ -285,7 +291,7 @@ function error_checking() {
   }
 
   if (error_list.length > 0) {
-    $("#errors").html("<h4>Before you can submit:</h4><ul><li class='warning'>" + error_list.join("</li><li>") + "</li></ul>")
+    $("#errors").html("<h4>Resolve the following errors before submitting:</h4><ul><li class='warning'>" + error_list.join("</li><li>") + "</li></ul>")
     $(".submit").attr("disabled", true);
   } else {
      $("#errors").html("")

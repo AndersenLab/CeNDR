@@ -1,4 +1,5 @@
 from cendr import app
+from flask import make_response
 from cendr.models import strain, report
 from collections import OrderedDict
 from flask import render_template

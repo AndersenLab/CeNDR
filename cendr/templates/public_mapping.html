@@ -16,7 +16,7 @@
 			<th>Report Name</th>
 			<th>Trait Name</th>
 			<th>CHROM:POS
-			<th>log10p</th>
+			<th>-log<sub>10</sub>p</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -33,7 +33,7 @@
 
 {% else %}
 	<div id="container" style="min-width: 310px; height: 500px; max-width: 100%; margin: 0 auto"></div>
-<strong>Explanation</strong>
+<p><strong>Cumulative Manhattan Plot</strong> - Significant genome-wide association mappings are plotted against their -log<sub>10</sub>p association value by genomic position.</p>
 
 <h3>Random Mappings</h3>
 
@@ -43,7 +43,7 @@
 			<th>Report Name</th>
 			<th>Trait Name</th>
 			<th>CHROM:POS
-			<th>log10p</th>
+			<th>-log<sub>10</sub>p</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -111,8 +111,8 @@ var data = [{% for chrom in pub_mappings|groupby('chrom') %}c{{ chrom[0] }},bf{{
 
 var layout = {
 	margin: {
-		t: 20,
-		l: 18,
+		t: 10,
+		l: 40,
 		r: 3
 	},
   showlegend: false,
@@ -162,12 +162,13 @@ var layout = {
   yaxis: {
 	range: [0, 20],
 	anchor: "y",
-	fixedrange: true
+	fixedrange: true,
+	title: "-log<sub>10</sub>p"
   }
 };
 
 
-Plotly.newPlot('container', data, layout);
+Plotly.newPlot('container', data, layout, {displayModeBar: false});
 
 manhattan = document.getElementById('container')
 
