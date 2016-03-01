@@ -58,7 +58,7 @@ class strain_ind_api(Resource):
         return Response(response=dat, status=200, mimetype="application/json")
 
 
-api.add_resource(mapping_api, '/api/mapping')
-api.add_resource(strain_api, '/api/strain')
-api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>')
-api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>')
+api.add_resource(mapping_api, '/api/mapping/')
+api.add_resource(strain_api, '/api/strain/')
+api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>/')
+api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>/')
