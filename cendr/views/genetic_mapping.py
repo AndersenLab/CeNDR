@@ -170,7 +170,7 @@ def public_mapping():
         title = "Search: " + query
         subtitle = "results"
         q = "%" + query + "%"
-        results = mapping.select(report, trait, mapping).filter(trait.status == "complete").join(trait).join(report).dicts().filter((trait.trait_slug % q) |
+        results = mapping.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(trait).join(report).dicts().filter((trait.trait_slug % q) |
                                     (trait.trait_name % q) |
                                     (report.report_name % q) |
                                     (report.report_slug % q)).order_by(mapping.log10p.desc())
@@ -178,7 +178,7 @@ def public_mapping():
         search = True
         return render_template('public_mapping.html', **locals())
     title = "Perform Mapping"
-    random_results = mapping.select(report, trait, mapping).filter(trait.status == "complete").join(trait).join(report).dicts().order_by(fn.Rand()).limit(5).execute()
+    random_results = mapping.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(trait).join(report).dicts().order_by(fn.Rand()).limit(5).execute()
     bcs = OrderedDict([("genetic-mapping", None), ("public", None)])
     title = "Public Mappings"
     pub_mappings = list(mapping.select(mapping, report, trait).join(trait).join(report).filter(report.release == 0).dicts().execute())
@@ -209,6 +209,9 @@ def trait_view(report_slug, trait_slug=""):
             return redirect(url_for("trait_view", report_slug=report_slug, trait_slug=first_trait["trait_slug"]))
         except:
             return render_template('404.html'), 404
+
+    # Redifine report slug as actual slug (instead of hash)
+    report_slug = trait_data["report_slug"]
     base_url = "https://storage.googleapis.com/cendr/" + report_slug + "/" + trait_slug
 
     # List available datasets
@@ -235,7 +238,7 @@ def report_progress():
     req = request.get_json()
     current_status = list(trait.select(trait.status)
                           .join(report)
-                          .filter(trait.trait_slug == req["trait_slug"], report.report_slug == req["report_slug"])
+                          .filter(trait.trait_slug == req["trait_slug"], (report.report_slug == req["report_slug"]) | (report.report_hash == req["report_slug"]))
                           .dicts()
                           .execute())[0]["status"]
     return json.dumps(current_status)
