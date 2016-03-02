@@ -1,7 +1,8 @@
-from cendr import app
+from cendr import app, json_serial
 from flask import render_template, url_for, Markup
 import markdown
 import yaml
+import json
 from cendr.models import strain, report, mapping, trait
 from collections import OrderedDict
 
@@ -18,6 +19,9 @@ def about():
 	# About us Page - directs to other pages.
     title = "About"
     bcs = OrderedDict([("about", None)])
+    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
+        .filter(strain.latitude.is_null() == False).execute())
+    strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
     return render_template('about.html', **locals())
 
 

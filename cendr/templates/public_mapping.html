@@ -1,12 +1,17 @@
 {% extends "_layouts/default.html" %} 
 {% block custom_head %}
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+  .point:hover {
+  	fill: green;
+  }
+  </style>
+
 {% endblock %} 
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
-
 
 {% if search %}
 
@@ -76,8 +81,8 @@
   <button type="submit" class="btn btn-primary">Search</button>
 </form>
 
-{% endblock %}
 
+{% endblock %}
 {% block script %}
 <script>
 
@@ -90,7 +95,10 @@ var c{{ chrom[0] }} = {
 	mode: 'markers',
 	type: 'scatter',
 	xaxis: 'x{{ loop.index  }}',
-	yaxis: 'y'
+	yaxis: 'y',
+	marker: {
+  		size: 500/{{ pub_mappings|length }} + 5
+  	},
 }
 
 var bf{{ chrom[0] }} = {

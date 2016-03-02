@@ -1,11 +1,123 @@
 {% extends "_layouts/default.html" %}
 
+{% block custom_head %}
+  <script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
+  <script src="/static/js/leaflet-search.js"></script>
+{% endblock %}
+
 
 {% block content %}
 <div class="row">
-      <div class="col-md-12">
-      {{ render_markdown("about.md") }}
+      <div class="col-md-6">
       
+<img src="/static/content/about/crawl.gif" class='img-responsive' />
+<div style="text-align:center">
+<small><em>C. elegans</em>  crawing taken by the <a href="http://goldsteinlab.weebly.com/">Goldstein Lab</a></small>
+</div>
+<p>Most research groups that study C. elegans focus on the laboratory-adapted strain (called N2) isolated in Bristol, England in the 1950s. We have learned a great deal about basic biological processes from studies of this one strain.</p>
+
+
+      </div>
+      <div class="col-md-6">
+	{{ render_markdown("about.md") }}
       </div>
   </div>
+  <div class="row">
+  <div class="col-md-12">
+  <h3>Global Distribution of <em>C. elegans</em> wild isolates</h3>
+<div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
+  </div>
+  </div>
+
+    <div class="row">
+    <div class="col-md-3">
+    </div>
+  <div class="col-md-6">
+
+<h3>CeNDR Goals</h3>
+<p>To facilitate the study of natural diversity by <em>C. elegans</em> research groups, we created the <em>C. elegans</em> Natural Diversity Resource (CeNDR). We have three major goals:</p>
+
+<ol>
+<li>To accept, organize, and distribute wild strains to research groups that want to investigate their favorite trait(s) across natural <em>C. elegans</em> strains. See <strong><a href="{{ url_for('strain_listing_page') }}">Strains</a></strong>.</li>
+
+<li>To sequence the whole genomes of wild <em>C. elegans</em> strains, provide the aligned sequence data, and facilitate discovery of genetic variation across the entire species. See <strong><a href="{{ url_for('data_page') }}">Data</a></strong>.</li>
+
+<li>To perform genome-wide association mappings to correlate genotype with phenotype and identify genetic variation underlying quantitative traits. See <strong><a href="{{ url_for('public_mapping') }}">Mappings</a></strong>.</li>
+</ol>
+
+  </div>
+  <div class="col-md-3">
+    </div>
+  </div>
+{% endblock %}
+
+
+
+{% block script %}
+
+<script>
+
+// Icons
+var icon_norm = L.icon({
+    iconUrl: '/static/img/icons/marker.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+var icon_hover = L.icon({
+    iconUrl: '/static/img/icons/selected.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+// Default click_s
+var click_s = {
+  target: {
+    options: {strain: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: ""},
+    setIcon: function(){},
+  },
+  latlng: { lat: "", lng: ""},
+}
+
+
+  ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
+  MB_ATTR = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+    'Imagery © <a href="http://mapbox.com">Mapbox</a>';
+  MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
+  OSM_URL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+  var southWest = L.latLng(-90, -180),
+    northEast = L.latLng(90, 180),
+    bounds = L.latLngBounds(southWest, northEast);
+
+  var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -50], 2);
+  L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
+  strain_info = [];
+  strain_names = [];
+  markers = [];
+
+ data = {{ strain_listing|safe }}
+ strain_info = data;
+ data.forEach(function(d) {
+  strain_names.push(d.strain);
+   m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
+                                         strain: d.strain,
+                                         title: d.strain,
+                                         isotype: d.isotype,
+                                         isolation_date : d.isolation_date,
+                                         loc : d.location,
+                                         landscape: d.landscape,
+                                         substrate: d.substrate,
+                                         comma: ",  ",
+                                         isolated_by: d.isolated_by }).addTo(map)
+  markers.push(m);
+ });
+var strain_layer = L.layerGroup(markers);
+
+</script>
+
 {% endblock %}
