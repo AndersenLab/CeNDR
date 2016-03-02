@@ -42,7 +42,8 @@
                             <input type="checkbox" id="checkAll" />
                         </th>
                         <th style="width: 200px;">Isotype</th>
-                        <th>Strains
+                        <th style="width: 200px;">Strains</th>
+                        <th>Alternative Names
                             <div class="pull-right"><a href="https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?output=tsv">Download Strain Information (.tsv)</a></div>
                         </th>
                     </tr>
@@ -54,7 +55,12 @@
                             <input type="checkbox" name="isotype" value="{{ isotype }}" info="{{ isotype + " " +strains|join(" ") }}" class="{% for set_name in strains[0].list_sets() %} {{ set_name }} {% endfor %}" />
                         </td>
                         <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-                        <td>{{ strains|join(" ") }}</td>
+                        <td>{{ strains|join(", ") }}</td>
+                        {% if strains[0].previous_names %}
+                            <td>{{ strains[0].previous_names.replace("|", ", ")}}</td>
+                        {% else %}
+                            <td> </td>
+                        {% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

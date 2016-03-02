@@ -53,7 +53,10 @@ def isotype_page(isotype_name):
 def strain_listing_page():
     bcs = OrderedDict([("strain", None)])
     title = "Strain Catalog"
-    strain_listing = strain.select().filter(strain.isotype != None).order_by(strain.isotype).execute()
+    strain_listing = strain.select(strain.strain, strain.isotype, strain.previous_names).filter(strain.isotype != None).order_by(strain.previous_names).execute()
+    # strain_test = strain.select(strain.strain, strain.isotype, strain.previous_names).filter(strain.isotype != None).tuples().execute()
+    # print list(strain_test)
+    print "strain listing: ", dir(list(strain_listing)[0])
     return render_template('strain_catalog.html', **locals())
 
 #
