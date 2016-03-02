@@ -53,7 +53,6 @@ class strain_api(Resource):
 class strain_ind_api(Resource):
     def get(self, strain_name):
         strain_data = list(strain.select(*PEWEE_FIELDS_LIST).filter(strain.strain == strain_name).tuples().execute())
-        print strain_data
         strain_data = OrderedDict(zip(FIELDS, strain_data[0]))
         dat = json.dumps(strain_data, cls=CustomEncoder, indent = 4)
         return Response(response=dat, status=200, mimetype="application/json")
