@@ -1,1 +1,5 @@
-## About Us!! ##
+### What is _C. elegans_?
+
+_Caenorhabditis elegans_ is a non-parasitic nematode roundworm that lives in rotting material and eats bacteria and fungi. Because this species grows easily and quickly in the laboratory, it is a powerful model to learn about human development, complex behaviors, and evolutionary processes. For more information about _C. elegans_, see its [wikipedia article](https://en.wikipedia.org/wiki/Caenorhabditis_elegans); or to learn about its history at [wormclassroom.org](http://wormclassroom.org/short-history-c-elegans-research).
+
+However, this species is found worldwide, and wild strains are as different from one another as humans are different from one another. These strains are isolated from a variety of environments in nature when researchers collect rotting materials, including fruits, flowers, nuts, berries, stems, leaves, and compost. We can use the natural diversity of these strains to learn about how populations of individuals are genetically different from another and how those differences might impact disease. 
