@@ -9,9 +9,8 @@ import datetime
 import os, sys
 
 
-FIELDS = ["strain", "isotype", "warning_message", "use", "sequenced", "previous_names", "source_lab", "latitude","longitude", "landscape", "substrate", "isolated_by", "isolation_date", "isolation_date_comment", "isolation","location", "address", "city", "state", "country", "set_heritability", "set_1", "set_2", "set_3", "set_4","bam_file", "bam_index", "cram_file", "cram_index", "variant_file"]
-PEWEE_FIELDS_LIST = [strain.strain, strain.isotype, strain.warning_message, strain.use, strain.sequenced, strain.previous_names, strain.source_lab, strain.latitude, strain.longitude, strain.landscape, strain.substrate, strain.isolated_by, strain.isolation_date, strain.isolation_date_comment, strain.isolation, strain.location, strain.address, strain.city, strain.state, strain.country, strain.set_heritability, strain.set_1, strain.set_2, strain.set_3, strain.set_4, strain.bam_file, strain.bam_index, strain.cram_file, strain.cram_index, strain.variant_file]
-
+FIELDS = [x.name for x in strain._meta.sorted_fields if x.name != "id"]
+PEEWEE_FIELDS_LIST = [getattr(strain, x.name) for x in strain._meta.sorted_fields if x.name != "id"]
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
@@ -44,7 +43,7 @@ class mapping_api(Resource):
 
 class strain_api(Resource):
     def get(self):
-        strain_data = list(strain.select(*PEWEE_FIELDS_LIST).tuples().execute())
+        strain_data = list(strain.select(*PEEWEE_FIELDS_LIST).tuples().execute())
         strain_data = [OrderedDict(zip(FIELDS, x)) for x in strain_data]
         dat = json.dumps(strain_data, cls=CustomEncoder, indent = 4)
         return Response(response=dat, status=200, mimetype="application/json")
@@ -52,14 +51,14 @@ class strain_api(Resource):
 
 class strain_ind_api(Resource):
     def get(self, strain_name):
-        strain_data = list(strain.select(*PEWEE_FIELDS_LIST).filter(strain.strain == strain_name).tuples().execute())
+        strain_data = list(strain.select(*PEEWEE_FIELDS_LIST).filter(strain.strain == strain_name).tuples().execute())
         strain_data = OrderedDict(zip(FIELDS, strain_data[0]))
         dat = json.dumps(strain_data, cls=CustomEncoder, indent = 4)
         return Response(response=dat, status=200, mimetype="application/json")
 
 class isotype_ind_api(Resource):
     def get(self, isotype_name):
-        strain_data = list(strain.select(*PEWEE_FIELDS_LIST).filter(strain.isotype == isotype_name).tuples().execute())
+        strain_data = list(strain.select(*PEEWEE_FIELDS_LIST).filter(strain.isotype == isotype_name).tuples().execute())
         strain_data = OrderedDict(zip(FIELDS, strain_data[0]))
         dat = json.dumps(strain_data, cls=CustomEncoder, indent = 4)
         return Response(response=dat, status=200, mimetype="application/json")
