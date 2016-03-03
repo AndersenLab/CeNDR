@@ -1,7 +1,7 @@
 from flask import Flask, Response
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api,reqparse
 from cendr import api
-from cendr.models import report, mapping, strain
+from cendr.models import report, mapping, strain,trait
 from collections import OrderedDict
 import decimal
 import json
@@ -23,6 +23,9 @@ class CustomEncoder(json.JSONEncoder):
 def abort_if_todo_doesnt_exist(request_id):
     if request_id not in TODOS:
         abort(404, message="Doesn't exist".format(request_id))
+
+
+parser = reqparse.RequestParser()
 
 class mapping_api(Resource):
     def get(self):
@@ -65,7 +68,18 @@ class isotype_ind_api(Resource):
 
 
 
+# class report_progress(Resource):
+#     def post(self, report_slug, trait_slug):
+#       current_status = list(trait.select(trait.status)
+#                             .join(report)
+#                             .filter(trait.trait_slug == trait_slug, (((report.report_slug == report_slug) and (report.release == 0)) | (report.report_hash == req["report_hash"]))
+#                             .dicts()
+#                             .execute())[0]["status"])
+#       return Response(response=current_status, status = 200, mimetype="application/json")
+
+
 api.add_resource(mapping_api, '/api/mapping/')
 api.add_resource(strain_api, '/api/strain/')
 api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>/')
 api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>/')
+# api.add_resource(report_progress, '/api/report/<string:report_slug>/') #Add strain slug tomorrow
