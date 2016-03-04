@@ -1,6 +1,9 @@
 /* @override 
   http://localhost:4000/assets/css/styles.css */
 
+.tooltip-item {
+    border-bottom: 1px dotted #777;
+}
 
 body {
   text-align:left;

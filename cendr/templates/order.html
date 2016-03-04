@@ -31,7 +31,7 @@
                     <td>{{ loop.index }}</td>
                     <td><strong>{{ isotype }}</strong></td>
                     <td>{{ strains|join(" ") }}</td>
-                    <td class="price">${{'%0.2f'| format(1500/100|float)}}</td>
+                    <td class="price">${{'%0.2f'| format(1000/100|float)}}</td>
                 </tr>
                 {% endfor %}
                 {% if price_adjustment > 0 %}
