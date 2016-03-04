@@ -41,6 +41,17 @@
   <li>{{ i.strain }}</li>
 {% endfor %}
 </ul>
+<br />
+{% if rec[0].previous_names %}
+<h4>Alternative Names</h4>
+<ul>
+{% for i in rec[0].previous_names.split("|") %}
+  <li>{{ i }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+
+
 </div>
 <div class="col-md-6">
 <h4>Data</h4>
@@ -55,8 +66,6 @@
 {% endif %}
 </div>
 </div>
-<h4>Mappings / Phenotypes</h4>
-<p>Show users mapping results</p>
 
       </div>
       <div class="col-md-4">

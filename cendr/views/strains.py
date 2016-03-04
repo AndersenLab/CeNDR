@@ -101,7 +101,7 @@ def calculate_total(strain_list):
         if all([x in strain_list for x in set_test]):
             price_adjustment += 5000
             added_sets.append("set_" + str(i))     
-    return len(strain_list)*1500 - price_adjustment, price_adjustment, added_sets
+    return len(strain_list)*1000 - price_adjustment, price_adjustment, added_sets
 
 @app.route('/order/', methods=['POST'])
 def order_page():

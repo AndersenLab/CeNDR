@@ -48,9 +48,16 @@
                         <th style="width: 20px;">
                             <input type="checkbox" id="checkAll" />
                         </th>
-                        <th style="width: 200px;">Isotype</th>
-                        <th style="width: 200px;">Strains</th>
-                        <th>Alternative Names
+                        <th style="width: 200px;">
+                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+                            Isotype
+                            </span>
+                        </th>
+                        <th style="width: 200px;">
+                        <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Individually isolated strains; If strains are assigned to the same isotype they are > 99.93% genetically identical">
+                        Strains
+                        </span></th>
+                        <th><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Previous names assigned to a strain or alternative names">Alternative Names</span>
                             <div class="pull-right"><a href="https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?output=tsv">Download Strain Information (.tsv)</a></div>
                         </th>
                     </tr>
@@ -183,5 +190,10 @@ $(document).ready(function() {
         }
     });
 });
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
 </script>
 {% endblock %}
