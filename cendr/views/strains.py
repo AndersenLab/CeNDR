@@ -33,6 +33,7 @@ def map_page():
 
 @app.route('/strain/<isotype_name>/')
 def isotype_page(isotype_name):
+    title = isotype_name
     page_type = "isotype"
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name)
