@@ -113,7 +113,15 @@ def process_gwa():
                                             (strain.previous_names.regexp('\|(' + row[0] + ')$')) |
                                             (strain.previous_names.regexp('\|(' + row[0] + ')\|')) |
                                             (strain.previous_names == row[0]))
-                strain_set.append(list(strain_name)[0])
+                # precedence of strain submission:
+                strain_match = [x for x in strain_name if x.strain == row[0]]
+                isotype_match = [x for x in strain_name if x.isotype == row[0]]
+                if len(strain_match) > 0:
+                    strain_set.append(list(strain_match)[0])
+                elif len(isotype_match) > 0:
+                    strain_set.append(list(isotype_match)[0])
+                else:
+                    strain_set.append(list(strain_match)[0])
 
         trait_set = data[0][1:]
         for n, t in enumerate(trait_set):
