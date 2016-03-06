@@ -35,6 +35,7 @@ class strain(Model):
     longitude = FloatField(null=True)
     landscape = CharField(null=True)
     substrate = CharField(null=True)
+    photo = CharField(null=True)
     isolated_by = CharField(null=True)
     sampled_by = CharField(null=True)
     isolation_date = DateField(null=True)

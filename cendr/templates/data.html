@@ -54,17 +54,22 @@
 
         </div>
 
-
-
-
         </div>
-        <input id="filter" type="text" class="form-control pull-right" style = "width:200px;" placeholder="Filter Here..." action="#">
         <hr />
+        <input id="filter" type="text" class="form-control pull-right" style = "width:200px;" placeholder="Filter Here..." action="#">
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
-                    <th style="width: 200px;">Isotype</th>
-                    <th style="width: 200px;">Strains</th>
+                        <th style="width: 200px;">
+                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+                            Isotype
+                            </span>
+                        </th>
+                        <th style="width: 200px;">
+                        <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Individually isolated strains; If strains are assigned to the same isotype they are > 99.93% genetically identical">
+                        Strains
+                        </span></th>
+                    </th>
                     <th style="width: 200px;">BAM</th>
                     <th style="width: 200px;">CRAM</th>
                 </tr>
