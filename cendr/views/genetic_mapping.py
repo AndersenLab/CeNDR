@@ -231,8 +231,8 @@ def trait_view(report_slug, trait_slug=""):
     report_html = requests.get(report_url).text.replace(
         'src="', 'src="' + base_url + "/")
     if not report_html.startswith("<?xml"):
-        report_html = "<div>" + report_html[report_html.find(
-            '<div id="phenotype'):report_html.find("</body>")].replace("</body>", "")
+        report_html = report_html[report_html.find(
+            '<body>'):report_html.find("</body>")].replace("</body>", "").replace("<body>","").replace('<h1 class="title">cegwas results</h1>', "")
     else:
         report_html = ""
     return render_template('report.html', **locals())
