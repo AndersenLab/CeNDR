@@ -1,0 +1,23 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block content %}
+<div class="row">
+    <div class = 'col-md-3 pull-left'>
+
+      <ul class="list-group">
+        {% for f in files %}
+        <a class="list-group-item {% if f.strip('md').strip('.') == filename %}active{% endif %}" href="{{ url_for('help_item', filename = f.strip('md').strip('.')) }}">
+            <strong>{{ f.strip("md").strip(".").replace("-", " ") }}</strong>
+          </a>
+
+        </li>
+
+        {% endfor %}
+      </ul>
+
+    </div>
+    <div class="col-md-9">
+      {{ render_markdown(filename + ".md", directory = "cendr/static/content/help/") }}
+    </div>
+{% endblock %}

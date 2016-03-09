@@ -48,6 +48,18 @@ def news_item(filename = ""):
     bcs = OrderedDict([("news", None), (title, None)])
     return render_template('news_item.html', **locals())
 
+@app.route("/help/")
+@app.route("/help/<filename>/")
+def help_item(filename = ""):
+    files = [x for x in os.listdir("cendr/static/content/help/") if not x.startswith(".")]
+    files.reverse()
+    if not filename:
+        filename = files[0].strip(".md")
+    title = filename.replace("-", " ")
+    print title
+    bcs = OrderedDict([("content", None), (title, None)])
+    return render_template('help_item.html', **locals())
+
 
 @app.route('/feed.atom')
 def feed():
