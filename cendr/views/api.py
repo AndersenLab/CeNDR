@@ -1,8 +1,9 @@
-from flask import Flask, Response
+from flask import Flask, Response,request
 from flask_restful import Resource, Api,reqparse
 from cendr import api
 from cendr.models import report, mapping, strain,trait
 from collections import OrderedDict
+from gcloud import storage
 import decimal
 import json
 import datetime
@@ -68,18 +69,55 @@ class isotype_ind_api(Resource):
 
 
 
-# class report_progress(Resource):
-#     def post(self, report_slug, trait_slug):
-#       current_status = list(trait.select(trait.status)
-#                             .join(report)
-#                             .filter(trait.trait_slug == trait_slug, (((report.report_slug == report_slug) and (report.release == 0)) | (report.report_hash == req["report_hash"]))
-#                             .dicts()
-#                             .execute())[0]["status"])
-#       return Response(response=current_status, status = 200, mimetype="application/json")
+class report_progress(Resource):
+    def post(self,trait_slug, report_slug = None,report_hash = None):
+      queue = get_queue()
+      print dir(queue)
+      current_status = list(trait.select(trait.status)
+                            .join(report)
+                            .filter(trait.trait_slug == trait_slug, ((report.report_slug == report_slug) and (report.release == 0)) | (report.report_hash == report_hash))
+                            .dicts()
+                            .execute())[0]["status"]
+      if trait_slug:
+        try:
+          trait_data = [x for x in report_data if x['trait_slug'] == trait_slug[0]]
+        except:
+          return Response(response="", status=404, catch_all_404s=True)
+        title = trait_data["report_name"]
+        subtitle = trait_data["trait_name"]
 
+        if trait_data["release"] == 0:
+          report_url_slug = trait_data["report_slug"]
+        else:
+          report_url_slug = trait_data["report_hash"]
+      else:
+
+        try:
+          first_trait = list(report_data)[0]
+        except:
+          return Response(response="", status=404, catch_all_404s=True)
+
+      report_slug = trait_data["report_slug"]
+      base_url = "https://storage.googleapis.com/cendr/" + report_slug + "/" + trait_slug
+      
+      report_files = list(storage.Client().get_bucket("cendr").list_blobs(
+        prefix=report_slug + "/" + trait_slug + "/tables"))
+      report_files = [os.path.split(x.name)[1] for x in report_files]
+
+      report_url = base_url + "/report.html"
+      report_html = requests.get(report_url).text.replace(
+        'src="', 'src="'+ base_url + "/")
+      
+      if not report_html.startswith("<?xml"):
+        report_html = report_html[report_html.find("<body>"):report_html.find("</body")].replace("</body", " ").replace("<body>","").replace('<h1 class="title">cegwas results</h1>', "")
+      else:
+        report_html = "hello"
+      return Response(response=report_html, status = 201, mimetype="application/json")
+
+reports_urls = ['/api/<string:report_slug>/<string:trait_slug>','/api/<string:report_slug>/<string:trait_slug>']
 
 api.add_resource(mapping_api, '/api/mapping/')
 api.add_resource(strain_api, '/api/strain/')
 api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>/')
 api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>/')
-# api.add_resource(report_progress, '/api/report/<string:report_slug>/') #Add strain slug tomorrow
+api.add_resource(report_progress, *reports_urls)
