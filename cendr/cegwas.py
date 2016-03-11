@@ -57,7 +57,7 @@ def help_item(filename = ""):
         filename = files[0]
     title = filename.replace("-", " ")
     print title
-    bcs = OrderedDict([("content", None), (title, None)])
+    bcs = OrderedDict([("Help", None), (title, None)])
     return render_template('help_item.html', **locals())
 
 
