@@ -113,7 +113,15 @@ def process_gwa():
                                             (strain.previous_names.regexp('\|(' + row[0] + ')$')) |
                                             (strain.previous_names.regexp('\|(' + row[0] + ')\|')) |
                                             (strain.previous_names == row[0]))
-                strain_set.append(list(strain_name)[0])
+                # precedence of strain submission:
+                strain_match = [x for x in strain_name if x.strain == row[0]]
+                isotype_match = [x for x in strain_name if x.isotype == row[0]]
+                if len(strain_match) > 0:
+                    strain_set.append(list(strain_match)[0])
+                elif len(isotype_match) > 0:
+                    strain_set.append(list(isotype_match)[0])
+                else:
+                    strain_set.append(list(strain_match)[0])
 
         trait_set = data[0][1:]
         for n, t in enumerate(trait_set):
@@ -223,8 +231,8 @@ def trait_view(report_slug, trait_slug=""):
     report_html = requests.get(report_url).text.replace(
         'src="', 'src="' + base_url + "/")
     if not report_html.startswith("<?xml"):
-        report_html = "<div>" + report_html[report_html.find(
-            '<div id="phenotype'):report_html.find("</body>")].replace("</body>", "")
+        report_html = report_html[report_html.find(
+            '<body>'):report_html.find("</body>")].replace("</body>", "").replace("<body>","").replace('<h1 class="title">cegwas results</h1>', "")
     else:
         report_html = ""
     return render_template('report.html', **locals())
