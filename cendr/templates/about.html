@@ -17,25 +17,25 @@
 
       </div>
       <div class="col-md-6">
-	{{ render_markdown("about.md") }}
+
+
+  {{ render_markdown("about.md") }}
+
+
+
       </div>
   </div>
   <div class="row">
 
   <div class="col-md-6">
 
-<h3>CeNDR Goals</h3>
-<p>To facilitate the study of natural diversity by <em>C. elegans</em> research groups, we created the <em>C. elegans</em> Natural Diversity Resource (CeNDR). We have three major goals:</p>
 
-<ol>
-<li>To accept, organize, and distribute wild strains to research groups that want to investigate their favorite trait(s) across natural <em>C. elegans</em> strains. See <strong><a href="{{ url_for('strain_listing_page') }}">Strains</a></strong>.</li>
 
-<li>To sequence the whole genomes of wild <em>C. elegans</em> strains, provide the aligned sequence data, and facilitate discovery of genetic variation across the entire species. See <strong><a href="{{ url_for('data_page') }}">Data</a></strong>.</li>
+  <h3>Global Distribution of wild isolates</h3>
+<p>Most research groups that study <em>C. elegans</em> focus on the laboratory-adapted strain (called N2) isolated in Bristol, England in the 1950s. We have learned a great deal about basic biological processes from studies of this one strain.</p>
+<p>
+However, this species is found worldwide, and wild strains are as different from one another as humans are different from one another. These strains are isolated from a variety of environments in nature when researchers collect rotting materials, including fruits, flowers, nuts, berries, stems, leaves, and compost. We can use the natural diversity of these strains to learn about how populations of individuals are genetically different from another and how those differences might impact disease. </p>
 
-<li>To perform genome-wide association mappings to correlate genotype with phenotype and identify genetic variation underlying quantitative traits. See <strong><a href="{{ url_for('public_mapping') }}">Mappings</a></strong>.</li>
-</ol>
-
-<p>Please <a href="{{ url_for('contact') }}">let us know</a> what we can do to facilitate your discoveries! We are interested in adding new resources and tools.</p>
   </div>
 
 
@@ -58,10 +58,20 @@
 
 
 <div class="col-md-6">
-  <h3>Global Distribution of wild isolates</h3>
-<p>Most research groups that study <em>C. elegans</em> focus on the laboratory-adapted strain (called N2) isolated in Bristol, England in the 1950s. We have learned a great deal about basic biological processes from studies of this one strain.</p>
-<p>
-However, this species is found worldwide, and wild strains are as different from one another as humans are different from one another. These strains are isolated from a variety of environments in nature when researchers collect rotting materials, including fruits, flowers, nuts, berries, stems, leaves, and compost. We can use the natural diversity of these strains to learn about how populations of individuals are genetically different from another and how those differences might impact disease. </p>
+
+<h3>CeNDR Goals</h3>
+<p>To facilitate the study of natural diversity by <em>C. elegans</em> research groups, we created the <em>C. elegans</em> Natural Diversity Resource (CeNDR). We have three major goals:</p>
+
+<ol>
+<li>To accept, organize, and distribute wild strains to research groups that want to investigate their favorite trait(s) across natural <em>C. elegans</em> strains. See <strong><a href="{{ url_for('strain_listing_page') }}">Strains</a></strong>.</li>
+
+<li>To sequence the whole genomes of wild <em>C. elegans</em> strains, provide the aligned sequence data, and facilitate discovery of genetic variation across the entire species. See <strong><a href="{{ url_for('data_page') }}">Data</a></strong>.</li>
+
+<li>To perform genome-wide association mappings to correlate genotype with phenotype and identify genetic variation underlying quantitative traits. See <strong><a href="{{ url_for('public_mapping') }}">Mappings</a></strong>.</li>
+</ol>
+
+<p>Please <a href="{{ url_for('contact') }}">let us know</a> what we can do to facilitate your discoveries! We are interested in adding new resources and tools.</p>
+
 </div>
   </div>
 {% endblock %}
