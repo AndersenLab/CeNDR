@@ -121,7 +121,7 @@ String.prototype.hashCode = function() {
 
 
   var data = [
-    ["STRAIN", "trait1", "trait2", "trait3"],
+    ["STRAIN", "", "", ""],
   ];
 
 var render_bold = function (instance, td, row, col, prop, value, cellProperties) {
@@ -141,7 +141,7 @@ incorrect_strains = [];
 // Strain Validator
 strainValidator = function (value, callback) {
     setTimeout(function(){
-      if (strain_list.includes(value) || value == "") {
+      if (strain_list.includes($.trim(value)) || value == "") {
         callback(true);
       }
       else {
@@ -151,8 +151,7 @@ strainValidator = function (value, callback) {
   };
 
 strainValidatorfunc = function (value) {
-  console.log(value);
-      if (strain_list.includes(value) || value == "") {
+      if (strain_list.includes($.trim(value)) || value == "") {
         return true;
       }
       else {
@@ -262,7 +261,7 @@ function error_checking() {
   // Unique Strain Names
   var row_names = Array();
   for (i = 1; i < data.length; i++) { 
-    row_names.push(data[i][0])
+    row_names.push($.trim(data[i][0]))
   }
   row_names = row_names.filter(validInput);
 
