@@ -11,7 +11,7 @@ We will send you everything you need to isolate your own nematodes. After you ma
 4. Wrap up the plates with provided parafilm.
 5. Mail them back to me at my expense.
 
-Download the full instructions [here](http://elegansvariation.org/static/content/protocols/CleaningWorms.pdf)
+Download the full instructions [here](http://andersenlab.org/files/WormCollecting.pdf)
 
 If you would like materials to collect your own nematodes, please fill out this [form](https://docs.google.com/forms/d/15JXAQptqCSenZMyqHHOKQH1wJe7m0n8_Q0nHMe0eTUY/viewform?formkey=dERCQ1lsamU1ZFNtOGJJUkJqVzZOOVE6MQ#gid=0).
 

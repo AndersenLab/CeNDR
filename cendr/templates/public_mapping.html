@@ -40,7 +40,7 @@
 	<div id="container" style="min-width: 310px; height: 500px; max-width: 100%; margin: 0 auto"></div>
 <p><strong>Cumulative Manhattan Plot</strong> - Significant genome-wide association mappings are plotted against their -log<sub>10</sub>p association value by genomic position.</p>
 
-<h3>Random Mappings</h3>
+<h3>Recent Mappings</h3>
 
 <table class="table table-hover table-striped">
 	<thead>
@@ -52,7 +52,7 @@
 		</tr>
 	</thead>
 	<tbody>
-	{% for i in random_results %}
+	{% for i in recent_results %}
 		<tr>
 			<td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.report_name }}</a></td>
 			<td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.trait_name }}</a></td>

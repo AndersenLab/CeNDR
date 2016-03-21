@@ -106,7 +106,7 @@ def process_gwa():
 
         for row in data[1:]:
             if row[0] is not None and row[0] != "":
-                row[0] = row[0].replace("(", "\(").replace(")", "\)")
+                row[0] = row[0].strip().replace("(", "\(").replace(")", "\)")
                 strain_name = strain.filter((strain.strain == row[0]) |
                                             (strain.isotype == row[0]) |
                                             (strain.previous_names.regexp('^(' + row[0] + ')\|')) |
@@ -153,10 +153,14 @@ def process_gwa():
         resp = queue.post(str(json.dumps(req)))
         req["success"] = True
         # Send user email
+    if req["release"] != 1:
+        report_slug = req["report_hash"]
+    else:
+        report_slug = req["report_slug"]
     mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
                    to=req["email"],
                    subject="CeNDR Mapping Report - " + req["report_slug"],
-                   body=mapping_submission.format(report_slug=req["report_slug"]))
+                   body=mapping_submission.format(report_slug=report_slug))
 
     return str(json.dumps(req))
 
@@ -186,7 +190,7 @@ def public_mapping():
         search = True
         return render_template('public_mapping.html', **locals())
     title = "Perform Mapping"
-    random_results = mapping.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(trait).join(report).dicts().order_by(fn.Rand()).limit(5).execute()
+    recent_results = mapping.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(trait).join(report).dicts().order_by(trait.submission_complete.desc()).limit(10).execute()
     bcs = OrderedDict([("genetic-mapping", None), ("public", None)])
     title = "Public Mappings"
     pub_mappings = list(mapping.select(mapping, report, trait).join(trait).join(report).filter(report.release == 0).dicts().execute())
