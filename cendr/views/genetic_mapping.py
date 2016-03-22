@@ -226,6 +226,9 @@ def trait_view(report_slug, trait_slug=""):
     report_slug = trait_data["report_slug"]
     base_url = "https://storage.googleapis.com/cendr/" + report_slug + "/" + trait_slug
 
+    # Fetch significant mappings
+    mapping_results = list(mapping.select(mapping, report, trait).join(trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())
+
     # List available datasets
     report_files = list(storage.Client().get_bucket("cendr").list_blobs(
         prefix=report_slug + "/" + trait_slug + "/tables"))

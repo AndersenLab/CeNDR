@@ -104,7 +104,7 @@ def calculate_total(strain_list):
             added_sets.append("set_" + str(i))     
     return len(strain_list)*1000 - price_adjustment, price_adjustment, added_sets
 
-@app.route('/order/', methods=['POST'])
+@app.route('/order', methods=['GET','POST'])
 def order_page():
     bcs = OrderedDict([("strain", "/strain/"), ("order", "")])
     title = "Order"
