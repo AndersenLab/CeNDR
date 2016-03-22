@@ -11,7 +11,7 @@ If you set your record to private, this email serves as a way for you to find th
 order_submission = """
 Your purchase on elegansvariation.org is available here:
 
-http://www.elegansvariation.org/order/{order_slug}/
+http://elegansvariation.org/order/{order_slug}/
 
 Please retain this email for your records.
 """
