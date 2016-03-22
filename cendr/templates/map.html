@@ -126,7 +126,7 @@ function restore_click_locked_content(m) {
     northEast = L.latLng(90, 180),
     bounds = L.latLngBounds(southWest, northEast);
 
-  var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -50], 2);
+  var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -100], 2);
   L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
   strain_info = [];
   strain_names = [];
@@ -157,13 +157,14 @@ var search_control = new L.Control.Search({layer: strain_layer,
                                       collapsed: false,
                                       position:'topright',
                                       tooltipLimit: 4,
+                                      textPlaceholder :'Enter strain name',
                                       zoom: 5,
                                       animateLocation: false,
                                       markerLocation: false,
                                       markerIcon: icon_hover });
 search_control.on('search_locationfound', set_panel_from_search);
 map.addControl(search_control);
-
+$('.search-input').width(100);
 </script>
 
 {% endblock %}
