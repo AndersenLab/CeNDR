@@ -51,7 +51,7 @@
             </tbody>
         </table>
 <div class="pull-right">
-<form action="/order/" method="POST">
+<form action="/order" method="POST">
 {% for isotype, strains in strain_listing|groupby('isotype') %}
 <input type="hidden" name="isotype" value="{{ isotype }}">
 {% endfor %}

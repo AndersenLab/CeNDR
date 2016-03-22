@@ -1,6 +1,6 @@
 from cendr import app
 from models import trait, report
-from flask import render_template, request, Markup, url_for
+from flask import render_template, request, Markup, url_for, Response
 import markdown
 from datetime import datetime
 import os
@@ -35,7 +35,6 @@ def main():
     latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
         trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('home.html', **locals())
-
 
 @app.route("/news/")
 @app.route("/news/<filename>/")
