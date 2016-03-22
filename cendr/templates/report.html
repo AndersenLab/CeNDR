@@ -8,8 +8,6 @@
 <link href="/static/report/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="/static/report/tocify-1.9.1/jquery.tocify.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="/static/report/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-<script src="/static/report/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="/static/report/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="/static/report/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="/static/report/htmlwidgets-0.6/htmlwidgets.js"></script>
@@ -29,11 +27,10 @@
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
+<script type="text/javascript" src="/static/js/d3-tip.js"></script>
 <script type="text/javascript" src="/static/js/d3_exploding_boxplot.js"></script>
 <link href="/static/css/d3_exploding_boxplot.css" rel="stylesheet" />
 
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha/js/bootstrap.min.js"></script>
 
 {% endblock %}
 
@@ -242,8 +239,6 @@ MathJax.Hub.Config({
 
 <script>
 
-
-//generate random data
 var box1 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
             .map(function(d,i){return {v:d,g:'box1',t:'pt 1'+i}})
 
@@ -251,7 +246,7 @@ var box2 = d3.range(100).map(d3.random.normal(Math.random()*100,30))
             .map(function(d,i){return {v:d,g:'box2',t:'pt 2'+i}})
 
 
-var data = box1.concat(box2)
+var data = box1.concat(box1).concat(box2)
 
 // chart(data,aes)
 // aesthetic :
@@ -266,9 +261,14 @@ var chart = exploding_boxplot(data,
 chart('#chartContainer')
 
 $(document).ready(function () {
-$('svg circle').tooltip({
-      'placement': 'right'
-  });
+    $("a").tooltip({
+        'placement': 'right'
+    });
+    
+    $("svg circle").tooltip({
+        'container': 'body',
+        'placement': 'right'
+    });
 });
   
 </script>
