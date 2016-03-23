@@ -17,10 +17,11 @@ import requests
 import itertools
 from slugify import slugify
 import hashlib
-import json
+import simplejson as json
 from iron_mq import IronMQ
 from gcloud import storage
 import os
+import time
 
 
 
@@ -292,3 +293,21 @@ def status_page():
         trait.submission_complete.desc()).limit(10).dicts().execute())
 
     return render_template('status.html', **locals())
+
+@app.route('/archive/')
+def archive_page():
+    report_data = list(trait.select().dicts().execute())
+    dates = {}
+
+    for report in report_data:
+        date = int(time.mktime(report['submission_date'].timetuple()[0:3]+6*(0,)))
+
+        if date not in dates:
+            dates[date] = 1
+        else:
+            dates[date] += 1
+
+    bcs = OrderedDict([("genetic-mapping", None), ("archive", None)])
+    title = "Archive"
+    json_dates = json.dumps(dates)
+    return render_template('archive.html', **locals())
