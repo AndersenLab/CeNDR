@@ -126,6 +126,12 @@
 
 <div id="report2" data-toggle="tab" >
 
+{# Null Report #}
+{% if 1 == 1 %}
+
+{% endif %}
+
+{% if mapping_results %}
 
 <h2>Phenotype</h2>
 
@@ -133,8 +139,7 @@
 <img src="{{ base_url }}/figures/phenotype_histogram-1.png" />
 <strong>Histogram representation of your phenotype</strong>
 
-{{ mapping_results }}
-{% if mapping_results %}
+
 
   Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
 
@@ -142,9 +147,10 @@
   Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped. If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.
 {% endif %}
 
+{% if mapping_results %}
+
 <h2>Manhattan Plot</h2>
 
-{% if mapping_results %}
 <img src="{{ base_url }}/figures/Manplot-1.png" />
 
 A genome-wide representation of the association between variation in the <em>C. elegans</em>em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated in the gray box above each facet. Dots represent single-nucleotide variant (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL confidence interval, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value $(-log_{10}\frac{0.05}{\#SNVs})$ and is usually around 5.5.
@@ -175,12 +181,56 @@ A genome-wide representation of the association between variation in the <em>C. 
 <p>Quantile-quantile plot generated from the p-values from the association mapping. This plot shows the expected distribution of association test statistics on the x-axis compared to the observed values on the y-axis. Each dot corresponds to an individual SNV. SNVs that deviate from the x=y line indicate that they are associated with your phenotype. Earlier separation from the identity line is indication of population stratification not being eliminated by the mapping algorithm.</p>
 
 <h3>Phenotype-by-Genotype</h3>
+<br />
+<img src="{{ base_url }}/figures/PxGplot-1.png" />
+
+
+<!--<div id="chartContainer"></div>-->
 
 
 <p>Phenotypic distributions represeted as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated in each the gray rectangles above the panels. REF refers to the N2 genotype and ALT refers to the variant phenotype. All of the SNVs in our data set are biallelic so these are the only two classes for any given SNV.</p>
 
-<div id="chartContainer"></div>
+<h3>Linkage Disequilibrium</h3>
 
+<img src="{{ base_url }}/figures/LDplot-1.png" />
+
+<p>Peak markers are the most statistically significant markers identified within a peak. The Linkage Disequilibrium (LD) measure being plotted is the correlation between peak markers $r = \frac{-D}{\sqrt{p(A) * p(a) * p(B) * p*(b)}}$, where D raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
+
+<h2>Peak Summary</h2>
+
+
+<strong>Switch between peaks below.</strong><br /><br />
+
+<div>
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+  {% for peak in mapping_results %}
+    <li role="presentation" {% if loop.first %}class="active"{% endif %}><a href="#{{ peak.chrom }}:{{ peak.pos }}" aria-controls="peak1" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.pos }}</a></li>
+    {% endfor %}
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+  {% for peak in mapping_results %}
+    <div role="tabpanel" class="tab-pane active" id="#{{ peak.chrom }}:{{ peak.pos }}">
+
+    <h3>Table Summary</h3>
+
+    <h3>Global Distribution</h3>
+
+    <p>Salmon dots correspond to strains that have the alternate allele and purple dots are strains that have the N2 allele.</p>
+
+    <h3>Tajima's D</h3>
+
+    <p>Tajima's D across the most signficant QTL interval. Tajimaâs D tests whether a genomic region has the expected level of variation if it is only undergoing drift - values close to 0 indicate observed variation similar to expected levels, D&lt;0 suggests that rare alleles are present, which may have arose due to a recent selective sweep, population expansion after a recent bottleneck, or linkage to a swept gene, and D&gt;0 indicating balancing selection or sudden population contraction.</p>
+
+
+    </div>
+  {% endfor %}
+  </div>
+
+</div>
 
 {% else %}
 {# nonsignificant mapping #}
@@ -245,6 +295,12 @@ var box1 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
 var box2 = d3.range(100).map(d3.random.normal(Math.random()*100,30))
             .map(function(d,i){return {v:d,g:'box2',t:'pt 2'+i}})
 
+var box3 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
+            .map(function(d,i){return {v:d,g:'box3',t:'pt 3'+i}})
+
+var box4 = d3.range(100).map(d3.random.normal(Math.random()*100,30))
+            .map(function(d,i){return {v:d,g:'box4',t:'pt 4'+i}})
+
 
 var data = box1.concat(box1).concat(box2)
 
@@ -258,7 +314,7 @@ var chart = exploding_boxplot(data,
             {y:'v',group:'g',color:'g',label:'t'})
 
 //call chart on a div
-chart('#chartContainer')
+//chart('#chartContainer')
 
 $(document).ready(function () {
     $("a").tooltip({
