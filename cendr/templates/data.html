@@ -27,12 +27,12 @@
         <div class="col-md-4">
             <h4>Downloading All Alignment Data</h4>
             <p>Interested in downloading everything? Use these scripts!</p>
-            <p> To download our data sets properly you need to
-            download and install <strong>wget</strong>, there are many ways to do this but we recommend using <a href="http://brew.sh/">Homebrew</a>. For more information on how to this go to our <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ section</a>.</p>
             <ul>
                 <li><a href="{{ url_for("download_script", filetype="bam") }}">Download BAMs</a></li>
                 <li><a href="{{ url_for("download_script", filetype="cram") }}">Download CRAMs</a></li>
             </ul>
+            <p> To download our data sets properly you need to
+            download and install <strong>wget</strong>, there are many ways to do this but we recommend using <a href="http://brew.sh/">Homebrew</a>. For more information on how to this go to our <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ section</a>.</p>
             <br /><br />
             <h4>Methods</h4>
             <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('help_item', filename = "Methods") }}">here</a>.</p>
