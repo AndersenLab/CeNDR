@@ -296,18 +296,17 @@ def status_page():
 
 @app.route('/archive/')
 def archive_page():
-    report_data = list(trait.select().dicts().execute())
+    report_data = list(trait.select(trait,report).join(report).filter(trait.status == "complete").dicts().execute())
     dates = {}
 
-    for report in report_data:
-        date = int(time.mktime(report['submission_date'].timetuple()[0:3]+6*(0,)))
-
+    for reporti in report_data:
+        date = int(time.mktime(reporti['submission_date'].timetuple()[0:3]+6*(0,)))
         if date not in dates:
             dates[date] = 1
         else:
             dates[date] += 1
 
+    report_data.reverse()
     bcs = OrderedDict([("genetic-mapping", None), ("archive", None)])
     title = "Archive"
-    json_dates = json.dumps(dates)
     return render_template('archive.html', **locals())
