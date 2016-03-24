@@ -5,22 +5,43 @@
 {% endblock %}
 {% block content %}
   <div id="cal-heatmap"></div>
+  <br></br>
+  <table class="table table-hover table-striped">
+  <thead>
+    <tr>
+      <th>Report Name</th>
+      <th>Trait Name</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for i in report_data %}
+      {% if i.release == 0 %}
+        <tr>
+          <td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.report_name }}</a></td>
+          <td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.trait_name }}</a></td>
+          <td>{{ i["submission_date"].date() }}</td>
+        </tr>
+      {% endif %}
+  {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
 {% block script %}
 <script type="text/javascript">
   var calendar = new CalHeatMap();
   calendar.init({
-      data: JSON.stringify({{ dates }}),
+      data: {{ dates }},
       dataType: "json",
-      start: new Date(2016, 0),
+      start: new Date(2016, 2),
       id : "graph_k",
       domain : "month",
-      subDomain : "day",
-      range : 6,
-      cellsize: 20,
-      cellpadding: 5,
-      cellradius: 15,
-      domainGutter: 25,
+      subDomain : "x_day",
+      range : 3,
+      cellsize: 15,
+      cellpadding: 3,
+      cellradius: 5,
+      domainGutter: 15,
       weekStartOnMonday: 0,
       scale: [40, 60, 80, 100]
   });
