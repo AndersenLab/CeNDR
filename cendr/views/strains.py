@@ -33,7 +33,7 @@ def map_page():
 
 @app.route('/strain/<isotype_name>/')
 def isotype_page(isotype_name):
-    title = isotype_name
+    page_title = isotype_name
     page_type = "isotype"
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name)
@@ -158,6 +158,6 @@ def order_confirmation(order_id):
     page_title = "Order: " + order_id
     query = "%" + order_id
     record = order.get(order.stripeToken ** query)
-    total = record.price
     strain_listing = order.select(strain.strain, strain.isotype, order.stripeToken).join(order_strain).switch(order_strain).join(strain).filter(order.stripeToken ** query).dicts().execute()
+    total, price_adjustment, added_sets = calculate_total([x["strain"] for x in strain_listing])
     return render_template('order_confirm.html', **locals())

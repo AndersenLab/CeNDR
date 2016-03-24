@@ -179,6 +179,49 @@ class mapping(Model):
     class Meta:
         database = db
 
+class site(Model):
+    CHROM = CharField(index = True)
+    POS = IntegerField(index = True)
+    _ID = CharField()
+    REF = CharField()
+    ALT = CharField()
+    QUAL = FloatField()
+    FILTER = CharField()
+    ANN = CharField()
+
+    class Meta:
+        database = db
+
+class annotation(Model):
+    site = ForeignKeyField(site)
+    allele = CharField(index=True)
+    annotation = CharField(index=True)
+    putative_impact = CharField(null=True)
+    gene_name = CharField(index=True, null=True)
+    gene_id = CharField(index=True, null=True)
+    feature_type = CharField(null=True)
+    feature_id = CharField(null=True)
+    transcript_biotype = CharField(null=True)
+    rank_total = CharField(null=True)
+    hgvs_c = CharField(null=True)
+    hgvs_p = CharField(null=True)
+    cdna_position = CharField(null=True)
+    cds_position = CharField(null=True)
+    protein_position = CharField(null=True)
+    distance_to_feature = CharField(null=True)
+    errors = CharField(null=True)
+
+    class Meta:
+        database = db
+
+class call(Model):
+    site = ForeignKeyField(site)
+    SAMPLE = CharField(index = True)
+    TGT = CharField(index = True)
+    FT = CharField(index = True)
+    GT = CharField(index = True)
+
+
 
 def autoconvert(s):
     for fn in (int, float):

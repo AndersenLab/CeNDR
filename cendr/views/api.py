@@ -1,13 +1,14 @@
 from flask import Flask, Response,request
 from flask_restful import Resource, Api,reqparse
 from cendr import api
-from cendr.models import report, mapping, strain,trait
+from cendr.models import report, mapping, strain, trait, site, call, annotation
 from collections import OrderedDict
 from gcloud import storage
 import decimal
 import json
 import datetime
 import os, sys
+from peewee import JOIN
 
 
 FIELDS = [x.name for x in strain._meta.sorted_fields if x.name != "id"]
@@ -116,8 +117,55 @@ class report_progress(Resource):
 
 reports_urls = ['/api/<string:report_slug>/<string:trait_slug>','/api/<string:report_slug>/<string:trait_slug>']
 
+
+class site_gt(Resource):
+    def get(self, chrom, pos):
+        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT).join(call).filter(site.CHROM == chrom, site.POS == pos).dicts().execute())
+        result = json.dumps(result, cls=CustomEncoder, indent = 4)
+        return Response(response=result, status = 201, mimetype="application/json")
+
+class site_gt_range(Resource):
+    def get(self, chrom, pos, pos_end):
+        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT).join(call).filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end).dicts().execute())
+        result = json.dumps(result, cls=CustomEncoder, indent = 4)
+        return Response(response=result, status = 201, mimetype="application/json")
+
+class site_gt_annotation(Resource):
+    def get(self, chrom, pos):
+        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
+                        .join(call)
+                        .switch(site)
+                        .join(annotation)
+                        .filter(site.CHROM == chrom, site.POS == pos)
+                        .dicts()
+                        .execute())
+        result = json.dumps(result, cls=CustomEncoder, indent = 4)
+        return Response(response=result, status = 201, mimetype="application/json")
+
+class site_gt_range_annotation(Resource):
+    def get(self, chrom, pos, pos_end):
+        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
+                        .join(call)
+                        .switch(site)
+                        .join(annotation)
+                        .filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end)
+                        .dicts()
+                        .execute())
+        result = json.dumps(result, cls=CustomEncoder, indent = 4)
+        return Response(response=result, status = 201, mimetype="application/json")
+
+
 api.add_resource(mapping_api, '/api/mapping/')
 api.add_resource(strain_api, '/api/strain/')
 api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>/')
 api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>/')
+
+# Variants
+api.add_resource(site_gt, '/api/variants/<string:chrom>/<int:pos>')
+api.add_resource(site_gt_range, '/api/variants/<string:chrom>/<int:pos>/<int:pos_end>')
+
+# Annotations
+api.add_resource(site_gt_annotation, '/api/variants/annotation/<string:chrom>/<int:pos>')
+api.add_resource(site_gt_range_annotation, '/api/variants/annotation/<string:chrom>/<int:pos>/<int:pos_end>')
+
 #api.add_resource(report_progress, *reports_urls)
