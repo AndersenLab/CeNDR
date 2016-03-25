@@ -49,6 +49,12 @@ cal.init({
     moment.locale("en");
     return moment(date).format("MMMM").toUpperCase();
   },
+  legendColors: {
+    min:  "#ffffff",
+    max: "#232181",
+    empty: "white"
+    // Will use the CSS for the missing keys
+  },
   cellRadius: 3,
   displayLegend: false,
   domainDynamicDimension: false,
