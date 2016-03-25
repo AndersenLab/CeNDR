@@ -31,8 +31,7 @@
                 <li><a href="{{ url_for("download_script", filetype="bam") }}">Download BAMs</a></li>
                 <li><a href="{{ url_for("download_script", filetype="cram") }}">Download CRAMs</a></li>
             </ul>
-            <p> To download our data sets properly you need to
-            download and install <strong>wget</strong>, there are many ways to do this but we recommend using <a href="http://brew.sh/">Homebrew</a>. For more information on how to this go to our <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ section</a>.</p>
+            <p>The above scripts require <strong>wget</strong>. Information on installing <strong>wget</strong> is available in our <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ section</a>.</p>
             <br /><br />
             <h4>Methods</h4>
             <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('help_item', filename = "Methods") }}">here</a>.</p>
@@ -47,11 +46,13 @@
             <strong style="line-height:50px;"><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz">WI.{{ current_variant_set }}.snpeff.vcf.gz</a></strong></p>
             <div style = "clear:both;"></div>
             
-            <p>Variant data is provided as a <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> which contains genotype calls for all isotypes and variant annotations. <a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat" >Learn more about VCF files here</a></p>
+            <p>Variant data are provided as a <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> which contains genotype calls for all isotypes and variant annotations. <a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat" >Learn more about VCF files here</a>.</p>
 
             <p>You can also access specific regions of VCF files (rather then the entire file!) from the command line: <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
               See Example
             </button></p>
+
+            <p>Currently, only single nucleotide variants (SNVs) have been called. We intend to incorporate indels and other variant classes in the near future.</p>
 
         </div>
 
