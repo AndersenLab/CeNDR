@@ -67,9 +67,9 @@ cal.init({
         }
 });
 
-$(document).ready(function () {
+$("body").ready(function () {
 
-
+setTimeout(function() {
   $("g").map(function() {
     title_text = $(this).children("title").text();
     var re = /^[0-9]+.*/
@@ -78,9 +78,10 @@ $(document).ready(function () {
       $(this).attr("data-toggle", "tooltip");
       $(this).attr("data-placement", "bottom");
       $(this).attr("data-title", items);
-      $(this).tooltip({"container":"body", "title":items})
+      $(this).tooltip({"container":"body"})
     }
   });
+}, 2000);
 
 });
 
