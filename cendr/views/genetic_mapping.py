@@ -8,6 +8,7 @@ from datetime import date, datetime
 import pytz
 from peewee import fn
 from dateutil.relativedelta import relativedelta
+from peewee import JOIN
 
 from flask import render_template, request, redirect, url_for
 from collections import OrderedDict
@@ -22,8 +23,8 @@ from iron_mq import IronMQ
 from gcloud import storage
 import os
 import time
-
-
+from collections import Counter
+from pprint import pprint as pp
 
 def get_queue():
     iron_credentials = ds.get(ds.key("credential", "iron"))
@@ -296,17 +297,21 @@ def status_page():
 
 @app.route('/archive/')
 def archive_page():
-    report_data = list(trait.select(trait,report).join(report).filter(trait.status == "complete").dicts().execute())
-    dates = {}
-
-    for reporti in report_data:
-        date = int(time.mktime(reporti['submission_date'].timetuple()[0:3]+6*(0,)))
-        if date not in dates:
-            dates[date] = 1
-        else:
-            dates[date] += 1
-
+    report_data = list(trait.select(report.release, 
+                                     report.report_name,
+                                     report.report_slug,
+                                     trait.trait_name,
+                                     trait.trait_slug,
+                                     trait.status,
+                                     trait.submission_complete).join(report, JOIN.LEFT_OUTER).filter((report.release == 0),(trait.status == "complete")).dicts().execute())
+    print pp(report_data)
+    pst = pytz.timezone("Europe/Amsterdam")
+    date_set = dict(Counter([time.mktime((x["submission_complete"]+relativedelta(hours = +6)).timetuple()) for x in report_data]))
     report_data.reverse()
     bcs = OrderedDict([("genetic-mapping", None), ("archive", None)])
     title = "Archive"
     return render_template('archive.html', **locals())
+
+
+
+
