@@ -304,23 +304,3 @@ def status_page():
         trait.submission_complete.desc()).limit(10).dicts().execute())
 
     return render_template('status.html', **locals())
-
-@app.route('/archive/')
-def archive_page():
-    report_data = list(trait.select(report.release, 
-                                     report.report_name,
-                                     report.report_slug,
-                                     trait.trait_name,
-                                     trait.trait_slug,
-                                     trait.status,
-                                     trait.submission_complete).join(report, JOIN.LEFT_OUTER).filter((report.release == 0),(trait.status == "complete")).dicts().execute())
-    pst = pytz.timezone("Europe/Amsterdam")
-    date_set = dict(Counter([time.mktime((x["submission_complete"]+relativedelta(hours = +6)).timetuple()) for x in report_data]))
-    report_data.reverse()
-    bcs = OrderedDict([("genetic-mapping", None), ("archive", None)])
-    title = "Archive"
-    return render_template('archive.html', **locals())
-
-
-
-
