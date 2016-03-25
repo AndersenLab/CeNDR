@@ -1,7 +1,7 @@
 from flask import Flask, Response,request
 from flask_restful import Resource, Api,reqparse
 from cendr import api
-from cendr.models import report, mapping, strain, trait, site, call, annotation
+from cendr.models import db, report, mapping, strain, trait, site, call, annotation
 from collections import OrderedDict
 from gcloud import storage
 import decimal
@@ -9,6 +9,7 @@ import json
 import datetime
 import os, sys
 from peewee import JOIN
+from dateutil.parser import parse
 
 
 FIELDS = [x.name for x in strain._meta.sorted_fields if x.name != "id"]
@@ -19,7 +20,7 @@ class CustomEncoder(json.JSONEncoder):
         if isinstance(o, decimal.Decimal):
             return float(o)
         if isinstance(o, datetime.date):
-            return "G"
+            return str(o)
         return super(CustomEncoder, self).default(o)
 
 def abort_if_todo_doesnt_exist(request_id):
@@ -69,6 +70,12 @@ class isotype_ind_api(Resource):
         return Response(response=dat, status=200, mimetype="application/json")
 
 
+class report_by_date(Resource):
+  def get(self, date):
+      print parse(date).date()
+      data = list(trait.select(report.report_slug, report.report_name, trait.trait_name, trait.trait_slug, report.release, trait.submission_complete).join(report).filter((db.truncate_date("day", trait.submission_complete) == parse(date).date()),(report.release == 0), trait.status == "complete").dicts().execute())
+      dat = json.dumps(data, cls=CustomEncoder, indent = 4)
+      return Response(response=dat, status=200, mimetype="application/json")
 
 class report_progress(Resource):
     def post(self,trait_slug, report_slug = None,report_hash = None):
@@ -167,5 +174,9 @@ api.add_resource(site_gt_range, '/api/variants/<string:chrom>/<int:pos>/<int:pos
 # Annotations
 api.add_resource(site_gt_annotation, '/api/variants/annotation/<string:chrom>/<int:pos>')
 api.add_resource(site_gt_range_annotation, '/api/variants/annotation/<string:chrom>/<int:pos>/<int:pos_end>')
+
+# Reports
+api.add_resource(report_by_date, '/api/report/date/<string:date>')
+
 
 #api.add_resource(report_progress, *reports_urls)
