@@ -14,45 +14,44 @@
     <div class="col-md-12">
         <div class="row">
 
-        <div class="col-md-4">
-            <h4>Alignment Data</h4>
+        <div class="col-md-6">
+            <h3>Alignment Data</h3>
+            <p>We aligned all wild isolate genomes to the WS245 version of the N2 genome. These data are stored using the <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> and <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> formats. <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> files are substantially smaller than <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> files.</p>
 
-            <p>Alignment data is stored using the <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> and <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> formats and is available below.</p>
-
-            <p><a href="http://biobits.org/samtools_primer.html"  target="_blank">Learn about how to access alignment data</a></p>
+            <p><a href="http://biobits.org/samtools_primer.html"  target="_blank">Learn about alignment data here</a>.</p>
 
             <p>CRAM files are substantially smaller than BAM files, but require the reference to be converted to BAM files. We are currently using WS245 (<strong><a href="https://northwestern.box.com/shared/static/ijlhhd1hwlbr5vvasjg35yjux1p5n01g.gz">Download</a></strong>).
-        </div>
 
-        <div class="col-md-4">
-            <h4>Downloading All Alignment Data</h4>
-            <p>Interested in downloading everything? Use these scripts!</p>
+        <h4>Downloading All Alignment Data</h4>
+            <p>Interested in downloading everything? Use the scripts below! Before these scripts will work, you need to download and install <strong>wget</strong>. We recommend using <a href="http://brew.sh">Homebrew</a> for this installation. Information on installing <strong>wget</strong> is available in our <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ section</a>. </p>
             <ul>
                 <li><a href="{{ url_for("download_script", filetype="bam") }}">Download BAMs</a></li>
                 <li><a href="{{ url_for("download_script", filetype="cram") }}">Download CRAMs</a></li>
             </ul>
-            <p>The above scripts require <strong>wget</strong>. Information on installing <strong>wget</strong> is available in our <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ section</a>.</p>
-            <br /><br />
-            <h4>Methods</h4>
-            <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('help_item', filename = "Methods") }}">here</a>.</p>
+            </p>
 
         </div>
 
 
-        <div class="col-md-4">
-            <h4>Variant Data</h4>
-            <p>Download SNV data:</p>
+        <div class="col-md-6">
+            <h3>Variant Data</h3>
+            <p>We used samtools to identify single-nucleotide variant  (SNV) sites as compared to the N2 reference genome (WS245). Variant data are provided as <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> or tab-delimited files.</p>
+
+            <p><a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat" >Learn more about VCF files here</a>.</p>
+
+            <h4>VCF</h4>
+            <p>The file below is a single <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> containing SNVs for all wild isolates.</p>
             <p><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
             <strong style="line-height:50px;"><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz">WI.{{ current_variant_set }}.snpeff.vcf.gz</a></strong></p>
-            <div style = "clear:both;"></div>
-            
-            <p>Variant data are provided as a <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> which contains genotype calls for all isotypes and variant annotations. <a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat" >Learn more about VCF files here</a>.</p>
 
-            <p>You can also access specific regions of VCF files (rather then the entire file!) from the command line: <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
+            <div style = "clear:both;"></div>
+          
+            <p>You can also access specific regions of <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> files (rather then the entire file) from the command line: <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
               See Example
             </button></p>
 
-            <p>Currently, only single nucleotide variants (SNVs) have been called. We intend to incorporate indels and other variant classes in the near future.</p>
+            <h4>Methods</h4>
+            <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('help_item', filename = "Methods") }}">here</a>.
 
         </div>
 
