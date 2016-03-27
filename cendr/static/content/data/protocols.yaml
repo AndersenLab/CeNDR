@@ -9,6 +9,9 @@ Nematode Isolation:
     link: content/protocols/ShippingStrains.pdf
 
 Maintenance:
+  - name: Freezing / Thawing Worms
+    link: content/protocols/FreezingThawingWeb.pdf
+
   - name: Cleaning Worms
     link: content/protocols/CleaningWorms.pdf
 
