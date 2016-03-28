@@ -73,9 +73,16 @@ class isotype_ind_api(Resource):
 class report_by_date(Resource):
   def get(self, date):
       print parse(date).date()
-      data = list(trait.select(report.report_slug, report.report_name, trait.trait_name, trait.trait_slug, report.release, trait.submission_complete).join(report).filter((db.truncate_date("day", trait.submission_complete) == parse(date).date()),(report.release == 0), trait.status == "complete").dicts().execute())
+      data = list(trait.select(report.release, 
+                                    report.report_name,
+                                    report.report_slug,
+                                    trait.trait_name,
+                                    trait.trait_slug,
+                                    trait.status,
+                                    trait.submission_complete, mapping).filter(trait.status == "complete", report.release == 0, (db.truncate_date("day", trait.submission_complete) == parse(date).date())).join(mapping, JOIN.LEFT_OUTER).switch(trait).join(report).distinct().dicts().order_by(trait.submission_complete.desc()).execute())
       dat = json.dumps(data, cls=CustomEncoder, indent = 4)
       return Response(response=dat, status=200, mimetype="application/json")
+
 
 class report_progress(Resource):
     def post(self,trait_slug, report_slug = None,report_hash = None):

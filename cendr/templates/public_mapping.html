@@ -46,7 +46,7 @@
 <h3>2016</h3>
 <div id="archive_date"></div>
 <br></br>
-<h3 id="title">Recent Mappings</h3>
+<h3 id="mappings">Recent Mappings</h3>
 
 <table class="table table-hover table-striped">
 	<thead>
@@ -65,7 +65,7 @@
 			<td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.trait_name }}</a></td>
 			<td>{% if i.log10p %}{{ i.chrom }}:{{ i.pos }}{% endif %}</td>
 			<td>{% if i.log10p %}{{ i.log10p }}{% else %}-{% endif %}</td>
-      <td class="date">{{ i["submission_complete"].date() }}</td>
+      <td>{{ i["submission_complete"].date() }}</td>
 		</tr>
 	{% endfor %}
 	</tbody>
@@ -225,27 +225,74 @@ cal.init({
   subDomainTextFormat: "%d",
   legend: [1, 3, 10, 15],
   onClick: function(x) {
-            $("#title").text("Archived Mappings");
+            $("#mappings").text("Archived Mappings");
             date = x.toISOString().split("T")[0];
             $.ajax({
               url: "/api/report/date/" + date,
+              success: function (data) {
+                $("tbody tr").remove();
+                console.log(data);
+                $.each(data, function(index,value){
+                  updateTable(value);
+                });
+              }
 
-            }).done(function(r) {
-              $("td.date").each(function(){
-                $(this).parent().show();
-                if (typeof r[0] !== 'undefined'){
-                  var date = r[0]['submission_complete'].substring(0,10);
-                  if ($(this).text().localeCompare(date) != 0){
-                    $(this).parent().hide();
-                  }
-                }
-                else{
-                  $(this).parent().hide();
-                }
-              })
             })
+            //.done(function(r) {
+            //   // console.log(r[0]['submission_complete']);
+            //   '{% set dates = r %}'
+            //   console.log('{{ dates }}');
+            //   // $("td.date").each(function(){
+            //   //   $(this).parent().show();
+            //   //   if (typeof r[0] !== 'undefined'){
+            //   //     var date = r[0]['submission_complete'].substring(0,10);
+            //   //     if ($(this).text().localeCompare(date) != 0){
+            //   //       $(this).parent().hide();
+            //   //     }
+            //   //   }
+            //   //   else{
+            //   //     $(this).parent().hide();
+            //   //   }
+            //   // })
+            // })
         }
 });
+
+http://localhost:8080/Genetic-Mapping/public/%7B%7B
+function updateTable(data) {
+      console.log("hello" + data['log10p']);
+      var log10p = data['log10p'].toString();
+      var chrom = data['chrom'].toString();
+      var pos = data['pos'].toString();
+      var date = data['submission_complete'].substring(0,10);
+      var newRow = 
+      {% raw %}
+      "<tr>"+ 
+        "<td>"+
+          "<a href =" + "{{ url_for('trait_view', report_slug =" + data['report_slug']+ ", trait_slug =" + data['trait_slug']+ "}}>"+ 
+            data['report_name'] + 
+          "</a>"+
+        "</td>"+
+        "<td>"+
+          "<a href =" + "{{ url_for('trait_view', report_slug= " + data['report_slug']+ ", trait_slug =" + data['trait_slug']+ "}}>"+ 
+            data['trait_name'] + 
+          "</a>"+
+        "</td>"+
+        {% endraw %}
+        "<td>"+
+          "{% if " log10p "%}{{ " chrom  " }}:{{ "  pos  " }}{% endif %}"+
+        "</td>"+
+        "<td>"+
+          "{% if"  log10p "%}{{ " log10p " }}{% else %}-{% endif %}"+
+        "</td>"+
+        "<td>"+
+            date + 
+        "</td>"+
+      "</tr>"
+
+    console.log(newRow);
+   $(newRow).appendTo($("tbody"));
+}
 
 $("body").ready(function () {
 
