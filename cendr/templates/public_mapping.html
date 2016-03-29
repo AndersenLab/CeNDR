@@ -238,60 +238,44 @@ cal.init({
               }
 
             })
-            //.done(function(r) {
-            //   // console.log(r[0]['submission_complete']);
-            //   '{% set dates = r %}'
-            //   console.log('{{ dates }}');
-            //   // $("td.date").each(function(){
-            //   //   $(this).parent().show();
-            //   //   if (typeof r[0] !== 'undefined'){
-            //   //     var date = r[0]['submission_complete'].substring(0,10);
-            //   //     if ($(this).text().localeCompare(date) != 0){
-            //   //       $(this).parent().hide();
-            //   //     }
-            //   //   }
-            //   //   else{
-            //   //     $(this).parent().hide();
-            //   //   }
-            //   // })
-            // })
         }
 });
 
 http://localhost:8080/Genetic-Mapping/public/%7B%7B
 function updateTable(data) {
-      console.log("hello" + data['log10p']);
-      var log10p = data['log10p'].toString();
-      var chrom = data['chrom'].toString();
-      var pos = data['pos'].toString();
+      var log10p = data['log10p'];
+      var chrom = data['chrom'];
+      var pos = data['pos'];
+      var td3 = (log10p) ? (chrom + ":" + pos) : ""; 
+      var td4 = (log10p) ? (log10p) : "--"; 
       var date = data['submission_complete'].substring(0,10);
-      var newRow = 
-      {% raw %}
-      "<tr>"+ 
+      var link = window.location.origin+"/report/" + data['report_slug'] + "/" + data['trait_slug'];
+      console.log(link);
+      var $newRow = 
+      $("<tr>"+ 
         "<td>"+
-          "<a href =" + "{{ url_for('trait_view', report_slug =" + data['report_slug']+ ", trait_slug =" + data['trait_slug']+ "}}>"+ 
+          "<a href =" + link + ">" +
             data['report_name'] + 
           "</a>"+
         "</td>"+
         "<td>"+
-          "<a href =" + "{{ url_for('trait_view', report_slug= " + data['report_slug']+ ", trait_slug =" + data['trait_slug']+ "}}>"+ 
+          "<a href =" + link + ">" +
             data['trait_name'] + 
           "</a>"+
         "</td>"+
-        {% endraw %}
         "<td>"+
-          "{% if " log10p "%}{{ " chrom  " }}:{{ "  pos  " }}{% endif %}"+
+          td3+
         "</td>"+
         "<td>"+
-          "{% if"  log10p "%}{{ " log10p " }}{% else %}-{% endif %}"+
+          td4+
         "</td>"+
         "<td>"+
             date + 
         "</td>"+
-      "</tr>"
+      "</tr>"); 
 
-    console.log(newRow);
-   $(newRow).appendTo($("tbody"));
+    console.log($newRow);
+   $($newRow).appendTo($("tbody"));
 }
 
 $("body").ready(function () {
