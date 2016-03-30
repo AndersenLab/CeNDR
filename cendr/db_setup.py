@@ -6,15 +6,19 @@ import json
 import datetime
 from dateutil.parser import parse
 import os
+import StringIO
+import csv
 import MySQLdb
 import _mysql
-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 
 #=======#
 # Setup #
 #=======#
 credentials = json.loads(open("credentials.json", 'r').read())
-reset_db = False
+reset_db = True
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
@@ -29,7 +33,17 @@ else:
 
 db.connect()
 
-booldict = {"TRUE": True, "FALSE": False, "NA": None, "": None, None: None}
+booldict = {"TRUE": True, "FALSE": False, "NA": None, "#N/A": None, "": None, None: None, 1: True, 0: False, "1": True, "0": False}
+
+def correct_values(k, v):
+    if v == "NA":
+        return None
+    elif k in ["set_1","set_2","set_3","set_4", "reference_strain", "set_heritability", "sequenced"]:
+        return booldict[v]
+    elif k in ["latitude", "longitude"]:
+        return autoconvert(v)
+    else:
+        return v.encode('utf-8').strip()
 
 from models import *
 with db.atomic():
@@ -40,31 +54,14 @@ with db.atomic():
 strain_info_join = requests.get(
     "https://raw.githubusercontent.com/AndersenLab/Andersen-Lab-Strains/master/processed/strain_isotype.tsv")
 
-lines = strain_info_join.text.splitlines()
+lines = csv.DictReader(StringIO.StringIO(strain_info_join.text), delimiter='\t')
 
+strain_data = []
 
 if reset_db:
-    strain_data = []
-    header = lines[0].split("\t")
-    for line in lines[1:]:
-        strain_info = re.split('\t', line)
-        strain_info = [None if x == "NA" else x for x in strain_info]
-        l = OrderedDict(zip(header, strain_info))
-        l = {k: v for k, v in l.items()}
-        l["sequenced"] = booldict[l["sequenced"]]
-        l["set_heritability"] = booldict[l["set_heritability"]]
-        l["set_1"] = booldict[l["set_1"]]
-        l["set_2"] = booldict[l["set_2"]]
-        l["set_3"] = booldict[l["set_3"]]
-        l["set_4"] = booldict[l["set_4"]]
-        if l["latitude"] == "":
-            l["latitude"] = None
-            l["longitude"] = None
-        if l["isolation_date"] is not None:
-            l["isolation_date"] = parse(l["isolation_date"])
-        for k in l.keys():
-            if l[k] == "NA":
-                l[k] = None
+    for line in lines:
+        l = {k: correct_values(k, v) for k, v in line.items()}
+        print l # Can't print characters when running!
         if l["isotype"] != "":
             strain_data.append(l)
 
@@ -84,24 +81,8 @@ else:
     strain_data = []
     header = lines[0].split("\t")
     for line in lines[1:]:
-        strain_info = re.split('\t', line)
-        strain_info = [None if x == "NA" else x for x in strain_info]
-        l = OrderedDict(zip(header, strain_info))
-        l = {k: v for k, v in l.items()}
-        l["sequenced"] = booldict[l["sequenced"]]
-        l["set_heritability"] = booldict[l["set_heritability"]]
-        l["set_1"] = booldict[l["set_1"]]
-        l["set_2"] = booldict[l["set_2"]]
-        l["set_3"] = booldict[l["set_3"]]
-        l["set_4"] = booldict[l["set_4"]]
-        if l["latitude"] == "":
-            l["latitude"] = None
-            l["longitude"] = None
-        if l["isolation_date"] is not None:
-            l["isolation_date"] = parse(l["isolation_date"])
-        for k in l.keys():
-            if l[k] == "NA":
-                l[k] = None
+        l = {k: correct_values(v) for k, v in line.items()}
+        print line["strain"]
         s = strain.get(strain = l["strain"])
         [setattr(s, k, v) for k,v in l.items()]
         s.save()

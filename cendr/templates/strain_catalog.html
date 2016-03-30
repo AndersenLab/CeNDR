@@ -57,6 +57,11 @@
                             <input type="checkbox" id="checkAll" />
                         </th>
                         <th style="width: 200px;">
+                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                            Reference Strain
+                            </span>
+                        </th>
+                        <th style="width: 200px;">
                             <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
                             Isotype
                             </span>
@@ -75,6 +80,15 @@
                     <tr>
                         <td>
                             <input type="checkbox" name="isotype" value="{{ isotype }}" info="{{ isotype + " " + strains|join(" ") }}" class="{% for s in strains %} {% for set_name in s.list_sets() %} {{ set_name }} {% endfor %}{% endfor %}" />
+                        </td>
+                        <td>
+                            {% for s in strains %}
+                                {% if s.reference_strain %}
+                                    <strong>
+                                    {{ s }}
+                                    </strong>
+                                {% endif %}
+                            {% endfor %}
                         </td>
                         <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                         <td>{{ strains|join(", ") }}</td>

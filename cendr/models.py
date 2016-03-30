@@ -25,11 +25,11 @@ class strain(Model):
         C. Elegans strain information database
     """
     strain = CharField(index=True)
+    reference_strain = BooleanField(index = True, null = False)
     isotype = CharField(null=True, index=True)
-    warning_message = CharField(null=True)
-    use = BooleanField()
-    sequenced = BooleanField()
     previous_names = CharField(null=True)
+    warning_message = CharField(null=True)
+    sequenced = BooleanField(index = True, null = False)
     source_lab = CharField(null=True)
     latitude = FloatField(null=True)
     longitude = FloatField(null=True)
@@ -41,9 +41,6 @@ class strain(Model):
     isolation_date = DateField(null=True)
     isolation_date_comment = CharField(null=True)
     notes = CharField(null=True)
-    isolation = CharField(null=True)
-    location = CharField(null=True)
-    address = CharField(null=True)
     city = CharField(null=True)
     state = CharField(null=True)
     country = CharField(null=True)
@@ -56,7 +53,6 @@ class strain(Model):
     bam_index = CharField(null=True)
     cram_file = CharField(null=True)
     cram_index = CharField(null=True)
-    variant_file = CharField(null=True)
 
     def __repr__(self):
         return self.strain
@@ -111,7 +107,7 @@ class order(Model):
 class order_strain(Model):
     order = ForeignKeyField(order)
     strain = ForeignKeyField(strain)
-
+    
     class Meta:
         database = db
 

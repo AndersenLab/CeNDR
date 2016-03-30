@@ -63,6 +63,11 @@
             <thead>
                 <tr>
                         <th style="width: 200px;">
+                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                            Reference Strain
+                            </span>
+                        </th>
+                        <th style="width: 200px;">
                             <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
                             Isotype
                             </span>
@@ -80,15 +85,19 @@
             <tbody class="searchable">
                 {% for isotype, strains in strain_listing|groupby('isotype') %}
                 <tr>
-                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-                    <td>{% for s in strains %}
-                            {% if s.sequenced == 1 %}
+                    <td>
+                        {% for s in strains %}
+                            {% if s.reference_strain %}
                                 <strong>
                                 {{ s }}
                                 </strong>
-                            {% else %}
-                                {{ s }}
                             {% endif %}
+                        {% endfor %}
+
+                    </td>
+                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
+                    <td>{% for s in strains %}
+                                {{ s }}
                         {% endfor %}
                     </td>
                     <td>
