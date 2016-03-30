@@ -43,14 +43,14 @@
 
       </div>
       <div class="col-md-6" style="text-align: center;">
-          <div class="timeline_strain_growth" style="height:250px;"></div>
-         <strong>Growth in the number of wild isolate strains</strong>
+          <!--<div class="timeline_strain_growth" style="height:250px;"></div>
+         <strong>Growth in the number of wild isolate strains</strong>-->
       </div>
   </div>
 {% endblock %}
 
 {% block script %}
-<script>
+{#<script>
 year_labels = Array();
 for (var i = 1950; i != 2020; ++i) {
     if (i % 10 == 0) {
@@ -82,6 +82,6 @@ new Chartist.Line('.timeline_strain_growth', {
     right: 40
   }
 });
-
+#}
 </script>
 {% endblock %}
