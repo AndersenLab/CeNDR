@@ -50,9 +50,9 @@ def news_item(filename = ""):
 @app.route("/help/")
 @app.route("/help/<filename>/")
 def help_item(filename = ""):
-    files = ["Getting-Started", "FAQ", "methods"]
+    files = ["Getting-Started", "FAQ", "Methods"]
     if not filename:
-        filename = files[0]
+        filename = "Getting-Started"
     title = filename.replace("-", " ")
     print title
     bcs = OrderedDict([("Help", None), (title, None)])
@@ -64,7 +64,6 @@ def feed():
     feed = AtomFeed('CeNDR News',
                     feed_url=request.url, url=request.url_root)
     files = os.listdir("cendr/static/content/news/")
-    files.reverse()
     for filename in files:
         title = filename[11:].strip(".md").replace("-", " ")
         content = render_markdown(filename.strip(".md"), "cendr/static/content/news/")
