@@ -96,13 +96,7 @@
 
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{% for s in strains %}
-                            {% if s.sequenced == 1 %}
-                                <strong>
                                 {{ s }}
-                                </strong>
-                            {% else %}
-                                {{ s }}
-                            {% endif %}
                         {% endfor %}
                     </td>
                     <td>

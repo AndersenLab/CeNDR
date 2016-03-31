@@ -12,7 +12,7 @@ else:
     print "connect"
     credentials = json.loads(open("credentials.json",'r').read())
     db =  MySQLDatabase(
-      'cegwas',
+      'cegwas_v2',
       **credentials
       )
 
