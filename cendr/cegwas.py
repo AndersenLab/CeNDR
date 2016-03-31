@@ -50,8 +50,7 @@ def news_item(filename = ""):
 @app.route("/help/")
 @app.route("/help/<filename>/")
 def help_item(filename = ""):
-    files = [os.path.splitext(x)[0] for x in os.listdir("cendr/static/content/help/") if not x.startswith(".")]
-    files.reverse()
+    files = ["Getting-Started", "FAQ", "methods"]
     if not filename:
         filename = files[0]
     title = filename.replace("-", " ")
