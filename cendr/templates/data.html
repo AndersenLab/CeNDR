@@ -62,6 +62,11 @@
             <thead>
                 <tr>
                         <th style="width: 200px;">
+                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                            Reference Strain
+                            </span>
+                        </th>
+                        <th style="width: 200px;">
                             <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
                             Isotype
                             </span>
@@ -73,22 +78,25 @@
                     </th>
                     <th style="width: 200px;">BAM</th>
                     <th style="width: 200px;">CRAM</th>
-                    <th style="width: 200px;">Tab-Delimited Variants</th>
                 </tr>
             </thead>
             <div style="height: 30px;" ></div>
             <tbody class="searchable">
                 {% for isotype, strains in strain_listing|groupby('isotype') %}
                 <tr>
+                        <td>
+                            {% for s in strains %}
+                                {% if s.reference_strain %}
+                                    <strong>
+                                    {{ s }}
+                                    </strong>
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+
                     <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                     <td>{% for s in strains %}
-                            {% if s.sequenced == 1 %}
-                                <strong>
                                 {{ s }}
-                                </strong>
-                            {% else %}
-                                {{ s }}
-                            {% endif %}
                         {% endfor %}
                     </td>
                     <td>
@@ -104,9 +112,6 @@
                             <strong>/</strong> <a href="{{ strains[0].cram_index }}">.crai</a> 
                         {% endif %}
 
-                    </td>
-                    <td>
-                       <a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/tsv/WI.{{ isotype }}.{{ current_variant_set }}.tsv">WI.{{ isotype }}.{{ current_variant_set }}.tsv</a>
                     </td>
                 </tr>
                 {% endfor %}

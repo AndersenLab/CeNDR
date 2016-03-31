@@ -55,6 +55,7 @@ def strain_listing_page():
     bcs = OrderedDict([("strain", None)])
     title = "Strain Catalog"
     strain_listing = strain.select(strain.strain,
+                                   strain.reference_strain,
                                    strain.isotype,
                                    strain.previous_names,
                                    strain.set_1,
