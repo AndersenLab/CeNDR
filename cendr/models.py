@@ -7,7 +7,7 @@ import _mysql
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    db = MySQLDatabase('cegwas', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+    db = MySQLDatabase('cegwas_v2', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
     print "connect"
     credentials = json.loads(open("credentials.json",'r').read())
@@ -77,7 +77,7 @@ class strain(Model):
 
 
 class order(Model):
-    price = FloatField()
+    total = FloatField()
     charge = CharField(null = False)
     stripeToken = CharField(index = True)
     stripeShippingName = CharField(null = False)
@@ -107,6 +107,7 @@ class order(Model):
 class order_strain(Model):
     order = ForeignKeyField(order)
     strain = ForeignKeyField(strain)
+    price = FloatField()
     
     class Meta:
         database = db

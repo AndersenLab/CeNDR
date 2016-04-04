@@ -184,7 +184,7 @@ def public_mapping():
         title = "Search: " + query
         subtitle = "results"
         q = "%" + query + "%"
-        results = mapping.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(trait).join(report).dicts().filter((trait.trait_slug % q) |
+        results = trait.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(mapping).join(report).dicts().filter((trait.trait_slug % q) |
                                     (trait.trait_name % q) |
                                     (report.report_name % q) |
                                     (report.report_slug % q)).order_by(mapping.log10p.desc())
@@ -240,7 +240,7 @@ def trait_view(report_slug, trait_slug=""):
 
     # Fetch significant mappings
     mapping_results = list(mapping.select(mapping, report, trait).join(trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())
-
+    status = list(trait.select(report, trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())[0]
     # List available datasets
     report_files = list(storage.Client().get_bucket("cendr").list_blobs(
         prefix=report_slug + "/" + trait_slug + "/tables"))

@@ -4,12 +4,17 @@ from flask import render_template, request, url_for, redirect
 from cendr.models import strain, order, order_strain
 from collections import OrderedDict
 import json
+import os
 import yaml
 import stripe
 from google.appengine.api import mail
 from cendr.emails import order_submission
 
-stripe_keys = ds.get(ds.key("credential", "stripe_test"))
+if (os.getenv('SERVER_SOFTWARE') and
+        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
+    stripe_keys = ds.get(ds.key("credential", "stripe_live"))
+else:
+    stripe_keys = ds.get(ds.key("credential", "stripe_test"))
 
 #
 # Global Strain Map
