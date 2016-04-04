@@ -143,8 +143,9 @@
 
   Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
 
-{% else %}
+{% elif status.status == 'complete' %}
   Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped. If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.
+
 {% endif %}
 
 {% if mapping_results %}

@@ -94,6 +94,8 @@
 {% block script %}
 <script>
 
+{% if not query %}
+
 {% for chrom in pub_mappings|groupby('chrom') %}
 var c{{ chrom[0] }} = {
 	name: "{{ chrom[0] }}",
@@ -296,6 +298,7 @@ setTimeout(function() {
 
 });
 
+{% endif %}
 
 </script>
 {% endblock %}
