@@ -203,7 +203,7 @@ cal.init({
   subDomainTextFormat: "%d",
   subDomain: "x_day",
   data: {{ date_set|tojson|safe }},
-  start: new Date(2016, 2,1),
+  start: new Date(2016, 3,1),
   cellSize: 20,
   cellPadding: 5,
   domainGutter: 20,
@@ -254,27 +254,18 @@ function updateTable(data) {
       var link = window.location.origin+"/report/" + data['report_slug'] + "/" + data['trait_slug'];
       console.log(link);
       var $newRow = 
-      $("<tr>"+ 
-        "<td>"+
-          "<a href =" + link + ">" +
+      $("<tr><td><a href =" + link + ">" +
             data['report_name'] + 
-          "</a>"+
-        "</td>"+
-        "<td>"+
+          "</a></td><td>"+
           "<a href =" + link + ">" +
             data['trait_name'] + 
-          "</a>"+
-        "</td>"+
-        "<td>"+
-          td3+
-        "</td>"+
-        "<td>"+
-          td4+
-        "</td>"+
-        "<td>"+
-            date + 
-        "</td>"+
-      "</tr>"); 
+        "</a></td><td>"+
+          td3 +
+        "</td><td>" +
+          td4 +
+        "</td><td>" +
+          date + 
+        "</td></tr>"); 
 
     console.log($newRow);
    $($newRow).appendTo($("tbody"));
