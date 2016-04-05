@@ -8,6 +8,8 @@
 <link href="/static/report/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="/static/report/tocify-1.9.1/jquery.tocify.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="/static/report/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="/static/report/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="/static/report/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="/static/report/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="/static/report/htmlwidgets-0.6/htmlwidgets.js"></script>
@@ -22,6 +24,7 @@
 <link href="/static/report/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet" />
 <script src="/static/report/selectize-0.12.0/selectize.min.js"></script>
 
+
 <script type="text/javascript" async
   src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
@@ -31,6 +34,30 @@
 <script type="text/javascript" src="/static/js/d3_exploding_boxplot.js"></script>
 <link href="/static/css/d3_exploding_boxplot.css" rel="stylesheet" />
 
+<style>
+#TOC {
+  width: 100%;
+}
+div.tocify {
+  width: 100%;
+  max-width: 240px;
+  max-height: 85%;
+}
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+#report .main-container {
+  padding: 0px;
+}
+</style>
 
 {% endblock %}
 
@@ -39,7 +66,8 @@
 {% endblock %}
 
 {% block content %}
-
+<!-- tabsets -->
+<script src="/static/report/navigation-1.0/tabsets.js"></script>
 
 <div class="row">
       <div class="col-md-12">
@@ -126,11 +154,7 @@
 
 <div id="report2" data-toggle="tab" >
 
-{# Null Report #}
-{% if 1 == 1 %}
-
-{% endif %}
-
+{# 
 {% if mapping_results %}
 
 <h2>Phenotype</h2>
@@ -234,47 +258,18 @@ A genome-wide representation of the association between variation in the <em>C. 
 </div>
 
 {% else %}
-{# nonsignificant mapping #}
+
 
 {% endif %}
 
 <div>
 
-
+#}
 
 <div id="report">
             {{ report_html|safe }}
 </div>
-<style>
 
-#TOC {
-  width: 100%;
-}
-
-div.tocify {
-  width: 100%;
-  max-width: 240px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-#report .main-container {
-  padding: 0px;
-}
-
-</style>
 
 
 {% endblock %}

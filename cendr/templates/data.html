@@ -78,6 +78,7 @@
                     </th>
                     <th style="width: 200px;">BAM</th>
                     <th style="width: 200px;">CRAM</th>
+                    <th>Tab-delimited variants</th>
                 </tr>
             </thead>
             <div style="height: 30px;" ></div>
@@ -111,6 +112,10 @@
                             <a href="{{ strains[0].cram_file }}">{{ isotype }}.cram</a>
                             <strong>/</strong> <a href="{{ strains[0].cram_index }}">.crai</a> 
                         {% endif %}
+
+                          <td>
+                      <a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/tsv/WI.{{ isotype }}.{{ current_variant_set }}.tsv">WI.{{ isotype }}.{{ current_variant_set }}.tsv</a>
+                      </td>
 
                     </td>
                 </tr>

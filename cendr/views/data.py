@@ -9,7 +9,7 @@ from flask import render_template
 def data_page():
     bcs = OrderedDict([("data", None)])
     title = "Data"
-    current_variant_set = "20160106"
+    current_variant_set = "20160326"
     strain_listing = strain.select().filter(
         strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('data.html', **locals())
