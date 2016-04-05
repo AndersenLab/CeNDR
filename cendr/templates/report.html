@@ -34,31 +34,6 @@
 <script type="text/javascript" src="/static/js/d3_exploding_boxplot.js"></script>
 <link href="/static/css/d3_exploding_boxplot.css" rel="stylesheet" />
 
-<style>
-#TOC {
-  width: 100%;
-}
-div.tocify {
-  width: 100%;
-  max-width: 240px;
-  max-height: 85%;
-}
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-#report .main-container {
-  padding: 0px;
-}
-</style>
-
 {% endblock %}
 
 
@@ -282,6 +257,31 @@ MathJax.Hub.Config({
   tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
 });
 </script>
+
+<style>
+#TOC {
+  width: 100%;
+}
+div.tocify {
+  width: 100%;
+  max-width: 240px;
+  max-height: 85%;
+}
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+#report .main-container {
+  padding: 0px;
+}
+</style>
 
 <script>
 
