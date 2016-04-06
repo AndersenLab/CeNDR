@@ -15,8 +15,17 @@
         <div class="panel panel-default">
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
               <ul class="list-group">
-                <li class="list-group-item"><strong>Isotype Name</strong> <div class="isotype pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Strain Name</strong> <div class="strain pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item">
+                <strong>
+                <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+                            Isotype
+                </span>
+                </strong> 
+                        <div class="isotype pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                            Reference Strain
+                            </span></strong> 
+                            <div class="strain pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div><div style="clear:both;"></div></li>
@@ -165,6 +174,18 @@ var search_control = new L.Control.Search({layer: strain_layer,
 search_control.on('search_locationfound', set_panel_from_search);
 map.addControl(search_control);
 $('.search-input').width(100);
+
+
+$(document).ready(function() {
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
+});
+
+
+
 </script>
 
 {% endblock %}
