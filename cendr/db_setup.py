@@ -18,7 +18,7 @@ sys.setdefaultencoding('utf-8')
 # Setup #
 #=======#
 credentials = json.loads(open("credentials.json", 'r').read())
-reset_db = True
+reset_db = False
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
@@ -78,11 +78,15 @@ if reset_db:
     except:
         pass
 else:
-    strain_data = []
-    header = lines[0].split("\t")
-    for line in lines[1:]:
-        l = {k: correct_values(v) for k, v in line.items()}
-        print line["strain"]
-        s = strain.get(strain = l["strain"])
-        [setattr(s, k, v) for k,v in l.items()]
-        s.save()
+    with db.atomic():
+        for line in lines:
+            l = {k: correct_values(k, v) for k, v in line.items()}
+            print line["strain"]
+            try:
+                s = strain.get(strain = l["strain"])
+                [setattr(s, k, v) for k,v in l.items()]
+                s.save()
+            except:
+                s = strain()
+                [setattr(s, k, v) for k,v in l.items()]
+                s.save()
