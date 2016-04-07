@@ -214,8 +214,8 @@ cal.init({
     return moment(date).format("MMMM").toUpperCase();
   },
   legendColors: {
-    min:  "#ffffff",
-    max: "#232181",
+    min:  "#FFCC66",
+    max: "#FF0000",
     empty: "white"
     // Will use the CSS for the missing keys
   },
@@ -225,7 +225,7 @@ cal.init({
   previousSelector: "#example-g-PreviousDomain-selector",
   nextSelector: "#example-g-NextDomain-selector",
   subDomainTextFormat: "%d",
-  legend: [1, 3, 10, 15],
+  legend: [1, 8, 12, 20],
   onClick: function(x) {
             $("#mappings").text("Archived Mappings");
             date = x.toISOString().split("T")[0];

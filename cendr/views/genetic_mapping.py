@@ -5,7 +5,6 @@ from cendr.models import db, report, strain, trait, trait_value, mapping
 from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
-import datetime
 import pytz
 from peewee import fn
 from dateutil.relativedelta import relativedelta
@@ -36,7 +35,7 @@ class CustomEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, decimal.Decimal):
             return float(o)
-        if isinstance(o, datetime.date):
+        if isinstance(o, date):
             return str(o)
         return super(CustomEncoder, self).default(o)
 
