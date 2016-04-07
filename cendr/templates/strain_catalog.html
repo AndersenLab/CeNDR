@@ -27,7 +27,7 @@
         <div class="col-md-12">
             <div class="row">
                 <div class="col-md-6">
-                    <button type="button" class="btn btn-primary" id="set_heritability">Divergent</button>
+                    <button type="button" class="btn btn-primary" id="set_divergent">Divergent</button>
                     <strong style="margin-left: 20px;">Mapping Sets:</strong>
                     <div class="btn-group" role="group" aria-label="...">
                         <button type="button" class="btn btn-default" id="set_1">1</button>
@@ -140,7 +140,7 @@ $(document).ready(function() {
 });
 
 highlight_set_buttons = function() {
-    set_names = ["set_heritability", "set_1", "set_2", "set_3", "set_4"];
+    set_names = ["set_divergent", "set_1", "set_2", "set_3", "set_4"];
     for (i in set_names) {
         if ($("." + set_names[i] + ":checkbox:checked").length == $("." + set_names[i]).length) {
             $("#" + set_names[i]).addClass("btn-success");

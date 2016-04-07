@@ -67,7 +67,7 @@ def strain_listing_page():
                                    strain.set_2,
                                    strain.set_3,
                                    strain.set_4,
-                                   strain.set_heritability).filter(strain.isotype != None).order_by(strain.isotype).execute()
+                                   strain.set_divergent).filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('strain_catalog.html', **locals())
 
 #
@@ -101,13 +101,18 @@ def protocols():
 def calculate_total(strain_list):
     price_adjustment = 0
     strain_list = [x["isotype"] for x in strain.select(strain.isotype).where(strain.isotype << strain_list).distinct(strain.isotype).dicts().execute()]
-    strain_sets = list(strain.select(strain.isotype, strain.set_1, strain.set_2, strain.set_3, strain.set_4).distinct().dicts().execute())
+    strain_sets = list(strain.select(strain.isotype, strain.set_1, strain.set_2, strain.set_3, strain.set_4, strain.set_divergent).distinct().dicts().execute())
     added_sets = []
     for i in range(1,5):
         set_test = [x["isotype"] for x in strain_sets if x["set_" + str(i)] is not None]
         if all([x in strain_list for x in set_test]):
-            price_adjustment += 5000
-            added_sets.append("set_" + str(i))     
+            price_adjustment += 8000
+            added_sets.append("set_" + str(i))
+    # Divergent set
+    set_divergent = [x["isotype"] for x in strain_sets if x["set_divergent"] is not None]
+    if all([x in strain_list for x in set_divergent]):
+            price_adjustment += 2000
+            added_sets.append("divergent_set")
     return len(strain_list)*1000 - price_adjustment, price_adjustment, added_sets
 
 @app.route('/order', methods=['GET','POST'])
@@ -141,7 +146,8 @@ def order_page():
         with db.atomic():
             order_created = order.create(**order_formatted)
             # NEED TO FILTER HERE FOR REFERENCE STRAINS
-            order_strain_insert = [{"order": order_created.id, "strain": strain.get(isotype=x)} for x in strain_listing]
+            strain_reference = list(strain.select(strain.strain).filter(strain.strain << strain_listing).filter(strain.reference_strain == True).dicts().execute())
+            order_strain_insert = [{"order": order_created.id, "strain": strain.get(strain=x["strain"])} for x in strain_reference]
             order_strain.insert_many(order_strain_insert).execute()
 
         # Send user email
@@ -149,7 +155,6 @@ def order_page():
                 to=order_formatted["stripeEmail"],
                 subject="CeNDR Order Submission " + order_formatted["stripeToken"][20:],
                 body=order_submission.format(order_slug=order_formatted["stripeToken"][20:]))
-
 
         return redirect(url_for("order_confirmation", order_id=request.form["stripeToken"][20:]), code=302)
     else:
@@ -167,3 +172,8 @@ def order_confirmation(order_id):
     strain_listing = order.select(strain.strain, strain.isotype, order.stripeToken).join(order_strain).switch(order_strain).join(strain).filter(order.stripeToken ** query).dicts().execute()
     total, price_adjustment, added_sets = calculate_total([x["strain"] for x in strain_listing])
     return render_template('order_confirm.html', **locals())
+
+
+
+
+

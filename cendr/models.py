@@ -44,7 +44,7 @@ class strain(Model):
     city = CharField(null=True)
     state = CharField(null=True)
     country = CharField(null=True)
-    set_heritability = BooleanField(null=True)
+    set_divergent = BooleanField(null=True)
     set_1 = BooleanField(null=True)
     set_2 = BooleanField(null=True)
     set_3 = BooleanField(null=True)
@@ -59,8 +59,8 @@ class strain(Model):
 
     def list_sets(self):
         set_list = []
-        if self.set_heritability == True:
-            set_list.append("set_heritability")
+        if self.set_divergent == True:
+            set_list.append("set_divergent")
         if self.set_1 == True:
             set_list.append("set_1")
         if self.set_2 == True:

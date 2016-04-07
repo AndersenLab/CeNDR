@@ -20,6 +20,7 @@
             <thead>
                 <tr>
                     <th style="width: 40px">#</th>
+                    <th style="width 200px;">Reference Strain</th>
                     <th style="width 200px;">Isotype</th>
                     <th>Strain</th>
                     <th class="price">Price</th>
@@ -29,6 +30,12 @@
                 {% for isotype, strains in strain_listing|groupby('isotype') %}
                 <tr>
                     <td>{{ loop.index }}</td>
+                    <td>{% for ref_strain in strains %}
+                            {% if ref_strain["reference_strain"] == True %}
+                                {{ ref_strain }}
+                            {% endif %}
+                        {% endfor %}
+                    </td>
                     <td><strong>{{ isotype }}</strong></td>
                     <td>{{ strains|join(" ") }}</td>
                     <td class="price">${{'%0.2f'| format(1000/100|float)}}</td>
@@ -38,12 +45,14 @@
                 <tr  style="color:red">
                 <td>Bulk Discount</td>
                 <td></td>
+                <td></td>
                 <td>{{ ', '.join(added_sets).replace("_", " ") }}</td>
                 <td class="price"><strong>${{'%0.2f'| format(price_adjustment/100|float)}}</strong></td>
                 </tr>
                 {% endif %}
                 <tr>
                 <td><strong>Total</strong></td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td class="price"><strong>${{'%0.2f'| format(total/100|float)}}</strong></td>
