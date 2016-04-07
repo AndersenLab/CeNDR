@@ -134,6 +134,7 @@ def order_page():
 
         charge = stripe.Charge.create(
             customer=customer.id,
+            receipt_email=request.form['stripeEmail'],
             amount=total,
             currency='usd',
             description='Flask Charge',
