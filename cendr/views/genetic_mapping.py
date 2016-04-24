@@ -14,7 +14,7 @@ from flask import render_template, request, redirect, url_for
 from collections import OrderedDict
 import hashlib
 import requests
-
+import decimal
 import itertools
 from slugify import slugify
 import hashlib
@@ -30,6 +30,14 @@ def get_queue():
     iron_credentials = ds.get(ds.key("credential", "iron"))
     return IronMQ(**dict(iron_credentials)).queue("cegwas-map")
 
+
+class CustomEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return float(o)
+        if isinstance(o, date):
+            return str(o)
+        return super(CustomEncoder, self).default(o)
 
 @app.route('/genetic-mapping/submit/')
 def gwa():
@@ -155,7 +163,7 @@ def process_gwa():
         resp = queue.post(str(json.dumps(req)))
         req["success"] = True
         # Send user email
-    if req["release"] != 1:
+    if req["release"] > 0:
         report_slug = req["report_hash"]
     else:
         report_slug = req["report_slug"]
@@ -211,7 +219,8 @@ def public_mapping():
 
 @app.route("/report/<report_slug>/")
 @app.route("/report/<report_slug>/<trait_slug>")
-def trait_view(report_slug, trait_slug=""):
+@app.route("/report/<report_slug>/<trait_slug>/<rerun>")
+def trait_view(report_slug, trait_slug="", rerun = None):
     report_data = list(trait.select(trait, report).join(report).where(((report.report_slug == report_slug) & (
         report.release == 0)) | (report.report_hash == report_slug)).dicts().execute())
     if trait_slug:
@@ -226,6 +235,17 @@ def trait_view(report_slug, trait_slug=""):
             report_url_slug = trait_data["report_slug"]
         else:
             report_url_slug = trait_data["report_hash"]
+        if rerun == "rerun":
+            if trait_data["status"] == "error":
+                queue = get_queue()
+                print trait_data
+                #trait_data["submission_date"] = datetime.now(
+                #    pytz.timezone("America/Chicago")).isoformat()
+                # Submit job to iron worker
+                queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
+            # Return user to current trait
+            return redirect(url_for("trait_view", report_slug=trait_data["report_slug"], trait_slug=trait_data["trait_slug"]))
+
     else:
         # Redirect to first trait always.
         try:
@@ -241,6 +261,7 @@ def trait_view(report_slug, trait_slug=""):
     # Fetch significant mappings
     mapping_results = list(mapping.select(mapping, report, trait).join(trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())
     status = list(trait.select(report, trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())[0]
+
     # List available datasets
     report_files = list(storage.Client().get_bucket("cendr").list_blobs(
         prefix=report_slug + "/" + trait_slug + "/tables"))
@@ -255,7 +276,6 @@ def trait_view(report_slug, trait_slug=""):
     else:
         report_html = ""
     return render_template('report.html', **locals())
-
 
 @app.route('/report_progress/', methods=['POST'])
 def report_progress():

@@ -26,7 +26,7 @@ def map_page():
     title = "Global Strain Map"
     bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("global-strain-map", "")])
     strain_list_dicts = []
-    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
+    strain_listing = list(strain.select().filter(strain.reference_strain == True)
         .filter(strain.latitude.is_null() == False).execute())
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
     return render_template('map.html', **locals())
@@ -43,10 +43,7 @@ def isotype_page(isotype_name):
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name)
                 .order_by(strain.latitude).dicts().execute())
-    try:
-        ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
-    except:
-        ref_strain = rec[0]
+    ref_strain = [x for x in rec if x["reference_strain"] == True][0]
     strain_json_output = json.dumps([x for x in rec if x["latitude"] != None],  default=json_serial)
     return render_template('strain.html', **locals())
 
