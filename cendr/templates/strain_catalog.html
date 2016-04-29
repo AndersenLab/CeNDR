@@ -10,36 +10,10 @@
 {% block content %}
 <form method="POST" action="/order">
     <div class="row">
-      <div class="col-md-6">
-            <h3><strong>Order Strains</strong></h3>
-            <p>To order strains, click the checkbox to the left of individual strains.</p>
-                <p>Below you will see a <strong>divergent</strong> button and <strong>1-4</strong> buttons for selecting pre-defined sets of strains.</p>
-
-                 <p>The <strong>divergent set</strong> includes 12 genotypically different strains and can be used to determine broad-sense heritability after repeated independent measures of your favorite phenotype. <strong>We recommend starting with the divergent set.</strong></p>
-                 <p>Sets <strong>1-4</strong> each contain 48 strains that should be assayed for genetic mapping experiments. We recommend using a single set of 48 strains. After you have scored and optimized your quantitative trait, additional sets can be assayed to increase statistical power for association mapping.</p>
-      </div>
-      <div class="col-md-6">
-          <img width="470px" style="border-style: dotted" src="/static/img/main/strain_map.png">
-          <br></br>
-      </div>
-    </div>
-    <div class="row">
         <div class="col-md-12">
             <div class="row">
-                <div class="col-md-6">
-                    <button type="button" class="btn btn-primary" id="set_divergent">Divergent</button>
-                    <strong style="margin-left: 20px;">Mapping Sets:</strong>
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" class="btn btn-default" id="set_1">1</button>
-                        <button type="button" class="btn btn-default" id="set_2">2</button>
-                        <button type="button" class="btn btn-default" id="set_3">3</button>
-                        <button type="button" class="btn btn-default" id="set_4">4</button>
-                    </div>
-                    <button style = "margin-left: auto;" type="button" class="btn btn-link" data-toggle="modal" tooltip data-target="#myModal" data-placement="top" title="Paste a list of strains to select">Paste File</button>
-
-                </div>
-                <div class="col-md-4">
-                    <input id="filter" type="text" class="form-control" placeholder="Enter Strain Name" action="#">
+                <div class="col-md-10">
+                            <h3>Strain Sets</h3>
                 </div>
                 <div class="col-md-2">
                     <div id="checkout" style="z-index:1000000" data-offset-top="170" data-spy="affix">
@@ -49,7 +23,84 @@
                     </div>
                 </div>
             </div>
-            <div style="height: 30px;" ></div>
+            <p>Pre-defined sets of strains can be ordered below.</p>
+                <p>The <strong>divergent set</strong> includes 12 genotypically different strains and can be used to determine broad-sense heritability after repeated independent measures of your favorite phenotype. <strong>We recommend starting with the divergent set.</strong></p>
+                 <p>Sets <strong>1-3</strong> each contain 48 strains that should be assayed for genetic mapping experiments. We recommend using a single set of 48 strains. After you have scored and optimized your quantitative trait, additional sets can be assayed to increase statistical power for association mapping.</p>
+
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th style="width: 20px;">
+                        
+                        </th>
+                        <th style="width:160px;">Set Name</th>
+                        <th style="width:120px;">Number of Strains</th>
+                        <th>Strains</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="set_divergent" value="set_divergent"/>
+                        </td>
+                        <td><strong>Divergent Set</strong></td>
+                        <td>12</td>
+                        <td>
+                        <small>
+                            {% for isotype, strains in strain_listing|groupby('isotype') %}
+                                {% for s in strains %} {% for set_name in s.list_sets() %} 
+                                {% with f = "set_divergent" %}
+                                    {% if set_name == f %}{{ s }}{% endif %}
+                                {% endwith %}
+                                {% endfor %}
+                                {% endfor %}
+                            {% endfor %}
+                        </small>
+                        </td>
+                    </tr>
+                    {% for i in range(1,4) %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="set_divergent" value="set_{{ i }}"/>
+                        </td>
+                        <td><strong>Mapping Set {{ i }}</strong></td>
+                        <td>48</td>
+                        <td>
+                        <a class="btn btn-link btn-block" data-toggle="collapse" data-target="#view_set_{{ i }}">View Strains</a>
+                        <p class="collapse" id="view_set_{{ i }}">
+                            {% for isotype, strains in strain_listing|groupby('isotype') %}
+                                {% for s in strains %} 
+                                    {% for set_name in s.list_sets() %} 
+                                        {% with f = "set_" + i|string %}
+                                            {% if set_name == f %}
+                                                {{ s }}<br />
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endfor %}
+                        </p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h3>Individual Strains</h3>
+ </div>
+ <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-7">
+                            <p>Individual strains can be ordered below.</p>
+                </div>
+                <div class="col-md-1">
+                    <button style = "margin-left: auto;" type="button" class="btn btn-link btn-block" data-toggle="modal" tooltip data-target="#myModal" data-placement="top" title="Paste a list of strains to select">Paste List</button>
+                </div>
+                <div class="col-md-4">
+                    <input id="filter" type="text" class="form-control" placeholder="Enter Strain Name" action="#">
+                </div>
+            </div>
+<br />
             <table class="table table-hover table-striped">
                 <thead>
                     <tr>
@@ -127,6 +178,7 @@ $(document).ready(function() {
         var patterns = [];
         $('#filter').keyup(function() {
             $('.searchable tr').hide();
+            console.log($(this).val());
             $(this).val().split(',').forEach(function(r) {
                 var rex = new RegExp(r, "i");
                 $('.searchable tr').filter(function() {
