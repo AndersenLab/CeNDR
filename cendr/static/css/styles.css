@@ -1,6 +1,11 @@
 /* @override 
   http://localhost:4000/assets/css/styles.css */
 
+.col-list { 
+    display: block;
+    width: 25%;
+    float: left;
+ }
 
 #feedback {
   position: fixed;
