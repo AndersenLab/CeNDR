@@ -16,36 +16,33 @@ import stripe
 from gcloud import datastore
 ds = datastore.Client(project="andersen-lab")
 sys.setdefaultencoding('utf-8')
-
-
-if (os.getenv('SERVER_SOFTWARE') and
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    stripe_keys = ds.get(ds.key("credential", "stripe_live"))
-else:
-    stripe_keys = ds.get(ds.key("credential", "stripe_test"))
+from models import *
 
 #=======#
 # Setup #
 #=======#
 reset_db = False
 
+# Fetch stripe keys
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     stripe_keys = ds.get(ds.key("credential", "stripe_live"))
-    db = MySQLDatabase('cegwas_v2', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
     stripe_keys = ds.get(ds.key("credential", "stripe_test"))
     credentials = json.loads(open("credentials.json",'r').read())
-    db =  MySQLDatabase(
-      'cegwas_v2',
-      **credentials
-      )
 
 stripe.api_key = stripe_keys["secret_key"]
 
-db.connect()
-
-booldict = {"TRUE": True, "FALSE": False, "NA": None, "#N/A": None, "": None, None: None, 1: True, 0: False, "1": True, "0": False}
+booldict = {"TRUE": True,
+            "FALSE": False,
+            "NA": None, 
+            "#N/A": None, 
+            "": None, 
+            None: None, 
+            1: True, 
+            0: False, 
+            "1": True, 
+            "0": False}
 
 def correct_values(k, v):
     if v == "NA":
@@ -57,13 +54,12 @@ def correct_values(k, v):
     else:
         return v.encode('utf-8').strip()
 
-from models import *
+table_list = [strain, report, trait, trait_value, mapping, order, order_strain]
 
-print dir(strain)
 with db.atomic():
     if reset_db:
-        db.drop_tables([strain, report, trait, trait_value, mapping, order, order_strain], safe = True)
-    db.create_tables([strain, report, trait, trait_value, mapping, order, order_strain], safe=True)
+        db.drop_tables(table_list, safe = True)
+    db.create_tables(table_list, safe = True)
 
 strain_info_join = requests.get(
     "https://raw.githubusercontent.com/AndersenLab/Andersen-Lab-Strains/master/processed/strain_isotype_full.tsv")
@@ -87,7 +83,6 @@ if reset_db:
         CREATE VIEW report_trait AS SELECT report.id AS report_id, report.report_name, report.report_slug, trait.id AS traitID , trait.trait_name, trait.trait_slug, report.email, trait.status, trait.submission_date, trait.submission_complete, report.release FROM report JOIN trait ON trait.report_id = report.id;
         CREATE VIEW report_trait_value AS (SELECT *  FROM trait_value JOIN report_trait ON report_trait.traitID = trait_value.trait_id)
         CREATE VIEW report_trait_strain_value AS (SELECT report_name, report_slug, trait_name, trait_slug, strain_id, value, email, submission_date, submission_complete, `release`, strain.* FROM report_trait_value JOIN strain ON strain_id = strain.id);
-
         """)
     except:
         pass
@@ -100,48 +95,48 @@ else:
             # Setup data for stripe.
             strain_set = "|".join([x["strain"] for x in lines if line["isotype"] == x["isotype"]])
             previous_names = '|'.join([x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
-            #try:
-            #    s = strain.get(strain = l["strain"])
-            #except:
-            #    s = strain()
-            #[setattr(s, k, v) for k,v in l.items()]
-            #s.save()
+            try:
+                s = strain.get(strain = l["strain"])
+            except:
+                s = strain()
+            [setattr(s, k, v) for k,v in l.items()]
+            s.save()
             # Add Stripe Products
-            if l["reference_strain"] and l["isotype"] != "NA" and l["isotype"] != "":
-                try:
-                    # Try to update product
-                    product = stripe.Product.retrieve(l["isotype"])
-                    product.id = l["isotype"]
-                    product.name = l["isotype"]
-                    product.caption = "Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"])
-                    product.metadata["isotype"] = l["isotype"]
-                    product.metadata["strain_set"] = strain_set
-                    product.metadata["previous_names"] = previous_names 
-                    product.save()
-                except:
-                    # If product does not exist, create it.
-                    product = stripe.Product.create(
-                        id=line["isotype"],
-                        name=line["isotype"],
-                        caption="Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"]),
-                        metadata={'isotype': line["isotype"],
-                                  'strain_set': strain_set,
-                                  'previous_names': previous_names},
-                    )
-                # Create SKU (Stock keeping unit)
-                try:
-                    # Try to update product
-                    sku = stripe.SKU.retrieve(l["strain"])
-                    sku.currency = "usd"
-                    sku.inventory = {"type": "infinite"}
-                    sku.product = line["isotype"]
-                    sku.price = 1000
-                except:
-                    sku = stripe.SKU.create(
-                        id = line["strain"],
-                        currency = "usd",
-                        inventory = {"type": "infinite"},
-                        product = line["isotype"],
-                        price = 1000
-                        )
-                print line["strain"]
+            #if l["reference_strain"] and l["isotype"] != "NA" and l["isotype"] != "":
+            #    try:
+            #        # Try to update product
+            #        product = stripe.Product.retrieve(l["isotype"])
+            #        product.id = l["isotype"]
+            #        product.name = l["isotype"]
+            #        product.caption = "Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"])
+            #        product.metadata["isotype"] = l["isotype"]
+            #        product.metadata["strain_set"] = strain_set
+            #        product.metadata["previous_names"] = previous_names 
+            #        product.save()
+            #    except:
+            #        # If product does not exist, create it.
+            #        product = stripe.Product.create(
+            #            id=line["isotype"],
+            #            name=line["isotype"],
+            #            caption="Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"]),
+            #            metadata={'isotype': line["isotype"],
+            #                      'strain_set': strain_set,
+            #                      'previous_names': previous_names},
+            #        )
+            #    # Create SKU (Stock keeping unit)
+            #    try:
+            #        # Try to update product
+            #        sku = stripe.SKU.retrieve(l["strain"])
+            #        sku.currency = "usd"
+            #        sku.inventory = {"type": "infinite"}
+            #        sku.product = line["isotype"]
+            #        sku.price = 1000
+            #    except:
+            #        sku = stripe.SKU.create(
+            #            id = line["strain"],
+            #            currency = "usd",
+            #            inventory = {"type": "infinite"},
+            #            product = line["isotype"],
+            #            price = 1000
+            #            )
+            #    print line["strain"]

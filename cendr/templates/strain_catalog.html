@@ -67,19 +67,19 @@
                         <td>48</td>
                         <td>
                         <a class="btn btn-link btn-block" data-toggle="collapse" data-target="#view_set_{{ i }}">View Strains</a>
-                        <p class="collapse" id="view_set_{{ i }}">
+                        <div class="collapse" id="view_set_{{ i }}" >
                             {% for isotype, strains in strain_listing|groupby('isotype') %}
                                 {% for s in strains %} 
                                     {% for set_name in s.list_sets() %} 
                                         {% with f = "set_" + i|string %}
                                             {% if set_name == f %}
-                                                {{ s }}<br />
+                                                <li class="col-list">{{ s }}</li>
                                             {% endif %}
                                         {% endwith %}
                                     {% endfor %}
                                 {% endfor %}
                             {% endfor %}
-                        </p>
+                        </div>
                         </td>
                     </tr>
                     {% endfor %}
