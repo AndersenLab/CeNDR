@@ -9,10 +9,9 @@ if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     db = MySQLDatabase('cegwas_v2', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
-    print "connect"
     credentials = json.loads(open("credentials.json",'r').read())
     db =  MySQLDatabase(
-      'cegwas_v2',
+      "development",
       **credentials
       )
 
