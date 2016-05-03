@@ -1,7 +1,7 @@
 from cendr import app, autoconvert, ds, db
 from cendr import json_serial
 from flask import render_template, request, url_for, redirect
-from cendr.models import strain, order, order_strain
+from cendr.models import strain
 from collections import OrderedDict
 import json
 import os
@@ -160,27 +160,27 @@ def order_page():
             description='CeNDR Order',
             statement_descriptor='CeNDR Order'
         )
-        print(order)
         # Send user email
         mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
                 to=customer.email,
-                subject="CeNDR Order Submission " + order.id[20:],
-                body=order_submission.format(order_slug=order.id[20:]))
+                subject="CeNDR Order Submission " + order.id[3:],
+                body=order_submission.format(order_slug=order.id[3:]))
         mail.send_mail_to_admins(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
-                subject="CeNDR Order Submission " + order.id[20:],
-                body=order_submission.format(order_slug=order.id[20:]))
-        return redirect(url_for("order_confirmation", order_id=order.id[20:]), code=302)
+                subject="CeNDR Order Submission " + order.id[3:],
+                body=order_submission.format(order_slug=order.id[3:]))
+        return redirect(url_for("order_confirmation", order_id=order.id), code=302)
     else:
         return render_template('order.html', **locals())
 
 
 @app.route("/order/<order_id>/")
 def order_confirmation(order_id):
+    if order_id.startswith("or_"):
+        order_id = order_id[3:]
     page_title = "Order: " + order_id
-    query = "%" + order_id
-    record = order.get(order.stripeToken ** query)
-    strain_listing = order.select(strain.strain, strain.isotype, order.stripeToken).join(order_strain).switch(order_strain).join(strain).filter(order.stripeToken ** query).dicts().execute()
-    total, price_adjustment, added_sets = calculate_total([x["strain"] for x in strain_listing])
+    stripe.api_key = stripe_keys["secret_key"]
+    order = stripe.Order.retrieve("or_" + order_id)   
+    print(order)     
     return render_template('order_confirm.html', **locals())
 
 

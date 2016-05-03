@@ -74,44 +74,6 @@ class strain(Model):
         database = db
 
 
-
-class order(Model):
-    total = FloatField()
-    charge = CharField(null = False)
-    stripeToken = CharField(index = True)
-    stripeShippingName = CharField(null = False)
-    stripeEmail = CharField(null = False)
-    stripeShippingAddressLine1 = CharField(null = False)
-    stripeShippingAddressCity = CharField(null = False)
-    stripeShippingAddressState = CharField(null = False)
-    stripeShippingAddressZip = IntegerField(null = False)
-    stripeShippingAddressCountry = CharField(null = False)
-    stripeShippingAddressCountryCode = CharField(null = False)
-
-    # Billing
-    stripeBillingName = CharField(null = False)
-    stripeBillingAddressLine1 = CharField(null = False)
-    stripeBillingAddressCity = CharField(null = False)
-    stripeBillingAddressState = CharField(null = False)
-    stripeBillingAddressZip = IntegerField(null = False)
-    stripeBillingAddressCountry = CharField(null = False)
-    stripeBillingAddressCountryCode = CharField(null = False)
-
-    order_time = DateTimeField(default=datetime.datetime.now)
-
-    class Meta:
-        database = db
-
-
-class order_strain(Model):
-    order = ForeignKeyField(order)
-    strain = ForeignKeyField(strain)
-    price = FloatField()
-    
-    class Meta:
-        database = db
-
-
 class report(Model):
     """
         Reports
