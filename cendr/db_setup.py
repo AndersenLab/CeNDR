@@ -100,7 +100,7 @@ else:
             except:
                 s = strain()
             [setattr(s, k, v) for k,v in l.items()]
-            s.save()
+            #s.save()
             # Add Stripe Products
             #if l["reference_strain"] and l["isotype"] != "NA" and l["isotype"] != "":
             #    try:
@@ -140,3 +140,46 @@ else:
             #            price = 1000
             #            )
             #    print line["strain"]
+
+# Add Strain Sets
+for i in ["1","2","3","divergent"]:
+    print i
+    set_name = "set_" + i 
+    if set_name == "set_divergent":
+        price = 10000
+        caption = "12 strains"
+    else:
+        price = 40000
+        caption = "48 strains"
+    strain_list = ','.join(sorted([str(x) for x in list(strain.filter(getattr(strain, set_name) == True).execute())]))
+    print(strain_list)
+    try:
+        product = stripe.Product.create(
+        id=set_name,
+        name=set_name,
+        description=strain_list,
+        caption=caption
+        )
+    except:
+        product = stripe.Product.retrieve(set_name)
+        product.id = set_name
+        product.name = set_name
+        product.description = strain_list
+        product.caption=caption
+        product.save()
+    try:
+        sku = stripe.SKU.create(
+            id = set_name,
+            currency = "usd",
+            inventory = {"type": "infinite"},
+            product = product.name,
+            price = price
+        )
+    except:
+        sku = stripe.SKU.retrieve(set_name)
+        sku.id = set_name
+        sku.currency = "usd"
+        sku.inventory = {"type": "infinite", "quantity": None, "value": None}
+        sku.price = price
+        sku.save()
+

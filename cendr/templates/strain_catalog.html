@@ -41,7 +41,7 @@
                 <tbody>
                     <tr>
                         <td>
-                            <input type="checkbox" name="set_divergent" value="set_divergent"/>
+                            <input type="checkbox" name="item" value="set_divergent"/>
                         </td>
                         <td><strong>Divergent Set</strong></td>
                         <td>12</td>
@@ -61,7 +61,7 @@
                     {% for i in range(1,4) %}
                     <tr>
                         <td>
-                            <input type="checkbox" name="set_divergent" value="set_{{ i }}"/>
+                            <input type="checkbox" name="item" value="set_{{ i }}"/>
                         </td>
                         <td><strong>Mapping Set {{ i }}</strong></td>
                         <td>48</td>
@@ -130,7 +130,7 @@
                     {% for isotype, strains in strain_listing|groupby('isotype') %}
                     <tr>
                         <td>
-                            <input type="checkbox" name="isotype" value="{{ isotype }}" info="{{ isotype + " " + strains|join(" ") }}" class="{% for s in strains %} {% for set_name in s.list_sets() %} {{ set_name }} {% endfor %}{% endfor %}" />
+                            <input type="checkbox" name="item" value="{{ isotype }}" info="{{ isotype + " " + strains|join(" ") }}" class="{% for s in strains %} {% for set_name in s.list_sets() %} {{ set_name }} {% endfor %}{% endfor %}" />
                         </td>
                         <td>
                             {% for s in strains %}
