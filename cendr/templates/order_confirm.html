@@ -21,10 +21,16 @@
     {{ order.shipping.address.line1 }}<br>
     {{ order.shipping.address.city }}, {{ order.shipping.address.state }}. {{ order.shipping.address.postal_code }}<br>
   </address></li>
-  <li><strong>Status:</strong> {{ order.status }}</li>
   <li><strong>Shipping Service: </strong>{{ order.metadata["Shipping Service"] }}
   <li><strong>Shipping Account Number: </strong>{{ order.metadata["Shipping Account"] }}</li>
-  <li><strong>Tracking Number: </strong>{% if order.metadata.tracking %}{{ order.metadata.tracking }}{% else %}Not yet assigned{% endif %}</li>
+  <li><strong>Tracking Number: </strong>
+  {% if order.metadata.tracking and order.metadata["Shipping Service"] == "UPS" %}
+      <a href="http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order.metadata.tracking }}">{{ order.metadata.tracking }}</a>
+  {% elif order.metadata.tracking and order.metadata["Shipping Service"] == "FEDEX" %}
+      <a href="http://www.fedex.com/Tracking?action=track&tracknumbers={{ order.metadata.tracking }}">{{ order.metadata.tracking }}</a>
+  {% else %}
+      Not yet assigned
+  {% endif %}</li>
 </p>
 
 </div>
