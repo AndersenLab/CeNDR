@@ -7,11 +7,13 @@ import _mysql
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    db = MySQLDatabase('cegwas_v2', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+    dbname = "cegwas_v2"
+    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
     credentials = json.loads(open("credentials.json",'r').read())
+    dbname = "development"
     db =  MySQLDatabase(
-      "development",
+      dbname,
       **credentials
       )
 

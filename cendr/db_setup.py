@@ -31,7 +31,7 @@ if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     stripe_keys = ds.get(ds.key("credential", "stripe_live"))
 else:
-    stripe_keys = ds.get(ds.key("credential", "stripe_live"))
+    stripe_keys = ds.get(ds.key("credential", "stripe_test"))
     credentials = json.loads(open("credentials.json",'r').read())
 
 stripe.api_key = stripe_keys["secret_key"]
