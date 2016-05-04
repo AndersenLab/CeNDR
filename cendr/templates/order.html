@@ -54,8 +54,8 @@
     </select>
   </div>
   <div class="form-group">
-    <label for="acct">Account Number</label>
-    <input id="acct" class="form-control" required name="shipping-account-number" placeholder="">
+    <label for="acct" placeholder="Enter Account Number" required>Account Number</label>
+    <input id="acct" class="form-control" required name="shipping-account-number" placeholder="Enter Account Number" required>
   </div>
 
   <script
@@ -91,7 +91,19 @@ $(document).ready(function() {
 
     }(jQuery));
 
+    if ( $(this).val().length == 0 ) {
+        $(".stripe-button-el").addClass("disabled");
+    }
+
 });
+
+$("#acct").keyup(function() {
+    if ( $(this).val().length == 0 ) {
+        $(".stripe-button-el").addClass("disabled");
+    } else {
+        $(".stripe-button-el").removeClass("disabled");
+    }
+})
 
 $("#checkAll").click(function() {
     $('input:checkbox:visible').not(this).prop('checked', this.checked);

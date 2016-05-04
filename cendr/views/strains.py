@@ -56,6 +56,10 @@ def isotype_page(isotype_name):
 def strain_listing_page():
     bcs = OrderedDict([("strain", None)])
     title = "Strain Catalog"
+
+    if 'warning' in request.args:
+        warning = request.args["warning"]
+
     strain_listing = strain.select(strain.strain,
                                    strain.reference_strain,
                                    strain.isotype,
@@ -112,12 +116,16 @@ def order_page():
     title = "Order"
     strain_listing = list(set(request.form.getlist('item')))
     items = request.form.getlist("item")
-    print request.form
     # Retreive SKU's for prices
     items = calculate_total(items)
     total = sum(items.values())
 
+    # Stripe can only process 25 items at once.
+    if len(items) > 25:
+        return redirect(url_for("strain_listing_page", warning = "A maximum of 25 items may be ordered (sets + strains)."))
+
     key = stripe_keys["public_key"]
+
     if 'stripeToken' in request.form:
         stripe.api_key = stripe_keys["secret_key"]
         try:

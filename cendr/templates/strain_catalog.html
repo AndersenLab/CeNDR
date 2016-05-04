@@ -130,7 +130,7 @@
                     {% for isotype, strains in strain_listing|groupby('isotype') %}
                     <tr>
                         <td>
-                            <input type="checkbox" name="item" value="{{ isotype }}" info="{{ isotype + " " + strains|join(" ") }}" class="{% for s in strains %} {% for set_name in s.list_sets() %} {{ set_name }} {% endfor %}{% endfor %}" />
+                            <input type="checkbox" name="item" value="{{ isotype }}" info="{{ isotype + " " + strains|join(" ") }}" class="ind_strain" />
                         </td>
                         <td>
                             {% for s in strains %}
@@ -206,7 +206,7 @@ highlight_set_buttons = function() {
 $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
 
 $("#checkAll").click(function() {
-    $('input:checkbox:visible').not(this).prop('checked', this.checked);
+    $('input:checkbox:visible.ind_strain').not(this).prop('checked', this.checked);
 });
 
 $("input:checkbox").click(function(x) {

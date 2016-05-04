@@ -21,7 +21,9 @@
   <h2>{{ title }}        {% if subtitle %}<small>{{subtitle}}</small>{% endif %}{% block title_right %}{% endblock %}</h2>
       {% endif %}
       {% if warning %}
-
+        <div class="alert alert-warning">
+          {{ warning }}
+        </div>
       {% endif %}
       {% if  bcs %}
       <ol class="breadcrumb">
