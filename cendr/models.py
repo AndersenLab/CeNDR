@@ -181,6 +181,13 @@ class call(Model):
     FT = CharField(index = True)
     GT = CharField(index = True)
 
+# class invariants(Model):
+#     chrom = CharField(index=True)
+#     pos = IntegerField(index=True)
+#     _id = IntegerField(index=True)
+#     ref = CharField()
+#     alt
+
 
 
 def autoconvert(s):

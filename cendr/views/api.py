@@ -161,6 +161,17 @@ class site_gt_range_annotation(Resource):
         result = json.dumps(result, cls=CustomEncoder, indent = 4)
         return Response(response=result, status = 201, mimetype="application/json")
 
+class site_gt_invariant_table(Resource):
+  def get(self,chrom,pos,interval_start, interval_end,reference):
+      result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
+                  .join(call)
+                  .switch(site)
+                  .join(annotation)
+                  .filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end)
+                  .dicts()
+                  .execute())
+      result = json.dumps(result, cls=CustomEncoder, indent = 4)
+      return Response(response=result, status = 201, mimetype="application/json")
 
 api.add_resource(mapping_api, '/api/mapping/')
 api.add_resource(strain_api, '/api/strain/')
@@ -170,6 +181,7 @@ api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>/')
 # Variants
 api.add_resource(site_gt, '/api/variants/<string:chrom>/<int:pos>')
 api.add_resource(site_gt_range, '/api/variants/<string:chrom>/<int:pos>/<int:pos_end>')
+api.add_resource(site_gt_invariant_table, '/api/variants/<string:chrom>/<int:pos>/<int:pos_end>')
 
 # Annotations
 api.add_resource(site_gt_annotation, '/api/variants/annotation/<string:chrom>/<int:pos>')

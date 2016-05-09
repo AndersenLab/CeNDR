@@ -3,6 +3,8 @@
 
 {% block custom_head %}
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" rel="stylesheet" />
+<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script
 <script src="/static/report/jquery-1.11.3/jquery.min.js"></script>
 <script src="/static/report/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="/static/report/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
@@ -34,6 +36,23 @@
 <script type="text/javascript" src="/static/js/d3_exploding_boxplot.js"></script>
 <link href="/static/css/d3_exploding_boxplot.css" rel="stylesheet" />
 
+<style>
+
+.report {
+  width: 100%;
+}
+
+.height-report {
+  height: 60%;
+  width: 60%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto
+}
+
+</style>
+
+
 {% endblock %}
 
 
@@ -63,13 +82,7 @@
 
 <div class="col-md-12">
 
-{% if trait_slug and report_html == "" %}
-<div class="progress">
-  <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
-  aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:0%">
-  </div>
-</div>
-{% else %}
+
 
 <div class="panel panel-default">
   <div class="panel-heading">
@@ -122,36 +135,30 @@
   </div>
 </div>
 
-{% endif %}
-
   </div>
 </div>
 
 <div id="report2" data-toggle="tab" >
 
-{# 
-{% if mapping_results %}
 
 <h2>Phenotype</h2>
 
 
-<img src="{{ base_url }}/figures/phenotype_histogram-1.png" />
+<img class="report" src="{{ base_url }}/figures/phenotype_histogram-1.png" />
 <strong>Histogram representation of your phenotype</strong>
 
 
 
   Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
 
-{% elif status.status == 'complete' %}
+<!--
   Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped. If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.
+ -->
 
-{% endif %}
-
-{% if mapping_results %}
 
 <h2>Manhattan Plot</h2>
 
-<img src="{{ base_url }}/figures/Manplot-1.png" />
+<img class="report" src="{{ base_url }}/figures/Manplot-1.png" />
 
 A genome-wide representation of the association between variation in the <em>C. elegans</em>em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated in the gray box above each facet. Dots represent single-nucleotide variant (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL confidence interval, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value $(-log_{10}\frac{0.05}{\#SNVs})$ and is usually around 5.5.
 
@@ -177,14 +184,14 @@ A genome-wide representation of the association between variation in the <em>C. 
 </table>
 <h3>QQ-Plot</h3>
 
-<img src="{{ base_url }}/figures/QQplot-1.png" />
+<img class="height-report" src="{{ base_url }}/figures/QQplot-1.png" />
 <p>Quantile-quantile plot generated from the p-values from the association mapping. This plot shows the expected distribution of association test statistics on the x-axis compared to the observed values on the y-axis. Each dot corresponds to an individual SNV. SNVs that deviate from the x=y line indicate that they are associated with your phenotype. Earlier separation from the identity line is indication of population stratification not being eliminated by the mapping algorithm.</p>
 
 <h3>Phenotype-by-Genotype</h3>
 <br />
-<img src="{{ base_url }}/figures/PxGplot-1.png" />
+<img class="report" src="{{ base_url }}/figures/PxGplot-1.png" />
 
-
+    
 <!--<div id="chartContainer"></div>-->
 
 
@@ -192,7 +199,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 <h3>Linkage Disequilibrium</h3>
 
-<img src="{{ base_url }}/figures/LDplot-1.png" />
+<img class="height-report" src="{{ base_url }}/figures/LDplot-1.png" />
 
 <p>Peak markers are the most statistically significant markers identified within a peak. The Linkage Disequilibrium (LD) measure being plotted is the correlation between peak markers $r = \frac{-D}{\sqrt{p(A) * p(a) * p(B) * p*(b)}}$, where D raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
 
@@ -216,13 +223,143 @@ A genome-wide representation of the association between variation in the <em>C. 
     <div role="tabpanel" class="tab-pane active" id="#{{ peak.chrom }}:{{ peak.pos }}">
 
     <h3>Table Summary</h3>
+    <table id="example" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Chrom</th>
+                <th>Pos</th>
+                <th>Interval</th>
+                <th>Gene_Name</th>
+                <th>Ref</th>
+                <th>Alt</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <th>Chrom</th>
+                <th>Pos</th>
+                <th>Interval</th>
+                <th>Gene_Name</th>
+                <th>Ref</th>
+                <th>Alt</th>
+            </tr>
+        </tfoot>
+    </table>
 
     <h3>Global Distribution</h3>
 
     <p>Salmon dots correspond to strains that have the alternate allele and purple dots are strains that have the N2 allele.</p>
 
     <h3>Tajima's D</h3>
+      <div class="container">
+   
+          <div>
+              <svg id="visualisation" width="1000" height="500"></svg>
+                  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+                  <script>
+                      function InitChart() {
+                          var data = [{
+                              "sale": "202",
+                              "year": "2000"
+                          }, {
+                              "sale": "215",
+                              "year": "2002"
+                          }, {
+                              "sale": "179",
+                              "year": "2004"
+                          }, {
+                              "sale": "199",
+                              "year": "2006"
+                          }, {
+                              "sale": "134",
+                              "year": "2008"
+                          }, {
+                              "sale": "176",
+                              "year": "2010"
+                          }];
+                          var data2 = [{
+                              "sale": "152",
+                              "year": "2000"
+                          }, {
+                              "sale": "189",
+                              "year": "2002"
+                          }, {
+                              "sale": "179",
+                              "year": "2004"
+                          }, {
+                              "sale": "199",
+                              "year": "2006"
+                          }, {
+                              "sale": "134",
+                              "year": "2008"
+                          }, {
+                              "sale": "176",
+                              "year": "2010"
+                          }];
+                          var vis = d3.select("#visualisation"),
+                              WIDTH = 1000,
+                              HEIGHT = 500,
+                              MARGINS = {
+                                  top: 20,
+                                  right: 20,
+                                  bottom: 20,
+                                  left: 50
+                              },
+                              xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([2000, 2010]),
+                              yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([134, 215]),
+                              xAxis = d3.svg.axis()
+                              .scale(xScale),
+                              yAxis = d3.svg.axis()
+                              .scale(yScale)
+                              .orient("left");
+                          
+                          vis.append("svg:g")
+                              .attr("class", "x axis")
+                              .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
+                              .call(xAxis);
+                          vis.append("svg:g")
+                              .attr("class", "y axis")
+                              .attr("transform", "translate(" + (MARGINS.left) + ",0)")
+                              .call(yAxis);
+                          var lineGen = d3.svg.line()
+                              .x(function(d) {
+                                  return xScale(d.year);
+                              })
+                              .y(function(d) {
+                                  return yScale(d.sale);
+                              })
+                              .interpolate("basis");
+                          vis.append('svg:path')
+                              .attr('d', lineGen(data))
+                              .attr('stroke', 'green')
+                              .attr('stroke-width', 2)
+                              .attr('fill', 'none');
+                          vis.append('svg:path')
+                              .attr('d', lineGen(data2))
+                              .attr('stroke', 'blue')
+                              .attr('stroke-width', 2)
+                              .attr('fill', 'none');
 
+                          var zoom = d3.behavior.zoom()
+                            .x(xScale)
+                            .on('zoom', function() {
+                                if (xScale.domain()[0] < minDate) {
+                              var x = zoom.translate()[0] - xScale(minDate) + xScale.range()[0];
+                                    zoom.translate([x, 0]);
+                                } else if (xScale.domain()[1] > maxDate) {
+                              var x = zoom.translate()[0] - xScale(maxDate) + xScale.range()[1];
+                                    zoom.translate([x, 0]);
+                                }
+                                redrawChart();
+                                updateViewportFromChart();
+                            });
+                          };
+                      InitChart();
+                  </script>
+          </div>
+   
+      </div>
+    </div>
     <p>Tajima's D across the most signficant QTL interval. Tajimaâs D tests whether a genomic region has the expected level of variation if it is only undergoing drift - values close to 0 indicate observed variation similar to expected levels, D&lt;0 suggests that rare alleles are present, which may have arose due to a recent selective sweep, population expansion after a recent bottleneck, or linkage to a swept gene, and D&gt;0 indicating balancing selection or sudden population contraction.</p>
 
 
@@ -232,18 +369,11 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 </div>
 
-{% else %}
-
-
-{% endif %}
-
 <div>
 
-#}
 
-<div id="report">
-            {{ report_html|safe }}
-</div>
+<style>
+
 
 
 
@@ -257,31 +387,6 @@ MathJax.Hub.Config({
   tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
 });
 </script>
-
-<style>
-#TOC {
-  width: 100%;
-}
-div.tocify {
-  width: 100%;
-  max-width: 240px;
-  max-height: 85%;
-}
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-#report .main-container {
-  padding: 0px;
-}
-</style>
 
 <script>
 
@@ -368,9 +473,17 @@ function check_status() {
     });
 }
 
+$(document).ready(function() {
+    $('#example').DataTable( {
+        "ajax": "/cendr/static/content/data/interval_variants.tsv",
+        "deferRender": true
+    } );
+} );
+
 check_status();
 
 window.setInterval(check_status, 3000);
+
 {% endif %}
 
 </script>
