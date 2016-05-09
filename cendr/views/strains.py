@@ -1,7 +1,7 @@
 from cendr import app, autoconvert, ds, db
 from cendr import json_serial
 from flask import render_template, request, url_for, redirect
-from cendr.models import strain, order, order_strain
+from cendr.models import strain
 from collections import OrderedDict
 import json
 import os
@@ -26,7 +26,7 @@ def map_page():
     title = "Global Strain Map"
     bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("global-strain-map", "")])
     strain_list_dicts = []
-    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
+    strain_listing = list(strain.select().filter(strain.reference_strain == True)
         .filter(strain.latitude.is_null() == False).execute())
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
     return render_template('map.html', **locals())
@@ -43,10 +43,7 @@ def isotype_page(isotype_name):
     obj = isotype_name
     rec = list(strain.filter(strain.isotype == isotype_name)
                 .order_by(strain.latitude).dicts().execute())
-    try:
-        ref_strain = [x for x in rec if x["strain"] == isotype_name][0]
-    except:
-        ref_strain = rec[0]
+    ref_strain = [x for x in rec if x["reference_strain"] == True][0]
     strain_json_output = json.dumps([x for x in rec if x["latitude"] != None],  default=json_serial)
     return render_template('strain.html', **locals())
 
@@ -59,6 +56,10 @@ def isotype_page(isotype_name):
 def strain_listing_page():
     bcs = OrderedDict([("strain", None)])
     title = "Strain Catalog"
+
+    if 'warning' in request.args:
+        warning = request.args["warning"]
+
     strain_listing = strain.select(strain.strain,
                                    strain.reference_strain,
                                    strain.isotype,
@@ -67,7 +68,7 @@ def strain_listing_page():
                                    strain.set_2,
                                    strain.set_3,
                                    strain.set_4,
-                                   strain.set_heritability).filter(strain.isotype != None).order_by(strain.isotype).execute()
+                                   strain.set_divergent).filter(strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('strain_catalog.html', **locals())
 
 #
@@ -98,72 +99,99 @@ def protocols():
 # Strain Ordering Pages
 # 
 
-def calculate_total(strain_list):
-    price_adjustment = 0
-    strain_list = [x["isotype"] for x in strain.select(strain.isotype).where(strain.isotype << strain_list).distinct(strain.isotype).dicts().execute()]
-    strain_sets = list(strain.select(strain.isotype, strain.set_1, strain.set_2, strain.set_3, strain.set_4).distinct().dicts().execute())
-    added_sets = []
-    for i in range(1,5):
-        set_test = [x["isotype"] for x in strain_sets if x["set_" + str(i)] is not None]
-        if all([x in strain_list for x in set_test]):
-            price_adjustment += 5000
-            added_sets.append("set_" + str(i))     
-    return len(strain_list)*1000 - price_adjustment, price_adjustment, added_sets
+def calculate_total(item_list):
+    item_price_list = {}
+    for i in item_list:
+        if i == "set_divergent":
+            item_price_list[i] = 10000
+        elif i.startswith("set"):
+            item_price_list[i] = 40000
+        else:
+            item_price_list[i] = 1000
+    return item_price_list
 
 @app.route('/order', methods=['GET','POST'])
 def order_page():
     bcs = OrderedDict([("strain", "/strain/"), ("order", "")])
     title = "Order"
-    strain_listing = list(set(request.form.getlist('isotype')))
+    strain_listing = list(set(request.form.getlist('item')))
+    items = request.form.getlist("item")
+    # Retreive SKU's for prices
+    items = calculate_total(items)
+    total = sum(items.values())
 
-    # Calculate total
-    total, price_adjustment, added_sets = calculate_total(strain_listing)
+    # Stripe can only process 25 items at once.
+    if len(items) > 25:
+        return redirect(url_for("strain_listing_page", warning = "A maximum of 25 items may be ordered (sets + strains)."))
 
     key = stripe_keys["public_key"]
+
     if 'stripeToken' in request.form:
         stripe.api_key = stripe_keys["secret_key"]
-        customer = stripe.Customer.create(
-            email=request.form['stripeEmail'],
-            card=request.form['stripeToken']
-        )
+        try:
+            customer = stripe.Customer.retrieve(request.form['stripeEmail'].lower())
+        except:
+            customer = stripe.Customer.create(
+                id=request.form['stripeEmail'].lower(),
+                email=request.form['stripeEmail'],
+                card=request.form['stripeToken']
+            )
 
+        address = {
+            "city": request.form["stripeShippingAddressCity"],
+            "country": request.form["stripeShippingAddressCountry"],
+            "line1": request.form["stripeShippingAddressLine1"],
+            "postal_code": request.form["stripeShippingAddressZip"],
+            "state": request.form["stripeShippingAddressState"]
+        }
+
+        if "stripeShippingAddressLine2" in request.form:
+            address.update({"line2":request.form["stripeShippingAddressLine2"]})
+        order = stripe.Order.create(
+            currency = 'usd',
+            items = [{"parent": m} for m in items.keys()],
+            shipping = {
+                        "name": request.form["stripeShippingName"],
+                        "address": address,
+                        "phone": None
+                        },
+            customer = customer.id,
+            metadata = {"Shipping Service": request.form["shipping-service"],
+                        "Shipping Account": request.form["shipping-account-number"]}
+            )
         charge = stripe.Charge.create(
             customer=customer.id,
-            amount=total,
-            currency='usd',
-            description='Flask Charge',
-            metadata={"strain_sets" : ", ".join(added_sets)}
+            order=order.id,
+            receipt_email=customer.email,
+            amount=order.amount,
+            currency=order.currency,
+            description='CeNDR Order',
+            statement_descriptor='CeNDR Order'
         )
-
-        order_formatted = {k: autoconvert(v) for k, v in request.form.items()}
-        order_formatted["price"] = total
-        order_formatted["charge"] = charge["id"]
-        with db.atomic():
-            order_created = order.create(**order_formatted)
-            # NEED TO FILTER HERE FOR REFERENCE STRAINS
-            order_strain_insert = [{"order": order_created.id, "strain": strain.get(isotype=x)} for x in strain_listing]
-            order_strain.insert_many(order_strain_insert).execute()
-
         # Send user email
         mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
-                to=order_formatted["stripeEmail"],
-                subject="CeNDR Order Submission " + order_formatted["stripeToken"][20:],
-                body=order_submission.format(order_slug=order_formatted["stripeToken"][20:]))
-
-
-        return redirect(url_for("order_confirmation", order_id=request.form["stripeToken"][20:]), code=302)
+                to=customer.email,
+                subject="CeNDR Order Submission " + order.id[3:],
+                body=order_submission.format(order_slug=order.id[3:]))
+        mail.send_mail_to_admins(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+                subject="CeNDR Order Submission " + order.id[3:],
+                body=order_submission.format(order_slug=order.id[3:]))
+        return redirect(url_for("order_confirmation", order_id=order.id), code=302)
     else:
-        n_strains = len(strain_listing)
-        # [ ] ! Filter for strains that will be sent out here!
-        strain_listing = strain.select().where(strain.isotype << strain_listing).order_by(strain.isotype).execute()
         return render_template('order.html', **locals())
 
 
 @app.route("/order/<order_id>/")
 def order_confirmation(order_id):
+    if order_id.startswith("or_"):
+        order_id = order_id[3:]
     page_title = "Order: " + order_id
-    query = "%" + order_id
-    record = order.get(order.stripeToken ** query)
-    strain_listing = order.select(strain.strain, strain.isotype, order.stripeToken).join(order_strain).switch(order_strain).join(strain).filter(order.stripeToken ** query).dicts().execute()
-    total, price_adjustment, added_sets = calculate_total([x["strain"] for x in strain_listing])
+    stripe.api_key = stripe_keys["secret_key"]
+    order = stripe.Order.retrieve("or_" + order_id)   
+    print(order)     
     return render_template('order_confirm.html', **locals())
+
+
+
+
+

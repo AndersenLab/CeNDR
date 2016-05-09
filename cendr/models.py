@@ -7,12 +7,13 @@ import _mysql
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    db = MySQLDatabase('cegwas_v2', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+    dbname = "cegwas_v2"
+    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
-    print "connect"
     credentials = json.loads(open("credentials.json",'r').read())
+    dbname = "development"
     db =  MySQLDatabase(
-      'cegwas_v2',
+      dbname,
       **credentials
       )
 
@@ -44,7 +45,7 @@ class strain(Model):
     city = CharField(null=True)
     state = CharField(null=True)
     country = CharField(null=True)
-    set_heritability = BooleanField(null=True)
+    set_divergent = BooleanField(null=True)
     set_1 = BooleanField(null=True)
     set_2 = BooleanField(null=True)
     set_3 = BooleanField(null=True)
@@ -59,8 +60,8 @@ class strain(Model):
 
     def list_sets(self):
         set_list = []
-        if self.set_heritability == True:
-            set_list.append("set_heritability")
+        if self.set_divergent == True:
+            set_list.append("set_divergent")
         if self.set_1 == True:
             set_list.append("set_1")
         if self.set_2 == True:
@@ -71,44 +72,6 @@ class strain(Model):
             set_list.append("set_4")
         return set_list
 
-    class Meta:
-        database = db
-
-
-
-class order(Model):
-    total = FloatField()
-    charge = CharField(null = False)
-    stripeToken = CharField(index = True)
-    stripeShippingName = CharField(null = False)
-    stripeEmail = CharField(null = False)
-    stripeShippingAddressLine1 = CharField(null = False)
-    stripeShippingAddressCity = CharField(null = False)
-    stripeShippingAddressState = CharField(null = False)
-    stripeShippingAddressZip = IntegerField(null = False)
-    stripeShippingAddressCountry = CharField(null = False)
-    stripeShippingAddressCountryCode = CharField(null = False)
-
-    # Billing
-    stripeBillingName = CharField(null = False)
-    stripeBillingAddressLine1 = CharField(null = False)
-    stripeBillingAddressCity = CharField(null = False)
-    stripeBillingAddressState = CharField(null = False)
-    stripeBillingAddressZip = IntegerField(null = False)
-    stripeBillingAddressCountry = CharField(null = False)
-    stripeBillingAddressCountryCode = CharField(null = False)
-
-    order_time = DateTimeField(default=datetime.datetime.now)
-
-    class Meta:
-        database = db
-
-
-class order_strain(Model):
-    order = ForeignKeyField(order)
-    strain = ForeignKeyField(strain)
-    price = FloatField()
-    
     class Meta:
         database = db
 

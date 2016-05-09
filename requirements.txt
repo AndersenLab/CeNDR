@@ -16,3 +16,4 @@ Markdown==2.5.2
 pyyaml
 gcloud
 PyCrypto
+Flask-SSLify

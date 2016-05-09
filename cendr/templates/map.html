@@ -1,7 +1,9 @@
 {% extends "_layouts/default.html" %}
 
 {% block custom_head %}
-  <script src="http://cdn.leafletjs.com/leaflet-0.7/leaflet.js"></script>
+  <link rel="stylesheet" href="/static/css/leaflet.css" />
+  <link rel="stylesheet" href="/static/css/leaflet-search.css" />
+  <script src="/static/js/leaflet.js"></script>
   <script src="/static/js/leaflet-search.js"></script>
 {% endblock %}
 
@@ -15,8 +17,17 @@
         <div class="panel panel-default">
           <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
               <ul class="list-group">
-                <li class="list-group-item"><strong>Isotype Name</strong> <div class="isotype pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Strain Name</strong> <div class="strain pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item">
+                <strong>
+                <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+                            Isotype
+                </span>
+                </strong> 
+                        <div class="isotype pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                            Reference Strain
+                            </span></strong> 
+                            <div class="strain pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div><div style="clear:both;"></div></li>
@@ -115,11 +126,11 @@ function restore_click_locked_content(m) {
 }
 
   ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
-  MB_ATTR = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+  MB_ATTR = 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+    '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
     'Imagery © <a href="http://mapbox.com">Mapbox</a>';
   MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
-  OSM_URL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
   var southWest = L.latLng(-90, -180),
@@ -165,6 +176,18 @@ var search_control = new L.Control.Search({layer: strain_layer,
 search_control.on('search_locationfound', set_panel_from_search);
 map.addControl(search_control);
 $('.search-input').width(100);
+
+
+$(document).ready(function() {
+
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
+});
+
+
+
 </script>
 
 {% endblock %}
