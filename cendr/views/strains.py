@@ -168,6 +168,8 @@ def order_page():
             description='CeNDR Order',
             statement_descriptor='CeNDR Order'
         )
+        if charge.paid:
+            order.pay()
         # Send user email
         mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
                 to=customer.email,
@@ -187,8 +189,7 @@ def order_confirmation(order_id):
         order_id = order_id[3:]
     page_title = "Order: " + order_id
     stripe.api_key = stripe_keys["secret_key"]
-    order = stripe.Order.retrieve("or_" + order_id)   
-    print(order)     
+    order = stripe.Order.retrieve("or_" + order_id)      
     return render_template('order_confirm.html', **locals())
 
 

@@ -138,7 +138,21 @@
   </div>
 </div>
 
-<div id="report2" data-toggle="tab" >
+
+<div id="report2" data-toggle="tab" data-spy="scroll" >
+
+
+<nav id="report_nav" class="navbar navbar-default">
+  <div class="container-fluid">
+   <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">Link</a></li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
 
 
 <h2>Phenotype</h2>
@@ -386,9 +400,19 @@ A genome-wide representation of the association between variation in the <em>C. 
 MathJax.Hub.Config({
   tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
 });
-</script>
 
-<script>
+
+
+$('#report_nav').affix({
+  offset: {
+    offset: 200,
+    target: $("#report2"),
+    top: function () {
+      return (this.top = $('#report2').outerHeight(true))
+    }
+  }
+})
+
 
 var box1 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
             .map(function(d,i){return {v:d,g:'box1',t:'pt 1'+i}})

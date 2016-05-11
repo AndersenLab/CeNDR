@@ -24,7 +24,7 @@ from models import *
 reset_db = False
 
 # which services should be updated.
-update = ["stripe"] # ["db", "stripe"]
+update = ["db"] # ["db", "stripe"]
 
 # Fetch stripe keys
 if (os.getenv('SERVER_SOFTWARE') and
@@ -91,8 +91,6 @@ if reset_db:
         except:
             pass
 else:
-        #print stripe.Product.all()
-
     with db.atomic():
         for line in lines:
             l = {k: correct_values(k, v) for k, v in line.items()}
@@ -105,6 +103,7 @@ else:
                 s = strain()
             [setattr(s, k, v) for k,v in l.items()]
             if "db" in update:
+                print(line["isotype"])
                 s.save()
             # Add Stripe Products
             if l["reference_strain"] and l["isotype"] != "NA" and l["isotype"] != "" and "stripe" in update:

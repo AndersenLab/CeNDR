@@ -1,7 +1,7 @@
 from cendr import app
 from cendr import ds
 from cendr import autoconvert
-from cendr.models import db, report, strain, trait, trait_value, mapping
+from cendr.models import db, report, strain, trait, trait_value, mapping, dbname
 from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
@@ -157,8 +157,10 @@ def process_gwa():
     for t in trait_keep:
         req["trait_name"] = t
         req["trait_slug"] = slugify(t)
+        req["dbname"] = dbname
         req["submission_date"] = datetime.now(
             pytz.timezone("America/Chicago")).isoformat()
+        req["db"] = dbname
         # Submit job to iron worker
         resp = queue.post(str(json.dumps(req)))
         req["success"] = True
@@ -239,8 +241,6 @@ def trait_view(report_slug, trait_slug="", rerun = None):
             if trait_data["status"] == "error":
                 queue = get_queue()
                 print trait_data
-                #trait_data["submission_date"] = datetime.now(
-                #    pytz.timezone("America/Chicago")).isoformat()
                 # Submit job to iron worker
                 queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
             # Return user to current trait
@@ -268,13 +268,6 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     report_files = [os.path.split(x.name)[1] for x in report_files]
 
     report_url = base_url + "/report.html"
-    report_html = requests.get(report_url).text.replace(
-        'src="', 'src="' + base_url + "/")
-    if not report_html.startswith("<?xml"):
-        report_html = report_html[report_html.find(
-            '<body>'):report_html.find("</body>")].replace("</body>", "").replace("<body>","").replace('<h1 class="title">cegwas results</h1>', "")
-    else:
-        report_html = ""
     return render_template('report.html', **locals())
 
 @app.route('/report_progress/', methods=['POST'])
