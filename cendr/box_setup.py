@@ -72,7 +72,7 @@ if __name__ == '__main__':
     bam = client.folder(folder_id="6547362613").get_items(limit = 100000)
     cram = client.folder(folder_id="6560143373").get_items(limit = 100000)
     [x.create_shared_link(access = "open") for x in bam + cram]
-    files = {x["name"]:x.get_shared_link_download_url() for x in bam + cram}
+    files = {x["name"]:x.get_shared_link_download_url() for x in bam + cram if x.get().size > 0}
     dict_out = {}
     for f, link in files.items():
         isotype = f.split(".")[0]

@@ -7,12 +7,13 @@ import _mysql
 
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    db = MySQLDatabase('cegwas_v2', unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+    dbname = "cegwas_v2"
+    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
-    print "connect"
     credentials = json.loads(open("credentials.json",'r').read())
+    dbname = "cegwas_v2"
     db =  MySQLDatabase(
-      'cegwas_v2',
+      dbname,
       **credentials
       )
 
@@ -71,44 +72,6 @@ class strain(Model):
             set_list.append("set_4")
         return set_list
 
-    class Meta:
-        database = db
-
-
-
-class order(Model):
-    total = FloatField()
-    charge = CharField(null = False)
-    stripeToken = CharField(index = True)
-    stripeShippingName = CharField(null = False)
-    stripeEmail = CharField(null = False)
-    stripeShippingAddressLine1 = CharField(null = False)
-    stripeShippingAddressCity = CharField(null = False)
-    stripeShippingAddressState = CharField(null = False)
-    stripeShippingAddressZip = IntegerField(null = False)
-    stripeShippingAddressCountry = CharField(null = False)
-    stripeShippingAddressCountryCode = CharField(null = False)
-
-    # Billing
-    stripeBillingName = CharField(null = False)
-    stripeBillingAddressLine1 = CharField(null = False)
-    stripeBillingAddressCity = CharField(null = False)
-    stripeBillingAddressState = CharField(null = False)
-    stripeBillingAddressZip = IntegerField(null = False)
-    stripeBillingAddressCountry = CharField(null = False)
-    stripeBillingAddressCountryCode = CharField(null = False)
-
-    order_time = DateTimeField(default=datetime.datetime.now)
-
-    class Meta:
-        database = db
-
-
-class order_strain(Model):
-    order = ForeignKeyField(order)
-    strain = ForeignKeyField(strain)
-    price = FloatField()
-    
     class Meta:
         database = db
 
@@ -218,6 +181,18 @@ class call(Model):
     FT = CharField(index = True)
     GT = CharField(index = True)
 
+
+class wb_gene(Model):
+    CHROM = CharField(index = True)
+    start = IntegerField(index = True)
+    end = IntegerField(index = True)
+    Name = CharField(index = True)
+    sequence_name = CharField(index = True)
+    biotype = CharField(index = True)
+    locus = CharField(index = True, default = None)
+
+    class Meta:
+        database = db
 
 
 def autoconvert(s):

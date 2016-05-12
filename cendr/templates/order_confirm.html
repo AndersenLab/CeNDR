@@ -13,32 +13,27 @@
   <div class="panel-body">
   <div class="row">
   
-  <div class="col-md-4">
+<div class="col-md-12">
+<p>
   <ul>
-  <li>{{ record.stripeEmail }}</li>
-  </ul>
-  </div>
-<div class="col-md-4">
-<h4>Shipping</h4>
-<address>
-  <strong>{{ record.stripeShippingName }}</strong><br>
-  {{ record.stripeShippingAddressLine1 }}<br>
-  {{ record.stripeShippingAddressCity }}, {{ record.stripeShippingAddressState }}. {{ record.stripeShippingAddressZip }}<br>
-</address>
+  <li><address>
+    <strong>{{ order.shipping.name }} <{{ order.email }}></strong><br>
+    {{ order.shipping.address.line1 }}<br>
+    {{ order.shipping.address.city }}, {{ order.shipping.address.state }}. {{ order.shipping.address.postal_code }}<br>
+  </address></li>
+  <li><strong>Shipping Service: </strong>{{ order.metadata["Shipping Service"] }}
+  <li><strong>Shipping Account Number: </strong>{{ order.metadata["Shipping Account"] }}</li>
+  <li><strong>Tracking Number: </strong>
+  {% if order.metadata.tracking and order.metadata["Shipping Service"] == "UPS" %}
+      <a href="http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order.metadata.tracking }}">{{ order.metadata.tracking }}</a>
+  {% elif order.metadata.tracking and order.metadata["Shipping Service"] == "FEDEX" %}
+      <a href="http://www.fedex.com/Tracking?action=track&tracknumbers={{ order.metadata.tracking }}">{{ order.metadata.tracking }}</a>
+  {% else %}
+      Not yet assigned
+  {% endif %}</li>
+</p>
 
 </div>
-
-<div class="col-md-4">
-<h4>Billing</h4>
-<address>
-  <strong>{{ record.stripeBillingName }}</strong><br>
-  {{ record.stripeBillingAddressLine1 }}<br>
-  {{ record.stripeBillingAddressCity }}, {{ record.stripeBillingAddressState }}. {{ record.stripeBillingAddressZip }}<br>
-</address>
-
-</div>
-
-
   </div>
   </div>
 
@@ -53,35 +48,24 @@
             <thead>
                 <tr>
                     <th style="width: 40px">#</th>
-                    <th style="width 200px;">Reference Strain</th>
-                    <th style="width 200px;">Isotype</th>
+                    <th style="width 200px;">Strain/Set</th>
                     <th class="price">Price</th>
                 </tr>
             </thead>
             <tbody class="searchable">
-                {% for isotype, strains in strain_listing|groupby('isotype') %}
+                {% for item in order["items"] %}
+                {% if item.parent not in [None, "ship_free-shipping"] %}
                 <tr>
                     <td>{{ loop.index }}</td>
-                    <td>
-                    {{ strains[0]["strain"] }}
-                    </td>
-                    <td><strong>{{ isotype }}</strong></td>
-                    <td class="price">${{'%0.2f'| format(1000/100|float)}}</td>
-                </tr>
-                {% endfor %}
-                {% if price_adjustment > 0 %}
-                <tr  style="color:red">
-                <td>Bulk Discount</td>
-                <td></td>
-                <td>{{ ', '.join(added_sets).replace("_", " ") }}</td>
-                <td class="price"><strong>${{'%0.2f'| format(price_adjustment/100|float)}}</strong></td>
+                    <td>{{ item.parent }}</td>
+                    <td class="price">${{'%0.2f'| format(item.amount/100|float)}}</td>
                 </tr>
                 {% endif %}
+                {% endfor %}
                 <tr>
                 <td><strong>Total</strong></td>
                 <td></td>
-                <td></td>
-                <td class="price"><strong>${{'%0.2f'| format(total/100|float)}}</strong></td>
+                <td class="price"><strong>${{'%0.2f'| format(order.amount/100|float)}}</strong></td>
                 </tr>
             </tbody>
         </table>

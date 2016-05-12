@@ -77,6 +77,12 @@ def feed():
                  published=date_published)
     return feed.get_response()
 
+@app.route('/donate/')
+def donate():
+    title = "Donate"
+    bcs = OrderedDict([("donate", "")])
+    return render_template('donate.html', **locals())
+
 
 @app.route('/outreach/')
 def outreach():

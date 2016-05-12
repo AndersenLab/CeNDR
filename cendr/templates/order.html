@@ -20,61 +20,55 @@
             <thead>
                 <tr>
                     <th style="width: 40px">#</th>
-                    <th style="width 200px;">Reference Strain</th>
-                    <th style="width 200px;">Isotype</th>
-                    <th>Strain</th>
+                    <th style="width 200px;">Strain/Set</th>
                     <th class="price">Price</th>
                 </tr>
             </thead>
             <tbody class="searchable">
-                {% for isotype, strains in strain_listing|groupby('isotype') %}
+                {% for item, price in items.items() %}
                 <tr>
                     <td>{{ loop.index }}</td>
-                    <td>{% for ref_strain in strains %}
-                            {% if ref_strain["reference_strain"] == True %}
-                                {{ ref_strain }}
-                            {% endif %}
-                        {% endfor %}
-                    </td>
-                    <td><strong>{{ isotype }}</strong></td>
-                    <td>{{ strains|join(" ") }}</td>
-                    <td class="price">${{'%0.2f'| format(1000/100|float)}}</td>
+                    <td>{{ item }}</td>
+                    <td class="price">${{'%0.2f'| format(price/100|float)}}</td>
                 </tr>
                 {% endfor %}
-                {% if price_adjustment > 0 %}
-                <tr  style="color:red">
-                <td>Bulk Discount</td>
-                <td></td>
-                <td></td>
-                <td>{{ ', '.join(added_sets).replace("_", " ") }}</td>
-                <td class="price"><strong>${{'%0.2f'| format(price_adjustment/100|float)}}</strong></td>
-                </tr>
-                {% endif %}
                 <tr>
                 <td><strong>Total</strong></td>
-                <td></td>
-                <td></td>
                 <td></td>
                 <td class="price"><strong>${{'%0.2f'| format(total/100|float)}}</strong></td>
                 </tr>
             </tbody>
         </table>
 <div class="pull-right">
-<form action="/order" method="POST">
-{% for isotype, strains in strain_listing|groupby('isotype') %}
-<input type="hidden" name="isotype" value="{{ isotype }}">
+<form action="/order" class="form-inline" method="POST">
+{% for item, price in items.items() %}
+<input type="hidden" name="item" value="{{ item }}">
 {% endfor %}
+
+  <div class="form-group">
+    <label for="shipping-service">Shipping Method</label>
+    <select name="shipping-service" id="shipping-service" class="form-control" required>
+        <option>FEDEX</option>
+        <option>UPS</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="acct" placeholder="Enter Account Number" required>Account Number</label>
+    <input id="acct" class="form-control" required name="shipping-account-number" placeholder="Enter Account Number" required>
+  </div>
+
   <script
     src="https://checkout.stripe.com/checkout.js" class="stripe-button"
     data-key="{{ key }}"
     data-name="CeNDR Resource"
-    data-description="{{ n_strains }} strain(s)"
+    data-description="{{ items|length }} strain/sets"
     data-shipping-address="true"
     data-billing-address="false"
     data-amount="{{ total }}"
     data-locale="auto">
   </script>
 </form>
+
 </div>
     </div>
     </div>
@@ -96,7 +90,19 @@ $(document).ready(function() {
 
     }(jQuery));
 
+    if ( $(this).val().length == 0 ) {
+        $(".stripe-button-el").addClass("disabled");
+    }
+
 });
+
+$("#acct").keyup(function() {
+    if ( $(this).val().length == 0 ) {
+        $(".stripe-button-el").addClass("disabled");
+    } else {
+        $(".stripe-button-el").removeClass("disabled");
+    }
+})
 
 $("#checkAll").click(function() {
     $('input:checkbox:visible').not(this).prop('checked', this.checked);
