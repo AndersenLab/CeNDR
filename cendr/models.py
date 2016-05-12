@@ -181,13 +181,18 @@ class call(Model):
     FT = CharField(index = True)
     GT = CharField(index = True)
 
-# class invariants(Model):
-#     chrom = CharField(index=True)
-#     pos = IntegerField(index=True)
-#     _id = IntegerField(index=True)
-#     ref = CharField()
-#     alt
 
+class wb_gene(Model):
+    CHROM = CharField(index = True)
+    start = IntegerField(index = True)
+    end = IntegerField(index = True)
+    Name = CharField(index = True)
+    sequence_name = CharField(index = True)
+    biotype = CharField(index = True)
+    locus = CharField(index = True, default = None)
+
+    class Meta:
+        database = db
 
 
 def autoconvert(s):

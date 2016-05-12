@@ -24,7 +24,7 @@ from models import *
 reset_db = False
 
 # which services should be updated.
-update = ["db"] # ["db", "stripe"]
+update = ["gene_table"] # ["db", "stripe", "gene_table"]
 
 # Fetch stripe keys
 if (os.getenv('SERVER_SOFTWARE') and
@@ -57,7 +57,7 @@ def correct_values(k, v):
     else:
         return v.encode('utf-8').strip()
 
-table_list = [strain, report, trait, trait_value, mapping]
+table_list = [strain, report, trait, trait_value, mapping, wb_gene]
 if "db" in update:
     with db.atomic():
         if reset_db:
@@ -70,6 +70,48 @@ strain_info_join = requests.get(
 lines = list(csv.DictReader(StringIO.StringIO(strain_info_join.text), delimiter='\t'))
 
 strain_data = []
+
+if "gene_table" in update:
+    build = "WS245"
+    gff_url = "ftp://ftp.wormbase.org/pub/wormbase/releases/{build}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{build}.annotations.gff3.gz".format(build = build)
+    gff = "c_elegans.{build}.gff".format(build = build)
+
+    if not os.path.exists(gff):
+        comm = """curl {gff_url} |\
+                  gunzip -kfc |\
+                  grep 'WormBase' |\
+                  awk '$2 == "WormBase" && $3 == "gene" {{ print }}' > {gff}""".format(**locals())
+        print(comm)
+        print(check_output(comm, shell = True))
+
+    with open(gff, 'r') as f:
+        c = 0
+        wb_gene_fieldset = [x.name for x in wb_gene._meta.sorted_fields if x.name != "id"]
+        gene_set = []
+        with db.atomic():
+            while True:
+                try:
+                    line = f.next().strip().split("\t")
+                except:
+                    break
+                if line[0].startswith("#"):
+                    continue
+                c += 1
+                gene = dict([x.split("=") for x in line[8].split(";")])
+                gene.update(zip(["CHROM", "start", "end"], [line[0], line[3], line[4]]))
+                gene = {k:v for k,v in gene.items() if k in wb_gene_fieldset}
+                for i in wb_gene_fieldset:
+                    if i not in gene.keys():
+                        gene[i] = None
+                gene_set.append(gene)
+                if c % 5000 == 0:
+                    print c, gene["CHROM"], gene["start"]
+                    wb_gene.insert_many(gene_set).execute()
+                    gene_set = []
+            wb_gene.insert_many(gene_set).execute()
+
+
+
 
 if reset_db:
     for line in lines:
