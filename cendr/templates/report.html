@@ -3,9 +3,6 @@
 
 {% block custom_head %}
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css" rel="stylesheet" />
-<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script
-<script src="/static/report/jquery-1.11.3/jquery.min.js"></script>
 <script src="/static/report/jqueryui-1.11.4/jquery-ui.min.js"></script>
 <link href="/static/report/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="/static/report/tocify-1.9.1/jquery.tocify.js"></script>
@@ -23,8 +20,6 @@
 <script src="/static/report/datatables-responsive-1.10.7/dataTables.responsive.min.js"></script>
 <link href="/static/report/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
 <script src="/static/report/nouislider-7.0.10/jquery.nouislider.min.js"></script>
-<link href="/static/report/selectize-0.12.0/selectize.bootstrap3.css" rel="stylesheet" />
-<script src="/static/report/selectize-0.12.0/selectize.min.js"></script>
 
 
 <script type="text/x-mathjax-config">
@@ -196,7 +191,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 <h3 id="intervals">QTL Confidence Intervals</h3>
 
-<table class="table table-hover table-striped">
+<table class="table table-hover table-striped confidence_intervals">
 <thead>
   <tr>
     <th>Interval</th>
@@ -207,7 +202,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 </thead>
 <tbody>
 {% for row in mapping_results %}
-<tr>
+<tr chrom="{{ row.chrom }}" start="{{ row.interval_start }}" end="{{ row.interval_end }}">
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
   <td>{{ row.log10p|round(3) }}</td>
@@ -406,6 +401,25 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 {% block script %}
 <script>
+
+
+
+function ngenes(chrom, start, end) {
+$.ajax({
+  url: "/api/gene/count/" + chrom + "/" + start + "/" + end,
+  contentType: 'application/json',
+  success:function(msg) {
+    result = msg;
+  }
+});
+return result;
+}
+
+$.each($(".confidence_intervals >> tr > td:nth-child(4)"), function(t) {
+  console.log(t);
+})
+
+
 
 var box1 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
             .map(function(d,i){return {v:d,g:'box1',t:'pt 1'+i}})
