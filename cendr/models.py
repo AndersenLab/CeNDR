@@ -11,7 +11,7 @@ if (os.getenv('SERVER_SOFTWARE') and
     db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
     credentials = json.loads(open("credentials.json",'r').read())
-    dbname = "development"
+    dbname = "cegwas_v2"
     db =  MySQLDatabase(
       dbname,
       **credentials
