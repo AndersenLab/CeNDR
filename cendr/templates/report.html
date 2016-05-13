@@ -147,7 +147,7 @@
 <div id="report" data-toggle="tab">
 
 
-<nav id="report_nav" data-offset-top="385" data-spy="affix" class="navbar navbar-default">
+<nav id="report_nav" data-offset-top="385" data-spy="affix" class="navbar navbar-default" style="z-index:10000">
   <div class="container-fluid">
    <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse">
@@ -206,7 +206,7 @@ A genome-wide representation of the association between variation in the <em>C. 
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
   <td>{{ row.log10p|round(3) }}</td>
-  <td>n genes</td>
+  <td>-</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -404,20 +404,23 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 
 
-function ngenes(chrom, start, end) {
-$.ajax({
+// Set gene count.
+$(document).ready(function() {
+$.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), function(k, v) {
+  pos = $(v).siblings().first().children().html();
+  chrom = pos.split(":")[0]
+  start = pos.split(":")[1].split("-")[0].split(",").join("");
+  end = pos.split(":")[1].split("-")[1].split(",").join("");
+  gene_count = $(this);
+  $.ajax({
   url: "/api/gene/count/" + chrom + "/" + start + "/" + end,
   contentType: 'application/json',
   success:function(msg) {
-    result = msg;
+    $(v).html(msg["count"])
   }
-});
-return result;
-}
-
-$.each($(".confidence_intervals >> tr > td:nth-child(4)"), function(t) {
-  console.log(t);
 })
+});
+});
 
 
 
