@@ -198,6 +198,7 @@ A genome-wide representation of the association between variation in the <em>C. 
     <th>Peak Position</th>
     <th>-log<sub>10</sub>p</th>
     <th>Genes</th>
+    <th>Protein Coding</th>
   </tr>
 </thead>
 <tbody>
@@ -206,6 +207,7 @@ A genome-wide representation of the association between variation in the <em>C. 
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
   <td>{{ row.log10p|round(3) }}</td>
+  <td>-</td>
   <td>-</td>
 </tr>
 {% endfor %}
@@ -243,38 +245,75 @@ A genome-wide representation of the association between variation in the <em>C. 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
   {% for peak in mapping_results %}
-    <li role="presentation" {% if loop.first %}class="active"{% endif %}><a href="#{{ peak.chrom }}:{{ peak.pos }}" aria-controls="peak1" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.pos }}</a></li>
+    <li role="presentation" {% if loop.first %}class="active"{% endif %}><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</a></li>
     {% endfor %}
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
   {% for peak in mapping_results %}
-    <div role="tabpanel" class="tab-pane active" id="#{{ peak.chrom }}:{{ peak.pos }}">
+    <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
 
-    <h3>Table Summary</h3>
-    <table id="example" class="display" cellspacing="0" width="100%">
-        <thead>
+    <h3>{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</h3>
+    <table class="peak_summary table table-hover table-striped">
+        <tbody>
             <tr>
-                <th>Chrom</th>
-                <th>Pos</th>
-                <th>Interval</th>
-                <th>Gene_Name</th>
-                <th>Ref</th>
-                <th>Alt</th>
+              <td>Protein Coding</td>
+              <td class="peak_{{ loop.index0 }}_protein_coding">-</td>
             </tr>
-        </thead>
-        <tfoot>
+              <tr>
+              <td>ncRNA</td>
+              <td class="peak_{{ loop.index0 }}_ncRNA">-</td>
+            </tr>
+              <tr>
+              <td>miRNA</td>
+              <td class="peak_{{ loop.index0 }}_miRNA">-</td>
+            </tr>
+              <tr>
+              <td>piRNA</td>
+              <td class="peak_{{ loop.index0 }}_piRNA">-</td>
+            </tr>
+              <tr>
+              <td>tRNA</td>
+              <td class="peak_{{ loop.index0 }}_tRNA">-</td>
+            </tr>
+              <tr>
+              <td>lincRNA</td>
+              <td class="peak_{{ loop.index0 }}_lincRNA">-</td>
+            </tr>
+              <tr>
+              <td>rRNA</td>
+              <td class="peak_{{ loop.index0 }}_rRNA">-</td>
+            </tr>
+              <tr>
+              <td>scRNA</td>
+              <td class="peak_{{ loop.index0 }}_scRNA">-</td>
+            </tr>
+              <tr>
+              <td>snoRNA</td>
+              <td class="peak_{{ loop.index0 }}_snoRNA">-</td>
+            </tr>
+              <tr>
+              <td>snRNA</td>
+              <td class="peak_{{ loop.index0 }}_snRNA">-</td>
+            </tr>
+              <tr>
+              <td>asRNA</td>
+              <td class="peak_{{ loop.index0 }}_asRNA">-</td>
+            </tr>
+              <tr>
+              <td>pseudogene</td>
+              <td class="peak_{{ loop.index0 }}_pseudogene">-</td>
+            </tr>
             <tr>
-                <th>Chrom</th>
-                <th>Pos</th>
-                <th>Interval</th>
-                <th>Gene_Name</th>
-                <th>Ref</th>
-                <th>Alt</th>
+              <td><strong>Total</strong></td>
+              <td class="peak_{{ loop.index0 }}_total">-</td>
             </tr>
-        </tfoot>
+        </tbody>
     </table>
+    </div>
+  {% endfor %}
+  </div>
 
     <h3>Global Distribution</h3>
 
@@ -388,9 +427,9 @@ A genome-wide representation of the association between variation in the <em>C. 
                   </script>
           </div>
    
-    <p>Tajima's D across the most signficant QTL interval. Tajimaâs D tests whether a genomic region has the expected level of variation if it is only undergoing drift - values close to 0 indicate observed variation similar to expected levels, D&lt;0 suggests that rare alleles are present, which may have arose due to a recent selective sweep, population expansion after a recent bottleneck, or linkage to a swept gene, and D&gt;0 indicating balancing selection or sudden population contraction.</p>
+    <p>Tajima's D across the most signficant QTL interval. Tajima's D tests whether a genomic region has the expected level of variation if it is only undergoing drift - values close to 0 indicate observed variation similar to expected levels, D&lt;0 suggests that rare alleles are present, which may have arose due to a recent selective sweep, population expansion after a recent bottleneck, or linkage to a swept gene, and D&gt;0 indicating balancing selection or sudden population contraction.</p>
 
-  {% endfor %}
+
   </div>
 
 
@@ -404,7 +443,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 
 
-// Set gene count.
+// Set Gene Counts
 $(document).ready(function() {
 $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), function(k, v) {
   pos = $(v).siblings().first().children().html();
@@ -416,7 +455,16 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
   url: "/api/gene/count/" + chrom + "/" + start + "/" + end,
   contentType: 'application/json',
   success:function(msg) {
-    $(v).html(msg["count"])
+    $(v).html(msg["total"]);
+    $(v).next().html(msg["protein_coding"]);
+    $(".peak_" + k + "_total").html(msg["total"]);
+    biotypes = ["protein_coding", "ncRNA", "miRNA", "piRNA", "asRNA", "snRNA", "snoRNA", "scRNA", "tRNA", "lincRNA", "rRNA", "pseudogene"];
+    $.each(biotypes, function(i, biotype) {
+      if (!(biotype in msg)) {
+        msg[biotype] = 0;
+      }
+      $(".peak_" + k + "_" + biotype).html(msg[biotype]);
+    })
   }
 })
 });

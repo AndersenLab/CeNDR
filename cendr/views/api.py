@@ -1,7 +1,7 @@
 from flask import Flask, Response, request
 from flask_restful import Resource, Api, reqparse
 from cendr import api
-from cendr.models import db, report, mapping, strain, trait, site, call, annotation, wb_gene
+from cendr.models import *
 from collections import OrderedDict
 from gcloud import storage
 import decimal
@@ -229,13 +229,18 @@ class get_gene(Resource):
 
 class get_gene_count(Resource):
     def get(self, chrom, start, end):
-        count = int(wb_gene.filter((wb_gene.CHROM == chrom),
+        count_by_type = list(wb_gene.select(wb_gene.biotype,
+                                            fn.Count(wb_gene.id).alias('count'))
+                            .filter((wb_gene.CHROM == chrom),
                                       (wb_gene.start > start),
-                                      (wb_gene.end < end)).count())
+                                      (wb_gene.end < end)).group_by(wb_gene.biotype).tuples().execute())
+        count = sum([x[1] for x in count_by_type])
         result = OrderedDict((("chrom", chrom),
                     ("start", start),
                     ("end", end),
-                    ("count", count)))
+                    ("total", count)))
+        result.update(dict(count_by_type))
+        print(result)
         result = json.dumps(result, cls=CustomEncoder, indent=4)
         return Response(response=result, status=201, mimetype="application/json")
 
