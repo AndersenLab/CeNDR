@@ -186,7 +186,7 @@ var layout = {
 };
 
 
-Plotly.newPlot('container', data, layout, {displayModeBar: false});
+Plotly.newPlot('container', data, layout, {displayModeBar: false, displaylogo: false});
 
 manhattan = document.getElementById('container')
 
@@ -243,7 +243,6 @@ cal.init({
         }
 });
 
-http://localhost:8080/Genetic-Mapping/public/%7B%7B
 function updateTable(data) {
       var log10p = data['log10p'];
       var chrom = data['chrom'];

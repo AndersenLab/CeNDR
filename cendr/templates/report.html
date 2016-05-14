@@ -21,6 +21,9 @@
 <link href="/static/report/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
 <script src="/static/report/nouislider-7.0.10/jquery.nouislider.min.js"></script>
 
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+
 
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
@@ -29,10 +32,6 @@
   src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
-<script type="text/javascript" src="/static/js/d3-tip.js"></script>
-<script type="text/javascript" src="/static/js/d3_exploding_boxplot.js"></script>
-<link href="/static/css/d3_exploding_boxplot.css" rel="stylesheet" />
 
 <style>
 
@@ -258,6 +257,10 @@ A genome-wide representation of the association between variation in the <em>C. 
     <table class="peak_summary table table-hover table-striped">
         <tbody>
             <tr>
+              <td><strong>Total</strong></td>
+              <td class="peak_{{ loop.index0 }}_total">-</td>
+            </tr>
+            <tr>
               <td>Protein Coding</td>
               <td class="peak_{{ loop.index0 }}_protein_coding">-</td>
             </tr>
@@ -305,10 +308,6 @@ A genome-wide representation of the association between variation in the <em>C. 
               <td>pseudogene</td>
               <td class="peak_{{ loop.index0 }}_pseudogene">-</td>
             </tr>
-            <tr>
-              <td><strong>Total</strong></td>
-              <td class="peak_{{ loop.index0 }}_total">-</td>
-            </tr>
         </tbody>
     </table>
     </div>
@@ -320,111 +319,9 @@ A genome-wide representation of the association between variation in the <em>C. 
     <p>Salmon dots correspond to strains that have the alternate allele and purple dots are strains that have the N2 allele.</p>
 
     <h3>Tajima's D</h3>
-      <div class="container">
-   
+      <div id="tajima" style="height: 500px;"></div>
           <div>
-              <svg id="visualisation" width="1000" height="500"></svg>
-                  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-                  <script>
-                      function InitChart() {
-                          var data = [{
-                              "sale": "202",
-                              "year": "2000"
-                          }, {
-                              "sale": "215",
-                              "year": "2002"
-                          }, {
-                              "sale": "179",
-                              "year": "2004"
-                          }, {
-                              "sale": "199",
-                              "year": "2006"
-                          }, {
-                              "sale": "134",
-                              "year": "2008"
-                          }, {
-                              "sale": "176",
-                              "year": "2010"
-                          }];
-                          var data2 = [{
-                              "sale": "152",
-                              "year": "2000"
-                          }, {
-                              "sale": "189",
-                              "year": "2002"
-                          }, {
-                              "sale": "179",
-                              "year": "2004"
-                          }, {
-                              "sale": "199",
-                              "year": "2006"
-                          }, {
-                              "sale": "134",
-                              "year": "2008"
-                          }, {
-                              "sale": "176",
-                              "year": "2010"
-                          }];
-                          var vis = d3.select("#visualisation"),
-                              WIDTH = 1000,
-                              HEIGHT = 500,
-                              MARGINS = {
-                                  top: 20,
-                                  right: 20,
-                                  bottom: 20,
-                                  left: 50
-                              },
-                              xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([2000, 2010]),
-                              yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([134, 215]),
-                              xAxis = d3.svg.axis()
-                              .scale(xScale),
-                              yAxis = d3.svg.axis()
-                              .scale(yScale)
-                              .orient("left");
-                          
-                          vis.append("svg:g")
-                              .attr("class", "x axis")
-                              .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
-                              .call(xAxis);
-                          vis.append("svg:g")
-                              .attr("class", "y axis")
-                              .attr("transform", "translate(" + (MARGINS.left) + ",0)")
-                              .call(yAxis);
-                          var lineGen = d3.svg.line()
-                              .x(function(d) {
-                                  return xScale(d.year);
-                              })
-                              .y(function(d) {
-                                  return yScale(d.sale);
-                              })
-                              .interpolate("basis");
-                          vis.append('svg:path')
-                              .attr('d', lineGen(data))
-                              .attr('stroke', 'green')
-                              .attr('stroke-width', 2)
-                              .attr('fill', 'none');
-                          vis.append('svg:path')
-                              .attr('d', lineGen(data2))
-                              .attr('stroke', 'blue')
-                              .attr('stroke-width', 2)
-                              .attr('fill', 'none');
 
-                          var zoom = d3.behavior.zoom()
-                            .x(xScale)
-                            .on('zoom', function() {
-                                if (xScale.domain()[0] < minDate) {
-                              var x = zoom.translate()[0] - xScale(minDate) + xScale.range()[0];
-                                    zoom.translate([x, 0]);
-                                } else if (xScale.domain()[1] > maxDate) {
-                              var x = zoom.translate()[0] - xScale(maxDate) + xScale.range()[1];
-                                    zoom.translate([x, 0]);
-                                }
-                                redrawChart();
-                                updateViewportFromChart();
-                            });
-                          };
-                      InitChart();
-                  </script>
           </div>
    
     <p>Tajima's D across the most signficant QTL interval. Tajima's D tests whether a genomic region has the expected level of variation if it is only undergoing drift - values close to 0 indicate observed variation similar to expected levels, D&lt;0 suggests that rare alleles are present, which may have arose due to a recent selective sweep, population expansion after a recent bottleneck, or linkage to a swept gene, and D&gt;0 indicating balancing selection or sudden population contraction.</p>
@@ -470,34 +367,6 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
 });
 });
 
-
-
-var box1 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
-            .map(function(d,i){return {v:d,g:'box1',t:'pt 1'+i}})
-
-var box2 = d3.range(100).map(d3.random.normal(Math.random()*100,30))
-            .map(function(d,i){return {v:d,g:'box2',t:'pt 2'+i}})
-
-var box3 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
-            .map(function(d,i){return {v:d,g:'box3',t:'pt 3'+i}})
-
-var box4 = d3.range(100).map(d3.random.normal(Math.random()*100,30))
-            .map(function(d,i){return {v:d,g:'box4',t:'pt 4'+i}})
-
-
-var data = box1.concat(box1).concat(box2)
-
-// chart(data,aes)
-// aesthetic :
-// y : point's value on y axis
-// group : how to group data on x axis
-// color : color of the point / boxplot
-// label : displayed text in toolbox
-var chart = exploding_boxplot(data,
-            {y:'v',group:'g',color:'g',label:'t'})
-
-//call chart on a div
-//chart('#chartContainer')
 
 {% if trait_slug and report_html == "" %}
 prog = Array()
@@ -586,6 +455,67 @@ $('#report_nav').ready(function () {
     });
 
 });
+
+
+//
+// Tajima D
+//
+
+      var data = [];
+      var layout = {
+        margin: {
+          t: 10,
+          l: 40,
+          r: 3
+        },
+        xaxis: {
+          domain: [0, 1000],
+          title: "I",
+          range: [ {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} ],
+          fixedrange: false,
+          anchor: "x1"
+        },
+        yaxis: {
+          range: [-4, 4],
+          fixedrange: true
+        },
+        dragmode: "pan",
+        showlegend: false,
+        hovermode: 'closest'
+      };
+
+      // Load initial position
+      update_tajima_plot('{{ mapping_results[0]["chrom"]}}', {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} )
+
+
+      function update_tajima_plot(chrom, start, end) {
+        start = start - 50000;
+        end = end + 50000;
+        if (start < 0) {
+          start = 0;
+        }
+        if (end < 0) {
+          end = 0;
+        }
+        $.ajax({
+          url: "/api/tajima/" + chrom + "/" + start + "/" + end,
+          contentType: 'application/json',
+          success:function(data) {
+            data["mode"] = "markers";
+            data["marker"] = {size: 5};
+            Plotly.newPlot('tajima', [data], layout, {displayModeBar: false, displaylogo: false});
+        }
+      });
+      }
+
+      $("#tajima").bind('plotly_relayout', function(event, eventdata) {
+        chrom = "I";
+        start = parseInt(eventdata["xaxis.range[0]"]);
+        end = parseInt(eventdata["xaxis.range[1]"]);
+        update_tajima_plot(chrom, start, end)
+      });
+
+
 
 
 </script>

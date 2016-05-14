@@ -174,12 +174,18 @@ class annotation(Model):
     class Meta:
         database = db
 
-class call(Model):
-    site = ForeignKeyField(site)
-    SAMPLE = CharField(index = True)
-    TGT = CharField(index = True)
-    FT = CharField(index = True)
-    GT = CharField(index = True)
+
+class tajimaD(Model):
+    CHROM = CharField(index=True)
+    BIN_START = IntegerField(index=True)
+    BIN_END = IntegerField(index=True)
+    N_Sites = IntegerField(index=True)
+    N_SNPs = IntegerField(index=True)
+    TajimaD = DecimalField(index=True)
+
+    class Meta:
+        database = db
+        db_table = "tajimad"
 
 
 class wb_gene(Model):

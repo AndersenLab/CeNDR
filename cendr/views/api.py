@@ -21,17 +21,11 @@ PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
 class CustomEncoder(json.JSONEncoder):
 
     def default(self, o):
-        if isinstance(o, decimal.Decimal):
+        if type(o) == decimal.Decimal:
             return float(o)
         if isinstance(o, datetime.date):
             return str(o)
         return super(CustomEncoder, self).default(o)
-
-
-def abort_if_todo_doesnt_exist(request_id):
-    if request_id not in TODOS:
-        abort(404, message="Doesn't exist".format(request_id))
-
 
 parser = reqparse.RequestParser()
 
@@ -206,6 +200,25 @@ class site_gt_invariant_table(Resource):
                       .execute())
         result = json.dumps(result, cls=CustomEncoder, indent=4)
         return Response(response=result, status=201, mimetype="application/json")
+
+#
+# Tajima's D
+#
+
+class tajima_d(Resource):
+  def get(self,chrom,start,end):
+      data = list(tajimaD.select((tajimaD.BIN_START + 100000)/2,
+                                 tajimaD.TajimaD).filter((tajimaD.id % 5 == 0), 
+                                                         (tajimaD.CHROM == chrom),
+                                                         (((tajimaD.BIN_START + 100000)/2 >=  start) and 
+                                                          ((tajimaD.BIN_END + 100000)/2 <= end))
+                                                         ).tuples().execute())
+      data = [(float(x[0]), float(x[1])) for x in data]
+      data = {"x": [x[0] for x in data], "y": [x[1] for x in data]}
+      dat = json.dumps(data, cls=CustomEncoder, indent = 4)
+      return Response(response=dat, status=200, mimetype="application/json")
+
+api.add_resource(tajima_d, '/api/tajima/<string:chrom>/<int:start>/<int:end>')
 
 #
 # wb_gene info
