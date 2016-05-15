@@ -247,7 +247,7 @@ A genome-wide representation of the association between variation in the <em>C. 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
   {% for peak in mapping_results %}
-    <li role="presentation" {% if loop.first %}class="active"{% endif %}><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</a></li>
+    <li role="presentation" peak="{{ peak.chrom }}:{{ peak.pos }}" class='peak-tab {% if loop.first %}active{% endif %}'><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</a></li>
     {% endfor %}
   </ul>
 
@@ -579,6 +579,18 @@ $(document).ready(function() {
   // Load initial position
   update_tajima_plot('{{ mapping_results[0]["chrom"]}}', {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} )
 });
+
+// Monitor peak tabs
+$(".peak-tab").bind("click", function() {
+  peak = $(this).attr("peak");
+  chrom = peak.split(":")[0];
+  pos = peak.split(":")[1];
+  interval = $(this).children("a").html();
+  start = interval.split(":")[1].split("-")[0];
+  end = start = interval.split(":")[1].split("-")[1]
+  update_geo_map(chrom, pos);
+  update_tajima_plot(chrom, start, end);
+})
 
 
 
