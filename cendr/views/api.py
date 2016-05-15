@@ -229,8 +229,11 @@ class strain_gt_locations(Resource):
               .distinct().dicts().execute())
         strain_locations = {x["isotype"]:x for x in strain_locations}
         for i in gt:
-            if i["SAMPLE"] in strain_locations:
+            if i["SAMPLE"] in strain_locations and i["GT"] in ["0/0", "1/1"]:
                 strain_locations[i["SAMPLE"]].update({"TGT": i["TGT"], "GT": i["GT"]})
+            else:
+                if i["SAMPLE"] in strain_locations:
+                    del strain_locations[i["SAMPLE"]]
         result = json.dumps(strain_locations.values(), cls=CustomEncoder, indent = 4)
         return Response(response=result, status = 201, mimetype="application/json")
 

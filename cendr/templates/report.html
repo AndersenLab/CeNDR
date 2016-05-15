@@ -320,7 +320,10 @@ A genome-wide representation of the association between variation in the <em>C. 
     <h3>Global Distribution</h3>
 
     <div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
-      <br /><br />
+    <p>
+      <img style="margin:10px; width:25px;" src="/static/img/icons/marker.png" /><strong>Reference (<span id="ref_gt"></span>)</strong>
+      <img style="margin:10px; width:25px;" src="/static/img/icons/selected.png" /><strong>Alternative (<span id="alt_gt"></span>)</strong>
+    </p>
     <h3>Tajima's D</h3>
       <div id="tajima" style="height: 500px;"></div>
           <div>
@@ -486,7 +489,11 @@ var southWest = L.latLng(-90, -180),
 var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -100], 2);
 L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
 
+var strain_layer = L.layerGroup();
+var gt_set = {"0/0": "-", "1/1": "-"}
+
 function update_geo_map(chrom, pos) {
+  map.removeLayer(strain_layer);
 
   $.ajax({
       url: "/api/gt_loc/" + chrom + "/" + pos,
@@ -494,18 +501,17 @@ function update_geo_map(chrom, pos) {
       success:function(data) {
         markers = [];
         $.each(data, function(k, d) {
-            m = L.marker([d.latitude, d.longitude], { icon: gt_icon[d.GT], title: d.isotype}).addTo(map);
+            m = L.marker([d.latitude, d.longitude], { icon: gt_icon[d.GT], tgt: d.TGT, gt: d.GT, title: d.isotype});
             markers.push(m);
+            gt_set[d.GT] = d.TGT.split("/")[0];
         });
-        var strain_layer = L.layerGroup(markers);
+        strain_layer = L.layerGroup(markers).addTo(map);
+        $("#ref_gt").html(gt_set["0/0"]);
+        $("#alt_gt").html(gt_set["1/1"]);
     }
 
   });
-
 }
-
-// Set initial map
-update_geo_map('{{ mapping_results[0]["chrom"]}}' , {{ mapping_results[0]["pos"]}});
 
 
 //
@@ -557,9 +563,6 @@ function update_tajima_plot(chrom, start, end) {
 }
 
 
-// Load initial position
-update_tajima_plot('{{ mapping_results[0]["chrom"]}}', {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} )
-
 
 
 $("#tajima").bind('plotly_relayout', function(event, eventdata) {
@@ -567,6 +570,14 @@ $("#tajima").bind('plotly_relayout', function(event, eventdata) {
   start = parseInt(eventdata["xaxis.range[0]"]);
   end = parseInt(eventdata["xaxis.range[1]"]);
   update_tajima_plot(chrom, start, end)
+});
+
+
+// Load initial map and Tajima
+$(document).ready(function() {
+  update_geo_map('{{ mapping_results[0]["chrom"]}}' , {{ mapping_results[0]["pos"]}});
+  // Load initial position
+  update_tajima_plot('{{ mapping_results[0]["chrom"]}}', {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} )
 });
 
 
