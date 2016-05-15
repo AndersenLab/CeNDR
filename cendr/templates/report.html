@@ -20,8 +20,11 @@
 <script src="/static/report/datatables-responsive-1.10.7/dataTables.responsive.min.js"></script>
 <link href="/static/report/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
 <script src="/static/report/nouislider-7.0.10/jquery.nouislider.min.js"></script>
-
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<link rel="stylesheet" href="/static/css/leaflet.css" />
+<script src="/static/js/leaflet.js"></script>
+<script src="/static/js/leaflet-search.js"></script>
 
 
 
@@ -316,8 +319,8 @@ A genome-wide representation of the association between variation in the <em>C. 
 
     <h3>Global Distribution</h3>
 
-    <p>Salmon dots correspond to strains that have the alternate allele and purple dots are strains that have the N2 allele.</p>
-
+    <div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
+      <br /><br />
     <h3>Tajima's D</h3>
       <div id="tajima" style="height: 500px;"></div>
           <div>
@@ -338,8 +341,6 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% block script %}
 <script>
 
-
-
 // Set Gene Counts
 $(document).ready(function() {
 $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), function(k, v) {
@@ -354,7 +355,7 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
   success:function(msg) {
     $(v).html(msg["total"]);
     $(v).next().html(msg["protein_coding"]);
-    $(".peak_" + k + "_total").html(msg["total"]);
+    $(".peak_" + k + "_total").html("<strong>" + msg["total"] + "</strong>");
     biotypes = ["protein_coding", "ncRNA", "miRNA", "piRNA", "asRNA", "snRNA", "snoRNA", "scRNA", "tRNA", "lincRNA", "rRNA", "pseudogene"];
     $.each(biotypes, function(i, biotype) {
       if (!(biotype in msg)) {
@@ -424,14 +425,6 @@ window.setInterval(check_status, 3000);
 
 // Document ready
 $('#report_nav').ready(function () {
-    $("a").tooltip({
-        'placement': 'right'
-    });
-    
-    $("svg circle").tooltip({
-        'container': 'body',
-        'placement': 'right'
-    });
 
     $('body').scrollspy({target: ".navbar", offset: 75}); 
     // Add smooth scrolling to all links inside a navbar
@@ -458,62 +451,123 @@ $('#report_nav').ready(function () {
 
 
 //
+// Genotype Location
+//
+
+// Icons
+var icon_norm = L.icon({
+    iconUrl: '/static/img/icons/marker.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+var icon_hover = L.icon({
+    iconUrl: '/static/img/icons/selected.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+gt_icon = {"0/0": icon_norm, "1/1": icon_hover}
+
+ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
+MB_ATTR = 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+  '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+  'Imagery © <a href="http://mapbox.com">Mapbox</a>';
+MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
+OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+var southWest = L.latLng(-90, -180),
+  northEast = L.latLng(90, 180),
+  bounds = L.latLngBounds(southWest, northEast);
+
+var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -100], 2);
+L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
+
+function update_geo_map(chrom, pos) {
+
+  $.ajax({
+      url: "/api/gt_loc/" + chrom + "/" + pos,
+      contentType: 'application/json',
+      success:function(data) {
+        markers = [];
+        $.each(data, function(k, d) {
+            m = L.marker([d.latitude, d.longitude], { icon: gt_icon[d.GT], title: d.isotype}).addTo(map);
+            markers.push(m);
+        });
+        var strain_layer = L.layerGroup(markers);
+    }
+
+  });
+
+}
+
+// Set initial map
+update_geo_map('{{ mapping_results[0]["chrom"]}}' , {{ mapping_results[0]["pos"]}});
+
+
+//
 // Tajima D
 //
 
-      var data = [];
-      var layout = {
-        margin: {
-          t: 10,
-          l: 40,
-          r: 3
-        },
-        xaxis: {
-          domain: [0, 1000],
-          title: "I",
-          range: [ {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} ],
-          fixedrange: false,
-          anchor: "x1"
-        },
-        yaxis: {
-          range: [-4, 4],
-          fixedrange: true
-        },
-        dragmode: "pan",
-        showlegend: false,
-        hovermode: 'closest'
-      };
-
-      // Load initial position
-      update_tajima_plot('{{ mapping_results[0]["chrom"]}}', {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} )
+var data = [];
+var layout = {
+  margin: {
+    t: 10,
+    l: 40,
+    r: 3
+  },
+  xaxis: {
+    domain: [0, 1000],
+    title: "I",
+    range: [ {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} ],
+    fixedrange: false,
+    anchor: "x1"
+  },
+  yaxis: {
+    range: [-4, 4],
+    fixedrange: true
+  },
+  dragmode: "pan",
+  showlegend: false,
+  hovermode: 'closest'
+};
 
 
-      function update_tajima_plot(chrom, start, end) {
-        start = start - 50000;
-        end = end + 50000;
-        if (start < 0) {
-          start = 0;
-        }
-        if (end < 0) {
-          end = 0;
-        }
-        $.ajax({
-          url: "/api/tajima/" + chrom + "/" + start + "/" + end,
-          contentType: 'application/json',
-          success:function(data) {
-            data["mode"] = "markers";
-            data["marker"] = {size: 5};
-            Plotly.newPlot('tajima', [data], layout, {displayModeBar: false, displaylogo: false});
-        }
-      });
-      }
+function update_tajima_plot(chrom, start, end) {
+  start = start - 50000;
+  end = end + 50000;
+  if (start < 0) {
+    start = 0;
+  }
+  if (end < 0) {
+    end = 0;
+  }
+  $.ajax({
+    url: "/api/tajima/" + chrom + "/" + start + "/" + end,
+    contentType: 'application/json',
+    success:function(data) {
+      data["mode"] = "markers";
+      data["marker"] = {size: 5};
+      Plotly.newPlot('tajima', [data], layout, {displayModeBar: false, displaylogo: false});
+  }
+});
+}
 
-      $("#tajima").bind('plotly_relayout', function(event, eventdata) {
-        chrom = "I";
-        start = parseInt(eventdata["xaxis.range[0]"]);
-        end = parseInt(eventdata["xaxis.range[1]"]);
-        update_tajima_plot(chrom, start, end)
-      });
+
+// Load initial position
+update_tajima_plot('{{ mapping_results[0]["chrom"]}}', {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} )
+
+
+
+$("#tajima").bind('plotly_relayout', function(event, eventdata) {
+  chrom = "I";
+  start = parseInt(eventdata["xaxis.range[0]"]);
+  end = parseInt(eventdata["xaxis.range[1]"]);
+  update_tajima_plot(chrom, start, end)
+});
 
 
 
