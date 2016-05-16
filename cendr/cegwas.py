@@ -37,6 +37,8 @@ def main():
         trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('home.html', **locals())
 
+
+
 @app.route("/news/")
 @app.route("/news/<filename>/")
 def news_item(filename = ""):
@@ -48,6 +50,8 @@ def news_item(filename = ""):
     bcs = OrderedDict([("news", None), (title, None)])
     return render_template('news_item.html', **locals())
 
+
+@cache.memoize(50)
 @app.route("/help/")
 @app.route("/help/<filename>/")
 def help_item(filename = ""):
@@ -78,6 +82,8 @@ def feed():
                  published=date_published)
     return feed.get_response()
 
+
+@cache.cached()
 @app.route('/donate/')
 def donate():
     title = "Donate"
@@ -85,6 +91,7 @@ def donate():
     return render_template('donate.html', **locals())
 
 
+@cache.cached()
 @app.route('/outreach/')
 def outreach():
     title = "Outreach"
@@ -92,6 +99,7 @@ def outreach():
     return render_template('outreach.html', **locals())
 
 
+@cache.cached()
 @app.route('/contact-us/')
 def contact():
     title = "Contact Us"

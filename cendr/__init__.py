@@ -6,7 +6,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 from models import *
 from datetime import date, datetime
 from urlparse import urljoin
-from flask.ext.cache import Cache
+from google.appengine.api import memcache
+from flask_cache import Cache
 
 # Fetch credentials
 from gcloud import datastore
@@ -30,9 +31,8 @@ def autoconvert(s):
     return s
 
 # Caching
-app = Flask(__name__, static_url_path='/static')
-
 cache = Cache(config={'CACHE_TYPE': 'gaememcached'})
+app = Flask(__name__, static_url_path='/static')
 cache.init_app(app)
 
 api = Api(app)
