@@ -3,6 +3,7 @@ pytz
 dateutils
 Flask==0.10
 flask-appconfig
+Flask-Cache
 flask-restful
 flask-debugtoolbar
 Jinja2

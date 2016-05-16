@@ -1,4 +1,5 @@
 from cendr import app
+from cendr import cache
 from cendr import ds
 from cendr import autoconvert
 from cendr.models import db, report, strain, trait, trait_value, mapping, dbname
@@ -25,6 +26,7 @@ import os
 import time
 from collections import Counter
 from pprint import pprint as pp
+
 
 def get_queue():
     iron_credentials = ds.get(ds.key("credential", "iron"))
@@ -90,6 +92,7 @@ def is_number(s):
         return False
 
 
+@cache.cached(timeout=50, key_prefix='report')
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
     release_dict = {"public": 0, "embargo12": 1,  "private": 2}

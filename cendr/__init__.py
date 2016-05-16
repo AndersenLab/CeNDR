@@ -6,6 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from models import *
 from datetime import date, datetime
 from urlparse import urljoin
+from flask.ext.cache import Cache
 
 # Fetch credentials
 from gcloud import datastore
@@ -28,9 +29,10 @@ def autoconvert(s):
             pass
     return s
 
-
+# Caching
+cache = Cache(config={'CACHE_TYPE': 'memcached'})
 app = Flask(__name__, static_url_path='/static')
-
+cache.init_app(app)
 
 api = Api(app)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
