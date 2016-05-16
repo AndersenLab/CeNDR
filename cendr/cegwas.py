@@ -1,4 +1,4 @@
-from cendr import app
+from cendr import app, cache
 from models import trait, report
 from flask import render_template, request, Markup, url_for, Response
 import markdown
@@ -26,6 +26,7 @@ def format_datetime(value):
         pass
 
 
+@cache.cached(timeout=50)
 @app.route('/')
 def main():
     page_title = "Caenorhabditis elegans Natural Diversity Resource"

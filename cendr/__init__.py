@@ -30,8 +30,9 @@ def autoconvert(s):
     return s
 
 # Caching
-cache = Cache(config={'CACHE_TYPE': 'memcached'})
 app = Flask(__name__, static_url_path='/static')
+
+cache = Cache(config={'CACHE_TYPE': 'gaememcached'})
 cache.init_app(app)
 
 api = Api(app)
