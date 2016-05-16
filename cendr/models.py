@@ -139,7 +139,7 @@ class mapping(Model):
     class Meta:
         database = db
 
-class site(Model):
+class WI(Model):
     CHROM = CharField(index = True)
     POS = IntegerField(index = True)
     _ID = CharField()
@@ -147,13 +147,8 @@ class site(Model):
     ALT = CharField()
     QUAL = FloatField()
     FILTER = CharField()
-    ANN = CharField()
-
-    class Meta:
-        database = db
-
-class annotation(Model):
-    site = ForeignKeyField(site)
+    GT = CharField()
+    INDEL = BooleanField()
     allele = CharField(index=True)
     annotation = CharField(index=True)
     putative_impact = CharField(null=True)
@@ -173,13 +168,20 @@ class annotation(Model):
 
     class Meta:
         database = db
+        db_table = "WI_20160408"
 
-class call(Model):
-    site = ForeignKeyField(site)
-    SAMPLE = CharField(index = True)
-    TGT = CharField(index = True)
-    FT = CharField(index = True)
-    GT = CharField(index = True)
+
+class tajimaD(Model):
+    CHROM = CharField(index=True)
+    BIN_START = IntegerField(index=True)
+    BIN_END = IntegerField(index=True)
+    N_Sites = IntegerField(index=True)
+    N_SNPs = IntegerField(index=True)
+    TajimaD = DecimalField(index=True)
+
+    class Meta:
+        database = db
+        db_table = "tajimad"
 
 
 class wb_gene(Model):

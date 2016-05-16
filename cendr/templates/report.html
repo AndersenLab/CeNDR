@@ -20,6 +20,12 @@
 <script src="/static/report/datatables-responsive-1.10.7/dataTables.responsive.min.js"></script>
 <link href="/static/report/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
 <script src="/static/report/nouislider-7.0.10/jquery.nouislider.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<link rel="stylesheet" href="/static/css/leaflet.css" />
+<script src="/static/js/leaflet.js"></script>
+<script src="/static/js/leaflet-search.js"></script>
+
 
 
 <script type="text/x-mathjax-config">
@@ -29,10 +35,6 @@
   src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
-<script type="text/javascript" src="/static/js/d3-tip.js"></script>
-<script type="text/javascript" src="/static/js/d3_exploding_boxplot.js"></script>
-<link href="/static/css/d3_exploding_boxplot.css" rel="stylesheet" />
 
 <style>
 
@@ -245,7 +247,7 @@ A genome-wide representation of the association between variation in the <em>C. 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
   {% for peak in mapping_results %}
-    <li role="presentation" {% if loop.first %}class="active"{% endif %}><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</a></li>
+    <li role="presentation" peak="{{ peak.chrom }}:{{ peak.pos }}" class='peak-tab {% if loop.first %}active{% endif %}'><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</a></li>
     {% endfor %}
   </ul>
 
@@ -257,6 +259,10 @@ A genome-wide representation of the association between variation in the <em>C. 
     <h3>{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</h3>
     <table class="peak_summary table table-hover table-striped">
         <tbody>
+            <tr>
+              <td><strong>Total</strong></td>
+              <td class="peak_{{ loop.index0 }}_total">-</td>
+            </tr>
             <tr>
               <td>Protein Coding</td>
               <td class="peak_{{ loop.index0 }}_protein_coding">-</td>
@@ -305,10 +311,6 @@ A genome-wide representation of the association between variation in the <em>C. 
               <td>pseudogene</td>
               <td class="peak_{{ loop.index0 }}_pseudogene">-</td>
             </tr>
-            <tr>
-              <td><strong>Total</strong></td>
-              <td class="peak_{{ loop.index0 }}_total">-</td>
-            </tr>
         </tbody>
     </table>
     </div>
@@ -317,114 +319,15 @@ A genome-wide representation of the association between variation in the <em>C. 
 
     <h3>Global Distribution</h3>
 
-    <p>Salmon dots correspond to strains that have the alternate allele and purple dots are strains that have the N2 allele.</p>
-
+    <div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
+    <p>
+      <img style="margin:10px; width:25px;" src="/static/img/icons/marker.png" /><strong>Reference (<span id="ref_gt"></span>)</strong>
+      <img style="margin:10px; width:25px;" src="/static/img/icons/selected.png" /><strong>Alternative (<span id="alt_gt"></span>)</strong>
+    </p>
     <h3>Tajima's D</h3>
-      <div class="container">
-   
+      <div id="tajima" style="height: 500px;"></div>
           <div>
-              <svg id="visualisation" width="1000" height="500"></svg>
-                  <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-                  <script>
-                      function InitChart() {
-                          var data = [{
-                              "sale": "202",
-                              "year": "2000"
-                          }, {
-                              "sale": "215",
-                              "year": "2002"
-                          }, {
-                              "sale": "179",
-                              "year": "2004"
-                          }, {
-                              "sale": "199",
-                              "year": "2006"
-                          }, {
-                              "sale": "134",
-                              "year": "2008"
-                          }, {
-                              "sale": "176",
-                              "year": "2010"
-                          }];
-                          var data2 = [{
-                              "sale": "152",
-                              "year": "2000"
-                          }, {
-                              "sale": "189",
-                              "year": "2002"
-                          }, {
-                              "sale": "179",
-                              "year": "2004"
-                          }, {
-                              "sale": "199",
-                              "year": "2006"
-                          }, {
-                              "sale": "134",
-                              "year": "2008"
-                          }, {
-                              "sale": "176",
-                              "year": "2010"
-                          }];
-                          var vis = d3.select("#visualisation"),
-                              WIDTH = 1000,
-                              HEIGHT = 500,
-                              MARGINS = {
-                                  top: 20,
-                                  right: 20,
-                                  bottom: 20,
-                                  left: 50
-                              },
-                              xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([2000, 2010]),
-                              yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([134, 215]),
-                              xAxis = d3.svg.axis()
-                              .scale(xScale),
-                              yAxis = d3.svg.axis()
-                              .scale(yScale)
-                              .orient("left");
-                          
-                          vis.append("svg:g")
-                              .attr("class", "x axis")
-                              .attr("transform", "translate(0," + (HEIGHT - MARGINS.bottom) + ")")
-                              .call(xAxis);
-                          vis.append("svg:g")
-                              .attr("class", "y axis")
-                              .attr("transform", "translate(" + (MARGINS.left) + ",0)")
-                              .call(yAxis);
-                          var lineGen = d3.svg.line()
-                              .x(function(d) {
-                                  return xScale(d.year);
-                              })
-                              .y(function(d) {
-                                  return yScale(d.sale);
-                              })
-                              .interpolate("basis");
-                          vis.append('svg:path')
-                              .attr('d', lineGen(data))
-                              .attr('stroke', 'green')
-                              .attr('stroke-width', 2)
-                              .attr('fill', 'none');
-                          vis.append('svg:path')
-                              .attr('d', lineGen(data2))
-                              .attr('stroke', 'blue')
-                              .attr('stroke-width', 2)
-                              .attr('fill', 'none');
 
-                          var zoom = d3.behavior.zoom()
-                            .x(xScale)
-                            .on('zoom', function() {
-                                if (xScale.domain()[0] < minDate) {
-                              var x = zoom.translate()[0] - xScale(minDate) + xScale.range()[0];
-                                    zoom.translate([x, 0]);
-                                } else if (xScale.domain()[1] > maxDate) {
-                              var x = zoom.translate()[0] - xScale(maxDate) + xScale.range()[1];
-                                    zoom.translate([x, 0]);
-                                }
-                                redrawChart();
-                                updateViewportFromChart();
-                            });
-                          };
-                      InitChart();
-                  </script>
           </div>
    
     <p>Tajima's D across the most signficant QTL interval. Tajima's D tests whether a genomic region has the expected level of variation if it is only undergoing drift - values close to 0 indicate observed variation similar to expected levels, D&lt;0 suggests that rare alleles are present, which may have arose due to a recent selective sweep, population expansion after a recent bottleneck, or linkage to a swept gene, and D&gt;0 indicating balancing selection or sudden population contraction.</p>
@@ -441,8 +344,6 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% block script %}
 <script>
 
-
-
 // Set Gene Counts
 $(document).ready(function() {
 $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), function(k, v) {
@@ -457,7 +358,7 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
   success:function(msg) {
     $(v).html(msg["total"]);
     $(v).next().html(msg["protein_coding"]);
-    $(".peak_" + k + "_total").html(msg["total"]);
+    $(".peak_" + k + "_total").html("<strong>" + msg["total"] + "</strong>");
     biotypes = ["protein_coding", "ncRNA", "miRNA", "piRNA", "asRNA", "snRNA", "snoRNA", "scRNA", "tRNA", "lincRNA", "rRNA", "pseudogene"];
     $.each(biotypes, function(i, biotype) {
       if (!(biotype in msg)) {
@@ -470,34 +371,6 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
 });
 });
 
-
-
-var box1 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
-            .map(function(d,i){return {v:d,g:'box1',t:'pt 1'+i}})
-
-var box2 = d3.range(100).map(d3.random.normal(Math.random()*100,30))
-            .map(function(d,i){return {v:d,g:'box2',t:'pt 2'+i}})
-
-var box3 = d3.range(100).map(d3.random.normal(Math.random()*100,5))
-            .map(function(d,i){return {v:d,g:'box3',t:'pt 3'+i}})
-
-var box4 = d3.range(100).map(d3.random.normal(Math.random()*100,30))
-            .map(function(d,i){return {v:d,g:'box4',t:'pt 4'+i}})
-
-
-var data = box1.concat(box1).concat(box2)
-
-// chart(data,aes)
-// aesthetic :
-// y : point's value on y axis
-// group : how to group data on x axis
-// color : color of the point / boxplot
-// label : displayed text in toolbox
-var chart = exploding_boxplot(data,
-            {y:'v',group:'g',color:'g',label:'t'})
-
-//call chart on a div
-//chart('#chartContainer')
 
 {% if trait_slug and report_html == "" %}
 prog = Array()
@@ -555,14 +428,6 @@ window.setInterval(check_status, 3000);
 
 // Document ready
 $('#report_nav').ready(function () {
-    $("a").tooltip({
-        'placement': 'right'
-    });
-    
-    $("svg circle").tooltip({
-        'container': 'body',
-        'placement': 'right'
-    });
 
     $('body').scrollspy({target: ".navbar", offset: 75}); 
     // Add smooth scrolling to all links inside a navbar
@@ -586,6 +451,148 @@ $('#report_nav').ready(function () {
     });
 
 });
+
+
+//
+// Genotype Location
+//
+
+// Icons
+var icon_norm = L.icon({
+    iconUrl: '/static/img/icons/marker.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+var icon_hover = L.icon({
+    iconUrl: '/static/img/icons/selected.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+gt_icon = {"0/0": icon_norm, "1/1": icon_hover}
+
+ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
+MB_ATTR = 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+  '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+  'Imagery © <a href="http://mapbox.com">Mapbox</a>';
+MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
+OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+var southWest = L.latLng(-90, -180),
+  northEast = L.latLng(90, 180),
+  bounds = L.latLngBounds(southWest, northEast);
+
+var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -100], 2);
+L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
+
+var strain_layer = L.layerGroup();
+var gt_set = {"0/0": "-", "1/1": "-"}
+
+function update_geo_map(chrom, pos) {
+  map.removeLayer(strain_layer);
+
+  $.ajax({
+      url: "/api/gt_loc/" + chrom + "/" + pos,
+      contentType: 'application/json',
+      success:function(data) {
+        markers = [];
+        $.each(data, function(k, d) {
+            m = L.marker([d.latitude, d.longitude], { icon: gt_icon[d.GT], tgt: d.TGT, gt: d.GT, title: d.isotype});
+            markers.push(m);
+            gt_set[d.GT] = d.TGT.split("/")[0];
+        });
+        strain_layer = L.layerGroup(markers).addTo(map);
+        $("#ref_gt").html(gt_set["0/0"]);
+        $("#alt_gt").html(gt_set["1/1"]);
+    }
+
+  });
+}
+
+
+//
+// Tajima D
+//
+
+var data = [];
+var layout = {
+  margin: {
+    t: 10,
+    l: 40,
+    r: 3
+  },
+  xaxis: {
+    domain: [0, 1000],
+    title: "I",
+    range: [ {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} ],
+    fixedrange: false,
+    anchor: "x1"
+  },
+  yaxis: {
+    range: [-4, 4],
+    fixedrange: true
+  },
+  dragmode: "pan",
+  showlegend: false,
+  hovermode: 'closest'
+};
+
+
+function update_tajima_plot(chrom, start, end) {
+  start = start - 50000;
+  end = end + 50000;
+  if (start < 0) {
+    start = 0;
+  }
+  if (end < 0) {
+    end = 0;
+  }
+  $.ajax({
+    url: "/api/tajima/" + chrom + "/" + start + "/" + end,
+    contentType: 'application/json',
+    success:function(data) {
+      data["mode"] = "markers";
+      data["marker"] = {size: 5};
+      Plotly.newPlot('tajima', [data], layout, {displayModeBar: false, displaylogo: false});
+  }
+});
+}
+
+
+
+
+$("#tajima").bind('plotly_relayout', function(event, eventdata) {
+  chrom = "I";
+  start = parseInt(eventdata["xaxis.range[0]"]);
+  end = parseInt(eventdata["xaxis.range[1]"]);
+  update_tajima_plot(chrom, start, end)
+});
+
+
+// Load initial map and Tajima
+$(document).ready(function() {
+  update_geo_map('{{ mapping_results[0]["chrom"]}}' , {{ mapping_results[0]["pos"]}});
+  // Load initial position
+  update_tajima_plot('{{ mapping_results[0]["chrom"]}}', {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} )
+});
+
+// Monitor peak tabs
+$(".peak-tab").bind("click", function() {
+  peak = $(this).attr("peak");
+  chrom = peak.split(":")[0];
+  pos = peak.split(":")[1];
+  interval = $(this).children("a").html();
+  start = interval.split(":")[1].split("-")[0];
+  end = start = interval.split(":")[1].split("-")[1]
+  update_geo_map(chrom, pos);
+  update_tajima_plot(chrom, start, end);
+})
+
+
 
 
 </script>
