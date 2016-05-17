@@ -1,9 +1,13 @@
 from cendr import app, json_serial, cache
-from flask import render_template, url_for, Markup
+from flask import render_template, url_for, Markup, request
 import markdown
 import yaml
 import json
+import stripe
+from cendr import get_stripe_keys
 from cendr.models import strain, report, mapping, trait
+from google.appengine.api import mail
+from cendr.emails import donate_submission
 from collections import OrderedDict
 
 @app.context_processor
@@ -67,3 +71,45 @@ def statistics():
 
     return render_template('statistics.html', **locals())
 
+
+
+@app.route('/donate/', methods=['GET','POST'])
+def donate():
+    title = "Donate"
+    bcs = OrderedDict([("donate", "")])
+    print(request.form)
+    stripe_keys = get_stripe_keys()
+    key = stripe_keys["public_key"]
+    # Process form if stripe token available.
+    if 'stripeToken' in request.form:
+        print(request.form)
+        token = request.form['stripeToken']
+        donation = int(request.form.get('amount')) * 100
+        stripe.api_key = stripe_keys["secret_key"]
+        try:
+            customer = stripe.Customer.retrieve(request.form['stripeEmail'].lower())
+        except:
+            customer = stripe.Customer.create(
+                id=request.form['stripeEmail'].lower(),
+                email=request.form['stripeEmail'],
+            )
+        charge = stripe.Charge.create(
+            receipt_email=customer.email,
+            amount=donation,
+            source=token,
+            currency='usd',
+            description='CeNDR Donation',
+            statement_descriptor='CeNDR Donation'
+        )
+        # Send user email
+        mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+                to=customer.email,
+                subject="CeNDR Donation",
+                body=donate_submission.format(donation=donation))
+        mail.send_mail_to_admins(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+                subject="Donation to CeNDR",
+                body=donate_submission.format(donation=donation))
+        return render_template('donate.html', **locals())
+
+    else:
+        return render_template('donate.html', **locals())

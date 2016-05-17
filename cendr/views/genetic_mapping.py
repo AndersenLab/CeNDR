@@ -272,7 +272,6 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     for r in mapping_results:
         try:
             result = fetch_geo_gt(r["chrom"], r["pos"])
-            print(result)
             geo_gt[r["chrom"] + ":" + str(r["pos"])] = result
         except:
             pass
