@@ -2,7 +2,8 @@ from cendr import app
 from cendr import cache
 from cendr import ds
 from cendr import autoconvert
-from cendr.models import db, report, strain, trait, trait_value, mapping, dbname
+from cendr.models import db, report, strain, trait, trait_value, mapping, dbname, WI
+from cendr.views.api import fetch_geo_gt
 from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
@@ -92,7 +93,6 @@ def is_number(s):
         return False
 
 
-@cache.cached(timeout=50, key_prefix='report')
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
     release_dict = {"public": 0, "embargo12": 1,  "private": 2}
@@ -222,9 +222,11 @@ def public_mapping():
     return render_template('public_mapping.html', **locals())
 
 
+
 @app.route("/report/<report_slug>/")
 @app.route("/report/<report_slug>/<trait_slug>")
 @app.route("/report/<report_slug>/<trait_slug>/<rerun>")
+#@cache.memoize(timeout=50)
 def trait_view(report_slug, trait_slug="", rerun = None):
     report_data = list(trait.select(trait, report).join(report).where(((report.report_slug == report_slug) & (
         report.release == 0)) | (report.report_hash == report_slug)).dicts().execute())
@@ -243,7 +245,6 @@ def trait_view(report_slug, trait_slug="", rerun = None):
         if rerun == "rerun":
             if trait_data["status"] == "error":
                 queue = get_queue()
-                print trait_data
                 # Submit job to iron worker
                 queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
             # Return user to current trait
@@ -263,6 +264,21 @@ def trait_view(report_slug, trait_slug="", rerun = None):
 
     # Fetch significant mappings
     mapping_results = list(mapping.select(mapping, report, trait).join(trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())
+    
+    #######################
+    # Fetch geo locations #
+    #######################
+    geo_gt = {}
+    for r in mapping_results:
+        try:
+            result = fetch_geo_gt(r["chrom"], r["pos"])
+            print(result)
+            geo_gt[r["chrom"] + ":" + str(r["pos"])] = result
+        except:
+            pass
+    geo_gt = json.dumps(geo_gt)
+
+
     status = list(trait.select(report, trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())[0]
 
     # List available datasets

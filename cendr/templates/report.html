@@ -4,22 +4,7 @@
 {% block custom_head %}
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script src="/static/report/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="/static/report/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="/static/report/tocify-1.9.1/jquery.tocify.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="/static/report/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-<script src="/static/report/bootstrap-3.3.5/js/bootstrap.min.js"></script>
-<script src="/static/report/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
-<script src="/static/report/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="/static/report/htmlwidgets-0.6/htmlwidgets.js"></script>
-<script src="/static/report/datatables-binding-0.1/datatables.js"></script>
-<script src="/static/report/datatables-1.10.7/jquery.dataTables.min.js"></script>
-<link href="/static/report/datatables-default-1.10.7/dataTables.extra.css" rel="stylesheet" />
-<link href="/static/report/datatables-default-1.10.7/jquery.dataTables.min.css" rel="stylesheet" />
-<link href="/static/report/datatables-responsive-1.10.7/dataTables.responsive.min.css" rel="stylesheet" />
-<script src="/static/report/datatables-responsive-1.10.7/dataTables.responsive.min.js"></script>
-<link href="/static/report/nouislider-7.0.10/jquery.nouislider.min.css" rel="stylesheet" />
-<script src="/static/report/nouislider-7.0.10/jquery.nouislider.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 <link rel="stylesheet" href="/static/css/leaflet.css" />
@@ -457,6 +442,8 @@ $('#report_nav').ready(function () {
 // Genotype Location
 //
 
+var geo_gt = {{ geo_gt|safe }}
+
 // Icons
 var icon_norm = L.icon({
     iconUrl: '/static/img/icons/marker.png',
@@ -492,25 +479,21 @@ L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld
 var strain_layer = L.layerGroup();
 var gt_set = {"0/0": "-", "1/1": "-"}
 
+
+
 function update_geo_map(chrom, pos) {
   map.removeLayer(strain_layer);
-
-  $.ajax({
-      url: "/api/gt_loc/" + chrom + "/" + pos,
-      contentType: 'application/json',
-      success:function(data) {
-        markers = [];
-        $.each(data, function(k, d) {
-            m = L.marker([d.latitude, d.longitude], { icon: gt_icon[d.GT], tgt: d.TGT, gt: d.GT, title: d.isotype});
-            markers.push(m);
-            gt_set[d.GT] = d.TGT.split("/")[0];
-        });
-        strain_layer = L.layerGroup(markers).addTo(map);
-        $("#ref_gt").html(gt_set["0/0"]);
-        $("#alt_gt").html(gt_set["1/1"]);
-    }
-
+  chrom_pos = chrom + ":" + pos;
+  markers = [];
+  $.each(geo_gt[chrom_pos], function(k, d) {
+      m = L.marker([d.latitude, d.longitude], { icon: gt_icon[d.GT], tgt: d.TGT, gt: d.GT, title: d.isotype});
+      markers.push(m);
+      gt_set[d.GT] = d.TGT.split("/")[0];
   });
+  strain_layer = L.layerGroup(markers).addTo(map);
+  $("#ref_gt").html(gt_set["0/0"]);
+  $("#alt_gt").html(gt_set["1/1"]);
+
 }
 
 

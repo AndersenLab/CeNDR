@@ -1,4 +1,4 @@
-from cendr import app, json_serial
+from cendr import app, json_serial, cache
 from flask import render_template, url_for, Markup
 import markdown
 import yaml
@@ -15,6 +15,7 @@ def utility_processor():
 
 
 @app.route('/about/')
+@cache.cached()
 def about():
 	# About us Page - directs to other pages.
     title = "About"
@@ -25,7 +26,9 @@ def about():
     return render_template('about.html', **locals())
 
 
+
 @app.route('/about/panel/')
+@cache.cached()
 def panel():
 	# Scientific Panel Page
     title = "Scientific Advisory Panel"
@@ -35,6 +38,7 @@ def panel():
 
 
 @app.route('/about/staff/')
+@cache.cached()
 def staff():
 	# Staff Page
     title = "Staff"
@@ -43,7 +47,9 @@ def staff():
     return render_template('staff.html', **locals())
 
 
+
 @app.route('/about/statistics/')
+@cache.cached()
 def statistics():
     title = "Site Statistics"
     bcs = OrderedDict([("about", url_for("about")), ("statistics", None)])

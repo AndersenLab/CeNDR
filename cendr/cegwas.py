@@ -26,8 +26,8 @@ def format_datetime(value):
         pass
 
 
-@cache.cached(timeout=50)
 @app.route('/')
+@cache.cached(timeout=50)
 def main():
     page_title = "Caenorhabditis elegans Natural Diversity Resource"
     files = [x for x in os.listdir("cendr/static/content/news/") if not x.startswith(".")]
@@ -51,9 +51,9 @@ def news_item(filename = ""):
     return render_template('news_item.html', **locals())
 
 
-@cache.memoize(50)
 @app.route("/help/")
 @app.route("/help/<filename>/")
+@cache.memoize(50)
 def help_item(filename = ""):
     files = ["Getting-Started", "FAQ", "Methods"]
     if not filename:
@@ -83,24 +83,26 @@ def feed():
     return feed.get_response()
 
 
-@cache.cached()
 @app.route('/donate/')
+@cache.cached()
 def donate():
     title = "Donate"
     bcs = OrderedDict([("donate", "")])
     return render_template('donate.html', **locals())
 
 
-@cache.cached()
+
 @app.route('/outreach/')
+@cache.cached()
 def outreach():
     title = "Outreach"
     bcs = OrderedDict([("outreach", "")])
     return render_template('outreach.html', **locals())
 
 
-@cache.cached()
+
 @app.route('/contact-us/')
+@cache.cached()
 def contact():
     title = "Contact Us"
     bcs = OrderedDict([("Contact Us", "/contact-us/")])

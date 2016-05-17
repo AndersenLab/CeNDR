@@ -219,22 +219,24 @@ class site_gt_invariant_table(Resource):
 # GT By Location
 #
 
+def fetch_geo_gt(chrom, pos):
+    gt = json.loads(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)
+    strain_locations = list(strain.select(strain.isotype, strain.latitude, strain.longitude)
+        .filter(strain.latitude != None)
+        .distinct().dicts().execute())
+    strain_locations = {x["isotype"]:x for x in strain_locations}
+    for i in gt:
+        if i["SAMPLE"] in strain_locations and i["GT"] in ["0/0", "1/1"]:
+            strain_locations[i["SAMPLE"]].update({"TGT": i["TGT"], "GT": i["GT"]})
+        else:
+            if i["SAMPLE"] in strain_locations:
+                del strain_locations[i["SAMPLE"]]
+    return strain_locations.values()
 
 class strain_gt_locations(Resource):
 
     def get(self, chrom, pos):
-        gt = json.loads(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)
-        strain_locations = list(strain.select(strain.isotype, strain.latitude, strain.longitude)
-              .filter(strain.latitude != None)
-              .distinct().dicts().execute())
-        strain_locations = {x["isotype"]:x for x in strain_locations}
-        for i in gt:
-            if i["SAMPLE"] in strain_locations and i["GT"] in ["0/0", "1/1"]:
-                strain_locations[i["SAMPLE"]].update({"TGT": i["TGT"], "GT": i["GT"]})
-            else:
-                if i["SAMPLE"] in strain_locations:
-                    del strain_locations[i["SAMPLE"]]
-        result = json.dumps(strain_locations.values(), cls=CustomEncoder, indent = 4)
+        result = json.dumps(fetch_geo_gt(chrom, pos), cls=CustomEncoder, indent = 4)
         return Response(response=result, status = 201, mimetype="application/json")
 
 api.add_resource(strain_gt_locations, '/api/gt_loc/<string:chrom>/<int:pos>')
