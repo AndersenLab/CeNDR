@@ -194,5 +194,58 @@ def order_confirmation(order_id):
 
 
 
+@app.route('/donate/', methods=['GET','POST'])
+def donate():
+    title = "Donate"
+    bcs = OrderedDict([("donate", "")])
+    donation = request.form.get('amount')
+    key = stripe_keys["public_key"]
+    print 'stripeToken' in request.form
+    if 'stripeToken' in request.form:
+        stripe.api_key = stripe_keys["secret_key"]
+        try:
+            customer = stripe.Customer.retrieve(request.form['stripeEmail'].lower())
+        except:
+            customer = stripe.Customer.create(
+                id=request.form['stripeEmail'].lower(),
+                email=request.form['stripeEmail'],
+                card=request.form['stripeToken']
+            )
+        order = stripe.Charge.create(
+            currency = 'usd',
+            customer = customer.id,
+            )
+        charge = stripe.Charge.create(
+            customer=customer.id,
+            order=order.id,
+            receipt_email=customer.email,
+            amount=donation,
+            currency=order.currency,
+            description='CeNDR Donation',
+            statement_descriptor='CeNDR Donation'
+        )
+        if charge.paid:
+            order.pay()
+        # Send user email
+        mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+                to=customer.email,
+                subject="CeNDR Order Submission ",
+                body=order_submission.format(donation=donation))
+        mail.send_mail_to_admins(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+                subject="Donation to CeNDR",
+                body=order_submission.format(donation=donation))
+        return redirect(url_for("donation_confirmation", donation_id=order.id), code=302)
+
+    else:
+        return render_template('donate.html', **locals())
+
+@app.route("/donate/<donation_id>/")
+def donation_confirmation(donation_id):
+    if donation_id.startswith("or_"):
+        donation_id = donation_id[3:]
+    page_title = "Donation: " + donation_id
+    stripe.api_key = stripe_keys["secret_key"]
+    order = stripe.Order.retrieve("or_" + donation_id)      
+    return render_template('order_confirm.html', **locals())
 
 

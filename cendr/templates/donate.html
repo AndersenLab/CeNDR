@@ -3,10 +3,30 @@
 
 {% block content %}
 <div class="row">
-      <div class="col-md-8">
+      <div class="col-md-12">
+        {{render_markdown("donate.md")}}
+        <br></br>
       </div>
-
-      <div class="col-md-4">
+      
+      <div class="col-md-4 pull-right">
+        <form action="/donate" class="form-inline" method="POST">
+        Donation:
+          <br>
+          <br>
+          <input type="text" name="amount">
+          <br>
+          <br>
+            <script
+              src="https://checkout.stripe.com/checkout.js"
+              class="stripe-button"
+              data-shipping-address="false"
+              data-billing-address="false"
+              data-key="{{ key }}"
+              data-description="Donation"
+              data-amount= "{{ donation }}"
+              >
+            </script>
+          </form>
       </div>
   </div>
 {% endblock %}
