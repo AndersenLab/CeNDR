@@ -1,6 +1,6 @@
-from cendr import app, autoconvert, ds, db
+from cendr import app, autoconvert, ds, db, cache, get_stripe_keys
 from cendr import json_serial
-from flask import render_template, request, url_for, redirect
+from flask import render_template, request, url_for, redirect, make_response
 from cendr.models import strain
 from collections import OrderedDict
 import json
@@ -10,18 +10,13 @@ import stripe
 from google.appengine.api import mail
 from cendr.emails import order_submission
 
-if (os.getenv('SERVER_SOFTWARE') and
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    stripe_keys = ds.get(ds.key("credential", "stripe_live"))
-else:
-    stripe_keys = ds.get(ds.key("credential", "stripe_test"))
-
 #
 # Global Strain Map
 #
 
 
 @app.route('/strain/global-strain-map/')
+@cache.cached()
 def map_page():
     title = "Global Strain Map"
     bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("global-strain-map", "")])
@@ -33,10 +28,33 @@ def map_page():
 
 
 #
+# Strain Metadata
+#
+
+
+@app.route('/strain/metadata.tsv')
+def strain_metadata():
+    strain_listing = list(strain.select().filter(
+        strain.isotype != None).tuples().execute())
+    resp = '\t'.join(strain._meta.sorted_field_names[1:21]) + "\n"
+    for row in strain_listing:
+        row = list(row)
+        for k, f in enumerate(row):
+            if type(f) == unicode:
+                row[k] = f.encode('ascii', 'ignore')
+        resp += '\t'.join(map(str, row[1:21])) + "\n"
+    response = make_response(resp)
+    response.headers["Content-Type"] = "text/plain"
+    return response
+
+
+
+#
 # Isotype View
 #
 
 @app.route('/strain/<isotype_name>/')
+@cache.cached()
 def isotype_page(isotype_name):
     page_title = isotype_name
     page_type = "isotype"
@@ -53,6 +71,7 @@ def isotype_page(isotype_name):
 #
 
 @app.route('/strain/')
+@cache.cached()
 def strain_listing_page():
     bcs = OrderedDict([("strain", None)])
     title = "Strain Catalog"
@@ -124,6 +143,7 @@ def order_page():
     if len(items) > 25:
         return redirect(url_for("strain_listing_page", warning = "A maximum of 25 items may be ordered (sets + strains)."))
 
+    stripe_keys = get_stripe_keys()
     key = stripe_keys["public_key"]
 
     if 'stripeToken' in request.form:
@@ -188,64 +208,9 @@ def order_confirmation(order_id):
     if order_id.startswith("or_"):
         order_id = order_id[3:]
     page_title = "Order: " + order_id
+    stripe_keys = get_stripe_keys()
     stripe.api_key = stripe_keys["secret_key"]
     order = stripe.Order.retrieve("or_" + order_id)      
-    return render_template('order_confirm.html', **locals())
-
-
-
-@app.route('/donate/', methods=['GET','POST'])
-def donate():
-    title = "Donate"
-    bcs = OrderedDict([("donate", "")])
-    donation = request.form.get('amount')
-    key = stripe_keys["public_key"]
-    print 'stripeToken' in request.form
-    if 'stripeToken' in request.form:
-        stripe.api_key = stripe_keys["secret_key"]
-        try:
-            customer = stripe.Customer.retrieve(request.form['stripeEmail'].lower())
-        except:
-            customer = stripe.Customer.create(
-                id=request.form['stripeEmail'].lower(),
-                email=request.form['stripeEmail'],
-                card=request.form['stripeToken']
-            )
-        order = stripe.Charge.create(
-            currency = 'usd',
-            customer = customer.id,
-            )
-        charge = stripe.Charge.create(
-            customer=customer.id,
-            order=order.id,
-            receipt_email=customer.email,
-            amount=donation,
-            currency=order.currency,
-            description='CeNDR Donation',
-            statement_descriptor='CeNDR Donation'
-        )
-        if charge.paid:
-            order.pay()
-        # Send user email
-        mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
-                to=customer.email,
-                subject="CeNDR Order Submission ",
-                body=order_submission.format(donation=donation))
-        mail.send_mail_to_admins(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
-                subject="Donation to CeNDR",
-                body=order_submission.format(donation=donation))
-        return redirect(url_for("donation_confirmation", donation_id=order.id), code=302)
-
-    else:
-        return render_template('donate.html', **locals())
-
-@app.route("/donate/<donation_id>/")
-def donation_confirmation(donation_id):
-    if donation_id.startswith("or_"):
-        donation_id = donation_id[3:]
-    page_title = "Donation: " + donation_id
-    stripe.api_key = stripe_keys["secret_key"]
-    order = stripe.Order.retrieve("or_" + donation_id)      
     return render_template('order_confirm.html', **locals())
 
 
