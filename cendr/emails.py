@@ -15,3 +15,7 @@ http://elegansvariation.org/order/{order_slug}/
 
 Please retain this email for your records.
 """
+
+donate_submission = """
+Thank you for your donation of {donation} to CeNDR!
+"""

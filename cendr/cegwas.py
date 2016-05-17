@@ -83,15 +83,6 @@ def feed():
     return feed.get_response()
 
 
-@app.route('/donate/')
-@cache.cached()
-def donate():
-    title = "Donate"
-    bcs = OrderedDict([("donate", "")])
-    return render_template('donate.html', **locals())
-
-
-
 @app.route('/outreach/')
 @cache.cached()
 def outreach():

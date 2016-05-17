@@ -3,30 +3,93 @@
 
 {% block content %}
 <div class="row">
+
+{% if 'stripeToken' in request.form %}
       <div class="col-md-12">
-        {{render_markdown("donate.md")}}
-        <br></br>
+        <h1>Thank You!</h1>
+
+        <p>Your donation of ${{'%0.2f'| format(donation/100|float)}} will benefit the <em>C. elegans</em> community and CeNDR!</p>
       </div>
-      
-      <div class="col-md-4 pull-right">
-        <form action="/donate" class="form-inline" method="POST">
-        Donation:
-          <br>
-          <br>
-          <input type="text" name="amount">
-          <br>
-          <br>
-            <script
-              src="https://checkout.stripe.com/checkout.js"
-              class="stripe-button"
-              data-shipping-address="false"
-              data-billing-address="false"
-              data-key="{{ key }}"
-              data-description="Donation"
-              data-amount= "{{ donation }}"
-              >
-            </script>
+
+{% else %}
+      <div class="col-md-8">
+        {{ render_markdown("donate.md") }}
+      </div>
+
+      <div class="col-md-4">
+
+        <div class="panel panel-default">
+          <div class="panel-heading">Donate</div>
+          <div class="panel-body">
+
+
+          <form id="donate_form" class="form-inline" method="POST" action="/donate/">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">$</div>
+                <input name="amount" type="text" class="form-control" id="donate_amount" placeholder="Amount">
+                <div class="input-group-addon">.00</div>
+              </div>
+            </div>
+            <br /><br />
+            <input type="hidden" id="stripeToken" name="stripeToken"/>
+            <input type="hidden" id="stripeEmail" name="stripeEmail"/>
+            <input type="submit" val="Donate!" class="btn btn-primary btn-block submit" disabled id="purchase" />
+
+            <script src="https://checkout.stripe.com/checkout.js"></script>
           </form>
+                  <script>
+                    var handler = StripeCheckout.configure({
+                      key: '{{ key }}',
+                      image: 'https://s3.amazonaws.com/stripe-uploads/acct_17TgllKyUGt5kjIVmerchant-icon-1462816982095-sqrimg.png',
+                      locale: 'auto',
+                      token: function(token) {
+                        $("#stripeToken").val(token.id);
+                        $("#stripeEmail").val(token.email);
+                        $("#donate_form").submit();
+                      }
+                    });
+
+                    $('#purchase').on('click', function(e) {
+                      // Open Checkout with further options:
+                      handler.open({
+                        name: 'CeNDR',
+                        description: 'Donation',
+                        amount: parseInt($("#donate_amount").val()) * 100
+                      });
+                      e.preventDefault();
+                    });
+
+                    // Close Checkout on page navigation:
+                    $(window).on('popstate', function() {
+                      handler.close();
+                    });
+                  </script>
+              </form>
+          </div>
+        </div>
+
       </div>
+{% endif %}
   </div>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+$(document).ready(function() {
+  
+  $("#donate_amount").on("input", function() {
+    if ($("#donate_amount").val() != "") {
+      $("#purchase").prop("disabled", false);
+    } else {
+      $("#purchase").prop("disabled", true);
+    }
+  })
+
+});
+</script>
+
+
 {% endblock %}
