@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from peewee import *
+from cendr import get_stripe_keys
 import re
 import requests
 import json
@@ -12,29 +13,19 @@ import MySQLdb
 import _mysql
 import sys
 reload(sys)
-import stripe
 from gcloud import datastore
 ds = datastore.Client(project="andersen-lab")
 sys.setdefaultencoding('utf-8')
-from models import *
+from cendr.models import *
 
 #=======#
 # Setup #
 #=======#
+current_build = 20160408
 reset_db = False
 
 # which services should be updated.
-update = ["gene_table"] # ["db", "stripe", "gene_table"]
-
-# Fetch stripe keys
-if (os.getenv('SERVER_SOFTWARE') and
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    stripe_keys = ds.get(ds.key("credential", "stripe_live"))
-else:
-    stripe_keys = ds.get(ds.key("credential", "stripe_test"))
-    credentials = json.loads(open("credentials.json",'r').read())
-
-stripe.api_key = stripe_keys["secret_key"]
+update = ["tajima"] # ["db", "stripe", "gene_table", "tajima"]
 
 booldict = {"TRUE": True,
             "FALSE": False,
@@ -57,7 +48,7 @@ def correct_values(k, v):
     else:
         return v.encode('utf-8').strip()
 
-table_list = [strain, report, trait, trait_value, mapping, wb_gene]
+table_list = [strain, report, trait, trait_value, mapping]
 if "db" in update:
     with db.atomic():
         if reset_db:
@@ -71,7 +62,38 @@ lines = list(csv.DictReader(StringIO.StringIO(strain_info_join.text), delimiter=
 
 strain_data = []
 
+
+##########
+# TAJIMA #
+##########
+
+if "tajima" in update:
+    if reset_db:
+        db.drop_tables([tajimaD], safe = True)
+        db.create_tables([tajimaD], safe = True)
+    with open("data/WI_{current_build}.tajima.tsv".format(current_build=current_build), 'r') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter='\t')
+        tajima_d = []
+        for index, line in enumerate(reader):
+            if index > 0:
+                for k,v in line.items():
+                    if k !='CHROM' and k != 'TajimaD':
+                        line[k] = int(v)
+                line['TajimaD'] = round(float(line['TajimaD']),3)
+                tajima_d.append(line)
+
+    with db.atomic():
+      tajimaD.insert_many(tajima_d).execute()
+
+
+##############
+# Gene Table #
+##############
+
 if "gene_table" in update:
+    if reset_db:
+        db.drop_tables([wb_gene], safe = True)
+        db.create_tables([wb_gene], safe = True)
     build = "WS245"
     gff_url = "ftp://ftp.wormbase.org/pub/wormbase/releases/{build}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{build}.annotations.gff3.gz".format(build = build)
     gff = "c_elegans.{build}.gff".format(build = build)
@@ -80,7 +102,7 @@ if "gene_table" in update:
         comm = """curl {gff_url} |\
                   gunzip -kfc |\
                   grep 'WormBase' |\
-                  awk '$2 == "WormBase" && $3 == "gene" {{ print }}' > {gff}""".format(**locals())
+                  awk '$2 == "WormBase" && $3 == "gene" {{ print }}' > data/{gff}""".format(**locals())
         print(comm)
         print(check_output(comm, shell = True))
 
@@ -187,8 +209,14 @@ else:
                         )
                 print line["strain"]
 
-# Add Strain Sets
+
+##########
+# Stripe #
+##########
 if "stripe" in update:
+    # Fetch stripe keys
+    stripe_keys = get_stripe_keys()
+    stripe.api_key = stripe_keys["secret_key"]
     for i in ["1","2","3","divergent"]:
         print i
         set_name = "set_" + i 

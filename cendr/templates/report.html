@@ -508,8 +508,8 @@ var layout = {
     r: 3
   },
   xaxis: {
-    domain: [0, 1000],
-    title: "I",
+    domain: [0, 1],
+    title: "{{ mapping_results[0]["chrom"]}}",
     range: [ {{ mapping_results[0]["interval_start"]}}, {{ mapping_results[0]["interval_end"]}} ],
     fixedrange: false,
     anchor: "x1"
@@ -525,33 +525,32 @@ var layout = {
 
 
 function update_tajima_plot(chrom, start, end) {
-  start = start - 50000;
-  end = end + 50000;
   if (start < 0) {
     start = 0;
   }
   if (end < 0) {
     end = 0;
   }
+  console.log("/api/tajima/" + chrom + "/" + start + "/" + end)
   $.ajax({
     url: "/api/tajima/" + chrom + "/" + start + "/" + end,
     contentType: 'application/json',
     success:function(data) {
       data["mode"] = "markers";
       data["marker"] = {size: 5};
+      layout.xaxis.title = chrom;
+      layout.xaxis.range = [start, end];
       Plotly.newPlot('tajima', [data], layout, {displayModeBar: false, displaylogo: false});
   }
 });
 }
 
 
-
-
 $("#tajima").bind('plotly_relayout', function(event, eventdata) {
-  chrom = "I";
+  chrom = $(".peak-tab.active").attr("peak").split(":")[0];
   start = parseInt(eventdata["xaxis.range[0]"]);
   end = parseInt(eventdata["xaxis.range[1]"]);
-  update_tajima_plot(chrom, start, end)
+  update_tajima_plot(chrom, start, end);
 });
 
 
@@ -563,16 +562,16 @@ $(document).ready(function() {
 });
 
 // Monitor peak tabs
-$(".peak-tab").bind("click", function() {
-  peak = $(this).attr("peak");
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+  peak = $(e.target).parent().attr("peak");
   chrom = peak.split(":")[0];
   pos = peak.split(":")[1];
-  interval = $(this).children("a").html();
-  start = interval.split(":")[1].split("-")[0];
-  end = start = interval.split(":")[1].split("-")[1]
+  interval = $(".peak-tab.active").children("a").html()
+  start = parseInt(interval.split(":")[1].split("-")[0]);
+  end = parseInt(interval.split(":")[1].split("-")[1]);
   update_geo_map(chrom, pos);
   update_tajima_plot(chrom, start, end);
-})
+});
 
 
 

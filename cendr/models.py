@@ -5,6 +5,8 @@ import os, sys
 import MySQLdb
 import _mysql
 
+current_build = 20160408
+
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     dbname = "cegwas_v2"
@@ -177,11 +179,11 @@ class tajimaD(Model):
     BIN_END = IntegerField(index=True)
     N_Sites = IntegerField(index=True)
     N_SNPs = IntegerField(index=True)
-    TajimaD = DecimalField(index=True)
+    TajimaD = FloatField(index=True)
 
     class Meta:
         database = db
-        db_table = "tajimad"
+        db_table = "WI_{current_build}_tajimad".format(current_build = current_build)
 
 
 class wb_gene(Model):
