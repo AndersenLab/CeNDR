@@ -33,7 +33,11 @@ def autoconvert(s):
 app = Flask(__name__, static_url_path='/static')
 
 # Cache
-cache = Cache(app, config={'CACHE_TYPE': 'gaememcached'})
+if (os.getenv('SERVER_SOFTWARE') and
+            os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
+    cache = Cache(app, config={'CACHE_TYPE': 'gaememcached'})
+else:
+    cache = Cache(app, config={'CACHE_TYPE': 'null'})
 
 api = Api(app)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
