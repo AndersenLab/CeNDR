@@ -11,7 +11,7 @@ import os
 import sys
 from peewee import JOIN
 from dateutil.parser import parse
-
+import zlib, cPickle, base64
 
 FIELDS = [x.name for x in strain._meta.sorted_fields if x.name != "id"]
 PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
@@ -155,72 +155,12 @@ class report_progress(Resource):
 reports_urls = ['/api/<string:report_slug>/<string:trait_slug>',
                 '/api/<string:report_slug>/<string:trait_slug>']
 
-
-class site_gt(Resource):
-
-    def get(self, chrom, pos):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT).join(
-            call).filter(site.CHROM == chrom, site.POS == pos).dicts().execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
-
-
-class site_gt_range(Resource):
-
-    def get(self, chrom, pos, pos_end):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT).join(
-            call).filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end).dicts().execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
-
-
-class site_gt_annotation(Resource):
-
-    def get(self, chrom, pos):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
-                      .join(call)
-                      .switch(site)
-                      .join(annotation)
-                      .filter(site.CHROM == chrom, site.POS == pos)
-                      .dicts()
-                      .execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
-
-
-class site_gt_range_annotation(Resource):
-
-    def get(self, chrom, pos, pos_end):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
-                      .join(call)
-                      .switch(site)
-                      .join(annotation)
-                      .filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end)
-                      .dicts()
-                      .execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
-
-
-class site_gt_invariant_table(Resource):
-
-    def get(self, chrom, pos, interval_start, interval_end, reference):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
-                      .join(call)
-                      .switch(site)
-                      .join(annotation)
-                      .filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end)
-                      .dicts()
-                      .execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
-
 #
 # GT By Location
 #
 
 def fetch_geo_gt(chrom, pos):
-    gt = json.loads(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)
+    gt = cPickle.loads(zlib.decompress(base64.b64decode(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)))
     strain_locations = list(strain.select(strain.isotype, strain.latitude, strain.longitude)
         .filter(strain.latitude != None)
         .distinct().dicts().execute())
@@ -378,20 +318,6 @@ class get_gt(Resource):
 
 api.add_resource(get_gt, '/api/variant/<string:chrom>/<int:pos>')
 
-
-
-# Variants
-api.add_resource(site_gt, '/api/variants/<string:chrom>/<int:pos>')
-api.add_resource(
-    site_gt_range, '/api/variants/<string:chrom>/<int:pos>/<int:pos_end>')
-api.add_resource(site_gt_invariant_table,
-                 '/api/variants/<string:chrom>/<int:pos>/<int:pos_end>')
-
-# Annotations
-api.add_resource(site_gt_annotation,
-                 '/api/variants/annotation/<string:chrom>/<int:pos>')
-api.add_resource(site_gt_range_annotation,
-                 '/api/variants/annotation/<string:chrom>/<int:pos>/<int:pos_end>')
 
 # Reports
 api.add_resource(report_by_date, '/api/report/date/<string:date>')
