@@ -3,7 +3,7 @@ from cendr import cache
 from cendr import ds
 from cendr import autoconvert
 from cendr.models import db, report, strain, trait, trait_value, mapping, dbname, WI
-from cendr.views.api import fetch_geo_gt
+from cendr.views.api import fetch_geo_gt, interval_summary
 from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
@@ -276,6 +276,16 @@ def trait_view(report_slug, trait_slug="", rerun = None):
         except:
             pass
     geo_gt = json.dumps(geo_gt)
+
+    ##########################
+    # Fetch interval summary #
+    ##########################
+    gene_count_summary = {}
+    for r in mapping_results:
+        result = interval_summary(r["chrom"], r["interval_start"], r["interval_end"])
+        gene_count_summary[r["chrom"] + ":" + str(r["pos"])] = result
+    gene_count_summary = json.dumps(gene_count_summary)
+
 
 
     status = list(trait.select(report, trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())[0]

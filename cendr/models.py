@@ -153,7 +153,7 @@ class WI(Model):
     INDEL = BooleanField()
     allele = CharField(index=True)
     annotation = CharField(index=True)
-    putative_impact = CharField(null=True)
+    putative_impact = CharField(index=True)
     gene_name = CharField(index=True, null=True)
     gene_id = CharField(index=True, null=True)
     feature_type = CharField(null=True)

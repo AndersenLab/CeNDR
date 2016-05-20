@@ -2,7 +2,7 @@ from flask import Flask, Response, request
 from flask_restful import Resource, Api, reqparse
 from cendr import api
 from cendr.models import *
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 from gcloud import storage
 import decimal
 import json
@@ -247,16 +247,14 @@ api.add_resource(strain_gt_locations, '/api/gt_loc/<string:chrom>/<int:pos>')
 
 class tajima_d(Resource):
   def get(self,chrom,start,end):
-      data = list(tajimaD.select((tajimaD.BIN_START + 100000)/2,
-                                 tajimaD.TajimaD).filter((tajimaD.id % 5 == 0), 
-                                                         (tajimaD.CHROM == chrom),
-                                                         (((tajimaD.BIN_START + 100000)/2 >=  start) and 
-                                                          ((tajimaD.BIN_END + 100000)/2 <= end))
+    data = list(tajimaD.select(tajimaD.BIN_START, tajimaD.TajimaD).filter(tajimaD.CHROM == chrom,
+                                                         tajimaD.BIN_START >  start - 500000,
+                                                         tajimaD.BIN_END < end + 500000,
                                                          ).tuples().execute())
-      data = [(float(x[0]), float(x[1])) for x in data]
-      data = {"x": [x[0] for x in data], "y": [x[1] for x in data]}
-      dat = json.dumps(data, cls=CustomEncoder, indent = 4)
-      return Response(response=dat, status=200, mimetype="application/json")
+    data = [(int(x[0]) + 5000, float(x[1])) for x in data]
+    data = {"x": [x[0] for x in data], "y": [x[1] for x in data]}
+    dat = json.dumps(data, cls=CustomEncoder, indent = 4)
+    return Response(response=dat, status=200, mimetype="application/json")
 
 api.add_resource(tajima_d, '/api/tajima/<string:chrom>/<int:start>/<int:end>')
 
@@ -325,6 +323,53 @@ class get_gene_list(Resource):
 # Variants
 #
 
+def get_gene_list(chrom, start, end):
+    """
+        Return genes from a given interval
+    """
+    return list(wb_gene.filter(wb_gene.CHROM == chrom, 
+                              ((wb_gene.start >= start) & (wb_gene.end <= end)) |
+                              ((wb_gene.start <= start) & (wb_gene.end >= start)) |
+                              (wb_gene.start <= end)).dicts().execute())
+
+
+def get_gene_w_variants(chrom, start, end, impact):
+    """
+        Return Genes with variants of given impact for a given interval
+    """
+    return {x["gene_name"]:x for x in list(WI.select(WI.gene_name, WI.putative_impact).filter(
+                   WI.CHROM == chrom,
+                   WI.POS >= start,
+                   WI.POS <= end,
+                   WI.putative_impact == impact
+                   )
+                  .distinct()
+                  .dicts().execute())}
+
+def get_variant_count(chrom, start, end):
+    """
+        Return the number of variants within an interval
+    """
+    return WI.select(WI.id).filter(WI.CHROM == chrom, WI.POS >= start, WI.POS <= end).count()
+
+
+def interval_summary(chrom, start, end):
+    gene_list = get_gene_list(chrom, start, end)
+    moderate_variants = get_gene_w_variants(chrom, start, end, "MODERATE")
+    high_gene_variants = get_gene_w_variants(chrom, start, end, "HIGH")
+    r = {}
+    for i in gene_list:
+        if i["Name"] in moderate_variants:
+            i.update({"moderate_effect": True})
+        if i["Name"] in high_gene_variants:
+            i.update({"high_effect": True})
+    r["N_VARIANTS"] = get_variant_count(chrom, start, end)
+    r["ALL"] = dict(Counter([x["biotype"] for x in gene_list]))
+    r["MODERATE"] = dict(Counter([x["biotype"] for x in gene_list if "moderate_effect" in x]))
+    r["HIGH"] = dict(Counter([x["biotype"] for x in gene_list if "high_effect" in x]))
+    return r
+
+
 class get_gt(Resource):
     def get(self, chrom, pos):
         result = WI.get(WI.CHROM == chrom, WI.POS == pos)
@@ -354,6 +399,5 @@ api.add_resource(report_by_date, '/api/report/date/<string:date>')
 # gene table
 api.add_resource(get_gene, '/api/gene/<string:gene>')
 api.add_resource(get_gene_count, '/api/gene/count/<string:chrom>/<int:start>/<int:end>')
-api.add_resource(get_gene_list, '/api/gene/list/<string:chrom>/<int:start>/<int:end>')
 
 #api.add_resource(report_progress, *reports_urls)

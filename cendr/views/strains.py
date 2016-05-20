@@ -1,6 +1,6 @@
 from cendr import app, autoconvert, ds, db, cache, get_stripe_keys
 from cendr import json_serial
-from flask import render_template, request, url_for, redirect, make_response
+from flask import render_template, request, url_for, redirect, make_response, Response
 from cendr.models import strain
 from collections import OrderedDict
 import json
@@ -36,16 +36,15 @@ def map_page():
 def strain_metadata():
     strain_listing = list(strain.select().filter(
         strain.isotype != None).tuples().execute())
-    resp = '\t'.join(strain._meta.sorted_field_names[1:21]) + "\n"
-    for row in strain_listing:
-        row = list(row)
-        for k, f in enumerate(row):
-            if type(f) == unicode:
-                row[k] = f.encode('ascii', 'ignore')
-        resp += '\t'.join(map(str, row[1:21])) + "\n"
-    response = make_response(resp)
-    response.headers["Content-Type"] = "text/plain"
-    return response
+    def generate():
+        yield '\t'.join(strain._meta.sorted_field_names[1:21]) + "\n"
+        for row in strain_listing:
+            row = list(row)
+            for k, f in enumerate(row):
+                if type(f) == unicode:
+                    row[k] = f.encode('ascii', 'ignore')
+            yield '\t'.join(map(str, row[1:21])) + "\n"
+    return Response(generate(), mimetype="text/csv")
 
 
 
