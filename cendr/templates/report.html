@@ -141,7 +141,6 @@
         <li><a href="#phenotype">Phenotype</a></li>
         <li><a href="#manhattan">Manhattan Plot</a></li>
         <li><a href="#intervals">Intervals</a></li>
-        <li><a href="#qqplot">QQ-Plot</a></li>
         <li><a href="#pxg">PxG</a></li>
         <li><a href="#ld">LD</a></li>
         <li><a href="#peak_summary">Peak Summary</a></li>
@@ -199,12 +198,6 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% endfor %}
 </tbody>
 </table>
-<a name="qqplot"></a>
-<h3 id="qqplot">QQ-Plot</h3>
-
-<img class="height-report" src="{{ base_url }}/figures/QQplot-1.png" />
-<p>Quantile-quantile plot generated from the p-values from the association mapping. This plot shows the expected distribution of association test statistics on the x-axis compared to the observed values on the y-axis. Each dot corresponds to an individual SNV. SNVs that deviate from the x=y line indicate that they are associated with your phenotype. Earlier separation from the identity line is indication of population stratification not being eliminated by the mapping algorithm.</p>
-
 <h3 id="pxg">Phenotype-by-Genotype</h3>
 <br />
 <img class="report" src="{{ base_url }}/figures/PxGplot-1.png" />

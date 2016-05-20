@@ -280,11 +280,11 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     ##########################
     # Fetch interval summary #
     ##########################
-    gene_count_summary = {}
-    for r in mapping_results:
-        result = interval_summary(r["chrom"], r["interval_start"], r["interval_end"])
-        gene_count_summary[r["chrom"] + ":" + str(r["pos"])] = result
-    gene_count_summary = json.dumps(gene_count_summary)
+    #gene_count_summary = {}
+    #for r in mapping_results:
+    #    result = interval_summary(r["chrom"], r["interval_start"], r["interval_end"])
+    #    gene_count_summary[r["chrom"] + ":" + str(r["pos"])] = result
+    #gene_count_summary = json.dumps(gene_count_summary)
 
 
 
