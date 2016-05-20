@@ -150,7 +150,6 @@ class WI(Model):
     QUAL = FloatField()
     FILTER = CharField()
     GT = CharField()
-    INDEL = BooleanField()
     allele = CharField(index=True)
     annotation = CharField(index=True)
     putative_impact = CharField(index=True)
@@ -167,6 +166,7 @@ class WI(Model):
     protein_position = CharField(null=True)
     distance_to_feature = CharField(null=True)
     errors = CharField(null=True)
+    INDEL = BooleanField()
 
     class Meta:
         database = db
