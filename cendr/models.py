@@ -149,7 +149,7 @@ class WI(Model):
     ALT = CharField()
     QUAL = FloatField()
     FILTER = CharField()
-    GT = CharField()
+    GT = CharField(max_length=50000)
     allele = CharField(index=True)
     annotation = CharField(index=True)
     putative_impact = CharField(index=True)
