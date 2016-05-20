@@ -253,15 +253,6 @@ article {
     width: 50vmin;  
 }
 
-
-video#bgvid {
-position: fixed; right: 0; bottom: 0;
-min-width: 100%; min-height: 100%;
-width: auto; height: auto; z-index: -100;
-background: url(polina.jpg) no-repeat;
-background-size: cover;
-}
-
 .funding {
   max-height: 150px; 
   margin:auto; 
