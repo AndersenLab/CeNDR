@@ -7,18 +7,22 @@ import _mysql
 
 current_build = 20160408
 
+# Fetch credentials
+from gcloud import datastore
+ds = datastore.Client(project="andersen-lab")
+
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     dbname = "cegwas_v2"
     db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
-    credentials = json.loads(open("credentials.json",'r').read())
+    credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+    credentials = dict(zip(map(str, credentials.keys()), map(str, credentials.values())))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
       dbname,
       **credentials
       )
-
 
 db.connect()
 
