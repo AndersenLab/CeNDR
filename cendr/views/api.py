@@ -329,6 +329,7 @@ def interval_summary(chrom, start, end):
             setattr(g_interval, "MODERATE_" + k, v)
         for k,v in r["HIGH"].items():
             setattr(g_interval, "HIGH_" + k, v)
+        setattr(g_interval, "ALL_Total", sum(r["ALL"].values()))
         g_interval.CHROM = chrom
         g_interval.BIN_START = start
         g_interval.BIN_END = end
