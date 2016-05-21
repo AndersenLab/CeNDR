@@ -14,9 +14,9 @@ ds = datastore.Client(project="andersen-lab")
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     dbname = "cegwas_v2"
-    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-db', user='root')
 else:
-    credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+    credentials = dict(ds.get(ds.key("credential", "cegwas-db")))
     credentials = dict(zip(map(str, credentials.keys()), map(str, credentials.values())))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
@@ -146,7 +146,7 @@ class mapping(Model):
         database = db
 
 class WI(Model):
-    CHROM = CharField(index = True)
+    CHROM = CharField(index = True, max_length=4)
     POS = IntegerField(index = True)
     _ID = CharField()
     REF = CharField()
@@ -174,8 +174,50 @@ class WI(Model):
 
     class Meta:
         database = db
-        db_table = "WI_20160408"
+        db_table = "WI_20160408_v3"
 
+class intervals(Model):
+    CHROM = CharField(index = True, max_length=4)
+    BIN_START = IntegerField(index=True)
+    BIN_END = IntegerField(index=True)
+    N_VARIANTS = IntegerField(default = 0)
+    ALL_protein_coding = IntegerField(default = 0)
+    ALL_ncRNA = IntegerField(default = 0)
+    ALL_miRNA = IntegerField(default = 0)
+    ALL_piRNA = IntegerField(default = 0)
+    ALL_tRNA = IntegerField(default = 0)
+    ALL_lincRNA = IntegerField(default = 0)
+    ALL_rRNA = IntegerField(default = 0)
+    ALL_scRNA = IntegerField(default = 0)
+    ALL_snoRNA = IntegerField(default = 0)
+    ALL_snRNA = IntegerField(default = 0)
+    ALL_pseudogene = IntegerField(default = 0)
+    MODERATE_protein_coding = IntegerField(default = 0)
+    MODERATE_ncRNA = IntegerField(default = 0)
+    MODERATE_miRNA = IntegerField(default = 0)
+    MODERATE_piRNA = IntegerField(default = 0)
+    MODERATE_tRNA = IntegerField(default = 0)
+    MODERATE_lincRNA = IntegerField(default = 0)
+    MODERATE_rRNA = IntegerField(default = 0)
+    MODERATE_scRNA = IntegerField(default = 0)
+    MODERATE_snoRNA = IntegerField(default = 0)
+    MODERATE_snRNA = IntegerField(default = 0)
+    MODERATE_pseudogene = IntegerField(default = 0)
+    HIGH_protein_coding = IntegerField(default = 0)
+    HIGH_ncRNA = IntegerField(default = 0)
+    HIGH_miRNA = IntegerField(default = 0)
+    HIGH_piRNA = IntegerField(default = 0)
+    HIGH_tRNA = IntegerField(default = 0)
+    HIGH_lincRNA = IntegerField(default = 0)
+    HIGH_rRNA = IntegerField(default = 0)
+    HIGH_scRNA = IntegerField(default = 0)
+    HIGH_snoRNA = IntegerField(default = 0)
+    HIGH_snRNA = IntegerField(default = 0)
+    HIGH_pseudogene = IntegerField(default = 0)
+
+    class Meta:
+        database = db
+        db_table = "WI_{current_build}_intervals".format(current_build = current_build)
 
 class tajimaD(Model):
     CHROM = CharField(index=True)
@@ -191,7 +233,7 @@ class tajimaD(Model):
 
 
 class wb_gene(Model):
-    CHROM = CharField(index = True)
+    CHROM = CharField(index = True, max_length = 4)
     start = IntegerField(index = True)
     end = IntegerField(index = True)
     Name = CharField(index = True)
