@@ -32,7 +32,7 @@
         </li>
 
         <li class="dropdown">
-          <a href="{{ url_for("map_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains <span class="caret"></span></a>
+          <a href="{{ url_for("map_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
             <li><a href="{{ url_for("map_page")}}">Global Strain Map</a></li>
             <li><a href="{{ url_for("strain_listing_page")}}">Strain Catalog</a></li>
@@ -42,8 +42,12 @@
           </ul>
         </li>
 
-        <li class="nav-item">
-          <a href="{{ url_for("data_page") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Data</a>
+        <li class="dropdown">
+        <a href="{{ url_for("data_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Data<span class="caret"></span></a>
+        <ul class="dropdown-menu dropdown-menu-left">
+          <li><a href="{{ url_for("browser") }}">Variant Browser</a></li>
+          <li><a href="{{ url_for("data_page") }}">Download Variant Data</a></li>
+        </ul>
         </li>
 
         <li class="dropdown">

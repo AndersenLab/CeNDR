@@ -187,9 +187,8 @@ def fetch_geo_gt(chrom, pos):
     return strain_locations.values()
 
 class strain_gt_locations(Resource):
-
     def get(self, chrom, pos):
-        result = cPickle.loads(zlib.decompress(base64.b64decode(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)))
+        result =  fetch_geo_gt(chrom, pos)
         result = json.dumps(result)
         return Response(response=result, status = 201, mimetype="application/json")
 
@@ -330,6 +329,8 @@ def interval_summary(chrom, start, end):
         for k,v in r["HIGH"].items():
             setattr(g_interval, "HIGH_" + k, v)
         setattr(g_interval, "ALL_Total", sum(r["ALL"].values()))
+        setattr(g_interval, "MODERATE_Total", sum(r["MODERATE"].values()))
+        setattr(g_interval, "HIGH_Total", sum(r["HIGH"].values()))
         g_interval.CHROM = chrom
         g_interval.BIN_START = start
         g_interval.BIN_END = end

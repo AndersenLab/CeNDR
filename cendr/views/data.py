@@ -30,3 +30,8 @@ def download_script(filetype):
     response = make_response(download_page)
     response.headers["Content-Type"] = "text/plain"
     return response
+
+
+@app.route("/data/browser/")
+def browser():
+    return render_template('browser.html', **locals())

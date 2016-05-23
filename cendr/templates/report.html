@@ -181,6 +181,8 @@ A genome-wide representation of the association between variation in the <em>C. 
     <th>-log<sub>10</sub>p</th>
     <th>Genes</th>
     <th>Protein Coding</th>
+    <th>Moderate Impact</th>
+    <th>High Impact</th>
   </tr>
 </thead>
 <tbody>
@@ -189,8 +191,10 @@ A genome-wide representation of the association between variation in the <em>C. 
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
   <td>{{ row.log10p|round(3) }}</td>
-  <td>-</td>
-  <td>-</td>
+  <td class="peaksum_{{ loop.index0 }}_Total">-</td>
+  <td class="peaksum_{{ loop.index0 }}_protein_coding">-</td>
+  <td class="peaksum_{{ loop.index0 }}_MODERATE">-</td>
+  <td class="peaksum_{{ loop.index0 }}_HIGH">-</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -241,7 +245,7 @@ A genome-wide representation of the association between variation in the <em>C. 
           <thead>
             <tr>
               <th>Gene Class</th>
-              <th>All</th>
+              <th># Variants</th>
               <th>Moderate Effect</th>
               <th>High Effect</th>
             </tr>
@@ -404,13 +408,6 @@ function check_status() {
     });
 }
 
-$(document).ready(function() {
-    $('#example').DataTable( {
-        "ajax": "/cendr/static/content/data/interval_variants.tsv",
-        "deferRender": true
-    } );
-} );
-
 check_status();
 
 window.setInterval(check_status, 3000);
@@ -435,6 +432,12 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
     $(v).next().html(msg["protein_coding"]);
     $(".peak_" + k + "_total").html("<strong>" + msg["total"] + "</strong>");
     biotypes = ["Total", "protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "asRNA", "snRNA", "snoRNA", "scRNA", "tRNA", "lincRNA", "rRNA"];
+
+    $(".peaksum_" + k + "_Total").html(msg["ALL_Total"]);
+    $(".peaksum_" + k + "_protein_coding").html(msg["ALL_protein_coding"]);
+    $(".peaksum_" + k + "_MODERATE").html(msg["MODERATE_Total"]);
+    $(".peaksum_" + k + "_HIGH").html(msg["HIGH_Total"]);
+
     $.each(biotypes, function(i, biotype) {
       // ALL
       $(".peak_" + k + "_" + biotype + " > td:nth-child(2)").html(msg["ALL_" + biotype]);

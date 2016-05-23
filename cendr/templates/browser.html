@@ -17,8 +17,6 @@
 <div class="row">
       <div class="col-md-12">
 
-
-<div id="browser2"></div>
 <div id="browser"></div>
 
       
@@ -30,12 +28,7 @@
 
 
 <script type="text/javascript">
-var div = document.getElementById('browser2');
-
-var bamSource = pileup.formats.bam({
-  url: 'https://northwestern.box.com/shared/static/y7isf0i7ax9nvtx27708epr39x91faij.bam',
-  indexUrl: 'https://northwestern.box.com/shared/static/txlquwgibqjsbnul9gwfvykat02ttlcq.bai'
-});
+var div = document.getElementById('browser');
 
 var p = pileup.create(div, {
   range: {contig: 'I', start: 7512384, stop: 7512544},
@@ -44,7 +37,7 @@ var p = pileup.create(div, {
       viz: pileup.viz.genome(),
       isReference: true,
       data: pileup.formats.twoBit({
-        url: "{{ url_for('static', filename = 'content/reference/WS245.2bit') }}"
+        url: "{{ url_for('static', filename = 'data/elegans.2bit') }}"
       }),
       name: 'Reference'
     },
@@ -56,12 +49,13 @@ var p = pileup.create(div, {
     viz: pileup.viz.location(),
     name: 'Location'
   	},
-  	  {
-    viz: pileup.viz.coverage(),
-    data: bamSource,
-    cssClass: 'normal',
-    name: 'Coverage'
-  }
+    {
+    viz: pileup.viz.genes(),
+    data: pileup.formats.bigBed({
+      url: "{{ url_for('static', filename = 'data/elegans_genes_WS245.bb') }}"
+    }),
+    name: 'Genes'
+   }
   ]
 });
 </script>
