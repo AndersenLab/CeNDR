@@ -16,8 +16,8 @@ if (os.getenv('SERVER_SOFTWARE') and
     dbname = "cegwas_v2"
     db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-db', user='root')
 else:
-    credentials = dict(ds.get(ds.key("credential", "cegwas-db")))
-    credentials = dict(zip(map(str, credentials.keys()), map(str, credentials.values())))
+    credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+    #credentials = dict(zip(map(str, credentials.keys()), map(str, credentials.values())))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
       dbname,
