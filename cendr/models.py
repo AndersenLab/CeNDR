@@ -11,8 +11,7 @@ current_build = 20160408
 from gcloud import datastore
 ds = datastore.Client(project="andersen-lab")
 
-if (os.getenv('SERVER_SOFTWARE') and
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
     dbname = "cegwas_v2"
     db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-db', user='root')
 else:
