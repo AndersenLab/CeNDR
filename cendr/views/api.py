@@ -11,7 +11,7 @@ import os
 import sys
 from peewee import JOIN
 from dateutil.parser import parse
-
+import zlib, cPickle, base64
 
 FIELDS = [x.name for x in strain._meta.sorted_fields if x.name != "id"]
 PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
@@ -97,7 +97,6 @@ api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>/')
 class report_by_date(Resource):
 
     def get(self, date):
-        print parse(date).date()
         data = list(trait.select(report.report_slug, report.report_name, trait.trait_name, trait.trait_slug, report.release, trait.submission_complete).join(
             report).filter((db.truncate_date("day", trait.submission_complete) == parse(date).date()), (report.release == 0), trait.status == "complete").dicts().execute())
         dat = json.dumps(data, cls=CustomEncoder, indent=4)
@@ -108,7 +107,6 @@ class report_progress(Resource):
 
     def post(self, trait_slug, report_slug=None, report_hash=None):
         queue = get_queue()
-        print dir(queue)
         current_status = list(trait.select(trait.status)
                               .join(report)
                               .filter(trait.trait_slug == trait_slug, ((report.report_slug == report_slug) and (report.release == 0)) | (report.report_hash == report_hash))
@@ -156,71 +154,26 @@ reports_urls = ['/api/<string:report_slug>/<string:trait_slug>',
                 '/api/<string:report_slug>/<string:trait_slug>']
 
 
-class site_gt(Resource):
+#
+# GT
+#
 
+class get_gt(Resource):
     def get(self, chrom, pos):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT).join(
-            call).filter(site.CHROM == chrom, site.POS == pos).dicts().execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
+        gt = cPickle.loads(zlib.decompress(base64.b64decode(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)))
+        result = json.dumps(gt, indent = 4)
         return Response(response=result, status=201, mimetype="application/json")
 
-
-class site_gt_range(Resource):
-
-    def get(self, chrom, pos, pos_end):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT).join(
-            call).filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end).dicts().execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
+api.add_resource(get_gt, '/api/variant/<string:chrom>/<int:pos>')
 
 
-class site_gt_annotation(Resource):
-
-    def get(self, chrom, pos):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
-                      .join(call)
-                      .switch(site)
-                      .join(annotation)
-                      .filter(site.CHROM == chrom, site.POS == pos)
-                      .dicts()
-                      .execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
-
-
-class site_gt_range_annotation(Resource):
-
-    def get(self, chrom, pos, pos_end):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
-                      .join(call)
-                      .switch(site)
-                      .join(annotation)
-                      .filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end)
-                      .dicts()
-                      .execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
-
-
-class site_gt_invariant_table(Resource):
-
-    def get(self, chrom, pos, interval_start, interval_end, reference):
-        result = list(site.select(site.CHROM, site.POS, call.SAMPLE, site.FILTER, call.FT, call.TGT, call.GT, annotation)
-                      .join(call)
-                      .switch(site)
-                      .join(annotation)
-                      .filter(site.CHROM == chrom, site.POS >= pos, site.POS <= pos_end)
-                      .dicts()
-                      .execute())
-        result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
 
 #
 # GT By Location
 #
 
 def fetch_geo_gt(chrom, pos):
-    gt = json.loads(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)
+    gt = cPickle.loads(zlib.decompress(base64.b64decode(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)))
     strain_locations = list(strain.select(strain.isotype, strain.latitude, strain.longitude)
         .filter(strain.latitude != None)
         .distinct().dicts().execute())
@@ -236,7 +189,8 @@ def fetch_geo_gt(chrom, pos):
 class strain_gt_locations(Resource):
 
     def get(self, chrom, pos):
-        result = json.dumps(fetch_geo_gt(chrom, pos), cls=CustomEncoder, indent = 4)
+        result = cPickle.loads(zlib.decompress(base64.b64decode(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)))
+        result = json.dumps(result)
         return Response(response=result, status = 201, mimetype="application/json")
 
 api.add_resource(strain_gt_locations, '/api/gt_loc/<string:chrom>/<int:pos>')
@@ -291,7 +245,6 @@ class get_gene_count(Resource):
                     ("end", end),
                     ("total", count)))
         result.update(dict(count_by_type))
-        print(result)
         result = json.dumps(result, cls=CustomEncoder, indent=4)
         return Response(response=result, status=201, mimetype="application/json")
 
@@ -337,11 +290,11 @@ def get_gene_w_variants(chrom, start, end, impact):
     """
         Return Genes with variants of given impact for a given interval
     """
-    return {x["gene_name"]:x for x in list(WI.select(WI.gene_name, WI.putative_impact).filter(
+    return {x["gene_name"]:x for x in list(WI.select(WI.gene_name, WI.putative_impact).where(
+                   WI.putative_impact == impact, 
                    WI.CHROM == chrom,
                    WI.POS >= start,
-                   WI.POS <= end,
-                   WI.putative_impact == impact
+                   WI.POS <= end
                    )
                   .distinct()
                   .dicts().execute())}
@@ -354,44 +307,47 @@ def get_variant_count(chrom, start, end):
 
 
 def interval_summary(chrom, start, end):
-    gene_list = get_gene_list(chrom, start, end)
-    moderate_variants = get_gene_w_variants(chrom, start, end, "MODERATE")
-    high_gene_variants = get_gene_w_variants(chrom, start, end, "HIGH")
-    r = {}
-    for i in gene_list:
-        if i["Name"] in moderate_variants:
-            i.update({"moderate_effect": True})
-        if i["Name"] in high_gene_variants:
-            i.update({"high_effect": True})
-    r["N_VARIANTS"] = get_variant_count(chrom, start, end)
-    r["ALL"] = dict(Counter([x["biotype"] for x in gene_list]))
-    r["MODERATE"] = dict(Counter([x["biotype"] for x in gene_list if "moderate_effect" in x]))
-    r["HIGH"] = dict(Counter([x["biotype"] for x in gene_list if "high_effect" in x]))
-    return r
+    try:
+        g_interval = intervals.get(intervals.CHROM == chrom, intervals.BIN_START == start, intervals.BIN_END == end)
+    except:
+        gene_list = get_gene_list(chrom, start, end)
+        moderate_variants = get_gene_w_variants(chrom, start, end, "MODERATE")
+        high_gene_variants = get_gene_w_variants(chrom, start, end, "HIGH")
+        r = {}
+        for i in gene_list:
+            if i["Name"] in moderate_variants:
+                i.update({"moderate_effect": True})
+            if i["Name"] in high_gene_variants:
+                i.update({"high_effect": True})
+        r["ALL"] = dict(Counter([x["biotype"] for x in gene_list]))
+        r["MODERATE"] = dict(Counter([x["biotype"] for x in gene_list if "moderate_effect" in x]))
+        r["HIGH"] = dict(Counter([x["biotype"] for x in gene_list if "high_effect" in x]))
+        g_interval = intervals()
+        for k,v in r["ALL"].items():
+            setattr(g_interval, "ALL_" + k, v)
+        for k,v in r["MODERATE"].items():
+            setattr(g_interval, "MODERATE_" + k, v)
+        for k,v in r["HIGH"].items():
+            setattr(g_interval, "HIGH_" + k, v)
+        setattr(g_interval, "ALL_Total", sum(r["ALL"].values()))
+        g_interval.CHROM = chrom
+        g_interval.BIN_START = start
+        g_interval.BIN_END = end
+        g_interval.N_VARIANTS = get_variant_count(chrom, start, end)
+        g_interval.save()
+    return g_interval
 
-
-class get_gt(Resource):
-    def get(self, chrom, pos):
-        result = WI.get(WI.CHROM == chrom, WI.POS == pos)
-        result = json.dumps(json.loads(result.GT), indent = 4)
+class get_interval_summary(Resource):
+    def get(self, chrom, start, end):
+        g_interval = interval_summary(chrom, start, end)
+        result = OrderedDict()
+        for x in intervals._meta.sorted_field_names:
+            if x != "id":
+                result[x] = getattr(g_interval, x)
+        result = json.dumps(result, indent = 4)
         return Response(response=result, status=201, mimetype="application/json")
 
-api.add_resource(get_gt, '/api/variant/<string:chrom>/<int:pos>')
-
-
-
-# Variants
-api.add_resource(site_gt, '/api/variants/<string:chrom>/<int:pos>')
-api.add_resource(
-    site_gt_range, '/api/variants/<string:chrom>/<int:pos>/<int:pos_end>')
-api.add_resource(site_gt_invariant_table,
-                 '/api/variants/<string:chrom>/<int:pos>/<int:pos_end>')
-
-# Annotations
-api.add_resource(site_gt_annotation,
-                 '/api/variants/annotation/<string:chrom>/<int:pos>')
-api.add_resource(site_gt_range_annotation,
-                 '/api/variants/annotation/<string:chrom>/<int:pos>/<int:pos_end>')
+api.add_resource(get_interval_summary, '/api/interval/<string:chrom>/<int:start>/<int:end>')
 
 # Reports
 api.add_resource(report_by_date, '/api/report/date/<string:date>')

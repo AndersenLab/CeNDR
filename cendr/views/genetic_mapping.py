@@ -277,17 +277,6 @@ def trait_view(report_slug, trait_slug="", rerun = None):
             pass
     geo_gt = json.dumps(geo_gt)
 
-    ##########################
-    # Fetch interval summary #
-    ##########################
-    #gene_count_summary = {}
-    #for r in mapping_results:
-    #    result = interval_summary(r["chrom"], r["interval_start"], r["interval_end"])
-    #    gene_count_summary[r["chrom"] + ":" + str(r["pos"])] = result
-    #gene_count_summary = json.dumps(gene_count_summary)
-
-
-
     status = list(trait.select(report, trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())[0]
 
     # List available datasets

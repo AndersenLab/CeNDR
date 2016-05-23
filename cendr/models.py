@@ -7,20 +7,24 @@ import _mysql
 
 current_build = 20160408
 
-if (os.getenv('SERVER_SOFTWARE') and
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-    dbname = "cegwas_v2"
-    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+# Fetch credentials
+from gcloud import datastore
+ds = datastore.Client(project="andersen-lab")
+
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
+    db = MySQLDatabase("cegwas_v2", unix_socket='/cloudsql/andersen-lab:us-central1:cegwas-db', user='root')
 else:
-    credentials = json.loads(open("credentials.json",'r').read())
+    credentials = dict(ds.get(ds.key("credential", "cegwas-db")))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
       dbname,
       **credentials
       )
 
-
-db.connect()
+try:
+    db.connect()
+except:
+    db.connect()
 
 class strain(Model):
     """
@@ -142,7 +146,7 @@ class mapping(Model):
         database = db
 
 class WI(Model):
-    CHROM = CharField(index = True)
+    CHROM = CharField(index = True, max_length=4)
     POS = IntegerField(index = True)
     _ID = CharField()
     REF = CharField()
@@ -170,8 +174,36 @@ class WI(Model):
 
     class Meta:
         database = db
-        db_table = "WI_20160408"
+        db_table = "WI_20160408_v3"
 
+class intervals(Model):
+    CHROM = CharField(index = True, max_length=4)
+    BIN_START = IntegerField(index=True)
+    BIN_END = IntegerField(index=True)
+    N_VARIANTS = IntegerField(default = 0)
+    ALL_Total = IntegerField(default = 0)
+    ALL_protein_coding = IntegerField(default = 0)
+    ALL_ncRNA = IntegerField(default = 0)
+    ALL_miRNA = IntegerField(default = 0)
+    ALL_piRNA = IntegerField(default = 0)
+    ALL_tRNA = IntegerField(default = 0)
+    ALL_lincRNA = IntegerField(default = 0)
+    ALL_rRNA = IntegerField(default = 0)
+    ALL_scRNA = IntegerField(default = 0)
+    ALL_snoRNA = IntegerField(default = 0)
+    ALL_snRNA = IntegerField(default = 0)
+    ALL_asRNA = IntegerField(default = 0)
+    ALL_pseudogene = IntegerField(default = 0)
+    MODERATE_Total = IntegerField(default = 0)
+    MODERATE_protein_coding = IntegerField(default = 0)
+    MODERATE_pseudogene = IntegerField(default = 0)
+    HIGH_Total = IntegerField(default = 0)
+    HIGH_protein_coding = IntegerField(default = 0)
+    HIGH_pseudogene = IntegerField(default = 0)
+
+    class Meta:
+        database = db
+        db_table = "WI_{current_build}_intervals".format(current_build = current_build)
 
 class tajimaD(Model):
     CHROM = CharField(index=True)
@@ -187,7 +219,7 @@ class tajimaD(Model):
 
 
 class wb_gene(Model):
-    CHROM = CharField(index = True)
+    CHROM = CharField(index = True, max_length = 4)
     start = IntegerField(index = True)
     end = IntegerField(index = True)
     Name = CharField(index = True)

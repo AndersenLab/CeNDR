@@ -8,9 +8,6 @@ from datetime import date, datetime
 from urlparse import urljoin
 from flask.ext.cache import Cache
 
-# Fetch credentials
-from gcloud import datastore
-ds = datastore.Client(project="andersen-lab")
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
