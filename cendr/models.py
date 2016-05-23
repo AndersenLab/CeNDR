@@ -14,9 +14,9 @@ ds = datastore.Client(project="andersen-lab")
 if (os.getenv('SERVER_SOFTWARE') and
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     dbname = "cegwas_v2"
-    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-db', user='root')
 else:
-    credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+    credentials = dict(ds.get(ds.key("credential", "cegwas-db")))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
       dbname,
