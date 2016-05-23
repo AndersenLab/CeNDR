@@ -113,3 +113,11 @@ def donate():
 
     else:
         return render_template('donate.html', **locals())
+
+@app.route('/about/funding/')
+@cache.cached()
+def funding():
+    title = "Funding"
+    bcs = OrderedDict([("about", url_for("about") ), ("Funding", "")])
+    staff_data = yaml.load(open("cendr/static/content/markdown/funding.md", 'r'))
+    return render_template('funding.html', **locals())

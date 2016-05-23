@@ -1,8 +1,4 @@
 /* Preload images */
-body:after {
-  content: url(/assets/img/close.png) url(/assets/img/loading.gif) url(/assets/img/prev.png) url(/assets/img/next.png);
-  display: none;
-}
 
 .lightboxOverlay {
   position: absolute;
