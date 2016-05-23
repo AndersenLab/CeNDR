@@ -201,6 +201,9 @@ class intervals(Model):
     class Meta:
         database = db
         db_table = "WI_{current_build}_intervals".format(current_build = current_build)
+        indexes = (
+            (('CHROM', 'BIN_START', 'BIN_END'), True),
+            )
 
 class tajimaD(Model):
     CHROM = CharField(index=True)
