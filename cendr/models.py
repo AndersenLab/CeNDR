@@ -14,7 +14,7 @@ ds = datastore.Client(project="andersen-lab")
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
     db = MySQLDatabase("cegwas_v2", unix_socket='/cloudsql/andersen-lab:cegwas-db2', user='root')
 else:
-    credentials = dict(ds.get(ds.key("credential", "cegwas-db")))
+    credentials = dict(ds.get(ds.key("credential", "cegwas-db2")))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
       dbname,
@@ -201,6 +201,9 @@ class intervals(Model):
     class Meta:
         database = db
         db_table = "WI_{current_build}_intervals".format(current_build = current_build)
+        indexes = (
+            (('CHROM', 'BIN_START', 'BIN_END'), True),
+            )
 
 class tajimaD(Model):
     CHROM = CharField(index=True)
