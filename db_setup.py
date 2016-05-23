@@ -25,7 +25,7 @@ current_build = 20160408
 reset_db = False
 
 # which services should be updated.
-update = ["tajima"] # ["db", "stripe", "gene_table", "tajima"]
+update = ["db"] # ["db", "stripe", "gene_table", "tajima"]
 
 booldict = {"TRUE": True,
             "FALSE": False,
