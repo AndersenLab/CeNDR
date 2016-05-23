@@ -12,15 +12,15 @@ from gcloud import datastore
 ds = datastore.Client(project="andersen-lab")
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-    #db = MySQLDatabase("cegwas_v2", unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
-    credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+    #db = MySQLDatabase("cegwas_v2", unix_socket='/cloudsql/andersen-lab:cegwas-database', user='root')
+    credentials = dict(ds.get(ds.key("credential", "cegwas-database")))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
       dbname,
       **credentials
       )
 else:
-    credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+    credentials = dict(ds.get(ds.key("credential", "cegwas-database")))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
       dbname,
@@ -157,7 +157,7 @@ class WI(Model):
     QUAL = FloatField()
     FILTER = CharField()
     GT = CharField(max_length=8000)
-    allele = CharField(index=True, max_length=3)
+    allele = CharField(max_length=3)
     annotation = CharField()
     putative_impact = CharField(max_length=40)
     gene_name = CharField(null=True, max_length=40)
