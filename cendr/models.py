@@ -22,7 +22,10 @@ else:
       **credentials
       )
 
-db.connect()
+try:
+    db.connect()
+except:
+    db.connect()
 
 class strain(Model):
     """
