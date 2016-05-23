@@ -12,7 +12,7 @@ from gcloud import datastore
 ds = datastore.Client(project="andersen-lab")
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-    #db = MySQLDatabase("cegwas_v2", unix_socket='/cloudsql/andersen-lab:cegwas-database', user='root')
+    #db = MySQLDatabase("cegwas_v2", unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
     credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
     dbname = "cegwas_v2"
     db =  MySQLDatabase(
@@ -149,19 +149,19 @@ class mapping(Model):
         database = db
 
 class WI(Model):
-    CHROM = CharField(index = True, max_length=4)
-    POS = IntegerField(index = True)
+    CHROM = CharField(max_length=4)
+    POS = IntegerField()
     _ID = CharField()
     REF = CharField()
     ALT = CharField()
     QUAL = FloatField()
     FILTER = CharField()
-    GT = CharField(max_length=50000)
+    GT = CharField(max_length=8000)
     allele = CharField(index=True, max_length=3)
-    annotation = CharField(index=True)
-    putative_impact = CharField(index=True, max_length=40)
-    gene_name = CharField(index=True, null=True, max_length=40)
-    gene_id = CharField(index=True, null=True, max_length=40)
+    annotation = CharField()
+    putative_impact = CharField(max_length=40)
+    gene_name = CharField(null=True, max_length=40)
+    gene_id = CharField(null=True, max_length=40)
     feature_type = CharField(null=True, max_length=40)
     feature_id = CharField(null=True)
     transcript_biotype = CharField(null=True)
@@ -177,9 +177,9 @@ class WI(Model):
 
     class Meta:
         database = db
-        db_table = "WI_20160408_v3"
+        db_table = "WI_20160408"
         indexes = (
-            (('CHROM', 'POS', 'feature_id', 'annotation', 'gene_name', 'putative_impact'), True),
+            (('CHROM', 'POS', 'FILTER', 'feature_id', 'annotation','gene_id', 'gene_name', 'putative_impact'), True),
             )
 
 class intervals(Model):
