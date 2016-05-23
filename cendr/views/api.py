@@ -18,6 +18,7 @@ PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
                       for x in strain._meta.sorted_fields if x.name != "id"]
 
 
+
 class CustomEncoder(json.JSONEncoder):
 
     def default(self, o):
@@ -29,6 +30,31 @@ class CustomEncoder(json.JSONEncoder):
 
 parser = reqparse.RequestParser()
 
+def wb_gene_getter(chrom =None, start = None, end = None, sequence_name = None,locus = None):
+    if start > end:
+        print "Error :( Reason: Start point is greater end point."
+        return
+    result = list(wb_gene.select(wb_gene.CHROM ,wb_gene.Name, wb_gene.start, wb_gene.end,wb_gene.sequence_name,wb_gene.locus,).filter( ( (wb_gene.CHROM == chrom) &
+                        (wb_gene.start >= start) &
+                        (wb_gene.end <= end) )) 
+                .dicts()
+                .execute())
+    return result
+
+class individual_wb_gene_get(Resource):
+    def get(self, chrom="", start="", end="", sequence_name="", locus=""):
+        wb_genes = wb_gene_getter(chrom,start,end)
+        if type(wb_genes)  == list:
+            fields = ["CHROM","Name", "start", "end", "sequence_name", "locus"]
+            print len(wb_genes)
+            dat = json.dumps(wb_genes, cls=CustomEncoder, indent=4)
+            return Response(response=dat,status=200, mimetype="application/json")
+        else:
+            return Response(response="", status=404, catch_all_404s=True)
+
+api.add_resource(individual_wb_gene_get,'/api/individual_wb_gene/<string:chrom>/<int:start>/<int:end>',
+                                        '/api/individual_wb_gene/<string:sequence_name>/'
+                                        '/api/individual_wb_gene/<string:locus>/')
 
 class mapping_api(Resource):
 
