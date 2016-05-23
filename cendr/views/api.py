@@ -335,7 +335,11 @@ def interval_summary(chrom, start, end):
         g_interval.BIN_START = start
         g_interval.BIN_END = end
         g_interval.N_VARIANTS = get_variant_count(chrom, start, end)
-        g_interval.save()
+        try:
+            g_interval.save()
+        except:
+            # Retrieve interval; failures likely due to duplicates.
+            g_interval = intervals.get(intervals.CHROM == chrom, intervals.BIN_START == start, intervals.BIN_END == end)
     return g_interval
 
 class get_interval_summary(Resource):

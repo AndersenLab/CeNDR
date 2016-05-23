@@ -9,17 +9,10 @@ from flask import render_template
 def data_page():
     bcs = OrderedDict([("data", None)])
     title = "Data"
-    current_variant_set = "20160408"
+    build = app.config['build']
     strain_listing = strain.select().filter(
         strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('data.html', **locals())
-
-
-@app.route('/data/browser')
-def genome_browser():
-    bcs = OrderedDict([("data", 'Browser')])
-    title = "Browser"
-    return render_template('browser.html', **locals())
 
 
 @app.route('/data/download/<filetype>.sh')
@@ -34,4 +27,7 @@ def download_script(filetype):
 
 @app.route("/data/browser/")
 def browser():
+    bcs = OrderedDict([("data", 'Browser')])
+    title = "Browser"
+    build = str(app.config['build'])
     return render_template('browser.html', **locals())
