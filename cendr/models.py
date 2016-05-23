@@ -179,7 +179,7 @@ class WI(Model):
         database = db
         db_table = "WI_20160408"
         indexes = (
-            (('CHROM', 'POS', 'FILTER', 'feature_id', 'annotation','gene_id', 'gene_name', 'putative_impact'), True),
+            (('CHROM', 'POS', 'FILTER', 'feature_id', 'annotation','gene_id', 'gene_name', 'putative_impact'), False),
             )
 
 class intervals(Model):
