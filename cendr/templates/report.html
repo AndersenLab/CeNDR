@@ -68,7 +68,7 @@
 </div>
 
 {% if trait_data.status == "complete" %}
-{% cache, report_slug, trait_slug %}
+{% cache 50, report_slug, trait_slug %}
 <div class="row">
 
 <div class="col-md-12">
@@ -351,7 +351,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 
   </div>
-
+{% endcache %}
 {% else %}
 
 <div class="progress">
@@ -359,7 +359,6 @@ A genome-wide representation of the association between variation in the <em>C. 
   aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:0%">
   </div>
 </div>
-{% endcache %}
 {% endif %}
 
 {% endblock %}
