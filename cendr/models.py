@@ -144,7 +144,7 @@ class mapping(Model):
         database = db
 
 class WI(Model):
-    CHROM = CharField(max_length=4)
+    CHROM = CharField(max_length=5)
     POS = IntegerField()
     _ID = CharField()
     REF = CharField()
@@ -178,7 +178,7 @@ class WI(Model):
             )
 
 class intervals(Model):
-    CHROM = CharField(index = True, max_length=4)
+    CHROM = CharField(index = True, max_length=5)
     BIN_START = IntegerField(index=True)
     BIN_END = IntegerField(index=True)
     N_VARIANTS = IntegerField(default = 0)
@@ -223,7 +223,7 @@ class tajimaD(Model):
 
 
 class wb_gene(Model):
-    CHROM = CharField(index = True, max_length = 4)
+    CHROM = CharField(index = True, max_length = 5)
     start = IntegerField(index = True)
     end = IntegerField(index = True)
     Name = CharField(index = True)

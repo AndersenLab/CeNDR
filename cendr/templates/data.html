@@ -41,8 +41,8 @@
 
             <h4>VCF</h4>
             <p>The file below is a single <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> containing SNVs for all wild isolates.</p>
-            <p><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
-            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz">WI.{{ current_variant_set }}.snpeff.vcf.gz</a></strong></p>
+            <p><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
+            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz">WI.{{ build }}.snpeff.vcf.gz</a></strong></p>
 
             <div style = "clear:both;"></div>
           
@@ -114,7 +114,7 @@
                         {% endif %}
 
                           <td>
-                      <a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/tsv/WI.{{ isotype }}.{{ current_variant_set }}.tsv">WI.{{ isotype }}.{{ current_variant_set }}.tsv</a>
+                      <a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/tsv/WI.{{ isotype }}.{{ build }}.tsv">WI.{{ isotype }}.{{ build }}.tsv</a>
                       </td>
 
                     </td>
@@ -141,18 +141,18 @@
 
         <strong>Query a the first 10kb on chromosome II</strong>
 <pre>
-bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz II:1-10000
+bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz II:1-10000
 </pre>
 
 <strong>Output a tab-delimited file of genotypes</strong>
 <pre>
-bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz II:1-10000 | \
+bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz II:1-10000 | \
 bcftools query --print-header -f '%CHROM\t%POS\t[%TGT\t]\n'
 </pre>
 
 <strong>Look for deleterious variants within a region in CB4856.</strong>
 <pre>
-bcftools view --samples CB4856 http://storage.googleapis.com/andersen_dist/vcf/all/{{ current_variant_set }}/WI.{{ current_variant_set }}.snpeff.vcf.gz II:804000-807000 | \
+bcftools view --samples CB4856 http://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz II:804000-807000 | \
 egrep '^#|HIGH' -  | \
 egrep '^#|1\/1' -  | \
 bcftools query -f '%CHROM\t%POS\t[%TGT\t%GT\t]%ANN\n' -
