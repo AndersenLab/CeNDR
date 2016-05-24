@@ -37,7 +37,7 @@ else:
     cache = Cache(app, config={'CACHE_TYPE': 'null'})
 
 api = Api(app)
-app.config['build'] = 20160408
+build = "20160408"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 

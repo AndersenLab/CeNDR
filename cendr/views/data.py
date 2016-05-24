@@ -9,7 +9,7 @@ from flask import render_template
 def data_page():
     bcs = OrderedDict([("data", None)])
     title = "Data"
-    build = app.config['build']
+    from cendr import build
     strain_listing = strain.select().filter(
         strain.isotype != None).order_by(strain.isotype).execute()
     return render_template('data.html', **locals())
@@ -29,5 +29,5 @@ def download_script(filetype):
 def browser():
     bcs = OrderedDict([("data", 'Browser')])
     title = "Browser"
-    build = str(app.config['build'])
+    from cendr import build
     return render_template('browser.html', **locals())
