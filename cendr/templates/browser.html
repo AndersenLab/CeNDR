@@ -31,6 +31,26 @@
 
 <div id="browser"></div>
 
+<h3>Variants</h3>
+
+<p>Only variants with predicted coding changes are listed below.</p>
+
+<table class="table table-striped table-hover" style="margin-top:10px;" id="variants">
+  
+<thead>
+  <tr>
+    <th>CHROM</th>
+    <th>POS</th>
+    <th>Gene ID</th>
+    <th>Locus ID</th>
+    <th>Putative Impact</th>
+  </tr>
+</thead>
+
+<tbody>
+</tbody>
+
+</table>
       
       </div>
   </div>
@@ -48,6 +68,7 @@
                     showNavigation: true,
                     showKaryo: false,
                     reference: {
+                      id: "WS245",
                       fastaURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa",
                       indexURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa.fai",
                       // cytobandURL: ""
@@ -82,26 +103,36 @@
 function refresh_variants() {
     region = $(".igvNavigationSearchInput").val()
     chrom = region.split(":")[0]
-    start = region.split(":")[1].split("-")[0].replace(/,/g, "")
-    end = region.split(":")[1].split("-")[1].replace(/,/g, "")
-
+    start = region.split(":")[1].split("-")[0].replace(/,/g, "");
+    end = region.split(":")[1].split("-")[1].replace(/,/g, "");
+    $("#variants > tbody").html("");
     $.ajax({
          url:"/api/gt/" + chrom + "/" + start + "/" + end,
          method: "GET",
          contentType: 'application/json',
          }).done(function(msg) {
           console.log(msg);
+          $.each(msg, function(k, v) {
+            items = [v["CHROM"],
+                     v["POS"],
+                     v["gene_id"],
+                     "",
+                     v["putative_impact"]];
+            console.log(items);
+            console.log(items.join("great"))
+            $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>")
+          })
         });
 
 }
 
 
 $("#browser").on("mouseup", function() { 
-  console.log("Great")
+  refresh_variants();
 })
 
 $(".igvNavigationSearchInput").on("input paste", function() {
-  console.log("input change");
+  refresh_variants();
 });
 
 
