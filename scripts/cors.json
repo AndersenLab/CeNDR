@@ -1,0 +1,8 @@
+[
+    {
+      "origin": ["https://2-dot-andersen-lab.appspot.com"],
+      "responseHeader": ["Access-Control-Allow-Headers", "Content-Type", "Range"],
+      "method": ["GET"],
+      "maxAgeSeconds": 3600
+    }
+]
