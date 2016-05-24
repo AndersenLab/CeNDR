@@ -4,18 +4,18 @@
 
 <link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
 <link rel="stylesheet" type="text/css" href="https:/maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
-<link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv-beta.css">
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-<script type="text/javascript" src="https://igv.org/web/beta/igv-beta.js"></script>
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/pileup.css') }}">
-<script type="text/javascript" src="{{ url_for('static', filename = 'js/pileup.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'js/pileup.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'js/Scribl.1.1.4.min.js') }}"></script>
+
 {% endblock %}
 
 
 {% block content %}
 <div class="row">
       <div class="col-md-12">
+
+<h3 id="region"></h3>
 
 <div id="browser"></div>
 
@@ -31,7 +31,7 @@
 var div = document.getElementById('browser');
 
 var p = pileup.create(div, {
-  range: {contig: 'I', start: 7512384, stop: 7512544},
+  range: {contig: 'I', start: 2500, stop: 5000},
   tracks: [
     {
       viz: pileup.viz.genome(),
@@ -42,22 +42,57 @@ var p = pileup.create(div, {
       name: 'Reference'
     },
   	{
-    viz: pileup.viz.scale(),
-    name: 'Scale'
+      viz: pileup.viz.scale(),
+      name: 'Scale'
     },
     {
-    viz: pileup.viz.location(),
-    name: 'Location'
+      viz: pileup.viz.location(),
+      name: 'Location'
   	},
     {
-    viz: pileup.viz.genes(),
-    data: pileup.formats.bigBed({
-      url: "{{ url_for('static', filename = 'data/elegans_genes_WS245.bb') }}"
+      viz: pileup.viz.genes(),
+      data: pileup.formats.bigBed({
+        url: "{{ url_for('static', filename = 'data/elegans_genes_WS245.bb') }}"
+      }),
+      name: 'genes'
+    },
+    {
+    viz: pileup.viz.variants(),
+    data: pileup.formats.vcf({
+      url: '{{ url_for('static', filename = 'data/variants.vcf') }}'
     }),
-    name: 'Genes'
+    name: 'Variants'
    }
   ]
 });
+
+
+
+
+$(document).ready(function() {
+  $(function() {
+    var isDragging = false;
+    $("#browser")
+    .mousedown(function() {
+        isDragging = false;
+    })
+    .mousemove(function() {
+        isDragging = true;
+     })
+    .mouseup(function() {
+        var wasDragging = isDragging;
+        isDragging = false;
+        if (!wasDragging) {
+              region = p.getRange();
+              loc = region.contig + ":" + region.start + "-" + region.stop;
+              $("#region").html(loc);
+        }
+    });
+    });
+});
+
+
+
 </script>
 
 
