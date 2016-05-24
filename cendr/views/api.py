@@ -30,12 +30,15 @@ class CustomEncoder(json.JSONEncoder):
 
 parser = reqparse.RequestParser()
 
-def wb_gene_getter(chrom = None, start = None, end = None, sequence_name = None,locus = None):
+def wb_gene_getter(chrom = None, name = None , start = None, end = None, sequence_name = None,locus = None):
     if sequence_name:
         filtrate = (wb_gene.sequence_name == sequence_name)
 
     elif locus:
         filtrate = (wb_gene.locus == locus)
+
+    elif name:
+        filtrate = (wb_gene.Name == name)
 
     else:
         if start > end:
@@ -52,8 +55,8 @@ def wb_gene_getter(chrom = None, start = None, end = None, sequence_name = None,
     return result
 
 class individual_wb_gene_get(Resource):
-    def get(self, chrom="", start="", end="", sequence_name="", locus=""):
-        wb_genes = wb_gene_getter(chrom,start,end, sequence_name, locus)
+    def get(self, chrom = None, name = None , start = None, end = None, sequence_name = None, locus = None):
+        wb_genes = wb_gene_getter(chrom,name,start,end,sequence_name, locus)
         if type(wb_genes)  == list:
             fields = ["CHROM","Name", "start", "end", "sequence_name", "locus"]
             dat = json.dumps(wb_genes, cls=CustomEncoder, indent=4)
@@ -63,6 +66,7 @@ class individual_wb_gene_get(Resource):
 
 api.add_resource(individual_wb_gene_get, '/api/individual_wb_gene/interval/<string:chrom>/<int:start>/<int:end>'
                 ,'/api/individual_wb_gene/sequence_name/<string:sequence_name>'
+                ,'/api/individual_wb_gene/name/<string:name>'
                 ,'/api/individual_wb_gene/locus/<string:locus>')
 
 class mapping_api(Resource):
