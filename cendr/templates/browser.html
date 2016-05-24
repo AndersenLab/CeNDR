@@ -2,11 +2,23 @@
 
 {% block custom_head %}
 
-<link rel="stylesheet" type="text/css" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
-<link rel="stylesheet" type="text/css" href="https:/maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/pileup.css') }}">
-<script type="text/javascript" src="{{ url_for('static', filename = 'js/pileup.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename = 'js/Scribl.1.1.4.min.js') }}"></script>
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" type="text/css"
+      href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+<!-- Font Awesome CSS -->
+<link rel="stylesheet" type="text/css"
+      href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
+
+<!-- IGV CSS -->
+<link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.0-rc1/igv-1.0.0-rc1.css">
+
+<!-- jQuery JS -->
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+
+<script type="text/javascript" src="{{ url_for('static', filename = 'js/igv-beta.js') }}"></script>
 
 {% endblock %}
 
@@ -28,70 +40,33 @@
 
 
 <script type="text/javascript">
-var div = document.getElementById('browser');
 
-var p = pileup.create(div, {
-  range: {contig: 'I', start: 2500, stop: 5000},
-  tracks: [
-    {
-      viz: pileup.viz.genome(),
-      isReference: true,
-      data: pileup.formats.twoBit({
-        url: "{{ url_for('static', filename = 'data/elegans.2bit') }}"
-      }),
-      name: 'Reference'
-    },
-  	{
-      viz: pileup.viz.scale(),
-      name: 'Scale'
-    },
-    {
-      viz: pileup.viz.location(),
-      name: 'Location'
-  	},
-    {
-      viz: pileup.viz.genes(),
-      data: pileup.formats.bigBed({
-        url: "{{ url_for('static', filename = 'data/elegans_genes_WS245.bb') }}"
-      }),
-      name: 'genes'
-    },
-    {
-    viz: pileup.viz.variants(),
-    data: pileup.formats.vcf({
-      url: '{{ url_for('static', filename = 'data/variants.vcf') }}'
-    }),
-    name: 'Variants'
-   }
-  ]
-});
+    $(document).ready(function () {
 
+        var div = $("#browser")[0],
+                options = {
+                    showNavigation: true,
+                    showKaryo: false,
+                    reference: {
+                      fastaURL: "{{ url_for('static', filename='data/c_elegans.PRJNA13758.WS245.genomic.fa') }}",
+                      indexURL: "{{ url_for('static', filename='data/c_elegans.PRJNA13758.WS245.genomic.fa.fai') }}",
+                      // cytobandURL: ""
+                    },
+                    locus: "I:1-1000",
+                    tracks: [
+                        {
+                            name: "Genes",
+                            url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            order: Number.MAX_VALUE,
+                            displayMode: "EXPANDED"
 
+                        }
+                    ]
+                };
 
+        igv.createBrowser(div, options);
 
-$(document).ready(function() {
-  $(function() {
-    var isDragging = false;
-    $("#browser")
-    .mousedown(function() {
-        isDragging = false;
-    })
-    .mousemove(function() {
-        isDragging = true;
-     })
-    .mouseup(function() {
-        var wasDragging = isDragging;
-        isDragging = false;
-        if (!wasDragging) {
-              region = p.getRange();
-              loc = region.contig + ":" + region.start + "-" + region.stop;
-              $("#region").html(loc);
-        }
     });
-    });
-});
-
-
 
 </script>
 
