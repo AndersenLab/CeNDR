@@ -18,7 +18,7 @@
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
 
-<script type="text/javascript" src="{{ url_for('static', filename = 'js/igv-beta.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename = 'js/igv-rc1.js') }}"></script>
 
 {% endblock %}
 
@@ -41,8 +41,11 @@
   <tr>
     <th>CHROM</th>
     <th>POS</th>
-    <th>Gene ID</th>
     <th>Locus ID</th>
+    <th>Wormbase ID</th>
+    <th>Feature ID</th>
+    <th>Change</th>
+    <th>Protein Position</th>
     <th>Putative Impact</th>
   </tr>
 </thead>
@@ -73,8 +76,27 @@
                       indexURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa.fai",
                       // cytobandURL: ""
                     },
-                    locus: "I:1000-2000",
+                    locus: "I:1000-8000",
                     tracks: [
+                        {
+                            name: "Genes",
+                            sourceType: "file",
+                            displayMode: "EXPANDED",
+                            order: 1,
+                            url: "{{ url_for('static', filename = 'browser/elegans_genes_WS245.bed') }}",
+                            indexURL: "{{ url_for('static', filename = 'browser/elegans_genes_WS245.bed') }}",
+                            searchable: true,
+                            color: "#5c5cd6"
+                        },
+                        {
+                            name: "Transcripts",
+                            url: "{{ url_for('static', filename = 'browser/elegans_transcripts_WS245.bed') }}",
+                            indexURL: "{{ url_for('static', filename = 'browser/elegans_transcripts_WS245.bed') }}",
+                            order: 2,
+                            color: "#a366ff",
+                            displayMode: "EXPANDED",
+                            searchable: true
+                        },
                         {
                             name: "Variants",
                             url: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz",
@@ -85,15 +107,6 @@
                             homvarColor: "#0066ff",
                             homrefColor: "#c2c2d6",
                             visibilityWindow: 20000
-
-                        },
-                        {
-                            name: "Genes",
-                            url: "{{ url_for('static', filename = 'browser/elegans_genes_WS245.bed') }}",
-                            indexURL: "{{ url_for('static', filename = 'browser/elegans_genes_WS245.bed') }}",
-                            order: 1,
-                            color: "#a366ff",
-                            displayMode: "EXPANDED"
 
                         }
                     ]
@@ -112,15 +125,16 @@ function refresh_variants() {
          method: "GET",
          contentType: 'application/json',
          }).done(function(msg) {
-          console.log(msg);
           $.each(msg, function(k, v) {
+            console.log(msg);
             items = [v["CHROM"],
                      v["POS"],
+                     v["locus"],
                      v["gene_id"],
-                     "",
+                     v["feature_id"],
+                     v["hgvs_p"],
+                     v["protein_position"],
                      v["putative_impact"]];
-            console.log(items);
-            console.log(items.join("great"))
             $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>")
           })
         });

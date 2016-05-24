@@ -1,0 +1,8 @@
+[
+    {
+      "origin": ["https://2-dot-andersen-lab.appspot.com", "https://elegansvariation.org", "https://www.elegansvariation.org", "localhost"],
+      "responseHeader": ["Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type", "Range"],
+      "method": ["GET"],
+      "maxAgeSeconds": 3600
+    }
+]
