@@ -30,31 +30,40 @@ class CustomEncoder(json.JSONEncoder):
 
 parser = reqparse.RequestParser()
 
-def wb_gene_getter(chrom =None, start = None, end = None, sequence_name = None,locus = None):
-    if start > end:
-        print "Error :( Reason: Start point is greater end point."
-        return
-    result = list(wb_gene.select(wb_gene.CHROM ,wb_gene.Name, wb_gene.start, wb_gene.end,wb_gene.sequence_name,wb_gene.locus,).filter( ( (wb_gene.CHROM == chrom) &
-                        (wb_gene.start >= start) &
-                        (wb_gene.end <= end) )) 
-                .dicts()
-                .execute())
+def wb_gene_getter(chrom = None, start = None, end = None, sequence_name = None,locus = None):
+    if sequence_name:
+        filtrate = (wb_gene.sequence_name == sequence_name)
+
+    elif locus:
+        filtrate = (wb_gene.locus == locus)
+
+    else:
+        if start > end:
+            return "Error :( Reason: start point is greater than end point in your query."
+        filtrate = ( (wb_gene.CHROM == chrom) 
+                    and (wb_gene.start >= start) 
+                    and (wb_gene.end <= end) )
+
+    result = list(wb_gene.select(wb_gene.CHROM ,wb_gene.Name, wb_gene.start,
+                                 wb_gene.end,wb_gene.sequence_name,wb_gene.locus)
+                                .filter(filtrate) 
+                                .dicts()
+                                .execute())
     return result
 
 class individual_wb_gene_get(Resource):
     def get(self, chrom="", start="", end="", sequence_name="", locus=""):
-        wb_genes = wb_gene_getter(chrom,start,end)
+        wb_genes = wb_gene_getter(chrom,start,end, sequence_name, locus)
         if type(wb_genes)  == list:
             fields = ["CHROM","Name", "start", "end", "sequence_name", "locus"]
-            print len(wb_genes)
             dat = json.dumps(wb_genes, cls=CustomEncoder, indent=4)
             return Response(response=dat,status=200, mimetype="application/json")
         else:
-            return Response(response="", status=404, catch_all_404s=True)
+            return Response(response=wb_genes, status=404)
 
-api.add_resource(individual_wb_gene_get,'/api/individual_wb_gene/<string:chrom>/<int:start>/<int:end>',
-                                        '/api/individual_wb_gene/<string:sequence_name>/'
-                                        '/api/individual_wb_gene/<string:locus>/')
+api.add_resource(individual_wb_gene_get, '/api/individual_wb_gene/interval/<string:chrom>/<int:start>/<int:end>'
+                ,'/api/individual_wb_gene/sequence_name/<string:sequence_name>'
+                ,'/api/individual_wb_gene/locus/<string:locus>')
 
 class mapping_api(Resource):
 
