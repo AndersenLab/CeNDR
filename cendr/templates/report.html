@@ -427,7 +427,6 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
   url: "/api/interval/" + chrom + "/" + start + "/" + end,
   contentType: 'application/json',
   success:function(msg) {
-    console.log(msg);
     $(v).html(msg["total"]);
     $(v).next().html(msg["protein_coding"]);
     $(".peak_" + k + "_total").html("<strong>" + msg["total"] + "</strong>");

@@ -48,16 +48,29 @@
                     showNavigation: true,
                     showKaryo: false,
                     reference: {
-                      fastaURL: "{{ url_for('static', filename='data/c_elegans.PRJNA13758.WS245.genomic.fa') }}",
-                      indexURL: "{{ url_for('static', filename='data/c_elegans.PRJNA13758.WS245.genomic.fa.fai') }}",
+                      fastaURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa",
+                      indexURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa.fai",
                       // cytobandURL: ""
                     },
-                    locus: "I:1-1000",
+                    locus: "I:1000-2000",
                     tracks: [
                         {
-                            name: "Genes",
-                            url: "//dn7ywbm9isq8j.cloudfront.net/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                            name: "Variants",
+                            url: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz",
+                            indexURL: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz.tbi",
                             order: Number.MAX_VALUE,
+                            displayMode: "SQUISHED",
+                            color: "#000000",
+                            homvarColor: "#0066ff",
+                            homrefColor: "#c2c2d6",
+                            visibilityWindow: 20000
+
+                        },
+                        {
+                            name: "Genes",
+                            url: "{{ url_for('static', filename = 'browser/elegans_genes_WS245.bed') }}",
+                            indexURL: "{{ url_for('static', filename = 'browser/elegans_genes_WS245.bed') }}",
+                            order: 1,
                             displayMode: "EXPANDED"
 
                         }
@@ -66,7 +79,34 @@
 
         igv.createBrowser(div, options);
 
-    });
+function refresh_variants() {
+    region = $(".igvNavigationSearchInput").val()
+    chrom = region.split(":")[0]
+    start = region.split(":")[1].split("-")[0].replace(/,/g, "")
+    end = region.split(":")[1].split("-")[1].replace(/,/g, "")
+
+    $.ajax({
+         url:"/api/gt/" + chrom + "/" + start + "/" + end,
+         method: "GET",
+         contentType: 'application/json',
+         }).done(function(msg) {
+          console.log(msg);
+        });
+
+}
+
+
+$("#browser").on("mouseup", function() { 
+  console.log("Great")
+})
+
+$(".igvNavigationSearchInput").on("input paste", function() {
+  console.log("input change");
+});
+
+
+});
+
 
 </script>
 

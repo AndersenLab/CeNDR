@@ -1,6 +1,4 @@
-#### Site Updates
-
-__May 2016 CeNDR Updates__
+#### May 2016 CeNDR Updates
 
 * The feedback system has been changed and now utilizes a google form.
 * Reports have been reworked to utilize the full width of pages.
