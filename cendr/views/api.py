@@ -118,8 +118,6 @@ class isotype_ind_api(Resource):
 api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>/')
 
 
-
-
 class report_by_date(Resource):
 
     def get(self, date):
@@ -193,13 +191,15 @@ class get_gt(Resource):
 api.add_resource(get_gt, '/api/variant/<string:chrom>/<int:pos>')
 
 
+def decode_gt(gt):
+    return cPickle.loads(zlib.decompress(base64.b64decode(gt)))
 
 #
 # GT By Location
 #
 
 def fetch_geo_gt(chrom, pos):
-    gt = cPickle.loads(zlib.decompress(base64.b64decode(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)))
+    gt = decode_gt(WI.get(WI.CHROM == chrom, WI.POS == pos).GT)
     strain_locations = list(strain.select(strain.isotype, strain.latitude, strain.longitude)
         .filter(strain.latitude != None)
         .distinct().dicts().execute())
@@ -214,11 +214,38 @@ def fetch_geo_gt(chrom, pos):
 
 class strain_gt_locations(Resource):
     def get(self, chrom, pos):
-        result =  fetch_geo_gt(chrom, pos)
+        result = fetch_geo_gt(chrom, pos)
         result = json.dumps(result)
         return Response(response=result, status = 201, mimetype="application/json")
 
 api.add_resource(strain_gt_locations, '/api/gt_loc/<string:chrom>/<int:pos>')
+
+
+#
+# Get Genotypes from Interval
+#
+
+def gt_from_interval(chrom, start, end):
+    result = list(WI.select(WI.CHROM, 
+                            WI.POS,
+                            WI.FILTER, 
+                            WI.putative_impact, 
+                            WI.gene_id, 
+                            WI.GT).filter(WI.CHROM == chrom,
+                                          WI.POS >= start,
+                                          WI.POS <= end,
+                                          WI.putative_impact != "").dicts().execute())
+    for i in result:
+        i["GT"] = decode_gt(i["GT"])
+    return result
+
+class fetch_gt_from_interval(Resource):
+    def get(self, chrom, start, end):
+        result = gt_from_interval(chrom, start, end)
+        result = json.dumps(result)
+        return Response(response=result, status = 201, mimetype="application/json")
+
+api.add_resource(fetch_gt_from_interval, '/api/gt/<string:chrom>/<int:start>/<int:end>')
 
 #
 # Tajima's D
@@ -323,6 +350,7 @@ def get_gene_w_variants(chrom, start, end, impact):
                    )
                   .distinct()
                   .dicts().execute())}
+
 
 def get_variant_count(chrom, start, end):
     """
