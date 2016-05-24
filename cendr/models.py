@@ -12,10 +12,11 @@ from gcloud import datastore
 ds = datastore.Client(project="andersen-lab")
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-    db = MySQLDatabase("cegwas_v2", unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+    dbname = "cegwas_v2" # don't remove, imported elsewhere.
+    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
     credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
-    dbname = "cegwas_v2"
+    dbname = "cegwas_v2" # don't remove, imported elsewhere.
     db =  MySQLDatabase(
       dbname,
       **credentials
