@@ -12,16 +12,11 @@ from gcloud import datastore
 ds = datastore.Client(project="andersen-lab")
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
-    #db = MySQLDatabase("cegwas_v2", unix_socket='/cloudsql/andersen-lab:cegwas-database', user='root')
-    credentials = dict(ds.get(ds.key("credential", "cegwas-database")))
-    dbname = "cegwas_v2"
-    db =  MySQLDatabase(
-      dbname,
-      **credentials
-      )
+    dbname = "cegwas_v2" # don't remove, imported elsewhere.
+    db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
-    credentials = dict(ds.get(ds.key("credential", "cegwas-database")))
-    dbname = "cegwas_v2"
+    credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+    dbname = "cegwas_v2" # don't remove, imported elsewhere.
     db =  MySQLDatabase(
       dbname,
       **credentials
@@ -149,7 +144,7 @@ class mapping(Model):
         database = db
 
 class WI(Model):
-    CHROM = CharField(max_length=4)
+    CHROM = CharField(max_length=5)
     POS = IntegerField()
     _ID = CharField()
     REF = CharField()
@@ -183,7 +178,7 @@ class WI(Model):
             )
 
 class intervals(Model):
-    CHROM = CharField(index = True, max_length=4)
+    CHROM = CharField(index = True, max_length=5)
     BIN_START = IntegerField(index=True)
     BIN_END = IntegerField(index=True)
     N_VARIANTS = IntegerField(default = 0)
@@ -228,7 +223,7 @@ class tajimaD(Model):
 
 
 class wb_gene(Model):
-    CHROM = CharField(index = True, max_length = 4)
+    CHROM = CharField(index = True, max_length = 5)
     start = IntegerField(index = True)
     end = IntegerField(index = True)
     Name = CharField(index = True)
