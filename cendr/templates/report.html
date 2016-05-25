@@ -350,7 +350,14 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 </table>
 
-
+    <div class="progress">
+      <div class="progress-bar progress-bar-warning" role="progressbar" style="width:10%; background-color:#0066FF">
+        Variant
+      </div>
+      <div class="progress-bar progress-bar-success" role="progressbar" style="width:80%; background-color:#C2C2D6">
+        Reference
+      </div>
+    </div>
 
     <h3>Global Distribution</h3>
 
@@ -554,6 +561,37 @@ function update_geo_map(chrom, pos) {
 
 }
 
+function reference_counter (chrom, start, end) {
+    if (start < 0) {
+      start = 0;
+    }
+    if (end < 0) {
+      end = 0;
+    }
+    $.ajax({
+      url: "/api/gt/" + chrom + "/" + start + "/" + end,
+      contentType: 'application/json',
+      success:function(data) {
+      referential_counter = 0;
+      variant_counter = 0;
+      other = 0
+      $.each(data, function(i,elem){
+        gt_array = elem['GT'];
+        $.each(gt_array, function(i,elem1){
+          if (elem1['GT'] == '0/0') {
+            referential_counter += 1;
+          } else if (elem1['GT'] == '1/1') {
+            variant_counter += 1;
+          }
+          else{
+            other += 1
+          }
+          console.log(referential_counter);
+        })
+      })
+    }
+  });
+}
 
 //
 // Tajima D
@@ -650,7 +688,7 @@ $(document).ready(function() {
   update_geo_map('{{ mapping_results.0.chrom }}' , {{ mapping_results.0.pos }});
   // Load initial position
   update_tajima_plot('{{ mapping_results.0.chrom }}', {{ mapping_results.0.interval_start }}, {{ mapping_results.0.interval_end }} );
-  update_gene_list('{{ mapping_results.0.chrom }}', {{ mapping_results.0.interval_start }}, {{ mapping_results.0.interval_end }})
+  update_gene_list('{{ mapping_results.0.chrom }}', {{ mapping_results.0.interval_start }}, {{ mapping_results.0.interval_end }});
 });
 
 // Monitor peak tabs
