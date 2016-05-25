@@ -14,6 +14,9 @@ igvtools index elegans_transcripts_WS245.bed
 
 # Gene Track
 sortBed -i ../../c_elegans.WS245.gff | gff2bed ../../c_elegans.WS245.gff | grep 'locus'  |\
-gawk '{ match($0, "locus=([^;\t]+)", f); print $1 "\t" $2 "\t" $3 "\t" f[1] "\t" 100 "\t" $6 "\t" $2 "\t" $3  "\t0\t1\t" $3 - $2 - 1 "\t0"  }' > elegans_genes_WS245.bed
-igvtools index elegans_genes_WS245.bed
+gawk '{ match($0, "locus=([^;\t]+)", f); print $1 "\t" $2 "\t" $3 "\t" f[1] "\t" 100 "\t" $6 "\t" $2 "\t" $3  "\t0\t1\t" $3 - $2 - 1 "\t0"  }' > elegans_gene.WS245.bed
+igvtools index elegans_gene.WS245.bed
 
+
+# Generate HIGH MED LOW tracks
+bcftools view ${andersen_vcf} | awk '$0 !~ "^#" { print $1 "\t" ($2 - 1) "\t" ($2)  "\t" $1 ":" $2 "\t0\t+"  "\t" $2 - 1 "\t" $2 "\t0\t1\t1\t0" }' | head -n 500 > test.bed && igvtools index test.bed
