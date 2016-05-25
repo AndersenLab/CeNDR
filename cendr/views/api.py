@@ -318,7 +318,7 @@ class get_gene_count(Resource):
         return Response(response=result, status=201, mimetype="application/json")
 
 
-class get_gene_list(Resource):
+class fetch_gene_list(Resource):
     def get(self, chrom, start, end):
         gene_list = list(wb_gene.select(wb_gene.CHROM,
                                         wb_gene.start,
@@ -337,9 +337,11 @@ class get_gene_list(Resource):
                     ("start", start),
                     ("end", end),
                     ("count", gene_count),
-                    ("list", gene_list)))
+                    ("gene_list", gene_list)))
         result = json.dumps(result, cls=CustomEncoder, indent=4)
         return Response(response=result, status=201, mimetype="application/json")
+
+api.add_resource(fetch_gene_list, '/api/genelist/<string:chrom>/<int:start>/<int:end>')
 
 #
 # Variants
