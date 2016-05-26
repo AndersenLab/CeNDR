@@ -23,3 +23,6 @@ gawk '{ match($0, "locus=([^;\t]+)", f); print $1 "\t" $2 "\t" $3 "\t" f[1] "\t"
 for i in LOW MODERATE HIGH; do
 	bcftools view --apply-filters PASS ${andersen_vcf} | grep ${i} | awk '$0 !~ "^#" { print $1 "\t" ($2 - 1) "\t" ($2)  "\t" $1 ":" $2 "\t0\t+"  "\t" $2 - 1 "\t" $2 "\t0\t1\t1\t0" }'  > ${build}.${i}.bed && sleep 3 && igvtools index ${build}.${i}.bed &
 done;
+
+# Finish this part later.
+gsutil cp gs://andersen_dist/vcf/all/${build}/browser/
