@@ -1,0 +1,123 @@
+# Variant Prediction
+
+We use [SnpEff](http://snpeff.sourceforge.net/) to perform variant prediction. Variants are labeled as having a LOW, MODERATE, or HIGH impact based on the location and nature of the variant. We do not include MODIFIER annotations provided by SnpEff. Variant impacts are detailed within [The Sequence Ontology Project](http://www.sequenceontology.org/).
+
+<table class="table table-striped table-hover">
+<thead>
+<tr>
+<th>Putative Effect</th>
+<th>Sequence Ontology Term</th>
+</tr>
+</thead>
+
+<tbody>
+  <tr>
+    <td>HIGH</td>
+    <td>chromosome_number_variation</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>exon_loss_variant</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>frameshift_variant</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>rare_amino_acid_variant</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>splice_acceptor_variant</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>splice_donor_variant</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>start_lost</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>stop_gained</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>stop_lost</td>
+  </tr>
+  <tr>
+    <td>HIGH</td>
+    <td>transcript_ablation</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>3_prime_UTR_truncation+exon_loss</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>5_prime_UTR_truncation+exon_loss</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>coding_sequence_variant</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>disruptive_inframe_deletion</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>disruptive_inframe_insertion</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>inframe_deletion</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>inframe_insertion</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>missense_variant</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>regulatory_region_ablation</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>splice_region_variant</td>
+  </tr>
+  <tr>
+    <td>MODERATE</td>
+    <td>TFBS_ablation</td>
+  </tr>
+  <tr>
+    <td>LOW</td>
+    <td>5_prime_UTR_premature</td>
+  </tr>
+  <tr>
+    <td>LOW</td>
+    <td>initiator_codon_variant</td>
+  </tr>
+  <tr>
+    <td>LOW</td>
+    <td>splice_region_variant</td>
+  </tr>
+  <tr>
+    <td>LOW</td>
+    <td>start_retained</td>
+  </tr>
+  <tr>
+    <td>LOW</td>
+    <td>stop_retained_variant</td>
+  </tr>
+  <tr>
+    <td>LOW</td>
+    <td>synonymous_variant</td>
+  </tr>
+  </tbody>
+</table>

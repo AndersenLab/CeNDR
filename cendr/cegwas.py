@@ -41,6 +41,7 @@ def main():
 
 @app.route("/news/")
 @app.route("/news/<filename>/")
+@cache.memoize(50)
 def news_item(filename = ""):
     files = [x for x in os.listdir("cendr/static/content/news/") if not x.startswith(".")]
     files.reverse()
@@ -55,7 +56,7 @@ def news_item(filename = ""):
 @app.route("/help/<filename>/")
 @cache.memoize(50)
 def help_item(filename = ""):
-    files = ["Getting-Started", "FAQ", "Methods"]
+    files = ["FAQ", "Variant-Prediction", "Methods"]
     if not filename:
         filename = "Getting-Started"
     title = filename.replace("-", " ")

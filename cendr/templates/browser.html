@@ -38,7 +38,7 @@
       </div>
       <div class="col-md-4">
 
-      <h4>Variant Effects</h4>
+      <h4>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h4>
       {% for i in ["LOW"] %}
         <div class="checkbox">
           <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label>
@@ -217,6 +217,12 @@ function refresh_variants() {
                      v["putative_impact"]];
             $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + items.join("</td><td>") + "</td></tr>")
           })
+
+          // Enable links
+          $( "#variants a" ).on( "click", function() {
+              window.location = $(this).attr('href');
+          });
+
         });
 
 

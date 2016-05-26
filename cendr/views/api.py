@@ -351,10 +351,11 @@ def get_gene_list(chrom, start, end):
     """
         Return genes from a given interval
     """
-    return list(wb_gene.filter(wb_gene.CHROM == chrom, 
-                              ((wb_gene.start >= start) & (wb_gene.end <= end)) |
-                              ((wb_gene.start <= start) & (wb_gene.end >= start)) |
-                              (wb_gene.start <= end)).dicts().execute())
+    return list(wb_gene.select().where(
+                                ((wb_gene.CHROM == chrom) & (wb_gene.start >= start) & (wb_gene.end <= end)) |
+                                ((wb_gene.CHROM == chrom) & (wb_gene.start <= start) & (wb_gene.end >= start)) |
+                                ((wb_gene.CHROM == chrom) & (wb_gene.end >= end) & (wb_gene.end <= start))
+                            ).dicts().distinct().execute())
 
 
 def get_gene_w_variants(chrom, start, end, impact):
