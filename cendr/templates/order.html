@@ -39,12 +39,12 @@
                 </tr>
             </tbody>
         </table>
+        <p>To expedite shipping, please supply FedEx or UPS account numbers.</p>
 <div class="pull-right">
 <form action="/order" class="form-inline" method="POST">
 {% for item, price in items.items() %}
 <input type="hidden" name="item" value="{{ item }}">
 {% endfor %}
-
   <div class="form-group">
     <label for="shipping-service">Shipping Method</label>
     <select name="shipping-service" id="shipping-service" class="form-control" required>

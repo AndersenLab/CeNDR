@@ -1,5 +1,5 @@
 Currently, the CeNDR project is supported by funds from Northwestern University, Weinberg College of Arts and Sciences, and Amazon Web Services, along with supplemental funds for genome sequencing from the American Cancer Society, the March of Dimes, and the Chicago Biomedical Consortium.
 
-For this project to have a sustainable future, we require researchers to contribute to our costs. The strain purchase costs offset organization, storage, and distribution of strains. However, we have data storage and cloud-based computational costs as well. If you would like to contribute from any active grants, please send Erik Andersen (link to email) an email. CeNDR will provide support letters for the specific project and how we can help. 
+For this project to have a sustainable future, we require researchers to contribute to our costs. The strain purchase costs offset organization, storage, and distribution of strains. However, we have data storage and cloud-based computational costs as well. If you would like to contribute from any active grants, please send <a href="mailto:erik.andersen@northwestern.edu">Erik Andersen</a> an email. CeNDR will provide support letters for the specific project and how we can help. 
 
-If you would like to donate, please use the link to the right.
+If you would like to donate, please use the form to the right. We will keep your information private.

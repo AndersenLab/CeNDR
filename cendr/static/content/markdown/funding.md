@@ -1,6 +1,6 @@
 ## Donors ##
 
-We would like to thank our donors
+We would like to thank our donors!
 
 <div class="row">
     <div class="col-md-4">
