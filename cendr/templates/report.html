@@ -402,11 +402,13 @@ A genome-wide representation of the association between variation in the <em>C. 
 </table>
 
     <div class="progress">
-      <div class="progress-bar progress-bar-warning" role="progressbar" style="width:10%; background-color:#0066FF">
+      <div class="progress-bar progress-bar-warning" id="var_percent" role="progressbar" style="width:10%; background-color:#0066FF">
         Variant
+        <p class="text"></p>
       </div>
-      <div class="progress-bar progress-bar-success" role="progressbar" style="width:80%; background-color:#C2C2D6">
+      <div class="progress-bar progress-bar-success" id= "ref_percent" role="progressbar" style="width:80%; background-color:#C0382A">
         Reference
+        <p class="text"></p>
       </div>
     </div>
 
@@ -603,7 +605,23 @@ function update_geo_map(chrom, pos) {
   map.removeLayer(strain_layer);
   chrom_pos = chrom + ":" + pos;
   markers = [];
+  referential_counter = 0;
+  alt_counter = 0;
+  other = 0
   $.each(geo_gt[chrom_pos], function(k, d) {
+
+      if (d.GT == '0/0') {
+        referential_counter += 1;
+      } else if (d.GT == '1/1') {
+        alt_counter += 1;
+      }
+      else{
+        other += 1
+      }
+      total = referential_counter + alt_counter + other
+      refer_percent = (referential_counter/total) * 100
+      alter_percent = (alt_counter/total) * 100
+
       m = L.marker([d.latitude, d.longitude], { icon: gt_icon[d.GT], tgt: d.TGT, gt: d.GT, title: d.isotype});
       markers.push(m);
       gt_set[d.GT] = d.TGT.split("/")[0];
@@ -611,40 +629,22 @@ function update_geo_map(chrom, pos) {
   strain_layer = L.layerGroup(markers).addTo(map);
   $("#ref_gt").html(gt_set["0/0"]);
   $("#alt_gt").html(gt_set["1/1"]);
+  console.log(referential_counter, alt_counter, other)
+  $("#ref_percent").width(refer_percent+'%');
+  $("#var_percent").width(alter_percent+'%');
+
+  // $("#ref_percent > p").text(refer_percent+'%');
+  // $("#var_percent > p").text(alter_percent+'%');
+  // $('.progress-bar').mouseover(function() {
+  //   $('.text').css("visibility","visible");
+  // });
+
+  // $('.progress-bar').mouseout(function() {
+  //   $('.text').css("visibility","hidden");
+  // });
 
 }
 
-function reference_counter (chrom, start, end) {
-    if (start < 0) {
-      start = 0;
-    }
-    if (end < 0) {
-      end = 0;
-    }
-    $.ajax({
-      url: "/api/gt/" + chrom + "/" + start + "/" + end,
-      contentType: 'application/json',
-      success:function(data) {
-      referential_counter = 0;
-      variant_counter = 0;
-      other = 0
-      $.each(data, function(i,elem){
-        gt_array = elem['GT'];
-        $.each(gt_array, function(i,elem1){
-          if (elem1['GT'] == '0/0') {
-            referential_counter += 1;
-          } else if (elem1['GT'] == '1/1') {
-            variant_counter += 1;
-          }
-          else{
-            other += 1
-          }
-          console.log(referential_counter);
-        })
-      })
-    }
-  });
-}
 
 //
 // Tajima D
