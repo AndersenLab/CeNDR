@@ -251,7 +251,7 @@ def gt_from_interval(chrom, start, end):
                             wb_gene).filter(WI.CHROM == chrom,
                                           WI.POS >= start,
                                           WI.POS <= end,
-                                          WI.putative_impact != "").join(wb_gene, on = (WI.gene_name == wb_gene.Name)).distinct().dicts().execute())
+                                          WI.putative_impact != "").join(wb_gene, on = (WI.gene_name == wb_gene.Name)).limit(1000).dicts().execute())
     for i in result:
         i["GT"] = decode_gt(i["GT"])
     return result

@@ -26,26 +26,51 @@
 {% block content %}
 <div class="row">
       <div class="col-md-12">
+    <div class="well">
+    <div class="row">
+      <div class="col-md-4">
+      <h4>Standard</h4>
+      {% for i in ["Genes", "Transcripts", "Variants"] %}
+        <div class="checkbox">
+          <label><input type="checkbox" checked class="track-select" value="{{ i }}" />{{ i }}</label>
+        </div>
+      {% endfor %}
+      </div>
+      <div class="col-md-4">
 
-<h3 id="region"></h3>
+      <h4>Variant Effects</h4>
+      {% for i in ["LOW"] %}
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label>
+        </div>
+      {% endfor %}
+      {% for i in ["MODERATE", "HIGH"] %}
+        <div class="checkbox">
+          <label><input type="checkbox" checked class="track-select" value="{{ i }}" />{{ i }}</label>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+    </div>
+
 
 <div id="browser"></div>
 
 <h3>Variants</h3>
 
-<p>Only variants with predicted coding changes are listed below.</p>
-
 <table class="table table-striped table-hover" style="margin-top:10px;" id="variants">
+
+<p><small>Maximum of 1000 variants from the region will be listed.</small></p>
   
 <thead>
   <tr>
     <th>CHROM</th>
     <th>POS</th>
-    <th>Locus ID</th>
-    <th>Wormbase ID</th>
-    <th>Feature ID</th>
-    <th>Change</th>
-    <th>Protein Position</th>
+    <th>Name</th>
+    <th>WormBase ID</th>
+    <th>CDS</th>
+    <th>Coding Change</th>
+    <th>Biotype</th>
     <th>Putative Impact</th>
   </tr>
 </thead>
@@ -64,6 +89,67 @@
 
 <script type="text/javascript">
 
+trackset = {"Genes": {
+                            name: "Genes",
+                            displayMode: "EXPANDED",
+                            order: 1,
+                            url: "{{ url_for('static', filename = 'browser/elegans_gene.WS245.bed') }}",
+                            //indexURL: "{{ url_for('static', filename = 'browser/elegans_gene.WS245.bed.idx') }}",
+                            searchable: true,
+                            color: "#5c5cd6",
+                            height: 30
+                     },
+            "Transcripts": {
+                            name: "Transcripts",
+                            url: "{{ url_for('static', filename = 'browser/elegans_transcripts_WS245.bed') }}",
+                            indexURL: "{{ url_for('static', filename = 'browser/elegans_transcripts_WS245.bed.idx') }}",
+                            order: 2,
+                            color: "#a366ff",
+                            displayMode: "SQUISHED",
+                            searchable: true
+                           },
+            "LOW": {
+                            name: "LOW",
+                            url: "{{ url_for('static', filename = 'browser/' + build + '.LOW.bed') }}",
+                            indexURL: "{{ url_for('static', filename = 'browser/' + build + '.LOW.bed.idx') }}",
+                            order: 3,
+                            color: "#33cc33",
+                            displayMode: "EXPANDED",
+                            height: 20
+                   },
+            "MODERATE": {
+                            name: "MODERATE",
+                            url: "{{ url_for('static', filename = 'browser/' + build + '.MODERATE.bed') }}",
+                            indexURL: "{{ url_for('static', filename = 'browser/' + build + '.MODERATE.bed.idx') }}",
+                            order: 4,
+                            color: "#ffc500",
+                            displayMode: "EXPANDED",
+                            height: 20
+                   },
+            "HIGH": {
+                            name: "HIGH",
+                            url: "{{ url_for('static', filename = 'browser/' + build + '.HIGH.bed') }}",
+                            indexURL: "{{ url_for('static', filename = 'browser/' + build + '.HIGH.bed.idx') }}",
+                            order: 5,
+                            color: "#ff0000",
+                            displayMode: "EXPANDED",
+                            height: 20
+                   },
+            "Variants": {
+                            name: "Variants",
+                            url: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz",
+                            indexURL: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz.tbi",
+                            order: Number.MAX_VALUE,
+                            displayMode: "SQUISHED",
+                            color: "#000000",
+                            homvarColor: "#0066ff",
+                            homrefColor: "#c2c2d6",
+                            visibilityWindow: 20000
+
+                        }
+
+}
+
     $(document).ready(function () {
 
         var div = $("#browser")[0],
@@ -76,47 +162,40 @@
                       indexURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa.fai",
                       // cytobandURL: ""
                     },
-                    locus: "I:1000-8000",
+                    locus: "III:11,746,923-11,750,250",
                     tracks: [
-                        {
-                            name: "Genes",
-                            sourceType: "file",
-                            displayMode: "EXPANDED",
-                            order: 1,
-                            url: "{{ url_for('static', filename = 'browser/elegans_gene.WS245.bed') }}",
-                            indexURL: "{{ url_for('static', filename = 'browser/elegans_gene.WS245.bed') }}",
-                            searchable: true,
-                            color: "#5c5cd6"
-                        },
-                        {
-                            name: "Transcripts",
-                            url: "{{ url_for('static', filename = 'browser/elegans_transcripts_WS245.bed') }}",
-                            indexURL: "{{ url_for('static', filename = 'browser/elegans_transcripts_WS245.bed') }}",
-                            order: 2,
-                            color: "#a366ff",
-                            displayMode: "EXPANDED",
-                            searchable: true
-                        },
-                        {
-                            name: "Variants",
-                            url: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz",
-                            indexURL: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz.tbi",
-                            order: Number.MAX_VALUE,
-                            displayMode: "SQUISHED",
-                            color: "#000000",
-                            homvarColor: "#0066ff",
-                            homrefColor: "#c2c2d6",
-                            visibilityWindow: 20000
-
-                        }
+                        trackset["Genes"],
+                        trackset["Transcripts"],
+                        trackset["MODERATE"],
+                        trackset["HIGH"],
+                        trackset["Variants"]
                     ]
                 };
 
         igv.createBrowser(div, options);
 
-function refresh_variants() {
-    region = $(".igvNavigationSearchInput").val();
 
+// Detect track changes
+$(".track-select").on("change", function() { 
+  if ($(this).prop("checked") == true) {
+    igv.browser.loadTrack(trackset[$(this).attr("value")]);
+  } else {
+    remove_track = $(this).attr("value");
+    $.each(igv.browser.trackViews, function(k, v) {
+      if(v.track.name == remove_track) {
+        igv.browser.removeTrack(v.track);
+      }
+    })
+  }
+})
+
+var_effect_class = {"LOW": "success",
+                    "MODERATE":"warning",
+                    "HIGH": "danger"}
+
+function refresh_variants() {
+    region = $(".igvNavigationSearchInput").val()
+    console.log(region);
     chrom = region.split(":")[0]
     start = region.split(":")[1].split("-")[0].replace(/,/g, "");
     end = region.split(":")[1].split("-")[1].replace(/,/g, "");
@@ -127,18 +206,20 @@ function refresh_variants() {
          contentType: 'application/json',
          }).done(function(msg) {
           $.each(msg, function(k, v) {
-            console.log(msg);
+            console.log(v)
             items = [v["CHROM"],
                      v["POS"],
                      v["locus"],
                      v["gene_id"],
                      v["feature_id"],
                      v["hgvs_p"],
-                     v["protein_position"],
+                     v["biotype"],
                      v["putative_impact"]];
-            $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>");
+            $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + items.join("</td><td>") + "</td></tr>")
           })
         });
+
+
 
 }
 
@@ -157,6 +238,9 @@ $(".igvNavigationSearchInput").keypress(function(e) {
     }
 });
 
+
+// Initial load
+setTimeout(refresh_variants, 1000);
 
 });
 

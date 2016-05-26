@@ -19,4 +19,8 @@ igvtools index elegans_gene.WS245.bed
 
 
 # Generate HIGH MED LOW tracks
-bcftools view ${andersen_vcf} | awk '$0 !~ "^#" { print $1 "\t" ($2 - 1) "\t" ($2)  "\t" $1 ":" $2 "\t0\t+"  "\t" $2 - 1 "\t" $2 "\t0\t1\t1\t0" }' | head -n 500 > test.bed && igvtools index test.bed
+
+# LOW
+for i in LOW MODERATE HIGH; do
+	bcftools view --apply-filters PASS ${andersen_vcf} | grep ${i} | awk '$0 !~ "^#" { print $1 "\t" ($2 - 1) "\t" ($2)  "\t" $1 ":" $2 "\t0\t+"  "\t" $2 - 1 "\t" $2 "\t0\t1\t1\t0" }'  > ${build}.${i}.bed && sleep 3 && igvtools index ${build}.${i}.bed &
+done;
