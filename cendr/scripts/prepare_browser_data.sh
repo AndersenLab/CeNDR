@@ -11,9 +11,11 @@ BigBedToBed elegans_genes_WS245.bb elegans_transcripts_WS245.bed
 # brew install igvtools
 igvtools index elegans_transcripts_WS245.bed
 
+# get gff
+gff=~/Dropbox/Andersenlab/Reagents/WormReagents/Variation/N2_GFF_WS245/c_elegans.WS245.annotations.gff3
 
 # Gene Track
-sortBed -i ../../c_elegans.WS245.gff | gff2bed ../../c_elegans.WS245.gff | grep 'locus'  |\
+sortBed -i ${gff} | gff2bed gff - | grep 'locus'  |\
 gawk '{ match($0, "locus=([^;\t]+)", f); print $1 "\t" $2 "\t" $3 "\t" f[1] "\t" 100 "\t" $6 "\t" $2 "\t" $3  "\t0\t1\t" $3 - $2 - 1 "\t0"  }' > elegans_gene.WS245.bed
 # Don't index to improve searching.
 

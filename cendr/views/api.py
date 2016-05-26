@@ -248,6 +248,7 @@ def gt_from_interval(chrom, start, end):
                             WI.protein_position,
                             WI.GT,
                             WI.feature_id,
+                            WI.annotation,
                             wb_gene).filter(WI.CHROM == chrom,
                                           WI.POS >= start,
                                           WI.POS <= end,

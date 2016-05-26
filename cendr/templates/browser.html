@@ -71,6 +71,7 @@
     <th>CDS</th>
     <th>Coding Change</th>
     <th>Biotype</th>
+    <th>Annotation</th>
     <th>Putative Impact</th>
   </tr>
 </thead>
@@ -93,16 +94,16 @@ trackset = {"Genes": {
                             name: "Genes",
                             displayMode: "EXPANDED",
                             order: 1,
-                            url: "{{ url_for('static', filename = 'browser/elegans_gene.WS245.bed') }}",
-                            //indexURL: "{{ url_for('static', filename = 'browser/elegans_gene.WS245.bed.idx') }}",
+                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_gene.WS245.bed",
+                            //indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_transcripts_WS245.bed.idx",
                             searchable: true,
                             color: "#5c5cd6",
                             height: 30
                      },
             "Transcripts": {
                             name: "Transcripts",
-                            url: "{{ url_for('static', filename = 'browser/elegans_transcripts_WS245.bed') }}",
-                            indexURL: "{{ url_for('static', filename = 'browser/elegans_transcripts_WS245.bed.idx') }}",
+                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_transcripts_WS245.bed",
+                            indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_transcripts_WS245.bed.idx",
                             order: 2,
                             color: "#a366ff",
                             displayMode: "SQUISHED",
@@ -110,8 +111,8 @@ trackset = {"Genes": {
                            },
             "LOW": {
                             name: "LOW",
-                            url: "{{ url_for('static', filename = 'browser/' + build + '.LOW.bed') }}",
-                            indexURL: "{{ url_for('static', filename = 'browser/' + build + '.LOW.bed.idx') }}",
+                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.LOW.bed",
+                            indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.LOW.bed.idx",
                             order: 3,
                             color: "#33cc33",
                             displayMode: "EXPANDED",
@@ -119,8 +120,8 @@ trackset = {"Genes": {
                    },
             "MODERATE": {
                             name: "MODERATE",
-                            url: "{{ url_for('static', filename = 'browser/' + build + '.MODERATE.bed') }}",
-                            indexURL: "{{ url_for('static', filename = 'browser/' + build + '.MODERATE.bed.idx') }}",
+                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.MODERATE.bed",
+                            indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.MODERATE.bed.idx",
                             order: 4,
                             color: "#ffc500",
                             displayMode: "EXPANDED",
@@ -128,8 +129,9 @@ trackset = {"Genes": {
                    },
             "HIGH": {
                             name: "HIGH",
-                            url: "{{ url_for('static', filename = 'browser/' + build + '.HIGH.bed') }}",
-                            indexURL: "{{ url_for('static', filename = 'browser/' + build + '.HIGH.bed.idx') }}",
+                            sourceType: "gcs",
+                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.HIGH.bed",
+                            indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.HIGH.bed.idx",
                             order: 5,
                             color: "#ff0000",
                             displayMode: "EXPANDED",
@@ -137,8 +139,8 @@ trackset = {"Genes": {
                    },
             "Variants": {
                             name: "Variants",
-                            url: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz",
-                            indexURL: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/WI.20160408.filtered.vcf.gz.tbi",
+                            url: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.filtered.vcf.gz",
+                            indexURL: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.filtered.vcf.gz.tbi",
                             order: Number.MAX_VALUE,
                             displayMode: "SQUISHED",
                             color: "#000000",
@@ -195,7 +197,6 @@ var_effect_class = {"LOW": "success",
 
 function refresh_variants() {
     region = $(".igvNavigationSearchInput").val()
-    console.log(region);
     chrom = region.split(":")[0]
     start = region.split(":")[1].split("-")[0].replace(/,/g, "");
     end = region.split(":")[1].split("-")[1].replace(/,/g, "");
@@ -206,7 +207,6 @@ function refresh_variants() {
          contentType: 'application/json',
          }).done(function(msg) {
           $.each(msg, function(k, v) {
-            console.log(v)
             items = [v["CHROM"],
                      v["POS"],
                      v["locus"],
@@ -214,6 +214,7 @@ function refresh_variants() {
                      v["feature_id"],
                      v["hgvs_p"],
                      v["biotype"],
+                     v["annotation"].split("&").join(", "),
                      v["putative_impact"]];
             $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + items.join("</td><td>") + "</td></tr>")
           })
