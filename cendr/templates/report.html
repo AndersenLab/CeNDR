@@ -144,7 +144,7 @@
     <strong>Info</strong>
     <ul>
       <li><strong>Version</strong>: {{ trait_data.version }}</li>
-      <li><strong>Availibility</strong>: {% if trait_data.release == 0 %}
+      <li><strong>Availabity</strong>: {% if trait_data.release == 0 %}
                                             Public
                                          {% elif trait_data.release == 1 %}
                                             Embargo
@@ -171,10 +171,12 @@
       <ul class="nav navbar-nav">
         <li><a href="#phenotype">Phenotype</a></li>
         <li><a href="#manhattan">Manhattan</a></li>
+        {% if mapping_results|length > 0 %}
         <li><a href="#intervals">Intervals</a></li>
         <li><a href="#pxg">PxG</a></li>
         <li><a href="#ld">LD</a></li>
         <li><a href="#peak_summary">Peak Summary</a></li>
+        {% endif %}
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
@@ -187,21 +189,38 @@
 <img class="report" src="{{ base_url }}/figures/phenotype_histogram-1.png" />
 <strong>Histogram representation of your phenotype</strong>
 
+{% if mapping_results|length > 0 %}
+
   Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
 
-<!--
-  Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped. If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.
- -->
+{% else %}
 
+  <p>Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped.</p>
+
+  <p>If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.</p>
+
+{% endif %}
 
 
 <a name="manhattan"></a>
 <h2 id="manhattan">Manhattan Plot</h2>
 
+{% if mapping_results|length > 0 %}
+
 <img class="report" src="{{ base_url }}/figures/Manplot-1.png" />
 
 A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value $(-log_{10}\frac{0.05}{\#SNVs})$ and is usually around 5.5.
 
+{% else %}
+
+<img class="report" src="{{ base_url }}/figures/non-sig Manhattan Plot-1.png" />
+
+A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as $(-log_{10}\frac{0.05}{\#SNVs})$.
+
+{% endif %}
+
+
+{% if mapping_results|length > 0 %}
 <h3 id="intervals">QTL Genomic Region of Interest</h3>
 
 <table class="table table-hover table-striped confidence_intervals">
@@ -230,7 +249,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% endfor %}
 </tbody>
 </table>
-<small>Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">availabe in the help section</a>.</small>
+<small>Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</small>
 
 
 <h3 id="pxg">Phenotype-by-Genotype</h3>
@@ -274,9 +293,9 @@ A genome-wide representation of the association between variation in the <em>C. 
           <thead>
             <tr>
               <th>Gene Class</th>
-              <th># Variants</th>
-              <th>Moderate Effect</th>
-              <th>High Effect</th>
+              <th># Genes</th>
+              <th>>=1 Moderate Impact</th>
+              <th>>=1 High Impact</th>
             </tr>
           </thead>
           <tbody>
@@ -300,7 +319,8 @@ A genome-wide representation of the association between variation in the <em>C. 
               </tr>
               <tr>
               <td colspan = "4">
-              <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">availabe in the help section</a>.</p>
+              <p style="text-align">Numbers listed under Moderate and High Impact correspond to the number of genes within the interval that have at least 1 variant classified as having a moderate or high impact.</p>
+              <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
               </td>
             </tbody>
           </table>
@@ -311,7 +331,7 @@ A genome-wide representation of the association between variation in the <em>C. 
         <thead>
         <tr>
         <th>Gene Class</th>
-        <th>Count</th>
+        <th># Genes</th>
         </tr>
         </thead>
         <tbody>
@@ -407,6 +427,8 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 
   </div>
+
+{% endif %}
 {% endcache %}
 {% else %}
 
@@ -469,7 +491,7 @@ window.setInterval(check_status, 3000);
 
 {% else %}
 
-
+{% if mapping_results|length > 0 %}
 // Set Gene Counts
 $(document).ready(function() {
 $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), function(k, v) {
@@ -744,7 +766,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 });
 
 {% endif %}
-
+{% endif %}
 
 </script>
 {% endblock %}
