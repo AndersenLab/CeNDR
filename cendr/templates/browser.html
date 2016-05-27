@@ -30,9 +30,14 @@
     <div class="row">
       <div class="col-md-4">
       <h4>Standard</h4>
-      {% for i in ["Genes", "Transcripts", "Variants"] %}
+      {% for i in ["Genes", "Transcripts"] %}
         <div class="checkbox">
           <label><input type="checkbox" checked class="track-select" value="{{ i }}" />{{ i }}</label>
+        </div>
+      {% endfor %}
+      {% for i in ["Conservation", "Variants"] %}
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
       </div>
@@ -147,8 +152,16 @@ trackset = {"Genes": {
                             homvarColor: "#0066ff",
                             homrefColor: "#c2c2d6",
                             visibilityWindow: 20000
+                        },
+            "Conservation": {
+                name: "Conservation",
+                url: "//storage.googleapis.com/andersen_dist/genome/elegans.phastcons.bw",
+                order: 6,
+                displayMode: "SQUISHED",
+                color: "#000000",
+                visibilityWindow: 20000
+            },
 
-                        }
 
 }
 
@@ -169,8 +182,7 @@ trackset = {"Genes": {
                         trackset["Genes"],
                         trackset["Transcripts"],
                         trackset["MODERATE"],
-                        trackset["HIGH"],
-                        trackset["Variants"]
+                        trackset["HIGH"]
                     ]
                 };
 
