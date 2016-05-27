@@ -420,7 +420,7 @@ A genome-wide representation of the association between variation in the <em>C. 
         <p class="text"></p>
       </div>
     </div>
-    
+
     <h3>Tajima's D</h3>
       <div id="tajima" style="height: 500px;"></div>
           <div>
@@ -714,8 +714,8 @@ function update_gene_list(chrom, start, end) {
 
 
       items = [v["CHROM"],
-               v["start"],
-               v["end"],
+               Number(v["start"]).toLocaleString('en'),
+               Number(v["end"]).toLocaleString('en'),
                v["locus"],
                v["sequence_name"],
                v["Name"],

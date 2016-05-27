@@ -220,7 +220,7 @@ function refresh_variants() {
          }).done(function(msg) {
           $.each(msg, function(k, v) {
             items = [v["CHROM"],
-                     v["POS"],
+                      Number(v["POS"]).toLocaleString('en'),
                      v["locus"],
                      v["gene_id"],
                      v["feature_id"],
