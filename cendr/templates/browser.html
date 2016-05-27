@@ -35,7 +35,7 @@
           <label><input type="checkbox" checked class="track-select" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
-      {% for i in ["Conservation", "Variants"] %}
+      {% for i in ["phyloP", "phastCons", "Variants"] %}
         <div class="checkbox">
           <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label>
         </div>
@@ -153,9 +153,17 @@ trackset = {"Genes": {
                             homrefColor: "#c2c2d6",
                             visibilityWindow: 20000
                         },
-            "Conservation": {
-                name: "Conservation",
+            "phastCons": {
+                name: "phastCons",
                 url: "//storage.googleapis.com/andersen_dist/genome/elegans.phastcons.bw",
+                order: 6,
+                displayMode: "SQUISHED",
+                color: "#000000",
+                visibilityWindow: 20000
+            },
+            "phyloP": {
+                name: "Phylop",
+                url: "//storage.googleapis.com/andersen_dist/genome/elegans.phylop.bw",
                 order: 6,
                 displayMode: "SQUISHED",
                 color: "#000000",
