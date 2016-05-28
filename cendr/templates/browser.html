@@ -185,7 +185,7 @@ trackset = {"Genes": {
                       indexURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa.fai",
                       // cytobandURL: ""
                     },
-                    locus: "III:11,746,923-11,750,250",
+                    locus: "{{ chrom }}:{{ start }}-{{ end }}",
                     tracks: [
                         trackset["Genes"],
                         trackset["Transcripts"],
@@ -221,8 +221,11 @@ function refresh_variants() {
     start = region.split(":")[1].split("-")[0].replace(/,/g, "");
     end = region.split(":")[1].split("-")[1].replace(/,/g, "");
     $("#variants > tbody").html("");
+    var loc = chrom + "/" + start + "/" + end;
+    // update browser
+    window.history.pushState({"pageTitle": document.title + "|" + loc},"", "/data/browser/" + loc);
     $.ajax({
-         url:"/api/gt/" + chrom + "/" + start + "/" + end,
+         url:"/api/gt/" + loc,
          method: "GET",
          contentType: 'application/json',
          }).done(function(msg) {
@@ -247,12 +250,11 @@ function refresh_variants() {
         });
 
 
-
 }
 
 
 $("#browser").on("mouseup", function() { 
-  refresh_variants();
+  setTimeout(refresh_variants, 200); 
 })
 
 $(".igvNavigationSearchInput").on("input paste", function() {
