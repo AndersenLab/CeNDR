@@ -25,8 +25,9 @@ def download_script(filetype):
     return response
 
 
-@app.route("/data/browser/")
-def browser():
+@app.route('/data/browser/')
+@app.route('/data/browser/<chrom>/<start>/<end>')
+def browser(chrom = "III", start = 11746923, end = 11750250):
     bcs = OrderedDict([("data", "/data"), ("Browser", None)])
     title = "Browser"
     from cendr import build
