@@ -238,7 +238,8 @@ api.add_resource(strain_gt_locations, '/api/gt_loc/<string:chrom>/<int:pos>')
 # Get Genotypes from Interval
 #
 
-def gt_from_interval(chrom, start, end):
+def gt_from_interval(chrom, start, end, var_eff=["",'LOW', 'MODERATE', 'HIGH']):
+    print var_eff
     result = list(WI.select(WI.CHROM, 
                             WI.POS,
                             WI.FILTER, 
@@ -252,18 +253,20 @@ def gt_from_interval(chrom, start, end):
                             wb_gene).filter(WI.CHROM == chrom,
                                           WI.POS >= start,
                                           WI.POS <= end,
-                                          WI.putative_impact != "").join(wb_gene, on = (WI.gene_name == wb_gene.Name)).limit(1000).dicts().execute())
+                                          WI.putative_impact << var_eff).join(wb_gene, on = (WI.gene_name == wb_gene.Name)).limit(1000).dicts().execute())
     for i in result:
         i["GT"] = decode_gt(i["GT"])
     return result
 
 class fetch_gt_from_interval(Resource):
-    def get(self, chrom, start, end):
-        result = gt_from_interval(chrom, start, end)
+    def get(self, chrom, start, end, L="", M="", H=""):
+        putativ_impct = {'L': 'LOW', 'M':'MODERATE', 'H': 'HIGH'}
+        var_eff = [putativ_impct[x] if x else '' for x in [L,M,H]]
+        result = gt_from_interval(chrom, start, end, var_eff)
         result = json.dumps(result)
         return Response(response=result, status = 201, mimetype="application/json")
 
-api.add_resource(fetch_gt_from_interval, '/api/gt/<string:chrom>/<int:start>/<int:end>')
+api.add_resource(fetch_gt_from_interval, '/api/gt/<string:chrom>/<int:start>/<int:end>/<string:L>/<string:M>/<string:H>')
 
 #
 # Tajima's D

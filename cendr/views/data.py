@@ -1,4 +1,5 @@
 from cendr import app
+from cendr import api
 from flask import make_response
 from cendr.models import strain, report
 from collections import OrderedDict
@@ -26,8 +27,8 @@ def download_script(filetype):
 
 
 @app.route('/data/browser/')
-@app.route('/data/browser/<chrom>/<start>/<end>')
-def browser(chrom = "III", start = 11746923, end = 11750250):
+@app.route('/data/browser/<chrom>/<start>/<end>/')
+def browser(chrom = "III", start = 11746923, end = 11750250, L="", M="", H=""):
     bcs = OrderedDict([("data", "/data"), ("Browser", None)])
     title = "Browser"
     from cendr import build
