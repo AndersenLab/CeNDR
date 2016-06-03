@@ -238,7 +238,7 @@ api.add_resource(strain_gt_locations, '/api/gt_loc/<string:chrom>/<int:pos>')
 # Get Genotypes from Interval
 #
 
-def gt_from_interval(chrom, start, end, var_eff=["",'LOW', 'MODERATE', 'HIGH']):
+def gt_from_interval(chrom, start, end, var_eff):
     print var_eff
     result = list(WI.select(WI.CHROM, 
                             WI.POS,
@@ -259,14 +259,19 @@ def gt_from_interval(chrom, start, end, var_eff=["",'LOW', 'MODERATE', 'HIGH']):
     return result
 
 class fetch_gt_from_interval(Resource):
-    def get(self, chrom, start, end, L="", M="", H=""):
-        putativ_impct = {'L': 'LOW', 'M':'MODERATE', 'H': 'HIGH'}
-        var_eff = [putativ_impct[x] if x else '' for x in [L,M,H]]
-        result = gt_from_interval(chrom, start, end, var_eff)
-        result = json.dumps(result)
+    def get(self, chrom, start, end, tracks=""):
+        if tracks:
+            putative_impact = {'l': 'LOW', 'm':'MODERATE', 'h': 'HIGH'}
+            var_eff = [putative_impact[x] if x else '' for x in tracks]
+            result = gt_from_interval(chrom, start, end, var_eff)
+            result = json.dumps(result)
+        else:
+            result = ""
         return Response(response=result, status = 201, mimetype="application/json")
 
-api.add_resource(fetch_gt_from_interval, '/api/gt/<string:chrom>/<int:start>/<int:end>/<string:L>/<string:M>/<string:H>')
+urls = ['/api/gt/<string:chrom>/<int:start>/<int:end>/<string:tracks>','/api/gt/<string:chrom>/<int:start>/<int:end>/']
+
+api.add_resource(fetch_gt_from_interval,*urls)
 
 #
 # Tajima's D

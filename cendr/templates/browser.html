@@ -44,16 +44,15 @@
       <div class="col-md-4">
 
       <h4>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h4>
-      {% for i in ["LOW"] %}
-        <div class="checkbox">
-          <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label>
-        </div>
-      {% endfor %}
-      {% for i in ["MODERATE", "HIGH"] %}
-        <div class="checkbox">
-          <label><input type="checkbox" checked class="track-select" value="{{ i }}" />{{ i }}</label>
-        </div>
-      {% endfor %}
+      <div class="checkbox">
+          <label><input type="checkbox" class="track-select" value="LOW" />LOW</label>
+      </div>
+      <div class="checkbox">
+            <label><input type="checkbox" class="track-select" value="MODERATE" />MODERATE</label>
+      </div>
+      <div class="checkbox">
+            <label><input type="checkbox" class="track-select" value="HIGH" />HIGH</label>
+      </div>
       </div>
     </div>
     </div>
@@ -175,6 +174,12 @@ trackset = {"Genes": {
 
     $(document).ready(function () {
 
+      {% for k,v in putative_impact_items %}
+        {% if v in var_eff %}
+          $('.track-select[value="{{ v }}"]').prop('checked',true);
+        {% endif %}
+      {% endfor %}
+
         var div = $("#browser")[0],
                 options = {
                     showNavigation: true,
@@ -187,13 +192,13 @@ trackset = {"Genes": {
                     },
                     locus: "{{ chrom }}:{{ start }}-{{ end }}",
                     tracks: [
+                        {% for i in var_eff %}
+                        trackset["{{ i }}"],
+                        {% endfor %}
                         trackset["Genes"],
                         trackset["Transcripts"],
-                        trackset["MODERATE"],
-                        trackset["HIGH"]
-                    ]
+                    ],
                 };
-
         igv.createBrowser(div, options);
 
 
@@ -220,9 +225,18 @@ function refresh_variants() {
     chrom = region.split(":")[0]
     start = region.split(":")[1].split("-")[0].replace(/,/g, "");
     end = region.split(":")[1].split("-")[1].replace(/,/g, "");
+    possible_tracks = {'LOW':'l', 'MODERATE':'m', 'HIGH':'h'};
+    tracks = "";
+    for (track in possible_tracks) {
+         if ($(".track-select[value="+track+"]").prop("checked") == true){
+            tracks += possible_tracks[track];
+         }
+    }
+
+
     $("#variants > tbody").html("");
-    
-    var loc = chrom + "/" + start + "/" + end;
+
+    var loc = chrom + "/" + start + "/" + end + "/" + tracks;
     // update browser
     window.history.pushState({"pageTitle": document.title + "|" + loc},"", "/data/browser/" + loc);
     $.ajax({
@@ -232,7 +246,7 @@ function refresh_variants() {
          }).done(function(msg) {
           $.each(msg, function(k, v) {
             items = [v["CHROM"],
-                      Number(v["POS"]).toLocaleString('en'),
+                     Number(v["POS"]).toLocaleString('en'),
                      v["locus"],
                      v["gene_id"],
                      v["feature_id"],
@@ -259,6 +273,10 @@ $("#browser").on("mouseup", function() {
 })
 
 $(".igvNavigationSearchInput").on("input paste", function() {
+  refresh_variants();
+});
+
+$(".track-select").on("change", function() {
   refresh_variants();
 });
 

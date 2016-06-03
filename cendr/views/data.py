@@ -28,7 +28,12 @@ def download_script(filetype):
 
 @app.route('/data/browser/')
 @app.route('/data/browser/<chrom>/<start>/<end>/')
-def browser(chrom = "III", start = 11746923, end = 11750250, L="", M="", H=""):
+@app.route('/data/browser/<chrom>/<start>/<end>/<tracks>')
+def browser(chrom = "III", start = 11746923, end = 11750250, tracks="mh"):
+    putative_impact = {'l': 'LOW', 'm':'MODERATE', 'h': 'HIGH'}
+    var_eff = [putative_impact[x] if x else '' for x in tracks]
+    putative_impact_items = putative_impact.items()
+    print "hello", putative_impact_items
     bcs = OrderedDict([("data", "/data"), ("Browser", None)])
     title = "Browser"
     from cendr import build
