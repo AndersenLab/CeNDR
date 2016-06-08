@@ -1,0 +1,37 @@
+
+
+rule all:
+    input:
+        "fetch_gff.done",
+        "transcripts_file.done"
+
+
+configfile: "setup_browser.yaml"
+
+# Prepare transcripts file
+rule transcripts_file:
+    shadow: "shallow"
+    output:
+        temp("elegans_genes.bb"),
+        expand("elegans_transcripts_{build}.bed", build = config["build"]),
+        expand("elegans_transcripts_{build}.bed.idx", build = config["build"]),
+        touch("transcripts_file.done")
+    shell:
+        """
+        curl ftp://ftp.wormbase.org/pub/wormbase/releases/WS253/MULTI_SPECIES/hub/elegans/elegans_genes_WS245.bb > {output[0]}
+        BigBedToBed {output[0]} {output[1]}
+        igvtools index {output[1]}
+        """
+
+
+rule fetch_gff:
+    params:
+        annotation_build=config["annotation_build"]
+    output:
+        expand("c_elegans.annotations.{build}.gff3.gz", build = config["annotation_build"]),
+        touch("fetch_gff.done")
+    shell:
+        """
+        curl ftp://ftp.wormbase.org/pub/wormbase/releases/{params.annotation_build}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{params.annotation_build}.annotations.gff3.gz > {output[1]}
+        """
+

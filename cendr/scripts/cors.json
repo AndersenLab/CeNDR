@@ -1,8 +1,0 @@
-[
-    {
-      "origin": ["*"],
-      "responseHeader": ["Access-Control-Allow-Origin", "Cache-control", "Access-Control-Allow-Headers", "Content-Type", "Range"],
-      "method": ["GET", "POST", "PUT", "OPTIONS"],
-      "maxAgeSeconds": 3600
-    }
-]

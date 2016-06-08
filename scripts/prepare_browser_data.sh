@@ -20,11 +20,21 @@ gawk '{ match($0, "locus=([^;\t]+)", f); print $1 "\t" $2 "\t" $3 "\t" f[1] "\t"
 # Don't index to improve searching.
 
 # Generate HIGH MED LOW tracks
-
-# LOW
 for i in LOW MODERATE HIGH; do
 	bcftools view --apply-filters PASS ${andersen_vcf} | grep ${i} | awk '$0 !~ "^#" { print $1 "\t" ($2 - 1) "\t" ($2)  "\t" $1 ":" $2 "\t0\t+"  "\t" $2 - 1 "\t" $2 "\t0\t1\t1\t0" }'  > ${build}.${i}.bed && sleep 3 && igvtools index ${build}.${i}.bed &
 done;
+
+# Generate allele frequency track
+bcftools view --apply-filters PASS ${andersen_vcf} |\
+vcffixup - |\
+bcftools query -f '%CHROM\t%POS\t%AF\n' - |\
+cut -f 1 -d ',' |\
+awk '$0 !~ "^#" { print $1 "\t" ($2 - 1) "\t" ($2)  "\t" $3 }' | sort -k1,1 -k2,2n - > ${build}.AF.bedGraph
+bedToBigBed ${build}.AF.bedGraph chrom.sizes ${build}.AF.bb
+
+
+# Copy AF track to google storage
+gsutil cp ${build}.AF.bedGraph gs://andersen_dist/vcf/all/${build}/browser/${build}.AF.bb
 
 # Finish this part later.
 gsutil cp gs://andersen_dist/vcf/all/${build}/browser/

@@ -168,6 +168,11 @@ trackset = {"Genes": {
                 color: "#000000",
                 visibilityWindow: 20000
             },
+            "AF": {
+                name: "Allele Frequency",
+                url: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.AF.bb",
+                order: 7
+            }
 
 
 }
@@ -197,6 +202,7 @@ trackset = {"Genes": {
                         {% endfor %}
                         trackset["Genes"],
                         trackset["Transcripts"],
+                        trackset["AF"]
                     ],
                 };
         igv.createBrowser(div, options);
@@ -269,6 +275,10 @@ function refresh_variants() {
 
 
 $("#browser").on("mouseup", function() { 
+  setTimeout(refresh_variants, 200); 
+})
+
+$(".checkbox").on("click", function() { 
   setTimeout(refresh_variants, 200); 
 })
 
