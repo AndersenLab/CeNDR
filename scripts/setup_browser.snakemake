@@ -1,21 +1,35 @@
-
+import os
 
 rule all:
     input:
-        "fetch_gff.done",
-        "transcripts_file.done"
+        "jobs/directories.done",
+        "jobs/gene_track.done",
+        "jobs/transcripts_file.done",
+        expand("jobs/{severity}.done", severity = ["LOW", "MODERATE", "HIGH"])
 
 
 configfile: "setup_browser.yaml"
 
+# Create directories
+rule create_dirs:
+    output:
+        touch("jobs/directories.done")
+    shell:
+        """
+            mkdir -p jobs
+            mkdir -p upload
+            mkdir -p data
+            mkdir -p dummy
+        """
+
 # Prepare transcripts file
 rule transcripts_file:
-    shadow: "shallow"
     output:
         temp("elegans_genes.bb"),
-        expand("elegans_transcripts_{build}.bed", build = config["build"]),
-        expand("elegans_transcripts_{build}.bed.idx", build = config["build"]),
-        touch("transcripts_file.done")
+        expand("upload/elegans_transcripts.bed", build = config["build"]),
+        expand("upload/elegans_transcripts.bed.idx", build = config["build"]),
+        touch("jobs/transcripts_file.done"),
+        temp("igv.log")
     shell:
         """
         curl ftp://ftp.wormbase.org/pub/wormbase/releases/WS253/MULTI_SPECIES/hub/elegans/elegans_genes_WS245.bb > {output[0]}
@@ -23,15 +37,69 @@ rule transcripts_file:
         igvtools index {output[1]}
         """
 
-
+# Download wormbase GFF
 rule fetch_gff:
     params:
         annotation_build=config["annotation_build"]
     output:
-        expand("c_elegans.annotations.{build}.gff3.gz", build = config["annotation_build"]),
-        touch("fetch_gff.done")
+        gff = expand("data/c_elegans.annotations.{build}.gff3.gz", build = config["annotation_build"])
     shell:
         """
-        curl ftp://ftp.wormbase.org/pub/wormbase/releases/{params.annotation_build}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{params.annotation_build}.annotations.gff3.gz > {output[1]}
+        curl ftp://ftp.wormbase.org/pub/wormbase/releases/{params.annotation_build}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{params.annotation_build}.annotations.gff3.gz > {output.gff}
         """
 
+rule filter_gff:
+    input:
+        rules.fetch_gff.output
+    output:
+        genes = "data/genes.gff",
+        temp_genes = temp("temp_genes.gff")
+    shell:
+        """
+            gzcat {input} | grep 'locus' > {output.temp_genes}
+            sortBed -i {output.temp_genes} > {output.genes}
+        """
+
+# Generate Gene Track BED File
+rule gene_track:
+    input:
+        rules.filter_gff.output.genes
+    output:
+        "upload/elegans_gene.bed",
+        touch("jobs/gene_track.done")
+    shell:
+        """
+            gawk '{{ match($0, "locus=([^;\t]+)", f); print $1 "\t" $2 "\t" $3 "\t" f[1] "\t" 100 "\t" $6 "\t" $2 "\t" $3  "\t0\t1\t" $3 - $2 - 1 "\t0"  }}' {input} > {output[0]}
+        """
+
+
+rule input_severity:
+    output:
+        expand("dummy/{severity}.txt", severity = ["LOW", "MODERATE", "HIGH"])
+    shell: "touch {output}"
+
+# Generate LOW MED HIGH Tracks
+rule severity_tracks:
+    params:
+        andersen_vcf = os.path.expanduser(config["VCF"])
+    input:
+        "dummy/{severity}.bed"
+    output:
+        "upload/{severity}.bed"
+    shell:
+        """
+        bcftools view --apply-filters PASS {params.andersen_vcf} | grep {wildcards.severity} | awk '$0 !~ "^#" {{ print $1 "\t" ($2 - 1) "\t" ($2)  "\t" $1 ":" $2 "\t0\t+"  "\t" $2 - 1 "\t" $2 "\t0\t1\t1\t0" }}' - > {output}
+        """
+
+rule index_severity:
+    input:
+        "upload/{severity}.bed"
+    output:
+        "upload/{severity}.bed.idx",
+    shell: "igvtools index {input}"
+
+rule severity_complete:
+    input:
+        "upload/{severity}.bed.idx"
+    output:
+        touch("jobs/{severity}.done")
