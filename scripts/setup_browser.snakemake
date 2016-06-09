@@ -1,14 +1,22 @@
 import os
+from subprocess import Popen, PIPE
+
+configfile: "setup_browser.yaml"
+
+snpeff_vcf = os.path.expanduser(config["snpeff_vcf"])
+sample_list = Popen(["bcftools", "query", "--list-samples", snpeff_vcf], stdout=PIPE).communicate()[0].decode("utf-8").splitlines()
+
 
 rule all:
     input:
         "jobs/directories.done",
         "jobs/gene_track.done",
         "jobs/transcripts_file.done",
+        "jobs/dummy_samples.done",
+        expand("jobs/{sample}_ind.done", sample = sample_list),
         expand("jobs/{severity}.done", severity = ["LOW", "MODERATE", "HIGH"])
 
 
-configfile: "setup_browser.yaml"
 
 # Create directories
 rule create_dirs:
@@ -78,10 +86,11 @@ rule input_severity:
         expand("dummy/{severity}.txt", severity = ["LOW", "MODERATE", "HIGH"])
     shell: "touch {output}"
 
+
 # Generate LOW MED HIGH Tracks
 rule severity_tracks:
     params:
-        andersen_vcf = os.path.expanduser(config["VCF"])
+        andersen_vcf = snpeff_vcf
     input:
         "dummy/{severity}.bed"
     output:
@@ -103,3 +112,38 @@ rule severity_complete:
         "upload/{severity}.bed.idx"
     output:
         touch("jobs/{severity}.done")
+
+
+# Create dummy input samples.
+rule input_samples:
+    params:
+        andersen_vcf = snpeff_vcf
+    output:
+        touch("jobs/dummy_samples.done"),
+        sample_list = expand("dummy/{sample}.sample", sample = sample_list)
+    shell:
+        """
+            touch {output.sample_list}
+        """
+
+# Generate Output VCFs
+rule ind_vcf_tracks:
+    params:
+        andersen_vcf = snpeff_vcf
+    input:
+        "dummy/{sample}.sample"
+    output:
+        "upload/{sample}.vcf.gz"
+    shell:
+        """
+        bcftools view -O z --samples {wildcards.sample} {params.andersen_vcf} > {output}
+        """
+
+rule index_vcf_tracks:
+    input:
+        "upload/{sample}.vcf.gz"
+    output:
+        "upload/{sample}.vcf.gz.tbi",
+        touch("jobs/{sample}_ind.done")
+    shell: "tabix {input}"
+
