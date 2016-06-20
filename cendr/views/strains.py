@@ -178,17 +178,7 @@ def order_page():
             metadata = {"Shipping Service": request.form["shipping-service"],
                         "Shipping Account": request.form["shipping-account-number"]}
             )
-        charge = stripe.Charge.create(
-            customer=customer.id,
-            order=order.id,
-            receipt_email=customer.email,
-            amount=order.amount,
-            currency=order.currency,
-            description='CeNDR Order',
-            statement_descriptor='CeNDR Order'
-        )
-        if charge.paid:
-            order.pay()
+        order.pay()
         # Send user email
         mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
                 to=customer.email,
