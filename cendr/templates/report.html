@@ -702,7 +702,6 @@ function update_gene_list(chrom, start, end) {
     url: "/api/genelist/" + chrom + "/" + start + "/" + end,
     contentType: 'application/json',
     success:function(msg) {
-      console.log(msg);
       $.each(msg["gene_list"], function(k,v) {
 
       if (v["locus"] != "") {

@@ -168,11 +168,7 @@ trackset = {"Genes": {
                 color: "#000000",
                 visibilityWindow: 20000
             },
-            "AF": {
-                name: "Allele Frequency",
-                url: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.AF.bb",
-                order: 7
-            }
+
 
 
 }
@@ -201,9 +197,7 @@ trackset = {"Genes": {
                         trackset["{{ i }}"],
                         {% endfor %}
                         trackset["Genes"],
-                        trackset["Transcripts"],
-                        trackset["AF"]
-                    ],
+                        trackset["Transcripts"]                    ],
                 };
         igv.createBrowser(div, options);
 
@@ -251,6 +245,10 @@ function refresh_variants() {
          contentType: 'application/json',
          }).done(function(msg) {
           $.each(msg, function(k, v) {
+            if (v["gene_id"] != "") {
+              v["gene_id"] = "<a href='http://www.wormbase.org/species/c_elegans/gene/" + v["gene_id"] + "'>" + v["gene_id"] + "</a>";
+                }
+
             items = [v["CHROM"],
                      Number(v["POS"]).toLocaleString('en'),
                      v["locus"],
