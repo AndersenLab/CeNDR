@@ -8,7 +8,7 @@ from flask import render_template
 
 @app.route('/data/')
 def data_page():
-    bcs = OrderedDict([("data", None)])
+    bcs = OrderedDict([("Data", None)])
     title = "Data"
     from cendr import build
     strain_listing = strain.select().filter(
@@ -34,7 +34,7 @@ def browser(chrom = "III", start = 11746923, end = 11750250, tracks="mh"):
     var_eff = [putative_impact[x] if x else '' for x in tracks]
     putative_impact_items = putative_impact.items()
     print "hello", putative_impact_items
-    bcs = OrderedDict([("data", "/data"), ("Browser", None)])
+    bcs = OrderedDict([("Data", "/data"), ("Browser", None)])
     title = "Browser"
     from cendr import build
     return render_template('browser.html', **locals())

@@ -45,7 +45,7 @@ class CustomEncoder(json.JSONEncoder):
 @app.route('/genetic-mapping/submit/')
 def gwa():
     title = "Perform Mapping"
-    bcs = OrderedDict([("genetic-mapping", None), ("perform-mapping", None)])
+    bcs = OrderedDict([("Perform-Mapping", None)])
 
     # Generate list of allowable strains
     query = strain.select(strain.strain,
@@ -193,7 +193,7 @@ def validate_url():
 def public_mapping():
     query = request.args.get("query")
     if query is not None:
-        bcs = OrderedDict([("genetic-mapping", None), ("Public Mappings", url_for('public_mapping')), ("Search", None)])
+        bcs = OrderedDict([("Public Mappings", url_for('public_mapping')), ("Search", None)])
         title = "Search: " + query
         subtitle = "results"
         q = "%" + query + "%"
@@ -216,7 +216,7 @@ def public_mapping():
     dates = recent_results
     date_set = dict(Counter([time.mktime((x["submission_complete"]+relativedelta(hours = +6)).timetuple()) for x in dates]))
     # recent_results.reverse()
-    bcs = OrderedDict([("genetic-mapping", None), ("public", None)])
+    bcs = OrderedDict([("Public", None)])
     title = "Public Mappings"
     pub_mappings = list(mapping.select(mapping, report, trait).join(trait).join(report).filter(report.release == 0).dicts().execute())
     return render_template('public_mapping.html', **locals())
@@ -304,7 +304,7 @@ def report_progress():
 @app.route('/genetic-mapping/status/')
 def status_page():
     # queue
-    bcs = OrderedDict([("genetic-mapping", None), ("status", None)])
+    bcs = OrderedDict([("Status", None)])
     title = "Status"
     queue = get_queue()
     ql = [json.loads(x["body"]) for x in queue.peek(max=100)["messages"]]

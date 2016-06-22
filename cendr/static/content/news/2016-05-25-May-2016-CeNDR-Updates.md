@@ -8,5 +8,5 @@
 * The ordering system has been updated. Strain sets are now treated as individual items.
 * A [Donation](/donate/) page has been added.
 * A [Funding](/about/funding/) page has been added.
-* [Strain metadata](/strain/metadata.tsv) is available as a file download.
+* Strain metadata is available, click [here](/strain/metadata.tsv) to download.
 * Report text and content has been edited for clarity.

@@ -24,4 +24,4 @@ The Andersen laboratory uses a Biosafety level 3 facility for the isolation of n
 * [APHIS - International](http://andersenlab.org/files/2014_Andersen_USDA_APHISpermit_international.pdf)
 
 ### Additional Protocols  ###
-* [Sampling and Isolation of C. elegans from the Natural Habitat](http://elegansvariation.org/static/content/protocols/SamplingIsolationC.elegansNaturalHabitat.pdf)
+* [Sampling and Isolation of _C. elegans_ from the Natural Habitat](http://elegansvariation.org/static/content/protocols/SamplingIsolationC.elegansNaturalHabitat.pdf)
