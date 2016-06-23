@@ -23,7 +23,7 @@ def utility_processor():
 def about():
 	# About us Page - directs to other pages.
     title = "About"
-    bcs = OrderedDict([("about", None)])
+    bcs = OrderedDict([("About", None)])
     strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
         .filter(strain.latitude.is_null() == False).execute())
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
@@ -36,7 +36,7 @@ def about():
 def panel():
 	# Scientific Panel Page
     title = "Scientific Advisory Panel"
-    bcs = OrderedDict([("about", url_for("about")), ("panel", "")])
+    bcs = OrderedDict([("About", url_for("about")), ("Panel", "")])
     panel_data = yaml.load(open("cendr/static/content/data/advisory-panel.yaml", 'r'))
     return render_template('panel.html', **locals())
 
@@ -46,7 +46,7 @@ def panel():
 def staff():
 	# Staff Page
     title = "Staff"
-    bcs = OrderedDict([("about", url_for("about") ), ("staff", "")])
+    bcs = OrderedDict([("About", url_for("about") ), ("Staff", "")])
     staff_data = yaml.load(open("cendr/static/content/data/staff.yaml", 'r'))
     return render_template('staff.html', **locals())
 
@@ -56,7 +56,7 @@ def staff():
 @cache.cached()
 def statistics():
     title = "Site Statistics"
-    bcs = OrderedDict([("about", url_for("about")), ("statistics", None)])
+    bcs = OrderedDict([("About", url_for("about")), ("Statistics", None)])
 
     # Number of reports
     n_reports = report.select().count()
@@ -76,7 +76,7 @@ def statistics():
 @app.route('/donate/', methods=['GET','POST'])
 def donate():
     title = "Donate"
-    bcs = OrderedDict([("donate", "")])
+    bcs = OrderedDict([("Donate", "")])
     print(request.form)
     stripe_keys = get_stripe_keys()
     key = stripe_keys["public_key"]
@@ -118,6 +118,6 @@ def donate():
 @cache.cached()
 def funding():
     title = "Funding"
-    bcs = OrderedDict([("about", url_for("about") ), ("Funding", "")])
+    bcs = OrderedDict([("About", url_for("about") ), ("Funding", "")])
     staff_data = yaml.load(open("cendr/static/content/markdown/funding.md", 'r'))
     return render_template('funding.html', **locals())

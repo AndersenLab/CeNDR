@@ -19,7 +19,7 @@ from cendr.emails import order_submission
 @cache.cached()
 def map_page():
     title = "Global Strain Map"
-    bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("global-strain-map", "")])
+    bcs = OrderedDict([("Strain", url_for("strain_listing_page")), ("Global-Strain-Map", "")])
     strain_list_dicts = []
     strain_listing = list(strain.select().filter(strain.reference_strain == True)
         .filter(strain.latitude.is_null() == False).execute())
@@ -72,7 +72,7 @@ def isotype_page(isotype_name):
 @app.route('/strain/')
 @cache.cached()
 def strain_listing_page():
-    bcs = OrderedDict([("strain", None)])
+    bcs = OrderedDict([("Strain", None)])
     title = "Strain Catalog"
 
     if 'warning' in request.args:
@@ -95,7 +95,7 @@ def strain_listing_page():
 
 @app.route('/strain/submit/')
 def strain_submission_page():
-    bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("Strain Submission", "")])
+    bcs = OrderedDict([("Strain", url_for("strain_listing_page")), ("Strain Submission", "")])
     title = "Strain Submission"
     return render_template('strain_submission.html', **locals())
 
@@ -107,7 +107,7 @@ def strain_submission_page():
 @app.route("/strain/protocols/")
 def protocols():
     title = "Protocols"
-    bcs = OrderedDict([("strain", url_for("strain_listing_page")), ("protocols", "")])
+    bcs = OrderedDict([("Strain", url_for("strain_listing_page")), ("Protocols", "")])
     protocols = yaml.load(open("cendr/static/content/data/protocols.yaml", 'r'))
     return render_template('protocols.html', **locals())
 
@@ -130,7 +130,7 @@ def calculate_total(item_list):
 
 @app.route('/order', methods=['GET','POST'])
 def order_page():
-    bcs = OrderedDict([("strain", "/strain/"), ("order", "")])
+    bcs = OrderedDict([("Strain", "/strain/"), ("Order", "")])
     title = "Order"
     strain_listing = list(set(request.form.getlist('item')))
     items = request.form.getlist("item")

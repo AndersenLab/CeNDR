@@ -1,1 +1,1 @@
-## Getting Started ##
+# We are getting started #

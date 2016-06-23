@@ -52,7 +52,7 @@ def news_item(filename = ""):
     if not filename:
         filename = files[0].strip(".md")
     title = filename[11:].strip(".md").replace("-", " ")
-    bcs = OrderedDict([("news", None), (title, None)])
+    bcs = OrderedDict([("News", None), (title, None)])
     return render_template('news_item.html', **locals())
 
 
@@ -60,12 +60,11 @@ def news_item(filename = ""):
 @app.route("/help/<filename>/")
 @cache.memoize(50)
 def help_item(filename = ""):
-    files = ["FAQ", "Variant-Prediction", "Methods"]
+    files = ["Getting-Started","FAQ", "Variant-Prediction", "Methods"]
     if not filename:
         filename = "Getting-Started"
     title = filename.replace("-", " ")
-    print title
-    bcs = OrderedDict([("Help", None), (title, None)])
+    bcs = OrderedDict([(title, None)])
     return render_template('help_item.html', **locals())
 
 
@@ -92,7 +91,7 @@ def feed():
 @cache.cached()
 def outreach():
     title = "Outreach"
-    bcs = OrderedDict([("outreach", "")])
+    bcs = OrderedDict([("Outreach", "")])
     return render_template('outreach.html', **locals())
 
 
@@ -101,7 +100,7 @@ def outreach():
 @cache.cached()
 def contact():
     title = "Contact Us"
-    bcs = OrderedDict([("Contact Us", "/contact-us/")])
+    bcs = OrderedDict([("Contact", None)])
     return render_template('contact.html', **locals())
 
 

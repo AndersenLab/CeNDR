@@ -184,7 +184,7 @@ class report_progress(Resource):
             report_html = report_html[report_html.find("<body>"):report_html.find("</body")].replace(
                 "</body", " ").replace("<body>", "").replace('<h1 class="title">cegwas results</h1>', "")
         else:
-            report_html = "hello"
+            report_html = ""
         return Response(response=report_html, status=201, mimetype="application/json")
 
 reports_urls = ['/api/<string:report_slug>/<string:trait_slug>',
