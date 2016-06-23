@@ -1,2 +1,4 @@
 build: WS245
 annotation_build: WS253
+snpeff_vcf: "~/Dropbox/AndersenLab/Reagents/WormReagents/Variation/Andersen_VCF/WI.20160408.snpeff.vcf.gz"
+filter_vcf: "~/Dropbox/AndersenLab/Reagents/WormReagents/Variation/Andersen_VCF/WI.20160408.filtered.vcf.gz"

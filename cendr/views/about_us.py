@@ -73,10 +73,10 @@ def statistics():
 
 
 
-@app.route('/donate/', methods=['GET','POST'])
+@app.route('/about/donate/', methods=['GET','POST'])
 def donate():
     title = "Donate"
-    bcs = OrderedDict([("Donate", "")])
+    bcs = OrderedDict([("About", url_for("about")), ("Donate", None)])
     print(request.form)
     stripe_keys = get_stripe_keys()
     key = stripe_keys["public_key"]
