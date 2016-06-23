@@ -37,6 +37,10 @@ def main():
         trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('home.html', **locals())
 
+@app.route("/.well-known/acme-challenge/")
+def le():
+    code = ""
+    return Response(code, mimetype = "text/plain")
 
 
 @app.route("/news/")
