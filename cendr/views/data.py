@@ -33,8 +33,17 @@ def browser(chrom = "III", start = 11746923, end = 11750250, tracks="mh"):
     putative_impact = {'l': 'LOW', 'm':'MODERATE', 'h': 'HIGH'}
     var_eff = [putative_impact[x] if x else '' for x in tracks]
     putative_impact_items = putative_impact.items()
-    print "hello", putative_impact_items
     bcs = OrderedDict([("Data", "/data"), ("Browser", None)])
     title = "Browser"
     from cendr import build
+    isotype_listing = list(strain.select( strain.isotype ).filter(
+                                    strain.isotype != None).order_by(strain.isotype).dicts().execute())
+    
+    isotypes = set()
+    for x in isotype_listing:
+        iso = x['isotype']
+        if iso not in isotypes:
+            isotypes.add(x['isotype']) 
+
+    isotypes = sorted(isotypes)
     return render_template('browser.html', **locals())

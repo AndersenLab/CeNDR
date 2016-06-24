@@ -19,7 +19,17 @@
 
 
 <script type="text/javascript" src="{{ url_for('static', filename = 'js/igv-rc1.js') }}"></script>
+<style>
+  .strain_list {
+        display: block;
+        width: 150px;
+  }
 
+  #strain_list_body {
+     height: 150px;
+     overflow-y: auto;   
+  }
+</style>
 {% endblock %}
 
 
@@ -53,6 +63,21 @@
       <div class="checkbox">
             <label><input type="checkbox" class="track-select" value="HIGH" />HIGH</label>
       </div>
+      </div>
+
+      <div class="col-md-4">
+        <h4>Strains</h4>
+        <table class="table table-striped table-hover" id="strain_list">
+          <tbody class="strain_list" id="strain_list_body">
+            {% for isotype in isotypes %}
+              <tr>
+                <td style="width:300px"><input type="checkbox" class="track-select" value="{{ isotype }}"></td>
+                <td>{{ isotype }}</td>
+                <td> </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
     </div>
@@ -169,12 +194,23 @@ trackset = {"Genes": {
                 visibilityWindow: 20000
             },
 
+            {% for strain in isotypes %}
+            {{ strain }} : {
+              name: "{{ strain }}",
+              url: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ strain }}.vcf.gz",
+              order: 100,
+              displayMode: "EXPANDED",
+              color: "#000000",
+              visibilityWindow: 20000,
+              searchable: false
+            },
+            {% endfor %}
+
 
 
 }
 
     $(document).ready(function () {
-
       {% for k,v in putative_impact_items %}
         {% if v in var_eff %}
           $('.track-select[value="{{ v }}"]').prop('checked',true);
@@ -194,7 +230,7 @@ trackset = {"Genes": {
                     locus: "{{ chrom }}:{{ start }}-{{ end }}",
                     tracks: [
                         {% for i in var_eff %}
-                        trackset["{{ i }}"],
+                          trackset["{{ i }}"],
                         {% endfor %}
                         trackset["Genes"],
                         trackset["Transcripts"]                    ],
@@ -219,6 +255,7 @@ $(".track-select").on("change", function() {
 var_effect_class = {"LOW": "success",
                     "MODERATE":"warning",
                     "HIGH": "danger"}
+
 
 function refresh_variants() {
     region = $(".igvNavigationSearchInput").val()
@@ -293,6 +330,7 @@ $(".igvNavigationSearchInput").keypress(function(e) {
       setTimeout(refresh_variants, 200); 
     }
 });
+
 
 
 // Initial load
