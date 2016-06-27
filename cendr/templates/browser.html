@@ -67,13 +67,14 @@
 
       <div class="col-md-4">
         <h4>Strains</h4>
-        <table class="table table-striped table-hover" id="strain_list">
-          <tbody class="strain_list" id="strain_list_body">
+        <form class="form-inline pull-xs-right">
+          <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360">
+        </form>
+        <table class="table table-striped table-hover table" id="strain_list">
+          <tbody class="strain_list" id="strain_list_body" style="width:100%; border: 1px solid #dcdcdc;" >
             {% for isotype in isotypes %}
-              <tr>
-                <td style="width:300px"><input type="checkbox" class="track-select" value="{{ isotype }}"></td>
-                <td>{{ isotype }}</td>
-                <td> </td>
+              <tr class="isotypes">
+                <td style="width:250px"><label><input type="checkbox" class="track-select" value="{{ isotype }}" /> {{ isotype }}</label></td>
               </tr>
             {% endfor %}
           </tbody>
@@ -200,7 +201,7 @@ trackset = {"Genes": {
               url: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ strain }}.vcf.gz",
               order: 100,
               displayMode: "EXPANDED",
-              color: "#000000",
+              color: "#ffffff",
               visibilityWindow: 20000,
               searchable: false
             },
@@ -237,7 +238,19 @@ trackset = {"Genes": {
                 };
         igv.createBrowser(div, options);
 
-
+      (function($) {
+      $('#filter').keyup(function() {
+        $('.isotypes').hide();
+        $(this).val().split(' ').forEach(function(r) {
+          var rex = new RegExp(r, "gi");
+          $('.isotypes td').filter(function() {
+            if (rex.test($(this).text())) {
+              $(this).parents().show();
+            }
+          })
+        }) 
+      })
+  }(jQuery));
 // Detect track changes
 $(".track-select").on("change", function() { 
   if ($(this).prop("checked") == true) {
