@@ -15,6 +15,6 @@ regex
 google-api-python-client
 Markdown==2.5.2
 pyyaml
-gcloud=0.15.0
+gcloud==0.15.0
 PyCrypto
 Flask-SSLify
