@@ -9,12 +9,13 @@ flask-debugtoolbar
 Jinja2
 peewee
 requests==2.3
+urllib2
 Werkzeug
 stripe
 regex
 google-api-python-client
 Markdown==2.5.2
 pyyaml
-gcloud=0.15.0
+gcloud==0.15.0
 PyCrypto
 Flask-SSLify

@@ -3,6 +3,8 @@ from peewee import *
 from cendr import get_stripe_keys
 import re
 import requests
+import urllib2
+import itertools
 import json
 import datetime
 from dateutil.parser import parse
@@ -84,6 +86,29 @@ if "tajima" in update:
 
     with db.atomic():
       tajimaD.insert_many(tajima_d).execute()
+
+####################
+# Homologues Genes #
+####################
+
+if "homologus_genes" in update:
+    db.drop_tables([homologus_genes], safe = True)
+    db.create_tables([homologus_genes], safe = True)
+    req = urllib2.Request('ftp://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data')
+    response = urllib2.urlopen(req)
+    reader = csv.reader(response, delimiter='\t')
+    fields = ['HID', 'taxonomy_id', 'gene_id', 'gene_symbol', 'protein_gi', 'protein_accession']
+    homologus_gene_list = []
+    for line in reader:
+        new_line = [int(x) if x.isdigit() else x for x in line]
+        new_row = dict(itertools.izip_longest(fields, new_line, fillvalue=None))
+        homologus_gene_list.append(new_row)
+
+    with db.atomic():
+        for idx in range(0, len(homologus_gene_list), 5000):
+            print idx
+            homologus_genes.insert_many(homologus_gene_list[idx:idx+5000]).execute()
+    db.commit()
 
 
 ##############

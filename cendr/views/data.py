@@ -36,14 +36,7 @@ def browser(chrom = "III", start = 11746923, end = 11750250, tracks="mh"):
     bcs = OrderedDict([("Data", "/data"), ("Browser", None)])
     title = "Browser"
     from cendr import build
-    isotype_listing = list(strain.select( strain.isotype ).filter(
+    isotype_listing = list(strain.select(strain.isotype).distinct().filter(
                                     strain.isotype != None).order_by(strain.isotype).dicts().execute())
-    
-    isotypes = set()
-    for x in isotype_listing:
-        iso = x['isotype']
-        if iso not in isotypes:
-            isotypes.add(x['isotype']) 
-
-    isotypes = sorted(isotypes)
+    isotypes = [x["isotype"] for x in isotype_listing]
     return render_template('browser.html', **locals())

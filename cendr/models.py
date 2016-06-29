@@ -234,6 +234,16 @@ class wb_gene(Model):
     class Meta:
         database = db
 
+class homologus_genes(Model):
+    HID = IntegerField(index=True)
+    taxonomy_id = IntegerField(index=True)
+    gene_id = IntegerField(index=True)
+    gene_symbol = CharField(index=True)
+    protein_gi = IntegerField(index=True)
+    protein_accession = CharField(index=True)
+    class Meta:
+        database = db
+
 
 def autoconvert(s):
     for fn in (int, float):
