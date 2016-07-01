@@ -241,6 +241,7 @@ class homologus_genes(Model):
     gene_symbol = CharField(index=True)
     protein_gi = IntegerField(index=True)
     protein_accession = CharField(index=True)
+    ortho_c_elegans = BooleanField(default=False)
     class Meta:
         database = db
 
