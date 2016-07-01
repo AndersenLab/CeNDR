@@ -14,7 +14,7 @@
     <div class="col-md-12">
         <div class="row">
 
-        <div class="col-md-6">
+        <div class="col-md-4">
             <h3>Alignment Data</h3>
             <p>We aligned all wild isolate genomes to the WS245 version of the N2 genome. These data are stored using the <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> and <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> formats. <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> files are substantially smaller than <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> files.</p>
 
@@ -33,7 +33,7 @@
         </div>
 
 
-        <div class="col-md-6">
+        <div class="col-md-4">
             <h3>Variant Data</h3>
             <p>We used samtools to identify single-nucleotide variant  (SNV) sites as compared to the N2 reference genome (WS245). Variant data are provided as <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> or tab-delimited files.</p>
 
@@ -54,7 +54,16 @@
             <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('help_item', filename = "Methods") }}">here</a>.
 
         </div>
-
+        </br>
+        <div class="col-md-4">
+                 <div class="panel panel-default">
+                        <div class="panel-heading">Strain Metadata</div>
+                        <div class="panel-body">
+                            Strain metadata including isolation location, isotype information, and more is available for download.<br /><br />
+                            <a href="{{ url_for('strain_metadata') }}" type="button" class="btn btn-default btn-block btn-success">Strain Metadata</a>
+                        </div>
+                    </div>
+        </div>
         </div>
         <hr />
         <input id="filter" type="text" class="form-control pull-right" style = "width:200px;" placeholder="Enter Strain Name" action="#">
