@@ -3,7 +3,6 @@ from peewee import *
 from cendr import get_stripe_keys
 import re
 import requests
-import urllib2
 import itertools
 import json
 import datetime
@@ -87,44 +86,44 @@ if "tajima" in update:
     with db.atomic():
       tajimaD.insert_many(tajima_d).execute()
 
+
 ####################
-# Homologues Genes #
-####################
+# Homologous Genes #
+###################
 
 
-if "homologus_genes" in update:
-    db.drop_tables([homologus_genes], safe = True)
-    db.create_tables([homologus_genes], safe = True)
-    req = urllib2.Request('ftp://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data')
-    response = urllib2.urlopen(req)
-    reader = csv.reader(response, delimiter='\t')
+if "homologene" in update:
+    db.drop_tables([homologene], safe = True)
+    db.create_tables([homologene], safe = True)
+
+    response = requests.get('http://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data')
+
     elegans_set = set()
     
     # In this loop we add the hid (line[0]) if there's a c_elegans gene (line[1]) in the group.
-    for line in reader:
+    for line in csv.reader(response.content.splitlines(), delimiter='\t'):
         if line[1] == '6239':
             elegans_set.add(int(line[0]))
 
-    fields = ['HID', 'taxonomy_id', 'gene_id', 'gene_symbol', 'protein_gi', 'protein_accession', 'ortho_c_elegans']
-    homologus_gene_list = []
+    fields = ['HID', 'taxonomy_id', 'gene_id', 'gene_symbol', 'protein_gi', 'protein_accession', 'ce_ortholog']
+    gene_list = []
 
-    for line in reader:
+    for line in csv.reader(response.content.splitlines(), delimiter='\t'):
         new_line = [int(x) if x.isdigit() else x for x in line]
         
         if new_line[0] in elegans_set:
             new_line.append(True)
         else:
             new_line.append(False)
-        new_row = dict(itertools.izip_longest(fields, new_line, fillvalue=None))
-        homologus_gene_list.append(new_row)
+        new_row = dict(zip(fields, new_line))
+        gene_list.append(new_row)
 
     with db.atomic():
-        for idx in range(0, len(homologus_gene_list), 5000):
+        for idx in range(0, len(gene_list), 10000):
             print idx
-            homologus_genes.insert_many(homologus_gene_list[idx:idx+5000]).execute()
+            homologene.insert_many(gene_list[idx:idx+10000]).execute()
 
     db.commit()
-
 
 
 ##############

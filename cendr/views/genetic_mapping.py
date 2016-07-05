@@ -277,7 +277,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
             pass
     geo_gt = json.dumps(geo_gt)
 
-    status = list(trait.select(report, trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())[0]
+    status = list(trait.select(report, trait).join(report).filter((report.report_slug == report_slug), (trait.trait_slug == trait_slug)).dicts().execute())[0]
 
     # List available datasets
     report_files = list(storage.Client().get_bucket("cendr").list_blobs(
