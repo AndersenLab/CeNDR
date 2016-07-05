@@ -7,6 +7,7 @@ from gcloud import storage
 import decimal
 import json
 import datetime
+# import urllib2
 import os
 import sys
 from peewee import JOIN
@@ -434,6 +435,15 @@ class get_interval_summary(Resource):
                 result[x] = getattr(g_interval, x)
         result = json.dumps(result, indent = 4)
         return Response(response=result, status=201, mimetype="application/json")
+
+# class get_homologus_genes(Resource):
+#     def get(self,gene):
+#         endpoint = urllib2.urlopen('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene&term=IRF').read()
+#         taxonomy_strings = endpoint[endpoint.index('<IdList>')+len('<IdList>')+1:endpoint.index('</IdList>')].replace('</Id>\n', "").split('<Id>')[1:]
+#         taxonomy_ids = [int(x) for x in taxonomy_strings]
+#         for taxonmy_id in taxonomy_ids:
+#             hid = list(homologus_genes.select(homologus_genes.HID).where((homologus_genes.taxonomy_id == taxonomy_id) & (homologus_genes.ortho_c_elegans==True)).dicts().execute())
+
 
 api.add_resource(get_interval_summary, '/api/interval/<string:chrom>/<int:start>/<int:end>')
 

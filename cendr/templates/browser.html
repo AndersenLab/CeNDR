@@ -50,37 +50,60 @@
           <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
+        <br>
+        <h4>Homologus Gene Search</h4>
+        <input type="text" class="form-control" id="gene-search" placeholder="e.g. IRF">
       </div>
       <div class="col-md-4">
 
-      <h4>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h4>
-      <div class="checkbox">
-          <label><input type="checkbox" class="track-select" value="LOW" />LOW</label>
-      </div>
-      <div class="checkbox">
-            <label><input type="checkbox" class="track-select" value="MODERATE" />MODERATE</label>
-      </div>
-      <div class="checkbox">
-            <label><input type="checkbox" class="track-select" value="HIGH" />HIGH</label>
-      </div>
+        <h4>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h4>
+
+        <div class="checkbox">
+            <label><input type="checkbox" class="track-select" value="LOW" />LOW</label>
+        </div>
+
+        <div class="checkbox">
+              <label><input type="checkbox" class="track-select" value="MODERATE" />MODERATE</label>
+        </div>
+
+        <div class="checkbox">
+              <label><input type="checkbox" class="track-select" value="HIGH" />HIGH</label>
+        </div>
+
       </div>
 
       <div class="col-md-4">
+
         <h4>Strains</h4>
+
         <form class="form-inline pull-xs-right">
+
           <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360">
+
         </form>
+
         <table class="table table-striped table-hover table" id="strain_list">
+          
           <tbody class="strain_list" id="strain_list_body" style="width:100%; border: 1px solid #dcdcdc;" >
+
             {% for isotype in isotypes %}
+
               <tr class="isotypes">
+
                 <td style="width:250px"><label><input type="checkbox" class="track-select" value="{{ isotype }}" /> {{ isotype }}</label></td>
+
               </tr>
+
             {% endfor %}
+
           </tbody>
+
         </table>
+
       </div>
+
     </div>
+     
     </div>
 
 
@@ -271,6 +294,19 @@ var_effect_class = {"LOW": "success",
                     "MODERATE":"warning",
                     "HIGH": "danger"}
 
+function search_orthologues() {
+  $('#gene-search').keyup(function() {
+    var gene = $(this).val();
+    console.log(gene);
+    $.ajax({
+         url: "/api/homologue/" + gene,
+         method: "GET",
+         contentType: 'application/xml',
+         }).done(function(msg) {
+          console.log(msg);
+          })
+        })
+ }
 
 function refresh_variants() {
     region = $(".igvNavigationSearchInput").val()
@@ -326,6 +362,11 @@ function refresh_variants() {
 
 $("#browser").on("mouseup", function() { 
   setTimeout(refresh_variants, 200); 
+})
+
+$("#gene-search").keypress(function(e) {
+  console.log(e);
+  search_orthologues();
 })
 
 $(".checkbox").on("click", function() { 
