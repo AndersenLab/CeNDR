@@ -1,7 +1,7 @@
 from cendr import app
 from cendr import api
 from flask import make_response
-from cendr.models import strain, report, homologus_genes
+from cendr.models import strain, report, homologene
 from collections import OrderedDict
 from flask import render_template
 

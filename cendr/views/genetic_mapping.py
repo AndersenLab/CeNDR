@@ -8,18 +8,15 @@ from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
 import pytz
-from peewee import fn
 from dateutil.relativedelta import relativedelta
 from peewee import JOIN
 
 from flask import render_template, request, redirect, url_for
 from collections import OrderedDict
 import hashlib
-import requests
 import decimal
 import itertools
 from slugify import slugify
-import hashlib
 import simplejson as json
 from iron_mq import IronMQ
 from gcloud import storage
