@@ -1,0 +1,16 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block content %}
+<div class="row">
+      <div class="col-md-8">
+      {{ gene_record ["locus"] }}
+      {{ gene_record ["sequence_name"] }}
+      {{ gene_record ["biotype"] }}
+      {{ gene_record ["CHROM"] }}
+      {{ gene_record ["start"] }}
+      {{ gene_record ["end"] }}
+      <br></br>
+      </div>
+</div>
+{% endblock %}
