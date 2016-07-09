@@ -6,7 +6,6 @@ import json
 import stripe
 from cendr import get_stripe_keys
 from cendr.models import strain, report, mapping, trait
-from google.appengine.api import mail
 from cendr.emails import donate_submission
 from collections import OrderedDict
 
@@ -75,6 +74,7 @@ def statistics():
 
 @app.route('/about/donate/', methods=['GET','POST'])
 def donate():
+    from google.appengine.api import mail
     title = "Donate"
     bcs = OrderedDict([("About", url_for("about")), ("Donate", None)])
     print(request.form)

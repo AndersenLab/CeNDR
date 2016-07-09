@@ -11,6 +11,11 @@
       {{ gene_record ["start"] }}
       {{ gene_record ["end"] }}
       <br></br>
+      {% for i in variants %}
+
+      {{ i }}
+
+      {% endfor %}
       </div>
 </div>
 {% endblock %}

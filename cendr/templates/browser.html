@@ -19,17 +19,6 @@
 
 
 <script type="text/javascript" src="{{ url_for('static', filename = 'js/igv-rc1.js') }}"></script>
-<style>
-  .strain_list {
-        display: block;
-        width: 150px;
-  }
-
-  #strain_list_body {
-     height: 150px;
-     overflow-y: auto;   
-  }
-</style>
 {% endblock %}
 
 
@@ -78,19 +67,19 @@
 
         <form class="form-inline pull-xs-right">
 
-          <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360">
+          <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360" autocomplete="off">
 
         </form>
 
-        <table class="table table-striped table-hover table" id="strain_list">
+        <table id='browser_strain_list' class="table table-striped table-hover table">
           
-          <tbody class="strain_list" id="strain_list_body" style="width:100%; border: 1px solid #dcdcdc;" >
+          <tbody class="searchable">
 
             {% for isotype in isotypes %}
 
-              <tr class="isotypes">
+              <tr class="isotype-select">
 
-                <td style="width:250px"><label><input type="checkbox" class="track-select" value="{{ isotype }}" /> {{ isotype }}</label></td>
+              <td class='isotype-item'><label><input type="checkbox" class="track-select" value="{{ isotype }}" /> {{ isotype }}</label></td>
 
               </tr>
 
@@ -263,19 +252,6 @@ trackset = {"Genes": {
                 };
         igv.createBrowser(div, options);
 
-      (function($) {
-      $('#filter').keyup(function() {
-        $('.isotypes').hide();
-        $(this).val().split(' ').forEach(function(r) {
-          var rex = new RegExp(r, "gi");
-          $('.isotypes td').filter(function() {
-            if (rex.test($(this).text())) {
-              $(this).parents().show();
-            }
-          })
-        }) 
-      })
-  }(jQuery));
 // Detect track changes
 $(".track-select").on("change", function() { 
   if ($(this).prop("checked") == true) {
@@ -294,7 +270,7 @@ var_effect_class = {"LOW": "success",
                     "MODERATE":"warning",
                     "HIGH": "danger"}
 
-function search_orthologues() {
+function search_orthologs() {
   $('#gene-search').keyup(function() {
     var gene = $(this).val();
     console.log(gene);
@@ -398,6 +374,34 @@ setTimeout(refresh_variants, 1000);
 </script>
 
 
+<script type="text/javascript">
+$(document).ready(function() {
+
+    (function($) {
+        var patterns = [];
+        $('#filter').keyup(function() {
+            $('.searchable tr').hide();
+            console.log($(this).val());
+            $(this).val().split(',').forEach(function(r) {
+                var rex = new RegExp(r, "i");
+                $('.searchable tr').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            })  
+        })
+
+    }(jQuery));
+
+
+    $('#filter').keydown(function(event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
+
+});
+</script>
 
 
 
