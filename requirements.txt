@@ -9,7 +9,6 @@ flask-debugtoolbar
 Jinja2
 peewee
 requests==2.3
-urllib2
 Werkzeug
 stripe
 regex
