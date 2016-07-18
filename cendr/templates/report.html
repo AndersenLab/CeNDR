@@ -667,6 +667,8 @@ var layout = {
 
 
 function update_tajima_plot(chrom, start, end) {
+  start = start - 500000;
+  end = end + 500000;
   if (start < 0) {
     start = 0;
   }
@@ -674,7 +676,7 @@ function update_tajima_plot(chrom, start, end) {
     end = 0;
   }
   $.ajax({
-    url: "/api/tajima/" + chrom + "/" + start + "/" + end,
+    url: "/api/variant/tajima/" + chrom + "/" + start + "/" + end,
     contentType: 'application/json',
     success:function(data) {
       data["mode"] = "markers";

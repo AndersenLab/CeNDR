@@ -70,6 +70,12 @@ api.add_resource(individual_wb_gene_get, '/api/individual_wb_gene/interval/<stri
                 ,'/api/individual_wb_gene/name/<string:name>'
                 ,'/api/individual_wb_gene/locus/<string:locus>')
 
+
+#=========#
+# MAPPING #
+#=========#
+
+
 class mapping_api(Resource):
 
     def get(self):
@@ -89,9 +95,12 @@ class mapping_api(Resource):
         dat = json.dumps(reports, cls=CustomEncoder, indent=4)
         return Response(response=dat, status=200, mimetype="application/json")
 
+api.add_resource(mapping_api, '/api/mapping')
 
-api.add_resource(mapping_api, '/api/mapping/')
 
+#========#
+# Strain #
+#========#
 
 class strain_api(Resource):
 
@@ -103,7 +112,7 @@ class strain_api(Resource):
         return Response(response=dat, status=200, mimetype="application/json")
 
 
-api.add_resource(strain_api, '/api/strain/')
+api.add_resource(strain_api, '/api/strain')
 
 
 class strain_ind_api(Resource):
@@ -116,7 +125,7 @@ class strain_ind_api(Resource):
         return Response(response=dat, status=200, mimetype="application/json")
 
 
-api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>/')
+api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>')
 
 
 class isotype_ind_api(Resource):
@@ -129,7 +138,7 @@ class isotype_ind_api(Resource):
         return Response(response=dat, status=200, mimetype="application/json")
 
 
-api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>/')
+api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>')
 
 
 class report_by_date(Resource):
@@ -192,6 +201,11 @@ reports_urls = ['/api/<string:report_slug>/<string:trait_slug>',
                 '/api/<string:report_slug>/<string:trait_slug>']
 
 
+#==========#
+# Variants #
+#==========#
+
+
 #
 # GT
 #
@@ -202,7 +216,7 @@ class get_gt(Resource):
         result = json.dumps(gt, indent = 4)
         return Response(response=result, status=201, mimetype="application/json")
 
-api.add_resource(get_gt, '/api/variant/<string:chrom>/<int:pos>')
+api.add_resource(get_gt, '/api/variant/gt/<string:chrom>/<int:pos>')
 
 
 def decode_gt(gt):
@@ -229,10 +243,10 @@ def fetch_geo_gt(chrom, pos):
 class strain_gt_locations(Resource):
     def get(self, chrom, pos):
         result = fetch_geo_gt(chrom, pos)
-        result = json.dumps(result)
+        result = json.dumps(result, indent = 4)
         return Response(response=result, status = 201, mimetype="application/json")
 
-api.add_resource(strain_gt_locations, '/api/gt_loc/<string:chrom>/<int:pos>')
+api.add_resource(strain_gt_locations, '/api/variant/gtloc/<string:chrom>/<int:pos>')
 
 
 #
@@ -279,17 +293,17 @@ api.add_resource(fetch_gt_from_interval,*urls)
 #
 
 class tajima_d(Resource):
-  def get(self,chrom,start,end):
+  def get(self, chrom, start, end):
     data = list(tajimaD.select(tajimaD.BIN_START, tajimaD.TajimaD).filter(tajimaD.CHROM == chrom,
-                                                         tajimaD.BIN_START >  start - 500000,
-                                                         tajimaD.BIN_END < end + 500000,
+                                                         tajimaD.BIN_START >= start - 50000,
+                                                         tajimaD.BIN_END <= end + 50000,
                                                          ).tuples().execute())
-    data = [(int(x[0]) + 5000, float(x[1])) for x in data]
+    data = [(int(x[0]) + 50000, float(x[1])) for x in data]
     data = {"x": [x[0] for x in data], "y": [x[1] for x in data]}
     dat = json.dumps(data, cls=CustomEncoder, indent = 4)
     return Response(response=dat, status=200, mimetype="application/json")
 
-api.add_resource(tajima_d, '/api/tajima/<string:chrom>/<int:start>/<int:end>')
+api.add_resource(tajima_d, '/api/variant/tajima/<string:chrom>/<int:start>/<int:end>')
 
 #
 # wb_gene info
