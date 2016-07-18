@@ -275,7 +275,7 @@ function search_orthologs() {
     var gene = $(this).val();
     console.log(gene);
     $.ajax({
-         url: "/api/homologue/" + gene,
+         url: "/api/homolog/" + gene,
          method: "GET",
          contentType: 'application/xml',
          }).done(function(msg) {
@@ -304,7 +304,7 @@ function refresh_variants() {
     // update browser
     window.history.pushState({"pageTitle": document.title + "|" + loc},"", "/data/browser/" + loc);
     $.ajax({
-         url:"/api/gt/" + loc,
+         url:"/api/variant/gt/" + loc,
          method: "GET",
          contentType: 'application/json',
          }).done(function(msg) {

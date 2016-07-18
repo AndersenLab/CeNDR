@@ -12,8 +12,10 @@ import StringIO
 import csv
 import MySQLdb
 import _mysql
+import cPickle as pickle
 import sys
 reload(sys)
+import urllib2
 from gcloud import datastore
 ds = datastore.Client(project="andersen-lab")
 sys.setdefaultencoding('utf-8')
@@ -26,7 +28,7 @@ current_build = 20160408
 reset_db = False
 
 # which services should be updated.
-update = ["db"] # ["db", "stripe", "gene_table", "tajima"]
+update = ["wb_orthologs"] # ["db", "stripe", "gene_table", "tajima", "homologene"]
 
 booldict = {"TRUE": True,
             "FALSE": False,
@@ -56,13 +58,6 @@ if "db" in update:
             db.drop_tables(table_list, safe = True)
         db.create_tables(table_list, safe = True)
 
-strain_info_join = requests.get(
-    "https://raw.githubusercontent.com/AndersenLab/Andersen-Lab-Strains/master/processed/strain_isotype_full.tsv")
-
-lines = list(csv.DictReader(StringIO.StringIO(strain_info_join.text), delimiter='\t'))
-
-strain_data = []
-
 
 ##########
 # TAJIMA #
@@ -89,42 +84,73 @@ if "tajima" in update:
 
 ####################
 # Homologous Genes #
-###################
+####################
 
+### Homologene
 
 if "homologene" in update:
+    # Load taxon ids
+    taxon_ids = pickle.load(open("ancillary/taxon_ids.pickle", "rb"))
     db.drop_tables([homologene], safe = True)
     db.create_tables([homologene], safe = True)
 
     response = requests.get('http://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data')
 
-    elegans_set = set()
+    elegans_set = {}
     
     # In this loop we add the hid (line[0]) if there's a c_elegans gene (line[1]) in the group.
     for line in csv.reader(response.content.splitlines(), delimiter='\t'):
         if line[1] == '6239':
-            elegans_set.add(int(line[0]))
+            elegans_set[int(line[0])] = line[3]
 
-    fields = ['HID', 'taxonomy_id', 'gene_id', 'gene_symbol', 'protein_gi', 'protein_accession', 'ce_ortholog']
+    fields = ['HID', 'taxon_id', 'gene_id', 'gene_symbol', 'protein_gi', 'protein_accession', 'species', 'ce_gene_name']
     gene_list = []
 
     for line in csv.reader(response.content.splitlines(), delimiter='\t'):
-        new_line = [int(x) if x.isdigit() else x for x in line]
-        
-        if new_line[0] in elegans_set:
-            new_line.append(True)
-        else:
-            new_line.append(False)
-        new_row = dict(zip(fields, new_line))
-        gene_list.append(new_row)
+        line = [int(x) if x.isdigit() else x for x in line]
+        line.append(taxon_ids[line[1]])
+        if line[0] in elegans_set.keys() and line[1] != 6239:
+            line.append(elegans_set[line[0]])
+            insert_row = dict(zip(fields, line))
+            gene_list.append(insert_row)
 
     with db.atomic():
         for idx in range(0, len(gene_list), 10000):
-            print idx
+            print idx, "homologene"
             homologene.insert_many(gene_list[idx:idx+10000]).execute()
 
     db.commit()
 
+
+### WB Orthologs
+
+if "wb_orthologs" in update:
+    db.drop_tables([wb_orthologs], safe = True)
+    db.create_tables([wb_orthologs], safe = True)
+    req = urllib2.Request('ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/PRJNA13758/annotation/orthologs/c_elegans.PRJNA13758.current_development.orthologs.txt')
+    response = urllib2.urlopen(req)
+    reader = csv.reader(response, delimiter='\t')
+
+    fields = ['wbid', 'ce_gene_name', 'species', 'ortholog', 'gene_symbol', 'method']
+    gene_list = []
+
+    for line in reader:
+        size_of_line = len(line)
+        if size_of_line < 2:
+            continue
+        elif size_of_line == 2:
+            wb_gene_header  = line
+        else:
+            new_line = wb_gene_header + line
+            new_row = dict(zip(fields, new_line))
+            gene_list.append(new_row)
+
+    with db.atomic():
+        for idx in range(0, len(gene_list), 10000):
+            print idx
+            wb_orthologs.insert_many(gene_list[idx:idx+10000]).execute()
+
+    db.commit()
 
 ##############
 # Gene Table #
@@ -143,8 +169,6 @@ if "gene_table" in update:
                   gunzip -kfc |\
                   grep 'WormBase' |\
                   awk '$2 == "WormBase" && $3 == "gene" {{ print }}' > data/{gff}""".format(**locals())
-        print(comm)
-        print(check_output(comm, shell = True))
 
     with open(gff, 'r') as f:
         c = 0
@@ -173,81 +197,88 @@ if "gene_table" in update:
             wb_gene.insert_many(gene_set).execute()
 
 
+if "strains" in update:
+    strain_info_join = requests.get(
+        "https://raw.githubusercontent.com/AndersenLab/Andersen-Lab-Strains/master/processed/strain_isotype_full.tsv")
+
+    lines = list(csv.DictReader(StringIO.StringIO(strain_info_join.text), delimiter='\t'))
+
+    strain_data = []
 
 
-if reset_db:
-    for line in lines:
-        l = {k: correct_values(k, v) for k, v in line.items()}
-        print l # Can't print characters when running!
-        if l["isotype"] != "":
-            strain_data.append(l)
-
-    if "db" in update:
-        with db.atomic():
-            strain.insert_many(strain_data).execute()
-
-        try:
-            db.execute_sql("""
-            CREATE VIEW report_trait AS SELECT report.id AS report_id, report.report_name, report.report_slug, trait.id AS traitID , trait.trait_name, trait.trait_slug, report.email, trait.status, trait.submission_date, trait.submission_complete, report.release FROM report JOIN trait ON trait.report_id = report.id;
-            CREATE VIEW report_trait_value AS (SELECT *  FROM trait_value JOIN report_trait ON report_trait.traitID = trait_value.trait_id)
-            CREATE VIEW report_trait_strain_value AS (SELECT report_name, report_slug, trait_name, trait_slug, strain_id, value, email, submission_date, submission_complete, `release`, strain.* FROM report_trait_value JOIN strain ON strain_id = strain.id);
-            """)
-        except:
-            pass
-else:
-    with db.atomic():
+    if reset_db:
         for line in lines:
             l = {k: correct_values(k, v) for k, v in line.items()}
-            # Setup data for stripe.
-            strain_set = "|".join([x["strain"] for x in lines if line["isotype"] == x["isotype"]])
-            previous_names = '|'.join([x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
+            print l # Can't print characters when running!
+            if l["isotype"] != "":
+                strain_data.append(l)
+
+        if "db" in update:
+            with db.atomic():
+                strain.insert_many(strain_data).execute()
+
             try:
-                s = strain.get(strain = l["strain"])
+                db.execute_sql("""
+                CREATE VIEW report_trait AS SELECT report.id AS report_id, report.report_name, report.report_slug, trait.id AS traitID , trait.trait_name, trait.trait_slug, report.email, trait.status, trait.submission_date, trait.submission_complete, report.release FROM report JOIN trait ON trait.report_id = report.id;
+                CREATE VIEW report_trait_value AS (SELECT *  FROM trait_value JOIN report_trait ON report_trait.traitID = trait_value.trait_id)
+                CREATE VIEW report_trait_strain_value AS (SELECT report_name, report_slug, trait_name, trait_slug, strain_id, value, email, submission_date, submission_complete, `release`, strain.* FROM report_trait_value JOIN strain ON strain_id = strain.id);
+                """)
             except:
-                s = strain()
-            [setattr(s, k, v) for k,v in l.items()]
-            if "db" in update:
-                print(line["isotype"])
-                s.save()
-            # Add Stripe Products
-            if l["reference_strain"] and l["isotype"] != "NA" and l["isotype"] != "" and "stripe" in update:
+                pass
+    else:
+        with db.atomic():
+            for line in lines:
+                l = {k: correct_values(k, v) for k, v in line.items()}
+                # Setup data for stripe.
+                strain_set = "|".join([x["strain"] for x in lines if line["isotype"] == x["isotype"]])
+                previous_names = '|'.join([x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
                 try:
-                    # Try to update product
-                    product = stripe.Product.retrieve(l["isotype"])
-                    product.id = l["isotype"]
-                    product.name = l["isotype"]
-                    product.caption = "Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"])
-                    product.metadata["isotype"] = l["isotype"]
-                    product.metadata["strain_set"] = strain_set
-                    product.metadata["previous_names"] = previous_names 
-                    product.save()
+                    s = strain.get(strain = l["strain"])
                 except:
-                    # If product does not exist, create it.
-                    product = stripe.Product.create(
-                        id=line["isotype"],
-                        name=line["isotype"],
-                        caption="Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"]),
-                        metadata={'isotype': line["isotype"],
-                                  'strain_set': strain_set,
-                                  'previous_names': previous_names},
-                    )
-                # Create SKU (Stock keeping unit)
-                try:
-                    # Try to update product
-                    sku = stripe.SKU.retrieve(l["strain"])
-                    sku.currency = "usd"
-                    sku.inventory = {"type": "infinite"}
-                    sku.product = line["isotype"]
-                    sku.price = 1000
-                except:
-                    sku = stripe.SKU.create(
-                        id = line["strain"],
-                        currency = "usd",
-                        inventory = {"type": "infinite"},
-                        product = line["isotype"],
-                        price = 1000
+                    s = strain()
+                [setattr(s, k, v) for k,v in l.items()]
+                if "db" in update:
+                    print(line["isotype"])
+                    s.save()
+                # Add Stripe Products
+                if l["reference_strain"] and l["isotype"] != "NA" and l["isotype"] != "" and "stripe" in update:
+                    try:
+                        # Try to update product
+                        product = stripe.Product.retrieve(l["isotype"])
+                        product.id = l["isotype"]
+                        product.name = l["isotype"]
+                        product.caption = "Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"])
+                        product.metadata["isotype"] = l["isotype"]
+                        product.metadata["strain_set"] = strain_set
+                        product.metadata["previous_names"] = previous_names 
+                        product.save()
+                    except:
+                        # If product does not exist, create it.
+                        product = stripe.Product.create(
+                            id=line["isotype"],
+                            name=line["isotype"],
+                            caption="Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"]),
+                            metadata={'isotype': line["isotype"],
+                                      'strain_set': strain_set,
+                                      'previous_names': previous_names},
                         )
-                print line["strain"]
+                    # Create SKU (Stock keeping unit)
+                    try:
+                        # Try to update product
+                        sku = stripe.SKU.retrieve(l["strain"])
+                        sku.currency = "usd"
+                        sku.inventory = {"type": "infinite"}
+                        sku.product = line["isotype"]
+                        sku.price = 1000
+                    except:
+                        sku = stripe.SKU.create(
+                            id = line["strain"],
+                            currency = "usd",
+                            inventory = {"type": "infinite"},
+                            product = line["isotype"],
+                            price = 1000
+                            )
+                    print line["strain"]
 
 
 ##########

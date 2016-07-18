@@ -236,15 +236,25 @@ class wb_gene(Model):
 
 class homologene(Model):
     HID = IntegerField(index=True)
-    taxonomy_id = IntegerField(index=True)
+    taxon_id = IntegerField(index=True)
     gene_id = IntegerField(index=True) # entrez
     gene_symbol = CharField(index=True)
     protein_gi = IntegerField(index=True)
     protein_accession = CharField(index=True)
-    ce_ortholog = BooleanField(default=False)
+    species = CharField(index=True)
+    ce_gene_name = CharField(default=False)
     class Meta:
         database = db
 
+class wb_orthologs(Model):
+    wbid = CharField(index=True)
+    ce_gene_name = CharField(index=True)
+    species = CharField(index=True)
+    ortholog = CharField(index=True)
+    gene_symbol = CharField(index=True)
+    method = CharField(index=True) # Method used to assign ortholog
+    class Meta:
+        database = db
 
 def autoconvert(s):
     for fn in (int, float):

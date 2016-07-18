@@ -132,13 +132,13 @@ class isotype_ind_api(Resource):
 
     def get(self, isotype_name):
         strain_data = list(strain.select(
-            *PEEWEE_FIELDS_LIST).filter(strain.isotype == isotype_name).tuples().execute())
-        strain_data = OrderedDict(zip(FIELDS, strain_data[0]))
+            strain.strain).filter(strain.isotype == isotype_name).execute())
+        strain_data = [x.strain for x in strain_data]
         dat = json.dumps(strain_data, cls=CustomEncoder, indent=4)
         return Response(response=dat, status=200, mimetype="application/json")
 
 
-api.add_resource(isotype_ind_api, '/api/isotype/<string:isotype_name>')
+api.add_resource(isotype_ind_api, '/api/strain/isotype/<string:isotype_name>')
 
 
 class report_by_date(Resource):
@@ -149,6 +149,7 @@ class report_by_date(Resource):
         dat = json.dumps(data, cls=CustomEncoder, indent=4)
         return Response(response=dat, status=200, mimetype="application/json")
 
+api.add_resource(report_by_date, '/api/report/date/<string:date>')
 
 class report_progress(Resource):
 
@@ -195,7 +196,7 @@ class report_progress(Resource):
                 "</body", " ").replace("<body>", "").replace('<h1 class="title">cegwas results</h1>', "")
         else:
             report_html = ""
-        return Response(response=report_html, status=201, mimetype="application/json")
+        return Response(response=report_html, status=200, mimetype="application/json")
 
 reports_urls = ['/api/<string:report_slug>/<string:trait_slug>',
                 '/api/<string:report_slug>/<string:trait_slug>']
@@ -244,7 +245,7 @@ class strain_gt_locations(Resource):
     def get(self, chrom, pos):
         result = fetch_geo_gt(chrom, pos)
         result = json.dumps(result, indent = 4)
-        return Response(response=result, status = 201, mimetype="application/json")
+        return Response(response=result, status = 200, mimetype="application/json")
 
 api.add_resource(strain_gt_locations, '/api/variant/gtloc/<string:chrom>/<int:pos>')
 
@@ -282,9 +283,9 @@ class fetch_gt_from_interval(Resource):
             result = json.dumps(result)
         else:
             result = ""
-        return Response(response=result, status = 201, mimetype="application/json")
+        return Response(response=result, status = 200, mimetype="application/json")
 
-urls = ['/api/gt/<string:chrom>/<int:start>/<int:end>/<string:tracks>','/api/gt/<string:chrom>/<int:start>/<int:end>/']
+urls = ['/api/variant/gt/<string:chrom>/<int:start>/<int:end>/<string:tracks>','/api/variant/gt/<string:chrom>/<int:start>/<int:end>/']
 
 api.add_resource(fetch_gt_from_interval,*urls)
 
@@ -322,8 +323,9 @@ class get_gene(Resource):
             for k in order:
                 ordered[k] = result[0][k]
             result = json.dumps(ordered, cls=CustomEncoder, indent=4)
-            return Response(response=result, status=201, mimetype="application/json")
+            return Response(response=result, status=200, mimetype="application/json")
 
+api.add_resource(get_gene, '/api/gene/<string:gene>')
 
 class get_gene_count(Resource):
     def get(self, chrom, start, end):
@@ -339,8 +341,9 @@ class get_gene_count(Resource):
                     ("total", count)))
         result.update(dict(count_by_type))
         result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
+        return Response(response=result, status=200, mimetype="application/json")
 
+api.add_resource(get_gene_count, '/api/gene/count/<string:chrom>/<int:start>/<int:end>')
 
 class fetch_gene_list(Resource):
     def get(self, chrom, start, end):
@@ -363,7 +366,7 @@ class fetch_gene_list(Resource):
                     ("count", gene_count),
                     ("gene_list", gene_list)))
         result = json.dumps(result, cls=CustomEncoder, indent=4)
-        return Response(response=result, status=201, mimetype="application/json")
+        return Response(response=result, status=200, mimetype="application/json")
 
 api.add_resource(fetch_gene_list, '/api/genelist/<string:chrom>/<int:start>/<int:end>')
 
@@ -448,24 +451,37 @@ class get_interval_summary(Resource):
             if x != "id":
                 result[x] = getattr(g_interval, x)
         result = json.dumps(result, indent = 4)
-        return Response(response=result, status=201, mimetype="application/json")
-
-# class get_homologus_genes(Resource):
-#     def get(self,gene):
-#         endpoint = urllib2.urlopen('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene&term=IRF').read()
-#         taxonomy_strings = endpoint[endpoint.index('<IdList>')+len('<IdList>')+1:endpoint.index('</IdList>')].replace('</Id>\n', "").split('<Id>')[1:]
-#         taxonomy_ids = [int(x) for x in taxonomy_strings]
-#         for taxonmy_id in taxonomy_ids:
-#             hid = list(homologus_genes.select(homologus_genes.HID).where((homologus_genes.taxonomy_id == taxonomy_id) & (homologus_genes.ortho_c_elegans==True)).dicts().execute())
+        return Response(response=result, status=200, mimetype="application/json")
 
 
 api.add_resource(get_interval_summary, '/api/interval/<string:chrom>/<int:start>/<int:end>')
 
-# Reports
-api.add_resource(report_by_date, '/api/report/date/<string:date>')
 
-# gene table
-api.add_resource(get_gene, '/api/gene/<string:gene>')
-api.add_resource(get_gene_count, '/api/gene/count/<string:chrom>/<int:start>/<int:end>')
+class search_homologs(Resource):
+    def get(self, term):
+        hgene_results = list(homologene.filter(
+                          (homologene.gene_symbol == term) or
+                          (homologene.protein_gi == term) or
+                          (homologene.protein_accession == term))
+                          .select(homologene.gene_symbol,
+                                  homologene.ce_ortholog,
+                                  homologene.species)
+                          .distinct()
+                          .dicts().execute())
 
-#api.add_resource(report_progress, *reports_urls)
+        #wbgene_results = list(wb_gene.filter(
+        #                      (wb_gene.gene == term) or
+        #                      (wb_gene.ortholog == term))
+        #                      .select(wb_gene.gene,
+        #                              wb_gene.ce_ortholog,
+        #                              wb_gene.species)
+
+
+        #result = json.dumps(hgene_results, indent = 4, cls=CustomEncoder)
+
+
+
+        return Response(response = result, status = 200, mimetype="application/json")
+
+api.add_resource(search_homologs, '/api/homolog/<string:term>')
+
