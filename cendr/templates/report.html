@@ -667,6 +667,8 @@ var layout = {
 
 
 function update_tajima_plot(chrom, start, end) {
+  orig_start = start;
+  orig_end = end;
   start = start - 500000;
   end = end + 500000;
   if (start < 0) {
@@ -682,7 +684,7 @@ function update_tajima_plot(chrom, start, end) {
       data["mode"] = "markers";
       data["marker"] = {size: 5};
       layout.xaxis.title = chrom;
-      layout.xaxis.range = [start, end];
+      layout.xaxis.range = [orig_start, orig_end];
       Plotly.newPlot('tajima', [data], layout, {displayModeBar: false, displaylogo: false});
   }
 });

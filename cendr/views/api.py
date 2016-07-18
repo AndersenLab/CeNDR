@@ -294,9 +294,9 @@ api.add_resource(fetch_gt_from_interval,*urls)
 
 class tajima_d(Resource):
   def get(self, chrom, start, end):
-    data = list(tajimaD.select(tajimaD.BIN_START, tajimaD.TajimaD).filter(tajimaD.CHROM == chrom,
-                                                         tajimaD.BIN_START >= start - 50000,
-                                                         tajimaD.BIN_END <= end + 50000,
+    data = list(tajimaD.select(tajimaD.BIN_START, tajimaD.TajimaD).filter((tajimaD.CHROM == chrom) &
+                                                         (tajimaD.BIN_START >= start - 50000) &
+                                                         (tajimaD.BIN_END <= end + 50000),
                                                          ).tuples().execute())
     data = [(int(x[0]) + 50000, float(x[1])) for x in data]
     data = {"x": [x[0] for x in data], "y": [x[1] for x in data]}
