@@ -107,7 +107,8 @@ var c{{ chrom[0] }} = {
 	xaxis: 'x{{ loop.index  }}',
 	yaxis: 'y',
 	marker: {
-  		size: 500/{{ pub_mappings|length }} + 5
+  		size: 500/{{ pub_mappings|length }} + 5,
+      color: '#c35e4e'
   	},
 }
 
@@ -178,7 +179,7 @@ var layout = {
     anchor: "x6",
   },
   yaxis: {
-	range: [0, 20],
+	range: [0, 30],
 	anchor: "y",
 	fixedrange: true,
 	title: "-log<sub>10</sub>p"
