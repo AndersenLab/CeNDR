@@ -464,20 +464,35 @@ class search_homologs(Resource):
                           (homologene.protein_gi == term) or
                           (homologene.protein_accession == term))
                           .select(homologene.gene_symbol,
-                                  homologene.ce_ortholog,
+                                  homologene.ce_gene_name,
                                   homologene.species)
                           .distinct()
                           .dicts().execute())
 
-        #wbgene_results = list(wb_gene.filter(
-        #                      (wb_gene.gene == term) or
-        #                      (wb_gene.ortholog == term))
-        #                      .select(wb_gene.gene,
-        #                              wb_gene.ce_ortholog,
-        #                              wb_gene.species)
+        wbgene_results = list(wb_orthologs.filter(
+                              (wb_orthologs.gene_symbol == term) or
+                              (wb_orthologs.ortholog == term))
+                              .select(wb_orthologs.gene_symbol,
+                                      wb_orthologs.ce_gene_name,
+                                      wb_orthologs.species)
+                              .distinct()
+                              .dicts().execute())
 
+        for x in hgene_results:
+            x.update({"source":"homologene"})
+        for x in wbgene_results:
+            x.update({"source":"wormbase"})
 
-        #result = json.dumps(hgene_results, indent = 4, cls=CustomEncoder)
+        homologs = hgene_results + wbgene_results
+        # For genes that can't be looked up, fetch coordinates.
+        for x in homologs:
+            if x["ce_gene_name"].find(".") > 0:
+                try:
+                    gene = wb_gene.get(wb_gene.sequence_name == x["ce_gene_name"])
+                    x.update({"CHROM": gene.CHROM, "start": gene.start, "end": gene.end})
+                except:
+                    del x
+        result = json.dumps(hgene_results + wbgene_results, indent = 4, cls=CustomEncoder)
 
 
 

@@ -95,6 +95,17 @@
      
     </div>
 
+<table id="orthotable" class='table table-striped' style="display: none;">
+  <thead>
+  <tr>
+    <th><em>C. elegans Gene</em></th>
+    <th>Gene Symbol</th>
+    <th>Species</th>
+    <th>Source</th>
+  </tr>
+  </thead>
+<tbody id="orthologs"></tbody>
+</table>
 
 <div id="browser"></div>
 
@@ -271,18 +282,22 @@ var_effect_class = {"LOW": "success",
                     "HIGH": "danger"}
 
 function search_orthologs() {
-  $('#gene-search').keyup(function() {
-    var gene = $(this).val();
-    console.log(gene);
+    var gene = $('#gene-search').val();
+    $("#orthologs").html("");
     $.ajax({
          url: "/api/homolog/" + gene,
          method: "GET",
          contentType: 'application/xml',
          }).done(function(msg) {
-          console.log(msg);
-          })
-        })
- }
+          row = Array();
+          $.each(msg, function(i,x) {
+            row = [x["ce_gene_name"], x["gene_symbol"], x["species"], x["source"]];
+            row = "<tr><td>" + row.join("</td><td>") + "</td></tr>";
+            $("#orthologs").append(row);
+          });
+          $("#orthotable").css("display","block").fadeIn();
+          });
+}
 
 function refresh_variants() {
     region = $(".igvNavigationSearchInput").val()
@@ -340,9 +355,8 @@ $("#browser").on("mouseup", function() {
   setTimeout(refresh_variants, 200); 
 })
 
-$("#gene-search").keypress(function(e) {
-  console.log(e);
-  search_orthologues();
+$("#gene-search").on("input", function(e) {
+  search_orthologs();
 })
 
 $(".checkbox").on("click", function() { 
