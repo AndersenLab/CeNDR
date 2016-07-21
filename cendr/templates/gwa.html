@@ -107,6 +107,15 @@
 
 <script>
 
+function FormatForUrl(str) {
+    return str.replace(/_/g, '-')
+        .replace(/ /g, '-')
+        .replace(/:/g, '-')
+        .replace(/\\/g, '-')
+        .replace(/\//g, '-')
+        .replace(/[^a-zA-Z0-9\-]+/g, '')
+        .replace(/-{2,}/g, '-')
+};
 
 String.prototype.hashCode = function() {
   var hash = 0, i, chr, len;
@@ -246,11 +255,11 @@ function validInput(val) {
 function error_checking() {
   // Error Checking
 
-  // Unique Column Names
+  // Unique Column Names & Valid names
   var error_list = Array();
   col_names = data[0].filter(validInput);
-  if (col_names.filter(onlyUnique).length != col_names.length) {
-    error_list.push("Duplicated column names");
+  if (col_names.map(FormatForUrl).filter(onlyUnique).filter(validInput).length != col_names.length) {
+    error_list.push("Duplicated column names or trait name issues.");
   }
 
   // No more than 10 traits
