@@ -60,7 +60,7 @@ def news_item(filename = ""):
 @app.route("/help/<filename>/")
 @cache.memoize(50)
 def help_item(filename = ""):
-    files = ["FAQ", "Variant-Prediction", "Methods"]
+    files = ["FAQ", "Variant-Browser", "Variant-Prediction", "Methods"]
     if not filename:
         filename = "FAQ"
     title = filename.replace("-", " ")

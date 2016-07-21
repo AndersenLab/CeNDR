@@ -235,6 +235,13 @@ td.isotype-item label {
     text-align:center;
 }
 
+.legend-box {
+  border: 1px solid black;
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+}
+
 .scroll {
     height:400px;
     overflow-y: auto;
