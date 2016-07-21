@@ -203,6 +203,29 @@ td.isotype-item label {
   display: block;
 }
 
+#orthotable {
+  max-height: 500px;
+  width: 100%;
+  display: block;
+  overflow-y: scroll;
+}
+
+#orthotable td, th {
+  width: 25%;
+  width: 1px solid #999999;
+}
+
+#ortholog-search-box > #loading-orthotable {
+  padding-top: 5px;
+}
+
+#ortholog-search-box {
+  margin: 2px;
+  padding: 5px;
+  border: 1px solid #e3e3e3;
+  border-radius: 3px;
+}
+
 #ftable tr td:nth-child(3), #ftable tr td:nth-child(4),
 #ftable tr th:nth-child(3), #ftable tr th:nth-child(4)   {
     text-align:right;
