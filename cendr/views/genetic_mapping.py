@@ -240,12 +240,17 @@ def trait_view(report_slug, trait_slug="", rerun = None):
         else:
             report_url_slug = trait_data["report_hash"]
         if rerun == "rerun":
-            if trait_data["status"] == "error":
+            if trait_data["status"] != "complete":
                 queue = get_queue()
                 # Submit job to iron worker
                 queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
+                # Reset item to queued
+                report_id = report.get(report_slug = trait_data["report_slug"]).id
+                rerun_trait = trait.get(report = report_id, trait_slug = trait_data["trait_slug"])
+                rerun_trait.status = "queue"
+                rerun_trait.save()
             # Return user to current trait
-            return redirect(url_for("trait_view", report_slug=trait_data["report_slug"], trait_slug=trait_data["trait_slug"]))
+            return redirect(url_for("trait_view", report_slug=report_slug, trait_slug=trait_data["trait_slug"]))
 
     else:
         # Redirect to first trait always.

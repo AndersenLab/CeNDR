@@ -229,6 +229,7 @@ A genome-wide representation of the association between variation in the <em>C. 
     <th>Interval</th>
     <th>Peak Position</th>
     <th>-log<sub>10</sub>p</th>
+    <th>Variance Explained</th>
     <th>Total</th>
     <th>Protein Coding</th>
     <th>Moderate Impact</th>
@@ -239,12 +240,13 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% for row in mapping_results %}
 <tr chrom="{{ row.chrom }}" start="{{ row.interval_start }}" end="{{ row.interval_end }}">
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
-  <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
-  <td>{{ row.log10p|round(3) }}</td>
-  <td class="peaksum_{{ loop.index0 }}_Total">-</td>
-  <td class="peaksum_{{ loop.index0 }}_protein_coding">-</td>
-  <td class="peaksum_{{ loop.index0 }}_MODERATE">-</td>
-  <td class="peaksum_{{ loop.index0 }}_HIGH">-</td>
+  <td class='text-right'><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
+  <td class='text-right'>{{ row.log10p|round(2) }}</td>
+  <td class='text-right'>{{ row.variance_explained|round(3) * 100 }}%</td>
+  <td class="text-right peaksum_{{ loop.index0 }}_Total">-</td>
+  <td class="text-right peaksum_{{ loop.index0 }}_protein_coding">-</td>
+  <td class="text-right peaksum_{{ loop.index0 }}_MODERATE">-</td>
+  <td class="text-right peaksum_{{ loop.index0 }}_HIGH">-</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -286,6 +288,7 @@ A genome-wide representation of the association between variation in the <em>C. 
     <ul>
       <li><strong>Peak Interval</strong> - {{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
       <li><strong>Peak Position</strong> - {{ peak.chrom}}:{{ peak.pos }}</li>
+      <li><strong>Variance Explained</strong> - {{ peak.variance_explained|round(3) * 100 }}%
     </ul>
     <div class="row">
     <div class="col-md-6">
