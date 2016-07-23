@@ -115,6 +115,10 @@
   <div class='col-md-6'>
   <strong>Data</strong>
     <ul>
+      {% if 'phenotype.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/phenotype.tsv">Phenotype Data</a></strong></li>
+      {% endif %}
+
       {% if 'raw_phenotype.tsv' in report_files %}
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/raw_phenotype.tsv">Raw Phenotype Data</a></strong></li>
       {% endif %}
@@ -291,9 +295,9 @@ A genome-wide representation of the association between variation in the <em>C. 
     <br />
     <br />
     <ul>
-      <li><strong>Peak Interval</strong> {{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
-      <li><strong>Peak Position</strong> {{ peak.chrom}}:{{ peak.pos }}</li>
-      <li><strong>Variance Explained</strong> {{ peak.variance_explained|round(3) * 100 }}%
+      <li><strong>Peak Interval</strong> &nbsp;{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
+      <li><strong>Peak Position</strong> &nbsp;{{ peak.chrom}}:{{ peak.pos }}</li>
+      <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%
     </ul>
     <div class="row">
     <div class="col-md-6">
