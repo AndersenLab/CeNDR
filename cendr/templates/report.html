@@ -291,9 +291,9 @@ A genome-wide representation of the association between variation in the <em>C. 
     <br />
     <br />
     <ul>
-      <li><strong>Peak Interval</strong> - {{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
-      <li><strong>Peak Position</strong> - {{ peak.chrom}}:{{ peak.pos }}</li>
-      <li><strong>Variance Explained</strong> - {{ peak.variance_explained|round(3) * 100 }}%
+      <li><strong>Peak Interval</strong> {{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
+      <li><strong>Peak Position</strong> {{ peak.chrom}}:{{ peak.pos }}</li>
+      <li><strong>Variance Explained</strong> {{ peak.variance_explained|round(3) * 100 }}%
     </ul>
     <div class="row">
     <div class="col-md-6">
