@@ -100,7 +100,7 @@
       </div>
 </div>
 
-{% if report_data.status == "complete" %}
+{% if trait_data.status == "complete" %}
 {% cache 50, report_slug, trait_slug %}
 <div class="row">
 
@@ -108,7 +108,7 @@
 
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{{ report_data["trait_name"] }}</h3>
+    <h3 class="panel-title">{{ trait_data["trait_name"] }}</h3>
   </div>
   <div class="panel-body">
   <div class="row">
@@ -147,10 +147,10 @@
     <div class='col-md-6'>
     <strong>Info</strong>
     <ul>
-      <li><strong>Version</strong>: {{ report_data.version }}</li>
-      <li><strong>Availabity</strong>: {% if report_data.release == 0 %}
+      <li><strong>Version</strong>: {{ report_data[0].version }}</li>
+      <li><strong>Availabity</strong>: {% if report_data[0].release == 0 %}
                                             Public
-                                         {% elif report_data.release == 1 %}
+                                         {% elif report_data[0].release == 1 %}
                                             Embargo
                                          {% else %}
                                             Private
@@ -461,7 +461,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% block script %}
 <script>
 
-{% if report_data.status != "complete" %}
+{% if trait_data.status != "complete" %}
 prog = Array()
 prog["queue"] = ""
 prog["Processing Phenotype Data"] = "10%"
@@ -508,6 +508,36 @@ window.setInterval(check_status, 3000);
 
 {% else %}
 
+
+
+// Scrolling
+$('#report_nav').ready(function () {
+
+    $('body').scrollspy({target: ".navbar", offset: 75}); 
+    // Add smooth scrolling to all links inside a navbar
+    $("#report_nav a").on('click', function(event){
+
+      // Prevent default anchor click behavior
+      event.preventDefault();
+
+      // Store hash (#)
+      var hash = this.hash;
+
+      // Using jQuery's animate() method to add smooth page scroll
+      // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area (the speed of the animation)
+      $('html, body').animate({
+        scrollTop: $(hash).offset().top - 74
+      }, 800, function(){
+
+        // Add hash (#) to URL when done scrolling (default click behavior)
+        window.location.hash = hash;
+      });
+    });
+
+});
+
+
+
 {% if mapping_results|length > 0 %}
 // Set Gene Counts
 $(document).ready(function() {
@@ -544,32 +574,6 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
   }
 })
 });
-});
-
-// Document ready
-$('#report_nav').ready(function () {
-
-    $('body').scrollspy({target: ".navbar", offset: 75}); 
-    // Add smooth scrolling to all links inside a navbar
-    $("#report_nav a").on('click', function(event){
-
-      // Prevent default anchor click behavior
-      event.preventDefault();
-
-      // Store hash (#)
-      var hash = this.hash;
-
-      // Using jQuery's animate() method to add smooth page scroll
-      // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area (the speed of the animation)
-      $('html, body').animate({
-        scrollTop: $(hash).offset().top - 74
-      }, 800, function(){
-
-        // Add hash (#) to URL when done scrolling (default click behavior)
-        window.location.hash = hash;
-      });
-    });
-
 });
 
 

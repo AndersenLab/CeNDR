@@ -259,19 +259,23 @@ def trait_view(report_slug, trait_slug="", rerun = None):
             # Redirect user to first trait if it can't be found.
             return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=report_data[0]["trait_slug"] ))
 
+
     title = trait_data["report_name"]
     subtitle = trait_data["trait_name"]
+    # Define report and trait slug 
+    report_slug = trait_data["report_slug"] # don't remove
+    trait_slug = trait_data["trait_slug"] # don't remove
 
     if rerun == "rerun":
-        if trait_data["status"] == "error":
+        if trait_data["status"] != "complete":
             queue = get_queue()
             # Submit job to iron worker
-            queue.post(str(json.dumps(report_data, cls=CustomEncoder)))
+            queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
         # Return user to current trait
-        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=trait_data["trait_slug"]))
+        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=trait_slug))
 
-    base_url = "https://storage.googleapis.com/cendr/%s/%s" % (trait_data["report_slug"], trait_data["trait_slug"])
-
+    report_trait = "%s/%s" % (report_slug, trait_slug)
+    base_url = "https://storage.googleapis.com/cendr/" + report_trait
 
     # Fetch significant mappings
     mapping_results = list(mapping.select(mapping, report, trait)
@@ -281,7 +285,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
                                             (report.report_slug == report_slug), 
                                             (trait.trait_slug == trait_slug)
                                           ).dicts().execute())
-    
+
     #######################
     # Fetch geo locations #
     #######################
@@ -298,10 +302,9 @@ def trait_view(report_slug, trait_slug="", rerun = None):
 
     # List available datasets
     report_files = list(storage.Client().get_bucket("cendr").list_blobs(
-        prefix=report_slug + "/" + trait_slug + "/tables"))
+        prefix=report_trait + "/tables"))
     report_files = [os.path.split(x.name)[1] for x in report_files]
 
-    report_url = base_url + "/report.html"
     return render_template('report.html', **locals())
 
 @app.route('/report_progress/', methods=['POST'])
