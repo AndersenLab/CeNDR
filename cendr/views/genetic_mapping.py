@@ -10,6 +10,7 @@ from datetime import date, datetime
 import pytz
 from dateutil.relativedelta import relativedelta
 from peewee import JOIN
+from playhouse.shortcuts import model_to_dict
 
 from flask import render_template, request, redirect, url_for
 from collections import OrderedDict
@@ -226,43 +227,50 @@ def public_mapping():
 #@cache.memoize(timeout=50)
 def trait_view(report_slug, trait_slug="", rerun = None):
 
-    if trait_slug:
-        filter_trait_slug = (trait.trait_slug == trait_slug)
-    else:
-        filter_trait_slug = (1 == 1)
 
     report_data = list(report.select(report,
-                                trait,
-                                report.report_url_slug.alias("report_url_slug")
-                                    ).join(trait).where(
-                                (
+                                     trait).join(trait).where(
                                     (
-                                        (report.report_url_slug == report_slug) &
-                                        filter_trait_slug
-                                    ) 
-                                )
+                                        (report.report_slug == report_slug) &
+                                        (report.release == 0)
+                                    ) |
+                                    (
+                                        (report.report_hash == report_slug) &
+                                        (report.release > 0)
+                                    )
                                 ).dicts().execute())
 
     if not report_data:    
         return render_template('404.html'), 404
+
+
+    if report_data[0]["release"] == 0:
+        report_url_slug = report_data[0]["report_slug"]
     else:
-        report_data = list(report_data)[0]
+        report_url_slug = report_data[0]["report_hash"]
 
+     
     if not trait_slug:
-        return redirect(url_for("trait_view", report_slug=report_data["report_url_slug"], trait_slug=report_data["trait_slug"] ))
+        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=report_data[0]["trait_slug"] ))
+    else:
+        try:
+            trait_data = [x for x in report_data if x["trait_slug"] == trait_slug][0]
+        except:
+            # Redirect user to first trait if it can't be found.
+            return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=report_data[0]["trait_slug"] ))
 
-    title = report_data["report_name"]
-    subtitle = report_data["trait_name"]
+    title = trait_data["report_name"]
+    subtitle = trait_data["trait_name"]
 
     if rerun == "rerun":
-        if report_data["status"] == "error":
+        if trait_data["status"] == "error":
             queue = get_queue()
             # Submit job to iron worker
             queue.post(str(json.dumps(report_data, cls=CustomEncoder)))
         # Return user to current trait
-        return redirect(url_for("trait_view", report_slug=report_data["report_slug"], trait_slug=report_data["trait_slug"]))
+        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=trait_data["trait_slug"]))
 
-    base_url = "https://storage.googleapis.com/cendr/%s/%s" % (report_data["report_slug"], report_data["trait_slug"])
+    base_url = "https://storage.googleapis.com/cendr/%s/%s" % (trait_data["report_slug"], trait_data["trait_slug"])
 
 
     # Fetch significant mappings
@@ -286,7 +294,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
             pass
     geo_gt = json.dumps(geo_gt)
 
-    status = list(trait.select(report, trait).join(report).filter((report.report_slug == report_slug), (trait.trait_slug == trait_slug)).dicts().execute())[0]
+    status = trait_data["status"]
 
     # List available datasets
     report_files = list(storage.Client().get_bucket("cendr").list_blobs(

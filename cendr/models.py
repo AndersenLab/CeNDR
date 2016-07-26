@@ -4,7 +4,6 @@ import datetime
 import os, sys
 import MySQLdb
 import _mysql
-from playhouse.hybrid import *
 
 current_build = 20160408
 
@@ -91,13 +90,6 @@ class report(Model):
     report_slug = CharField(index=True)
     email = CharField(index=True)
     version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
-
-    @hybrid_property
-    def report_url_slug(self):
-        if (self.release == 0):
-            return self.report_slug
-        elif (self.release > 0):
-            return self.report_hash
 
     def __repr__(self):
         return self.report_name
