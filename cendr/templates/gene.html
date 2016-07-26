@@ -3,19 +3,45 @@
 
 {% block content %}
 <div class="row">
+      <div class="col-md-4">
+
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Locus</strong><div class='pull-right'>{{ gene_record ["locus"] }}</div></li>
+              <li class="list-group-item"><strong>Sequence name</strong><div class='pull-right'>{{ gene_record ["sequence_name"] }}</div></li>
+              <li class="list-group-item"><strong>Biotype</strong><div class='pull-right'>{{ gene_record ["biotype"] }}</div></li>
+              <li class="list-group-item"><strong>Location</strong><div class='pull-right'>{{ gene_record ["CHROM"] }}:{{ gene_record ["start"] }}-{{ gene_record ["end"] }}</div></li>
+            </ul>
+
+      </div>
       <div class="col-md-8">
-      {{ gene_record ["locus"] }}
-      {{ gene_record ["sequence_name"] }}
-      {{ gene_record ["biotype"] }}
-      {{ gene_record ["CHROM"] }}
-      {{ gene_record ["start"] }}
-      {{ gene_record ["end"] }}
-      <br></br>
-      {% for i in variants %}
-
-      {{ i }}
-
-      {% endfor %}
+      <h3>Variants</h3>
+      <table class='table table-striped table-hover'>
+      <thead>
+            <tr>
+                  <th>Location</th>
+                  <th>Reference</th>
+                  <th>Alternate</th>
+                  <th>Amino Acid Change</th>
+                  <th>Exon</th>
+                  <th>Annotation</th>
+                  <th>Putative Impact</th>
+            </tr>
+      </thead>
+      <tbody>
+                  {% for i in variants %}
+                        <tr>
+                              <td>{{ i["CHROM"] }}:{{ i["POS"] }}</td>
+                              <td>{{ i["REF"] }}</td>
+                              <td>{{ i["ALT"] }}</td>
+                              <td>{{ i["hgvs_p"] }}</td>
+                              <td>{{ i["rank_total"] }}</td>
+                              <td>{{ i["annotation"] }}</td>
+                              <td>{{ i["putative_impact"] }}</td>
+                        </tr>
+                  {% endfor %}
+      </tbody>
+      </table>
+      
       </div>
 </div>
 {% endblock %}

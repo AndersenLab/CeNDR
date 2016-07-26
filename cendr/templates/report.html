@@ -115,6 +115,10 @@
   <div class='col-md-6'>
   <strong>Data</strong>
     <ul>
+      {% if 'phenotype.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/phenotype.tsv">Phenotype Data</a></strong></li>
+      {% endif %}
+
       {% if 'raw_phenotype.tsv' in report_files %}
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/raw_phenotype.tsv">Raw Phenotype Data</a></strong></li>
       {% endif %}
@@ -174,7 +178,9 @@
         {% if mapping_results|length > 0 %}
         <li><a href="#intervals">Intervals</a></li>
         <li><a href="#pxg">PxG</a></li>
+        {% if mapping_results|length > 1 %}
         <li><a href="#ld">LD</a></li>
+        {% endif %}
         <li><a href="#peak_summary">Peak Summary</a></li>
         {% endif %}
       </ul>
@@ -229,6 +235,7 @@ A genome-wide representation of the association between variation in the <em>C. 
     <th>Interval</th>
     <th>Peak Position</th>
     <th>-log<sub>10</sub>p</th>
+    <th>Variance Explained</th>
     <th>Total</th>
     <th>Protein Coding</th>
     <th>Moderate Impact</th>
@@ -239,12 +246,13 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% for row in mapping_results %}
 <tr chrom="{{ row.chrom }}" start="{{ row.interval_start }}" end="{{ row.interval_end }}">
   <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
-  <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
-  <td>{{ row.log10p|round(3) }}</td>
-  <td class="peaksum_{{ loop.index0 }}_Total">-</td>
-  <td class="peaksum_{{ loop.index0 }}_protein_coding">-</td>
-  <td class="peaksum_{{ loop.index0 }}_MODERATE">-</td>
-  <td class="peaksum_{{ loop.index0 }}_HIGH">-</td>
+  <td class='text-right'><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
+  <td class='text-right'>{{ row.log10p|round(2) }}</td>
+  <td class='text-right'>{{ row.variance_explained|round(3) * 100 }}%</td>
+  <td class="text-right peaksum_{{ loop.index0 }}_Total">-</td>
+  <td class="text-right peaksum_{{ loop.index0 }}_protein_coding">-</td>
+  <td class="text-right peaksum_{{ loop.index0 }}_MODERATE">-</td>
+  <td class="text-right peaksum_{{ loop.index0 }}_HIGH">-</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -258,6 +266,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 <p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. All of the SNVs in our data set are biallelic, so only two classes for any given SNV site exist.</p>
 
+{% if mapping_results|length > 1 %}
 
 <h3 id="ld">Linkage Disequilibrium</h3>
 
@@ -265,6 +274,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 <p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers $r = \frac{-D}{\sqrt{p(A) * p(a) * p(B) * p*(b)}}$, where D raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
 <br />
+{% endif %}
 <h2 id="peak_summary">Peak Summary</h2>
 
 <strong>Switch between peaks below.</strong><br /><br />
@@ -285,8 +295,9 @@ A genome-wide representation of the association between variation in the <em>C. 
     <br />
     <br />
     <ul>
-      <li><strong>Peak Interval</strong> - {{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
-      <li><strong>Peak Position</strong> - {{ peak.chrom}}:{{ peak.pos }}</li>
+      <li><strong>Peak Interval</strong> &nbsp;{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
+      <li><strong>Peak Position</strong> &nbsp;{{ peak.chrom}}:{{ peak.pos }}</li>
+      <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%
     </ul>
     <div class="row">
     <div class="col-md-6">
@@ -458,6 +469,7 @@ prog["Performing Mapping"] = "20%"
 prog["Processing Mapping"] = "60%"
 prog["Plotting Figures"] = "75%"
 prog["Processing Peaks"] = "80%"
+prog["Fine Mapping"] = "85%"
 prog["Transferring Data"] = "95%"
 prog["complete"] = "100%"
 prog["error"] = "100%"

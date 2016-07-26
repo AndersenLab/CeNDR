@@ -92,7 +92,6 @@ class report(Model):
     email = CharField(index=True)
     version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
 
-
     @hybrid_property
     def report_url_slug(self):
         if (self.release == 0):
@@ -163,13 +162,9 @@ class mapping_correlation(Model):
     num_strains = IntegerField()
     correlation = FloatField()
 
-    indexes = (
-            (('report', 'trait', 'CHROM', 'POS', 'gene_id'), False),
-            )
-
-
     class Meta:
         database = db
+
 
 class WI(Model):
     CHROM = CharField(max_length=5)

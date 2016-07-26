@@ -1,5 +1,6 @@
 from cendr import app
 from cendr.models import wb_gene, WI
+from collections import OrderedDict
 from flask import render_template, request, redirect, url_for
 
 #
@@ -10,6 +11,7 @@ from flask import render_template, request, redirect, url_for
 @app.route('/gene/<gene_name>/')
 def gene(gene_name):
     title = gene_name
+    bcs = OrderedDict([("Gene", None), (title, None)])
 
     result = list(wb_gene.filter((wb_gene.Name == gene_name) |
                                   (wb_gene.sequence_name == gene_name) |
@@ -20,10 +22,7 @@ def gene(gene_name):
 
     gene_record = result[0]
 
-    variants = WI.select(WI.CHROM,
-                         WI.POS,
-                         WI.gene_id,
-                         WI.gene_name).filter(
+    variants = WI.select().filter(
                          WI.CHROM == gene_record["CHROM"],
                          WI.gene_id == gene_record["Name"]).dicts().execute()
 
