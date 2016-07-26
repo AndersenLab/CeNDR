@@ -4,6 +4,7 @@ import datetime
 import os, sys
 import MySQLdb
 import _mysql
+from playhouse.hybrid import *
 
 current_build = 20160408
 
@@ -91,6 +92,14 @@ class report(Model):
     email = CharField(index=True)
     version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
 
+
+    @hybrid_property
+    def report_url_slug(self):
+        if (self.release == 0):
+            return self.report_slug
+        elif (self.release > 0):
+            return self.report_hash
+
     def __repr__(self):
         return self.report_name
 
@@ -139,6 +148,25 @@ class mapping(Model):
     interval_end = IntegerField()
     version = CharField()
     reference = CharField()
+
+    class Meta:
+        database = db
+
+
+class mapping_correlation(Model):
+    report = ForeignKeyField(report)
+    trait = ForeignKeyField(trait)
+    CHROM = CharField(index = True)
+    POS = IntegerField(index = True)
+    gene_id = CharField(index = True)
+    alt_allele = IntegerField() # Number of alternative alleles.
+    num_strains = IntegerField()
+    correlation = FloatField()
+
+    indexes = (
+            (('report', 'trait', 'CHROM', 'POS', 'gene_id'), False),
+            )
+
 
     class Meta:
         database = db

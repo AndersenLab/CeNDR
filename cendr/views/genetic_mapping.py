@@ -225,42 +225,54 @@ def public_mapping():
 @app.route("/report/<report_slug>/<trait_slug>/<rerun>")
 #@cache.memoize(timeout=50)
 def trait_view(report_slug, trait_slug="", rerun = None):
-    report_data = list(trait.select(trait, report).join(report).where(((report.report_slug == report_slug) & (
-        report.release == 0)) | (report.report_hash == report_slug)).dicts().execute())
+
     if trait_slug:
-        try:
-            trait_data = [x for x in report_data if x["trait_slug"] == trait_slug][0]
-        except:
-            # Trait report not found:
-            return render_template('404.html'), 404
-        title = trait_data["report_name"]
-        subtitle = trait_data["trait_name"]
-        if trait_data["release"] == 0:
-            report_url_slug = trait_data["report_slug"]
-        else:
-            report_url_slug = trait_data["report_hash"]
-        if rerun == "rerun":
-            if trait_data["status"] == "error":
-                queue = get_queue()
-                # Submit job to iron worker
-                queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
-            # Return user to current trait
-            return redirect(url_for("trait_view", report_slug=trait_data["report_slug"], trait_slug=trait_data["trait_slug"]))
-
+        filter_trait_slug = (trait.trait_slug == trait_slug)
     else:
-        # Redirect to first trait always.
-        try:
-            first_trait = list(report_data)[0]
-            return redirect(url_for("trait_view", report_slug=report_slug, trait_slug=first_trait["trait_slug"]))
-        except:
-            return render_template('404.html'), 404
+        filter_trait_slug = (1 == 1)
 
-    # Redifine report slug as actual slug (instead of hash)
-    report_slug = trait_data["report_slug"]
-    base_url = "https://storage.googleapis.com/cendr/" + report_slug + "/" + trait_slug
+    report_data = list(report.select(report,
+                                trait,
+                                report.report_url_slug.alias("report_url_slug")
+                                    ).join(trait).where(
+                                (
+                                    (
+                                        (report.report_url_slug == report_slug) &
+                                        filter_trait_slug
+                                    ) 
+                                )
+                                ).dicts().execute())
+
+    if not report_data:    
+        return render_template('404.html'), 404
+    else:
+        report_data = list(report_data)[0]
+
+    if not trait_slug:
+        return redirect(url_for("trait_view", report_slug=report_data["report_url_slug"], trait_slug=report_data["trait_slug"] ))
+
+    title = report_data["report_name"]
+    subtitle = report_data["trait_name"]
+
+    if rerun == "rerun":
+        if report_data["status"] == "error":
+            queue = get_queue()
+            # Submit job to iron worker
+            queue.post(str(json.dumps(report_data, cls=CustomEncoder)))
+        # Return user to current trait
+        return redirect(url_for("trait_view", report_slug=report_data["report_slug"], trait_slug=report_data["trait_slug"]))
+
+    base_url = "https://storage.googleapis.com/cendr/%s/%s" % (report_data["report_slug"], report_data["trait_slug"])
+
 
     # Fetch significant mappings
-    mapping_results = list(mapping.select(mapping, report, trait).join(trait).join(report).filter((report.report_slug == report_slug),(trait.trait_slug == trait_slug)).dicts().execute())
+    mapping_results = list(mapping.select(mapping, report, trait)
+                                  .join(trait)
+                                  .join(report)
+                                  .filter(
+                                            (report.report_slug == report_slug), 
+                                            (trait.trait_slug == trait_slug)
+                                          ).dicts().execute())
     
     #######################
     # Fetch geo locations #

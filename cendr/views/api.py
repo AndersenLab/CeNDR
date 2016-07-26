@@ -457,6 +457,37 @@ class get_interval_summary(Resource):
 api.add_resource(get_interval_summary, '/api/interval/<string:chrom>/<int:start>/<int:end>')
 
 
+def get_variant_correlation_obj(report_slug, trait_slug):
+    r = report.get(((report.report_slug == report_slug) and (report.release == 0)) | (report.report_hash == report_slug))
+    t = trait.get(trait.trait_slug == trait_slug)
+    result = list(mapping_correlation.select(mapping_correlation,
+                             wb_gene.Name,
+                             wb_gene.sequence_name,
+                             wb_gene.biotype,
+                             wb_gene.locus,
+                             wb_gene.start,
+                             wb_gene.end,
+                             WI.putative_impact,
+                             WI.feature_id,
+                             WI.rank_total,
+                             WI.hgvs_p,
+                             WI.protein_position)
+                            .join(wb_gene, on=(mapping_correlation.gene_id == wb_gene.Name))
+                            .join(WI, on=((mapping_correlation.CHROM == WI.CHROM) & (mapping_correlation.POS == WI.POS)))
+                            .where((mapping_correlation.report == r), (mapping_correlation.trait == t))
+                            .order_by(-fn.ABS(mapping_correlation.correlation)).dicts().execute())
+    return result
+
+class get_variant_correlation(Resource):
+    def get(self, report_slug, trait_slug):
+        result = get_variant_correlation_obj(report_slug, trait_slug)
+        result = json.dumps(result, indent = 4)
+        return Response(response=result, status=200, mimetype="application/json")
+
+        
+api.add_resource(get_variant_correlation, '/api/correlation/<string:report_slug>/<string:trait_slug>')
+
+
 class search_homologs(Resource):
     def get(self, term):
         hgene_results = list(homologene.filter(
