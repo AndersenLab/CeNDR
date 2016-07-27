@@ -3,7 +3,7 @@ from cendr import cache
 from cendr import ds
 from cendr import autoconvert
 from cendr.models import db, report, strain, trait, trait_value, mapping, dbname, WI
-from cendr.views.api import fetch_geo_gt, interval_summary
+from cendr.views.api import *
 from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
@@ -285,6 +285,20 @@ def trait_view(report_slug, trait_slug="", rerun = None):
                                             (report.report_slug == report_slug), 
                                             (trait.trait_slug == trait_slug)
                                           ).dicts().execute())
+
+    #######################
+    # Variant Correlation #
+    #######################
+
+    var_corr = []
+    for sig_mapping in mapping_results:
+        correlation_results = get_variant_correlation_obj(report_slug,
+        trait_slug,
+        sig_mapping['chrom'],
+        sig_mapping['interval_start'],
+        sig_mapping['interval_end'])
+
+        var_corr.append(correlation_results)
 
     #######################
     # Fetch geo locations #

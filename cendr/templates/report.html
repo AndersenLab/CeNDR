@@ -44,31 +44,32 @@
 
 
 /* Keep Header Scroll */
-#gene_list table {
+#gene_list table, #variant_list table {
         width: 100%;
     }
 
 #gene_list thead, #gene_list tbody, #gene_list tr, #gene_list td, #gene_list th { display: block; }
+#variant_list thead, #variant_list tbody, #variant_list tr, #variant_list td, #variant_list th { display: block; }
 
-#gene_list tr:after {
+#gene_list tr:after, #variant_list tr:after {
     content: ' ';
     display: block;
     visibility: hidden;
     clear: both;
 }
 
-#gene_list thead th {
+#gene_list thead th, #variant_list thead th {
     height: 30px;
 
     /*text-align: left;*/
 }
 
-#gene_list tbody {
+#gene_list tbody, #variant_list tbody {
     height: 500px;
     overflow-y: auto;
 }
 
-#gene_list tbody td, #gene_list thead th {
+#gene_list tbody td, #gene_list thead th, #variant_list tbody td, #variant_list thead th {
     width: 14.28%;
     float: left;
 }
@@ -225,7 +226,6 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 {% endif %}
 
-
 {% if mapping_results|length > 0 %}
 <h3 id="intervals">QTL Genomic Region of Interest</h3>
 
@@ -344,12 +344,14 @@ A genome-wide representation of the association between variation in the <em>C. 
         <tr>
         <th>Gene Class</th>
         <th># Genes</th>
+        <th>Show</th>
         </tr>
         </thead>
         <tbody>
               <tr class="peak_{{ loop.index0 }}_ncRNA">
                 <td>ncRNA</td>
                 <td>-</td>
+                <td><input type="checkbox" class="peak_{{ loop.index0 }}_miRNA" checked data-toggle="toggle" data-size="mini"></td>
               </tr>
               <tr class="peak_{{ loop.index0 }}_miRNA">
                 <td>miRNA</td>
@@ -392,8 +394,51 @@ A genome-wide representation of the association between variation in the <em>C. 
       </div>
       </div>
     </div>
+
+<h3>Variants</h3>
+
+
+
+
+<table class="table table-hover table-striped" id="variant_list">
+    <thead>
+        <tr>
+            <th>Location</th>
+            <th>Gene</th>
+            <th>Biotype</th>
+            <th>Coding Change</th>
+            <th>Annotation</th>
+            <th>Putative Impact</th>
+            <th>Correlation</th>
+        </tr>
+    </thead>
+<tbody>
+{% for variant in var_corr[loop.index0] %}
+      <tr>
+        <td>{{ variant["CHROM"] }}:{{variant["POS"]|comma }}</td>
+        <td>
+          {% if variant["locus"] %}
+            {{ variant["locus"] }}
+          {% else %}
+            {{ variant["feature_id"] }}
+          {% endif %}
+        </td>
+        <td>{{ variant["biotype"] }}</td>
+        <td>{{ variant["hgvs_p"] }}</td>
+        <td>{{ variant["annotation"].replace("&", "<br />")|safe }}</td>
+        <td>{{ variant["putative_impact"] }}</td>
+        <td>{{ variant["correlation"]|round(3) }}</td>
+      </tr>
+{% endfor %}
+  </tbody>
+</table>
+
+
+
   {% endfor %}
   </div>
+
+
 
     <h3>Genes</h3>
 

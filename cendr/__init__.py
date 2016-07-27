@@ -4,6 +4,9 @@ from flask_debugtoolbar import DebugToolbarExtension
 from models import *
 from datetime import date
 from flask.ext.cache import Cache
+from jinja2 import contextfilter
+
+
 
 
 def json_serial(obj):
@@ -62,6 +65,14 @@ def get_stripe_keys():
     else:
         return ds.get(ds.key("credential", "stripe_test"))
 
+
+#
+# Custom Filters
+#
+
+@app.template_filter('comma')
+def comma_filter(value):
+    return "{:,.0f}".format(value)
 
 from views import *
 from cegwas import *

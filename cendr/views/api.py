@@ -457,7 +457,15 @@ class get_interval_summary(Resource):
 api.add_resource(get_interval_summary, '/api/interval/<string:chrom>/<int:start>/<int:end>')
 
 
-def get_variant_correlation_obj(report_slug, trait_slug):
+def get_variant_correlation_obj(report_slug, trait_slug, chrom = None, start = None, end = None):
+
+    if chrom:
+        interval_filter = ((mapping_correlation.CHROM == chrom) & 
+        (mapping_correlation.POS >= start) & 
+        (mapping_correlation.POS <= end))
+    else:
+        interval_filter = ( 1 == 1 )
+
     r = report.get(((report.report_slug == report_slug) and (report.release == 0)) | (report.report_hash == report_slug))
     t = trait.get(trait.trait_slug == trait_slug)
     result = list(mapping_correlation.select(mapping_correlation,
@@ -471,10 +479,11 @@ def get_variant_correlation_obj(report_slug, trait_slug):
                              WI.feature_id,
                              WI.rank_total,
                              WI.hgvs_p,
-                             WI.protein_position)
+                             WI.protein_position,
+                             WI.annotation)
                             .join(wb_gene, on=(mapping_correlation.gene_id == wb_gene.Name))
                             .join(WI, on=((mapping_correlation.CHROM == WI.CHROM) & (mapping_correlation.POS == WI.POS)))
-                            .where((mapping_correlation.report == r), (mapping_correlation.trait == t))
+                            .where((mapping_correlation.report == r), (mapping_correlation.trait == t), interval_filter)
                             .order_by(-fn.ABS(mapping_correlation.correlation)).dicts().execute())
     return result
 
