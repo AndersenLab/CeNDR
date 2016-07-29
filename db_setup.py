@@ -51,7 +51,7 @@ def correct_values(k, v):
     else:
         return v.encode('utf-8').strip()
 
-table_list = [strain, report, trait, trait_value, mapping]
+table_list = [strain, report, trait, trait_value, mapping, mapping_list]
 if "db" in update:
     with db.atomic():
         if reset_db:

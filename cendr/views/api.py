@@ -75,7 +75,6 @@ api.add_resource(individual_wb_gene_get, '/api/individual_wb_gene/interval/<stri
 # MAPPING #
 #=========#
 
-
 class mapping_api(Resource):
 
     def get(self):
@@ -399,11 +398,40 @@ def get_gene_w_variants(chrom, start, end, impact):
                   .dicts().execute())}
 
 
+def get_variant_count_by_biotype(chrom, start, end):
+    query = db.execute_sql("""SELECT 
+                     biotype,
+                     COUNT(biotype)
+              FROM 
+                (SELECT 
+                    WI.CHROM,
+                    WI.POS,
+                    gene_id, 
+                    wb_gene.Name,
+                    wb_gene.biotype
+                FROM
+                    WI_20160408
+                AS 
+                    WI
+                INNER JOIN
+                    wb_gene
+                ON 
+                    (wb_gene.Name = WI.gene_id)
+                WHERE 
+                    WI.CHROM = "%s"
+                AND 
+                    WI.POS >= %s AND WI.POS < %s 
+                GROUP BY WI.CHROM, WI.POS) AS jq GROUP BY biotype;""" % (chrom, start, end))
+    return dict(query.fetchall())
+
 def get_variant_count(chrom, start, end):
     """
         Return the number of variants within an interval
     """
-    return WI.select(WI.id).filter(WI.CHROM == chrom, WI.POS >= start, WI.POS <= end).count()
+    return WI.select(WI.id) \
+           .filter(WI.CHROM == chrom, WI.POS >= start, WI.POS <= end) \
+           .group_by(WI.CHROM, WI.POS) \
+           .distinct().count()
 
 
 def interval_summary(chrom, start, end):
@@ -443,6 +471,7 @@ def interval_summary(chrom, start, end):
             g_interval = intervals.get(intervals.CHROM == chrom, intervals.BIN_START == start, intervals.BIN_END == end)
     return g_interval
 
+
 class get_interval_summary(Resource):
     def get(self, chrom, start, end):
         g_interval = interval_summary(chrom, start, end)
@@ -450,6 +479,7 @@ class get_interval_summary(Resource):
         for x in intervals._meta.sorted_field_names:
             if x != "id":
                 result[x] = getattr(g_interval, x)
+        result["biotype_variants"] = get_variant_count_by_biotype(chrom, start, end)
         result = json.dumps(result, indent = 4)
         return Response(response=result, status=200, mimetype="application/json")
 
@@ -495,6 +525,48 @@ class get_variant_correlation(Resource):
 
         
 api.add_resource(get_variant_correlation, '/api/correlation/<string:report_slug>/<string:trait_slug>')
+
+
+def get_mapping_variant_summary(report_slug, trait_slug, chrom = None, start = None, end = None):
+
+    if chrom:
+        interval_filter = ((mapping_correlation.CHROM == chrom) & 
+        (mapping_correlation.POS >= start) & 
+        (mapping_correlation.POS <= end))
+    else:
+        interval_filter = ( 1 == 1 )
+
+    r = report.get(((report.report_slug == report_slug) and (report.release == 0)) | (report.report_hash == report_slug))
+    t = trait.get(trait.trait_slug == trait_slug)
+    result = list(WI.select(mapping_correlation,
+                             wb_gene.Name,
+                             wb_gene.sequence_name,
+                             wb_gene.biotype,
+                             wb_gene.locus,
+                             wb_gene.start,
+                             wb_gene.end,
+                             WI.putative_impact,
+                             WI.feature_id,
+                             WI.rank_total,
+                             WI.hgvs_p,
+                             WI.protein_position,
+                             WI.annotation,
+                             fn.Count(fn.Distinct(WI.POS)).alias("N_Variants"),
+                             fn.MAX(fn.ABS(mapping_correlation.correlation)).alias("max_corr"))
+                            .join(wb_gene, on=(mapping_correlation.gene_id == wb_gene.Name))
+                            .join(mapping_correlation, on=(
+                                            (mapping_correlation.CHROM == WI.CHROM) &
+                                            (mapping_correlation.POS == WI.POS)
+                                         ),
+                            )
+                            .group_by(wb_gene.Name)
+                            .where(
+                                    (mapping_correlation.report == r),
+                                    (mapping_correlation.trait == t),
+                                     interval_filter)
+                            .order_by(-fn.MAX(fn.ABS(mapping_correlation.correlation)))
+                            .distinct().dicts().execute())
+    return result
 
 
 class search_homologs(Resource):

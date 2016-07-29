@@ -263,7 +263,7 @@ function error_checking() {
   }
 
   // No more than 10 traits
-  if (col_names.length > 11) {
+  if (col_names.length > 40) {
     error_list.push("Maximum of 10 traits.");
   }
 
@@ -279,8 +279,8 @@ function error_checking() {
   }
 
   // At least 5 strains
-  if (row_names.length < 5) {
-    error_list.push("A minimum of five strains are required");
+  if (row_names.length < 30) {
+    error_list.push("A minimum of 30 strains are required");
   }
 
   // report email required

@@ -1,6 +1,6 @@
 from cendr import app, cache
 from models import trait, report
-from flask import render_template, request, Markup, url_for, Response
+from flask import render_template, request, Markup, url_for, Response, redirect
 import markdown
 from datetime import datetime
 import os
@@ -43,6 +43,10 @@ def le():
     return Response(code, mimetype = "text/plain")
 
 
+@app.route("/Software")
+def reroute_software():
+    return redirect(url_for('help_item', filename = "Software"))
+
 @app.route("/news/")
 @app.route("/news/<filename>/")
 @cache.memoize(50)
@@ -60,7 +64,7 @@ def news_item(filename = ""):
 @app.route("/help/<filename>/")
 @cache.memoize(50)
 def help_item(filename = ""):
-    files = ["FAQ", "Variant-Browser", "Variant-Prediction", "Methods"]
+    files = ["FAQ", "Variant-Browser", "Variant-Prediction", "Methods", "Software"]
     if not filename:
         filename = "FAQ"
     title = filename.replace("-", " ")
