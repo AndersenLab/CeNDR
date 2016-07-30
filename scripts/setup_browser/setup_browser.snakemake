@@ -117,7 +117,7 @@ rule ind_vcf_tracks:
         "upload/strain.{strain}.vcf.gz"
     shell:
         """
-        bcftools view -O z --samples {wildcards.strain} {params.andersen_vcf} > {output}
+        bcftools view --threads 4 -O z --samples {wildcards.strain} {params.andersen_vcf} | bcftools view --genotype ^miss -O z > {output}
         """
 
 rule index_vcf_tracks:
