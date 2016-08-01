@@ -159,6 +159,7 @@ class mapping_correlation(Model):
 
 
 class WI(Model):
+    variant = IntegerField()
     CHROM = CharField(max_length=5)
     POS = IntegerField()
     _ID = CharField()
@@ -166,7 +167,7 @@ class WI(Model):
     ALT = CharField()
     QUAL = FloatField()
     FILTER = CharField()
-    GT = CharField(max_length=8000)
+    GT = TextField()
     allele = CharField(max_length=3)
     annotation = CharField()
     putative_impact = CharField(max_length=40)
@@ -187,9 +188,9 @@ class WI(Model):
 
     class Meta:
         database = db
-        db_table = "WI_20160408"
+        db_table = "WI_20160408c"
         indexes = (
-            (('CHROM', 'POS', 'FILTER', 'feature_id', 'annotation','gene_id', 'gene_name', 'putative_impact'), False),
+            (('CHROM', 'POS', 'variant','FILTER', 'feature_id', 'annotation','gene_id', 'gene_name', 'putative_impact'), False),
             )
 
 class intervals(Model):

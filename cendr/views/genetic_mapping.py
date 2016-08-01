@@ -3,7 +3,7 @@ from cendr import cache
 from cendr import ds
 from cendr import autoconvert
 from cendr.models import db, report, strain, trait, trait_value, mapping, dbname, WI
-from cendr.views.api import *
+from api import *
 from cendr.emails import mapping_submission
 from google.appengine.api import mail
 from datetime import date, datetime
@@ -91,6 +91,22 @@ def is_number(s):
         return False
 
 
+def resolve_strain_isotype(q):
+    try:
+        return strain.get(strain.strain == q)
+    except:
+        try:
+            return strain.get(strain.isotype == q)
+        except:
+            strain_name = list(strain.filter((strain.previous_names.regexp('^(' + q + ')\|')) |
+                                        (strain.previous_names.regexp('\|(' + q + ')$')) |
+                                        (strain.previous_names.regexp('\|(' + q + ')\|')) |
+                                        (strain.previous_names == q)).execute())
+            if len(strain_name) > 0:
+                return strain_name[0]
+            else:
+                return None
+
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
     release_dict = {"public": 0, "embargo12": 1,  "private": 2}
@@ -117,22 +133,9 @@ def process_gwa():
 
         for row in data[1:]:
             if row[0] is not None and row[0] != "":
-                row[0] = row[0].strip().replace("(", "\(").replace(")", "\)")
-                strain_name = strain.filter((strain.strain == row[0]) |
-                                            (strain.isotype == row[0]) |
-                                            (strain.previous_names.regexp('^(' + row[0] + ')\|')) |
-                                            (strain.previous_names.regexp('\|(' + row[0] + ')$')) |
-                                            (strain.previous_names.regexp('\|(' + row[0] + ')\|')) |
-                                            (strain.previous_names == row[0]))
-                # precedence of strain submission:
-                strain_match = [x for x in strain_name if x.strain == row[0]]
-                isotype_match = [x for x in strain_name if x.isotype == row[0]]
-                if len(strain_match) > 0:
-                    strain_set.append(list(strain_match)[0])
-                elif len(isotype_match) > 0:
-                    strain_set.append(list(isotype_match)[0])
-                else:
-                    strain_set.append(list(strain_match)[0])
+                q = row[0].strip().replace("(", "\(").replace(")", "\)")
+                strain_name = resolve_strain_isotype(q)
+                strain_set.append(strain_name)
 
         trait_set = data[0][1:]
         for n, t in enumerate(trait_set):
@@ -154,6 +157,7 @@ def process_gwa():
                     trait_data.append({"trait": t,
                                        "strain": s,
                                        "value": autoconvert(data[1:][row][col + 1])})
+        print(trait_data)
         trait_value.insert_many(trait_data).execute()
     for t in trait_keep:
         req["trait_name"] = t
@@ -292,6 +296,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
 
     var_corr = []
     for sig_mapping in mapping_results:
+        print locals()
         correlation_results = get_variant_correlation_obj(report_slug,
         trait_slug,
         sig_mapping['chrom'],

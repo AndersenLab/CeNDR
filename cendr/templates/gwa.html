@@ -130,7 +130,7 @@ String.prototype.hashCode = function() {
 
 
   var data = [
-    ["STRAIN", "", "", ""],
+    ["STRAIN", "", "", "", "", ""],
   ];
 
 var render_bold = function (instance, td, row, col, prop, value, cellProperties) {
@@ -173,9 +173,12 @@ var container = document.getElementById('entry');
 var hot = new Handsontable(container,
  {
    data: data,
-   colHeaders: false,
-   stretchH: 'all',
+   colHeaders: true,
    columnSorting: true,
+   stretchH: 'all',
+   colWidths: 150,
+   maxCols: 6,
+   manualColumnResize: true,
    contextMenu: true,
    fixedRowsTop: 1,
    minSpareRows: 5,

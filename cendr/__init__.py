@@ -8,7 +8,6 @@ from jinja2 import contextfilter
 
 
 
-
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
 
@@ -40,6 +39,7 @@ api = Api(app)
 build = "20160408"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+app.config['version'] = "1.0.0"
 
 
 if os.getenv('SERVER_SOFTWARE') and \
