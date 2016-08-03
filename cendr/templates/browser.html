@@ -362,19 +362,16 @@ function refresh_variants() {
     var loc = chrom + "/" + start + "/" + end + "/" + tracks;
     // update browser
     window.history.pushState({"pageTitle": document.title + "|" + loc},"", "/data/browser/" + loc);
-    $.ajax({
-         url:"/api/variant/gt/" + loc,
-         method: "GET",
-         contentType: 'application/json',
-         }).done(function(msg) {
+    console.log("/api/variant/gt/" + loc)
+    $.getJSON("/api/variant/gt/" + loc, function(msg) {
           $.each(msg, function(k, v) {
             if (v["gene_id"] != "") {
-              v["gene_id"] = "<a href='http://www.wormbase.org/species/c_elegans/gene/" + v["gene_id"] + "'>" + v["gene_id"] + "</a>";
+                v["gene_id"] = "<a href='http://www.wormbase.org/species/c_elegans/gene/" + v["gene_id"] + "'>" + v["gene_id"] + "</a>";
                 }
 
             items = [v["CHROM"],
                      Number(v["POS"]).toLocaleString('en'),
-                     v["locus"],
+                     v["gene_name"],
                      v["gene_id"],
                      v["feature_id"],
                      v["hgvs_p"],

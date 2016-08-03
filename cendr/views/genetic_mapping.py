@@ -295,15 +295,15 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     #######################
 
     var_corr = []
-    for sig_mapping in mapping_results:
-        print locals()
-        correlation_results = get_variant_correlation_obj(report_slug,
-        trait_slug,
-        sig_mapping['chrom'],
-        sig_mapping['interval_start'],
-        sig_mapping['interval_end'])
-
-        var_corr.append(correlation_results)
+    #for sig_mapping in mapping_results:
+    #    print locals()
+    #    correlation_results = get_variant_correlation_obj(report_slug,
+    #    trait_slug,
+    #    sig_mapping['chrom'],
+    #    sig_mapping['interval_start'],
+    #    sig_mapping['interval_end'])
+#
+    #    var_corr.append(correlation_results)
 
     #######################
     # Fetch geo locations #

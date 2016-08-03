@@ -25,6 +25,15 @@ def autoconvert(s):
             pass
     return s
 
+class CustomEncoder(json.JSONEncoder):
+
+    def default(self, o):
+        if type(o) == decimal.Decimal:
+            return float(o)
+        if isinstance(o, datetime.date):
+            return str(o)
+        return super(CustomEncoder, self).default(o)
+
 # Caching
 app = Flask(__name__, static_url_path='/static')
 

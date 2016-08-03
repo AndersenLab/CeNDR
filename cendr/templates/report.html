@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <link rel="stylesheet" href="/static/css/leaflet.css" />
 <script src="/static/js/leaflet.js"></script>
 <script src="/static/js/leaflet-search.js"></script>
@@ -124,8 +125,8 @@
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/interval_variants.tsv">Interval Variants</a></strong></li>
       {% endif %}
 
-      {% if 'raw_mapping.tsv' in report_files %}
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/raw_mapping.tsv">Raw Mappings</a></strong></li>
+      {% if 'raw.mapping.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/raw.mapping.tsv">Raw Mappings</a></strong></li>
       {% endif %}
 
       {% if 'processed_sig_mapping.tsv' in report_files %}
@@ -184,8 +185,7 @@
 
 <h2 id="phenotype" name="phenotype">Phenotype</h2>
 
-
-<img class="report" src="{{ base_url }}/figures/phenotype_histogram-1.png" />
+<img class="report" src="{{ base_url }}/figures/Phenotype.png" />
 <strong>Histogram representation of your phenotype</strong>
 
 {% if mapping_results|length > 0 %}
@@ -206,13 +206,13 @@
 
 {% if mapping_results|length > 0 %}
 
-<img class="report" src="{{ base_url }}/figures/Manplot-1.png" />
+<img class="report" src="{{ base_url }}/figures/Manhattan.png" />
 
 A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value $(-log_{10}\frac{0.05}{\#SNVs})$ and is usually around 5.5.
 
 {% else %}
 
-<img class="report" src="{{ base_url }}/figures/non-sig Manhattan Plot-1.png" />
+<img class="report" src="{{ base_url }}/figures/Manhattan.png" />
 
 A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as $(-log_{10}\frac{0.05}{\#SNVs})$.
 
@@ -254,7 +254,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 <h3 id="pxg">Phenotype-by-Genotype</h3>
 <br />
-<img class="report" src="{{ base_url }}/figures/PxGplot-1.png" />
+<img class="report" src="{{ base_url }}/figures/PxG.png" />
 
 <p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. All of the SNVs in our data set are biallelic, so only two classes for any given SNV site exist.</p>
 
@@ -262,7 +262,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 <h3 id="ld">Linkage Disequilibrium</h3>
 
-<img class="height-report" src="{{ base_url }}/figures/LDplot-1.png" />
+<img class="height-report" src="{{ base_url }}/figures/LD.png" />
 
 <p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers $r = \frac{-D}{\sqrt{p(A) * p(a) * p(B) * p*(b)}}$, where D raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
 <br />
@@ -580,10 +580,12 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
   start = pos.split(":")[1].split("-")[0].split(",").join("");
   end = pos.split(":")[1].split("-")[1].split(",").join("");
   gene_count = $(this);
-  $.ajax({
-  url: "/api/interval/" + chrom + "/" + start + "/" + end,
-  contentType: 'application/json',
-  success:function(msg) {
+  url = "/api/interval/" + chrom + "/" + start + "/" + end;
+  $.getJSON(url, function(msg) {
+    console.log(msg);
+      $(v).html(msg["total"]);
+      $(".peak_" + k + "_total").html("<strong>" + msg["total"] + "</strong>");
+  });
     $(v).html(msg["total"]);
     $(v).next().html(msg["protein_coding"]);
     $(".peak_" + k + "_total").html("<strong>" + msg["total"] + "</strong>");
@@ -608,11 +610,8 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
       // Biotype variants
       $(".peak_" + k + "_" + biotype + " > td:nth-child(5)").html(msg["biotype_variants"][biotype]);
     })
-  }
+  })
 })
-});
-});
-
 
 // Gene List
 function update_gene_list(chrom, start, end) {

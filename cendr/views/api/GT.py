@@ -1,12 +1,9 @@
-from flask import Flask, Response, request
-from flask_restful import Resource, Api, reqparse
-from cendr import CustomEncoder
+from flask_restful import Resource
 from cendr import api
 import cPickle
 import base64
 import zlib
 from cendr.models import WI, strain
-import json
 from flask import jsonify
 
 
@@ -31,7 +28,7 @@ def fetch_geo_gt(chrom, pos):
     gt = get_gt(chrom, pos)
     strain_locations = list(strain.select(strain.isotype,
                                           strain.latitude,
-                                          strain.longitude) \
+                                          strain.longitude)
                 .filter(strain.latitude != None)
                 .distinct().dicts().execute())
     strain_locations = {x["isotype"]: x for x in strain_locations}
@@ -46,20 +43,24 @@ def fetch_geo_gt(chrom, pos):
 
 
 def gt_from_interval(chrom, start, end, var_eff):
-    result = list(WI.select(WI.CHROM, 
+    result = list(WI.select(WI.CHROM,
                             WI.POS,
-                            WI.FILTER, 
-                            WI.putative_impact, 
+                            WI.FILTER,
+                            WI.putative_impact,
                             WI.gene_name,
-                            WI.gene_id, 
+                            WI.gene_id,
                             WI.hgvs_p,
                             WI.protein_position,
                             WI.GT,
                             WI.feature_id,
-                            WI.annotation).filter(WI.CHROM == chrom,
-                                          WI.POS >= start,
-                                          WI.POS <= end,
-                                          WI.putative_impact << var_eff).limit(1000).dicts().execute())
+                            WI.annotation)
+                    .filter(WI.CHROM == chrom,
+                            WI.POS >= start,
+                            WI.POS <= end,
+                            WI.putative_impact << var_eff)
+                    .limit(1000)
+                    .dicts()
+                    .execute())
     for i in result:
         i["GT"] = decode_gt(i["GT"])
     return result
@@ -68,7 +69,7 @@ def gt_from_interval(chrom, start, end, var_eff):
 class api_get_gt(Resource):
     def get(self, chrom, pos):
         """
-        Retrieve a single genotype.
+            Retrieve a single genotype.
         """
         gt = get_gt(chrom, pos)
         return jsonify(gt)
@@ -78,11 +79,15 @@ api.add_resource(api_get_gt, '/api/variant/gt/<string:chrom>/<int:pos>')
 
 class strain_gt_locations(Resource):
     def get(self, chrom, pos):
+        """
+            Retreive genotypes with location information
+        """
         result = fetch_geo_gt(chrom, pos)
         return jsonify(result)
 
 
-api.add_resource(strain_gt_locations, '/api/variant/gtloc/<string:chrom>/<int:pos>')
+api.add_resource(strain_gt_locations,
+                 '/api/variant/gtloc/<string:chrom>/<int:pos>')
 
 
 #
@@ -93,13 +98,14 @@ api.add_resource(strain_gt_locations, '/api/variant/gtloc/<string:chrom>/<int:po
 class fetch_gt_from_interval(Resource):
     def get(self, chrom, start, end, tracks=""):
         if tracks:
-            putative_impact = {'l': 'LOW', 'm':'MODERATE', 'h': 'HIGH'}
+            putative_impact = {'l': 'LOW', 'm': 'MODERATE', 'h': 'HIGH'}
             var_eff = [putative_impact[x] if x else '' for x in tracks]
             result = gt_from_interval(chrom, start, end, var_eff)
         else:
             result = []
         return jsonify(result)
 
-urls = ['/api/variant/gt/<string:chrom>/<int:start>/<int:end>/<string:tracks>','/api/variant/gt/<string:chrom>/<int:start>/<int:end>/']
+urls = ['/api/variant/gt/<string:chrom>/<int:start>/<int:end>/<string:tracks>',
+        '/api/variant/gt/<string:chrom>/<int:start>/<int:end>/']
 
-api.add_resource(fetch_gt_from_interval,*urls)
+api.add_resource(fetch_gt_from_interval, *urls)
