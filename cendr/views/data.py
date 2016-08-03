@@ -6,6 +6,7 @@ from collections import OrderedDict
 from flask import render_template
 
 
+@app.route('/Data/')
 @app.route('/data/')
 def data_page():
     bcs = OrderedDict([("Data", None)])
