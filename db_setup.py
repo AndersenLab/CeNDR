@@ -1,17 +1,8 @@
-from collections import OrderedDict
 from peewee import *
-from cendr import get_stripe_keys
-import re
 import requests
-import itertools
-import json
-import datetime
-from dateutil.parser import parse
 import os
 import StringIO
 import csv
-import MySQLdb
-import _mysql
 import cPickle as pickle
 import sys
 reload(sys)
@@ -28,7 +19,7 @@ current_build = 20160408
 reset_db = False
 
 # which services should be updated.
-update = ["wb_orthologs"] # ["db", "stripe", "gene_table", "tajima", "homologene"]
+update = ["strains"] # ["db", "gene_table", "tajima", "homologene", "strains"]
 
 booldict = {"TRUE": True,
             "FALSE": False,
@@ -51,7 +42,7 @@ def correct_values(k, v):
     else:
         return v.encode('utf-8').strip()
 
-table_list = [strain, report, trait, trait_value, mapping, mapping_list]
+table_list = [strain, report, trait, trait_value, mapping]
 if "db" in update:
     with db.atomic():
         if reset_db:
@@ -228,8 +219,8 @@ if "strains" in update:
     else:
         with db.atomic():
             for line in lines:
+                print(line["strain"])
                 l = {k: correct_values(k, v) for k, v in line.items()}
-                # Setup data for stripe.
                 strain_set = "|".join([x["strain"] for x in lines if line["isotype"] == x["isotype"]])
                 previous_names = '|'.join([x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
                 try:
@@ -237,94 +228,6 @@ if "strains" in update:
                 except:
                     s = strain()
                 [setattr(s, k, v) for k,v in l.items()]
-                if "db" in update:
-                    print(line["isotype"])
-                    s.save()
-                # Add Stripe Products
-                if l["reference_strain"] and l["isotype"] != "NA" and l["isotype"] != "" and "stripe" in update:
-                    try:
-                        # Try to update product
-                        product = stripe.Product.retrieve(l["isotype"])
-                        product.id = l["isotype"]
-                        product.name = l["isotype"]
-                        product.caption = "Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"])
-                        product.metadata["isotype"] = l["isotype"]
-                        product.metadata["strain_set"] = strain_set
-                        product.metadata["previous_names"] = previous_names 
-                        product.save()
-                    except:
-                        # If product does not exist, create it.
-                        product = stripe.Product.create(
-                            id=line["isotype"],
-                            name=line["isotype"],
-                            caption="Strain: {strain}; Isotype: {isotype}".format(strain = line["strain"], isotype = line["isotype"]),
-                            metadata={'isotype': line["isotype"],
-                                      'strain_set': strain_set,
-                                      'previous_names': previous_names},
-                        )
-                    # Create SKU (Stock keeping unit)
-                    try:
-                        # Try to update product
-                        sku = stripe.SKU.retrieve(l["strain"])
-                        sku.currency = "usd"
-                        sku.inventory = {"type": "infinite"}
-                        sku.product = line["isotype"]
-                        sku.price = 1000
-                    except:
-                        sku = stripe.SKU.create(
-                            id = line["strain"],
-                            currency = "usd",
-                            inventory = {"type": "infinite"},
-                            product = line["isotype"],
-                            price = 1000
-                            )
-                    print line["strain"]
+                s.save()
 
-
-##########
-# Stripe #
-##########
-if "stripe" in update:
-    # Fetch stripe keys
-    stripe_keys = get_stripe_keys()
-    stripe.api_key = stripe_keys["secret_key"]
-    for i in ["1","2","3","divergent"]:
-        print i
-        set_name = "set_" + i 
-        if set_name == "set_divergent":
-            price = 10000
-            caption = "12 strains"
-        else:
-            price = 40000
-            caption = "48 strains"
-        strain_list = ','.join(sorted([str(x) for x in list(strain.filter(getattr(strain, set_name) == True).execute())]))
-        try:
-            product = stripe.Product.create(
-            id=set_name,
-            name=set_name,
-            description=strain_list,
-            caption=caption
-            )
-        except:
-            product = stripe.Product.retrieve(set_name)
-            product.id = set_name
-            product.name = set_name
-            product.description = strain_list
-            product.caption=caption
-            product.save()
-        try:
-            sku = stripe.SKU.create(
-                id = set_name,
-                currency = "usd",
-                inventory = {"type": "infinite"},
-                product = product.name,
-                price = price
-            )
-        except:
-            sku = stripe.SKU.retrieve(set_name)
-            sku.id = set_name
-            sku.currency = "usd"
-            sku.inventory = {"type": "infinite", "quantity": None, "value": None}
-            sku.price = price
-            sku.save()
 

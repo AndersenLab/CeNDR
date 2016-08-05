@@ -38,6 +38,7 @@ class strain(Model):
     source_lab = CharField(null=True)
     latitude = FloatField(null=True)
     longitude = FloatField(null=True)
+    elevation = FloatField(null=True)
     landscape = CharField(null=True)
     substrate = CharField(null=True)
     photo = CharField(null=True)

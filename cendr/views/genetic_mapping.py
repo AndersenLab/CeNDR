@@ -4,8 +4,11 @@ from cendr import ds
 from cendr import autoconvert
 from cendr.models import db, report, strain, trait, trait_value, mapping, dbname, WI
 from api import *
-from cendr.emails import mapping_submission
-from google.appengine.api import mail
+try:
+    from cendr.emails import mapping_submission
+    from google.appengine.api import mail
+except:
+    pass
 from datetime import date, datetime
 import pytz
 from dateutil.relativedelta import relativedelta

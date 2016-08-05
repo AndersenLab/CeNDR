@@ -7,7 +7,10 @@ import json
 import os
 import yaml
 import stripe
-from google.appengine.api import mail
+try:
+    from google.appengine.api import mail
+except:
+    pass # Importing this not always important...
 from cendr.emails import order_submission
 
 #
