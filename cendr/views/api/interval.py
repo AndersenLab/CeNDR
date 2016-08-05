@@ -2,6 +2,7 @@
 from flask_restful import Resource
 from cendr.models import wb_gene, WI
 from cendr import api
+from cendr import cache
 from peewee import *
 from collections import OrderedDict
 from collections import Counter
@@ -130,7 +131,7 @@ def get_gene_w_impact(chrom, start, end):
     return response
 
 
-
+@cache.memoize(timeout=50)
 def variant_interval_summary(chrom, start, end):
     r = {}
     r["chrom"] = chrom

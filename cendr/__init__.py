@@ -42,7 +42,7 @@ if (os.getenv('SERVER_SOFTWARE') and
             os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
     cache = Cache(app, config={'CACHE_TYPE': 'gaememcached'})
 else:
-    cache = Cache(app, config={'CACHE_TYPE': 'null'})
+    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
 
 api = Api(app)
 build = "20160408"

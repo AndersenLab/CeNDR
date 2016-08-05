@@ -228,7 +228,6 @@ def public_mapping():
 @app.route("/report/<report_slug>/")
 @app.route("/report/<report_slug>/<trait_slug>")
 @app.route("/report/<report_slug>/<trait_slug>/<rerun>")
-#@cache.memoize(timeout=50)
 def trait_view(report_slug, trait_slug="", rerun = None):
 
 
