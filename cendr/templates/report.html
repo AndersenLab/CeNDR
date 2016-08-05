@@ -42,14 +42,13 @@
 
 
 /* Keep Header Scroll */
-#gene_list table, #variant_list table {
-        width: 100%;
-    }
+#variant_list table {
+    width: 100%;
+}
 
-#gene_list thead, #gene_list tbody, #gene_list tr, #gene_list td, #gene_list th { display: block; }
 #variant_list thead, #variant_list tbody, #variant_list tr, #variant_list td, #variant_list th { display: block; }
 
-#gene_list tr:after, #variant_list tr:after {
+#variant_list tr:after {
     content: ' ';
     display: block;
     visibility: hidden;
@@ -67,7 +66,7 @@
 }
 
 #gene_list tbody td, #gene_list thead th, #variant_list tbody td, #variant_list thead th {
-    width: 14.28%;
+    width: 16.66%;
     float: left;
 }
 
@@ -221,30 +220,31 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% if mapping_results|length > 0 %}
 <h3 id="intervals">QTL Genomic Region of Interest</h3>
 
-<table class="table table-hover table-striped confidence_intervals">
+<table class="table table-hover table-striped confidence_intervals" style="table-layout: fixed">
 <thead>
   <tr>
     <th>Interval</th>
     <th>Peak Position</th>
     <th>-log<sub>10</sub>p</th>
     <th>Variance Explained</th>
-    <th>Total</th>
-    <th>Protein Coding</th>
+    <th>Variants</th>
+    <th>Protein Coding w/ Variants</th>
     <th>Moderate Impact</th>
     <th>High Impact</th>
   </tr>
 </thead>
 <tbody>
 {% for row in mapping_results %}
-<tr chrom="{{ row.chrom }}" start="{{ row.interval_start }}" end="{{ row.interval_end }}">
-  <td><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
+{% set peak_index = loop.index0 %}
+<tr chrom="{{ row.chrom }}" start="{{ row.interval_start }}" end="{{ row.interval_end }}" class="text-right">
+  <td class="text-left"><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
   <td class='text-right'><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
-  <td class='text-right'>{{ row.log10p|round(2) }}</td>
-  <td class='text-right'>{{ row.variance_explained|round(3) * 100 }}%</td>
-  <td class="text-right peaksum_{{ loop.index0 }}_Total">-</td>
-  <td class="text-right peaksum_{{ loop.index0 }}_protein_coding">-</td>
-  <td class="text-right peaksum_{{ loop.index0 }}_MODERATE">-</td>
-  <td class="text-right peaksum_{{ loop.index0 }}_HIGH">-</td>
+  <td>{{ row.log10p|round(2) }}</td>
+  <td>{{ row.variance_explained|round(3) * 100 }}%</td>
+  <td data='msg.variants' class='dat_{{ peak_index }}'>-</td>
+  <td data='msg.gene_w_variants_biotype.protein_coding' class='dat_{{ peak_index }}'>-</td>
+  <td data='msg.gene_by_impact.total.MODERATE' class='dat_{{ peak_index }}'>-</td>
+  <td data='msg.gene_by_impact.total.HIGH' class='dat_{{ peak_index }}'>-</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -283,6 +283,7 @@ A genome-wide representation of the association between variation in the <em>C. 
   <!-- Tab panes -->
   <div class="tab-content">
   {% for peak in mapping_results %}
+  {% set peak_index = loop.index0 %}
     <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
     <br />
     <br />
@@ -292,154 +293,108 @@ A genome-wide representation of the association between variation in the <em>C. 
       <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%</li>
     </ul>
     <div class="row">
-    <div class="col-md-6">
-      <table class="peak_summary table table-hover table-striped">
+    <div class="col-md-12">
+      <table class="peak_summary table table-hover table-striped" style="table-layout: fixed">
           <thead>
             <tr>
               <th>Biotype</th>
               <th># Genes</th>
+              <th># Genes w/ variants</th>
               <th>>=1 Moderate Impact</th>
               <th>>=1 High Impact</th>
               <th># Variants</th>
             </tr>
           </thead>
-          <tbody>
-              <tr class="peak_{{ loop.index0 }}_Total">
-                <td><strong>Total</strong></td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td class='n_variants'>-</td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_protein_coding">
-                <td>Protein Coding</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_pseudogene">
-                <td>pseudogene</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-              </tr>
+          <tbody class='peak_{{ loop.index0 }} text-right'>
               <tr>
-              <td colspan = "5">
+                <td class='text-left'><strong>Total</strong></td>
+                <td data='msg.gene_biotype.total' class='dat_{{ peak_index }}'>-</td>
+                <td data='msg.gene_w_variants_biotype.total' class='dat_{{ peak_index }}'>-</td>
+                <td data='msg.gene_by_impact.total.MODERATE' class='dat_{{ peak_index }}'>-</td>
+                <td data='msg.gene_by_impact.total.HIGH' class='dat_{{ peak_index }}'>-</td>
+                <td data='msg.variants' class='dat_{{ peak_index }}'>-</td>
+              </tr>
+              {% for i in ["protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "tRNA", "lincRNA", "rRNA", "scRNA", "snoRNA", "snRNA", "asRNA", "Coding", "Noncoding"] %}
+              <tr>
+                <td class='text-left'>{{ i }}</td>
+                <td data='msg.gene_biotype.biotype_summary.{{ i }}' class='dat_{{ peak_index }}'>-</td>
+                <td data='msg.gene_w_variants_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
+                <td data='msg.gene_by_impact.MODERATE.{{ i }}' class='dat_{{ peak_index }}'>-</td>
+                <td data='msg.gene_by_impact.HIGH.{{ i }}' class='dat_{{ peak_index }}'>-</td>
+                <td data='msg.variant_in_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
+              </tr>
+              {% endfor %}
+              <tr>
+              <td colspan = "6">
               <p style="text-align">Numbers listed under Moderate and High Impact correspond to the number of genes within the interval that have at least 1 variant classified as having a moderate or high impact.</p>
               <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
               </td>
-            </tbody>
-          </table>
-      </div>
-
-      <div class="col-md-6">
-        <table class="table table-hover table-striped">
-        <thead>
-        <tr>
-        <th>Biotype</th>
-        <th># Genes</th>
-        <th># Variants</th>
-        </tr>
-        </thead>
-        <tbody>
-              <tr class="peak_{{ loop.index0 }}_ncRNA">
-                <td>ncRNA</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_ncRNA" checked data-toggle="toggle" data-size="mini"></td>
               </tr>
-              <tr class="peak_{{ loop.index0 }}_miRNA">
-                <td>miRNA</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_miRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_piRNA">
-                <td>piRNA</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_piRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_tRNA">
-                <td>tRNA</td>
-                <td>-</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_tRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_lincRNA">
-                <td>lincRNA</td>
-                <td>-</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_lincRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_rRNA">
-                <td>rRNA</td>
-                <td>-</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_rRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_scRNA">
-                <td>scRNA</td>
-                <td>-</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_scRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_snoRNA">
-                <td>snoRNA</td>
-                <td>-</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_snoRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_snRNA">
-                <td>snRNA</td>
-                <td>-</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_snRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-              <tr class="peak_{{ loop.index0 }}_asRNA">
-                <td>asRNA</td>
-                <td>-</td>
-                <td>-</td>
-                <td><input type="checkbox" class="peak_{{ loop.index0 }}_asRNA" checked data-toggle="toggle" data-size="mini"></td>
-              </tr>
-          </tbody>
+        </tbody>
       </table>
       </div>
-      </div>
     </div>
+    </div>
+      
 
 <h3>Variants</h3>
 
 
-
-
-<table class="table table-hover table-striped" id="variant_list">
+<table class="table table-hover table-striped" id="variant_list" style="table-layout: fixed">
     <thead>
         <tr>
-            <th>Location</th>
-            <th>Gene</th>
+            <th>Gene Name</th>
+            <th>Wormbase ID</th>
             <th>Biotype</th>
-            <th>Coding Change</th>
-            <th>Annotation</th>
-            <th>Putative Impact</th>
-            <th>Correlation</th>
+            <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The total number of variants with Moderate/High predicted effects'>Total Variants</abbr></th>
+            <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The Maximum correlation among all variants examined'>Max. Correlation</abbr></th>
+            <th>Toggle Variants</th>
         </tr>
     </thead>
 <tbody>
-{% for variant in var_corr[loop.index0] %}
+{% for gene in var_corr[peak_index] %}
       <tr>
-        <td>{{ variant["CHROM"] }}:{{variant["POS"]|comma }}</td>
         <td>
-          {% if variant["locus"] %}
-            {{ variant["locus"] }}
+          {% if gene["gene_name"] %}
+              {{ gene["gene_name"] }}
           {% else %}
-            {{ variant["feature_id"] }}
+              {{ gene["feature_id"] }}&nbsp;
           {% endif %}
         </td>
-        <td>{{ variant["biotype"] }}</td>
+        <td>{{ gene["gene_id"] }}</td>
+        <td>{{ gene["transcript_biotype"] }}</td>
+        <td>{{ gene["n_variants"] }}</td>
+        <td>{{ gene["max_corr"]|round(3) }}</td>
+        <td><a class='show_genes' gene="{{ gene["gene_id"] }}" href='#show'>Variants</a></td>
+      </tr>
+      <tr class='{{ gene["gene_id"] }}' style="display: none;">
+        <td colspan="5" style="padding:0px; width: 100%">
+          <table  class="table table-hover table-striped table-condensed internal-table">
+            <thead>
+              <tr>
+              <th>CHROM:POS</th>
+              <th>REF/ALT</th>
+              <th>Predicted Effect</th>
+              <th>Putative Impact</th>
+              <th>Annotation</th>
+              <th>Correlation</th>
+              </tr>
+            </thead>
+            <tbody style="height: inherit;">
+{% for variant in gene["variant_set"] %}
+      <tr class='{{ tbl_color[variant["putative_impact"]] }}'>
+        <td>{{ variant["CHROM_POS"] }}</td>
+        <td>{{ variant["REF"] }} / {{ variant["ALT"] }}</td>
         <td>{{ variant["hgvs_p"] }}</td>
-        <td>{{ variant["annotation"].replace("&", "<br />")|safe }}</td>
         <td>{{ variant["putative_impact"] }}</td>
+        <td>{{ variant["annotation"] }}</td>
         <td>{{ variant["correlation"]|round(3) }}</td>
+      </tr>
+      {% endfor %}
+            </tbody>
+          </table>
+          <br />
+        </td>
       </tr>
 {% endfor %}
   </tbody>
@@ -449,26 +404,6 @@ A genome-wide representation of the association between variation in the <em>C. 
 
   {% endfor %}
   </div>
-
-
-
-    <h3>Genes</h3>
-
-<table class="table table-striped table-hover" id="gene_list">
-  <thead>
-    <tr>
-      <th>CHROM</th>
-      <th>start</th>
-      <th>end</th>
-      <th>locus</th>
-      <th>Sequence</th>
-      <th>Wormbase ID</th>
-      <th>Biotype</th>
-    </tr>
-  </thead>
-  <tbody>
-  </tbody>
-</table>
 
 
     {% include 'components/geo_map.html' %}
@@ -582,36 +517,15 @@ $.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), functi
   gene_count = $(this);
   url = "/api/interval/" + chrom + "/" + start + "/" + end;
   $.getJSON(url, function(msg) {
-    console.log(msg);
-      $(v).html(msg["total"]);
-      $(".peak_" + k + "_total").html("<strong>" + msg["total"] + "</strong>");
-  });
-    $(v).html(msg["total"]);
-    $(v).next().html(msg["protein_coding"]);
-    $(".peak_" + k + "_total").html("<strong>" + msg["total"] + "</strong>");
-    biotypes = ["Total", "protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "asRNA", "snRNA", "snoRNA", "scRNA", "tRNA", "lincRNA", "rRNA"];
-
-    $(".n_variants").html(msg["N_VARIANTS"]);
-    $(".peaksum_" + k + "_Total").html(msg["ALL_Total"]);
-    $(".peaksum_" + k + "_protein_coding").html(msg["ALL_protein_coding"]);
-    $(".peaksum_" + k + "_MODERATE").html(msg["MODERATE_Total"]);
-    $(".peaksum_" + k + "_HIGH").html(msg["HIGH_Total"]);
-
-    $.each(biotypes, function(i, biotype) {
-      // ALL
-      $(".peak_" + k + "_" + biotype + " > td:nth-child(2)").html(msg["ALL_" + biotype]);
-      $(".peak_" + k + "_" + biotype + " > td:nth-child(3)").html(msg["biotype_variants"][biotype]);
+    $.each($(".dat_" + k), function(x) {
+      try {
+        $(this).html(eval($(this).attr("data")));
+      } catch(err) {}
     });
-    $.each(biotypes.slice(0,3), function(i, biotype) {
-      // Moderate
-      $(".peak_" + k + "_" + biotype + " > td:nth-child(3)").html(msg["MODERATE_" + biotype]);
-      // High
-      $(".peak_" + k + "_" + biotype + " > td:nth-child(4)").html(msg["HIGH_" + biotype]);
-      // Biotype variants
-      $(".peak_" + k + "_" + biotype + " > td:nth-child(5)").html(msg["biotype_variants"][biotype]);
-    })
-  })
-})
+});
+});
+});
+
 
 // Gene List
 function update_gene_list(chrom, start, end) {
@@ -651,6 +565,12 @@ function update_gene_list(chrom, start, end) {
 
 }
 
+
+$(".show_genes").on("click", function() {
+  var clicked = $(this);
+  console.log(clicked);
+  $("." + $(this).attr("gene")).toggle(function() {})
+})
 
 
 // Load initial map and Tajima

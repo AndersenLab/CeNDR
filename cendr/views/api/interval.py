@@ -84,7 +84,10 @@ def biotype_by_genes_w_variants(chrom, start, end):
           .group_by(WI.gene_id) \
           .tuples()
           .execute())
-    return count_column(q)
+    q = count_column(q)
+    q["total"] = sum(q.values())
+    return q
+
 
 
 def variants_in_biotype(chrom, start, end):
@@ -97,7 +100,9 @@ def variants_in_biotype(chrom, start, end):
           .group_by(WI.variant) \
           .tuples()
           .execute())
-    return count_column(q)
+    q = count_column(q)
+    q["total"] = sum(q.values())
+    return q
 
 
 def get_gene_w_impact(chrom, start, end):

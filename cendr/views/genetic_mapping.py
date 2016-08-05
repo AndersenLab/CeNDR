@@ -293,17 +293,12 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     #######################
     # Variant Correlation #
     #######################
-
     var_corr = []
-    #for sig_mapping in mapping_results:
-    #    print locals()
-    #    correlation_results = get_variant_correlation_obj(report_slug,
-    #    trait_slug,
-    #    sig_mapping['chrom'],
-    #    sig_mapping['interval_start'],
-    #    sig_mapping['interval_end'])
-#
-    #    var_corr.append(correlation_results)
+    for r in mapping_results:
+        r = report.get(report_slug = report_slug)
+        t = trait.get(trait_slug = trait_slug)
+        var_corr.append(correlation.get_correlated_genes(r, t))
+    tbl_color = {"LOW": 'success', "MODERATE": 'warning', "HIGH": 'danger'}
 
     #######################
     # Fetch geo locations #
@@ -311,7 +306,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     geo_gt = {}
     for r in mapping_results:
         try:
-            result = fetch_geo_gt(r["chrom"], r["pos"])
+            result = GT.fetch_geo_gt(r["chrom"], r["pos"])
             geo_gt[r["chrom"] + ":" + str(r["pos"])] = result
         except:
             pass
