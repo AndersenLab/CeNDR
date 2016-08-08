@@ -49,6 +49,7 @@ def gwa():
     bcs = OrderedDict([("Perform-Mapping", None)])
 
     # Generate list of allowable strains
+    print(dir(strain))
     query = strain.select(strain.strain,
                           strain.isotype,
                           strain.previous_names).filter(strain.isotype.is_null() == False).execute()

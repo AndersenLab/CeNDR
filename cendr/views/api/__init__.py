@@ -1,1 +1,1 @@
-__all__ = ["GT", "strain", "popgen", "homologs", "interval", "gene", "correlation"]
+__all__ = ["GT", "strains", "popgen", "homologs", "interval", "gene", "correlation", "wormbase"]

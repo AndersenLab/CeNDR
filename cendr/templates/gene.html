@@ -12,6 +12,12 @@
               <li class="list-group-item"><strong>Location</strong><div class='pull-right'>{{ gene_record ["CHROM"] }}:{{ gene_record ["start"] }}-{{ gene_record ["end"] }}</div></li>
             </ul>
 
+
+            <h4>External Links</h4>
+            <ul class="list-group" id="external_links">
+
+            </ul>
+
       </div>
       <div class="col-md-8">
 
@@ -27,7 +33,7 @@
         <tr>
           <td><a href="{{ url_for('trait_view', report_slug=i.report_slug, trait_slug=i.trait_slug ) }}">{{ i.report_name }} → {{ i.trait_name }}</a></td>
           <td>{{ i.chrom }}:{{ i.interval_start }}-{{ i.interval_end }}</td>
-          <td>{{ i.variance_explained }}</td>
+          <td>{{ i.variance_explained|round(3) }}</td>
           <td>{{ i.log10p|round(3) }}</td>
           <td>{{ i.submission_date.strftime('%Y-%m-%d') }}</td>
         </tr>
@@ -65,4 +71,62 @@
       
       </div>
 </div>
+
+
+<script>
+
+$.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", function(msg) {
+  console.log(msg);
+  link_set = {}
+  $.each(msg["fields"]["xrefs"]["data"], function(k, d) {
+    if (k == "AceView") {
+      id = d["gene"]["ids"][0];
+      link = "http://www.ncbi.nlm.nih.gov/IEB/Research/Acembly/av.cgi?db=worm&q=" + id;
+      link_set[k] = link;
+    } else if(k == "NCBI") {
+      id = d["gene"]["ids"][0];
+      link = "http://www.ncbi.nlm.nih.gov/gene/?term=" + id;
+      link_set[k] = link;
+    } else if(k == "NDB") {
+      id = d["locus_tag"]["ids"][0];
+      link = "http://www.wormbase.org/species/c_elegans/gene/" + id;
+      link_set[k] = link
+    } else if(k == "RefSeq") {
+      id = d["mRNA"]["ids"][0];
+      link = "http://www.ncbi.nlm.nih.gov/protein/" + id;
+      link_set[k] = link
+      id = d["protein"]["ids"][0];
+      link = "http://www.ncbi.nlm.nih.gov/protein/NP_498558.1" + id;
+      link_set[k] = link;
+    } else if (k == "TREEFAM") {
+      id = d["TREEFAM_ID"]["ids"][0]
+      link = "http://www.treefam.org/family/" + id;
+      link_set[k] = link;
+    } else if (k == "UniProt") {
+      id = d["UniProtAcc"]["ids"][0]
+      link = "http://www.ebi.uniprot.org/entry/" + id;
+      link_set[k] = link;
+    } else if (k == "WormQTL") {
+      id = d["gene"]["ids"][0];
+      link = "http://www.wormqtl.org/molgenis.do?__target=QtlFinderPublic2&select=QtlFinderPublic2&p=" + id;
+      link_set[k] = link;
+    }
+
+    console.log(link_set);
+
+    linked = ""
+    link_set = $.each(link_set, function(k, v) {
+      linked += "<li class='list-group-item'><a style='width: 100%; height:100%; display: block;' href='" + v + "'>" + k + "</a></li>";
+    })
+
+    $("#external_links").html(linked);
+
+  });
+  
+})
+
+</script>
+
 {% endblock %}
+
+
