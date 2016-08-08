@@ -67,11 +67,6 @@
     border-bottom: 1px dotted #777;
 }
 
-.tab-pane {
-  border-right: 1px solid #dddddd;
-  border-bottom: 1px solid #dddddd;
-  border-left: 1px solid #dddddd;
-}
 
 body {
   text-align:left;

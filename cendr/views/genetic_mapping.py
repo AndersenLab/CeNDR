@@ -273,10 +273,10 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     trait_slug = trait_data["trait_slug"] # don't remove
 
     if rerun == "rerun":
-        if trait_data["status"] != "complete":
-            queue = get_queue()
-            # Submit job to iron worker
-            queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
+        #if trait_data["status"] != "complete":
+        queue = get_queue()
+        # Submit job to iron worker
+        queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
         # Return user to current trait
         return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=trait_slug))
 

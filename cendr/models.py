@@ -193,38 +193,7 @@ class WI(Model):
         indexes = (
             (('CHROM', 'POS', 'variant','FILTER', 'feature_id', 'annotation','gene_id', 'gene_name', 'putative_impact'), False),
             )
-
-class intervals(Model):
-    CHROM = CharField(index = True, max_length=5)
-    BIN_START = IntegerField(index=True)
-    BIN_END = IntegerField(index=True)
-    N_VARIANTS = IntegerField(default = 0)
-    ALL_Total = IntegerField(default = 0)
-    ALL_protein_coding = IntegerField(default = 0)
-    ALL_ncRNA = IntegerField(default = 0)
-    ALL_miRNA = IntegerField(default = 0)
-    ALL_piRNA = IntegerField(default = 0)
-    ALL_tRNA = IntegerField(default = 0)
-    ALL_lincRNA = IntegerField(default = 0)
-    ALL_rRNA = IntegerField(default = 0)
-    ALL_scRNA = IntegerField(default = 0)
-    ALL_snoRNA = IntegerField(default = 0)
-    ALL_snRNA = IntegerField(default = 0)
-    ALL_asRNA = IntegerField(default = 0)
-    ALL_pseudogene = IntegerField(default = 0)
-    MODERATE_Total = IntegerField(default = 0)
-    MODERATE_protein_coding = IntegerField(default = 0)
-    MODERATE_pseudogene = IntegerField(default = 0)
-    HIGH_Total = IntegerField(default = 0)
-    HIGH_protein_coding = IntegerField(default = 0)
-    HIGH_pseudogene = IntegerField(default = 0)
-
-    class Meta:
-        database = db
-        db_table = "WI_{current_build}_intervals".format(current_build = current_build)
-        indexes = (
-            (('CHROM', 'BIN_START', 'BIN_END'), True),
-            )
+        
 
 class tajimaD(Model):
     CHROM = CharField(index=True)

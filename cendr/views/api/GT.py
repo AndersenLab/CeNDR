@@ -45,7 +45,10 @@ def fetch_geo_gt(chrom, pos):
 def gt_from_interval(chrom, start, end, var_eff):
     result = list(WI.select(WI.CHROM,
                             WI.POS,
+                            WI.REF,
+                            WI.ALT,
                             WI.FILTER,
+                            WI.transcript_biotype,
                             WI.putative_impact,
                             WI.gene_name,
                             WI.gene_id,

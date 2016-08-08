@@ -325,15 +325,14 @@ A genome-wide representation of the association between variation in the <em>C. 
               </tr>
               {% endfor %}
               <tr>
-              <td colspan = "6">
-              <p style="text-align">Numbers listed under Moderate and High Impact correspond to the number of genes within the interval that have at least 1 variant classified as having a moderate or high impact.</p>
-              <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
-              </td>
+                <td colspan = "6">
+                <p style="text-align">Numbers listed under Moderate and High Impact correspond to the number of genes within the interval that have at least 1 variant classified as having a moderate or high impact.</p>
+                <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
+                </td>
               </tr>
         </tbody>
       </table>
       </div>
-    </div>
     </div>
       
 
@@ -361,7 +360,7 @@ A genome-wide representation of the association between variation in the <em>C. 
               {{ gene["feature_id"] }}&nbsp;
           {% endif %}
         </td>
-        <td>{{ gene["gene_id"] }}</td>
+        <td><a href="{{ url_for("gene", gene_name=gene["gene_id"]) }}">{{ gene["gene_id"] }}</a></td>
         <td>{{ gene["transcript_biotype"] }}</td>
         <td>{{ gene["n_variants"] }}</td>
         <td>{{ gene["max_corr"]|round(3) }}</td>
@@ -375,8 +374,8 @@ A genome-wide representation of the association between variation in the <em>C. 
               <th>CHROM:POS</th>
               <th>REF/ALT</th>
               <th>Predicted Effect</th>
-              <th>Putative Impact</th>
               <th>Annotation</th>
+              <th>Putative Impact</th>
               <th>Correlation</th>
               </tr>
             </thead>
@@ -386,8 +385,8 @@ A genome-wide representation of the association between variation in the <em>C. 
         <td>{{ variant["CHROM_POS"] }}</td>
         <td>{{ variant["REF"] }} / {{ variant["ALT"] }}</td>
         <td>{{ variant["hgvs_p"] }}</td>
-        <td>{{ variant["putative_impact"] }}</td>
         <td>{{ variant["annotation"] }}</td>
+        <td>{{ variant["putative_impact"] }}</td>
         <td>{{ variant["correlation"]|round(3) }}</td>
       </tr>
       {% endfor %}
@@ -401,7 +400,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 </table>
 
 
-
+    </div>
   {% endfor %}
   </div>
 
@@ -571,6 +570,12 @@ $(".show_genes").on("click", function() {
   console.log(clicked);
   $("." + $(this).attr("gene")).toggle(function() {})
 })
+
+
+// Fix Links
+$( "a" ).on( "click", function() {
+    window.location = $(this).attr('href');
+});
 
 
 // Load initial map and Tajima

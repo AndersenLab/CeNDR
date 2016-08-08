@@ -14,6 +14,27 @@
 
       </div>
       <div class="col-md-8">
+
+      <h3>Mappings</h3>
+      <table class='table table-striped table-hover'>
+      <thead>
+      <th>Report → Trait</th>
+      <th>Interval</th>
+      <th>Variance Explained</th>
+      <th>log<sub>10</sub>p</th>
+      <th>Submission Date</th>
+        {% for i in mapping_set %}
+        <tr>
+          <td><a href="{{ url_for('trait_view', report_slug=i.report_slug, trait_slug=i.trait_slug ) }}">{{ i.report_name }} → {{ i.trait_name }}</a></td>
+          <td>{{ i.chrom }}:{{ i.interval_start }}-{{ i.interval_end }}</td>
+          <td>{{ i.variance_explained }}</td>
+          <td>{{ i.log10p|round(3) }}</td>
+          <td>{{ i.submission_date.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+
+      </table>
+
       <h3>Variants</h3>
       <table class='table table-striped table-hover'>
       <thead>
@@ -29,7 +50,7 @@
       </thead>
       <tbody>
                   {% for i in variants %}
-                        <tr>
+                        <tr class='{{ tbl_color[i["putative_impact"]] }}'>
                               <td>{{ i["CHROM"] }}:{{ i["POS"] }}</td>
                               <td>{{ i["REF"] }}</td>
                               <td>{{ i["ALT"] }}</td>

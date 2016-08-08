@@ -140,9 +140,9 @@
   
 <thead>
   <tr>
-    <th>CHROM</th>
-    <th>POS</th>
-    <th>Name</th>
+    <th>CHROM:POS</th>
+    <th>REF / ALT</th>
+    <th>Gene Name</th>
     <th>WormBase ID</th>
     <th>CDS</th>
     <th>Coding Change</th>
@@ -368,14 +368,13 @@ function refresh_variants() {
             if (v["gene_id"] != "") {
                 v["gene_id"] = "<a href='http://www.wormbase.org/species/c_elegans/gene/" + v["gene_id"] + "'>" + v["gene_id"] + "</a>";
                 }
-
-            items = [v["CHROM"],
-                     Number(v["POS"]).toLocaleString('en'),
+            items = [v["CHROM"] + ":" + Number(v["POS"]).toLocaleString('en'),
+                     v["REF"] + " / " + v["ALT"],
                      v["gene_name"],
                      v["gene_id"],
                      v["feature_id"],
                      v["hgvs_p"],
-                     v["biotype"],
+                     v["transcript_biotype"],
                      v["annotation"].split("&").join(", "),
                      v["putative_impact"]];
             $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + items.join("</td><td>") + "</td></tr>")
