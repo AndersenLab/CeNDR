@@ -12,6 +12,19 @@
               <li class="list-group-item"><strong>Location</strong><div class='pull-right'>{{ gene_record ["CHROM"] }}:{{ gene_record ["start"] }}-{{ gene_record ["end"] }}</div></li>
             </ul>
 
+            <h4>Human Disease</h4>
+            <table class='table table-striped table-bordered' id="omim">
+            <thead>
+            <tr>
+              <th>Class</th>
+              <th>OMIM</th>
+              <th>Description</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            </tbody>
+            </table>
 
             <h4>External Links</h4>
             <ul class="list-group" id="external_links">
@@ -69,6 +82,17 @@
       </tbody>
       </table>
       
+      <h3>Gene Ontology</h3>
+      <table class='table table-striped table-hover' id="gene_ontology">
+        <thead>
+          <th>Type</th>
+          <th>ID</th>
+          <th>Label</th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
       </div>
 </div>
 
@@ -76,7 +100,6 @@
 <script>
 
 $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", function(msg) {
-  console.log(msg);
   link_set = {}
   $.each(msg["fields"]["xrefs"]["data"], function(k, d) {
     if (k == "AceView") {
@@ -112,8 +135,6 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", 
       link_set[k] = link;
     }
 
-    console.log(link_set);
-
     linked = ""
     link_set = $.each(link_set, function(k, v) {
       linked += "<li class='list-group-item'><a style='width: 100%; height:100%; display: block;' href='" + v + "'>" + k + "</a></li>";
@@ -125,6 +146,38 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", 
   
 })
 
+</script>
+
+<script>
+{# OMIM #}
+
+$.getJSON("/api/omim/{{ gene_record["Name"] }}", function(msg) {
+  omim_table = "";
+  $.each(msg["omim_diseases"], function(k,v) {
+    omim_table += "<tr><td>Disease</td><td><a href='http://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
+  });
+  $.each(msg["omim_genes"], function(k,v) {
+    omim_table += "<tr><td>Gene</td><td><a href='http://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
+  });
+  $("#omim > tbody").html(omim_table)
+})
+
+</script>
+
+<script>
+{# Gene Ontology #}
+var term_set = "";
+var current_grouping = "";
+$.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/gene_ontology", function(msg) {
+  $.each(msg["fields"]["gene_ontology_summary"]["data"], function(grouping, v) {
+    grouping = grouping.replace("_", " ");
+    $.each(v, function(i, term) {
+      term_d = term["term_description"][0];
+      term_set += "<tr><td>" + grouping + "</td><td><a href='http://amigo.geneontology.org/amigo/term/" + term_d["id"] + "'>" + term_d["id"] + "</a></td><td>" + term_d["label"] + "</td></tr>";
+    });
+  });
+  $("#gene_ontology > tbody").html(term_set)
+})
 </script>
 
 {% endblock %}

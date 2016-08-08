@@ -93,7 +93,7 @@ class report(Model):
     version = IntegerField(choices=((0, "report 1.0")))  # Version of Report
 
     def __repr__(self):
-        return self.report_name
+        return "%s:%s" % (self.id, self.report_name)
 
     class Meta:
         database = db
@@ -113,6 +113,9 @@ class trait(Model):
     status = CharField(null = False)
     submission_date = DateTimeField(default=datetime.datetime.now)
     submission_complete = DateTimeField(null = True)
+
+    def __repr__(self):
+        return "%s:%s" % (self.id, self.trait_name)
 
     class Meta:
         database = db

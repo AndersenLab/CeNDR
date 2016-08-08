@@ -300,6 +300,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     for r in mapping_results:
         r = report.get(report_slug = report_slug)
         t = trait.get(trait_slug = trait_slug)
+        print(t)
         var_corr.append(correlation.get_correlated_genes(r, t))
     tbl_color = {"LOW": 'success', "MODERATE": 'warning', "HIGH": 'danger'}
 

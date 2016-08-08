@@ -32,7 +32,8 @@ def gene(gene_name):
     mapping_set = mapping.select(mapping, trait, report) \
                        .join(trait) \
                        .join(report) \
-                       .where((report.release == 0) &
+                       .where((gene_record["CHROM"] == mapping.chrom) &
+                        (report.release == 0) &
                         (gene_record["start"] >= mapping.interval_start) & 
                         (gene_record["end"] <= mapping.interval_end)) \
                        .dicts() \

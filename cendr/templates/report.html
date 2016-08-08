@@ -355,7 +355,7 @@ A genome-wide representation of the association between variation in the <em>C. 
       <tr>
         <td>
           {% if gene["gene_name"] %}
-              {{ gene["gene_name"] }}
+              <a href="{{ url_for("gene", gene_name=gene["gene_name"]) }}">{{ gene["gene_name"] }}</a>
           {% else %}
               {{ gene["feature_id"] }}&nbsp;
           {% endif %}

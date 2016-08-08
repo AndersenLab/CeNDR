@@ -9,11 +9,12 @@ from flask import jsonify
 
 
 def get_correlated_genes(r, t):
+    # Fetch the maximally correlated genes.
     max_corr = list(mapping_correlation.select(
                         fn.CONCAT(WI.CHROM, ":", WI.POS).alias("CHROM_POS"),
                         fn.MAX(fn.ABS(mapping_correlation.correlation)).alias("max_corr"),
                         fn.COUNT(fn.DISTINCT(WI.variant)).alias("n_variants"),
-                        WI.gene_id,
+                        mapping_correlation.gene_id,
                         WI.gene_name,
                         WI.transcript_biotype) \
                        .group_by(WI.gene_id) \
@@ -23,6 +24,7 @@ def get_correlated_genes(r, t):
                                mapping_correlation.trait == t) \
                        .order_by(-fn.MAX(fn.ABS(mapping_correlation.correlation)), fn.ABS(mapping_correlation.correlation)) \
                        .dicts().execute())
+    # Fetch maximally correlated variants
     av = list(mapping_correlation.select(
                         fn.CONCAT(WI.CHROM, ":", WI.POS).alias("CHROM_POS"),
                         mapping_correlation.correlation,
@@ -47,6 +49,7 @@ def get_correlated_genes(r, t):
             av_set[i["gene_id"]] = []
         av_set[i["gene_id"]].append(i)
     for gene in max_corr:
+        print(gene)
         gene["variant_set"] = av_set[gene["gene_id"]]
     return max_corr
 
