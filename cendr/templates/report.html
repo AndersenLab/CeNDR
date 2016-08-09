@@ -112,29 +112,10 @@
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/phenotype.tsv">Phenotype Data</a></strong></li>
       {% endif %}
 
-      {% if 'raw_phenotype.tsv' in report_files %}
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/raw_phenotype.tsv">Raw Phenotype Data</a></strong></li>
+      {% if 'mapping.tsv' in report_files %}
+      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/mapping.tsv">Mapping</a></strong></li>
       {% endif %}
 
-      {% if 'processed_phenotype.tsv' in report_files %}
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/processed_phenotype.tsv">Processed Phenotype Data</a></strong></li>
-      {% endif %}
-
-      {% if 'interval_variants.tsv' in report_files %}
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/interval_variants.tsv">Interval Variants</a></strong></li>
-      {% endif %}
-
-      {% if 'raw.mapping.tsv' in report_files %}
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/raw.mapping.tsv">Raw Mappings</a></strong></li>
-      {% endif %}
-
-      {% if 'processed_sig_mapping.tsv' in report_files %}
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/processed_sig_mapping.tsv">Processed Significant Mappings</a></strong></li>
-      {% endif %}
-
-      {% if 'non_sig_mapping.tsv' in report_files %}
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/non_sig_mapping.tsv">Nonsignificant Mappings</a></strong></li>
-      {% endif %}
     </ul>
     </div>
     <div class='col-md-6'>

@@ -234,7 +234,6 @@ def public_mapping():
 @app.route("/report/<report_slug>/<trait_slug>/<rerun>")
 def trait_view(report_slug, trait_slug="", rerun = None):
 
-
     report_data = list(report.select(report,
                                      trait).join(trait).where(
                                     (
@@ -273,9 +272,14 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     report_slug = trait_data["report_slug"] # don't remove
     trait_slug = trait_data["trait_slug"] # don't remove
 
+    r = report.get(report_slug = report_slug)
+    t = trait.get(report = r.id, trait_slug = trait_slug)
+
     if rerun == "rerun":
         #if trait_data["status"] != "complete":
         queue = get_queue()
+        t.status = "queue"
+        t.save()
         # Submit job to iron worker
         queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
         # Return user to current trait
@@ -297,21 +301,18 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     # Variant Correlation #
     #######################
     var_corr = []
-    for r in mapping_results:
-        r = report.get(report_slug = report_slug)
-        t = trait.get(trait_slug = trait_slug)
-        print(t)
-        var_corr.append(correlation.get_correlated_genes(r, t))
+    for m in mapping_results:
+        var_corr.append(correlation.get_correlated_genes(r, t, m["chrom"], m["interval_start"], m["interval_end"]))
     tbl_color = {"LOW": 'success', "MODERATE": 'warning', "HIGH": 'danger'}
 
     #######################
     # Fetch geo locations #
     #######################
     geo_gt = {}
-    for r in mapping_results:
+    for m in mapping_results:
         try:
-            result = GT.fetch_geo_gt(r["chrom"], r["pos"])
-            geo_gt[r["chrom"] + ":" + str(r["pos"])] = result
+            result = GT.fetch_geo_gt(m["chrom"], m["pos"])
+            geo_gt[m["chrom"] + ":" + str(m["pos"])] = result
         except:
             pass
     geo_gt = json.dumps(geo_gt)

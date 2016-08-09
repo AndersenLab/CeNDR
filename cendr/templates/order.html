@@ -9,6 +9,7 @@
 .price {
     text-align: right;
 }
+
 </style>
 {% endblock %} 
 
@@ -16,7 +17,7 @@
 <div class="row">
     <div class="col-md-12">
 
-        <table class="table table-hover table-striped">
+        <table class="table table-hover table-striped" style="table-layout: fixed">
             <thead>
                 <tr>
                     <th style="width: 40px">#</th>
@@ -39,39 +40,19 @@
                 </tr>
             </tbody>
         </table>
+        <strong>
+            Print this page and send to:
+        </strong>
+        <br />
+        <p><strong>Erik C. Andersen</strong><br />
+        Department of Molecular Biosciences<br />
+        Northwestern University<br />
+        2145 Tech Drive, Tech MG90<br />
+        Evanston, IL. 60208-3500</p>
         <p>To expedite shipping, please supply FedEx or UPS account numbers.</p>
-<div class="pull-right">
-<form action="/order" class="form-inline" method="POST">
-{% for item, price in items.items() %}
-<input type="hidden" name="item" value="{{ item }}">
-{% endfor %}
-  <div class="form-group">
-    <label for="shipping-service">Shipping Method</label>
-    <select name="shipping-service" id="shipping-service" class="form-control" required>
-        <option>FEDEX</option>
-        <option>UPS</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="acct" placeholder="Enter Account Number" required>Account Number</label>
-    <input id="acct" class="form-control" required name="shipping-account-number" placeholder="Enter Account Number" required>
-  </div>
-
-  <script
-    src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-    data-key="{{ key }}"
-    data-name="CeNDR Resource"
-    data-description="{{ items|length }} strain/sets"
-    data-shipping-address="true"
-    data-billing-address="false"
-    data-amount="{{ total }}"
-    data-locale="auto">
-  </script>
-</form>
 
 </div>
-    </div>
-    </div>
+</div>
 {% endblock %} {% block script %}
 <script>
 $(document).ready(function() {
