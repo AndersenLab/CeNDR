@@ -10,7 +10,7 @@ from collections import defaultdict
 from flask import jsonify
 
 # Genes
-
+@cache.memoize(timeout=500)
 def get_gene_interval_summary(chrom, start, end, include_list = False):
     """
         Return Gene List and Summarizes
@@ -43,6 +43,7 @@ api.add_resource(
 
 
 # Variants
+@cache.memoize(timeout=500)
 def get_variant_count(chrom, start, end, filter=True):
     """
         Return the number of variants within an interval
@@ -75,6 +76,7 @@ api.add_resource(api_variant_count, *urls)
 def count_column(q):
     return dict(Counter([x[0] for x in q]))
 
+@cache.memoize(timeout=500)
 def biotype_by_genes_w_variants(chrom, start, end):
     q = list(WI.select(WI.transcript_biotype) \
                .filter(WI.gene_id != "",
@@ -90,7 +92,7 @@ def biotype_by_genes_w_variants(chrom, start, end):
     return q
 
 
-
+@cache.memoize(timeout=500)
 def variants_in_biotype(chrom, start, end):
     q = list(WI.select(WI.transcript_biotype) \
                .filter(WI.gene_id != "",
@@ -105,7 +107,7 @@ def variants_in_biotype(chrom, start, end):
     q["total"] = sum(q.values())
     return q
 
-
+@cache.memoize(timeout=500)
 def get_gene_w_impact(chrom, start, end):
     """
         Return Genes with variants of given impact for a given interval
@@ -131,7 +133,7 @@ def get_gene_w_impact(chrom, start, end):
     return response
 
 
-@cache.memoize(timeout=50)
+@cache.memoize(timeout=500)
 def variant_interval_summary(chrom, start, end):
     r = {}
     r["chrom"] = chrom

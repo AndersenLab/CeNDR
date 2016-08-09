@@ -220,17 +220,25 @@ A genome-wide representation of the association between variation in the <em>C. 
 {% if mapping_results|length > 0 %}
 <h3 id="intervals">QTL Genomic Region of Interest</h3>
 
-<table class="table table-hover table-striped confidence_intervals" style="table-layout: fixed">
+<table class="table table-hover table-striped confidence_intervals" >
+<col width="15">
+<col width="10">
+<col width="5">
+<col width="14">
+<col width="14">
+<col width="14">
+<col width="14">
+<col width="14">
 <thead>
   <tr>
     <th>Interval</th>
-    <th>Peak Position</th>
-    <th>-log<sub>10</sub>p</th>
-    <th>Variance Explained</th>
-    <th>Variants</th>
-    <th>Protein Coding w/ Variants</th>
-    <th>Moderate Impact</th>
-    <th>High Impact</th>
+    <th class='text-right'>Peak Position</th>
+    <th class='text-right'>-log<sub>10</sub>p</th>
+    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Variance Explained">V.E.</abbr></abbr></th>
+    <th class='text-right'>Variants</th>
+    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of coding genes with at least 1 variant">Coding</abbr></th>
+    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of genes with >= 1 moderate impact variant">Moderate</abbr></th>
+    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of genes with >= 1 high impact variant">High</abbr></th>
   </tr>
 </thead>
 <tbody>

@@ -9,7 +9,7 @@
               <li class="list-group-item"><strong>Locus</strong><div class='pull-right'>{{ gene_record ["locus"] }}</div></li>
               <li class="list-group-item"><strong>Sequence name</strong><div class='pull-right'>{{ gene_record ["sequence_name"] }}</div></li>
               <li class="list-group-item"><strong>Biotype</strong><div class='pull-right'>{{ gene_record ["biotype"] }}</div></li>
-              <li class="list-group-item"><strong>Location</strong><div class='pull-right'>{{ gene_record ["CHROM"] }}:{{ gene_record ["start"] }}-{{ gene_record ["end"] }}</div></li>
+              <li class="list-group-item"><strong>Location</strong><div class='pull-right'><a href="{{ url_for("browser", chrom = gene_record["CHROM"], start = gene_record["start"], end = gene_record["end"], tracks = "lmh") }}">{{ gene_record ["CHROM"] }}:{{ gene_record ["start"] }}-{{ gene_record ["end"] }}</a></div></li>
             </ul>
 
             <h4>Human Disease</h4>
@@ -55,10 +55,11 @@
       </table>
 
       <h3>Variants</h3>
-      <table class='table table-striped table-hover'>
+      <table class='table table-striped table-hover table-responsive'>
       <thead>
             <tr>
                   <th>Location</th>
+                  <th>Sequence</th>
                   <th>Reference</th>
                   <th>Alternate</th>
                   <th>Amino Acid Change</th>
@@ -71,6 +72,7 @@
                   {% for i in variants %}
                         <tr class='{{ tbl_color[i["putative_impact"]] }}'>
                               <td>{{ i["CHROM"] }}:{{ i["POS"] }}</td>
+                              <td>{{ i["feature_id"] }}</td>
                               <td>{{ i["REF"] }}</td>
                               <td>{{ i["ALT"] }}</td>
                               <td>{{ i["hgvs_p"] }}</td>
@@ -82,6 +84,22 @@
       </tbody>
       </table>
       
+      <h3>Phenotypes</h3>
+      <table class='table table-striped table-hover table-condensed table-responsive' style="table-layout: fixed; margin: 0 auto; width: 100%x;" id="phenotypes">
+    <colgroup>
+            <col style="width:50%" />
+            <col style="width:50%" />
+    </colgroup>
+        <thead>
+          <th>Phenotype</th>
+          <th>Evidence</th>
+          <th></th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+
       <h3>Gene Ontology</h3>
       <table class='table table-striped table-hover' id="gene_ontology">
         <thead>
@@ -100,7 +118,7 @@
 <script>
 
 $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", function(msg) {
-  link_set = {}
+  link_set = {Wormbase: "http://www.wormbase.org/species/c_elegans/gene/{{ gene_record["Name"] }}"}
   $.each(msg["fields"]["xrefs"]["data"], function(k, d) {
     if (k == "AceView") {
       id = d["gene"]["ids"][0];
@@ -134,6 +152,7 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", 
       link = "http://www.wormqtl.org/molgenis.do?__target=QtlFinderPublic2&select=QtlFinderPublic2&p=" + id;
       link_set[k] = link;
     }
+
 
     linked = ""
     link_set = $.each(link_set, function(k, v) {
@@ -178,6 +197,34 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/gene_ontology", f
   });
   $("#gene_ontology > tbody").html(term_set)
 })
+</script>
+
+<script>
+{# Phenotypes #}
+
+$.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/phenotype", function(msg) {
+  if (msg["fields"]["phenotype"]["data"]) {
+    ptable = "";
+  $.each(msg["fields"]["phenotype"]["data"], function(k, e) {
+    phenotype = e["phenotype"]["label"];
+    ptable += "<tr><td>" + phenotype + "</td><td>";
+    $.each(e["evidence"], function(evidence_type, piece_of_evidence) {
+      $.each(piece_of_evidence, function(x,i) {
+        console.log(i);
+        if (i['text']['class'] == 'rnai') {
+          evidence_class = "RNAi";
+        } else {
+          evidence_class = i['text']['class'];
+        }
+        ptable += " <a href='http://www.wormbase.org/search/phenotype/" + i['text']["id"] + "' class='label label-primary'>" + evidence_class + ": " + i['text']["label"] + "</a>"
+      });
+    });
+    ptable += "</td></tr>";
+  });
+  $("#phenotypes > tbody").html(ptable)
+}
+});
+
 </script>
 
 {% endblock %}

@@ -14,7 +14,7 @@
           <div class="col-md-8 col-xsm-offset-1">
             <h5><strong>Hover over or click a pin to see information about a <i>C. elegans</i> wild isolate</strong></h5>
           </div>
-        </div>
+        </div>_
       <div class="col-md-8">
               <div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
       </div>
@@ -35,6 +35,7 @@
                             <div class="strain pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right"><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Landscape</strong> <div class="landscape pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Substrate</strong> <div class="substrate pull-right"></div><div style="clear:both;"></div></li>
@@ -69,7 +70,7 @@ var icon_hover = L.icon({
 // Default click_s
 var click_s = {
   target: {
-    options: {strain: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: ""},
+    options: {strain: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: "", elevation: ""},
     setIcon: function(){},
   },
   latlng: { lat: "", lng: ""},
@@ -83,6 +84,7 @@ function set_panel_from_search(m) {
   $(".isotype").html("<strong><a href='/strain/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
   $(".isolation_date").text(s.isolation_date);
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
+  $(".elevation").text(s.elevation);
   $(".location").text(s.loc);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
@@ -105,6 +107,7 @@ function set_panel_content(m) {
   $(".isolation_date").text(s.isolation_date);
   $(".comma").text(s.comma)
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
+  $(".elevation").text(s.elevation);
   $(".location").text(s.loc);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
@@ -152,7 +155,8 @@ function restore_click_locked_content(m) {
                                          title: d.strain,
                                          isotype: d.isotype,
                                          isolation_date : d.isolation_date,
-                                         loc : d.location,
+                                         loc: d.location,
+                                         elevation: d.elevation + " M",
                                          landscape: d.landscape,
                                          substrate: d.substrate,
                                          comma: ",  ",
