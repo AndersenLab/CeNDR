@@ -63,19 +63,6 @@ else:
 
 
 #
-# Utility Functions
-# 
-
-def get_stripe_keys():
-    # Retrieves stripe keys
-    if (os.getenv('SERVER_SOFTWARE') and
-            os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
-        return ds.get(ds.key("credential", "stripe_live"))
-    else:
-        return ds.get(ds.key("credential", "stripe_test"))
-
-
-#
 # Custom Filters
 #
 

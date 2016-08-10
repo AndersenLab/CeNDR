@@ -1,6 +1,6 @@
-from cendr import app, autoconvert, ds, db, cache, get_stripe_keys
+from cendr import app, autoconvert, ds, db, cache
 from cendr import json_serial
-from flask import render_template, request, url_for, redirect, make_response, Response
+from flask import render_template, request, url_for, redirect, make_response, Response, abort
 from cendr.models import strain
 from collections import OrderedDict
 import json
@@ -12,7 +12,10 @@ try:
 except:
     pass # Importing this not always important...
 from cendr.emails import order_submission
-
+from gcloud.datastore.entity import Entity
+from datetime import datetime
+import pytz
+from dateutil.relativedelta import relativedelta
 #
 # Global Strain Map
 #
@@ -136,73 +139,52 @@ def order_page():
     bcs = OrderedDict([("Strain", "/strain/"), ("Order", "")])
     title = "Order"
     strain_listing = list(set(request.form.getlist('item')))
+    if (len(strain_listing) == 0):
+        return redirect(url_for("strain_listing_page"))
     items = request.form.getlist("item")
     # Retreive SKU's for prices
     items = calculate_total(items)
     total = sum(items.values())
+    field_list = ['name', 'phone', 'email', 'shipping-account', 'address']
+    print(request.form)
+    if 'shipping-service' in request.form:
+        # Check that all pieces are filled out.
+        missing_fields = []
+        for i in field_list:
+            if i in request.form:
+                if not request.form[i]:
+                    missing_fields.append(i)
+                    warning = "Missing Some Fields"
+        if len(missing_fields) == 0:
+            o = ds.get(ds.key("cendr-order", "count"))
+            o["order-number"] += 1
+            order = Entity(ds.key('cendr-order'))
+            for k in field_list:
+                order[k] = request.form[k]
+            order["items"] = [u"{k}:{v}".format(k=k, v=v) for k,v in items.items()]
+            order["total"] = total
+            order['submitted'] = datetime.now(pytz.timezone("America/Chicago"))
+            order['order-number'] = o['order-number']
+            order['shipping-service'] = request.form['shipping-service']
+            with ds.transaction():
+                ds.put(o)
+                ds.put(order)
+            order_hash = order.key.id
+            mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+               to=order["email"],
+               subject="CeNDR Order #" + str(order["order-number"]),
+               body=order_submission.format(order_hash=order_hash))
+            return redirect(url_for("order_confirmation", order_hash=order_hash), code=302)
+        
+    return render_template('order.html', **locals())
 
-    # Stripe can only process 25 items at once.
-    if len(items) > 25:
-        return redirect(url_for("strain_listing_page", warning = "A maximum of 25 items may be ordered (sets + strains)."))
-
-    stripe_keys = get_stripe_keys()
-    key = stripe_keys["public_key"]
-
-    if 'stripeToken' in request.form:
-        stripe.api_key = stripe_keys["secret_key"]
-        try:
-            customer = stripe.Customer.retrieve(request.form['stripeEmail'].lower())
-        except:
-            customer = stripe.Customer.create(
-                id=request.form['stripeEmail'].lower(),
-                email=request.form['stripeEmail'],
-                card=request.form['stripeToken']
-            )
-
-        address = {
-            "city": request.form["stripeShippingAddressCity"],
-            "country": request.form["stripeShippingAddressCountry"],
-            "line1": request.form["stripeShippingAddressLine1"],
-            "postal_code": request.form["stripeShippingAddressZip"],
-            "state": request.form["stripeShippingAddressState"]
-        }
-
-        if "stripeShippingAddressLine2" in request.form:
-            address.update({"line2":request.form["stripeShippingAddressLine2"]})
-        order = stripe.Order.create(
-            currency = 'usd',
-            items = [{"parent": m} for m in items.keys()],
-            shipping = {
-                        "name": request.form["stripeShippingName"],
-                        "address": address,
-                        "phone": None
-                        },
-            customer = customer.id,
-            metadata = {"Shipping Service": request.form["shipping-service"],
-                        "Shipping Account": request.form["shipping-account-number"]}
-            )
-        order.pay()
-        # Send user email
-        mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
-                to=customer.email,
-                subject="CeNDR Order Submission " + order.id[3:],
-                body=order_submission.format(order_slug=order.id[3:]))
-        mail.send_mail_to_admins(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
-                subject="CeNDR Order Submission " + order.id[3:],
-                body=order_submission.format(order_slug=order.id[3:]))
-        return redirect(url_for("order_confirmation", order_id=order.id), code=302)
-    else:
-        return render_template('order.html', **locals())
-
-
-@app.route("/order/<order_id>/")
-def order_confirmation(order_id):
-    if order_id.startswith("or_"):
-        order_id = order_id[3:]
-    page_title = "Order: " + order_id
-    stripe_keys = get_stripe_keys()
-    stripe.api_key = stripe_keys["secret_key"]
-    order = stripe.Order.retrieve("or_" + order_id)      
+@app.route("/order/<order_hash>/")
+def order_confirmation(order_hash):
+    order = ds.get(ds.key("cendr-order", int(order_hash)))
+    order["items"] = {x.split(":")[0]:int(x.split(":")[1]) for x in order['items']}
+    if order is None:
+        abort(404)
+    page_title = "Order Number: " + str(order['order-number'])
     return render_template('order_confirm.html', **locals())
 
 

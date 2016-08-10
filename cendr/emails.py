@@ -9,11 +9,12 @@ If you set your record to private, this email serves as a way for you to find th
 """
 
 order_submission = """
-Your purchase on elegansvariation.org is available here:
+Thank you for your order. Please retain this email for your records.
 
-http://elegansvariation.org/order/{order_slug}/
+Information regarding your purchase, including its tracking number is available here:
 
-Please retain this email for your records.
+http://elegansvariation.org/order/{order_hash}/
+
 """
 
 donate_submission = """

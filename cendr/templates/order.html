@@ -40,16 +40,86 @@
                 </tr>
             </tbody>
         </table>
-        <strong>
-            Print this page and send to:
-        </strong>
-        <br />
-        <p><strong>Erik C. Andersen</strong><br />
-        Department of Molecular Biosciences<br />
-        Northwestern University<br />
-        2145 Tech Drive, Tech MG90<br />
-        Evanston, IL. 60208-3500</p>
-        <p>To expedite shipping, please supply FedEx or UPS account numbers.</p>
+
+<form class="form-horizontal" method="POST">
+{% for item, price in items.items() %}
+    <input type="hidden" name="item"  id="{{ item }}" value="{{ item }}"/>
+{% endfor %}
+<div class="row">
+<div class="col-lg-6">
+  <div class="form-group {% if 'name' in missing_fields %}has-warning{% endif %}">
+    <label for="name" class="col-sm-2 control-label">Name</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="name" name="name" placeholder="" value="{{ request.form['name'] }}">
+    </div>
+  </div>
+  </div>
+
+<div class="col-lg-6">
+  <div class="form-group {% if 'email' in missing_fields %}has-warning{% endif %}">
+    <label for="email" class="col-sm-2 control-label">Email</label>
+    <div class="col-sm-10">
+      <input type="email" class="form-control" id="email" name="email" placeholder="" value="{{ request.form['email'] }}">
+    </div>
+  </div>
+</div>
+</div>
+<div class="row">
+<div class="col-lg-6">
+  <div class="form-group {% if 'phone' in missing_fields %}has-warning{% endif %}">
+    <label for="phone" class="col-sm-2 control-label">Phone</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="phone" name="phone"  placeholder="(111)-111-1111" value="{{ request.form['phone'] }}">
+    </div>
+  </div>
+</div>
+
+<div class="col-lg-6">
+  <div class="form-group {% if 'shipping-account' in missing_fields %}has-warning{% endif %}">
+    <label for="shipping-service" class="col-sm-2 control-label">Shipping</label>
+    <div class="col-sm-4">
+      <select class="form-control" id="shipping-service" name="shipping-service">
+          <option>UPS</option>
+          <option>FEDEX</option>
+      </select>
+    </div>
+    <div class="col-sm-6">
+        <input type="text" class="form-control" id="shipping-account" name="shipping-account" placeholder="Account Number" value="{{ request.form['shipping-account'] }}">
+    </div>
+
+  </div>
+  <div class='col-sm-offset-2' id="helpBlock" class="help-block">Select a shipping service and provide an account number.</span>
+</div>
+
+</div>
+
+
+<div class="col-lg-6">
+  <div class="form-group {% if 'address' in missing_fields %}has-warning{% endif %}">
+    <label for="address" class="col-sm-2 control-label">Shipping Address</label>
+    <div class="col-sm-10">
+      <textarea class="form-control" style="display:block; width: 100%" rows="3" id="address" name="address" placeholder="123 Sheridan Rd.
+Chicago, IL. 60657" value="{{ request.form['address'] }}"></textarea>
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+
+<div class='row'
+  <div class="form-group">
+    <div class="col-sm-4 col-sm-offset-4">
+    <br />
+    <br />
+      <button type="submit" class="btn btn-block btn-primary">Submit</button>
+      <br />
+      <div  id="helpBlock" class="help-block"><strong>Note: </strong>You will still need to send a check to complete your order.</span>
+    </div>
+  </div>
+</form>
+</div>
 
 </div>
 </div>

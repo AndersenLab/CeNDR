@@ -18,7 +18,7 @@
     <div class="col-md-12">
 {% if search %}
 
-<table class="table table-hover table-striped">
+<table class="table table-hover table-striped" style="table-layout: fixed">
 	<thead>
 		<tr>
 			<th>Report Name</th>
@@ -48,7 +48,7 @@
 <br></br>
 <h3 id="mappings">Recent Mappings</h3>
 
-<table class="table table-hover table-striped">
+<table class="table table-hover table-striped" style="table-layout: fixed">
 	<thead>
 		<tr>
 			<th>Report Name</th>
@@ -65,7 +65,7 @@
 			<td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.trait_name }}</a></td>
 			<td>{% if i.log10p %}{{ i.chrom }}:{{ i.pos }}{% endif %}</td>
 			<td>{% if i.log10p %}{{ i.log10p }}{% else %}-{% endif %}</td>
-      <td>{{ i["submission_complete"].date() }}</td>
+      <td>{{ i["submission_date"].date() }}</td>
 		</tr>
 	{% endfor %}
 	</tbody>
@@ -250,7 +250,7 @@ function updateTable(data) {
       var pos = data['pos'];
       var td3 = (log10p) ? (chrom + ":" + pos) : ""; 
       var td4 = (log10p) ? (log10p) : "--"; 
-      var date = data['submission_complete'].substring(0,10);
+      var date = moment(data['submission_date']).format("YYYY-MM-DD");
       var link = window.location.origin+"/report/" + data['report_slug'] + "/" + data['trait_slug'];
       console.log(link);
       var $newRow = 

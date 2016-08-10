@@ -13,10 +13,10 @@ class report_by_date(Resource):
                                  trait.trait_name,
                                  trait.trait_slug,
                                  report.release,
-                                 trait.submission_complete) \
+                                 trait.submission_date) \
                     .join(report) \
                     .filter(
-            (db.truncate_date("day", trait.submission_complete) == parse(date).date()
+            (db.truncate_date("day", trait.submission_date) == parse(date).date()
              ),
             (report.release == 0),
             (trait.status == "complete")

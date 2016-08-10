@@ -217,10 +217,12 @@ def public_mapping():
                                     trait.trait_name,
                                     trait.trait_slug,
                                     trait.status,
-                                    trait.submission_complete, mapping).filter(trait.status == "complete", report.release == 0).join(mapping, JOIN.LEFT_OUTER).switch(trait).join(report).distinct().dicts().order_by(trait.submission_complete.desc()).execute()
+                                    trait.submission_complete,
+                                    trait.submission_date,
+                                    mapping).filter(trait.status == "complete", report.release == 0).join(mapping, JOIN.LEFT_OUTER).switch(trait).join(report).distinct().dicts().order_by(trait.submission_complete.desc()).execute()
 
     dates = recent_results
-    date_set = dict(Counter([time.mktime((x["submission_complete"]+relativedelta(hours = +6)).timetuple()) for x in dates]))
+    date_set = dict(Counter([time.mktime((x["submission_date"]+relativedelta(hours = +6)).timetuple()) for x in dates]))
     # recent_results.reverse()
     bcs = OrderedDict([("Public", None)])
     title = "Public Mappings"

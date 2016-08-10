@@ -57,7 +57,10 @@ def get_correlated_genes(r, t, chrom, start, end):
             av_set[i["gene_id"]] = []
         av_set[i["gene_id"]].append(i)
     for gene in max_corr:
-        gene["variant_set"] = av_set[gene["gene_id"]]
+        if gene["gene_id"] in av_set:
+            gene["variant_set"] = av_set[gene["gene_id"]]
+        else:
+            gene["variant_set"] = []
     return max_corr
 
 

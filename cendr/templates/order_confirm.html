@@ -17,16 +17,14 @@
 <p>
   <ul>
   <li><address>
-    <strong>{{ order.shipping.name }} <{{ order.email }}></strong><br>
-    {{ order.shipping.address.line1 }}<br>
-    {{ order.shipping.address.city }}, {{ order.shipping.address.state }}. {{ order.shipping.address.postal_code }}<br>
+    <strong>{{ order['name'] }} <{{ order['email'] }}></strong><br>
+    {{ order['address'] }}
   </address></li>
-  <li><strong>Shipping Service: </strong>{{ order.metadata["Shipping Service"] }}
-  <li><strong>Shipping Account Number: </strong>{{ order.metadata["Shipping Account"] }}</li>
+  <li><strong>Shipping Service: </strong>{{ order["shipping-service"] }}
   <li><strong>Tracking Number: </strong>
-  {% if order.metadata.tracking and order.metadata["Shipping Service"] == "UPS" %}
+  {% if order['tracking'] and order['shipping-service'] == "UPS" %}
       <a href="http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order.metadata.tracking }}">{{ order.metadata.tracking }}</a>
-  {% elif order.metadata.tracking and order.metadata["Shipping Service"] == "FEDEX" %}
+  {% elif order['tracking'] and order['shipping-service'] == "FEDEX" %}
       <a href="http://www.fedex.com/Tracking?action=track&tracknumbers={{ order.metadata.tracking }}">{{ order.metadata.tracking }}</a>
   {% else %}
       Not yet assigned
@@ -44,7 +42,7 @@
 
 <div class="row">
     <div class="col-md-12">
-	 <table class="table table-hover table-striped">
+	 <table class="table table-hover table-striped" style="table-layout: fixed">
             <thead>
                 <tr>
                     <th style="width: 40px">#</th>
@@ -53,22 +51,37 @@
                 </tr>
             </thead>
             <tbody class="searchable">
-                {% for item in order["items"] %}
-                {% if item.parent not in [None, "ship_free-shipping"] %}
+                {% for k, v in order["items"].items() %}
                 <tr>
                     <td>{{ loop.index }}</td>
-                    <td>{{ item.parent }}</td>
-                    <td class="price">${{'%0.2f'| format(item.amount/100|float)}}</td>
+                    <td>{{ k }}</td>
+                    <td class="price">${{'%0.2f'| format(v/100|float)}}</td>
                 </tr>
-                {% endif %}
                 {% endfor %}
                 <tr>
                 <td><strong>Total</strong></td>
                 <td></td>
-                <td class="price"><strong>${{'%0.2f'| format(order.amount/100|float)}}</strong></td>
+                <td class="price"><strong>${{'%0.2f'| format(order['total']/100|float)}}</strong></td>
                 </tr>
             </tbody>
         </table>
+
+        <h3>To complete your order</h3>
+
+        <ol>
+            <li>Please make a check payable to Northwestern University</li>
+            <li>Print this page out.</li>
+            <li>Mail the check and this printed page to the address below. <strong>Be sure to note the order number</strong></li>
+        </ol>
+        <br />
+        <p><strong>Erik C. Andersen</strong><br />
+        Department of Molecular Biosciences<br />
+        Northwestern University<br />
+        2145 Tech Drive, Tech MG90<br />
+        Evanston, IL. 60208-3500</p>
+        <p>Please contact us if you have any questions.</p>
+
+
       </div>
   </div>
 {% endblock %}
