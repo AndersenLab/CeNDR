@@ -9,6 +9,7 @@ import json
 from xml.dom import minidom
 
 @app.route('/api/wormbase/<path:r>')
+@cache.memoize(50)
 def wormbase_api(r):
     r = requests.get('http://www.wormbase.org/rest/' + r, headers = {'Content-Type': 'application/json; charset=utf-8'}
 )
@@ -17,6 +18,7 @@ def wormbase_api(r):
 
 
 @app.route('/api/omim/<string:gene_name>')
+@cache.memoize(50)
 def omim(gene_name):
     gene_id = wb_gene.get(Name = gene_name)
     r = requests.get('http://www.wormbase.org/rest/widget/gene/%s/human_diseases' % gene_id.Name,

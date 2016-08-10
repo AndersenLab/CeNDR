@@ -5,6 +5,7 @@ from cendr.models import homologene, wb_orthologs, wb_gene
 
 
 class search_homologs(Resource):
+    @cache.memoize(50)
     def get(self, term):
         hgene_results = list(homologene.filter(
                             (homologene.gene_symbol == term) or

@@ -9,6 +9,7 @@ from flask import render_template, request, redirect, url_for
 
 
 @app.route('/gene/<gene_name>/')
+@cache.memoize(50)
 def gene(gene_name):
     title = gene_name
     tbl_color = {"LOW": 'success', "MODERATE": 'warning', "HIGH": 'danger'}

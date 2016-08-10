@@ -7,7 +7,7 @@ from collections import Counter
 from collections import defaultdict
 from flask import jsonify
 
-
+@cache.memoize(500)
 def get_correlated_genes(r, t, chrom, start, end):
     print(r)
     print(t)

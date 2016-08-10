@@ -22,7 +22,7 @@ from dateutil.relativedelta import relativedelta
 
 
 @app.route('/strain/global-strain-map/')
-@cache.cached()
+@cache.memoize(50)
 def map_page():
     title = "Global Strain Map"
     bcs = OrderedDict([("Strain", url_for("strain_listing_page")), ("Global-Strain-Map", "")])
@@ -39,6 +39,7 @@ def map_page():
 
 
 @app.route('/strain/metadata.tsv')
+@cache.memoize(50)
 def strain_metadata():
     strain_listing = list(strain.select().filter(
         strain.isotype != None).tuples().execute())
@@ -59,7 +60,7 @@ def strain_metadata():
 #
 
 @app.route('/strain/<isotype_name>/')
-@cache.cached()
+@cache.memoize(50)
 def isotype_page(isotype_name):
     page_title = isotype_name
     page_type = "isotype"
@@ -76,7 +77,7 @@ def isotype_page(isotype_name):
 #
 
 @app.route('/strain/')
-@cache.cached()
+@cache.memoize(50)
 def strain_listing_page():
     bcs = OrderedDict([("Strain", None)])
     title = "Strain Catalog"
@@ -111,6 +112,7 @@ def strain_submission_page():
 #
 
 @app.route("/strain/protocols/")
+@cache.cached(timeout=50)
 def protocols():
     title = "Protocols"
     bcs = OrderedDict([("Strain", url_for("strain_listing_page")), ("Protocols", "")])
@@ -133,6 +135,7 @@ def calculate_total(item_list):
         else:
             item_price_list[i] = 1000
     return item_price_list
+
 
 @app.route('/order', methods=['GET','POST'])
 def order_page():

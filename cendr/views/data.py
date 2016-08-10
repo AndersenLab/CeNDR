@@ -8,6 +8,7 @@ from flask import render_template
 
 @app.route('/Data/')
 @app.route('/data/')
+@cache.memoize(50)
 def data_page():
     bcs = OrderedDict([("Data", None)])
     title = "Data"
@@ -18,6 +19,7 @@ def data_page():
 
 
 @app.route('/data/download/<filetype>.sh')
+@cache.memoize(50)
 def download_script(filetype):
     strain_listing = strain.select().filter(
         strain.isotype != None).order_by(strain.isotype).execute()

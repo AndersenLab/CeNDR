@@ -10,6 +10,7 @@ PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
 
 
 class strain_api(Resource):
+    @cache.memoize(50)
     def get(self):
         """
             Return information for all strains.
@@ -24,6 +25,7 @@ api.add_resource(strain_api, '/api/strain')
 
 
 class strain_ind_api(Resource):
+    @cache.memoize(50)
     def get(self, strain_name):
         """
             Return information for an individual strain.
@@ -41,6 +43,7 @@ api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>')
 
 
 class isotype_ind_api(Resource):
+    @cache.memoize(50)
     def get(self, isotype_name):
         """
             Return all strains within an isotype.

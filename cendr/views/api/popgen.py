@@ -5,6 +5,7 @@ from cendr import api
 
 
 class tajima_d(Resource):
+    @cache.memoize(50)
     def get(self, chrom, start, end):
         data = list(tajimaD.select(tajimaD.BIN_START, tajimaD.TajimaD)
                            .filter((tajimaD.CHROM == chrom) &

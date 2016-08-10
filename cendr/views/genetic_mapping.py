@@ -43,6 +43,7 @@ class CustomEncoder(json.JSONEncoder):
             return str(o)
         return super(CustomEncoder, self).default(o)
 
+
 @app.route('/genetic-mapping/submit/')
 def gwa():
     title = "Perform Mapping"
@@ -110,6 +111,7 @@ def resolve_strain_isotype(q):
                 return strain_name[0]
             else:
                 return None
+
 
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
@@ -196,6 +198,7 @@ def validate_url():
 
 
 @app.route('/Genetic-Mapping/public/', methods=['GET'])
+@cache.memoize(50)
 def public_mapping():
     query = request.args.get("query")
     if query is not None:
