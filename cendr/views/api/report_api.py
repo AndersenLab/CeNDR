@@ -1,4 +1,4 @@
-from cendr import api
+from cendr import api, cache
 from flask import jsonify
 from cendr.models import trait, report, db
 from dateutil.parser import parse

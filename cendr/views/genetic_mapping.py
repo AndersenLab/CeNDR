@@ -1,4 +1,4 @@
-from cendr import app
+from cendr import app, cache
 from cendr import cache
 from cendr import ds
 from cendr import autoconvert

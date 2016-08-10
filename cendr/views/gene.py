@@ -1,4 +1,4 @@
-from cendr import app
+from cendr import app, cache
 from cendr.models import wb_gene, WI, mapping, trait, report
 from collections import OrderedDict
 from flask import render_template, request, redirect, url_for

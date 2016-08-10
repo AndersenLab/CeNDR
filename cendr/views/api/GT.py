@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from cendr import api
+from cendr import api, cache
 import cPickle
 import base64
 import zlib

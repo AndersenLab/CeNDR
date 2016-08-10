@@ -1,7 +1,7 @@
 from flask_restful import Resource
 from cendr.models import tajimaD
 from flask import jsonify
-from cendr import api
+from cendr import api, cache
 
 
 class tajima_d(Resource):

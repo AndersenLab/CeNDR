@@ -1,6 +1,6 @@
 from flask_restful import Resource
 from cendr.models import WI, mapping_correlation
-from cendr import api
+from cendr import api, cache
 from peewee import *
 from collections import OrderedDict
 from collections import Counter

@@ -1,5 +1,5 @@
 from cendr.models import strain, wb_gene
-from cendr import app
+from cendr import app, cache
 from cendr import ds
 from cendr import api
 from flask import Response, jsonify

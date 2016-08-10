@@ -1,6 +1,6 @@
 from flask_restful import Resource
 from cendr.models import wb_gene
-from cendr import api
+from cendr import api, cache
 from collections import OrderedDict
 from flask import jsonify
 

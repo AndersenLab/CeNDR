@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from cendr import api
+from cendr import api, cache
 from flask import jsonify
 from cendr.models import homologene, wb_orthologs, wb_gene
 
