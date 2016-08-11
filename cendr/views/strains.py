@@ -34,12 +34,11 @@ def map_page():
 
 
 #
-# Strain Metadata
+# Strain Data
 #
 
 
-@app.route('/strain/metadata.tsv')
-@cache.memoize(50)
+@app.route('/strain/strain_data.tsv')
 def strain_metadata():
     strain_listing = list(strain.select().filter(
         strain.isotype != None).tuples().execute())
@@ -51,7 +50,7 @@ def strain_metadata():
                 if type(f) == unicode:
                     row[k] = f.encode('ascii', 'ignore')
             yield '\t'.join(map(str, row[1:21])) + "\n"
-    return Response(generate(), mimetype="text/csv")
+    return Response(generate(), mimetype="text/tab-separated-values")
 
 
 
