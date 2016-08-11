@@ -43,6 +43,10 @@ def fetch_geo_gt(chrom, pos):
 
 
 def gt_from_interval(chrom, start, end, var_eff):
+    if var_eff == "ALL":
+        var_eff = WI.CHROM == chrom
+    else:
+        var_eff = (WI.putative_impact << var_eff)
     result = list(WI.select(WI.CHROM,
                             WI.POS,
                             WI.REF,
@@ -60,7 +64,7 @@ def gt_from_interval(chrom, start, end, var_eff):
                     .filter(WI.CHROM == chrom,
                             WI.POS >= start,
                             WI.POS <= end,
-                            WI.putative_impact << var_eff)
+                            var_eff) 
                     .limit(1000)
                     .dicts()
                     .execute())
@@ -99,16 +103,15 @@ api.add_resource(strain_gt_locations,
 
 
 class fetch_gt_from_interval(Resource):
-    def get(self, chrom, start, end, tracks=""):
-        if tracks:
+    def get(self, chrom, start, end, tracks="ALL"):
+        if tracks != "ALL":
             putative_impact = {'l': 'LOW', 'm': 'MODERATE', 'h': 'HIGH'}
-            var_eff = [putative_impact[x] if x else '' for x in tracks]
-            result = gt_from_interval(chrom, start, end, var_eff)
-        else:
-            result = []
+            tracks = [putative_impact[x] if x else '' for x in tracks]
+        result = gt_from_interval(chrom, start, end, tracks)
         return jsonify(result)
 
 urls = ['/api/variant/gt/<string:chrom>/<int:start>/<int:end>/<string:tracks>',
-        '/api/variant/gt/<string:chrom>/<int:start>/<int:end>/']
+        '/api/variant/gt/<string:chrom>/<int:start>/<int:end>/',
+        '/api/variant/gt/<string:chrom>/<int:start>/<int:end>']
 
 api.add_resource(fetch_gt_from_interval, *urls)
