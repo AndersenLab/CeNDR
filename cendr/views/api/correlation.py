@@ -9,8 +9,6 @@ from flask import jsonify
 
 @cache.memoize(500)
 def get_correlated_genes(r, t, chrom, start, end):
-    print(r)
-    print(t)
     # Fetch the maximally correlated genes.
     max_corr = list(mapping_correlation.select(
                         fn.CONCAT(WI.CHROM, ":", WI.POS).alias("CHROM_POS"),

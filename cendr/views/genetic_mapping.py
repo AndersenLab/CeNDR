@@ -248,7 +248,8 @@ def public_mapping():
 def trait_view(report_slug, trait_slug="", rerun = None):
 
     report_data = list(report.select(report,
-                                     trait).join(trait).where(
+                                     trait,
+                                     mapping).join(trait).where(
                                     (
                                         (report.report_slug == report_slug) &
                                         (report.release == 0)
@@ -257,7 +258,9 @@ def trait_view(report_slug, trait_slug="", rerun = None):
                                         (report.report_hash == report_slug) &
                                         (report.release > 0)
                                     )
-                                ).dicts().execute())
+                                ) \
+                        .join(mapping, JOIN.LEFT_OUTER) \
+                        .dicts().execute())
 
     if not report_data:    
         return render_template('404.html'), 404
@@ -286,7 +289,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     trait_slug = trait_data["trait_slug"] # don't remove
 
     r = report.get(report_slug = report_slug)
-    t = trait.get(report = r.id, trait_slug = trait_slug)
+    t = trait.get(report = r, trait_slug = trait_slug)
 
     if rerun == "rerun":
         #if trait_data["status"] != "complete":

@@ -88,7 +88,7 @@
       <div class="btn-group" role="group">
         {% for trait in report_data %} 
 
-          <a href="{{ url_for('trait_view', report_slug = report_url_slug, trait_slug = trait.trait_slug) }}" type="button" class="btnbtn-secondary btn-sm {% if trait.trait_slug == trait_slug %} btn-primary {% endif %}">{{ trait.trait_name }}</a>     
+          <a href="{{ url_for('trait_view', report_slug = report_url_slug, trait_slug = trait.trait_slug) }}" type="button" class="btn btn-sm {% if trait.trait_slug == trait_slug %} btn-primary {% else %} btn-link {% endif %}">{% if trait.interval_start %}<strong>{{ trait.trait_name }}</strong>{% else %}{{ trait.trait_name }}{% endif %}</a>     
           
         {% endfor %}
 
@@ -116,6 +116,10 @@
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/mapping.tsv">Mapping</a></strong></li>
       {% endif %}
 
+      {% if mapping_results|length > 0 %}
+      <li><strong><a href='{{ url_for('interval_download', report_slug = report_slug, trait_slug = trait_slug) }}'>Variant Correlation</a></strong></li>
+      {% endif %}
+
     </ul>
     </div>
     <div class='col-md-6'>
@@ -137,7 +141,6 @@
 
   </div>
 </div>
-
 
 <div id="report" data-toggle="tab">
 
