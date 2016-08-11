@@ -282,7 +282,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
             return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=report_data[0]["trait_slug"] ))
 
 
-    title = trait_data["report_name"]
+    title = trait_data["report_name"] + " > " + trait_data["trait_name"]
     subtitle = trait_data["trait_name"]
     # Define report and trait slug 
     report_slug = trait_data["report_slug"] # don't remove
@@ -339,6 +339,10 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     report_files = list(storage.Client().get_bucket("cendr").list_blobs(
         prefix=report_trait + "/tables"))
     report_files = [os.path.split(x.name)[1] for x in report_files]
+
+
+    # Fetch biotypes descriptions
+    from cendr import biotypes
 
     return render_template('report.html', **locals())
 

@@ -308,7 +308,13 @@ A genome-wide representation of the association between variation in the <em>C. 
               </tr>
               {% for i in ["protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "tRNA", "lincRNA", "rRNA", "scRNA", "snoRNA", "snRNA", "asRNA", "Coding", "Noncoding"] %}
               <tr>
-                <td class='text-left'>{{ i }}</td>
+                <td class='text-left'>
+                {% if i in biotypes.keys() %}
+                  <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ biotypes[i] }}'>{{ i }}</abbr>
+                {% else %}
+                {{ i }}
+                {% endif %}
+                </td>
                 <td data='msg.gene_biotype.biotype_summary.{{ i }}' class='dat_{{ peak_index }}'>-</td>
                 <td data='msg.gene_w_variants_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
                 <td data='msg.gene_by_impact.MODERATE.{{ i }}' class='dat_{{ peak_index }}'>-</td>

@@ -7,6 +7,23 @@ from flask.ext.cache import Cache
 from jinja2 import contextfilter
 
 
+biotypes = {
+    "miRNA" : "microRNA",
+    "piRNA" : "piwi-interacting RNA",
+    "rRNA"  : "ribosomal RNA",
+    "siRNA" : "small interfering RNA",
+    "snRNA" : "small nuclear RNA",
+    "snoRNA": "small nucleolar RNA",
+    "tRNA"  : "transfer RNA",
+    "vaultRNA" : "Short non-coding RNA genes that form part of the vault ribonucleoprotein complex",
+    "lncRNA" : "Long non-coding RNA",
+    "lincRNA" : "Long interspersed ncRNA",
+    "pseudogene" : "non-functional gene.",
+    "asRNA" : "Anti-sense RNA",
+    "ncRNA" : "Non-coding RNA",
+    "scRNA" : "Small cytoplasmic RNA"
+}
+
 
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
