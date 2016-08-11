@@ -1,6 +1,7 @@
 from cendr import api, cache
+from peewee import fn, JOIN
 from flask import jsonify
-from cendr.models import trait, report, db
+from cendr.models import trait, report, db, mapping
 from dateutil.parser import parse
 from flask_restful import Resource
 
@@ -13,7 +14,11 @@ class report_by_date(Resource):
                                  trait.trait_name,
                                  trait.trait_slug,
                                  report.release,
-                                 trait.submission_date) \
+                                 trait.submission_date,
+                                 mapping.log10p,
+                                 fn.CONCAT(mapping.chrom, ":", mapping.pos).alias("CHROM_POS")) \
+                    .join(mapping, JOIN.LEFT_OUTER) \
+                    .switch(trait) \
                     .join(report) \
                     .filter(
             (db.truncate_date("day", trait.submission_date) == parse(date).date()

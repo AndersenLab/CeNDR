@@ -214,7 +214,7 @@ def public_mapping():
         search = True
         return render_template('public_mapping.html', **locals())
     title = "Perform Mapping"
-    recent_results = trait.select(report.release, 
+    results = trait.select(report.release, 
                                     report.report_name,
                                     report.report_slug,
                                     trait.trait_name,
@@ -222,11 +222,19 @@ def public_mapping():
                                     trait.status,
                                     trait.submission_complete,
                                     trait.submission_date,
-                                    mapping).filter(trait.status == "complete", report.release == 0).join(mapping, JOIN.LEFT_OUTER).switch(trait).join(report).distinct().dicts().order_by(trait.submission_complete.desc()).execute()
+                                    mapping) \
+                           .filter(trait.status == "complete", 
+                                   report.release == 0) \
+                           .join(mapping, JOIN.LEFT_OUTER) \
+                           .switch(trait) \
+                           .join(report) \
+                           .distinct() \
+                           .dicts() \
+                           .order_by(trait.submission_complete.desc()) \
+                           .execute()
 
-    dates = recent_results
-    date_set = dict(Counter([time.mktime((x["submission_date"]+relativedelta(hours = +6)).timetuple()) for x in dates]))
-    # recent_results.reverse()
+    date_set = dict(Counter([time.mktime((x["submission_date"]+relativedelta(hours = +6)).timetuple()) for x in results]))
+    recent_results = list(results)[0:20]
     bcs = OrderedDict([("Public", None)])
     title = "Public Mappings"
     pub_mappings = list(mapping.select(mapping, report, trait).join(trait).join(report).filter(report.release == 0).dicts().execute())

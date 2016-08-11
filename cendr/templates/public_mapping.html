@@ -59,8 +59,8 @@
 		</tr>
 	</thead>
 	<tbody>
-	{% for i in dates %}
-		<tr >
+	{% for i in recent_results %}
+		<tr>
 			<td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.report_name }}</a></td>
 			<td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.trait_name }}</a></td>
 			<td>{% if i.log10p %}{{ i.chrom }}:{{ i.pos }}{% endif %}</td>
@@ -228,47 +228,28 @@ cal.init({
   subDomainTextFormat: "%d",
   legend: [1, 8, 12, 20],
   onClick: function(x) {
-            $("#mappings").text("Archived Mappings");
+            $("#mappings").text("Significant public mappings From " + moment(x).format("YYYY-MM-DD"));
             date = x.toISOString().split("T")[0];
-            $.ajax({
-              url: "/api/report/date/" + date,
-              success: function (data) {
+            $.getJSON("/api/report/date/" + date, function (data) {
                 $("tbody tr").remove();
                 console.log(data);
                 $.each(data, function(index,value){
                   updateTable(value);
                 });
-              }
-
-            })
+            });
         }
 });
 
 function updateTable(data) {
+      var report = sprintf("<a href='/report/%s'>%s</a>", data['report_slug'], data['report_name']);
+      var trait = sprintf("<a href='/report/%s/%s'>%s</a>", data['report_slug'], data['trait_slug'], data['trait_name']);
+      var CHROM_POS = data['CHROM_POS']; 
       var log10p = data['log10p'];
-      var chrom = data['chrom'];
-      var pos = data['pos'];
-      var td3 = (log10p) ? (chrom + ":" + pos) : ""; 
-      var td4 = (log10p) ? (log10p) : "--"; 
       var date = moment(data['submission_date']).format("YYYY-MM-DD");
-      var link = window.location.origin+"/report/" + data['report_slug'] + "/" + data['trait_slug'];
-      console.log(link);
-      var $newRow = 
-      $("<tr><td><a href =" + link + ">" +
-            data['report_name'] + 
-          "</a></td><td>"+
-          "<a href =" + link + ">" +
-            data['trait_name'] + 
-        "</a></td><td>"+
-          td3 +
-        "</td><td>" +
-          td4 +
-        "</td><td>" +
-          date + 
-        "</td></tr>"); 
-
-    console.log($newRow);
-   $($newRow).appendTo($("tbody"));
+      var link = window.location.origin + "/report/" + data['report_slug'] + "/" + data['trait_slug'];
+      var newRow = [report, trait, CHROM_POS, log10p, date];
+      newRow = "<tr><td>" + newRow.join("</td><td>") + "</td></tr>";
+   $("tbody").append(newRow);
 }
 
 $("body").ready(function () {

@@ -89,7 +89,7 @@
         
         <a href = "{{ url_for('news_item') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
       </h4>
-        {% for f in files %}
+        {% for f in files|reverse %}
 
             <h4 class="list-group-item-heading"><a href="{{ url_for('news_item', filename = f.strip(".md")) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></h4>
             </a> <br />
