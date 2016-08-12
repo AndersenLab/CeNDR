@@ -27,40 +27,57 @@
       <div class="col-md-12">
     <div class="well">
     <div class="row">
-      <div class="col-md-4">
-      <h4>Standard</h4>
+      <div class="col-md-2">
+      <h5>Tracks <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
       {% for i in ["Genes", "Transcripts"] %}
         <div class="checkbox">
           <label><input type="checkbox" checked class="track-select" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
-      {% for i in ["phyloP", "phastCons", "Variants"] %}
+      {% for i in ["PhyloP", "PhastCons", "Variants"] %}
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label>
+          <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label> 
         </div>
       {% endfor %}
+
+        <h5>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+
+        <div class="checkbox">
+            <label><input type="checkbox" class="track-select" value="LOW" />LOW <div class="legend-box" style="background-color: #66d866;"></div></label>
+        </div>
+
+        <div class="checkbox">
+              <label><input type="checkbox" class="track-select" value="MODERATE" />MODERATE <div class="legend-box" style="background-color: #ffd33f;"></div></label>
+        </div>
+
+        <div class="checkbox">
+              <label><input type="checkbox" class="track-select" value="HIGH" />HIGH <div class="legend-box" style="background-color: #ff3f3f;"></div></label>
+        </div>
+
+
       </div>
-      <div class="col-md-4">
+      <div class="col-md-6">
 
-        <h4>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h4>
-
-        <div class="checkbox">
-            <label><input type="checkbox" class="track-select" value="LOW" />LOW</label>
-        </div>
-
-        <div class="checkbox">
-              <label><input type="checkbox" class="track-select" value="MODERATE" />MODERATE</label>
-        </div>
-
-        <div class="checkbox">
-              <label><input type="checkbox" class="track-select" value="HIGH" />HIGH</label>
-        </div>
+      <h5>Homologous Gene Search</h5>
+        <input type="text" class="form-control" id="gene-search" placeholder="Homologous Gene Search (e.g. TERT)">
+      <div id="loading-orthotable" style="display:none; margin-top:20px;"><div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div></div>
+      
+      <table id="orthotable" class='table table-striped' style="display: none;">
+      <thead>
+      <tr>
+        <th><em>C. elegans Gene</em></th>
+        <th>Gene Symbol</th>
+        <th>Species</th>
+        <th>Source</th>
+      </tr>
+      </thead>
+    <tbody id="orthologs"></tbody>
+    </table>
 
       </div>
 
       <div class="col-md-4">
-
-        <h4>Strains</h4>
+        <h5>Strains</h5>
 
         <form class="form-inline pull-xs-right">
 
@@ -94,29 +111,6 @@
 </div>{# Close col #}
 </div>{# Close row #}
 
-<div class="row" id="ortholog-search-box">
-
-  <div class="col-md-4 col-lg-4">
-    <input type="text" class="form-control" id="gene-search" placeholder="Homologous Gene Search (e.g. TERT)">
-    <div id="loading-orthotable" style="display:none; margin-top:20px;"><div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div></div>
-  </div>
-
-  <div class="col-md-8 col-lg-8">
-    <table id="orthotable" class='table table-striped' style="display: none;">
-      <thead>
-      <tr>
-        <th><em>C. elegans Gene</em></th>
-        <th>Gene Symbol</th>
-        <th>Species</th>
-        <th>Source</th>
-      </tr>
-      </thead>
-    <tbody id="orthologs"></tbody>
-    </table>
-  </div>
-</div>
-
-<br />
 
 <div id="browser"></div>
 
@@ -171,7 +165,7 @@ trackset = {"Genes": {
                             displayMode: "EXPANDED",
                             order: 1,
                             url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_gene.WS245.bed",
-                            //indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_transcripts_WS245.bed.idx",
+                            indexed: false,
                             searchable: true,
                             color: "#5c5cd6",
                             height: 30
@@ -224,7 +218,7 @@ trackset = {"Genes": {
                             homrefColor: "#c2c2d6",
                             visibilityWindow: 20000
                         },
-            "phastCons": {
+            "PhastCons": {
                 name: "phastCons",
                 url: "//storage.googleapis.com/andersen_dist/genome/elegans.phastcons.bw",
                 order: 6,
@@ -232,7 +226,7 @@ trackset = {"Genes": {
                 color: "#000000",
                 visibilityWindow: 20000
             },
-            "phyloP": {
+            "PhyloP": {
                 name: "Phylop",
                 url: "//storage.googleapis.com/andersen_dist/genome/elegans.phylop.bw",
                 order: 6,

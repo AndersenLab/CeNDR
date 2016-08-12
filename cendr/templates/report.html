@@ -2,24 +2,24 @@
 
 
 {% block custom_head %}
+
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <link rel="stylesheet" href="/static/css/leaflet.css" />
 <script src="/static/js/leaflet.js"></script>
-<script src="/static/js/leaflet-search.js"></script>
-
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
-</script>
-<script type="text/javascript" async
-  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
-</script>
 
 
+
+
+{% endblock %}
+
+
+
+{% block style %}
 <style>
-
 .report {
   width: 100%;
 }
@@ -70,21 +70,13 @@
     float: left;
 }
 
-
 </style>
-
-
-{% endblock %}
-
-
-{% block style %}
 {% endblock %}
 
 {% block content %}
 
 <div class="row">
       <div class="col-md-12">
-
       <div class="btn-group" role="group">
         {% for trait in report_data %} 
 
@@ -191,13 +183,13 @@
 
 <img class="report" src="{{ base_url }}/figures/Manhattan.png" />
 
-A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value $(-log_{10}\frac{0.05}{\#SNVs})$ and is usually around 5.5.
+<p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
 
 {% else %}
 
 <img class="report" src="{{ base_url }}/figures/Manhattan.png" />
 
-A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as $(-log_{10}\frac{0.05}{\#SNVs})$.
+<p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as <img src='/static/img/report/bf.png' style="height: 30px;" />.</p>
 
 {% endif %}
 
@@ -256,7 +248,12 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 <img class="height-report" src="{{ base_url }}/figures/LD.png" />
 
-<p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers $r = \frac{-D}{\sqrt{p(A) * p(a) * p(B) * p*(b)}}$, where D raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
+<p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers:</p>
+<div class='text-center'>
+<img src='/static/img/report/tajimad.png' style="height: 50px;" ' />
+</div>
+<br />
+<p>D is the raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
 <br />
 {% endif %}
 <h2 id="peak_summary">Peak Summary</h2>
@@ -336,6 +333,7 @@ A genome-wide representation of the association between variation in the <em>C. 
 
 <h3>Variants</h3>
 
+<p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
 
 <table class="table table-hover table-striped" id="variant_list" style="table-layout: fixed">
     <thead>

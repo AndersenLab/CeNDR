@@ -249,7 +249,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
 
     report_data = list(report.select(report,
                                      trait,
-                                     mapping).join(trait).where(
+                                     mapping.trait_id).join(trait).where(
                                     (
                                         (report.report_slug == report_slug) &
                                         (report.release == 0)
@@ -260,6 +260,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
                                     )
                                 ) \
                         .join(mapping, JOIN.LEFT_OUTER) \
+                        .distinct() \
                         .dicts().execute())
 
     if not report_data:    
@@ -281,8 +282,8 @@ def trait_view(report_slug, trait_slug="", rerun = None):
             # Redirect user to first trait if it can't be found.
             return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=report_data[0]["trait_slug"] ))
 
-
-    title = trait_data["report_name"] + " > " + trait_data["trait_name"]
+    page_title = trait_data["report_name"] + " > " + trait_data["trait_name"]
+    title = trait_data["report_name"]
     subtitle = trait_data["trait_name"]
     # Define report and trait slug 
     report_slug = trait_data["report_slug"] # don't remove
