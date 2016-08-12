@@ -60,8 +60,8 @@
             <tr>
                   <th>Location</th>
                   <th>Sequence</th>
-                  <th>Reference</th>
-                  <th>Alternate</th>
+                  <th>REF</th>
+                  <th>ALT</th>
                   <th>Amino Acid Change</th>
                   <th>Exon</th>
                   <th>Annotation</th>
@@ -77,7 +77,7 @@
                               <td>{{ i["ALT"] }}</td>
                               <td>{{ i["hgvs_p"] }}</td>
                               <td>{{ i["rank_total"] }}</td>
-                              <td>{{ i["annotation"] }}</td>
+                              <td>{{ i["annotation"].replace("&", "<br />") | safe }}</td>
                               <td>{{ i["putative_impact"] }}</td>
                         </tr>
                   {% endfor %}

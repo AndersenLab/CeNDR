@@ -28,19 +28,19 @@
     <div class="well">
     <div class="row">
       <div class="col-md-2">
-      <h5>Tracks <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+      <h5>Tracks <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}#standard-tracks"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
       {% for i in ["Genes", "Transcripts"] %}
         <div class="checkbox">
           <label><input type="checkbox" checked class="track-select" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
-      {% for i in ["PhyloP", "PhastCons", "Variants"] %}
+      {% for i in ["phyloP", "phastCons", "Variants"] %}
         <div class="checkbox">
           <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label> 
         </div>
       {% endfor %}
 
-        <h5>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+        <h5>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
         <div class="checkbox">
             <label><input type="checkbox" class="track-select" value="LOW" />LOW <div class="legend-box" style="background-color: #66d866;"></div></label>
@@ -77,7 +77,7 @@
       </div>
 
       <div class="col-md-4">
-        <h5>Strains</h5>
+        <h5>Strains <a href="{{ url_for('help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></h5>
 
         <form class="form-inline pull-xs-right">
 
@@ -119,6 +119,9 @@
     <div class="col-lg-12">
         <div class="legend-box" style="background-color: #c2c2d6;"></div> <strong>Reference</strong>&nbsp;&nbsp;
         <div class="legend-box" style="background-color: #0066ff;"></div> <strong>Alternate</strong>
+          <label><div class="legend-box" style="background-color: #66d866;"> </div> LOW</label>&nbsp;&nbsp;
+        <label><div class="legend-box" style="background-color: #ffd33f;"></div> MODERATE</label>
+        <label><div class="legend-box" style="background-color: #ff3f3f;"></div> HIGH</label>
     </div>
 
 </div>
@@ -226,8 +229,8 @@ trackset = {"Genes": {
                 color: "#000000",
                 visibilityWindow: 20000
             },
-            "PhyloP": {
-                name: "Phylop",
+            "phyloP": {
+                name: "phylop",
                 url: "//storage.googleapis.com/andersen_dist/genome/elegans.phylop.bw",
                 order: 6,
                 displayMode: "SQUISHED",
@@ -360,7 +363,7 @@ function refresh_variants() {
     $.getJSON("/api/variant/gt/" + loc, function(msg) {
           $.each(msg, function(k, v) {
             if (v["gene_id"] != "") {
-                v["gene_id"] = "<a href='http://www.wormbase.org/species/c_elegans/gene/" + v["gene_id"] + "'>" + v["gene_id"] + "</a>";
+                v["gene_id"] = "<a href='/gene/" + v["gene_id"] + "'>" + v["gene_id"] + "</a>";
                 }
             items = [v["CHROM"] + ":" + Number(v["POS"]).toLocaleString('en'),
                      v["REF"] + " / " + v["ALT"],
