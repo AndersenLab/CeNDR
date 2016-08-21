@@ -186,7 +186,7 @@ def order_confirmation(order_hash):
     order["items"] = {x.split(":")[0]:int(x.split(":")[1]) for x in order['items']}
     if order is None:
         abort(404)
-    page_title = "Order Number: " + str(order['order-number'])
+    page_title = "Invoice Number: " + str(order['order-number'])
     return render_template('order_confirm.html', **locals())
 
 
