@@ -18,11 +18,42 @@
 
       <div class="col-md-4">
 
-       <!-- <div class="panel panel-default">
+       <div class="panel panel-default">
           <div class="panel-heading">Donate</div>
           <div class="panel-body">
+
+          <form method="POST" action="{{ url_for('donate') }}">
+
+
+   <div class="form-group">
+    <label for="email">Email address</label>
+    <input type="email" class="form-control" id="email" name="email" placeholder="Email" />
+  </div>
+  <br />
+
+   <div class="form-group">
+   <label for="donation_amount">Donation Amount</label>
+    <div class="input-group">
+  <span class="input-group-addon">$</span>
+  <input id="donate_amount" name='donation_amount' type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
+  <span class="input-group-addon">.00</span>
+  </div>
+</div>
+
+
+
+<br />
+
+
+
+            <button type="submit" value="Checkout" class="btn btn-primary btn-block" id="purchase" disabled>
+                            <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Donate
+              </button>
+
+          </form>
+
           </div>
-        </div> -->
+        </div>
 
       </div>
 {% endif %}

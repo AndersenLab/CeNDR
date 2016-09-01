@@ -18,5 +18,10 @@ http://elegansvariation.org/order/{order_hash}/
 """
 
 donate_submission = """
-Thank you for your donation of {donation} to CeNDR!
+Thank you for your donation. Please retain this email for your records.
+
+Information regarding your purchase, including its tracking number is available here:
+
+http://elegansvariation.org/order/{order_hash}/
+
 """

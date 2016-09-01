@@ -10,18 +10,27 @@
         </div>
       </div>
 
-<div class='text-left'><strong><em>C. elegans</em> <br />Natural Diversity Resource</strong>
+
+<div class='text-left'><small>
+
         <address class='text-left'>
-        Department of Molecular Biosciences
-        Northwestern University
-        2145 Tech Drive, Tech MG90
+        <strong><em>C. elegans</em> Natural Diversity Resource</strong><br />
+        Department of Molecular Biosciences<br />
+        Northwestern University<br />
+        2145 Tech Drive, Tech MG90<br />
         Evanston, IL. 60208-3500
         </address>
-      
+      </small>
       </div>
+
+      <form>
+<input type="button" class='btn btn-primary btn-block hidden-print' value="Print Invoice" onClick="window.print()">
+</form>
 
 
       </div>
+
+
 
 <div class='col lg-9 col-md-9 col-sm-9 col-xs-9'>
 <div class="panel panel-default">
@@ -31,12 +40,15 @@
 
 <table class='table table-bordered'>
   <tr>
+  {% if not order['donation'] %}
   <th>Shipping Service</th>
   <th>Tracking</th>
+  {% endif %}
   <th>Order ID</th>
   <th>Order Date</th>
   </tr>
   <tr>
+  {% if not order['donation'] %}
   <td>{{ order["shipping-service"] }}</td>
   <td>
   {% if order['tracking'] and order['shipping-service'] == "UPS" %}
@@ -47,22 +59,24 @@
       Not yet assigned
   {% endif %}
   </td>
+  {% endif %}
   <td>{{ order.key.id }}</td>
   <td>{{ order['submitted'].strftime('%Y-%m-%d') }}</td>
   </tr>
   </table>
 
-
+{% if not order['donation'] %}
    <ul class="list-group">
     <li class="list-group-item">
       <h4 class="list-group-item-heading">Ship To</h4>
-      <p class="list-group-item-text">{{ order['name'] }}<br />{{ order['address'] }}</p>
+      <p class="list-group-item-text">{{ order['name'] }}<br />{{ order['address'].replace("\n", "<br />")|safe }}</p>
       <br />
     </li>
 
   </ul>
-
+{% endif %}
   </div>
+
 
 
 
@@ -72,7 +86,7 @@
             <thead>
                 <tr>
                     <th style="width: 40px">#</th>
-                    <th style="width 200px;">Strain/Set</th>
+                    <th style="width 200px;">Item</th>
                     <th class="price">Price</th>
                 </tr>
             </thead>
@@ -91,21 +105,23 @@
                 </tr>
             </tbody>
         </table>
-
+        <div class='hidden-print'>
         <h3>To complete your order</h3>
 
         <ol>
-            <li>Please make a check payable to Northwestern University</li>
             <li>Print this page out.</li>
-            <li>Mail the check and this printed page to the address below. </li>
+            <li>Make a check payable to Northwestern University</li>
+            <li>Mail the check and this printed page to the address below.</li>
         </ol>
+        </div>
         <br />
-        <p><strong>Erik C. Andersen</strong><br />
-        Department of Molecular Biosciences<br />
+        <p class='visible-print'>Mail a check payable to Northwestern University and a copy of your invoice to the address below.</p>
+        <p><strong>Erik C. Andersen, Ph.D.</strong><br />
+        Dept. of Molecular Biosciences<br />
         Northwestern University<br />
-        2145 Tech Drive, Tech MG90<br />
+        2205 Tech Drive<br />
         Evanston, IL. 60208-3500</p>
-        <p>Please contact us if you have any questions.</p>
+        <p class='hidden-print'>Please contact us if you have any questions (<a href='mailto:erik.andersen@northwestern.edu'>erik.andersen@northwestern.edu</a>; 847-467-4382).</p>
 
 
       </div>
