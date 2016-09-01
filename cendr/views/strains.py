@@ -6,7 +6,6 @@ from collections import OrderedDict
 import json
 import os
 import yaml
-import stripe
 try:
     from google.appengine.api import mail
 except:
@@ -148,7 +147,6 @@ def order_page():
     items = calculate_total(items)
     total = sum(items.values())
     field_list = ['name', 'phone', 'email', 'shipping-account', 'address']
-    print(request.form)
     if 'shipping-service' in request.form:
         # Check that all pieces are filled out.
         missing_fields = []
@@ -174,6 +172,7 @@ def order_page():
             order_hash = order.key.id
             mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
                to=order["email"],
+               cc=['dec@u.northwestern.edu', 'robyn.tanny@northwestern.edu', 'erik.andersen@northwestern.edu'],
                subject="CeNDR Order #" + str(order["order-number"]),
                body=order_submission.format(order_hash=order_hash))
             return redirect(url_for("order_confirmation", order_hash=order_hash), code=302)

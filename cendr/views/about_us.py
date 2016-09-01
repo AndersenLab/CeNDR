@@ -1,11 +1,15 @@
-from cendr import app, json_serial, cache
-from flask import render_template, url_for, Markup, request
+from cendr import app, json_serial, cache, ds
+from flask import render_template, url_for, Markup, request, redirect
 import markdown
 import yaml
 import json
 from cendr.models import strain, report, mapping, trait
 from cendr.emails import donate_submission
 from collections import OrderedDict
+from gcloud.datastore.entity import Entity
+from datetime import datetime
+from cendr.emails import donate_submission
+import pytz
 
 @app.context_processor
 def utility_processor():
@@ -72,6 +76,32 @@ def statistics():
 
 @app.route('/about/donate/', methods=['GET','POST'])
 def donate():
+    # Process donation.
+    if request.form:
+        donation_amount = int(request.form['donation_amount']) * 100
+        o = ds.get(ds.key("cendr-order", "count"))
+        o["order-number"] += 1
+        order = Entity(ds.key('cendr-order'))
+        items = {"CeNDR strain and data support": donation_amount}
+        order["email"] = request.form["email"]
+        order["items"] = [u"{k}:{v}".format(k=k, v=v) for k,v in items.items()]
+        order["total"] = donation_amount
+        order["donation"] = True
+        order["submitted"] = datetime.now(pytz.timezone("America/Chicago"))
+        order["order-number"] = o['order-number']
+        with ds.transaction():
+            ds.put(o)
+            ds.put(order)
+        order_hash = order.key.id
+        from google.appengine.api import mail
+        mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+           to=order["email"],
+           cc=['dec@u.northwestern.edu', 'robyn.tanny@northwestern.edu', 'erik.andersen@northwestern.edu'],
+           subject="CeNDR Order #" + str(order["order-number"]),
+           body=donate_submission.format(order_hash=order_hash))
+        return redirect(url_for("order_confirmation", order_hash=order_hash), code=302)
+    
+
     from google.appengine.api import mail
     title = "Donate"
     bcs = OrderedDict([("About", url_for("about")), ("Donate", None)])
