@@ -191,10 +191,14 @@ def order_page():
 @app.route("/order/<invoice_hash>/")
 def order_confirmation(invoice_hash):
     order = lookup_order(invoice_hash)
-    order["items"] = {x.split(":")[0]:float(x.split(":")[1]) for x in order['items'].split("\n")}
-    if order is None:
+    if order:
+        order["items"] = {x.split(":")[0]:float(x.split(":")[1]) for x in order['items'].split("\n")}
+        if order is None:
+            abort(404)
+        page_title = "Invoice Number: " + str(order['order_number'])
+        return render_template('order_confirm.html', **locals())
+    except:
         abort(404)
-    page_title = "Invoice Number: " + str(order['order_number'])
-    return render_template('order_confirm.html', **locals())
+        
 
 
