@@ -5,7 +5,7 @@ from models import *
 from datetime import date
 from flask.ext.cache import Cache
 from jinja2 import contextfilter
-
+import json
 
 biotypes = {
     "miRNA" : "microRNA",
@@ -78,7 +78,46 @@ else:
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
 
+def add_to_order_ws(row):
+    """
+        Stores order info in a google sheet.
+    """
+    import gspread
+    from oauth2client.service_account import ServiceAccountCredentials
+    sa = ds.get(ds.key("credential", "service_account"))
+    sa = json.loads(sa["json"])
+    scope = ['https://spreadsheets.google.com/feeds']
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
+    gc = gspread.authorize(credentials)
+    orders = gc.open_by_key("1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM")
+    ws = orders.worksheet("orders")
+    index = sum([1 for x in ws.col_values(1) if x]) + 1
 
+    header_row = filter(len, ws.row_values(1))
+    values = []
+    for x in header_row:
+        if x in row.keys():
+            values.append(row[x])
+        else:
+            values.append("")
+
+    row = map(str, row)
+    ws.insert_row(values, index)
+
+def lookup_order(invoice_hash):
+    import gspread
+    from oauth2client.service_account import ServiceAccountCredentials
+    sa = ds.get(ds.key("credential", "service_account"))
+    sa = json.loads(sa["json"])
+    scope = ['https://spreadsheets.google.com/feeds']
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
+    gc = gspread.authorize(credentials)
+    orders = gc.open_by_key("1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM")
+    ws = orders.worksheet("orders")
+    row = ws.row_values(ws.findall(invoice_hash)[0].row)
+    header_row = ws.row_values(1)
+    result = dict(zip(header_row, row))
+    return {k:v for k,v in result.items() if v}
 #
 # Custom Filters
 #

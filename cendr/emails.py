@@ -13,15 +13,33 @@ Thank you for your order. Please retain this email for your records.
 
 Information regarding your purchase, including its tracking number is available here:
 
-http://elegansvariation.org/order/{order_hash}/
+http://elegansvariation.org/order/{invoice_hash}/
+
+Address
+=======
+{name}
+{address}
+
+Items
+=====
+{items}
+
+Total
+=====
+{total}
+
+
+Date
+====
+{date}
 
 """
 
 donate_submission = """
-Thank you for your donation. Please retain this email for your records.
+Thank you for your donation of ${donation_amount}. Please retain this email for your records.
 
 Information regarding your purchase, including its tracking number is available here:
 
-http://elegansvariation.org/order/{order_hash}/
+http://elegansvariation.org/order/{invoice_hash}/
 
 """
