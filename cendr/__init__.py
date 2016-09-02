@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, g
 from flask_restful import Api
 from flask_debugtoolbar import DebugToolbarExtension
 from models import *
@@ -6,6 +6,19 @@ from datetime import date
 from flask.ext.cache import Cache
 from jinja2 import contextfilter
 import json
+
+def get_google_sheet():
+    if not hasattr(g, 'gc'):
+        import gspread
+        from oauth2client.service_account import ServiceAccountCredentials
+        sa = ds.get(ds.key("credential", "service_account"))
+        sa = json.loads(sa["json"])
+        scope = ['https://spreadsheets.google.com/feeds']
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
+        gc = gspread.authorize(credentials)
+        g.gc = gc
+    return g.gc
+    
 
 biotypes = {
     "miRNA" : "microRNA",
@@ -82,13 +95,7 @@ def add_to_order_ws(row):
     """
         Stores order info in a google sheet.
     """
-    import gspread
-    from oauth2client.service_account import ServiceAccountCredentials
-    sa = ds.get(ds.key("credential", "service_account"))
-    sa = json.loads(sa["json"])
-    scope = ['https://spreadsheets.google.com/feeds']
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
-    gc = gspread.authorize(credentials)
+    gc = get_google_sheet()
     orders = gc.open_by_key("1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM")
     ws = orders.worksheet("orders")
     index = sum([1 for x in ws.col_values(1) if x]) + 1
@@ -105,19 +112,17 @@ def add_to_order_ws(row):
     ws.insert_row(values, index)
 
 def lookup_order(invoice_hash):
-    import gspread
-    from oauth2client.service_account import ServiceAccountCredentials
-    sa = ds.get(ds.key("credential", "service_account"))
-    sa = json.loads(sa["json"])
-    scope = ['https://spreadsheets.google.com/feeds']
-    credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
-    gc = gspread.authorize(credentials)
+    gc = get_google_sheet()
     orders = gc.open_by_key("1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM")
     ws = orders.worksheet("orders")
-    row = ws.row_values(ws.findall(invoice_hash)[0].row)
-    header_row = ws.row_values(1)
-    result = dict(zip(header_row, row))
-    return {k:v for k,v in result.items() if v}
+    find_row = ws.findall(invoice_hash)
+    if len(find_row) > 0:
+        row = ws.row_values(find_row[0].row)
+        header_row = ws.row_values(1)
+        result = dict(zip(header_row, row))
+        return {k:v for k,v in result.items() if v}
+    else:
+        return None
 #
 # Custom Filters
 #
