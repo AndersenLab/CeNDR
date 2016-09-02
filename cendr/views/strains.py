@@ -197,7 +197,7 @@ def order_confirmation(invoice_hash):
             abort(404)
         page_title = "Invoice Number: " + str(order['order_number'])
         return render_template('order_confirm.html', **locals())
-    except:
+    else:
         abort(404)
         
 
