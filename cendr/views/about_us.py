@@ -94,6 +94,7 @@ def donate():
         order["is_donation"] = True
         order["date"] = datetime.now(pytz.timezone("America/Chicago")).date().isoformat()
         order["invoice_hash"] = hashlib.sha1(str(order)).hexdigest()[0:10]
+        order["url"] = "http://elegansvariation.org/order/" + order["invoice_hash"]
         from google.appengine.api import mail
         mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
            to=order["email"],

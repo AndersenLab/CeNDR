@@ -170,6 +170,7 @@ def order_page():
             order['is_donation'] = False
             order['date'] = datetime.now(pytz.timezone("America/Chicago")).date().isoformat()
             order['invoice_hash'] = hashlib.sha1(str(order)).hexdigest()[0:10]
+            order["url"] = "http://elegansvariation.org/order/" + order["invoice_hash"]
             mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
                to=order["email"],
                cc=['dec@u.northwestern.edu', 'robyn.tanny@northwestern.edu', 'erik.andersen@northwestern.edu'],

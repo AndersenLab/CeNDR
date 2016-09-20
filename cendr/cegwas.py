@@ -42,6 +42,11 @@ def le():
     code = ""
     return Response(code, mimetype = "text/plain")
 
+@app.route("/.well-known/acme-challenge/")
+def le2():
+    code = ""
+    return Response(code, mimetype = "text/plain")
+
 
 @app.route("/Software")
 def reroute_software():
