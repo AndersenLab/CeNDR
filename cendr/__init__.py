@@ -6,6 +6,7 @@ from datetime import date
 from flask.ext.cache import Cache
 from jinja2 import contextfilter
 import json
+import yaml
 
 def get_google_sheet():
     if not hasattr(g, 'gc'):
@@ -78,7 +79,8 @@ api = Api(app)
 build = "20160408"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-app.config['version'] = "1.0.0"
+version = yaml.load(open("app.yaml", 'r').read())["version"].replace("-",".").replace("version.","")
+app.config['version'] = version
 
 
 if os.getenv('SERVER_SOFTWARE') and \
