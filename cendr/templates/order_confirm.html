@@ -26,9 +26,7 @@
       <form>
 <input type="button" class='btn btn-primary btn-block hidden-print' value="Print Invoice" onClick="window.print()">
 </form>
-
-
-      </div>
+</div>
 
 
 
@@ -41,14 +39,14 @@
 <table class='table table-bordered'>
   <tr>
   {% if order['is_donation'] == "FALSE" %}
-  <th>Shipping Service</th>
+  <th>Shipping Service</th> 
   <th>Tracking</th>
   {% endif %}
   <th>Order ID</th>
   <th>Order Date</th>
   </tr>
   <tr>
-  {% if order['is_donation'] == "FALSE" %}
+  {% if order['is_donation'] == "FALSE" %} 
   <td>{{ order["shipping_service"] }}</td>
   <td>
   {% if order['tracking'] and order['shipping_service'] == "UPS" %}
@@ -82,7 +80,7 @@
 
 <div class="row">
     <div class="col-md-12">
-	 <table class="table table-hover table-striped" style="table-layout: fixed">
+   <table class="table table-hover table-striped" style="table-layout: fixed">
             <thead>
                 <tr>
                     <th style="width: 40px">#</th>
@@ -90,7 +88,7 @@
                     <th class="price text-right">Price</th>
                 </tr>
             </thead>
-            <tbody class="searchable">
+            <tbody class="searchable"> 
                 {% for k, v in order["items"].items() %}
                 <tr>
                     <td>{{ loop.index }}</td>
@@ -98,6 +96,15 @@
                     <td class="price text-right">${{'%0.2f'| format(v)}}</td>
                 </tr>
                 {% endfor %}
+
+                {% if order['shipping_service'] == "$65 Flat Fee"%}
+                <tr> 
+                  <td> - </td>
+                  <td> $65 Shipping Flat Fee</td>
+                  <td class="price text-right">$65</td>
+                </tr>
+                {% endif %}
+
                 <tr>
                 <td><strong>Total</strong></td>
                 <td></td>
