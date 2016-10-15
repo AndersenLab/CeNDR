@@ -40,7 +40,7 @@
 
 <table class='table table-bordered'>
   <tr>
-  {% if not order['donation'] %}
+  {% if order['is_donation'] == "FALSE" %}
   <th>Shipping Service</th>
   <th>Tracking</th>
   {% endif %}
@@ -48,33 +48,33 @@
   <th>Order Date</th>
   </tr>
   <tr>
-  {% if not order['donation'] %}
-  <td>{{ order["shipping-service"] }}</td>
+  {% if order['is_donation'] == "FALSE" %}
+  <td>{{ order["shipping_service"] }}</td>
   <td>
-  {% if order['tracking'] and order['shipping-service'] == "UPS" %}
-      <a href="http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order.metadata.tracking }}">{{ order.metadata.tracking }}</a>
-  {% elif order['tracking'] and order['shipping-service'] == "FEDEX" %}
-      <a href="http://www.fedex.com/Tracking?action=track&tracknumbers={{ order.metadata.tracking }}">{{ order.metadata.tracking }}</a>
+  {% if order['tracking'] and order['shipping_service'] == "UPS" %}
+      <a href="http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order['tracking'] }}">{{ order['tracking'] }}</a>
+  {% elif order['tracking'] and order['shipping_service'] == "FEDEX" %}
+      <a href="http://www.fedex.com/Tracking?action=track&tracknumbers={{ order['tracking'] }}">{{ order['tracking'] }}</a>
   {% else %}
       Not yet assigned
   {% endif %}
   </td>
   {% endif %}
-  <td>{{ order.key.id }}</td>
-  <td>{{ order['submitted'].strftime('%Y-%m-%d') }}</td>
+  <td>{{ order["order_number"] }}</td>
+  <td>{{ order['date'] }}</td>
   </tr>
   </table>
 
-{% if not order['donation'] %}
+
    <ul class="list-group">
     <li class="list-group-item">
-      <h4 class="list-group-item-heading">Ship To</h4>
+      <h4 class="list-group-item-heading">Address</h4>
       <p class="list-group-item-text">{{ order['name'] }}<br />{{ order['address'].replace("\n", "<br />")|safe }}</p>
       <br />
     </li>
 
   </ul>
-{% endif %}
+
   </div>
 
 
@@ -87,7 +87,7 @@
                 <tr>
                     <th style="width: 40px">#</th>
                     <th style="width 200px;">Item</th>
-                    <th class="price">Price</th>
+                    <th class="price text-right">Price</th>
                 </tr>
             </thead>
             <tbody class="searchable">
@@ -95,13 +95,13 @@
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ k }}</td>
-                    <td class="price">${{'%0.2f'| format(v/100|float)}}</td>
+                    <td class="price text-right">${{'%0.2f'| format(v)}}</td>
                 </tr>
                 {% endfor %}
                 <tr>
                 <td><strong>Total</strong></td>
                 <td></td>
-                <td class="price"><strong>${{'%0.2f'| format(order['total']/100|float)}}</strong></td>
+                <td class="price text-right"><strong>{{ order["total"] }}</strong></td>
                 </tr>
             </tbody>
         </table>

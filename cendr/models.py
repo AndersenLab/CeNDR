@@ -2,8 +2,12 @@ from peewee import *
 import json
 import datetime
 import os, sys
-import MySQLdb
-import _mysql
+try:
+    import MySQLdb
+    import _mysql
+except:
+    import pymysql
+    pymysql.install_as_MySQLdb()
 
 current_build = 20160408
 

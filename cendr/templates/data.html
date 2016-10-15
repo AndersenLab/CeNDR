@@ -23,7 +23,7 @@
             <p>CRAM files are substantially smaller than BAM files, but require the reference to be converted to BAM files. We are currently using WS245 (<strong><a href="https://northwestern.box.com/shared/static/ijlhhd1hwlbr5vvasjg35yjux1p5n01g.gz">Download</a></strong>).
 
         <h4>Downloading All Alignment Data</h4>
-            <p>Interested in downloading everything? Use the scripts below! Before these scripts will work, you need to download and install <strong>wget</strong>. We recommend using <a href="http://brew.sh">Homebrew</a> for this installation. Information on installing <strong>wget</strong> is available in our <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ section</a>. </p>
+            <p>Interested in downloading everything? Use the scripts below! Before these scripts will work, you need to download and install <strong>wget</strong>. We recommend using <a href="http://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ</a> for details on installing <strong>wget</strong>. </p>
             <ul>
                 <li><a href="{{ url_for("download_script", filetype="bam") }}">Download BAMs</a></li>
                 <li><a href="{{ url_for("download_script", filetype="cram") }}">Download CRAMs</a></li>

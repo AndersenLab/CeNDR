@@ -30,16 +30,19 @@
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ item }}</td>
-                    <td class="price">${{'%0.2f'| format(price/100|float)}}</td>
+                    <td class="price">${{'%0.2f'| format(price|float)}}</td>
                 </tr>
                 {% endfor %}
                 <tr>
                 <td><strong>Total</strong></td>
                 <td></td>
-                <td class="price"><strong>${{'%0.2f'| format(total/100|float)}}</strong></td>
+                <td class="price"><strong>${{'%0.2f'| format(total|float)}}</strong></td>
                 </tr>
             </tbody>
         </table>
+<div class ="well well-sm">
+  <p> If you are ordering a ready-made set, the strains will be sent as frozen stocks on dry-ice. Please select a carrier from the drop-down menu and enter an account number. If you are ordering a customized set of strains, these strains will be sent on plates. Unless you select a carrier and provide an account number, these strains will be sent via U.S. Post. </p>
+</div> 
 
 <form class="form-horizontal" method="POST">
 {% for item, price in items.items() %}
@@ -75,16 +78,16 @@
 </div>
 
 <div class="col-lg-6">
-  <div class="form-group {% if 'shipping-account' in missing_fields %}has-warning{% endif %}">
-    <label for="shipping-service" class="col-sm-2 control-label">Shipping</label>
+  <div class="form-group {% if 'shipping_account' in missing_fields %}has-warning{% endif %}">
+    <label for="shipping_service" class="col-sm-2 control-label">Shipping</label>
     <div class="col-sm-4">
-      <select class="form-control" id="shipping-service" name="shipping-service">
+      <select class="form-control" id="shipping_service" name="shipping_service">
           <option>UPS</option>
           <option>FEDEX</option>
       </select>
     </div>
     <div class="col-sm-6">
-        <input type="text" class="form-control" id="shipping-account" name="shipping-account" placeholder="Account Number" value="{{ request.form['shipping-account'] }}">
+        <input type="text" class="form-control" id="shipping_account" name="shipping_account" placeholder="Account Number" value="{{ request.form['shipping_account'] }}">
     </div>
 
   </div>

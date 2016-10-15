@@ -1,4 +1,4 @@
-from cendr import app, json_serial, cache, ds
+from cendr import app, json_serial, cache, ds, add_to_order_ws
 from flask import render_template, url_for, Markup, request, redirect
 import markdown
 import yaml
@@ -10,6 +10,8 @@ from gcloud.datastore.entity import Entity
 from datetime import datetime
 from cendr.emails import donate_submission
 import pytz
+import hashlib
+
 
 @app.context_processor
 def utility_processor():
@@ -78,28 +80,32 @@ def statistics():
 def donate():
     # Process donation.
     if request.form:
-        donation_amount = int(request.form['donation_amount']) * 100
+        donation_amount = str(int(request.form['donation_amount']))
         o = ds.get(ds.key("cendr-order", "count"))
         o["order-number"] += 1
-        order = Entity(ds.key('cendr-order'))
-        items = {"CeNDR strain and data support": donation_amount}
+        ds.put(o)
+        order = {}
+        order["order_number"] = o["order-number"]
         order["email"] = request.form["email"]
-        order["items"] = [u"{k}:{v}".format(k=k, v=v) for k,v in items.items()]
+        order["address"] = request.form["address"]
+        order["name"] = request.form["name"]
+        order["items"] = u"{k}:{v}".format(k = "CeNDR strain and data support", v = donation_amount)
         order["total"] = donation_amount
-        order["donation"] = True
-        order["submitted"] = datetime.now(pytz.timezone("America/Chicago"))
-        order["order-number"] = o['order-number']
-        with ds.transaction():
-            ds.put(o)
-            ds.put(order)
-        order_hash = order.key.id
+        order["is_donation"] = True
+        order["date"] = datetime.now(pytz.timezone("America/Chicago")).date().isoformat()
+        order["invoice_hash"] = hashlib.sha1(str(order)).hexdigest()[0:10]
+        order["url"] = "http://elegansvariation.org/order/" + order["invoice_hash"]
         from google.appengine.api import mail
         mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
            to=order["email"],
            cc=['dec@u.northwestern.edu', 'robyn.tanny@northwestern.edu', 'erik.andersen@northwestern.edu'],
-           subject="CeNDR Order #" + str(order["order-number"]),
-           body=donate_submission.format(order_hash=order_hash))
-        return redirect(url_for("order_confirmation", order_hash=order_hash), code=302)
+           subject="CeNDR Order #" + str(order["order_number"]),
+           body=donate_submission.format(invoice_hash=order["invoice_hash"],
+                                         donation_amount=donation_amount))
+
+        add_to_order_ws(order)
+
+        return redirect(url_for("order_confirmation", invoice_hash=order["invoice_hash"]), code=302)
     
 
     from google.appengine.api import mail

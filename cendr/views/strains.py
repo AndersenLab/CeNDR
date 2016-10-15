@@ -1,4 +1,4 @@
-from cendr import app, autoconvert, ds, db, cache
+from cendr import app, autoconvert, ds, db, cache, add_to_order_ws, lookup_order
 from cendr import json_serial
 from flask import render_template, request, url_for, redirect, make_response, Response, abort
 from cendr.models import strain
@@ -15,6 +15,7 @@ from gcloud.datastore.entity import Entity
 from datetime import datetime
 import pytz
 from dateutil.relativedelta import relativedelta
+import hashlib
 #
 # Global Strain Map
 #
@@ -125,13 +126,13 @@ def protocols():
 
 def calculate_total(item_list):
     item_price_list = {}
-    for i in item_list:
+    for i in sorted(item_list):
         if i == "set_divergent":
-            item_price_list[i] = 10000
+            item_price_list[i] = 100
         elif i.startswith("set"):
-            item_price_list[i] = 40000
+            item_price_list[i] = 400
         else:
-            item_price_list[i] = 1000
+            item_price_list[i] = 10
     return item_price_list
 
 
@@ -146,8 +147,8 @@ def order_page():
     # Retreive SKU's for prices
     items = calculate_total(items)
     total = sum(items.values())
-    field_list = ['name', 'phone', 'email', 'shipping-account', 'address']
-    if 'shipping-service' in request.form:
+    field_list = ['name', 'phone', 'email', 'shipping_account', 'shipping_service', 'address']
+    if 'shipping_service' in request.form:
         # Check that all pieces are filled out.
         missing_fields = []
         for i in field_list:
@@ -158,34 +159,47 @@ def order_page():
         if len(missing_fields) == 0:
             o = ds.get(ds.key("cendr-order", "count"))
             o["order-number"] += 1
-            order = Entity(ds.key('cendr-order'))
+            ds.put(o)
+            order = {}
             for k in field_list:
                 order[k] = request.form[k]
-            order["items"] = [u"{k}:{v}".format(k=k, v=v) for k,v in items.items()]
-            order["total"] = total
-            order['submitted'] = datetime.now(pytz.timezone("America/Chicago"))
-            order['order-number'] = o['order-number']
-            order['shipping-service'] = request.form['shipping-service']
-            with ds.transaction():
-                ds.put(o)
-                ds.put(order)
-            order_hash = order.key.id
+            order['items'] = '\n'.join(sorted([u"{k}:{v}".format(k=k, v=v) for k,v in items.items()]))
+            order['total'] = total
+            order['date'] = datetime.now(pytz.timezone("America/Chicago"))
+            order['order_number'] = o['order-number']
+            order['is_donation'] = False
+            order['date'] = datetime.now(pytz.timezone("America/Chicago")).date().isoformat()
+            order['invoice_hash'] = hashlib.sha1(str(order)).hexdigest()[0:10]
+            order["url"] = "http://elegansvariation.org/order/" + order["invoice_hash"]
             mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
                to=order["email"],
                cc=['dec@u.northwestern.edu', 'robyn.tanny@northwestern.edu', 'erik.andersen@northwestern.edu'],
-               subject="CeNDR Order #" + str(order["order-number"]),
-               body=order_submission.format(order_hash=order_hash))
-            return redirect(url_for("order_confirmation", order_hash=order_hash), code=302)
+               subject="CeNDR Order #" + str(order["order_number"]),
+               body=order_submission.format(invoice_hash=order['invoice_hash'],
+                                            name = order['name'],
+                                            address = order['address'],
+                                            items = order['items'],
+                                            total = order['total'],
+                                            date = order['date']))
+
+            # Save to google sheet
+            add_to_order_ws(order)
+
+            return redirect(url_for("order_confirmation", invoice_hash=order['invoice_hash']), code=302)
         
     return render_template('order.html', **locals())
 
-@app.route("/order/<order_hash>/")
-def order_confirmation(order_hash):
-    order = ds.get(ds.key("cendr-order", int(order_hash)))
-    order["items"] = {x.split(":")[0]:int(x.split(":")[1]) for x in order['items']}
-    if order is None:
+@app.route("/order/<invoice_hash>/")
+def order_confirmation(invoice_hash):
+    order = lookup_order(invoice_hash)
+    if order:
+        order["items"] = {x.split(":")[0]:float(x.split(":")[1]) for x in order['items'].split("\n")}
+        if order is None:
+            abort(404)
+        page_title = "Invoice Number: " + str(order['order_number'])
+        return render_template('order_confirm.html', **locals())
+    else:
         abort(404)
-    page_title = "Invoice Number: " + str(order['order-number'])
-    return render_template('order_confirm.html', **locals())
+        
 
 

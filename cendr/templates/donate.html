@@ -25,11 +25,26 @@
           <form method="POST" action="{{ url_for('donate') }}">
 
 
+<div class="form-group {% if 'address' in missing_fields %}has-warning{% endif %}">
+
+ <div class="form-group {% if 'name' in missing_fields %}has-warning{% endif %}">
+    <label for="name" class="control-label">Name</label>
+    <br />
+      <input type="text" class="form-control" id="name" name="name" placeholder="" value="{{ request.form['name'] }}">
+  </div>
+
+    <label for="address" class="control-label">Address</label>
+    <br />
+      <textarea class="form-control" style="display:block; width: 100%" rows="3" id="address" name="address" placeholder="123 Sheridan Rd.
+Chicago, IL. 60657" value="{{ request.form['address'] }}"></textarea>
+  </div>
+
+
    <div class="form-group">
     <label for="email">Email address</label>
     <input type="email" class="form-control" id="email" name="email" placeholder="Email" />
   </div>
-  <br />
+
 
    <div class="form-group">
    <label for="donation_amount">Donation Amount</label>
