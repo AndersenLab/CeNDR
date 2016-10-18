@@ -1,6 +1,9 @@
 # Change Log
 
-<a name="Updates"></a>
-###Updates
+--- 
 
-10/18/2016:         Added Change Log
+### v1.0.1 - (2016-10-18)
+
+* A change log has been added. You are looking at it.
+* A link to the change log was added to the homepage.
+* A link to the CeNDR paper and Nucleic Acids Research was added to the homepage.
