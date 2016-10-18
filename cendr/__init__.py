@@ -1,25 +1,38 @@
 from flask import Flask, g
 from flask_restful import Api
 from flask_debugtoolbar import DebugToolbarExtension
-from models import *
 from datetime import date
 from flask.ext.cache import Cache
 from jinja2 import contextfilter
 import json
 import yaml
+import os
+
+# Caching
+app = Flask(__name__, static_url_path='/static')
+
+def get_ds():
+    with app.app_context():
+        if not hasattr(g, 'ds'):
+            from gcloud import datastore
+            g.ds = datastore.Client(project="andersen-lab")
+        return g.ds
 
 def get_google_sheet():
-    if not hasattr(g, 'gc'):
-        import gspread
-        from oauth2client.service_account import ServiceAccountCredentials
-        sa = ds.get(ds.key("credential", "service_account"))
-        sa = json.loads(sa["json"])
-        scope = ['https://spreadsheets.google.com/feeds']
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
-        gc = gspread.authorize(credentials)
-        g.gc = gc
-    return g.gc
-    
+    with app.app_context():
+        if not hasattr(g, 'gc'):
+            import gspread
+            from oauth2client.service_account import ServiceAccountCredentials
+            ds = get_ds()
+            sa = ds.get(ds.key("credential", "service_account"))
+            sa = json.loads(sa["json"])
+            scope = ['https://spreadsheets.google.com/feeds']
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
+            gc = gspread.authorize(credentials)
+            g.gc = gc
+        return g.gc
+
+ds = get_ds()
 
 biotypes = {
     "miRNA" : "microRNA",
@@ -64,9 +77,6 @@ class CustomEncoder(json.JSONEncoder):
         if isinstance(o, datetime.date):
             return str(o)
         return super(CustomEncoder, self).default(o)
-
-# Caching
-app = Flask(__name__, static_url_path='/static')
 
 # Cache
 if (os.getenv('SERVER_SOFTWARE') and

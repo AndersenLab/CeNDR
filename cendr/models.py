@@ -1,4 +1,6 @@
+from cendr import get_ds
 from peewee import *
+from flask import g
 import json
 import datetime
 import os, sys
@@ -11,14 +13,11 @@ except:
 
 current_build = 20160408
 
-# Fetch credentials
-from gcloud import datastore
-ds = datastore.Client(project="andersen-lab")
-
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
     dbname = "cegwas_v2" # don't remove, imported elsewhere.
     db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
 else:
+    ds = get_ds()
     credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
     dbname = "cegwas_v2" # don't remove, imported elsewhere.
     db =  MySQLDatabase(
