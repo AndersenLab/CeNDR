@@ -36,7 +36,7 @@
                 <tr>
                 <td><strong>Total</strong></td>
                 <td></td>
-                <td class="price"><strong>${{'%0.2f'| format(total|float)}}</strong></td>
+                <td class="price"><strong>${{'%0.2f'| format(total|float)}}</strong></td> 
                 </tr>
             </tbody>
         </table>
@@ -81,17 +81,30 @@
   <div class="form-group {% if 'shipping_account' in missing_fields %}has-warning{% endif %}">
     <label for="shipping_service" class="col-sm-2 control-label">Shipping</label>
     <div class="col-sm-4">
-      <select class="form-control" id="shipping_service" name="shipping_service">
+      <select onchange="flatRate()" class="form-control" id="shipping_service" name="shipping_service">
           <option>UPS</option>
           <option>FEDEX</option>
+          <option>$65 Flat Fee</option> 
       </select>
     </div>
     <div class="col-sm-6">
         <input type="text" class="form-control" id="shipping_account" name="shipping_account" placeholder="Account Number" value="{{ request.form['shipping_account'] }}">
     </div>
+  
+    <script type="text/javascript">
+    function flatRate() {
+      if ($("select[name='shipping_service'] option:selected").index() == 2)  {//flat rate is the third element of the dropdown)
+        $('#shipping_account').prop('disabled', true);
+      }
+      else {
+        $('#shipping_account').prop('disabled', false);
+      }
+  }
+
+    </script>
 
   </div>
-  <div class='col-sm-offset-2' id="helpBlock" class="help-block">Select a shipping service and provide an account number.</span>
+  <div class='col-sm-offset-2' id="helpBlock" class="help-block">Select a shipping service and provide an account number or select flat $65 shipping fee.</span>
 </div>
 
 </div>

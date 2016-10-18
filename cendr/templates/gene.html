@@ -32,27 +32,7 @@
             </ul>
 
       </div>
-      <div class="col-md-8">
-
-      <h3>Mappings</h3>
-      <table class='table table-striped table-hover'>
-      <thead>
-      <th>Report → Trait</th>
-      <th>Interval</th>
-      <th>Variance Explained</th>
-      <th>log<sub>10</sub>p</th>
-      <th>Submission Date</th>
-        {% for i in mapping_set %}
-        <tr>
-          <td><a href="{{ url_for('trait_view', report_slug=i.report_slug, trait_slug=i.trait_slug ) }}">{{ i.report_name }} → {{ i.trait_name }}</a></td>
-          <td>{{ i.chrom }}:{{ i.interval_start }}-{{ i.interval_end }}</td>
-          <td>{{ i.variance_explained|round(3) }}</td>
-          <td>{{ i.log10p|round(3) }}</td>
-          <td>{{ i.submission_date.strftime('%Y-%m-%d') }}</td>
-        </tr>
-        {% endfor %}
-
-      </table>
+      <div class="col-md-8"> 
 
       <h3>Variants</h3>
       <table class='table table-striped table-hover table-responsive'>
@@ -83,6 +63,38 @@
                   {% endfor %}
       </tbody>
       </table>
+
+      <h3>Gene Ontology</h3>
+      <table class='table table-striped table-hover' id="gene_ontology">
+        <thead>
+          <th>Type</th>
+          <th>ID</th>
+          <th>Label</th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+      <h3>Mappings</h3>
+      <table class='table table-striped table-hover'>
+      <thead>
+      <th>Report → Trait</th>
+      <th>Interval</th>
+      <th>Variance Explained</th>
+      <th>log<sub>10</sub>p</th>
+      <th>Submission Date</th>
+        {% for i in mapping_set %}
+        <tr>
+          <td><a href="{{ url_for('trait_view', report_slug=i.report_slug, trait_slug=i.trait_slug ) }}">{{ i.report_name }} → {{ i.trait_name }}</a></td>
+          <td>{{ i.chrom }}:{{ i.interval_start }}-{{ i.interval_end }}</td>
+          <td>{{ i.variance_explained|round(3) }}</td>
+          <td>{{ i.log10p|round(3) }}</td>
+          <td>{{ i.submission_date.strftime('%Y-%m-%d') }}</td>
+        </tr>
+        {% endfor %}
+
+      </table>
+
       
       <h3>Phenotypes</h3>
       <table class='table table-striped table-hover table-condensed table-responsive' style="table-layout: fixed; margin: 0 auto; width: 100%x;" id="phenotypes">
@@ -94,18 +106,6 @@
           <th>Phenotype</th>
           <th>Evidence</th>
           <th></th>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-
-
-      <h3>Gene Ontology</h3>
-      <table class='table table-striped table-hover' id="gene_ontology">
-        <thead>
-          <th>Type</th>
-          <th>ID</th>
-          <th>Label</th>
         </thead>
         <tbody>
         </tbody>
