@@ -1,4 +1,4 @@
-from cendr import app, autoconvert, ds, db, cache, add_to_order_ws, lookup_order
+from cendr import app, autoconvert, get_ds, cache, add_to_order_ws, lookup_order
 from cendr import json_serial
 from flask import render_template, request, url_for, redirect, make_response, Response, abort
 from cendr.models import strain
@@ -157,6 +157,7 @@ def order_page():
                     missing_fields.append(i)
                     warning = "Missing Some Fields"
         if len(missing_fields) == 0:
+            ds = get_ds()
             o = ds.get(ds.key("cendr-order", "count"))
             o["order-number"] += 1
             ds.put(o)

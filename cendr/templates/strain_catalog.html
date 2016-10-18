@@ -78,7 +78,7 @@
                             <input type="checkbox" name="item"  id="set_{{ i }}" value="set_{{ i }}"/>
                         </td>
                         <td><strong><label for="set_{{ i }}">Mapping Set {{ i }}</label></strong></td>
-                        <td>48</td>
+                        <td>{% if i < 3 %}48{% else %}44{% endif %}</td>
                         <td>
                         <a class="btn btn-link btn-block" data-toggle="collapse" data-target="#view_set_{{ i }}">View Strains</a>
                         <div class="collapse" id="view_set_{{ i }}" >

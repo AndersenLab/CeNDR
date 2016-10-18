@@ -322,6 +322,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
         var_corr.append(correlation.get_correlated_genes(r, t, m["chrom"], m["interval_start"], m["interval_end"]))
     tbl_color = {"LOW": 'success', "MODERATE": 'warning', "HIGH": 'danger'}
 
+
     #######################
     # Fetch geo locations #
     #######################

@@ -1,4 +1,4 @@
-from cendr import app, json_serial, cache, ds, add_to_order_ws
+from cendr import app, json_serial, cache, get_ds, add_to_order_ws
 from flask import render_template, url_for, Markup, request, redirect
 import markdown
 import yaml
@@ -80,6 +80,7 @@ def statistics():
 def donate():
     # Process donation.
     if request.form:
+        ds = get_ds()
         donation_amount = str(int(request.form['donation_amount']))
         o = ds.get(ds.key("cendr-order", "count"))
         o["order-number"] += 1
