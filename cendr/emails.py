@@ -23,11 +23,11 @@ Address
 Items
 =====
 {items}
+{shipping}
 
 Total
 =====
 {total}
-
 
 Date
 ====

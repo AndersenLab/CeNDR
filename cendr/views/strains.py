@@ -147,7 +147,7 @@ def order_page():
     # Retreive SKU's for prices
     items = calculate_total(items)
     total = sum(items.values())
-    field_list = ['name', 'phone', 'email', 'shipping_account', 'shipping_service', 'address']
+    field_list = ['name', 'phone', 'email', 'shipping_service', 'address']
     if 'shipping_service' in request.form:
         # Check that all pieces are filled out.
         missing_fields = []
@@ -165,7 +165,12 @@ def order_page():
             for k in field_list:
                 order[k] = request.form[k]
             order['items'] = '\n'.join(sorted([u"{k}:{v}".format(k=k, v=v) for k,v in items.items()]))
+            order['shipping_service'] = request.form['shipping_service']
             order['total'] = total
+            shipping = ""
+            if order['shipping_service'] == '$65 Flat Fee':
+                order['total'] += 65
+                shipping = "\nShipping\n=========\n$65"
             order['date'] = datetime.now(pytz.timezone("America/Chicago"))
             order['order_number'] = o['order-number']
             order['is_donation'] = False
@@ -177,11 +182,12 @@ def order_page():
                cc=['dec@u.northwestern.edu', 'robyn.tanny@northwestern.edu', 'erik.andersen@northwestern.edu'],
                subject="CeNDR Order #" + str(order["order_number"]),
                body=order_submission.format(invoice_hash=order['invoice_hash'],
-                                            name = order['name'],
-                                            address = order['address'],
-                                            items = order['items'],
-                                            total = order['total'],
-                                            date = order['date']))
+                                            name=order['name'],
+                                            address=order['address'],
+                                            items=order['items'],
+                                            total=order['total'],
+                                            date=order['date'],
+                                            shipping=shipping))
 
             # Save to google sheet
             add_to_order_ws(order)

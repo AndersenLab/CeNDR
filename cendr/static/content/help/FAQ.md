@@ -5,7 +5,7 @@ The BAM and CRAM download scripts require wget. Once you have wget, follow the i
 
 #### Mac OS or Linux
 
-_wget__ can be obtained using <a href="http://brew.sh/">homebrew</a> on Mac OSX. Install homebrew, then type:
+__wget__ can be obtained using <a href="http://brew.sh/">homebrew</a> on Mac OSX. Install homebrew, then type:
 
 <pre>
 brew install wget
