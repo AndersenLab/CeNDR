@@ -21,3 +21,7 @@ Flask-SSLify
 oauth2client==2.1.0
 gspread
 pymysql
+pyyaml
+pycrypto
+cyvcf2
+MySQL-python
