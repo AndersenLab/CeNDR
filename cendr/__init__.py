@@ -93,6 +93,7 @@ version = yaml.load(open("app.yaml", 'r').read())["version"].replace("-",".").re
 app.config['version'] = version
 
 
+
 if os.getenv('SERVER_SOFTWARE') and \
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/'):
     app.debug = False
