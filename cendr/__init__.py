@@ -89,8 +89,7 @@ api = Api(app)
 build = "20160408"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-version = yaml.load(open("app.yaml", 'r').read())["version"].replace("-",".").replace("version.","")
-app.config['version'] = version
+app.config['version'] = "version 1-0-1"
 
 
 if os.getenv('SERVER_SOFTWARE') and \
