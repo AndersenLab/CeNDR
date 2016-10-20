@@ -266,6 +266,7 @@ function validInput(val) {
 }
 
 function error_checking() {
+
   // Error Checking
 
   // Unique Column Names & Valid names
@@ -310,6 +311,21 @@ function error_checking() {
   if (row_names.every(strainValidatorfunc) == false) {
     error_list.push("Incorrect strain names");
   }
+
+  var trait_values = Array();
+  for (i = 0; i<data.length; i++) {
+    for (j=1; j<5; j++) {
+      trait_values.push(data[i][j]);
+    }
+  }
+  trait_values = trait_values.filter(validInput);
+  
+  // trait name required if there is trait data
+  if ((trait_values.length > 0) && (col_names.length - 1 == 0)) {
+  error_list.push("Add trait name");
+}
+  
+
 
   if (error_list.length > 0) {
     $("#errors").html("<h4>Resolve the following errors before submitting:</h4><ul><li class='warning'>" + error_list.join("</li><li>") + "</li></ul>")
