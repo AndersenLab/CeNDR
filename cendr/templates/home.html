@@ -89,7 +89,7 @@
         <a href = "{{ url_for('news_item') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
         <a href = "{{ url_for('help_item' , filename = 'Change-Log') }}" type="button" style="background-color: #f4e5fe; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">Change Log</a>
       </h4>
-        {% for f in files|reverse %}
+        {% for f in files%}
 
             <h4 class="list-group-item-heading"><a href="{{ url_for('news_item', filename = f.strip(".md")) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></h4>
             </a> <br />
@@ -112,7 +112,7 @@
             </a>
             </div><strong>CeNDR, the <em> Caenorhabditis elegans</em> natural diversity resource</strong><br />Cook DE, Zdraljevic S, Roberts JP, Andersen EC
                 <br>                
-                (2016 Oct 3) <em>Oxford University Press</em> [<a href="http://nar.oxfordjournals.org/content/early/2016/10/03/nar.gkw893.full">Article on Nucleic Acids Research</a> | <a title="Document Object Identifier; Takes you to the Journal Website" href="http://dx.doi.org/10.1093/nar/gkw893" target="_blank">DOI</a> | <a href="http://www.ncbi.nlm.nih.gov/pubmed/27701074" target="_blank">Pubmed</a> ]
+                (2016 Oct 3) <em>Nucleic Acids Research</em> [ <a href="http://nar.oxfordjournals.org/content/early/2016/10/03/nar.gkw893.full">Article on Nucleic Acids Research</a> | <a title="Document Object Identifier; Takes you to the Journal Website" href="http://dx.doi.org/10.1093/nar/gkw893" target="_blank">DOI</a> | <a href="http://www.ncbi.nlm.nih.gov/pubmed/27701074" target="_blank">Pubmed</a> ]
       </div>
 </div>
 

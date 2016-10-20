@@ -5,7 +5,6 @@ from cendr.models import strain, report, homologene, mapping, trait
 from cendr.views.api.correlation import get_correlated_genes
 from collections import OrderedDict
 from flask import render_template
-from cyvcf2 import VCF
 
 @app.route('/Data/')
 @app.route('/data/')

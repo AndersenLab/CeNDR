@@ -25,13 +25,16 @@ def format_datetime(value):
     except:
         pass
 
+def sortedfiles(path):
+    return sorted([x for x in os.listdir(path) if not x.startswith(".")], reverse = True)
 
 @app.route('/')
 @cache.cached(timeout=50)
 def main():
     page_title = "Caenorhabditis elegans Natural Diversity Resource"
-    files = [x for x in os.listdir("cendr/static/content/news/") if not x.startswith(".")]
-    files.reverse()
+    files = sortedfiles("cendr/static/content/news/")
+    print(files)
+    #files.reverse()
     # latest mappings
     latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
         trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
@@ -56,8 +59,8 @@ def reroute_software():
 @app.route("/news/<filename>/")
 @cache.memoize(50)
 def news_item(filename = ""):
-    files = [x for x in os.listdir("cendr/static/content/news/") if not x.startswith(".")]
-    files.reverse()
+    files = sortedfiles("cendr/static/content/news/")
+    #sorts the thing in the right order on the webpage after clicking on the server
     if not filename:
         filename = files[0].strip(".md")
     title = filename[11:].strip(".md").replace("-", " ")
@@ -81,7 +84,30 @@ def help_item(filename = ""):
 def feed():
     feed = AtomFeed('CeNDR News',
                     feed_url=request.url, url=request.url_root)
-    files = os.listdir("cendr/static/content/news/")
+    files = sortedfiles("cendr/static/content/news/") #files is a list of file names
+    # tuple_files=[]
+    # for filename in files:
+    #    tuple1=(datetime.strptime(filename[:10], "%Y-%m-%d"), filename[11:].strip(".md").replace("-", " "), filename)
+    #    if len(tuple_files)==0:
+    #        tuple_files.append(tuple1)
+    #    else:
+    #        for i in range(len(tuple_files)):
+    #            if tuple1>tuple_files[i]:
+    #                tuple_files.insert(i, tuple1)
+    #            elif i==len(tuple_files):
+    #                tuple_files.append(tuple1)
+
+    # for filename in tuple_files:
+    #    title = filename[1]
+    #    content = render_markdown(filename[2].strip(".md"), "cendr/static/content/news/")
+    #    date_published = filename[0]
+    #    feed.add(title, unicode(content),
+    #             content_type='html',
+    #             author="CeNDR News",
+    #             url=make_external(
+    #                 url_for("news_item", filename=filename[2].strip(".md"))),
+    #             updated=date_published,
+    #             published=date_published)
     for filename in files:
         title = filename[11:].strip(".md").replace("-", " ")
         content = render_markdown(filename.strip(".md"), "cendr/static/content/news/")
@@ -93,6 +119,7 @@ def feed():
                      url_for("news_item", filename=filename.strip(".md"))),
                  updated=date_published,
                  published=date_published)
+
     return feed.get_response()
 
 
