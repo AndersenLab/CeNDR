@@ -265,6 +265,14 @@ function validInput(val) {
   return val !== null && val !== ""
 }
 
+function checkFalse (array) {
+  for (i = 0; i<array.length; i++) {
+    if (array[i] !== false)
+      return false;
+  }
+  return true;
+}
+
 function error_checking() {
 
   // Error Checking
@@ -307,25 +315,45 @@ function error_checking() {
     error_list.push("Report name required");
   }
 
-  // Correct Strain Names
+  // Correct Strain Names     
   if (row_names.every(strainValidatorfunc) == false) {
     error_list.push("Incorrect strain names");
   }
+  
 
-  var trait_values = Array();
-  for (i = 0; i<data.length; i++) {
-    for (j=1; j<5; j++) {
-      trait_values.push(data[i][j]);
+  var contains_data = [false, false, false, false, false]; 
+  var contains_title = [false, false, false, false, false];
+  for (i = 1; i<=contains_data.length ; i++) { 
+    for (j=1; j<data.length; j++) {
+      if (validInput(data[j][i])) {
+        contains_data[i-1] = true;
+        break;   //stop loop once we hit virst valid input
+        }
+      }
+    }
+
+  for (i =1; i<=contains_title.length; i++) {
+    if (validInput(data[0][i])) {
+      contains_title[i-1] = true;
     }
   }
-  trait_values = trait_values.filter(validInput);
-  
-  // trait name required if there is trait data
-  if ((trait_values.length > 0) && (col_names.length - 1 == 0)) {
-  error_list.push("Add trait name");
-}
-  
 
+  if ((checkFalse(contains_title) === true) && (checkFalse(contains_data) === true))
+  {
+    error_list.push("Add trait titles and data");
+  }
+
+  for (i=0; i<= contains_title.length; i++)
+  {
+    if ((contains_title[i] === true) && (contains_data[i] === false))
+    {
+      error_list.push("Add trait data to column " + parseInt(i+1));
+    }
+    else if ((contains_title[i] === false) && (contains_data[i] === true))
+    {
+      error_list.push("Add trait title to column " + parseInt(i+1));
+    }
+  }  
 
   if (error_list.length > 0) {
     $("#errors").html("<h4>Resolve the following errors before submitting:</h4><ul><li class='warning'>" + error_list.join("</li><li>") + "</li></ul>")
@@ -334,15 +362,11 @@ function error_checking() {
      $("#errors").html("")
     $(".submit").attr("disabled", false);
   }
-}
-
 
 $("#ReportName,input[name=Release]").on('change', update_url_message);
 $("#ReportName,input[name=Release]").on('keyup', update_url_message);
 $("input").on('change', error_checking);
 $("input").on('keyup', error_checking);
-
-
 
 $("form").submit(function(e) {
   e.preventDefault();
@@ -385,7 +409,7 @@ $("form").submit(function(e) {
         }, 5000);
       }
   });
-})
+});}  
 
 
 
