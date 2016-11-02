@@ -6,7 +6,6 @@
 
 * Fixed an issue that prevented variant correlation tables from being output.
 
-
 ### v1.0.1 - (2016-10-18)
 
 * A change log has been added. You are looking at it.
