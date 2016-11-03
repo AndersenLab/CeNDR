@@ -60,14 +60,8 @@ def interval_download(report_slug, trait_slug):
         intervals = list(report.select(mapping) \
                .join(mapping) \
                .where(
-                        (
-                            (report.report_slug == report_slug) &
-                            (report.release == 0)
-                        ) |
-                        (
-                            (report.report_hash == report_slug) &
-                            (report.release > 0)
-                        ) & 
+                        (report.report_slug == report_slug)
+                        & 
                         (mapping.trait == t)
                     ) \
                .dicts()
