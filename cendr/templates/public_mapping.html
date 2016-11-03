@@ -3,6 +3,7 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
   <script src="/static/js/moment.min.js"></script>
+  <script src="/static/js/d3-waffle-master/d3-waffle.js"></script>
   <link rel="stylesheet" href="/static/css/cal-heatmap.css" />
   <script src="/static/js/cal-heatmap.min.js"></script>
   <style>
@@ -228,6 +229,7 @@ cal.init({
   subDomainTextFormat: "%d",
   legend: [1, 8, 12, 20],
   onClick: function(x) {
+    console.log(x);
             $("#mappings").text("Significant public mappings From " + moment(x).format("YYYY-MM-DD"));
             date = x.toISOString().split("T")[0];
             $.getJSON("/api/report/date/" + date, function (data) {
@@ -240,6 +242,15 @@ cal.init({
         }
 });
 
+/*Waffle Plot script
+var chart = d3waffle();
+
+d3.select("#container")
+            .datum(waffle_date_set)
+            .call(chart);*/
+
+
+
 function updateTable(data) {
       var report = sprintf("<a href='/report/%s'>%s</a>", data['report_slug'], data['report_name']);
       var trait = sprintf("<a href='/report/%s/%s'>%s</a>", data['report_slug'], data['trait_slug'], data['trait_name']);
@@ -251,6 +262,7 @@ function updateTable(data) {
       newRow = "<tr><td>" + newRow.join("</td><td>") + "</td></tr>";
    $("tbody").append(newRow);
 }
+
 
 $("body").ready(function () {
 
