@@ -97,10 +97,12 @@ app.config['version'] = version
 if os.getenv('SERVER_SOFTWARE') and \
         os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/'):
     app.debug = False
+    app.config["debug"] = False
     from flask_sslify import SSLify
     sslify = SSLify(app, skips=['strains/global-strain-map', '.well-known', '/.well-known'])
 else:
     app.debug = True
+    app.config["debug"] = True
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
 

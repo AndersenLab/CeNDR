@@ -234,6 +234,22 @@ def public_mapping():
                            .execute()
 
     date_set = dict(Counter([time.mktime((x["submission_date"]+relativedelta(hours = +6)).timetuple()) for x in results]))
+    wdata = Counter([(x["submission_date"]+relativedelta(hours = +6)).date().isoformat() for x in results])
+    waffle_date_set=[{"date":x, "count":y} for x,y in wdata.items()]
+    print(waffle_date_set)
+
+    #added in here waffle_date_set should be filtered by month instead of time stamp. Then could be used for the waffle plot
+    #submission date is a datetime object
+    #waffle_date_set=[]
+    #sum=0
+    #current_month=results[0]["submission_date"].month
+    #for x in results:
+    #    if x["submission_date"].month==current_month:
+    #        sum++
+    #    else:
+    #        waffle_date_set.append(("month": current_month, "total": sum)) #appending a tuple
+    #        sum=1
+    #        current_month=x["submission_date"].month
     recent_results = list(results)[0:20]
     bcs = OrderedDict([("Public", None)])
     title = "Public Mappings"
