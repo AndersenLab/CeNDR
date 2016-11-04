@@ -41,66 +41,67 @@
             <div class="row">
                 <div class="col-md-12">
 
-            <table class="table table-hover table-striped" style="table-layout: fixed">
-                <thead>
-                    <tr>
-                        <th style="width: 20px;">
-                        
-                        </th>
-                        <th style="width:160px;">Set Name</th>
-                        <th style="width:120px;">Number of Strains</th>
-                        <th>Strains</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <input type="checkbox" name="item" id="divergent" value="set_divergent"/>
-                        </td>
-                        <td><strong><label for="divergent">Divergent Set</label></strong></td>
-                        <td>12</td>
-                        <td>
-                        <small>
-                            {% for isotype, strains in strain_listing|groupby('isotype') %}
-                                {% for s in strains %} {% for set_name in s.list_sets() %} 
-                                {% with f = "set_divergent" %}
-                                    {% if set_name == f %}{{ s }}{% endif %}
-                                {% endwith %}
-                                {% endfor %}
-                                {% endfor %}
-                            {% endfor %}
-                        </small>
-                        </td>
-                    </tr>
-                    {% for i in range(1,4) %}
-                    <tr>
-                        <td>
-                            <input type="checkbox" name="item"  id="set_{{ i }}" value="set_{{ i }}"/>
-                        </td>
-                        <td><strong><label for="set_{{ i }}">Mapping Set {{ i }}</label></strong></td>
-                        <td>{% if i < 3 %}48{% else %}44{% endif %}</td>
-                        <td>
-                        <a class="btn btn-link btn-block" data-toggle="collapse" data-target="#view_set_{{ i }}">View Strains</a>
-                        <div class="collapse" id="view_set_{{ i }}" >
-                            {% for isotype, strains in strain_listing|groupby('isotype') %}
-                                {% for s in strains %} 
-                                    {% for set_name in s.list_sets() %} 
-                                        {% with f = "set_" + i|string %}
-                                            {% if set_name == f %}
-                                                <li class="col-list">{{ s }}</li>
-                                            {% endif %}
-                                        {% endwith %}
+                <table class="table table-hover table-striped" style="table-layout: fixed">
+                    <thead>
+                        <tr>
+                            <th style="width: 20px;">
+                            
+                            </th>
+                            <th style="width:160px;">Set Name</th>
+                            <th style="width:120px;">Number of Strains</th>
+                            <th>Strains</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="item" id="divergent" value="set_divergent"/>
+                            </td>
+                            <td><strong><label for="divergent">Divergent Set</label></strong></td>
+                            <td>12</td>
+                            <td>
+                            <small>
+                                {% for isotype, strains in strain_listing|groupby('isotype') %}
+                                    {% for s in strains %} {% for set_name in s.list_sets() %} 
+                                    {% with f = "set_divergent" %}
+                                        {% if set_name == f %}{{ s }}{% endif %}
+                                    {% endwith %}
+                                    {% endfor %}
                                     {% endfor %}
                                 {% endfor %}
-                            {% endfor %}
-                        </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                            </small>
+                            </td>
+                        </tr>
+                        {% for i in range(1,4) %}
+                        <tr>
+                            <td>
+                                <input type="checkbox" name="item"  id="set_{{ i }}" value="set_{{ i }}"/>
+                            </td>
+                            <td><strong><label for="set_{{ i }}">Mapping Set {{ i }}</label></strong></td>
+                            <td>{% if i < 3 %}48{% else %}44{% endif %}</td>
+                            <td>
+                            <a class="btn btn-link btn-block" data-toggle="collapse" data-target="#view_set_{{ i }}">View Strains</a>
+                            <div class="collapse" id="view_set_{{ i }}" >
+                                {% for isotype, strains in strain_listing|groupby('isotype') %}
+                                    {% for s in strains %} 
+                                        {% for set_name in s.list_sets() %} 
+                                            {% with f = "set_" + i|string %}
+                                                {% if set_name == f %}
+                                                    <li class="col-list">{{ s }}</li>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endfor %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
             </div>
-            </div>
+
             <div class="row">
                 <div class="col-md-7">
                             <h3>Individual Strains</h3>
@@ -166,8 +167,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
-    </div>
 </form>
 <div class="modal fade" id="myModal" tabindex="-1" style="z-index:1000000"  role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
