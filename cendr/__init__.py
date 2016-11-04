@@ -7,6 +7,7 @@ from jinja2 import contextfilter
 import json
 import yaml
 import os
+from gcloud import datastore
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -14,7 +15,6 @@ app = Flask(__name__, static_url_path='/static')
 def get_ds():
     with app.app_context():
         if not hasattr(g, 'ds'):
-            from gcloud import datastore
             g.ds = datastore.Client(project="andersen-lab")
         return g.ds
 
