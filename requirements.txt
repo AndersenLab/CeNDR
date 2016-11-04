@@ -19,3 +19,4 @@ Flask-SSLify
 oauth2client==2.1.0
 gspread
 pymysql
+py.test
