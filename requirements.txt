@@ -14,12 +14,13 @@ regex
 google-api-python-client
 Markdown==2.5.2
 pyyaml
-gcloud==0.16.0
+gcloud
 Flask-SSLify
-oauth2client==2.1.0
+oauth2client
 gspread
 pymysql
 pytest
 simplejson
+pycrypto
 MySQL-python
 iron_mq
