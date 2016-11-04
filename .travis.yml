@@ -1,14 +1,14 @@
 language: python
 python:
-  - "2.7"
-
-cache: 
-  - pip
-
+- '2.7'
+cache:
+- pip
 install:
-  - pip install -r requirements.txt
-  - export PYTHONPATH="~/:${PYTHONPATH}"
-  - echo "$PYTHONPATH"
-
-script: 
-  - py.test tests/
+- pip install -r requirements.txt
+- export PYTHONPATH="~/:${PYTHONPATH}"
+- echo "$PYTHONPATH"
+script:
+- py.test tests/
+before_install:
+- openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
+  -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
