@@ -23,6 +23,5 @@ pytest
 simplejson
 pycrypto
 ssl
-pyyaml
 MySQL-python
 iron_mq
