@@ -7,12 +7,16 @@ cache:
 - pip
 
 install:
-- pip install -r requirements.txt
+- pip install -t lib -r requirements.txt
+- pip install virtualenvwrapper
+- source virtualenvwrapper.sh
+- add2virtualenv ./lib
 - export PYTHONPATH="~/:${PYTHONPATH}"
 - echo "$PYTHONPATH"
 
 script:
 - py.test tests/
+
 
 before_install:
 - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
