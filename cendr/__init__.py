@@ -7,7 +7,6 @@ from jinja2 import contextfilter
 import json
 import yaml
 import os
-from google.appengine.api import modules
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
