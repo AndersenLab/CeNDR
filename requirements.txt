@@ -21,6 +21,5 @@ gspread
 pymysql
 pytest
 simplejson
-pycrypto
 MySQL-python
 iron_mq
