@@ -21,3 +21,7 @@ gspread
 pymysql
 pytest
 simplejson
+pycrypto
+ssl
+pyyaml
+MySQL-python
