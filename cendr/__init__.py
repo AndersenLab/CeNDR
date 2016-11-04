@@ -7,6 +7,7 @@ from jinja2 import contextfilter
 import json
 import yaml
 import os
+from google.appengine.api import modules
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -89,8 +90,7 @@ api = Api(app)
 build = "20160408"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-version = yaml.load(open("app.yaml", 'r').read())["version"].replace("-",".").replace("version.","")
-app.config['version'] = version
+app.config['version'] = modules.get_current_version_name().replace("-",".").replace("version.","")
 
 
 

@@ -19,6 +19,7 @@ before_install:
   -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
 
 deploy:
+  version: version-1-0-2
   provider: gae
   project: andersen-lab
   keyfile: andersenlab-a0c69892694b.json
