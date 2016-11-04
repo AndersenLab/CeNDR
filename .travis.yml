@@ -9,7 +9,7 @@ cache:
 addons:
   apt:
     packages:
-    - gcc
+    - protobuf
 
 
 before_install:
