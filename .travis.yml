@@ -13,7 +13,7 @@ before_install:
 - pip install virtualenvwrapper
 - source virtualenvwrapper.sh
 - add2virtualenv ./lib
-- export PYTHONPATH="~/:${PYTHONPATH}"
+- export PYTHONPATH="./lib:${PYTHONPATH}"
 - echo "$PYTHONPATH"
 
 script:
