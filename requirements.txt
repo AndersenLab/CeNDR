@@ -24,4 +24,4 @@ simplejson
 pycrypto
 MySQL-python
 iron_mq
-protobuf
+google.protobuf
