@@ -7,7 +7,7 @@ Flask-Cache
 flask-restful
 flask-debugtoolbar
 Jinja2==2.8
-peewee=2.8.5
+peewee==2.8.5
 requests==2.3
 Werkzeug
 regex
