@@ -1,13 +1,13 @@
 python-slugify
 pytz
 dateutils
-Flask
+Flask==0.10.1
 flask-appconfig
 Flask-Cache
 flask-restful
 flask-debugtoolbar
-Jinja2
-peewee
+Jinja2==2.8
+peewee=2.8.5
 requests==2.3
 Werkzeug
 regex
@@ -19,7 +19,7 @@ Flask-SSLify
 oauth2client
 gspread
 pymysql
-pytest
+pytest==3.0.3
 simplejson
 pycrypto
 MySQL-python
