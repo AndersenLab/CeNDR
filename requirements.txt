@@ -14,7 +14,7 @@ regex
 google-api-python-client
 Markdown==2.5.2
 pyyaml
-gcloud
+gcloud==0.18.3
 Flask-SSLify
 oauth2client
 gspread
