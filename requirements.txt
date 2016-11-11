@@ -24,4 +24,3 @@ simplejson
 pycrypto
 MySQL-python
 iron_mq
-protobuf==3.1.0
