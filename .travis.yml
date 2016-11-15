@@ -16,8 +16,8 @@ before_install:
   -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
 - pip install --upgrade pip
 - pip install --upgrade setuptools
-- sudo pip install -t lib protobuf==3.1.0
-- pip install -t lib -r requirements.txt
+- sudo pip install protobuf==3.1.0
+- pip install -r requirements.txt
 - export PYTHONPATH=".:./lib:${PYTHONPATH}"
 - echo "$PYTHONPATH"
 
