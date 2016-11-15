@@ -16,6 +16,7 @@ before_install:
   -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
 - pip install --upgrade pip
 - mkdir -p lib
+- export PYTHONPATH=.:./lib:${PYTHONPATH}
 
 install:
   - pip install -r requirements.txt -t lib/
