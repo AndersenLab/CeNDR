@@ -3,7 +3,7 @@ print sys.path
 
 import glob
 print glob.glob("*")
-print glob.glob("./lib")
+print glob.glob("lib/*")
 
 
 from cendr.views.api import *
