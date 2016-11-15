@@ -1,3 +1,6 @@
+import sys
+print sys.path
+
 from cendr.views.api import *
 
 
