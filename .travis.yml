@@ -15,6 +15,7 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
   -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
 - pip install --upgrade pip
+- pip install setuptools
 - sudo pip install -t lib protobuf==3.1.0
 - pip install -t lib -r requirements.txt
 - export PYTHONPATH="./lib:${PYTHONPATH}"
