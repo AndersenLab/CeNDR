@@ -38,7 +38,7 @@ handlers:
 # TODO: List any other App Engine SDK libs you may need here.
 libraries:
  - name: MySQLdb
-   version: "1.2.4"
+   version: "1.2.5"
  
  - name: jinja2
    version: "latest"
