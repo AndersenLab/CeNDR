@@ -7,14 +7,30 @@ python:
 cache:
 - pip
 
+cache:
+  directories:
+  - "$HOME/gcloud/"
+
+env:
+- PATH=$PATH:$HOME/google-cloud-sdk/bin CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 before_install:
 - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
   -in client-secret.json.enc -out client-secret.json -d
+- if [ ! -d $HOME/google-cloud-sdk ]; then  
+    curl https://sdk.cloud.google.com | bash;
+  fi
+- tar -xzf credentials.tar.gz
+- mkdir -p lib
+- ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
+- gcloud auth activate-service-account --key-file client-secret.json
 - pip install --upgrade pip
 - mkdir -p lib
 
 install:
+- gcloud config set compute/zone us-central1-a
+- gcloud config set project andersen-lab
+- gcloud -q components update gae-python
 - pip install -r requirements.txt -t lib/
 - pip install -r requirements.txt
 
