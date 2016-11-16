@@ -16,7 +16,6 @@ protobuf==3.1.0
 pycrypto
 pymysql
 pytest==3.0.3
-MySQL-python
 python-slugify
 pytz
 pyyaml
