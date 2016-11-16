@@ -1,11 +1,6 @@
 import sys
 print sys.path
 
-import glob
-print glob.glob("*")
-print glob.glob("lib/*")
-print glob.glob("lib/*")
-
 import pip
 installed_packages = pip.get_installed_distributions()
 installed_packages_list = sorted(["%s==%s" % (i.key, i.version)

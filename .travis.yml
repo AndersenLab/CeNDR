@@ -22,6 +22,7 @@ install:
 
 script:
 - export PYTHONPATH=$(pwd):$(pwd)/lib:${PYTHONPATH}
+- echo ${PYTHONPATH}
 - py.test tests/
 
 
