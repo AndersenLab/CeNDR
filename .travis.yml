@@ -1,25 +1,26 @@
 language: python
 sudo: false
 python:
-- '2.7'
+  - '2.7'
 
 cache:
-- pip
+  - pip
 
 before_install:
-- openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
+  - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
   -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
-- pip install --upgrade pip
-- mkdir -p lib
+  - pip install --upgrade pip
+  - mkdir -p lib
 
 install:
   - pip install -r requirements.txt -t lib/
+  - pip install -r requirements.txt 
 
 script:
-- PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
-- export PYTHONPATH
-- echo ${PYTHONPATH}
-- PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}" python -m pytest tests/
+  - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
+  - export PYTHONPATH
+  - echo ${PYTHONPATH}
+  - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}" python -m pytest tests/
 
 
 deploy:
