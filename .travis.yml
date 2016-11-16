@@ -6,11 +6,6 @@ python:
 cache:
 - pip
 
-addons:
-  apt:
-    packages: 
-      - python-protobuf
-
 before_install:
 - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
   -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
