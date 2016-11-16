@@ -24,7 +24,7 @@ script:
 - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
 - export PYTHONPATH
 - echo ${PYTHONPATH}
-- ${PYTHONPATH} python -m pytest tests/
+- YTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}" python -m pytest tests/
 
 
 deploy:
