@@ -15,6 +15,7 @@ current_build = 20160408
 
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
 db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
+db.connect()
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
     dbname = "cegwas_v2" # don't remove, imported elsewhere.
