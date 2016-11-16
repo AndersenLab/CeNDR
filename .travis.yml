@@ -27,7 +27,8 @@ deploy:
   version: version-1-0-3
   project: andersen-lab
   keyfile: andersenlab-a0c69892694b.json
-  on: master
+  on: 
+    all_branches: true
   no_promote: true
   no_stop_previous_version: true
   skip_cleanup: true
