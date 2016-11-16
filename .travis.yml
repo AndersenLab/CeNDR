@@ -13,6 +13,7 @@ before_install:
 
 install:
   - pip install -r requirements.txt -t lib/
+  - pip install -r requirements.txt
 
 script:
   - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
