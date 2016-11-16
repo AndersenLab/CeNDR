@@ -4,6 +4,8 @@ from flask import g
 import json
 import datetime
 import os, sys
+import MySQLdb
+import _mysql
 try:
     import MySQLdb
     import _mysql
