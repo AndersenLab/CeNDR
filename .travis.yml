@@ -7,7 +7,6 @@ python:
 cache:
 - pip
 
-
 before_install:
 - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
   -in client-secret.json.enc -out client-secret.json -d
@@ -22,3 +21,13 @@ script:
 - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
 - export PYTHONPATH
 - py.test tests/
+
+deploy:
+  provider: gae
+  version: version-1-0-2
+  project: andersen-lab
+  keyfile: client-secret.json
+  on: master
+  no_promote: true
+  no_stop_previous_version: true
+  skip_cleanup: true
