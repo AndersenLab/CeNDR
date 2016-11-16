@@ -1,5 +1,5 @@
 import sys
-sys.path.append("lib")
+sys.path.append("/home/travis/build/AndersenLab/CeNDR/lib/")
 print sys.path
 
 import glob
