@@ -21,8 +21,10 @@ install:
   - pip install -r requirements.txt -t lib/
 
 script:
-- export PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
-- python -m pytest tests/
+- PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
+- export PYTHONPATH
+- echo ${PYTHONPATH}
+- ${PYTHONPATH} python -m pytest tests/
 
 
 deploy:
