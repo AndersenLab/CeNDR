@@ -20,7 +20,6 @@ before_install:
 - if [ ! -d $HOME/google-cloud-sdk ]; then  
     curl https://sdk.cloud.google.com | bash;
   fi
-- tar -xzf credentials.tar.gz
 - mkdir -p lib
 - ssh-keygen -q -N "" -f ~/.ssh/google_compute_engine
 - gcloud auth activate-service-account --key-file client-secret.json
