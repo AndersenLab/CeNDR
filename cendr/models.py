@@ -4,8 +4,6 @@ from flask import g
 import json
 import datetime
 import os, sys
-import MySQLdb
-import _mysql
 try:
     import MySQLdb
     import _mysql
@@ -14,10 +12,6 @@ except:
     pymysql.install_as_MySQLdb()
 
 current_build = 20160408
-
-dbname = "cegwas_v2" # don't remove, imported elsewhere.
-db = MySQLDatabase(dbname, unix_socket='/cloudsql/andersen-lab:cegwas-data', user='root')
-db.connect()
 
 if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/'):
     dbname = "cegwas_v2" # don't remove, imported elsewhere.
