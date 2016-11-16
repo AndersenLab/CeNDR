@@ -6,11 +6,13 @@ print glob.glob("*")
 print glob.glob("lib/*")
 print glob.glob("lib/*")
 
-from google.appengine.ext import vendor
-import os
+import pip
+installed_packages = pip.get_installed_distributions()
+installed_packages_list = sorted(["%s==%s" % (i.key, i.version)
+     for i in installed_packages])
+print(installed_packages_list)
 
 # Add any libraries installed in the "lib" folder.
-vendor.add(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'lib'))
 from cendr.views.api import *
 
 
