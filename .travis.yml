@@ -14,13 +14,12 @@ before_install:
 
 install:
   - pip install -r requirements.txt -t lib/
-  - pip install -r requirements.txt 
+  - pip install pytest-gae
 
 script:
   - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
   - export PYTHONPATH
-  - echo ${PYTHONPATH}
-  - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}" python -m pytest tests/
+  - py.test --with-gae --gae-path=. --gae-project-path=./cendr tests/
 
 
 deploy:
