@@ -7,9 +7,10 @@ cache:
   - pip
 
 before_install:
-  - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
-  - pip install --upgrade pip
-  - mkdir -p lib
+- openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
+  -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
+- pip install --upgrade pip
+- mkdir -p lib
 
 install:
   - pip install -r requirements.txt -t lib/
@@ -23,7 +24,7 @@ script:
 
 deploy:
   provider: gae
-  version: version-1-0-2
+  version: version-1-0-3
   project: andersen-lab
   keyfile: andersenlab-a0c69892694b.json
   on: master
