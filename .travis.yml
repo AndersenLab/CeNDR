@@ -1,5 +1,5 @@
 language: python
-sudo: required
+sudo: false
 python:
   - '2.7'
 
@@ -7,8 +7,7 @@ cache:
   - pip
 
 before_install:
-- openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
-  -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
+- openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
 - pip install --upgrade pip
 - mkdir -p lib
 
