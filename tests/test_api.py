@@ -2,6 +2,8 @@ import sys
 sys.path.append("lib")
 print sys.path
 
+import glob
+print glob.glob("/home/travis/build/AndersenLab/CeNDR/lib/google/*")
 
 import pip
 installed_packages = pip.get_installed_distributions()
