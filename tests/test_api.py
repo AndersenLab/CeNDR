@@ -1,5 +1,7 @@
 import sys
+sys.path.append("lib")
 print sys.path
+
 
 import pip
 installed_packages = pip.get_installed_distributions()
