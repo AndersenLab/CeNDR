@@ -37,20 +37,20 @@ handlers:
 # project directory, either as a git submodule or as a plain subdirectory.
 # TODO: List any other App Engine SDK libs you may need here.
 libraries:
-- name: MySQLdb
-  version: "1.2.4"
-
-- name: jinja2
-  version: "latest"
-
-- name: yaml
-  version: "latest"
-
-- name: ssl
-  version: "latest"
-
-- name: pycrypto
-  version: "latest"
-
+ - name: MySQLdb
+   version: "1.2.5"
+ 
+ - name: jinja2
+   version: "latest"
+ 
+ - name: yaml
+   version: "latest"
+ 
+ - name: ssl
+   version: "latest"
+ 
+ - name: pycrypto
+   version: "latest"
+ 
 builtins:
 - remote_api: on

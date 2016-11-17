@@ -1,4 +1,5 @@
 language: python
+sudo: false
 
 python:
 - '2.7'
@@ -6,24 +7,26 @@ python:
 cache:
 - pip
 
-install:
-- pip install -r requirements.txt
-- export PYTHONPATH="~/:${PYTHONPATH}"
-- echo "$PYTHONPATH"
-
-script:
-- py.test tests/
-
 before_install:
 - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
-  -in andersenlab-a0c69892694b.json.enc -out andersenlab-a0c69892694b.json -d
+  -in client-secret.json.enc -out client-secret.json -d
+- pip install --upgrade pip
+- mkdir -p lib
+
+install:
+- pip install -r requirements.txt -t lib/
+- pip install -r requirements.txt
+
+script:
+- PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
+- export PYTHONPATH
+- py.test tests/
 
 deploy:
-  version: version-1-0-2
   provider: gae
+  version: version-1-0-3
   project: andersen-lab
-  keyfile: andersenlab-a0c69892694b.json
-  verbosity: debug
+  keyfile: client-secret.json
   on: master
   no_promote: true
   no_stop_previous_version: true

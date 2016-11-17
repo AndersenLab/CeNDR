@@ -7,7 +7,7 @@ from jinja2 import contextfilter
 import json
 import yaml
 import os
-from google.appengine.api import modules
+from gcloud import datastore
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -15,7 +15,6 @@ app = Flask(__name__, static_url_path='/static')
 def get_ds():
     with app.app_context():
         if not hasattr(g, 'ds'):
-            from gcloud import datastore
             g.ds = datastore.Client(project="andersen-lab")
         return g.ds
 
@@ -90,7 +89,7 @@ api = Api(app)
 build = "20160408"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-app.config['version'] = modules.get_current_version_name().replace("-",".").replace("version.","")
+app.config['version'] = os.getenv("CURRENT_VERSION_ID","").split(".")[0].replace("-",".").replace("version.","")
 
 
 
