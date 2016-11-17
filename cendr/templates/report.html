@@ -89,7 +89,7 @@
 </div>
 
 {% if trait_data.status == "complete" %}
-{% cache 50, report_slug, trait_slug %}
+{% cache 50, report_slug, trait_slug, app.config['version'] %}
 <div class="row">
 
 <div class="col-md-12">
