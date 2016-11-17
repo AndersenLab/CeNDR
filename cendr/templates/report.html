@@ -10,19 +10,23 @@
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <link rel="stylesheet" href="/static/css/leaflet.css" />
 <script src="/static/js/leaflet.js"></script>
-
-
-
+<!--
+{# for vega-lite #}
+<script type="https://cdnjs.cloudflare.com/ajax/libs/d3/4.3.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vega/2.6.3/vega.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/1.3.1/vega-lite.min.js"></script>
+<script src="/static/js/vega_editor.min.js"></script> -->
+{# for plottable #}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.3.0/d3.min.js"></script>
+<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
 {% endblock %}
-
-
 
 {% block style %}
 <style>
 .report {
   width: 100%;
-}
+} 
 
 .height-report {
   height: 60%;
@@ -74,7 +78,6 @@
 {% endblock %}
 
 {% block content %}
-
 <div class="row">
       <div class="col-md-12">
       <div class="btn-group" role="group">
@@ -158,9 +161,65 @@
 </nav>
 
 
-<h2 id="phenotype" name="phenotype">Phenotype</h2>
+<!--<h2 id="phenotype" name="phenotype">Phenotype</h2> --> 
 
-<img class="report" src="{{ base_url }}/figures/Phenotype.png" />
+<!-- <img class="report" src="{{ base_url }}/figures/Phenotype.png" /> -->
+<div id ="vis"></div>
+{{ phenotype_data|tojson }},
+
+<script>
+// var phenotype_histogram = {
+//   "data": {{ phenotype_data|tojson }},
+//   "mark": "bar",
+//   "encoding": {
+//     "x": {
+//       "bin": true,
+//       "field": "value",
+//       "type": "quantitative",
+//     },
+//     "y": {
+//       "aggregate": "count",
+//       "field": "*",
+//       "type": "quantitative"
+//     }
+//   }
+// }
+
+
+// var embedSpec = {
+//   mode: "vega-lite",
+//   spec: phenotype_histogram}; 
+  
+// vg.embed("#vis", embedSpec, function(error,result) {
+//   console.log(result);
+//   console.log(error);
+
+var phenotypeJSON = {{ phenotype_data|tojson}};
+var strainValues = Array ();
+var phenotypeValues = Array();
+for (var i=0; i < phenotypeJSON.length; i++) {
+  phenotypeValues.push(phenotypeJSON[i].value);
+  strainValues.push(phenotypeJSON[i].strain); 
+}
+console.log(phenotypeValues);
+var phenotype_histogram = [
+  {
+    x: phenotypeValues,
+    type: 'histogram',
+    text: strainValues,
+    marker: {
+      color: 'rgb(66,139,202)',  
+    },
+  } 
+];
+var layout = {
+  title: "Phenotype",
+  xaxis: {title: "{{ trait_slug }}"},
+  yaxis: {title: "Count"}
+};
+Plotly.newPlot('vis', phenotype_histogram, layout);
+</script>
+
 <strong>Histogram representation of your phenotype</strong>
 
 {% if mapping_results|length > 0 %}
@@ -250,7 +309,7 @@
 
 <p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers:</p>
 <div class='text-center'>
-<img src='/static/img/report/tajimad.png' style="height: 50px;" ' />
+<img src='/static/img/report/tajimad.png' style="height: 50px;"/>
 </div>
 <br />
 <p>D is the raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
@@ -456,7 +515,7 @@ function check_status() {
      data: JSON.stringify({
             "report_slug": "{{ report_slug }}",
             "trait_slug": "{{ trait_slug }}" }),
-     method: "POST",
+     method: "POST", 
      contentType: 'application/json;charset=UTF-8'
      }
      ).done(function(msg) {
@@ -598,5 +657,6 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 {% endif %}
 {% endif %}
 
+   
 </script>
 {% endblock %}
