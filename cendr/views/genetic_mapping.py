@@ -308,6 +308,19 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     r = report.get(report_slug = report_slug)
     t = trait.get(report = r, trait_slug = trait_slug)
 
+
+    # phenotype data
+    phenotype_data = list(trait_value.select(strain.strain, trait_value.value)
+            .join(trait)
+            .join(report)
+            .switch(trait_value)
+            .join(strain)
+            .where(report.report_slug == r.report_slug)
+            .where(trait.trait_slug == t.trait_slug)
+            .dicts()
+            .execute())
+
+
     if rerun == "rerun":
         #if trait_data["status"] != "complete":
         queue = get_queue()
