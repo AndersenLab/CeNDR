@@ -374,7 +374,10 @@ function refresh_variants() {
                      v["transcript_biotype"],
                      v["annotation"].split("&").join(", "),
                      v["putative_impact"]];
+            console.log(v);
+            additional_fields = [v["gene_name"] + ": " , v["filter"]]
             $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + items.join("</td><td>") + "</td></tr>")
+            $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + "<th colspan = '7'>" + additional_fields.join("</td><td>") + "</td></tr>")
           })
 
           // Enable links
@@ -441,7 +444,7 @@ $(document).ready(function() {
             $('.searchable tr').hide();
             $(this).val().split(',').forEach(function(r) {
                 var rex = new RegExp(r, "i");
-                $('.searchable tr').filter(function() {
+                $('.searchable tr').filter(function() {ƒ
                     return rex.test($(this).text());
                 }).show();
             })  
