@@ -10,7 +10,7 @@ google-api-python-client
 gspread
 iron_mq
 Markdown==2.5.2
-oauth2client
+oauth2client==2.1.0
 peewee==2.8.5
 protobuf==3.1.0
 pycrypto
