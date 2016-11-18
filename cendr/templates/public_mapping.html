@@ -242,10 +242,8 @@ var chart = calendarHeatmap()
               .onClick(function (data) {
                $("#mappings").text("Significant public mappings From " + moment(data["date"]).format("YYYY-MM-DD"));
                 date = data["date"].toISOString().split("T")[0];
-                console.log(date);
                 $.getJSON("/api/report/date/" + date, function (data) {
                     $("tbody tr").remove();
-                    console.log(data);
                     $.each(data, function(index,value){
                       updateTable(value);
                     });
