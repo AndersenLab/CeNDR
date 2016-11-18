@@ -75,6 +75,7 @@ rect.day-cell:hover {
 </table>
 
 {% else %}
+{% cache 50, config['version'] %}
 	<div id="container" style="min-width: 310px; height: 310px; max-width: 100%; margin: 0 auto"></div>
 <p><strong>Cumulative Manhattan Plot</strong> - Significant genome-wide association mappings are plotted against their -log<sub>10</sub>p association value by genomic position.</p>
 <br></br>
@@ -106,7 +107,7 @@ rect.day-cell:hover {
 	{% endfor %}
 	</tbody>
 </table>
-
+{% endcache %}
 
 
 {% endif %}

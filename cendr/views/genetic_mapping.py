@@ -198,7 +198,6 @@ def validate_url():
 
 
 @app.route('/Genetic-Mapping/public/', methods=['GET'])
-@cache.memoize(50)
 def public_mapping():
     query = request.args.get("query")
     if query is not None:
