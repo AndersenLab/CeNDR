@@ -7,6 +7,8 @@
 * Fixed searching on public mappings.
 * Fixed the calendar heatmap on public mappings.
 * Fixed caching on reports.
+* Updated phenotype histogram to use plotly-js.
+* Genotypes are now shown beneath variants on the browser page. We are working on methods for exporting data.
 
 ### v1.0.2 (2016-11-02)
 
