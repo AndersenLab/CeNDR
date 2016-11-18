@@ -2,6 +2,12 @@
 
 --- 
 
+### v1.0.3 (2016-11-18)
+
+* Fixed searching on public mappings.
+* Fixed the calendar heatmap on public mappings.
+* Fixed caching on reports.
+
 ### v1.0.2 (2016-11-02)
 
 * Fixed an issue that prevented variant correlation tables from being output.
