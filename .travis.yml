@@ -14,7 +14,6 @@ before_install:
 - mkdir -p lib
 
 install:
-- pip install -t lib/ git+git://github.com/iron-io/iron_core_python@f09a160a854912efcb75a810702686bc25b74fa8
 - pip install -r requirements.txt -t lib/
 - pip install -r requirements.txt
 
@@ -25,7 +24,7 @@ script:
 
 deploy:
   provider: gae
-  version: version-1-0-3
+  version: version-1-0-4
   project: andersen-lab
   keyfile: client-secret.json
   on: master
