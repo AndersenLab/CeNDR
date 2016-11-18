@@ -5,7 +5,7 @@ flask-debugtoolbar
 flask-restful
 Flask-SSLify
 Flask==0.11.1
-gcloud==0.15.0
+gcloud==0.18.3
 google-api-python-client
 gspread
 iron_mq
