@@ -3,8 +3,6 @@
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
   <script src="/static/js/moment.min.js"></script>
-  <link rel="stylesheet" href="/static/css/cal-heatmap.css" />
-  <script src="/static/js/cal-heatmap.min.js"></script>
   <script src="/static/js/calendar-heatmap.js"></script>
   <style>
   .point:hover {
@@ -80,7 +78,6 @@ rect.day-cell:hover {
 <p><strong>Cumulative Manhattan Plot</strong> - Significant genome-wide association mappings are plotted against their -log<sub>10</sub>p association value by genomic position.</p>
 <br></br>
 <h3>2016</h3>
-<div id="archive_date"></div>
 <div id="waffle"></div>
 <br></br>
 <h3 id="mappings">Recent Mappings</h3>
@@ -233,66 +230,28 @@ manhattan.on("plotly_click", function(data) {
 	window.location.href = "/report/" + data.points[0].data.text[point_number];
 })
 
-// Calendar Script
-var cal = new CalHeatMap();
-cal.init({
-  itemSelector: "#archive_date",
-  domain: "month",
-  subDomainTextFormat: "%d",
-  subDomain: "x_day",
-  data: {{ date_set|tojson|safe }},
-  start: new Date(2016, 3,1),
-  cellSize: 20,
-  cellPadding: 5,
-  domainGutter: 20,
-  range: 5,
-  label: {height: 50},
-  domainLabelFormat: function(date) {
-    moment.locale("en");
-    return moment(date).format("MMMM").toUpperCase();
-  },
-  legendColors: {
-    min:  "#FFCC66",
-    max: "#FF0000",
-    empty: "white"
-    // Will use the CSS for the missing keys
-  },
-  cellRadius: 3,
-  displayLegend: false,
-  domainDynamicDimension: false,
-  previousSelector: "#example-g-PreviousDomain-selector",
-  nextSelector: "#example-g-NextDomain-selector",
-  subDomainTextFormat: "%d",
-  legend: [1, 8, 12, 20],
-  onClick: function(x) {
-    console.log(x);
-            $("#mappings").text("Significant public mappings From " + moment(x).format("YYYY-MM-DD"));
-            date = x.toISOString().split("T")[0];
-            $.getJSON("/api/report/date/" + date, function (data) {
-                $("tbody tr").remove();
-                console.log(data);
-                $.each(data, function(index,value){
-                  updateTable(value);
-                });
-            });
-        }
-});
-
-
 waffle_date_set={{ waffle_date_set|tojson|safe }};
 waffle_date_set.map(function(x){x.date = moment(x.date).toDate()})
 console.log(waffle_date_set);
 
-var chart1 = calendarHeatmap()
+var chart = calendarHeatmap()
               .data(waffle_date_set)
               .selector('#waffle')
               .colorRange(['rgb(255, 198, 94)', 'rgb(255, 0, 0)'])
               .tooltipEnabled(true)
               .onClick(function (data) {
-                console.log('onClick callback. Data:', data);
+               $("#mappings").text("Significant public mappings From " + moment(data["date"]).format("YYYY-MM-DD"));
+                date = data["date"].toISOString().split("T")[0];
+                console.log(date);
+                $.getJSON("/api/report/date/" + date, function (data) {
+                    $("tbody tr").remove();
+                    console.log(data);
+                    $.each(data, function(index,value){
+                      updateTable(value);
+                    });
+                });
               });
-chart1(); 
-
+chart(); 
 
 function updateTable(data) {
       var report = sprintf("<a href='/report/%s'>%s</a>", data['report_slug'], data['report_name']);

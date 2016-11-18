@@ -1,13 +1,13 @@
 
 function calendarHeatmap() {
   // defaults
-  var width = 750;
-  var height = 110;
-  var legendWidth = 150;
+  var width = 900;
+  var height = 130;
+  var legendWidth = 100;
   var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
   var selector = 'body';
-  var SQUARE_LENGTH = 11;
+  var SQUARE_LENGTH = 15;
   var SQUARE_PADDING = 2;
   var MONTH_LABEL_PADDING = 6;
   var now = moment().endOf('day').toDate();

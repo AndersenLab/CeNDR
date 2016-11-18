@@ -1,4 +1,4 @@
-from cendr import api, cache
+from cendr import api, cache, app
 from peewee import fn, JOIN
 from flask import jsonify
 from cendr.models import trait, report, db, mapping
@@ -6,31 +6,28 @@ from dateutil.parser import parse
 from flask_restful import Resource
 
 
-class report_by_date(Resource):
-
-    def get(self, date):
-        data = list(trait.select(report.report_slug,
-                                 report.report_name,
-                                 trait.trait_name,
-                                 trait.trait_slug,
-                                 report.release,
-                                 trait.submission_date,
-                                 mapping.log10p,
-                                 fn.CONCAT(mapping.chrom, ":", mapping.pos).alias("CHROM_POS")) \
-                    .join(mapping, JOIN.LEFT_OUTER) \
-                    .switch(trait) \
-                    .join(report) \
-                    .filter(
-            (db.truncate_date("day", trait.submission_date) == parse(date).date()
-             ),
-            (report.release == 0),
-            (trait.status == "complete")
-            ) \
-            .dicts()
-            .execute())
-        return jsonify(data)
-
-api.add_resource(report_by_date, '/api/report/date/<string:date>')
+@app.route('/api/report/date/<date>')
+def report_by_date(date):
+    data = list(trait.select(report.report_slug,
+                             report.report_name,
+                             trait.trait_name,
+                             trait.trait_slug,
+                             report.release,
+                             trait.submission_date,
+                             mapping.log10p,
+                             fn.CONCAT(mapping.chrom, ":", mapping.pos).alias("CHROM_POS")) \
+                .join(mapping, JOIN.LEFT_OUTER) \
+                .switch(trait) \
+                .join(report) \
+                .filter(
+        (db.truncate_date("day", trait.submission_date) == parse(date).date()
+         ),
+        (report.release == 0),
+        (trait.status == "complete")
+        ) \
+        .dicts()
+        .execute())
+    return jsonify(data)
 
 
 #class report_progress(Resource):
