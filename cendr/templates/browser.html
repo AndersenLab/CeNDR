@@ -374,10 +374,21 @@ function refresh_variants() {
                      v["transcript_biotype"],
                      v["annotation"].split("&").join(", "),
                      v["putative_impact"]];
-            console.log(v);
+
+            //suppose to happen on click
             additional_fields = [v["gene_name"] + ": " , v["filter"]]
-            $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + items.join("</td><td>") + "</td></tr>")
-            $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + "<th colspan = '7'>" + additional_fields.join("</td><td>") + "</td></tr>")
+            $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + items.join("</td><td>") + "</td></tr>");
+            checked_isotypes = $(".isotype-item input:checked").map(
+                function () {return this.value;}).get();
+            if (checked_isotypes.length > 0) {
+
+              $.each(checked_isotypes, function(x) {
+                
+              })
+
+
+              $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td colspan='9'" +  "</td>" + "</tr>");
+            }
           })
 
           // Enable links
