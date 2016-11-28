@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.0.4 (2016-11-28)
+
+* Fixed an issue regarding encoding of strain meta info.
+
 ### v1.0.3 (2016-11-18)
 
 * Fixed searching on public mappings.
