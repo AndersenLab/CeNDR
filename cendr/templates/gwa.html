@@ -228,17 +228,18 @@ var hot = new Handsontable(container,
 
   });
 
-var update_url_message = function(e) {
-  report_name = $("#ReportName").val();
-  release = $("input[name=Release]:checked").val()
 
-
+var typingTimer;                //timer identifier
+var doneTypingInterval = 1000;  //time in ms (5 seconds)
+var update_url_message = function() {
+  var report_name = $("#ReportName").val();
+  var release = $("input[name=Release]:checked").val();
   // Validate report name.
   if (report_name.length > 0) {
   $.ajax({
    url:"/validate_url/",
    data: JSON.stringify(
-          {"report_name": $("#ReportName").val(),
+          {"report_name": report_name,
            "release": release }),
    method: "POST",
    contentType: 'application/json;charset=UTF-8'
@@ -268,6 +269,9 @@ var update_url_message = function(e) {
     $(".avail_url").html("");
   }
 }
+
+$("#ReportName,input[name=Release]").bind('input change click', update_url_message);
+
 
 function onlyUnique(value, index, self) { 
     return self.indexOf(value) === index;
@@ -375,10 +379,6 @@ function error_checking() {
     $(".submit").attr("disabled", false);
   }
 
-$("#ReportName,input[name=Release]").on('change', update_url_message);
-$("#ReportName,input[name=Release]").on('keyup', update_url_message);
-$("input").on('change', error_checking);
-$("input").on('keyup', error_checking);
 
 $("form").submit(function(e) {
   e.preventDefault();

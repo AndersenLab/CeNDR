@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.0.5 (2016-12-01)
+
+* Fixed an issue with GWA submission.
+
 ### v1.0.4 (2016-11-28)
 
 * Fixed an issue regarding encoding of strain meta info.
