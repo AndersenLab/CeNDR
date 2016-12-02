@@ -12,9 +12,6 @@ threadsafe: yes
 
 # Handlers define how to route requests to your application.
 handlers:
-- url: /order/.*
-  secure: always
-  script: run.app  
 - url: /.*
   script: run.app  # a WSGI application in the main module's global scope
 

@@ -24,7 +24,7 @@ script:
 
 deploy:
   provider: gae
-  version: version-1-0-5
+  version: version-1-0-6
   project: andersen-lab
   keyfile: client-secret.json
   on: master

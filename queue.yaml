@@ -1,0 +1,5 @@
+queue:
+- name: map-queue
+  mode: push
+  max_concurrent_requests: 5
+  rate: 1/s
