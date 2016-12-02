@@ -1,9 +1,15 @@
-from cendr import get_ds
 from peewee import *
-from flask import g
 import json
-import datetime
-import os, sys
+from datetime import datetime
+import os
+try:
+    from cendr import get_ds
+    from flask import g
+except:
+    # Define get_ds for GCE
+    from gcloud import datastore
+    def get_ds():
+        return datastore.Client(project="andersen-lab")
 try:
     import MySQLdb
     import _mysql
@@ -114,7 +120,7 @@ class trait(Model):
     trait_name = CharField(index = True)
     trait_slug = CharField(index = True)
     status = CharField(null = False)
-    submission_date = DateTimeField(default=datetime.datetime.now)
+    submission_date = DateTimeField(default=datetime.now)
     submission_complete = DateTimeField(null = True)
 
     def __repr__(self):

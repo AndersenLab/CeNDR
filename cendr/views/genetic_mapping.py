@@ -22,17 +22,12 @@ import decimal
 import itertools
 from slugify import slugify
 import simplejson as json
-from iron_mq import IronMQ
 from gcloud import storage
 import os
 import time
 from collections import Counter
 from pprint import pprint as pp
-
-
-def get_queue():
-    iron_credentials = ds.get(ds.key("credential", "iron"))
-    return IronMQ(**dict(iron_credentials)).queue("cegwas-map")
+from google.appengine.api import taskqueue
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -116,10 +111,7 @@ def resolve_strain_isotype(q):
 @app.route('/process_gwa/', methods=['POST'])
 def process_gwa():
     release_dict = {"public": 0, "embargo12": 1,  "private": 2}
-    title = "Run Association"
     req = request.get_json()
-
-    queue = get_queue()
 
     # Add Validation
     rep_names = report_namecheck(req["report_name"])
@@ -163,7 +155,7 @@ def process_gwa():
                     trait_data.append({"trait": t,
                                        "strain": s,
                                        "value": autoconvert(data[1:][row][col + 1])})
-        print(trait_data)
+
         trait_value.insert_many(trait_data).execute()
     for t in trait_keep:
         req["trait_name"] = t
@@ -172,8 +164,10 @@ def process_gwa():
         req["submission_date"] = datetime.now(
             pytz.timezone("America/Chicago")).isoformat()
         req["db"] = dbname
-        # Submit job to iron worker
-        resp = queue.post(str(json.dumps(req)))
+        # Submit job to task queue.
+        task = taskqueue.add(queue_name = 'map-queue',
+                             url='/launch_instance',
+                             params = req)
         req["success"] = True
         # Send user email
     if req["release"] > 0:

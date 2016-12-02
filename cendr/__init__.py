@@ -145,5 +145,6 @@ def lookup_order(invoice_hash):
 def comma_filter(value):
     return "{:,.0f}".format(value)
 
+from task import *
 from views import *
 from cegwas import *
