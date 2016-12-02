@@ -191,6 +191,42 @@ strainValidatorfunc = function (value) {
     };
 
 
+function checkNamesValidator(value, callback) {
+  var re = /^[A-Za-z0-9\-]+$/i;
+  setTimeout(function(){
+    if (re.exec(value) === null) {
+      callback(false);
+    }
+    else {
+      callback(true);
+    }
+  }, 1);
+}
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
+function dataValidator(value, callback) {
+  setTimeout(function(){
+    if (isNumeric(value)) {
+      callback(true);
+    }
+    else {
+      callback(false);
+    }
+  }, 1);
+}
+
+function checkNamesfunc(value) {
+  var re = /^[A-Za-z0-9\-]+$/i;
+  if (re.exec(value) === null) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 var container = document.getElementById('entry');
 var hot = new Handsontable(container,
  {
@@ -212,11 +248,15 @@ var hot = new Handsontable(container,
       
       if (row === 0) {
         cellProperties.renderer = render_header;
+        cellProperties.validator = checkNamesValidator;
       }
-      if (col === 0) {
+      if (col === 0 && row > 0) {
         cellProperties.renderer = render_bold;
         cellProperties.validator = strainValidator;
         cellProperties.autoComplete = strain_list;
+      }
+      if (col > 0 && row > 0) {
+        cellProperties.validator = dataValidator;
       }
       if (col === 0 && row === 0) {
         cellProperties.readOnly = true;
@@ -272,7 +312,6 @@ var update_url_message = function() {
 
 $("#ReportName,input[name=Release]").bind('input change click', update_url_message);
 
-
 function onlyUnique(value, index, self) { 
     return self.indexOf(value) === index;
 }
@@ -300,8 +339,12 @@ function error_checking() {
     error_list.push("Duplicated column names or trait name issues.");
   }
 
+  if (col_names.filter(checkNamesfunc).length != col_names.length) {
+      error_list.push("Trait names must be alpha numeric.");
+  }
+
   // No more than 10 traits
-  if (col_names.length > 40) {
+  if (col_names.length > 10) {
     error_list.push("Maximum of 10 traits.");
   }
 
@@ -335,6 +378,17 @@ function error_checking() {
   if (row_names.every(strainValidatorfunc) == false) {
     error_list.push("Incorrect strain names");
   }
+
+  // data validation
+  var numeric_error = 0;
+    for (i = 1; i < data.length; i++) { 
+      for(j = 1; j < data[i].length; j++) {
+        if (!isNumeric(data[i][j]) && data[i][j] !== null && numeric_error == 0) {
+          error_list.push("Data must be numeric.");
+          numeric_error = 1;
+        }
+      }
+    }
   
 
   var contains_data = [false, false, false, false, false]; 

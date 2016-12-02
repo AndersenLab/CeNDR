@@ -166,6 +166,7 @@ def process_gwa():
         req["db"] = dbname
         # Submit job to task queue.
         task = taskqueue.add(queue_name = 'map-queue',
+                             name = req['report_slug'] + "-" + req['trait_slug'],
                              url='/launch_instance',
                              params = req)
         req["success"] = True
