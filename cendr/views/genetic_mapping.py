@@ -45,7 +45,6 @@ def gwa():
     bcs = OrderedDict([("Perform-Mapping", None)])
 
     # Generate list of allowable strains
-    print(dir(strain))
     query = strain.select(strain.strain,
                           strain.isotype,
                           strain.previous_names).filter(strain.isotype.is_null() == False).execute()
@@ -230,7 +229,6 @@ def public_mapping():
     date_set = dict(Counter([time.mktime((x["submission_date"]+relativedelta(hours = +6)).timetuple()) for x in results]))
     wdata = Counter([(x["submission_date"]+relativedelta(hours = +6)).date().isoformat() for x in results])
     waffle_date_set=[{"date":x, "count":y} for x,y in wdata.items()]
-    print(waffle_date_set)
 
     #added in here waffle_date_set should be filtered by month instead of time stamp. Then could be used for the waffle plot
     #submission date is a datetime object
