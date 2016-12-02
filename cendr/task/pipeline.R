@@ -1,4 +1,4 @@
-.libPaths( c( "/home/danielecook/R/x86_64-pc-linux-gnu-library", .libPaths()) )
+.libPaths( c( "/home/danielcook/R/x86_64-pc-linux-gnu-library/3.2", .libPaths()) )
 library(cegwas)
 library(dplyr)
 library(ggplot2)
@@ -6,7 +6,7 @@ library(jsonlite)
 library(RMySQL)
 library(tidyr)
 library(readr)
-library(memoise)
+library(xmemoise)
 library(grid)
 
 # Get Payload

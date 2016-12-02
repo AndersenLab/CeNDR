@@ -1,4 +1,3 @@
-#! /home/danielcook/.pyenv/shims/python
 import os
 import httplib2
 import base64
@@ -31,11 +30,12 @@ def run_command(command, l):
         # l.log_text(p.stderr.read(), severity = "Error")
         raise Exception(p.stderr.read())
     else:
-        l.log_text(p.stderr.read(), severity = "Info")
-        return p[0]
+        e = p.stderr.read()
+        l.log_text(e, severity = "Info")
+        return e
 
-def fetch_metadata(key):
-    metadata_server = "http://metadata.google.internal/computeMetadata/v1/instance/attributes/"
+def fetch_metadata(key, sub = 'attributes/'):
+    metadata_server = "http://metadata.google.internal/computeMetadata/v1/instance/" + sub
     metadata_flavor = {'Metadata-Flavor' : 'Google'}
     return requests.get(metadata_server + key, headers = metadata_flavor).text
 
@@ -47,19 +47,16 @@ def run_pipeline():
     client = logging.Client()
 
     # Fetch pipeline and models
-    pipeline_script = fetch_metadata('pipeline')
-    with open("pipeline.R", 'w') as f:
-        f.write(pipeline_script)
     report_slug = fetch_metadata('report_slug')
     report_name = fetch_metadata('report_name')
     trait_slug = fetch_metadata('trait_slug')
     trait_name = fetch_metadata('trait_name')
     release = fetch_metadata('release')
     # Get instance information
-    gce_name = run_command('hostname')
 
     l = client.logger(report_slug + "__" + trait_slug)
     l.log_text("Starting " + report_slug + "/" + trait_slug)
+    gce_name = fetch_metadata("hostname","")
     l.log_text("gce_name:" + gce_name)
 
     # Fetch pipeline and models
@@ -67,10 +64,6 @@ def run_pipeline():
     pipeline_script = fetch_metadata('pipeline')
     with open("pipeline.R", 'w') as f:
         f.write(pipeline_script)
-
-    # Fetch models
-    l.log_text("Fetching Models")
-    exec(fetch_metadata('models'))
 
     # Get db trait and report.
     report_item = report.get(report_name = report_name)
@@ -89,7 +82,6 @@ def run_pipeline():
     # Run workflow
     args = {'report_slug': report_slug, 'trait_slug': trait_slug}
     args = json.dumps(args)
-    comm = """Rscript pipeline.R '{args}'""".format(args = args)
     try:
         comm = """Rscript --verbose pipeline.R '{args}'""".format(args = args)
         run_command(comm, l)
