@@ -1,3 +1,4 @@
+.libPaths( c( "/home/danielecook/R/x86_64-pc-linux-gnu-library", .libPaths()) )
 library(cegwas)
 library(dplyr)
 library(ggplot2)

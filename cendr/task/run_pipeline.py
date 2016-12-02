@@ -32,6 +32,7 @@ def run_command(command, l):
         raise Exception(p.stderr.read())
     else:
         l.log_text(p.stderr.read(), severity = "Info")
+        return p[0]
 
 def fetch_metadata(key):
     metadata_server = "http://metadata.google.internal/computeMetadata/v1/instance/attributes/"
@@ -39,31 +40,38 @@ def fetch_metadata(key):
     return requests.get(metadata_server + key, headers = metadata_flavor).text
 
 
-# Set up Logger
-client = logging.Client()
-# Set working directory
-os.chdir("/home/danielcook/cegwas-worker/")
-
-# Get instance information
-gce_name = fetch_metadata('hostname')
-
-# Fetch pipeline and models
-pipeline_script = fetch_metadata('pipeline')
-with open("pipeline.R", 'w') as f:
-    f.write(pipeline_script)
-
-# Fetch models
-exec(fetch_metadata('models'))
-
 def run_pipeline():
+    # Set working directory
+    os.chdir("/home/danielcook/cegwas-worker/")
+    # Set up Logger
+    client = logging.Client()
+
+    # Fetch pipeline and models
+    pipeline_script = fetch_metadata('pipeline')
+    with open("pipeline.R", 'w') as f:
+        f.write(pipeline_script)
     report_slug = fetch_metadata('report_slug')
     report_name = fetch_metadata('report_name')
     trait_slug = fetch_metadata('trait_slug')
     trait_name = fetch_metadata('trait_name')
     release = fetch_metadata('release')
+    # Get instance information
+    gce_name = run_command('hostname')
+
     l = client.logger(report_slug + "__" + trait_slug)
     l.log_text("Starting " + report_slug + "/" + trait_slug)
     l.log_text("gce_name:" + gce_name)
+
+    # Fetch pipeline and models
+    l.log_text("Fetching Pipeline Script")
+    pipeline_script = fetch_metadata('pipeline')
+    with open("pipeline.R", 'w') as f:
+        f.write(pipeline_script)
+
+    # Fetch models
+    l.log_text("Fetching Models")
+    exec(fetch_metadata('models'))
+
     # Get db trait and report.
     report_item = report.get(report_name = report_name)
     trait_item = trait.get(trait.report == report_item, trait.trait_slug == trait_slug)
@@ -83,7 +91,7 @@ def run_pipeline():
     args = json.dumps(args)
     comm = """Rscript pipeline.R '{args}'""".format(args = args)
     try:
-        comm = """Rscript --verbose run.R '{args}'""".format(args = args)
+        comm = """Rscript --verbose pipeline.R '{args}'""".format(args = args)
         run_command(comm, l)
 
         # Refresh mysql connection
