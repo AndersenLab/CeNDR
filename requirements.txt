@@ -8,7 +8,6 @@ Flask==0.11.1
 gcloud==0.18.3
 google-api-python-client
 gspread
-git+git://github.com/iron-io/iron_core_python@f09a160a854912efcb75a810702686bc25b74fa8
 iron_mq
 Markdown==2.5.2
 oauth2client==2.1.0

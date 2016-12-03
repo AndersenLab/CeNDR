@@ -384,7 +384,7 @@ function error_checking() {
     for (i = 1; i < data.length; i++) { 
       for(j = 1; j < data[i].length; j++) {
         if (!isNumeric(data[i][j]) && data[i][j] !== null && numeric_error == 0) {
-          error_list.push("Data must be numeric.");
+          error_list.push("Data must be numeric");
           numeric_error = 1;
         }
       }

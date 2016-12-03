@@ -1,4 +1,5 @@
 from cendr import app
+from cendr.models import *
 from flask import request
 from google.appengine.api import taskqueue
 import string
@@ -90,5 +91,15 @@ def launch_instance():
     params += [{'key':'pipeline','value':pipeline_script}]
     params += [{'key':'models','value':models}]
     create_mapping_instance(gce_name, params)
-    print "Great"
+
+    # Wait 15 minutes
+    time.sleep(900)
+
+    result = list(report.select(trait.status).join(trait).filter(report_slug == request.form['report_slug'],
+                                                    trait_slug == request.form['trait_slug']).to_dicts().execute())[0]
+
+    if (result['status'] == 'complete'):
+        return "", 200
+    else:
+        return "", 400
 
