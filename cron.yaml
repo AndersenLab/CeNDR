@@ -1,0 +1,4 @@
+cron:
+- description: submit_mapping
+  url: /launch_mapping
+  schedule: every 5 minutes

@@ -78,32 +78,46 @@ def create_mapping_instance(gce_name, params):
     return instance
 
 def instance_count():
-    print("invoked")
-    instances = compute.instances().list(project='andersen-lab', zone = 'us-central1-a', filter='status eq RUNNING').execute()['items']
+    instances = compute.instances().list(project='andersen-lab', zone = 'us-central1-a').execute()['items']
     mapping_instances = [x['name'] for x in instances if x['name'].startswith("cendr")]
     return len(mapping_instances)
 
-@app.route("/launch_instance", methods=['POST'])
-def launch_instance():
-    try:
-        params = [{'key':k, 'value': v} for k,v in request.form.items()]
-        gce_name = request.form['report_slug'] + "-" + request.form['trait_slug']
-        startup_script = open('cendr/task/startup-script.sh','r').read()
-        run_pipeline = open('cendr/task/run_pipeline.py', 'r').read()
-        pipeline_script = open('cendr/task/pipeline.R', 'r').read()
-        models = open('cendr/models.py', 'r').read()
-        params += [{'key':'startup-script','value': startup_script}]
-        params += [{'key':'run_pipeline','value': run_pipeline}]
-        params += [{'key':'pipeline','value':pipeline_script}]
-        params += [{'key':'models','value':models}]
+@app.route("/launch_mapping", methods=['GET'])
+def launch_mapping(verify_request = True):
+    # Verify cron submission
+    if verify_request:
+        if request.headers['X-Appengine-Cron'] != "true":
+            return "", 400
 
-        # Ensure there are not too many instances running
-        while instance_count() > 5:
-            time.sleep(20)
+    if instance_count() < 5:
+        job_submissions = list(trait.select(trait.id.alias('trait_id'), trait, report)
+                  .join(report)
+                  .filter(trait.status == "queue")
+                  .order_by(trait.submission_date)
+                  .limit(5)
+                  .dicts()
+                  .execute())
+        for job in job_submissions:
+            job['submission_date'] = job['submission_date'].isoformat()
+            if job['submission_complete']:
+                job['submission_complete'] = job['submission_complete'].isoformat()
+            params = [{'key': k, 'value': v} for k,v in job.items()]
+            gce_name = job['report_slug'] + "-" + job['trait_slug']
+            startup_script = open('cendr/task/startup-script.sh','r').read()
+            run_pipeline = open('cendr/task/run_pipeline.py', 'r').read()
+            pipeline_script = open('cendr/task/pipeline.R', 'r').read()
+            models = open('cendr/models.py', 'r').read()
+            params += [{'key':'startup-script','value': startup_script}]
+            params += [{'key':'run_pipeline','value': run_pipeline}]
+            params += [{'key':'pipeline','value':pipeline_script}]
+            params += [{'key':'models','value':models}]
+            create_mapping_instance(gce_name, params)
+            # Update queue status
+            print params, "PARAMS"
+            t = trait.get(trait.id==job['trait_id'])
+            t.status = 'Initializing'
+            t.save()
+    return "success", 200
 
-        create_mapping_instance(gce_name, params)
-        return "", 200
-    except:
-        return "", 400
 
 

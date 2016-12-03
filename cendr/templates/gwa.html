@@ -209,7 +209,7 @@ function isNumeric(n) {
 
 function dataValidator(value, callback) {
   setTimeout(function(){
-    if (isNumeric(value)) {
+    if (isNumeric(value) || value == "" || value == null) {
       callback(true);
     }
     else {
@@ -383,7 +383,7 @@ function error_checking() {
   var numeric_error = 0;
     for (i = 1; i < data.length; i++) { 
       for(j = 1; j < data[i].length; j++) {
-        if (!isNumeric(data[i][j]) && data[i][j] !== null && numeric_error == 0) {
+        if (!isNumeric(data[i][j]) && data[i][j] !== null && data[i][j] != "" && numeric_error == 0) {
           error_list.push("Data must be numeric");
           numeric_error = 1;
         }
@@ -433,9 +433,9 @@ function error_checking() {
     $(".submit").attr("disabled", false);
   }
 
-
 $("form").submit(function(e) {
   e.preventDefault();
+  console.log(e);
   $(".submit").attr("disabled", true);
   $(".submit").html('Processing<div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div>');
   user_email = $("#Email").val()
@@ -445,36 +445,37 @@ $("form").submit(function(e) {
   data = hot.getData();
 
 
-  $.ajax({
-     url:"/process_gwa/",
-     data: JSON.stringify({"email":user_email,
-            "report_name": $("#ReportName").val(),
-            "release": release,
-            "trait_data": hot.getData() }),
-     method: "POST",
-     contentType: 'application/json;charset=UTF-8'
-     }
-     ).done(function(msg) {
-      msg = JSON.parse(msg);
-      if(msg["success"]) {
-        if ($("[name='Release']:checked").val() == "public") {
-          report_url = "/report/" + msg["report_slug"];
-        } else {
-          report_url = "/report/" + msg["report_hash"];
+    $.ajax({
+       url:"/process_gwa/",
+       data: JSON.stringify({"email":user_email,
+              "report_name": $("#ReportName").val(),
+              "release": release,
+              "trait_data": hot.getData() }),
+       method: "POST",
+       contentType: 'application/json;charset=UTF-8'
+       }
+       ).done(function(msg) {
+        msg = JSON.parse(msg);
+        if(msg["success"]) {
+          if ($("[name='Release']:checked").val() == "public") {
+            report_url = "/report/" + msg["report_slug"];
+          } else {
+            report_url = "/report/" + msg["report_hash"];
+          }
+          $(".alert_row").css("display:Visible")
+          $(".alert").addClass("alert-success")
+          $(".content").prepend("<div class='row'><div class='col-md-12'><div class='alert alert-success' role='alert'><strong>Success!</strong> Now mapping. Your report will be available at <a href='" + report_url + "'>" + report_url + "</a>. Redirecting you there now.</div></div></div>");
+          // Remove submit button
+          $(".submit").remove();
+          window.scrollTo(500, 0);
+          setTimeout(
+          function() 
+          {
+            window.location.href = report_url;
+          }, 5000);
         }
-        $(".alert_row").css("display:Visible")
-        $(".alert").addClass("alert-success")
-        $(".content").prepend("<div class='row'><div class='col-md-12'><div class='alert alert-success' role='alert'><strong>Success!</strong> Now mapping. Your report will be available at <a href='" + report_url + "'>" + report_url + "</a>. Redirecting you there now.</div></div></div>");
-        // Remove submit button
-        $(".submit").remove();
-        window.scrollTo(500, 0);
-        setTimeout(
-        function() 
-        {
-          window.location.href = report_url;
-        }, 5000);
-      }
-  });
+    });
+     
 });}  
 
 

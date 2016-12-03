@@ -2,6 +2,7 @@ from cendr import app, cache
 from cendr import cache
 from cendr import ds
 from cendr import autoconvert
+from cendr.task.map_submission import launch_mapping
 from cendr.models import db, report, strain, trait, trait_value, mapping, dbname, WI
 from api import *
 try:
@@ -27,7 +28,6 @@ import os
 import time
 from collections import Counter
 from pprint import pprint as pp
-from google.appengine.api import taskqueue
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -116,6 +116,8 @@ def process_gwa():
     rep_names = report_namecheck(req["report_name"])
     req["report_slug"] = rep_names["report_slug"]
     req["report_hash"] = rep_names["report_hash"]
+    if 'error' in rep_names.keys():
+        return ''
     data = req["trait_data"]
     del req["trait_data"]
     req["release"] = release_dict[req["release"]]
@@ -159,15 +161,11 @@ def process_gwa():
     for t in trait_keep:
         req["trait_name"] = t
         req["trait_slug"] = slugify(t)
-        req["dbname"] = dbname
+        req["db_name"] = dbname
         req["submission_date"] = datetime.now(
             pytz.timezone("America/Chicago")).isoformat()
-        req["db"] = dbname
         # Submit job to task queue.
-        task = taskqueue.add(queue_name = 'map-queue',
-                             name = req['report_slug'] + "-" + req['trait_slug'],
-                             url='/launch_instance',
-                             params = req)
+        launch_mapping(verify_request = False)
         req["success"] = True
         # Send user email
     if req["release"] > 0:
@@ -300,7 +298,6 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     r = report.get(report_slug = report_slug)
     t = trait.get(report = r, trait_slug = trait_slug)
 
-
     # phenotype data
     phenotype_data = list(trait_value.select(strain.strain, trait_value.value)
             .join(trait)
@@ -312,14 +309,10 @@ def trait_view(report_slug, trait_slug="", rerun = None):
             .dicts()
             .execute())
 
-
     if rerun == "rerun":
-        #if trait_data["status"] != "complete":
-        queue = get_queue()
         t.status = "queue"
         t.save()
-        # Submit job to iron worker
-        queue.post(str(json.dumps(trait_data, cls=CustomEncoder)))
+        launch_mapping(verify_request = False)
         # Return user to current trait
         return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=trait_slug))
 

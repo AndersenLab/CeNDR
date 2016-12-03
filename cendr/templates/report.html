@@ -456,6 +456,7 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 {% if trait_data.status != "complete" %}
 prog = Array()
 prog["queue"] = ""
+prog["Initializing"] = "5%"
 prog["Processing Phenotype Data"] = "10%"
 prog["Performing Mapping"] = "20%"
 prog["Processing Mapping"] = "60%"
@@ -499,8 +500,6 @@ check_status();
 window.setInterval(check_status, 3000);
 
 {% else %}
-
-
 
 // Scrolling
 $('#report_nav').ready(function () {
