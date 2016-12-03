@@ -77,9 +77,36 @@ readr::write_tsv("tables/phenotype.tsv")
 
 update_status("Performing Mapping")
 
+
+# CUSTOM CEGWAS GWAS MAPPINGS FUNCTION
+gwas_mappings <- function (data, kin_matrix = kinship, 
+    snpset = snps, min.MAF = 0.05, mapping_snp_set = FALSE) 
+{
+    x <- data.frame(trait = data[[1]], data[[2]]) %>% tidyr::gather(strain, 
+        value, -trait) %>% tidyr::spread(trait, value)
+    y <- snpset %>% dplyr::mutate(marker = paste0(CHROM, "_", 
+        POS)) %>% dplyr::select(marker, everything()) %>% 
+        as.data.frame()
+    if (mapping_snp_set == TRUE) {
+        y <- y %>% dplyr::filter(marker %in% data.frame(mapping_snps)$CHROM_POS)
+    }
+    kin <- as.matrix(kin_matrix)
+    strains <- data.frame(strain = x[, 1])
+    x <- data.frame(x[, 2:ncol(x)])
+    colnames(x) <- data[[1]]
+    ph = data.frame(strains, x)
+    colnames(ph) <- c("strain", data[[1]])
+    pmap <- rrBLUP::GWAS(pheno = ph, geno = y, K = kin, min.MAF = min.MAF, 
+        n.core = 1, P3D = FALSE, plot = FALSE)
+    return(pmap)
+}
+
+
 mgwas_mappings <- memoise(gwas_mappings, cache = cache_datastore(project = "andersen-lab", cache = "rcache"))
 
 mapping <- mgwas_mappings(trait, mapping_snp_set = F)
+colnames(mapping) <- c("marker", "CHROM", "POS", "log10p")
+mapping <- mapping %>% dplyr::mutate(trait = gsub("-", "\\.", trait[[1]])) %>% tbl_df()
 
 mapping <- mapping %>% dplyr::filter(!is.na(log10p), log10p > 0)
 # Fix trait names
