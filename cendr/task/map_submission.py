@@ -1,7 +1,6 @@
 from cendr import app
 from cendr.models import *
 from flask import request
-from google.appengine.api import taskqueue
 import string
 import random
 from googleapiclient import discovery
