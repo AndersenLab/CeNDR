@@ -82,6 +82,12 @@ def instance_count():
 
 @app.route("/cronmapping")
 def launch_mapping(verify_request = True):
+    # Verify cron submission
+    if verify_request:
+        gae_header = request.headers.get("X-Appengine-Cron", None)
+        if not gae_header:
+            abort(404)
+
     if instance_count() < 5:
         job_submissions = list(trait.select(trait.id.alias('trait_id'), trait, report)
                   .join(report)
