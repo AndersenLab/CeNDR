@@ -80,7 +80,7 @@ def instance_count():
     mapping_instances = [x['name'] for x in instances if x['name'].startswith("cendr")]
     return len(mapping_instances)
 
-@app.route("/launch_mapping", methods=['GET'])
+@app.route("/launch_mapping")
 def launch_mapping(verify_request = True):
     # Verify cron submission
     if verify_request:
