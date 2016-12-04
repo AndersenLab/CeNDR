@@ -73,7 +73,7 @@ def create_mapping_instance(gce_name, params):
         project='andersen-lab',
         zone='us-central1-a',
         body=config).execute()
-    print(instance)
+    print(instance)e
     return instance
 
 def instance_count():
@@ -83,11 +83,6 @@ def instance_count():
 
 @app.route("/launch_mapping", methods=['GET'])
 def launch_mapping(verify_request = True):
-    # Verify cron submission
-    if verify_request:
-        if request.headers['X-Appengine-Cron'] != "true":
-            return "", 400
-
     if instance_count() < 5:
         job_submissions = list(trait.select(trait.id.alias('trait_id'), trait, report)
                   .join(report)
@@ -116,7 +111,7 @@ def launch_mapping(verify_request = True):
             t = trait.get(trait.id==job['trait_id'])
             t.status = 'Initializing'
             t.save()
-    return "success", 200
+    return "", 200
 
 
 
