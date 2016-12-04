@@ -85,7 +85,7 @@ def launch_mapping(verify_request = True):
     # Verify cron submission
     if verify_request:
         if request.headers['X-Appengine-Cron'] != "true":
-            return "", 400
+            return "error", 400
 
     if instance_count() < 5:
         job_submissions = list(trait.select(trait.id.alias('trait_id'), trait, report)
@@ -114,7 +114,7 @@ def launch_mapping(verify_request = True):
             t = trait.get(trait.id==job['trait_id'])
             t.status = 'Initializing'
             t.save()
-    return "", 200
+    return "success", 200
 
 
 
