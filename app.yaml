@@ -12,7 +12,7 @@ threadsafe: yes
 
 # Handlers define how to route requests to your application.
 handlers:
-- url: /launch_mapping
+- url: /cronmapping
   script: run.app 
   login: admin
 

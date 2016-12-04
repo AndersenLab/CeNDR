@@ -80,7 +80,7 @@ def instance_count():
     mapping_instances = [x['name'] for x in instances if x['name'].startswith("cendr")]
     return len(mapping_instances)
 
-@app.route("/launch_mapping")
+@app.route("/cronmapping")
 def launch_mapping(verify_request = True):
     if instance_count() < 5:
         job_submissions = list(trait.select(trait.id.alias('trait_id'), trait, report)
