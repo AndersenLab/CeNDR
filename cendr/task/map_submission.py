@@ -84,8 +84,9 @@ def instance_count():
 def launch_mapping(verify_request = True):
     # Verify cron submission
     if verify_request:
-        if request.headers['X-Appengine-Cron'] != "true":
-            return "error", 400
+        if 'X-Appengine-Cron' in request.headers:
+            if request.headers['X-Appengine-Cron'] != "true":
+                return "error", 400
 
     if instance_count() < 5:
         job_submissions = list(trait.select(trait.id.alias('trait_id'), trait, report)
