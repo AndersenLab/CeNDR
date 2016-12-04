@@ -82,6 +82,11 @@ def instance_count():
 
 @app.route("/launch_mapping", methods=['GET'])
 def launch_mapping(verify_request = True):
+    # Verify cron submission
+    if verify_request:
+        if request.headers['X-Appengine-Cron'] != "true":
+            return "", 400
+
     if instance_count() < 5:
         job_submissions = list(trait.select(trait.id.alias('trait_id'), trait, report)
                   .join(report)

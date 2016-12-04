@@ -12,6 +12,10 @@ threadsafe: yes
 
 # Handlers define how to route requests to your application.
 handlers:
+- url: /launch_mapping
+  script: run.app 
+  login: admin
+
 - url: /.*
   script: run.app  # a WSGI application in the main module's global scope
 

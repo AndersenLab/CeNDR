@@ -2,6 +2,11 @@
 
 --- 
 
+### v1.0.6 (2016-12-03)
+
+* Added additional error checking to mapping submission page.
+* Changed submissions to run 'on demand.'
+
 ### v1.0.5 (2016-12-01)
 
 * Fixed an issue with GWA submission.
