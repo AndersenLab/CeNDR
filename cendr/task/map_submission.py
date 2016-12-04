@@ -1,6 +1,6 @@
 from cendr import app
 from cendr.models import *
-from flask import request
+from flask import request, abort
 import string
 import random
 from googleapiclient import discovery
@@ -84,9 +84,9 @@ def instance_count():
 def launch_mapping(verify_request = True):
     # Verify cron submission
     if verify_request:
-        if 'X-Appengine-Cron' in request.headers:
-            if request.headers['X-Appengine-Cron'] != "true":
-                return "error", 400
+        gae_header = request.headers.get("X-Appengine-Cron", None)
+        if not gae_header:
+            abort(404)
 
     if instance_count() < 5:
         job_submissions = list(trait.select(trait.id.alias('trait_id'), trait, report)
