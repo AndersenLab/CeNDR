@@ -73,7 +73,6 @@ def create_mapping_instance(gce_name, params):
         project='andersen-lab',
         zone='us-central1-a',
         body=config).execute()
-    print(instance)e
     return instance
 
 def instance_count():
@@ -107,7 +106,6 @@ def launch_mapping(verify_request = True):
             params += [{'key':'models','value':models}]
             create_mapping_instance(gce_name, params)
             # Update queue status
-            print params, "PARAMS"
             t = trait.get(trait.id==job['trait_id'])
             t.status = 'Initializing'
             t.save()
