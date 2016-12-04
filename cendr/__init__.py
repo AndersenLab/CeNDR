@@ -98,7 +98,7 @@ if os.getenv('SERVER_SOFTWARE') and \
     app.debug = False
     app.config["debug"] = False
     from flask_sslify import SSLify
-    sslify = SSLify(app, skips=['strains/global-strain-map', '.well-known', '/.well-known', '/cronmapping'])
+    sslify = SSLify(app, skips=['strains/global-strain-map', '.well-known', '/.well-known', 'cronmapping', '/cronmapping'])
 else:
     app.debug = True
     app.config["debug"] = True
