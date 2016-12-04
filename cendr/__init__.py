@@ -99,7 +99,7 @@ if os.getenv('SERVER_SOFTWARE') and \
     app.config["debug"] = False
     from flask_sslify import SSLify
     # Ignore leading slash of urls; skips must use start of path
-    sslify = SSLify(app, skips=['strains/global-strain-map', '.well-known', '.well-known', 'cronmapping', 'cronmapping'])
+    sslify = SSLify(app, skips=['strains/global-strain-map', '.well-known', 'cronmapping'])
 else:
     app.debug = True
     app.config["debug"] = True
