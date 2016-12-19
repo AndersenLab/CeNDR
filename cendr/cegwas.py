@@ -1,4 +1,4 @@
-from cendr import app, cache
+from cendr import app, cache, get_ds
 from models import trait, report
 from flask import render_template, request, Markup, url_for, Response, redirect
 import markdown
@@ -38,15 +38,14 @@ def main():
         trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('home.html', **locals())
 
-@app.route("/.well-known/acme-challenge/")
-def le():
-    code = ""
-    return Response(code, mimetype = "text/plain")
-
-@app.route("/.well-known/acme-challenge/")
-def le2():
-    code = ""
-    return Response(code, mimetype = "text/plain")
+@app.route("/.well-known/acme-challenge/<acme>")
+def le(acme):
+    ds = get_ds()
+    try:
+        acme_challenge = ds.get(ds.key("credential", acme))
+        return Response(acme_challenge['token'], mimetype = "text/plain")
+    except:
+        return Response("Error", mimetype = "text/plain")
 
 
 @app.route("/Software")

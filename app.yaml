@@ -9,6 +9,17 @@
 runtime: python27
 api_version: 1
 threadsafe: yes
+skip_files:
+  - ^(.*/)?.*vcf\.gz$
+  - ^(.*/)?.*vcf$
+  - ^(.*/)?.*gff3\.gz$
+  - ^(.*/)?.*gff3$  
+  - ^(.*/)?.*bed\.gz$
+  - ^(.*/)?.*bed$
+  - ^\.git/.*$
+  - ^.*pyc$  
+  - ^scripts/.*$
+  - ^tests/.*$
 
 # Handlers define how to route requests to your application.
 handlers:
