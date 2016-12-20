@@ -7,7 +7,7 @@ Flask-SSLify
 Flask==0.11.1
 gcloud==0.18.3
 google-api-python-client
-gspread
+gspread==0.4.1
 iron_mq
 Markdown==2.5.2
 oauth2client==2.1.0
