@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.0.8 (2016-12-20)
+
+* Fixed issue with ordering page
+
 ### v1.0.7 (2016-12-19)
 
 * Fixed issue with css on strain pages.
