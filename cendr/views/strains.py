@@ -48,7 +48,7 @@ def strain_metadata():
             row = list(row)
             for k, f in enumerate(row):
                 if type(f) == unicode:
-                    row[k] = f.encode('ascii', 'ignore')
+                    row[k] = f.encode('utf-8', 'ignore')
             yield '\t'.join(map(str, row[1:21])) + "\n"
     return Response(generate(), mimetype="text/tab-separated-values")
 
