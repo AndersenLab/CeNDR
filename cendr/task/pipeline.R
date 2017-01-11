@@ -53,7 +53,6 @@ pub_theme <- ggplot2::theme_bw() +
                  legend.position="none",
                  plot.margin = unit(c(1.0,0.5,0.5,1.0),"cm"),
                  plot.title = ggplot2::element_text(size=24, face="bold", vjust = 1),
-                 legend.position="none",
                  panel.background = ggplot2::element_rect(color = "black", size= 0.75),
                  strip.background = ggplot2::element_rect(color = "black", size = 0.75))
 
@@ -85,7 +84,7 @@ gwas_mappings <- function (data, kin_matrix = kinship,
     x <- data.frame(trait = data[[1]], data[[2]]) %>% tidyr::gather(strain, 
         value, -trait) %>% tidyr::spread(trait, value)
     y <- snpset %>% dplyr::mutate(marker = paste0(CHROM, "_", 
-        POS)) %>% dplyr::select(marker, everything()) %>% 
+        POS)) %>% dplyr::select(marker, dplyr::everything(), -REF, -ALT) %>% 
         as.data.frame()
     if (mapping_snp_set == TRUE) {
         y <- y %>% dplyr::filter(marker %in% data.frame(mapping_snps)$CHROM_POS)
