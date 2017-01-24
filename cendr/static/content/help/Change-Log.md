@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.0.9 (2017-01-24)
+
+* Released transposon data.
+
 ### v1.0.8 (2016-12-20)
 
 * Fixed issue with ordering page
