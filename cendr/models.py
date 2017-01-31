@@ -255,7 +255,9 @@ class wb_orthologs(Model):
         database = db
 
 def autoconvert(s):
-    for fn in (int, float):
+    if s is None or s == "" or s == "NA":
+        return None
+    for fn in (float, int):
         try:
             return fn(s)
         except ValueError:
