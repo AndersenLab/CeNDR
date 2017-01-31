@@ -200,7 +200,7 @@ if "strains" in update:
     if reset_db:
         for line in lines:
             l = {k: correct_values(k, v) for k, v in line.items()}
-            print l # Can't print characters when running!
+            print(l) # Can't print characters when running!
             if l["isotype"] != "":
                 strain_data.append(l)
 
@@ -219,7 +219,6 @@ if "strains" in update:
     else:
         with db.atomic():
             for line in lines:
-                print(line["strain"])
                 l = {k: correct_values(k, v) for k, v in line.items()}
                 strain_set = "|".join([x["strain"] for x in lines if line["isotype"] == x["isotype"]])
                 previous_names = '|'.join([x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
@@ -227,7 +226,7 @@ if "strains" in update:
                     s = strain.get(strain = l["strain"])
                 except:
                     s = strain()
-                [setattr(s, k, v) for k,v in l.items()]
+                [setattr(s, k, autoconvert(v)) for k, v in l.items()]
                 s.save()
 
 
