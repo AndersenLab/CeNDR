@@ -1,1 +1,0 @@
-from cendr import app

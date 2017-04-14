@@ -6,7 +6,12 @@
 # TODO: Enter your application id below. If you have signed up
 # using cloud.google.com/console use the "project id" for your application
 # id.
-runtime: python27
+runtime: custom
+env: flex
+entrypoint: gunicorn -b :$PORT main:app
+runtime_config:
+  python_version: 2
+
 api_version: 1
 threadsafe: yes
 skip_files:
@@ -30,6 +35,9 @@ handlers:
 - url: /.*
   script: run.app  # a WSGI application in the main module's global scope
 
+env_variables:
+  version: '1.1.0'
+
 # App Engine serves and caches static files contained in the listed directories
 # (and subdirectories). Uncomment and set the directory as needed.
 #- url: /client
@@ -48,21 +56,21 @@ handlers:
 # of the App Engine SDK don't need to be listed here, instead add them to your
 # project directory, either as a git submodule or as a plain subdirectory.
 # TODO: List any other App Engine SDK libs you may need here.
-libraries:
- - name: MySQLdb
-   version: "1.2.5"
- 
- - name: jinja2
-   version: "latest"
- 
- - name: yaml
-   version: "latest"
- 
- - name: ssl
-   version: "latest"
- 
- - name: pycrypto
-   version: "latest"
+#libraries:
+# - name: MySQLdb
+#   version: "1.2.5"
+# 
+# - name: jinja2
+#   version: "latest"
+# 
+# - name: yaml
+#   version: "latest"
+# 
+# - name: ssl
+#   version: "latest"
+# 
+# - name: pycrypto
+#   version: "latest"
  
 builtins:
 - remote_api: on

@@ -8,7 +8,6 @@ Flask==0.11.1
 gcloud==0.18.3
 google-api-python-client
 gspread==0.4.1
-iron_mq
 Markdown==2.5.2
 oauth2client==2.1.0
 peewee==2.8.5
@@ -24,3 +23,6 @@ requests==2.3
 simplejson
 Werkzeug
 MySQL-python==1.2.5
+cyvcf2
+gunicorn
+gsutil
