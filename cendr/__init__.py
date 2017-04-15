@@ -78,33 +78,30 @@ class CustomEncoder(json.JSONEncoder):
             return str(o)
         return super(CustomEncoder, self).default(o)
 
-# Cache
-if (os.getenv('SERVER_SOFTWARE') and
-            os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')):
+if os.getenv('HOME') == "/root":
+    # Running on server
     cache = Cache(app, config={'CACHE_TYPE': 'gaememcached'})
-else:
-    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-
-api = Api(app)
-build = "20160408"
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-app.config['version'] = os.getenv("CURRENT_VERSION_ID","").split(".")[0].replace("-",".").replace("version.","")
-
-
-
-if os.getenv('SERVER_SOFTWARE') and \
-        os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/'):
+    app.config['version'] = os.getenv("VERSION","").split(".")[0].replace("-",".").replace("version.","")
     app.debug = False
     app.config["debug"] = False
     from flask_sslify import SSLify
     # Ignore leading slash of urls; skips must use start of path
     sslify = SSLify(app, skips=['strains/global-strain-map', '.well-known', 'cronmapping'])
 else:
+    # Running locally
+    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+    version = [x for x in yaml.load(open(".travis.yml", 'r').read())['before_install'] if 'VERSION' in x][0].split("=")[1]
+    app.config['version'] = version.split(".")[0].replace("-",".").replace("version.","")
     app.debug = True
     app.config["debug"] = True
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
+
+
+api = Api(app)
+build = "20160408"
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 def add_to_order_ws(row):
     """
