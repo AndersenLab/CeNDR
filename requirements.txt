@@ -4,7 +4,7 @@ Flask-Cache
 flask-debugtoolbar
 flask-restful
 Flask-SSLify
-Flask==0.11.1
+Flask==0.12.0
 gcloud==0.18.3
 google-api-python-client
 gspread==0.4.1
