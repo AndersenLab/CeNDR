@@ -21,7 +21,7 @@ current_build = 20160408
 
 if os.getenv('HOME') == "/root":
     dbname = "cendr-db" # don't remove, imported elsewhere.
-    socket = '/cloudsql/andersen-lab/us-central1/' + db_name
+    socket = '/cloudsql/andersen-lab:us-central1:' + db_name
     db = MySQLDatabase(dbname, unix_socket=socket, user='root')
 else:
     ds = get_ds()
