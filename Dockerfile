@@ -42,6 +42,10 @@ RUN pip install -r /app/requirements.txt
 # Add the application source code.
 ADD . /app
 
+# Setup MySQL Socket
+RUN wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 && mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy && chmod +x cloud_sql_proxy
+RUN ./cloud_sql_proxy -instances=andersen-lab:us-central1:cendr-db=tcp:3306
+
 # Run a WSGI server to serve the application. gunicorn must be declared as
 # a dependency in requirements.txt.
 CMD gunicorn -b :$PORT main:app

@@ -48,3 +48,6 @@ handlers:
  
 builtins:
 - remote_api: on
+
+beta_settings:
+    cloud_sql_instances: andersen-lab:us-central1:cendr-db
