@@ -80,7 +80,9 @@ class CustomEncoder(json.JSONEncoder):
 
 if os.getenv('HOME') == "/root":
     # Running on server
-    cache = Cache(app, config={'CACHE_TYPE': 'gaememcached'})
+    #cache = Cache(app, config={'CACHE_TYPE': 'gaememcached'})
+    # Cache service not yet available - use simple for now.
+    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
     app.config['version'] = os.getenv("VERSION","").split(".")[0].replace("-",".").replace("version.","")
     app.debug = False
     app.config["debug"] = False
