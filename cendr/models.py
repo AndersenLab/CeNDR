@@ -19,18 +19,13 @@ except:
 
 current_build = 20160408
 
-if os.getenv('HOME') == "/root":
-    dbname = "cendr-db" # don't remove, imported elsewhere.
-    socket = '/cloudsql/andersen-lab:us-central1:' + dbname
-    db = MySQLDatabase(dbname, unix_socket=socket, user='root')
-else:
-    ds = get_ds()
-    credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
-    dbname = "cegwas_v2" # don't remove, imported elsewhere.
-    db =  MySQLDatabase(
-      dbname,
-      **credentials
-      )
+ds = get_ds()
+credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+dbname = "cegwas_v2" # don't remove, imported elsewhere.
+db =  MySQLDatabase(
+  dbname,
+  **credentials
+  )
 
 db.connect()
 
