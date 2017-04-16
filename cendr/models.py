@@ -199,7 +199,7 @@ class wb_gene(Model):
     Name = CharField(index = True)
     sequence_name = CharField(index = True)
     biotype = CharField(index = True)
-    locus = CharField(index = True, default = None)
+    locus = CharField(index = True, default = None, null = True)
 
     class Meta:
         database = db
