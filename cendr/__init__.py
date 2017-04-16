@@ -40,7 +40,7 @@ def get_db():
             import MySQLdb
             import _mysql
             ds = get_ds()
-            credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+            credentials = dict(ds.get(ds.key("credential", "cendr-db")))
             g.db =  MySQLDatabase(
               dbname,
               **credentials
@@ -99,7 +99,6 @@ if os.getenv('HOME') == "/root":
     # cache = Cache(app, config={'CACHE_TYPE': 'gaememcached'})
     # Cache service not yet available - use simple for now.
     cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-    app.config['version'] = os.getenv("VERSION","").split(".")[0].replace("-",".").replace("version.","")
     app.debug = False
     app.config["debug"] = False
     from flask_sslify import SSLify
@@ -108,14 +107,14 @@ if os.getenv('HOME') == "/root":
 else:
     # Running locally
     cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-    version = [x for x in yaml.load(open(".travis.yml", 'r').read())['before_install'] if 'VERSION' in x][0].split("=")[1]
-    app.config['version'] = version.split(".")[0].replace("-",".").replace("version.","")
     app.debug = True
     app.config["debug"] = True
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
 
 
+version = [x for x in yaml.load(open(".travis.yml", 'r').read())['before_install'] if 'VERSION' in x][0].split("=")[1]
+app.config['version'] = version.split(".")[0].replace("-",".").replace("version.","")
 api = Api(app)
 build = "20160408"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
