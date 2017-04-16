@@ -1,9 +1,10 @@
 from cendr import app, cache
 from cendr import cache
 from cendr import ds
+from cendr import dbname
 from cendr import autoconvert
 from cendr.task.map_submission import launch_mapping
-from cendr.models import db, report, strain, trait, trait_value, mapping, dbname, WI
+from cendr.models import db, report, strain, trait, trait_value, mapping, WI
 from api import *
 try:
     from cendr.emails import mapping_submission

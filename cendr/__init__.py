@@ -1,8 +1,9 @@
 from flask import Flask, g
+from peewee import *
 from flask_restful import Api
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import date
-from flask.ext.cache import Cache
+from flask_cache import Cache
 from jinja2 import contextfilter
 import json
 import yaml
@@ -31,6 +32,21 @@ def get_google_sheet():
             gc = gspread.authorize(credentials)
             g.gc = gc
         return g.gc
+
+dbname = "cegwas_v2" # don't remove, imported elsewhere.
+def get_db():
+    with app.app_context():
+        if not hasattr(g, 'db'):
+            import MySQLdb
+            import _mysql
+            ds = get_ds()
+            credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
+            g.db =  MySQLDatabase(
+              dbname,
+              **credentials
+              )
+            g.db.connect()
+        return g.db
 
 ds = get_ds()
 

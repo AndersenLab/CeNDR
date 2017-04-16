@@ -1,33 +1,9 @@
 from peewee import *
-import json
 from datetime import datetime
-import os
-try:
-    from cendr import get_ds
-    from flask import g
-except:
-    # Define get_ds for GCE
-    from gcloud import datastore
-    def get_ds():
-        return datastore.Client(project="andersen-lab")
-try:
-    import MySQLdb
-    import _mysql
-except:
-    import pymysql
-    pymysql.install_as_MySQLdb()
-
+from . import get_db
 current_build = 20160408
 
-ds = get_ds()
-credentials = dict(ds.get(ds.key("credential", "cegwas-data")))
-dbname = "cegwas_v2" # don't remove, imported elsewhere.
-db =  MySQLDatabase(
-  dbname,
-  **credentials
-  )
-
-db.connect()
+db = get_db()
 
 class strain(Model):
     """
