@@ -14,10 +14,6 @@ liblzma-dev \
 fuse \
 && rm -rf /var/lib/apt/lists/*
 
-# Integrate Version
-RUN VERSION="`cat .version`"
-ENV VERSION=${VERSION}
-
 ENV BCFTOOLS_BIN="bcftools-1.4.tar.bz2" \
 BCFTOOLS_PLUGINS="/usr/local/libexec/bcftools" \
 BCFTOOLS_VERSION="1.4"
@@ -45,6 +41,10 @@ RUN pip install -r /app/requirements.txt
 
 # Add the application source code.
 ADD . /app
+
+# Integrate Version
+RUN VERSION="`cat .version`"
+ENV VERSION=${VERSION}
 
 # Run a WSGI server to serve the application. gunicorn must be declared as
 # a dependency in requirements.txt.
