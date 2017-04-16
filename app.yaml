@@ -1,11 +1,3 @@
-# This file specifies your Python application's runtime configuration
-# including URL routing, versions, static file uploads, etc. See
-# https://developers.google.com/appengine/docs/python/config/appconfig
-# for details.
-
-# TODO: Enter your application id below. If you have signed up
-# using cloud.google.com/console use the "project id" for your application
-# id.
 runtime: custom
 env: flex
 entrypoint: gunicorn -b :$PORT main:app
@@ -26,12 +18,12 @@ skip_files:
   - ^scripts/.*$
   - ^tests/.*$
 
-automatic_scaling:
-  min_num_instances: 1
-  max_num_instances: 3
-  cool_down_period_sec: 120 # default value
-  cpu_utilization:
-    target_utilization: 0.5
+# automatic_scaling:
+#   min_num_instances: 1
+#   max_num_instances: 3
+#   cool_down_period_sec: 120 # default value
+#   cpu_utilization:
+#     target_utilization: 0.5
 
 # Handlers define how to route requests to your application.
 handlers:
