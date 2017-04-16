@@ -1,9 +1,7 @@
 from peewee import *
 from datetime import datetime
-from . import get_db
+from cendr import db
 current_build = 20160408
-
-db = get_db()
 
 class strain(Model):
     """

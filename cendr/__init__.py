@@ -9,6 +9,8 @@ import json
 import yaml
 import os
 from gcloud import datastore
+import MySQLdb
+import _mysql
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -34,21 +36,14 @@ def get_google_sheet():
         return g.gc
 
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
-def get_db():
-    with app.app_context():
-        if not hasattr(g, 'db'):
-            import MySQLdb
-            import _mysql
-            ds = get_ds()
-            credentials = dict(ds.get(ds.key("credential", "cendr-db")))
-            g.db =  MySQLDatabase(
-              dbname,
-              **credentials
-              )
-            g.db.connect()
-        return g.db
-
 ds = get_ds()
+credentials = dict(ds.get(ds.key("credential", "cendr-db")))
+db =  MySQLDatabase(
+  dbname,
+  **credentials
+  )
+db.connect()
+
 
 biotypes = {
     "miRNA" : "microRNA",
