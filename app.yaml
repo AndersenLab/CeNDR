@@ -39,22 +39,8 @@ handlers:
   script: run.app 
   login: admin
 
-- url: /.*
+- url: .*
   script: run.app  # a WSGI application in the main module's global scope
-
-# App Engine serves and caches static files contained in the listed directories
-# (and subdirectories). Uncomment and set the directory as needed.
-#- url: /client
-#  static_dir: client
-
-# This handler tells app engine how to route requests to a WSGI application.
-# The script value is in the format <path.to.module>.<wsgi_application>
-# where <wsgi_application> is a WSGI application object.
-- url: .*  # This regex directs all routes to main.app
-  script: cegwas.app
  
 builtins:
 - remote_api: on
-
-beta_settings:
-    cloud_sql_instances: andersen-lab:us-central1:cendr-db
