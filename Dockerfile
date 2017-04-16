@@ -43,8 +43,7 @@ RUN pip install -r /app/requirements.txt
 ADD . /app
 
 # Integrate Version
-RUN export VERSION="`cat .version`"
-ENV VERSION=${VERSION}
+ENV VERSION="`cat .version`"
 
 # Run a WSGI server to serve the application. gunicorn must be declared as
 # a dependency in requirements.txt.
