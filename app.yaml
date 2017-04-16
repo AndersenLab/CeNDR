@@ -1,3 +1,4 @@
+service: cendr
 runtime: custom
 env: flex
 entrypoint: gunicorn -b :$PORT main:app
