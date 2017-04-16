@@ -17,6 +17,7 @@ script:
 - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
 - export PYTHONPATH
 - py.test tests/
+- python db_init.py
 deploy:
   provider: gae
   version: ${VERSION}
