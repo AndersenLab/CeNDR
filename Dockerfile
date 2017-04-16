@@ -14,6 +14,10 @@ liblzma-dev \
 fuse \
 && rm -rf /var/lib/apt/lists/*
 
+# Integrate Version
+RUN VERSION="`cat .version`"
+ENV VERSION=${VERSION}
+
 ENV BCFTOOLS_BIN="bcftools-1.4.tar.bz2" \
 BCFTOOLS_PLUGINS="/usr/local/libexec/bcftools" \
 BCFTOOLS_VERSION="1.4"
