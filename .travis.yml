@@ -26,3 +26,4 @@ deploy:
   no_promote: true
   no_stop_previous_version: true
   skip_cleanup: true
+set
