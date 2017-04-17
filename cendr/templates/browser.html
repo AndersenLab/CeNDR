@@ -381,12 +381,13 @@ function refresh_variants() {
 
     $("#variants > tbody").html("");
 
-    var loc = chrom + "/" + start + "/" + end + "/" + tracks;
+    var loc = chrom + ":" + start + "-" + end + "/" + tracks;
     // update browser
     window.history.pushState({"pageTitle": document.title + "|" + loc},"", "/data/browser/" + loc);
-    console.log("/api/variant/gt/" + loc)
-    $.getJSON("/api/variant/gt/" + loc, function(msg) {
+    console.log("/api/variant/" + loc)
+    $.getJSON("/api/variant/" + loc, function(msg) {
           $.each(msg, function(k, v) {
+            console.log(msg);
             if (v["gene_id"] != "") {
                 v["gene_id"] = "<a href='/gene/" + v["gene_id"] + "'>" + v["gene_id"] + "</a>";
                 }
