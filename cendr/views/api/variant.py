@@ -26,8 +26,6 @@ ANN_header = ["allele",
               "distance_to_feature",
               "error"]
 
-GT_zip = ['SAMPLE', 'TGT', 'GT', 'FT']
-
 def get_region(region):
     region = region.replace(",", "")
     m = re.match("^([0-9A-Za-z]+):([0-9]+)-([0-9]+)$", region)
@@ -51,10 +49,12 @@ def get_region(region):
 @app.route('/api/variant/<region>')
 @app.route('/api/variant/<region>')
 def variant_api(region, tracks = "mh"):
+    app.logger.info('REGION:' + region)
     version = request.args.get('version') or 20170312
     samples = request.args.get('samples')
     vcf = "http://storage.googleapis.com/elegansvariation.org/releases/{version}/WI.{version}.vcf.gz".format(
         version=version)
+
     region, chrom, start, end, gene = get_region(region)
 
     if start >= end:
@@ -70,35 +70,38 @@ def variant_api(region, tracks = "mh"):
         print(comm)
 
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
-    print(out)
+    if err:
+        app.logger.error(err)
     tfile = NamedTemporaryFile()
+    tfile = open("test.vcf", 'w')
     json_out = []
     with tfile as f:
         f.write(out)
-        v = VCF(tfile.name)
 
-        if samples:
-            samples = samples.split(",")
-            incorrect_samples = [x for x in samples if x not in v.samples]
-            if incorrect_samples:
-                return "Incorrectly specified sample(s): " + ','.join(incorrect_samples), 400
+    v = VCF(tfile.name)
 
-        for record in v:
-            INFO = dict(record.INFO)
-            if "ANN" in INFO.keys():
-                ANN_set = INFO['ANN'].split(",")
-                del INFO['ANN']
-                for ANN_rec in ANN_set:
-                    ANN = dict(zip(ANN_header, ANN_rec.split("|")))
-                    gt_set = zip(v.samples, record.gt_bases.tolist(), record.gt_types.tolist(), record.format("FT").tolist())
-                    gt_set = [dict(zip(GT_zip, x)) for x in gt_set]
-                    json_out.append({
-                        "CHROM": record.CHROM,
-                        "POS": record.POS,
-                        "REF": record.REF,
-                        "ALT": record.ALT,
-                        "GT": gt_set,
-                        "INFO": INFO,
-                        "ANN": ANN
-                    })
+    if samples:
+        samples = samples.split(",")
+        incorrect_samples = [x for x in samples if x not in v.samples]
+        if incorrect_samples:
+            return "Incorrectly specified sample(s): " + ','.join(incorrect_samples), 400
+
+    for record in v:
+        INFO = dict(record.INFO)
+        ANN = []
+        if "ANN" in INFO.keys():
+            for ANN_rec in INFO['ANN'].split(","):
+                ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
+            del INFO['ANN']
+        gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist())
+        json_out.append({
+            "CHROM": record.CHROM,
+            "POS": record.POS,
+            "REF": record.REF,
+            "ALT": record.ALT,
+            "GT": gt_set,
+            "phastcons": float(INFO['phastcons']),
+            "phylop": float(INFO['phylop']),
+            "ANN": ANN
+        })
     return jsonify(json_out)
