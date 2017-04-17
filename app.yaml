@@ -18,12 +18,13 @@ skip_files:
   - ^scripts/.*$
   - ^tests/.*$
 
- automatic_scaling:
-   min_num_instances: 1
-   max_num_instances: 3
-   cool_down_period_sec: 120 # default value
-   cpu_utilization:
-     target_utilization: 0.5
+
+automatic_scaling:
+  min_num_instances: 1
+  max_num_instances: 3
+  cool_down_period_sec: 120 # default value
+  cpu_utilization:
+    target_utilization: 0.5
 
 # Handlers define how to route requests to your application.
 handlers:
