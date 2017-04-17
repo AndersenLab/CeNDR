@@ -4,7 +4,7 @@ Flask-Cache
 flask-debugtoolbar
 flask-restful
 Flask-SSLify
-Flask==0.12.0
+Flask==0.12.1
 gcloud==0.18.3
 google-api-python-client
 gspread==0.4.1
@@ -24,6 +24,6 @@ simplejson
 Werkzeug
 MySQL-python==1.2.5
 cyvcf2
-gunicorn
+gunicorn==19.7.1
 gsutil
 ipython
