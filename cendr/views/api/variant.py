@@ -2,9 +2,11 @@
 
 from cendr import api, cache, app, autoconvert
 from cyvcf2 import VCF
-from flask import jsonify
+from flask import jsonify, request
 import re
 import sys
+from cendr.models import wb_gene
+from cendr.views.api.gene import get_gene_region
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 
@@ -28,22 +30,32 @@ GT_zip = ['SAMPLE', 'TGT', 'GT', 'FT']
 
 def get_region(region):
     region = region.replace(",", "")
-    print(region)
     m = re.match("^([0-9A-Za-z]+):([0-9]+)-([0-9]+)$", region)
-    if not m:
-        return "Invalid region", 400
+    if m:
+        chrom = m.group(1)
+        start = int(m.group(2))
+        end = int(m.group(3))
+        gene = None
+    else:
+        # Resolve gene/location
+        gene = get_gene_region(region)
+        if not gene:
+            return "Invalid region", 400
+        chrom = gene["CHROM"]
+        start = gene["start"]
+        end = gene["end"]
+    region = "{chrom}:{start}-{end}".format(**locals())
+    return region, chrom, start, end, gene
 
-    chrom = m.group(1)
-    start = int(m.group(2))
-    end = int(m.group(3))
-    return chrom, start, end
 
-
-@app.route('/api/variant/<region>/<tracks>')
-def variant_from_region(region, tracks = "mh"):
+@app.route('/api/variant/<region>')
+@app.route('/api/variant/<region>')
+def variant_api(region, tracks = "mh"):
+    version = request.args.get('version') or 20170312
+    samples = request.args.get('samples')
     vcf = "http://storage.googleapis.com/elegansvariation.org/releases/{version}/WI.{version}.vcf.gz".format(
-        version=20170312)
-    chrom, start, end = get_region(region)
+        version=version)
+    region, chrom, start, end, gene = get_region(region)
 
     if start >= end:
         return "Invalid start and end region values", 400
@@ -51,12 +63,26 @@ def variant_from_region(region, tracks = "mh"):
         return "You can only query a maximum of 100 kb", 400
 
     comm = ["bcftools", "view", vcf, region]
+
+    # Query samples
+    if samples:
+        comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
+        print(comm)
+
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
+    print(out)
     tfile = NamedTemporaryFile()
     json_out = []
     with tfile as f:
         f.write(out)
         v = VCF(tfile.name)
+
+        if samples:
+            samples = samples.split(",")
+            incorrect_samples = [x for x in samples if x not in v.samples]
+            if incorrect_samples:
+                return "Incorrectly specified sample(s): " + ','.join(incorrect_samples), 400
+
         for record in v:
             INFO = dict(record.INFO)
             if "ANN" in INFO.keys():
