@@ -1,7 +1,10 @@
 from peewee import *
 from datetime import datetime
-from cendr import db
+from flask import g
+from cendr import get_db
 current_build = 20160408
+
+db = get_db()
 
 class strain(Model):
     """

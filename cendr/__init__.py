@@ -14,6 +14,7 @@ import _mysql
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
+dbname = "cegwas_v2" # don't remove, imported elsewhere.
 
 def get_ds():
     with app.app_context():
@@ -35,14 +36,25 @@ def get_google_sheet():
             g.gc = gc
         return g.gc
 
-dbname = "cegwas_v2" # don't remove, imported elsewhere.
 ds = get_ds()
-credentials = dict(ds.get(ds.key("credential", "cendr-db")))
-db =  MySQLDatabase(
-  dbname,
-  **credentials
-  )
-db.connect()
+
+def get_db():
+    ds = get_ds()
+    credentials = dict(ds.get(ds.key("credential", 'cendr-db')))
+    db = MySQLDatabase(
+        dbname,
+        **credentials
+    )
+    return db
+
+@app.before_request
+def db_connect():
+    g.db =  get_db()
+    g.db.connect()
+
+@app.teardown_request
+def db_disconnect(exception):
+    if hasattr(g, 'db'): g.db.close()
 
 
 biotypes = {
