@@ -67,11 +67,11 @@ def variant_api(region, tracks = "mh"):
     # Query samples
     if samples:
         comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
-        print(comm)
-
+    app.logger.info(' '.join(comm))
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
-    if err:
+    if not out and err:
         app.logger.error(err)
+        return err, 400
     tfile = NamedTemporaryFile()
     tfile = open("test.vcf", 'w')
     json_out = []
@@ -94,14 +94,20 @@ def variant_api(region, tracks = "mh"):
                 ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
             del INFO['ANN']
         gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist())
-        json_out.append({
+        rec_out = {
             "CHROM": record.CHROM,
             "POS": record.POS,
             "REF": record.REF,
             "ALT": record.ALT,
             "GT": gt_set,
-            "phastcons": float(INFO['phastcons']),
-            "phylop": float(INFO['phylop']),
+            "AF": INFO["AF"],
             "ANN": ANN
-        })
+        }
+        if 'phastcons' in INFO:
+            rec_out["phastcons"] = float(INFO['phastcons'])
+            del INFO['phastcons']
+        if 'phylop' in INFO:
+            rec_out["phylop"] = float(INFO['phylop'])
+            del INFO['phylop']
+        json_out.append(rec_out)
     return jsonify(json_out)
