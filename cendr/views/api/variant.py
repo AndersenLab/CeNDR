@@ -105,9 +105,7 @@ def variant_api(region, tracks = "mh"):
         }
         if 'phastcons' in INFO:
             rec_out["phastcons"] = float(INFO['phastcons'])
-            del INFO['phastcons']
         if 'phylop' in INFO:
             rec_out["phylop"] = float(INFO['phylop'])
-            del INFO['phylop']
         json_out.append(rec_out)
     return jsonify(json_out)
