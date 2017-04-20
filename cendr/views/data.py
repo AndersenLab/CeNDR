@@ -30,16 +30,10 @@ def download_script(filetype):
 
 
 @app.route('/data/browser/')
-@app.route('/data/browser/<chrom>/<start>/<end>/')
-@app.route('/data/browser/<chrom>/<start>/<end>/<tracks>')
-def browser(chrom = "III", start = 11746923, end = 11750250, tracks="mh"):
+@app.route('/data/browser/<region>')
+def browser(region = "III:11746923-11750250", tracks="mh"):
     bcs = OrderedDict([("Data", "/data"), ("Browser", None)])
-    title = "Browser"
-    
-    putative_impact = {'l': 'LOW', 'm':'MODERATE', 'h': 'HIGH'}
-    var_eff = [putative_impact[x] if x else '' for x in tracks]
-    putative_impact_items = putative_impact.items()
-    
+    title = "Browser" 
     from cendr import build
     
     isotype_listing = list(strain.select(strain.isotype).distinct().filter(

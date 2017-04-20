@@ -47,11 +47,12 @@ def get_region(region):
 
 
 @app.route('/api/variant/<region>')
-@app.route('/api/variant/<region>')
+@app.route('/api/variant/<region>/<tracks>')
 def variant_api(region, tracks = "mh"):
     app.logger.info('REGION:' + region)
     version = request.args.get('version') or 20170312
     samples = request.args.get('samples')
+    output_all_variants = request.args.get('output_all_variants') or True
     vcf = "http://storage.googleapis.com/elegansvariation.org/releases/{version}/WI.{version}.vcf.gz".format(
         version=version)
 
@@ -90,7 +91,10 @@ def variant_api(region, tracks = "mh"):
         INFO = dict(record.INFO)
         ANN = []
         if "ANN" in INFO.keys():
-            for ANN_rec in INFO['ANN'].split(","):
+            ANN_set = INFO['ANN'].split(",")
+            if len(ANN_set) == 0 and not output_all_variants:
+                break
+            for ANN_rec in ANN_set:
                 ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
             del INFO['ANN']
         gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist())

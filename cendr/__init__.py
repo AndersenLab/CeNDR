@@ -40,7 +40,7 @@ ds = get_ds()
 
 def get_db():
     ds = get_ds()
-    credentials = dict(ds.get(ds.key("credential", 'cendr-db')))
+    credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
     db = MySQLDatabase(
         dbname,
         **credentials

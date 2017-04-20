@@ -170,7 +170,7 @@
     <th>Coding Change</th>
     <th>Biotype</th>
     <th>Annotation</th>
-    <th>Putative Impact</th>
+    <th>Impact</th>
   </tr>
 </thead>
 
@@ -282,7 +282,7 @@ trackset = {"Genes": {
 }
 
 $(document).ready(function () {
-      {% for k,v in putative_impact_items %}
+      {% for k,v in impact_items %}
         {% if v in var_eff %}
           $('.track-select[value="{{ v }}"]').prop('checked',true);
         {% endif %}
@@ -298,7 +298,7 @@ $(document).ready(function () {
                       indexURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa.fai",
                       // cytobandURL: ""
                     },
-                    locus: "{{ chrom }}:{{ start }}-{{ end }}",
+                    locus: "{{ region }}",
                     tracks: [
                         {% for i in var_eff %}
                           trackset["{{ i }}"],
@@ -322,9 +322,10 @@ $(".track-select").on("change", function() {
   }
 })
 
-var_effect_class = {"LOW": "success",
+var_impact_class = {"LOW": "success",
                     "MODERATE":"warning",
-                    "HIGH": "danger"}
+                    "HIGH": "danger",
+                    "MODIFIER": "default"}
 
 
 function process_ortholog_search() {
@@ -363,52 +364,64 @@ function process_ortholog_search() {
     }
 }
 
-
+function encodeQueryData(data) {
+   let ret = [];
+   for (let d in data)
+     ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
+   return ret.join('&');
+}
 
 function refresh_variants() {
     region = $(".igvNavigationSearchInput").val();
     chrom = region.split(":")[0];
     start = region.split(":")[1].split("-")[0].replace(/,/g, "");
     end = region.split(":")[1].split("-")[1].replace(/,/g, "");
-    possible_tracks = {'LOW':'l', 'MODERATE':'m', 'HIGH':'h'};
+    track_set = {'LOW':'l', 'MODERATE':'m', 'HIGH':'h'};
     tracks = "";
-    for (track in possible_tracks) {
+    for (track in track_set) {
          if ($(".track-select[value="+track+"]").prop("checked") == true){
-            tracks += possible_tracks[track];
+            tracks += track_set[track];
          }
     }
 
-
     $("#variants > tbody").html("");
-
-    var loc = chrom + ":" + start + "-" + end + "/" + tracks;
+    
+    data = {'output_all_variants': false,
+            'trackset': track_set}
+    var querystring = encodeQueryData(data);
+    var loc = chrom + ":" + start + "-" + end + "/" + tracks + "_?" + querystring;
     // update browser
+
     window.history.pushState({"pageTitle": document.title + "|" + loc},"", "/data/browser/" + loc);
-    console.log("/api/variant/" + loc)
+
     $.getJSON("/api/variant/" + loc, function(msg) {
-          $.each(msg, function(k, v) {
-            console.log(msg);
-            if (v["gene_id"] != "") {
-                v["gene_id"] = "<a href='/gene/" + v["gene_id"] + "'>" + v["gene_id"] + "</a>";
-                }
-            items = [v["CHROM"] + ":" + Number(v["POS"]).toLocaleString('en'),
-                     v["REF"] + " / " + v["ALT"],
-                     v["gene_name"],
-                     v["gene_id"],
-                     v["feature_id"],
-                     v["hgvs_p"],
-                     v["transcript_biotype"],
-                     v["annotation"].split("&").join(", "),
-                     v["putative_impact"]];
+          $.each(msg, function(k, r) {
+            $.each(r['ANN'], function(annk, a) {
+              console.log(a);
+
+            if (a["gene_id"] != "") 
+            {
+              a["gene_id"] = "<a href='/gene/" + a["gene_id"] + "'>" + a["gene_id"] + "</a>";
+            }
+
+            items = [r["CHROM"] + ":" + Number(r["POS"]).toLocaleString('en'),
+                     r["REF"] + " / " + r["ALT"].join(","),
+                     a["gene_name"],
+                     a["gene_id"],
+                     a["feature_id"],
+                     a["hgvs_p"],
+                     a["transcript_biotype"],
+                     a["effect"].split("&").join(", "),
+                     "<span class='label label-" + var_impact_class[a["impact"]] + "'>" + a["impact"] + "</span>"];
 
             //suppose to happen on click
-            additional_fields = [v["gene_name"] + ": " , v["filter"]]
-            $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td>" + items.join("</td><td>") + "</td></tr>");
+            additional_fields = [a["gene_name"] + ": " , a["filter"]]
+            $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>");
             checked_isotypes = $(".isotype-item input:checked").map(
                 function () {return this.value;}).get();
             
             if (checked_isotypes.length > 0) {
-              gts = v["GT"].filter(function(i) { return checked_isotypes.includes(i["SAMPLE"]) });
+              gts = a["GT"].filter(function(i) { return checked_isotypes.includes(i["SAMPLE"]) });
 
               // Construct gt view
               gtset = gts.map( function(gt) {
@@ -422,9 +435,14 @@ function refresh_variants() {
                 r += "</span>";
                 return r}).join(" ");
 
-              $("#variants > tbody").append("<tr class='" + var_effect_class[v["putative_impact"]] + "'><td style='border-top:none;' colspan='9'>" + gtset + "</td>" + "</tr>");
+              $("#variants > tbody").append("<tr class='" + var_impact_class[a["impact"]] + "'><td style='border-top:none;' colspan='9'>" + gtset + "</td>" + "</tr>");
             }
-          })
+          });
+        });
+
+
+        
+
 
           // Enable links
           $( "#variants a" ).on( "click", function() {
