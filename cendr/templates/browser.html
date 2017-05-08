@@ -83,17 +83,18 @@
       </div>
       <div class="col-md-6">
 
-      <h5>Homologous Gene Search</h5>
-        <input type="text" class="form-control" id="gene-search" placeholder="Homologous Gene Search (e.g. TERT)">
-      <div id="loading-orthotable" style="display:none; margin-top:20px;"><div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div></div>
+      <h5>Gene Search</h5>
+        <input type="text" class="form-control" id="gene-search" placeholder="Gene Search (e.g. trt-1)">
+      <div id="loading-search-table" style="display:none; margin-top:20px;"><div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div></div>
       
-      <table id="orthotable" class='table table-striped' style="display: none;">
+      <table id="search-table" class='table table-striped' style="display: none;">
       <thead>
       <tr>
         <th><em>C. elegans Gene</em></th>
-        <th>Gene Symbol</th>
+        <th>Symbol/ID</th>
+        <th>Sequence</th>
         <th>Species</th>
-        <th>Source</th>
+        <th>Type</th>
       </tr>
       </thead>
     <tbody id="orthologs"></tbody>
@@ -328,15 +329,15 @@ var_impact_class = {"LOW": "success",
                     "MODIFIER": "default"}
 
 
-function process_ortholog_search() {
-    $("#loading-orthotable").fadeOut();
+function process_gene_search() {
+    $("#loading-search-table").fadeOut();
     var gene = $('#gene-search').val();
     if (gene.length == 0) {
-      $("#orthotable").fadeOut();
+      $("#search-table").fadeOut();
     } else {
       $("#orthologs").html("");
       $.ajax({
-           url: "/api/homolog/" + gene,
+           url: "/api/gene/search/" + gene,
            method: "GET",
            contentType: 'application/xml',
            }).done(function(msg) {
@@ -352,7 +353,7 @@ function process_ortholog_search() {
               row = "<tr><td>" + row.join("</td><td>") + "</td></tr>";
               $("#orthologs").append(row);
             });
-            $("#orthotable").fadeIn();
+            $("#search-table").fadeIn();
 
             // Make links work!  
             $(".ortholink").on("click", function() {
@@ -465,9 +466,9 @@ var doneTypingInterval = 1000;  //time in ms (5 seconds)
 
 // Ortholog search
 $("#gene-search").on("input", function(e) {
-  $("#loading-orthotable").fadeIn();
+  $("#loading-search-table").fadeIn();
   clearTimeout(typingTimer);
-  typingTimer = setTimeout(process_ortholog_search, doneTypingInterval);
+  typingTimer = setTimeout(process_gene_search, doneTypingInterval);
 })
 
 $(".checkbox").on("click", function() { 
@@ -525,6 +526,7 @@ $(document).ready(function() {
     });
 
 });
+
 </script>
 
 

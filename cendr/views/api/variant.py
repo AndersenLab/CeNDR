@@ -6,7 +6,7 @@ from flask import jsonify, request
 import re
 import sys
 from cendr.models import wb_gene
-from cendr.views.api.gene import get_gene_region
+from cendr.views.api.gene import gene_search
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 
@@ -26,6 +26,7 @@ ANN_header = ["allele",
               "distance_to_feature",
               "error"]
 
+
 def get_region(region):
     region = region.replace(",", "")
     m = re.match("^([0-9A-Za-z]+):([0-9]+)-([0-9]+)$", region)
@@ -36,7 +37,7 @@ def get_region(region):
         gene = None
     else:
         # Resolve gene/location
-        gene = get_gene_region(region)
+        gene = gene_search(region)
         if not gene:
             return "Invalid region", 400
         chrom = gene["CHROM"]
@@ -47,8 +48,8 @@ def get_region(region):
 
 
 @app.route('/api/variant/<region>')
-@app.route('/api/variant/<region>/<tracks>')
-def variant_api(region, tracks = "mh"):
+@app.route('/api/variant/<region>/<track>')
+def variant_api(region, track="mh"):
     app.logger.info('REGION:' + region)
     version = request.args.get('version') or 20170312
     samples = request.args.get('samples')
