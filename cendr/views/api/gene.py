@@ -72,9 +72,9 @@ def api_browser_search(term):
 
     # Get gene results
     gene_results = gene_search(term, search=True)
-    results []
-    for i in gene_results:
-        results.append(
-            {"CHROM": i['CHROM'],})
+#    results []
+#    for i in gene_results:
+#        results.append(
+#            {"CHROM": i['CHROM'],})
 
     return jsonify(result)

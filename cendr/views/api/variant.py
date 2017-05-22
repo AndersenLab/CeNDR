@@ -47,17 +47,18 @@ def get_region(region):
     return region, chrom, start, end, gene
 
 
-@app.route('/api/variant/<region>')
-@app.route('/api/variant/<region>/<track>')
-def variant_api(region, track="mh"):
-    app.logger.info('REGION:' + region)
+@app.route('/api/variant', methods=["POST"])
+def variant_api():
+    query = request.json
+    app.logger.info(query)
     version = request.args.get('version') or 20170312
     samples = request.args.get('samples')
-    output_all_variants = request.args.get('output_all_variants') or True
     vcf = "http://storage.googleapis.com/elegansvariation.org/releases/{version}/WI.{version}.vcf.gz".format(
         version=version)
 
-    region, chrom, start, end, gene = get_region(region)
+    region = query['region'].replace(",", "")
+    start = query['start']
+    end = query['end']
 
     if start >= end:
         return "Invalid start and end region values", 400
@@ -65,6 +66,8 @@ def variant_api(region, track="mh"):
         return "You can only query a maximum of 100 kb", 400
 
     comm = ["bcftools", "view", vcf, region]
+
+    # Query Severity
 
     # Query samples
     if samples:
@@ -99,6 +102,7 @@ def variant_api(region, track="mh"):
                 ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
             del INFO['ANN']
         gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist())
+        ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
         rec_out = {
             "CHROM": record.CHROM,
             "POS": record.POS,

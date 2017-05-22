@@ -56,27 +56,31 @@
       <h5>Tracks <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}#standard-tracks"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
       {% for i in ["Genes", "Transcripts"] %}
         <div class="checkbox">
-          <label><input type="checkbox" checked class="track-select" value="{{ i }}" />{{ i }}</label>
+          <label><input type="checkbox" checked class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
       {% for i in ["phyloP", "phastCons", "Variants"] %}
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select" value="{{ i }}" />{{ i }}</label> 
+          <label><input type="checkbox" class="track-select normal-track" value="{{ i }}" />{{ i }}</label> 
         </div>
       {% endfor %}
 
-        <h5>Variant Effects <a href="{{ url_for('help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+        <h5>Variant Impact <a href="{{ url_for('help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
         <div class="checkbox">
-            <label><input type="checkbox" class="track-select" value="LOW" />LOW <div class="legend-box" style="background-color: #66d866;"></div></label>
+              <label><input type="checkbox" class="track-select variant-impact" value="MODIFIER" />MODIFIER <div class="legend-box" style="background-color: #6f6f6f;"></div></label>
         </div>
 
         <div class="checkbox">
-              <label><input type="checkbox" class="track-select" value="MODERATE" />MODERATE <div class="legend-box" style="background-color: #ffd33f;"></div></label>
+            <label><input type="checkbox" class="track-select variant-impact" value="LOW" />LOW <div class="legend-box" style="background-color: #66d866;"></div></label>
         </div>
 
         <div class="checkbox">
-              <label><input type="checkbox" class="track-select" value="HIGH" />HIGH <div class="legend-box" style="background-color: #ff3f3f;"></div></label>
+              <label><input type="checkbox" class="track-select variant-impact" value="MODERATE" checked />MODERATE <div class="legend-box" style="background-color: #ffd33f;"></div></label>
+        </div>
+
+        <div class="checkbox">
+              <label><input type="checkbox" class="track-select variant-impact" value="HIGH" checked />HIGH <div class="legend-box" style="background-color: #ff3f3f;"></div></label>
         </div>
 
 
@@ -119,7 +123,7 @@
 
               <tr class="isotype-select">
 
-              <td class='isotype-item'><label><input type="checkbox" class="track-select" value="{{ isotype }}" /> {{ isotype }}</label></td>
+              <td class='isotype-item'><label><input type="checkbox" class="track-select sample-track" value="{{ isotype }}" /> {{ isotype }}</label></td>
 
               </tr>
 
@@ -365,19 +369,20 @@ function process_gene_search() {
     }
 }
 
-function encodeQueryData(data) {
-   let ret = [];
-   for (let d in data)
-     ret.push(encodeURIComponent(d) + '=' + encodeURIComponent(data[d]));
-   return ret.join('&');
-}
-
 function refresh_variants() {
     region = $(".igvNavigationSearchInput").val();
     chrom = region.split(":")[0];
     start = region.split(":")[1].split("-")[0].replace(/,/g, "");
     end = region.split(":")[1].split("-")[1].replace(/,/g, "");
-    track_set = {'LOW':'l', 'MODERATE':'m', 'HIGH':'h'};
+
+    sample_tracks = []
+    $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
+
+    normal_tracks = []
+    $(".normal-track:checked").each(function() { normal_tracks.push(this.value) })
+    variant_impact = []
+    $(".variant-impact:checked").each(function() { variant_impact.push(this.value) })
+    track_set = $.extend(normal_tracks, variant_impact, sample_tracks);
     tracks = "";
     for (track in track_set) {
          if ($(".track-select[value="+track+"]").prop("checked") == true){
@@ -387,15 +392,22 @@ function refresh_variants() {
 
     $("#variants > tbody").html("");
     
-    data = {'output_all_variants': false,
-            'trackset': track_set}
-    var querystring = encodeQueryData(data);
-    var loc = chrom + ":" + start + "-" + end + "/" + tracks + "_?" + querystring;
-    // update browser
+    data = {'variant_impact': variant_impact,
+            'sample_tracks': sample_tracks,
+            'region': region,
+            'start': parseInt(start),
+            'end': parseInt(end),
+            'chrom': chrom}
 
-    window.history.pushState({"pageTitle": document.title + "|" + loc},"", "/data/browser/" + loc);
+    console.log(data);
 
-    $.getJSON("/api/variant/" + loc, function(msg) {
+    $.ajax({
+      url: "{{ url_for('variant_api') }}",
+      data: JSON.stringify(data),
+      method: "POST",
+      contentType: "application/json",
+      success: function(msg) {
+          console.log(msg);
           $.each(msg, function(k, r) {
             $.each(r['ANN'], function(annk, a) {
               console.log(a);
@@ -450,7 +462,8 @@ function refresh_variants() {
               window.location = $(this).attr('href');
           });
 
-        });
+        }
+      });
 
 
 }

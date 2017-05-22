@@ -31,7 +31,8 @@ def download_script(filetype):
 
 @app.route('/data/browser/')
 @app.route('/data/browser/<region>')
-def browser(region = "III:11746923-11750250", tracks="mh"):
+@app.route('/data/browser/<region>/<query>')
+def browser(region = "III:11746923-11750250", tracks="mh", query = None):
     bcs = OrderedDict([("Data", "/data"), ("Browser", None)])
     title = "Browser" 
     from cendr import build
