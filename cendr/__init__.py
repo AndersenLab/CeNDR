@@ -12,6 +12,8 @@ from gcloud import datastore
 from playhouse.pool import PooledMySQLDatabase
 import MySQLdb
 import _mysql
+import requests
+
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -158,6 +160,18 @@ def lookup_order(invoice_hash):
         return {k:v for k,v in result.items() if v}
     else:
         return None
+
+
+def send_mail(data):
+    ds = get_ds()
+    api_key = ds.get(ds.key("credential", 'mailgun'))['apiKey']
+    return requests.post(
+        "https://api.mailgun.net/v3/mail.elegansvariation.org/messages",
+        auth=("api", api_key),
+        data=data)
+
+
+
 #
 # Custom Filters
 #

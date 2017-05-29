@@ -27,3 +27,4 @@ cyvcf2
 gunicorn==19.7.1
 gsutil
 ipython
+sendgrid==4.1.0
