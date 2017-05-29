@@ -55,7 +55,11 @@ def variant_api():
     query = request.json
     app.logger.info(query)
     version = request.args.get('version') or  20170507
-    samples = request.args.get('samples')
+    samples = query['sample_tracks']
+    if not samples:
+        samples = "N2"
+    else:
+        samples = ','.join(samples)
     vcf = "http://storage.googleapis.com/elegansvariation.org/releases/{version}/WI.{version}.vcf.gz".format(
         version=version)
 
@@ -73,8 +77,7 @@ def variant_api():
     # Query Severity
 
     # Query samples
-    if samples:
-        comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
+    comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
     app.logger.info(' '.join(comm))
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:

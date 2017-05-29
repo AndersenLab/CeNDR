@@ -1,22 +1,15 @@
-from cendr import app, cache
-from cendr import cache
+from cendr import app, cache, send_mail
 from cendr import ds
 from cendr import dbname
 from cendr import autoconvert
 from cendr.task.map_submission import launch_mapping
-from cendr.models import db, report, strain, trait, trait_value, mapping, WI
+from cendr.models import db, report, strain, trait, trait_value, mapping
 from api import *
-try:
-    from cendr.emails import mapping_submission
-    from google.appengine.api import mail
-except:
-    pass
+from cendr.emails import mapping_submission
 from datetime import date, datetime
 import pytz
 from dateutil.relativedelta import relativedelta
 from peewee import JOIN
-from playhouse.shortcuts import model_to_dict
-
 from flask import render_template, request, redirect, url_for
 from collections import OrderedDict
 import hashlib
@@ -28,7 +21,6 @@ from gcloud import storage
 import os
 import time
 from collections import Counter
-from pprint import pprint as pp
 
 
 class CustomEncoder(json.JSONEncoder):
@@ -173,10 +165,10 @@ def process_gwa():
         report_slug = req["report_hash"]
     else:
         report_slug = req["report_slug"]
-    mail.send_mail(sender="CeNDR <andersen-lab@appspot.gserviceaccount.com>",
-                   to=req["email"],
-                   subject="CeNDR Mapping Report - " + req["report_slug"],
-                   body=mapping_submission.format(report_slug=report_slug))
+    send_mail({"from":"no-reply@elegansvariation.org",
+                   "to":[req["email"]],
+                   "subject":"CeNDR Mapping Report - " + req["report_slug"],
+                   "text": mapping_submission.format(report_slug=report_slug)})
 
     return str(json.dumps(req))
 
@@ -353,7 +345,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     status = trait_data["status"]
 
     # List available datasets
-    report_files = list(storage.Client().get_bucket("cendr").list_blobs(
+    report_files = list(storage.Client(project='andersen-lab').get_bucket("cendr").list_blobs(
         prefix=report_trait + "/tables"))
     report_files = [os.path.split(x.name)[1] for x in report_files]
 
