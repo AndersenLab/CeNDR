@@ -35,7 +35,7 @@ def get_google_sheet():
             credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
             gc = gspread.authorize(credentials)
             g.gc = gc
-        return g.gc∏
+        return g.gc
 
 ds = get_ds()
 
