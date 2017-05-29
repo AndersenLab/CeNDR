@@ -9,6 +9,7 @@ import json
 import yaml
 import os
 from gcloud import datastore
+from playhouse.pool import PooledMySQLDatabase
 import MySQLdb
 import _mysql
 
@@ -34,17 +35,15 @@ def get_google_sheet():
             credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
             gc = gspread.authorize(credentials)
             g.gc = gc
-        return g.gc
+        return g.gc∏
 
 ds = get_ds()
 
+
+credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
+db = PooledMySQLDatabase(dbname, stale_timeout=300, **credentials)
+
 def get_db():
-    ds = get_ds()
-    credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
-    db = MySQLDatabase(
-        dbname,
-        **credentials
-    )
     return db
 
 @app.before_request
