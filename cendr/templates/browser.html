@@ -22,22 +22,22 @@
 
 <style>
 
-.gt-00 {
+.gt-0 {
   background-color: rgba(194,194,214,1.0);
   border: 1px solid black;
   color: black;
 }
-.gt-11 {
+.gt-3 {
   background-color: rgba(0, 102, 255,1.0);
   border: 1px solid black;
   color: white;
 }
 
-.gt-00 .mapping_quality,.min_depth,.dv_dp,.het {
+.gt-0 .mapping_quality,.min_depth,.dv_dp,.het {
   background-color: rgba(194,194,214,0.25);
   border: none;
 }
-.gt-11 .mapping_quality,.min_depth,.dv_dp,.het{
+.gt-3 .mapping_quality,.min_depth,.dv_dp,.het{
   background-color: rgba(0, 102, 255,0.25);
   border: none;
 }
@@ -408,47 +408,45 @@ function refresh_variants() {
       contentType: "application/json",
       success: function(msg) {
           console.log(msg);
-          $.each(msg, function(k, r) {
-            $.each(r['ANN'], function(annk, a) {
-              console.log(a);
+          $.each(msg, function(k, rec) {
+            $.each(rec['ANN'], function(annk, ann) {
 
-            if (a["gene_id"] != "") 
+            if (ann["gene_id"] != "") 
             {
-              a["gene_id"] = "<a href='/gene/" + a["gene_id"] + "'>" + a["gene_id"] + "</a>";
+              ann["gene_id"] = "<a href='/gene/" + ann["gene_id"] + "'>" + ann["gene_id"] + "</a>";
             }
 
-            items = [r["CHROM"] + ":" + Number(r["POS"]).toLocaleString('en'),
-                     r["REF"] + " / " + r["ALT"].join(","),
-                     a["gene_name"],
-                     a["gene_id"],
-                     a["feature_id"],
-                     a["hgvs_p"],
-                     a["transcript_biotype"],
-                     a["effect"].split("&").join(", "),
-                     "<span class='label label-" + var_impact_class[a["impact"]] + "'>" + a["impact"] + "</span>"];
+            items = [rec["CHROM"] + ":" + Number(rec["POS"]).toLocaleString('en'),
+                     rec["REF"] + " / " + rec["ALT"].join(","),
+                     ann["gene_name"],
+                     ann["gene_id"],
+                     ann["feature_id"],
+                     ann["hgvs_p"],
+                     ann["transcript_biotype"],
+                     ann["effect"].split("&").join(", "),
+                     "<span style='color: white;' class='label label-" + var_impact_class[ann["impact"]] + "'>" + ann["impact"] + "</span>"];
 
             //suppose to happen on click
-            additional_fields = [a["gene_name"] + ": " , a["filter"]]
+            additional_fields = [ann["gene_name"] + ": " , ann["filter"]]
             $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>");
             checked_isotypes = $(".isotype-item input:checked").map(
                 function () {return this.value;}).get();
             
             if (checked_isotypes.length > 0) {
-              gts = a["GT"].filter(function(i) { return checked_isotypes.includes(i["SAMPLE"]) });
-
+              gts = rec["GT"].filter(function(i) { return checked_isotypes.includes(i["SAMPLE"]) });
               // Construct gt view
               gtset = gts.map( function(gt) {
 
                 r = ""
                 classes = [];
-                classes.push("gt-" + gt["GT"].replace("/", ""));
+                classes.push("gt-" + gt["GT"]);
                 classes.push(gt["FT"].split(";"));
                 r += "<span class='label " + classes.join(" ") + "'>";
                 r += gt["SAMPLE"] + " : " + gt["TGT"];
                 r += "</span>";
                 return r}).join(" ");
 
-              $("#variants > tbody").append("<tr class='" + var_impact_class[a["impact"]] + "'><td style='border-top:none;' colspan='9'>" + gtset + "</td>" + "</tr>");
+              $("#variants > tbody").append("<tr><td style='border-top:none;' colspan='9'>" + gtset + "</td>" + "</tr>");
             }
           });
         });

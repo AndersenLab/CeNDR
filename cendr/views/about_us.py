@@ -107,7 +107,7 @@ def donate():
         add_to_order_ws(order)
 
         return redirect(url_for("order_confirmation", invoice_hash=order["invoice_hash"]), code=302)
-    
+
 
     from google.appengine.api import mail
     title = "Donate"

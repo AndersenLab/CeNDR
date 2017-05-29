@@ -26,8 +26,10 @@ def format_datetime(value):
     except:
         pass
 
+
 def sortedfiles(path):
     return sorted([x for x in os.listdir(path) if not x.startswith(".")], reverse = True)
+
 
 @app.route('/')
 @cache.cached(timeout=50)

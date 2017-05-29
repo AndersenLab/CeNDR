@@ -47,11 +47,14 @@ def get_region(region):
     return region, chrom, start, end, gene
 
 
-@app.route('/api/variant', methods=["POST"])
+gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
+
+
+@app.route('/api/variant', methods=["GET", "POST"])
 def variant_api():
     query = request.json
     app.logger.info(query)
-    version = request.args.get('version') or 20170312
+    version = request.args.get('version') or  20170507
     samples = request.args.get('samples')
     vcf = "http://storage.googleapis.com/elegansvariation.org/releases/{version}/WI.{version}.vcf.gz".format(
         version=version)
@@ -101,7 +104,8 @@ def variant_api():
             for ANN_rec in ANN_set:
                 ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
             del INFO['ANN']
-        gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist())
+        gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
+        gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set if x[1] != 2] # Filter missing (2)
         ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
         rec_out = {
             "CHROM": record.CHROM,
