@@ -123,5 +123,7 @@ def variant_api():
             rec_out["phastcons"] = float(INFO['phastcons'])
         if 'phylop' in INFO:
             rec_out["phylop"] = float(INFO['phylop'])
-        json_out.append(rec_out)
+        print(query['variant_impact'])
+        if len(rec_out['ANN']) > 0 or 'ALL' in query['variant_impact']:
+            json_out.append(rec_out)
     return jsonify(json_out)

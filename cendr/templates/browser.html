@@ -67,6 +67,11 @@
 
         <h5>Variant Impact <a href="{{ url_for('help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
+
+        <div class="checkbox">
+              <label><input type="checkbox" class="track-select variant-impact" value="ALL" />No Annotation <div class="legend-box" style="background-color: #fff;"></div></label>
+        </div>
+
         <div class="checkbox">
               <label><input type="checkbox" class="track-select variant-impact" value="MODIFIER" />MODIFIER <div class="legend-box" style="background-color: #6f6f6f;"></div></label>
         </div>
@@ -409,25 +414,30 @@ function refresh_variants() {
       success: function(msg) {
           console.log(msg);
           $.each(msg, function(k, rec) {
+
+            if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
+              rec["ANN"] = [{ effect: "", gene_id: null}]
+            }
+
             $.each(rec['ANN'], function(annk, ann) {
 
-            if (ann["gene_id"] != "") 
+            if (ann["gene_id"] != null) 
             {
               ann["gene_id"] = "<a href='/gene/" + ann["gene_id"] + "'>" + ann["gene_id"] + "</a>";
             }
 
             items = [rec["CHROM"] + ":" + Number(rec["POS"]).toLocaleString('en'),
                      rec["REF"] + " / " + rec["ALT"].join(","),
-                     ann["gene_name"],
-                     ann["gene_id"],
-                     ann["feature_id"],
-                     ann["hgvs_p"],
-                     ann["transcript_biotype"],
-                     ann["effect"].split("&").join(", "),
-                     "<span style='color: white;' class='label label-" + var_impact_class[ann["impact"]] + "'>" + ann["impact"] + "</span>"];
+                     ann.gene_name,
+                     ann.gene_id,
+                     ann.feature_id,
+                     ann.hgvs_p,
+                     ann.transcript_biotype,
+                     ann.effect.split("&").join(", "),
+                     "<span style='color: white;' class='label label-" + var_impact_class[ann.impact] + "'>" + ann.impact + "</span>"];
 
             //suppose to happen on click
-            additional_fields = [ann["gene_name"] + ": " , ann["filter"]]
+            additional_fields = [ann.gene_name + ": " , ann.filter]
             $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>");
             checked_isotypes = $(".isotype-item input:checked").map(
                 function () {return this.value;}).get();
