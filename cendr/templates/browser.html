@@ -397,22 +397,25 @@ function refresh_variants() {
 
     $("#variants > tbody").html("");
     
-    data = {'variant_impact': variant_impact,
-            'sample_tracks': sample_tracks,
-            'region': region,
+    data = {'chrom': chrom,
             'start': parseInt(start),
             'end': parseInt(end),
-            'chrom': chrom}
+            'variant_impact': variant_impact.join('_'),
+            'sample_tracks': sample_tracks.join('_')}
 
-    console.log(data);
+    data =  $.param(data);
+
+
 
     $.ajax({
       url: "{{ url_for('variant_api') }}",
-      data: JSON.stringify(data),
-      method: "POST",
+      data: data,
+      method: "GET",
       contentType: "application/json",
       success: function(msg) {
-          console.log(msg);
+          
+          window.history.pushState('page', document.title, "{{ url_for('browser') }}" + data);
+
           $.each(msg, function(k, rec) {
 
             if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {

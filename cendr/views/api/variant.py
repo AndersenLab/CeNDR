@@ -52,18 +52,23 @@ gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
 
 @app.route('/api/variant', methods=["GET", "POST"])
 def variant_api():
-    query = request.json
+    query = request.args
+    query = {'chrom': query['chrom'],
+             'start': int(query['start']),
+             'end': int(query['end']),
+             'variant_impact': query['variant_impact'].split("_"),
+             'sample_tracks': query['sample_tracks'].split("_")}
     app.logger.info(query)
     version = request.args.get('version') or  20170507
     samples = query['sample_tracks']
-    if not samples:
+    if not samples[0]:
         samples = "N2"
     else:
         samples = ','.join(samples)
     vcf = "http://storage.googleapis.com/elegansvariation.org/releases/{version}/WI.{version}.vcf.gz".format(
         version=version)
 
-    region = query['region'].replace(",", "")
+    chrom = query['chrom']
     start = query['start']
     end = query['end']
 
@@ -72,12 +77,13 @@ def variant_api():
     if end - start > 1e5:
         return "You can only query a maximum of 100 kb", 400
 
+    region = "{chrom}:{start}-{end}".format(**locals())
     comm = ["bcftools", "view", vcf, region]
-
     # Query Severity
 
     # Query samples
     comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
+    print(comm)
     app.logger.info(' '.join(comm))
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
