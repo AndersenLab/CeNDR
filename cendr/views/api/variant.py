@@ -1,6 +1,5 @@
 # NEW API
-
-from cendr import api, cache, app, autoconvert
+from cendr import app, build
 from cyvcf2 import VCF
 from flask import jsonify, request
 import re
@@ -59,7 +58,7 @@ def variant_api():
              'variant_impact': query['variant_impact'].split("_"),
              'sample_tracks': query['sample_tracks'].split("_")}
     app.logger.info(query)
-    version = request.args.get('version') or  20170507
+    version = request.args.get('version') or  build
     samples = query['sample_tracks']
     if not samples[0]:
         samples = "N2"
@@ -74,8 +73,8 @@ def variant_api():
 
     if start >= end:
         return "Invalid start and end region values", 400
-    if end - start > 1e5:
-        return "You can only query a maximum of 100 kb", 400
+    #if end - start > 1e5:
+    #    return jsonify('error': "You can only query a maximum of 100 kb"), 400
 
     region = "{chrom}:{start}-{end}".format(**locals())
     comm = ["bcftools", "view", vcf, region]
@@ -83,53 +82,54 @@ def variant_api():
 
     # Query samples
     comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
-    print(comm)
     app.logger.info(' '.join(comm))
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
         app.logger.error(err)
         return err, 400
-    tfile = NamedTemporaryFile()
-    tfile = open("test.vcf", 'w')
-    json_out = []
+    tfile = NamedTemporaryFile(mode='w+b', bufsize=100)
     with tfile as f:
         f.write(out)
+        json_out = []
 
-    v = VCF(tfile.name)
+        v = VCF(f.name)
 
-    if samples:
-        samples = samples.split(",")
-        incorrect_samples = [x for x in samples if x not in v.samples]
-        if incorrect_samples:
-            return "Incorrectly specified sample(s): " + ','.join(incorrect_samples), 400
+        if samples:
+            samples = samples.split(",")
+            incorrect_samples = [x for x in samples if x not in v.samples]
+            if incorrect_samples:
+                return "Incorrectly specified sample(s): " + ','.join(incorrect_samples), 400
 
-    for record in v:
-        INFO = dict(record.INFO)
-        ANN = []
-        if "ANN" in INFO.keys():
-            ANN_set = INFO['ANN'].split(",")
-            if len(ANN_set) == 0 and not output_all_variants:
-                break
-            for ANN_rec in ANN_set:
-                ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
-            del INFO['ANN']
-        gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
-        gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set if x[1] != 2] # Filter missing (2)
-        ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
-        rec_out = {
-            "CHROM": record.CHROM,
-            "POS": record.POS,
-            "REF": record.REF,
-            "ALT": record.ALT,
-            "GT": gt_set,
-            "AF": INFO["AF"],
-            "ANN": ANN
-        }
-        if 'phastcons' in INFO:
-            rec_out["phastcons"] = float(INFO['phastcons'])
-        if 'phylop' in INFO:
-            rec_out["phylop"] = float(INFO['phylop'])
-        print(query['variant_impact'])
-        if len(rec_out['ANN']) > 0 or 'ALL' in query['variant_impact']:
-            json_out.append(rec_out)
-    return jsonify(json_out)
+        for i, record in enumerate(v):
+            INFO = dict(record.INFO)
+            ANN = []
+            if "ANN" in INFO.keys():
+                ANN_set = INFO['ANN'].split(",")
+                if len(ANN_set) == 0 and not output_all_variants:
+                    break
+                for ANN_rec in ANN_set:
+                    ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
+                del INFO['ANN']
+
+
+            gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
+            gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set if x[1] != 2] # Filter missing (2)
+            ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
+            rec_out = {
+                "CHROM": record.CHROM,
+                "POS": record.POS,
+                "REF": record.REF,
+                "ALT": record.ALT,
+                "GT": gt_set,
+                "AF": INFO["AF"],
+                "ANN": ANN
+            }
+            if 'phastcons' in INFO:
+                rec_out["phastcons"] = float(INFO['phastcons'])
+            if 'phylop' in INFO:
+                rec_out["phylop"] = float(INFO['phylop'])
+            if len(rec_out['ANN']) > 0 or 'ALL' in query['variant_impact']:
+                json_out.append(rec_out)
+            if i == 1000:
+                return jsonify(json_out)
+        return jsonify(json_out)
