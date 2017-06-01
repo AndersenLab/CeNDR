@@ -1,16 +1,13 @@
-from cendr import app, autoconvert, get_ds, cache, add_to_order_ws, lookup_order, send_mail
+from cendr import app, get_ds, cache, add_to_order_ws, lookup_order, send_mail
 from cendr import json_serial
-from flask import render_template, request, url_for, redirect, make_response, Response, abort
+from flask import render_template, request, url_for, redirect, Response, abort
 from cendr.models import strain
 from collections import OrderedDict
 import json
-import os
 import yaml
 from cendr.emails import order_submission
-from gcloud.datastore.entity import Entity
 from datetime import datetime
 import pytz
-from dateutil.relativedelta import relativedelta
 import hashlib
 
 

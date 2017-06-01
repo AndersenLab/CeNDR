@@ -202,7 +202,7 @@ trackset = {"Genes": {
                             name: "Genes",
                             displayMode: "EXPANDED",
                             order: 1,
-                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_gene.WS245.bed",
+                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/20160408/browser/elegans_gene.WS245.bed",
                             indexed: false,
                             searchable: true,
                             color: "#5c5cd6",
@@ -405,7 +405,7 @@ function refresh_variants() {
 
     data =  $.param(data);
 
-
+    console.log(data);
 
     $.ajax({
       url: "{{ url_for('variant_api') }}",
@@ -414,7 +414,7 @@ function refresh_variants() {
       contentType: "application/json",
       success: function(msg) {
           
-          window.history.pushState('page', document.title, "{{ url_for('browser') }}" + data);
+          //window.history.pushState('page', document.title, "{{ url_for('browser') }}" + data);
 
           $.each(msg, function(k, rec) {
 

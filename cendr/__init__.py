@@ -124,7 +124,7 @@ else:
 version = [x for x in yaml.load(open(".travis.yml", 'r').read())['before_install'] if 'VERSION' in x][0].split("=")[1]
 app.config['version'] = version.split(".")[0].replace("-",".").replace("version.","")
 api = Api(app)
-build = "20160408"
+build = "20170531"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
