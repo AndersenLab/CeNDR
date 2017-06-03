@@ -1,13 +1,14 @@
 # NEW API
 from cendr import app, build
 from cyvcf2 import VCF
-from flask import jsonify, request
+from flask import jsonify, request, Response
 import re
 import sys
 from cendr.models import wb_gene
 from cendr.views.api.gene import gene_search
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
+from collections import OrderedDict
 
 ANN_header = ["allele",
               "effect",
@@ -56,7 +57,8 @@ def variant_api():
              'start': int(query['start']),
              'end': int(query['end']),
              'variant_impact': query['variant_impact'].split("_"),
-             'sample_tracks': query['sample_tracks'].split("_")}
+             'sample_tracks': query['sample_tracks'].split("_"),
+             'output': query['output']}
     app.logger.info(query)
     version = request.args.get('version') or  build
     samples = query['sample_tracks']
@@ -91,7 +93,7 @@ def variant_api():
     with tfile as f:
         f.write(out)
         f.flush()
-        json_out = []
+        output_data = []
 
         v = VCF(f.name)
 
@@ -112,7 +114,6 @@ def variant_api():
                     ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
                 del INFO['ANN']
 
-            print(record)
             gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
             gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set if x[1] != 2] # Filter missing (2)
             ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
@@ -130,7 +131,44 @@ def variant_api():
             if 'phylop' in INFO:
                 rec_out["phylop"] = float(INFO['phylop'])
             if len(rec_out['ANN']) > 0 or 'ALL' in query['variant_impact']:
-                json_out.append(rec_out)
-            if i == 1000:
-                return jsonify(json_out)
-        return jsonify(json_out)
+                output_data.append(rec_out)
+            elif i == 1000 and query['output'] != "tsv":
+                return jsonify(output_data)
+        if query['output'] == 'tsv':
+            filename = '_'.join([query['chrom'], str(query['start']), str(query['end'])])
+            build_output = OrderedDict()
+            output = []
+            header = False
+            for rec in output_data:
+                for k in ['CHROM', 'POS', "REF", "ALT", "phastcons", "phylop", "AF"]:
+                    if k == 'ALT':
+                        build_output[k]  = ','.join(rec[k])
+                    else:
+                        build_output[k]  = rec[k]
+                for ann in rec['ANN']:
+                    for k in ['allele',
+                              'effect',
+                              'impact',
+                              'gene_name',
+                              'gene_id',
+                              'feature_type',
+                              'feature_id',
+                              'transcript_biotype',
+                              'exon_intron_rank',
+                              'nt_change',
+                              'aa_change',
+                              'protein_position', 'distance_to_feature']:
+                        build_output[k] = ann[k]
+                for gt in rec['GT']:
+                    sample = gt['SAMPLE']
+                    build_output[sample + '_GT'] = gt['GT']
+                    build_output[sample + '_FT'] = gt['FT']
+                if header is False:
+                    output.append('\t'.join(build_output.keys()))
+                    header = True
+
+                output.append('\t'.join(map(str,build_output.values())))
+            return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
+        return jsonify(output_data)
+
+

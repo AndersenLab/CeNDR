@@ -24,6 +24,7 @@ def gene_search(gene, search = False):
             return result[0]
     return None
 
+
 @app.route('/api/gene/<string:gene>')
 def api_get_gene(gene):
     return jsonify(gene_search(gene))
@@ -71,10 +72,9 @@ def api_browser_search(term):
                 del x
 
     # Get gene results
-    gene_results = gene_search(term, search=True)
-#    results []
-#    for i in gene_results:
-#        results.append(
-#            {"CHROM": i['CHROM'],})
-
+    gene_search_results = gene_search(term, search=True)
+    for i in gene_search_results:
+      i.update({'species': "c. elegans", 'ce_gene_name': (i['locus'] or i['Name']), 'source': 'wormbase', 'gene_symbol': i['locus'] + " / " + i['sequence_name']})
+    result = gene_search_results + homologs
+    
     return jsonify(result)

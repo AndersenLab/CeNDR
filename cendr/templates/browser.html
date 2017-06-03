@@ -101,9 +101,8 @@
       <tr>
         <th><em>C. elegans Gene</em></th>
         <th>Symbol/ID</th>
-        <th>Sequence</th>
         <th>Species</th>
-        <th>Type</th>
+        <th>Source</th>
       </tr>
       </thead>
     <tbody id="orthologs"></tbody>
@@ -166,6 +165,8 @@
 <div class="col-md-12 col-lg-12">
 <h3>Variants</h3>
 
+<button id='download' class='btn btn-primary pull-right'>Download</button>
+
 <table class="table table-striped table-hover" id="variants">
 
 <p><small>Maximum of 1000 variants from the region will be listed. Variants without a black border have a filter applied, and are less reliable.</small></p>
@@ -210,8 +211,7 @@ trackset = {"Genes": {
                      },
             "Transcripts": {
                             name: "Transcripts",
-                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_transcripts_WS245.bed",
-                            indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/elegans_transcripts_WS245.bed.idx",
+                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/20160408/browser/elegans_transcripts_WS245.bed",
                             order: 2,
                             color: "#a366ff",
                             displayMode: "SQUISHED",
@@ -219,8 +219,7 @@ trackset = {"Genes": {
                            },
             "LOW": {
                             name: "LOW",
-                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.LOW.bed",
-                            indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.LOW.bed.idx",
+                            url: "https://storage.googleapis.com/elegansvariation.org/releases/{{ build }}/tracks/severity/{{ build }}.LOW.bed",
                             order: 3,
                             color: "#33cc33",
                             displayMode: "EXPANDED",
@@ -228,8 +227,7 @@ trackset = {"Genes": {
                    },
             "MODERATE": {
                             name: "MODERATE",
-                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.MODERATE.bed",
-                            indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.MODERATE.bed.idx",
+                            url: "https://storage.googleapis.com/elegansvariation.org/releases/20170531/tracks/severity/20170531.MODERATE.bed",
                             order: 4,
                             color: "#ffc500",
                             displayMode: "EXPANDED",
@@ -238,17 +236,25 @@ trackset = {"Genes": {
             "HIGH": {
                             name: "HIGH",
                             sourceType: "gcs",
-                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.HIGH.bed",
-                            indexURL: "https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ build }}.HIGH.bed.idx",
+                            url: "https://storage.googleapis.com/elegansvariation.org/releases/{{ build }}/tracks/severity/{{ build }}.HIGH.bed",
                             order: 5,
                             color: "#ff0000",
                             displayMode: "EXPANDED",
                             height: 20
                    },
+            "MODIFIER": {
+                            name: "MODIFIER",
+                            sourceType: "gcs",
+                            url: "https://storage.googleapis.com/elegansvariation.org/releases/{{ build }}/tracks/severity/{{ build }}.MODIFIER.bed",
+                            order: 5,
+                            color: "#999999",
+                            displayMode: "EXPANDED",
+                            height: 20
+                   },
             "Variants": {
                             name: "Variants",
-                            url: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.filtered.vcf.gz",
-                            indexURL: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.filtered.vcf.gz.tbi",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ build }}/WI.{{ build }}.vcf.gz",
+                            indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ build }}/WI.{{ build }}.vcf.gz.tbi",
                             order: Number.MAX_VALUE,
                             displayMode: "SQUISHED",
                             color: "#000000",
@@ -273,10 +279,10 @@ trackset = {"Genes": {
                 visibilityWindow: 20000
             },
 
-            {% for strain in isotypes %}
-            {{ strain }} : {
-              name: "{{ strain }}",
-              url: "//storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/browser/{{ strain }}.vcf.gz",
+            {% for isotype in isotypes %}
+            {{ isotype }} : {
+              name: "{{ isotype }}",
+              url: "//storage.googleapis.com/elegansvariation.org/releases/{{ build }}/tracks/isotype/{{ isotype }}.{{ build }}.vcf.gz",
               order: 100,
               displayMode: "EXPANDED",
               color: "#ffffff",
@@ -314,7 +320,10 @@ $(document).ready(function () {
                           trackset["{{ i }}"],
                         {% endfor %}
                         trackset["Genes"],
-                        trackset["Transcripts"]                    ],
+                        trackset["Transcripts"],
+                        trackset["MODERATE"],
+                        trackset["HIGH"]
+                        ],
                 };
         igv.createBrowser(div, options);
 
@@ -350,6 +359,7 @@ function process_gene_search() {
            method: "GET",
            contentType: 'application/xml',
            }).done(function(msg) {
+            console.log(msg);
             row = Array();
             $.each(msg, function(i,x) {
               if ("CHROM" in x) {
@@ -370,11 +380,12 @@ function process_gene_search() {
               // Update tables and URL
               refresh_variants();
             });
+
             });
     }
 }
 
-function refresh_variants() {
+function refresh_variants(download = false) {
     region = $(".igvNavigationSearchInput").val();
     chrom = region.split(":")[0];
     start = region.split(":")[1].split("-")[0].replace(/,/g, "");
@@ -403,66 +414,71 @@ function refresh_variants() {
             'variant_impact': variant_impact.join('_'),
             'sample_tracks': sample_tracks.join('_')}
 
-    data =  $.param(data);
-
-    console.log(data);
-
-    $.ajax({
-      url: "{{ url_for('variant_api') }}",
-      data: data,
-      method: "GET",
-      contentType: "application/json",
-      success: function(msg) {
-          
-          //window.history.pushState('page', document.title, "{{ url_for('browser') }}" + data);
-
-          $.each(msg, function(k, rec) {
-
-            if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
-              rec["ANN"] = [{ effect: "", gene_id: null}]
-            }
-
-            $.each(rec['ANN'], function(annk, ann) {
-
-            if (ann["gene_id"] != null) 
-            {
-              ann["gene_id"] = "<a href='/gene/" + ann["gene_id"] + "'>" + ann["gene_id"] + "</a>";
-            }
-
-            items = [rec["CHROM"] + ":" + Number(rec["POS"]).toLocaleString('en'),
-                     rec["REF"] + " / " + rec["ALT"].join(","),
-                     ann.gene_name,
-                     ann.gene_id,
-                     ann.feature_id,
-                     ann.hgvs_p,
-                     ann.transcript_biotype,
-                     ann.effect.split("&").join(", "),
-                     "<span style='color: white;' class='label label-" + var_impact_class[ann.impact] + "'>" + ann.impact + "</span>"];
-
-            //suppose to happen on click
-            additional_fields = [ann.gene_name + ": " , ann.filter]
-            $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>");
-            checked_isotypes = $(".isotype-item input:checked").map(
-                function () {return this.value;}).get();
+    if (download == true) {
+        data['output'] = 'tsv';
+        url =  "{{ url_for('variant_api') }}?" + $.param(data);
+        console.log(url);
+        window.open(url, sprintf("%s_%s_%s.csv", chrom, start, end));
+    } else {
+      data['output'] = 'json';
+      data =  $.param(data);
+      $.ajax({
+        url: "{{ url_for('variant_api') }}",
+        data: data,
+        method: "GET",
+        contentType: "application/json",
+        success: function(msg) {
             
-            if (checked_isotypes.length > 0) {
-              gts = rec["GT"].filter(function(i) { return checked_isotypes.includes(i["SAMPLE"]) });
-              // Construct gt view
-              gtset = gts.map( function(gt) {
+            $.each(msg, function(k, rec) {
 
-                r = ""
-                classes = [];
-                classes.push("gt-" + gt["GT"]);
-                classes.push(gt["FT"].split(";"));
-                r += "<span class='label " + classes.join(" ") + "'>";
-                r += gt["SAMPLE"] + " : " + gt["TGT"];
-                r += "</span>";
-                return r}).join(" ");
+              if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
+                rec["ANN"] = [{ effect: "", gene_id: null}]
+              }
 
-              $("#variants > tbody").append("<tr><td style='border-top:none;' colspan='9'>" + gtset + "</td>" + "</tr>");
-            }
+              $.each(rec['ANN'], function(annk, ann) {
+
+              if (ann["gene_id"] != null) 
+              {
+                ann["gene_id"] = "<a href='/gene/" + ann["gene_id"] + "'>" + ann["gene_id"] + "</a>";
+              }
+              if (ann.impact != undefined) {
+                impact = "<span style='color: white;' class='label label-" + var_impact_class[ann.impact] + "'>" + ann.impact + "</span>"
+              } else {
+                impact = ""
+              }
+              items = [rec["CHROM"] + ":" + Number(rec["POS"]).toLocaleString('en'),
+                       rec["REF"] + " / " + rec["ALT"].join(","),
+                       ann.gene_name,
+                       ann.gene_id,
+                       ann.feature_id,
+                       ann.hgvs_p,
+                       ann.transcript_biotype,
+                       ann.effect.split("&").join(", "),
+                       impact];
+
+              additional_fields = [ann.gene_name + ": " , ann.filter]
+              $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>");
+              checked_isotypes = $(".isotype-item input:checked").map(
+                  function () {return this.value;}).get();
+              
+              if (checked_isotypes.length > 0) {
+                gts = rec["GT"].filter(function(i) { return checked_isotypes.includes(i["SAMPLE"]) });
+                // Construct gt view
+                gtset = gts.map( function(gt) {
+
+                  r = ""
+                  classes = [];
+                  classes.push("gt-" + gt["GT"]);
+                  classes.push(gt["FT"].split(";"));
+                  r += "<span class='label " + classes.join(" ") + "'>";
+                  r += gt["SAMPLE"] + " : " + gt["TGT"];
+                  r += "</span>";
+                  return r}).join(" ");
+
+                $("#variants > tbody").append("<tr><td style='border-top:none;' colspan='9'>" + gtset + "</td>" + "</tr>");
+              }
+            });
           });
-        });
 
 
         
@@ -476,8 +492,15 @@ function refresh_variants() {
         }
       });
 
+      } // End if else logic for download
+
 
 }
+
+$("#download").click(function() {
+  console.log("download")
+    refresh_variants(download=true);
+});
 
 
 $("#browser").on("mouseup", function() { 
@@ -550,6 +573,8 @@ $(document).ready(function() {
     });
 
 });
+
+
 
 </script>
 
