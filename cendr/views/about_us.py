@@ -96,7 +96,7 @@ def donate():
         order["date"] = datetime.now(pytz.timezone("America/Chicago")).date().isoformat()
         order["invoice_hash"] = hashlib.sha1(str(order)).hexdigest()[0:10]
         order["url"] = "http://elegansvariation.org/order/" + order["invoice_hash"]
-        send_mail({"from":"CeNDR <andersen-lab@appspot.gserviceaccount.com>",
+        send_mail({"from":"no-reply@elegansvariation.org",
            "to":order["email"],
            "cc": ['dec@u.northwestern.edu',
                   'robyn.tanny@northwestern.edu',
