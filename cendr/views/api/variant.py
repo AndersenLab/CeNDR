@@ -87,9 +87,10 @@ def variant_api():
     if not out and err:
         app.logger.error(err)
         return err, 400
-    tfile = NamedTemporaryFile(mode='w+b', bufsize=100)
+    tfile = NamedTemporaryFile(mode='w+b', bufsize=10000)
     with tfile as f:
         f.write(out)
+        f.flush()
         json_out = []
 
         v = VCF(f.name)
@@ -111,7 +112,7 @@ def variant_api():
                     ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
                 del INFO['ANN']
 
-
+            print(record)
             gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
             gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set if x[1] != 2] # Filter missing (2)
             ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
