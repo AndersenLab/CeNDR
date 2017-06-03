@@ -50,6 +50,20 @@ def get_region(region):
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
 
 
+ann_cols = ['allele',
+            'effect',
+            'impact',
+            'gene_name',
+            'gene_id',
+            'feature_type',
+            'feature_id',
+            'transcript_biotype',
+            'exon_intron_rank',
+            'nt_change',
+            'aa_change',
+            'protein_position',
+            'distance_to_feature']
+
 @app.route('/api/variant', methods=["GET", "POST"])
 def variant_api():
     query = request.args
@@ -145,20 +159,14 @@ def variant_api():
                         build_output[k]  = ','.join(rec[k])
                     else:
                         build_output[k]  = rec[k]
-                for ann in rec['ANN']:
-                    for k in ['allele',
-                              'effect',
-                              'impact',
-                              'gene_name',
-                              'gene_id',
-                              'feature_type',
-                              'feature_id',
-                              'transcript_biotype',
-                              'exon_intron_rank',
-                              'nt_change',
-                              'aa_change',
-                              'protein_position', 'distance_to_feature']:
-                        build_output[k] = ann[k]
+                if rec['ANN']:
+                    for ann in rec['ANN']:
+                        for k in ann_cols:
+                            build_output[k] = ann[k]
+                else:
+                    for k in ann_cols:
+                        build_output[k] = ""
+
                 for gt in rec['GT']:
                     sample = gt['SAMPLE']
                     build_output[sample + '_GT'] = gt['GT']

@@ -406,7 +406,6 @@ function refresh_variants(download = false) {
          }
     }
 
-    $("#variants > tbody").html("");
     
     data = {'chrom': chrom,
             'start': parseInt(start),
@@ -420,6 +419,7 @@ function refresh_variants(download = false) {
         console.log(url);
         window.open(url, sprintf("%s_%s_%s.csv", chrom, start, end));
     } else {
+      $("#variants > tbody").html("");
       data['output'] = 'json';
       data =  $.param(data);
       $.ajax({
