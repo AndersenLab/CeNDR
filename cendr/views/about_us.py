@@ -97,14 +97,14 @@ def donate():
         order["invoice_hash"] = hashlib.sha1(str(order)).hexdigest()[0:10]
         order["url"] = "http://elegansvariation.org/order/" + order["invoice_hash"]
         send_mail({"from":"no-reply@elegansvariation.org",
-           "to":order["email"],
+           "to": [order["email"]],
            "cc": ['dec@u.northwestern.edu',
                   'robyn.tanny@northwestern.edu',
                   'erik.andersen@northwestern.edu',
                   'g-gilmore@northwestern.edu',
                   'irina.iacobut@northwestern.edu'],
            "subject":"CeNDR Order #" + str(order["order_number"]),
-           "body": donate_submission.format(invoice_hash=order["invoice_hash"],
+           "text": donate_submission.format(invoice_hash=order["invoice_hash"],
                                          donation_amount=donation_amount)})
 
         add_to_order_ws(order)
