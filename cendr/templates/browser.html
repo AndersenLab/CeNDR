@@ -391,7 +391,7 @@ function process_gene_search() {
 
 function refresh_variants(download = false) {
     region = $(".igvNavigationSearchInput").val();
-    if (/[IVXMtDNA]+:[0-9]+-[0-9]+/g.exec(region) != null) {
+    if (/[IVXMtDNA]+:[0-9,]+-[0-9,]+/g.exec(region) != null) {
       chrom = region.split(":")[0];
       start = region.split(":")[1].split("-")[0].replace(/,/g, "");
       end = region.split(":")[1].split("-")[1].replace(/,/g, "");
