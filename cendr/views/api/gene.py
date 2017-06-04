@@ -1,5 +1,5 @@
 from cendr import app, cache
-from flask import jsonify
+from flask import jsonify, request
 from cendr.models import homologene, wb_orthologs, wb_gene
 
 
@@ -25,8 +25,15 @@ def gene_search(gene, search = False):
     return None
 
 
+@app.route('/api/genome/search/<string:gene>') # Seach for IGV Browser
 @app.route('/api/gene/<string:gene>')
 def api_get_gene(gene):
+    print(request.path)
+    if request.path.startswith('/api/genome/search/'):
+        result = gene_search(gene)
+        return jsonify({"result": [{"chromosome": result['CHROM'],
+                        "start": result["start"],
+                        "end": result["end"]}]})
     return jsonify(gene_search(gene))
 
 
@@ -77,4 +84,4 @@ def api_browser_search(term):
       i.update({'species': "c. elegans", 'ce_gene_name': (i['locus'] or i['Name']), 'source': 'wormbase', 'gene_symbol': i['locus'] + " / " + i['sequence_name']})
     result = gene_search_results + homologs
     
-    return jsonify(result)
+    return jsonify(result[:10])
