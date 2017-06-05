@@ -19,6 +19,14 @@ import requests
 app = Flask(__name__, static_url_path='/static')
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
 
+
+releases = ["20170531", "20160408"]
+
+
+def get_vcf(release = releases[0]):
+    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/WI.{release}.vcf.gz".format(release=release)
+
+
 def get_ds():
     with app.app_context():
         if not hasattr(g, 'ds'):

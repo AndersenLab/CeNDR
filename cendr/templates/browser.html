@@ -203,7 +203,7 @@ trackset = {"Genes": {
                             name: "Genes",
                             displayMode: "EXPANDED",
                             order: 1,
-                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/20160408/browser/elegans_gene.WS245.bed",
+                            url: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/browser/elegans_gene.WS245.bed",
                             indexed: false,
                             searchable: false,
                             color: "#5c5cd6",
@@ -211,7 +211,7 @@ trackset = {"Genes": {
                      },
             "Transcripts": {
                             name: "Transcripts",
-                            url: "https://storage.googleapis.com/andersen_dist/vcf/all/20160408/browser/elegans_transcripts_WS245.bed",
+                            url: "//storage.googleapis.com/andersen_dist/vcf/all/20160408/browser/elegans_transcripts_WS245.bed",
                             order: 2,
                             color: "#a366ff",
                             displayMode: "SQUISHED",
@@ -219,7 +219,7 @@ trackset = {"Genes": {
                            },
             "LOW": {
                             name: "LOW",
-                            url: "https://storage.googleapis.com/elegansvariation.org/releases/{{ build }}/tracks/severity/{{ build }}.LOW.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ build }}/tracks/severity/{{ build }}.LOW.bed",
                             order: 3,
                             color: "#33cc33",
                             displayMode: "EXPANDED",
@@ -314,8 +314,6 @@ $(document).ready(function () {
                     reference: {
                       id: "WS245",
                       fastaURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa",
-                      indexURL: "//storage.googleapis.com/andersen_dist/genome/c_elegans.PRJNA13758.WS245.genomic.fa.fai",
-                      // cytobandURL: ""
                     },
                     locus: "{{ region }}",
                     tracks: [
