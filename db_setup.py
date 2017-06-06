@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from peewee import *
 import requests
 import os
@@ -230,7 +231,7 @@ if "strains" in update:
             for line in lines:
                 print(line)
                 l = {k: correct_values(k, v) for k, v in line.items()}
-                l = {k: v.encode("UTF-8") for k, v in l.items() if type(v) == str}
+                l = {k: v.encode('iso-8859-1') for k, v in l.items() if type(v) == str}
                 strain_set = "|".join(
                     [x["strain"] for x in lines if line["isotype"] == x["isotype"]])
                 previous_names = '|'.join(
@@ -240,4 +241,5 @@ if "strains" in update:
                 except:
                     s = strain()
                 [setattr(s, k, autoconvert(v)) for k, v in l.items()]
+                print(s.isolated_by)
                 s.save()
