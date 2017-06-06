@@ -85,6 +85,7 @@ def strain_listing_page():
     strain_listing = strain.select(strain.strain,
                                    strain.reference_strain,
                                    strain.isotype,
+                                   strain.release,
                                    strain.previous_names,
                                    strain.set_1,
                                    strain.set_2,

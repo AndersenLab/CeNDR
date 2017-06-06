@@ -1,4 +1,4 @@
-from cendr import app, cache
+from cendr import app, cache, releases
 from cendr import api
 from flask import make_response, Response
 from cendr.models import strain, report, homologene, mapping, trait
@@ -9,8 +9,10 @@ from flask import render_template
 
 @app.route('/Data/')
 @app.route('/data/')
+@app.route('/Data/<string:release>')
+@app.route('/data/<string:release>')
 @cache.memoize(50)
-def data_page():
+def data_page(release = releases[0]):
     bcs = OrderedDict([("Data", None)])
     title = "Data"
     from cendr import build

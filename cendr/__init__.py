@@ -188,6 +188,12 @@ def send_mail(data):
 def comma_filter(value):
     return "{:,.0f}".format(value)
 
+
+@app.template_filter('format_release')
+def format_release_filter(value):
+    print(value)
+    return datetime.strptime(str(value), '%Y%m%d').strftime('%Y-%m-%d')
+
 from task import *
 from views import *
 from cegwas import *

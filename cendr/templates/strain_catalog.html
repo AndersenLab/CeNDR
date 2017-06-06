@@ -72,13 +72,13 @@
                             </small>
                             </td>
                         </tr>
-                        {% for i in range(1,4) %}
+                        {% for i in range(1,5) %}
                         <tr>
                             <td>
                                 <input type="checkbox" name="item"  id="set_{{ i }}" value="set_{{ i }}"/>
                             </td>
                             <td><strong><label for="set_{{ i }}">Mapping Set {{ i }}</label></strong></td>
-                            <td>{% if i < 3 %}48{% else %}44{% endif %}</td>
+                            <td>48</td>
                             <td>
                             <a class="btn btn-link btn-block" data-toggle="collapse" data-target="#view_set_{{ i }}">View Strains</a>
                             <div class="collapse" id="view_set_{{ i }}" >
@@ -139,6 +139,7 @@
                         <th><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Previous names assigned to a strain or alternative names">Alternative Names</span>
                             <!--<div class="pull-right"><a href="https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?output=tsv">Download Strain Information (.tsv)</a></div>-->
                         </th>
+                        <th><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Date of original release">Release</span></th>
                     </tr>
                 </thead>
                 <tbody class="searchable">
@@ -163,6 +164,7 @@
                         {% else %}
                             <td> </td>
                         {% endif %}
+                        <td>{{ strains[0]['release'] | format_release }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

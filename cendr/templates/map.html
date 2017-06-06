@@ -33,6 +33,7 @@
                             Reference Strain
                             </span></strong> 
                             <div class="strain pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset isotype originally released with."><strong>Release</strong> <div class="release pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right"><div style="clear:both;"></div></li>
@@ -70,7 +71,7 @@ var icon_hover = L.icon({
 // Default click_s
 var click_s = {
   target: {
-    options: {strain: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: "", elevation: ""},
+    options: {strain: "", release: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: "", elevation: ""},
     setIcon: function(){},
   },
   latlng: { lat: "", lng: ""},
@@ -82,6 +83,7 @@ function set_panel_from_search(m) {
   s = m.layer.options
   $(".strain").text(s.strain);
   $(".isotype").html("<strong><a href='/strain/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".release").text(s.release);
   $(".isolation_date").text(s.isolation_date);
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
   $(".elevation").text(s.elevation);
@@ -104,6 +106,7 @@ function set_panel_content(m) {
   latlng = m.latlng.lat + comma + m.latlng;
   $(".strain").text(s.strain);
   $(".isotype").html("<strong><a href='/strain/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".release").text(s.release);
   $(".isolation_date").text(s.isolation_date);
   $(".comma").text(s.comma)
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
@@ -156,7 +159,8 @@ function restore_click_locked_content(m) {
                                          isotype: d.isotype,
                                          isolation_date : d.isolation_date,
                                          loc: d.location,
-                                         elevation: d.elevation + " m",
+                                         release: String(d.release).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
+                                         elevation: d.elevation + " m" ,
                                          landscape: d.landscape,
                                          substrate: d.substrate,
                                          comma: ",  ",

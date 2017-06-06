@@ -114,7 +114,7 @@
     <div class='col-md-6'>
     <strong>Info</strong>
     <ul>
-      <li><strong>Version</strong>: {{ report_data[0].version }}</li>
+      <li><strong>Release</strong>: {{ report_data[0].version | format_release }}</li>
       <li><strong>Availabity</strong>: {% if report_data[0].release == 0 %}
                                             Public
                                          {% elif report_data[0].release == 1 %}
