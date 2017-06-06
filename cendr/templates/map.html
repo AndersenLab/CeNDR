@@ -39,7 +39,7 @@
                 <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right"><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Landscape</strong> <div class="landscape pull-right"></div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Substrate</strong> <div class="substrate pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Isolated By</strong> <div class="isolated_by pull-right"></div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Sampled By</strong> <div class="sampled_by pull-right"></div><div style="clear:both;"></div></li>
               </ul>
         </div>
         <a class="btn btn-primary btn-s btn-block" href="{{ url_for("strain_submission_page") }}" role="button">Submit Strains</a></p>
@@ -70,7 +70,7 @@ var icon_hover = L.icon({
 // Default click_s
 var click_s = {
   target: {
-    options: {strain: "", release: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: "", elevation: ""},
+    options: {strain: "", release: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", sampled_by: "", elevation: ""},
     setIcon: function(){},
   },
   latlng: { lat: "", lng: ""},
@@ -88,7 +88,7 @@ function set_panel_from_search(m) {
   $(".elevation").text(s.elevation);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
-  $(".isolated_by").text(s.isolated_by);
+  $(".sampled_by").text(s.sampled_by);
 }
 
 function set_panel_content(m) {
@@ -99,7 +99,7 @@ function set_panel_content(m) {
   strain = s.strain;
   loc = s.loc;
   isolation_date = s.isolation_date;
-  isolated_by = s.isolated_by;
+  sampled_by = s.sampled_by;
   comma = s.comma;
   latlng = m.latlng.lat + comma + m.latlng;
   $(".strain").text(s.strain);
@@ -111,7 +111,7 @@ function set_panel_content(m) {
   $(".elevation").text(s.elevation);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
-  $(".isolated_by").text(s.isolated_by);
+  $(".sampled_by").text(s.sampled_by);
 }
 
 function set_click_locked_content(m) {
@@ -160,7 +160,7 @@ function restore_click_locked_content(m) {
                                          landscape: d.landscape,
                                          substrate: d.substrate,
                                          comma: ",  ",
-                                         isolated_by: d.isolated_by }).addTo(map)
+                                         sampled_by: d.sampled_by }).addTo(map)
                                         .on("click", set_click_locked_content)
                                         .on('mouseover', set_panel_content)
                                         .on('mouseout', restore_click_locked_content)
