@@ -10,10 +10,18 @@ from wsgiref.simple_server import WSGIServer, WSGIRequestHandler, make_server
 import json
 import yaml
 from collections import defaultdict
+from cendr import get_ds
+from cendr.models import *
 
 from boxsdk import OAuth2, Client
 
-box_cred = json.loads(open("box.json").read())
+
+### SET ME ###
+bam_folder_id = "28886940493"
+cram_folder_id = "28886940493"
+
+ds = get_ds()
+box_cred = ds.get(ds.key("credential", 'box'))
 CLIENT_ID = box_cred["CLIENT_ID"] # Insert Box client ID here
 CLIENT_SECRET = box_cred["CLIENT_SECRET"]   # Insert Box client secret here
 
@@ -69,22 +77,24 @@ def authenticate():
 
 if __name__ == '__main__':
     client = Client(authenticate())
-    bam = client.folder(folder_id="6547362613").get_items(limit = 100000)
-    cram = client.folder(folder_id="6560143373").get_items(limit = 100000)
-    [x.create_shared_link(access = "open") for x in bam + cram]
-    files = {x["name"]:x.get_shared_link_download_url() for x in bam + cram if x.get().size > 0}
-    dict_out = {}
-    for f, link in files.items():
-        isotype = f.split(".")[0]
-        if isotype not in dict_out.keys():
-            dict_out[isotype] = {}
-            dict_out[isotype]["bam"] = ""
-            dict_out[isotype]["bam.bai"] = ""
-            dict_out[isotype]["cram"] = ""
-            dict_out[isotype]["cram.crai"] = ""
-            dict_out[isotype]["tsv"] = ""
-        dict_out[isotype][".".join(f.split(".")[1:])] = link
-    with open("static/content/data/urls.tsv", 'w') as f:
-        for i in dict_out:
-            f.write('\t'.join([i, dict_out[i]["bam"], dict_out[i]["bam.bai"], dict_out[i]["cram"], dict_out[i]["cram.crai"], dict_out[i]["tsv"]]) + "\n")
+    bam = client.folder(folder_id=bam_folder_id).get_items(limit = 100000)
+    #cram = client.folder(folder_id=cram_folder_id).get_items(limit = 100000)
+    cram = []
+    fileset = bam + cram
+    for x in fileset:
+        isotype = x['name'].split(".")[0]
+        if x.get().size > 0:
+            x.create_shared_link(access = "open")
+            if x['name'].endswith(".bam"):
+                query = strain.update(bam_file = x.get_shared_link_download_url())
+            elif x['name'].endswith(".bam.bai"):
+                query = strain.update(bam_index = x.get_shared_link_download_url())
+            elif x['name'].endswith(".cram"):
+                query = strain.update(bam_index = x.get_shared_link_download_url())
+            elif x['name'].endswith(".cram.crai"):
+                query = strain.update(cram_index = x.get_shared_link_download_url())
+
+            query = query.where(strain.isotype == isotype)
+            query.execute()
+            print(x['name'])
     os._exit(0)

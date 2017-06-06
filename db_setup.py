@@ -229,17 +229,17 @@ if "strains" in update:
     else:
         with db.atomic():
             for line in lines:
-                print(line)
                 l = {k: correct_values(k, v) for k, v in line.items()}
                 l = {k: v.encode('iso-8859-1') for k, v in l.items() if type(v) == str}
-                strain_set = "|".join(
-                    [x["strain"] for x in lines if line["isotype"] == x["isotype"]])
-                previous_names = '|'.join(
-                    [x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
-                try:
-                    s = strain.get(strain=l["strain"])
-                except:
-                    s = strain()
-                [setattr(s, k, autoconvert(v)) for k, v in l.items()]
-                print(s.isolated_by)
-                s.save()
+                if 'isotype' in l and l['isotype'] != "":
+                    strain_set = "|".join(
+                        [x["strain"] for x in lines if line["isotype"] == x["isotype"]])
+                    previous_names = '|'.join(
+                        [x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
+                    try:
+                        s = strain.get(strain=l["strain"])
+                    except:
+                        s = strain()
+                    [setattr(s, k, autoconvert(v)) for k, v in l.items()]
+                    print(l['isotype'])
+                    s.save()
