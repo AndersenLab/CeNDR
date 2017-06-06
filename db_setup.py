@@ -230,8 +230,8 @@ if "strains" in update:
         with db.atomic():
             for line in lines:
                 l = {k: correct_values(k, v) for k, v in line.items()}
-                l = {k: v.encode('iso-8859-1') for k, v in l.items() if type(v) == str}
-                if 'isotype' in l and l['isotype'] != "":
+                l.update({k: v.encode('iso-8859-1') for k, v in l.items() if type(v) == str})
+                if 'isotype' in l and l['isotype']:
                     strain_set = "|".join(
                         [x["strain"] for x in lines if line["isotype"] == x["isotype"]])
                     previous_names = '|'.join(
