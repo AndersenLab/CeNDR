@@ -76,6 +76,7 @@
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
+                        <th style='width: 20px;'>#</th>
                         <th style="width: 200px;">
                             <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
                             Reference Strain
@@ -100,6 +101,7 @@
             <tbody class="searchable">
                 {% for isotype, strains in strain_listing|groupby('isotype') %}
                 <tr>
+                        <td>{{ loop.index }}</td>
                         <td>
                             {% for s in strains %}
                                 {% if s.reference_strain %}
