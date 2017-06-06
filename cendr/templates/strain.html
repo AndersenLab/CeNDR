@@ -82,13 +82,15 @@
                             Reference Strain
                             </span></strong> 
                             <div class="strain pull-right">{{ ref_strain["strain"]}}</div><div style="clear:both;"></div></li>
+
+                <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset isotype originally released with."><strong>Release</strong></span> <div class="pull-right">{{ ref_strain['release']|format_release }}</div></li>
                 <li class="list-group-item"><strong>Isolation Date</strong> <div class="strain pull-right">{{ ref_strain["isolation_date"] }}</div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Lat/Lon</strong> <div class="lat pull-right">{{ ref_strain["latitude"] }}, {{ ref_strain["longitude"] }}</div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right">{{ ref_strain["elevation"] }} M<div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ ref_strain["location"] }}</div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Landscape</strong> <div class="location pull-right">{{ ref_strain["landscape"] }}</div><div style="clear:both;"></div></li>
                 <li class="list-group-item"><strong>Substrate</strong> <div class="location pull-right">{{ ref_strain["substrate"] }}</div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Isolated By</strong> <div class="location pull-right">{{ ref_strain["isolated_by"] }}</div><div style="clear:both;"></div></li>
+                <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ ref_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
               </ul>
         </div>
       </div>
