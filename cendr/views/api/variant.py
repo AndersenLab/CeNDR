@@ -1,5 +1,5 @@
 # NEW API
-from cendr import app, build
+from cendr import app, build, get_vcf
 from cyvcf2 import VCF
 from flask import jsonify, request, Response
 import re
@@ -80,8 +80,7 @@ def variant_api():
         samples = "N2"
     else:
         samples = ','.join(samples)
-    vcf = "http://storage.googleapis.com/elegansvariation.org/releases/{version}/WI.{version}.vcf.gz".format(
-        version=version)
+    vcf = get_vcf()
 
     chrom = query['chrom']
     start = query['start']
