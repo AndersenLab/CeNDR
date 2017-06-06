@@ -18,6 +18,7 @@ class strain(Model):
     warning_message = CharField(null=True)
     sequenced = BooleanField(index = True, null = False)
     source_lab = CharField(null=True)
+    release = IntegerField(null=False, index = True)
     latitude = FloatField(null=True)
     longitude = FloatField(null=True)
     elevation = FloatField(null=True)
@@ -61,6 +62,7 @@ class strain(Model):
 
     class Meta:
         database = db
+        db_table = 'strain_20170531'
 
 
 class report(Model):

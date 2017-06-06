@@ -19,23 +19,24 @@ current_build = 20160408
 reset_db = False
 
 # which services should be updated.
-update = ["strains"] # ["db", "gene_table", "tajima", "homologene", "strains"]
+update = ["strains"]  # ["db", "gene_table", "tajima", "homologene", "strains"]
 
 booldict = {"TRUE": True,
             "FALSE": False,
-            "NA": None, 
-            "#N/A": None, 
-            "": None, 
-            None: None, 
-            1: True, 
-            0: False, 
-            "1": True, 
+            "NA": None,
+            "#N/A": None,
+            "": None,
+            None: None,
+            1: True,
+            0: False,
+            "1": True,
             "0": False}
+
 
 def correct_values(k, v):
     if v == "NA":
         return None
-    elif k in ["set_1","set_2","set_3","set_4", "reference_strain", "set_heritability", "sequenced"]:
+    elif k in ["set_1", "set_2", "set_3", "set_4", "reference_strain", "set_heritability", "sequenced"]:
         return booldict[v]
     elif k in ["latitude", "longitude"]:
         return autoconvert(v)
@@ -46,8 +47,8 @@ table_list = [strain, report, trait, trait_value, mapping]
 if "db" in update:
     with db.atomic():
         if reset_db:
-            db.drop_tables(table_list, safe = True)
-        db.create_tables(table_list, safe = True)
+            db.drop_tables(table_list, safe=True)
+        db.create_tables(table_list, safe=True)
 
 
 ##########
@@ -56,45 +57,48 @@ if "db" in update:
 
 if "tajima" in update:
     if reset_db:
-        db.drop_tables([tajimaD], safe = True)
-        db.create_tables([tajimaD], safe = True)
+        db.drop_tables([tajimaD], safe=True)
+        db.create_tables([tajimaD], safe=True)
     with open("data/WI_{current_build}.tajima.tsv".format(current_build=current_build), 'r') as csvfile:
         reader = csv.DictReader(csvfile, delimiter='\t')
         tajima_d = []
         for index, line in enumerate(reader):
             if index > 0:
-                for k,v in line.items():
-                    if k !='CHROM' and k != 'TajimaD':
+                for k, v in line.items():
+                    if k != 'CHROM' and k != 'TajimaD':
                         line[k] = int(v)
-                line['TajimaD'] = round(float(line['TajimaD']),3)
+                line['TajimaD'] = round(float(line['TajimaD']), 3)
                 tajima_d.append(line)
 
     with db.atomic():
-      tajimaD.insert_many(tajima_d).execute()
+        tajimaD.insert_many(tajima_d).execute()
 
 
 ####################
 # Homologous Genes #
 ####################
 
-### Homologene
+# Homologene
 
 if "homologene" in update:
     # Load taxon ids
     taxon_ids = pickle.load(open("ancillary/taxon_ids.pickle", "rb"))
-    db.drop_tables([homologene], safe = True)
-    db.create_tables([homologene], safe = True)
+    db.drop_tables([homologene], safe=True)
+    db.create_tables([homologene], safe=True)
 
-    response = requests.get('http://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data')
+    response = requests.get(
+        'http://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data')
 
     elegans_set = {}
-    
-    # In this loop we add the hid (line[0]) if there's a c_elegans gene (line[1]) in the group.
+
+    # In this loop we add the hid (line[0]) if there's a c_elegans gene
+    # (line[1]) in the group.
     for line in csv.reader(response.content.splitlines(), delimiter='\t'):
         if line[1] == '6239':
             elegans_set[int(line[0])] = line[3]
 
-    fields = ['HID', 'taxon_id', 'gene_id', 'gene_symbol', 'protein_gi', 'protein_accession', 'species', 'ce_gene_name']
+    fields = ['HID', 'taxon_id', 'gene_id', 'gene_symbol',
+              'protein_gi', 'protein_accession', 'species', 'ce_gene_name']
     gene_list = []
 
     for line in csv.reader(response.content.splitlines(), delimiter='\t'):
@@ -108,21 +112,23 @@ if "homologene" in update:
     with db.atomic():
         for idx in range(0, len(gene_list), 10000):
             print idx, "homologene"
-            homologene.insert_many(gene_list[idx:idx+10000]).execute()
+            homologene.insert_many(gene_list[idx:idx + 10000]).execute()
 
     db.commit()
 
 
-### WB Orthologs
+# WB Orthologs
 
 if "wb_orthologs" in update:
-    db.drop_tables([wb_orthologs], safe = True)
-    db.create_tables([wb_orthologs], safe = True)
-    req = urllib2.Request('ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/PRJNA13758/annotation/orthologs/c_elegans.PRJNA13758.current_development.orthologs.txt')
+    db.drop_tables([wb_orthologs], safe=True)
+    db.create_tables([wb_orthologs], safe=True)
+    req = urllib2.Request(
+        'ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/PRJNA13758/annotation/orthologs/c_elegans.PRJNA13758.current_development.orthologs.txt')
     response = urllib2.urlopen(req)
     reader = csv.reader(response, delimiter='\t')
 
-    fields = ['wbid', 'ce_gene_name', 'species', 'ortholog', 'gene_symbol', 'method']
+    fields = ['wbid', 'ce_gene_name', 'species',
+              'ortholog', 'gene_symbol', 'method']
     gene_list = []
 
     for line in reader:
@@ -130,7 +136,7 @@ if "wb_orthologs" in update:
         if size_of_line < 2:
             continue
         elif size_of_line == 2:
-            wb_gene_header  = line
+            wb_gene_header = line
         else:
             new_line = wb_gene_header + line
             new_row = dict(zip(fields, new_line))
@@ -139,7 +145,7 @@ if "wb_orthologs" in update:
     with db.atomic():
         for idx in range(0, len(gene_list), 10000):
             print idx
-            wb_orthologs.insert_many(gene_list[idx:idx+10000]).execute()
+            wb_orthologs.insert_many(gene_list[idx:idx + 10000]).execute()
 
     db.commit()
 
@@ -149,11 +155,12 @@ if "wb_orthologs" in update:
 
 if "gene_table" in update:
     if reset_db:
-        db.drop_tables([wb_gene], safe = True)
-        db.create_tables([wb_gene], safe = True)
+        db.drop_tables([wb_gene], safe=True)
+        db.create_tables([wb_gene], safe=True)
     build = "WS245"
-    gff_url = "ftp://ftp.wormbase.org/pub/wormbase/releases/{build}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{build}.annotations.gff3.gz".format(build = build)
-    gff = "c_elegans.{build}.gff".format(build = build)
+    gff_url = "ftp://ftp.wormbase.org/pub/wormbase/releases/{build}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{build}.annotations.gff3.gz".format(
+        build=build)
+    gff = "c_elegans.{build}.gff".format(build=build)
 
     if not os.path.exists(gff):
         comm = """curl {gff_url} |\
@@ -163,7 +170,8 @@ if "gene_table" in update:
 
     with open(gff, 'r') as f:
         c = 0
-        wb_gene_fieldset = [x.name for x in wb_gene._meta.sorted_fields if x.name != "id"]
+        wb_gene_fieldset = [
+            x.name for x in wb_gene._meta.sorted_fields if x.name != "id"]
         gene_set = []
         with db.atomic():
             while True:
@@ -175,8 +183,9 @@ if "gene_table" in update:
                     continue
                 c += 1
                 gene = dict([x.split("=") for x in line[8].split(";")])
-                gene.update(zip(["CHROM", "start", "end"], [line[0], line[3], line[4]]))
-                gene = {k:v for k,v in gene.items() if k in wb_gene_fieldset}
+                gene.update(zip(["CHROM", "start", "end"],
+                                [line[0], line[3], line[4]]))
+                gene = {k: v for k, v in gene.items() if k in wb_gene_fieldset}
                 for i in wb_gene_fieldset:
                     if i not in gene.keys():
                         gene[i] = None
@@ -190,17 +199,17 @@ if "gene_table" in update:
 
 if "strains" in update:
     strain_info_join = requests.get(
-        "https://raw.githubusercontent.com/AndersenLab/Andersen-Lab-Strains/master/processed/strain_isotype_full.tsv")
+        "https://docs.google.com/spreadsheets/d/1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI/pub?gid=0&single=true&output=tsv")
 
-    lines = list(csv.DictReader(StringIO.StringIO(strain_info_join.text), delimiter='\t'))
+    lines = list(csv.DictReader(StringIO.StringIO(
+        strain_info_join.text), delimiter='\t'))
 
     strain_data = []
-
 
     if reset_db:
         for line in lines:
             l = {k: correct_values(k, v) for k, v in line.items()}
-            print(l) # Can't print characters when running!
+            print(l)  # Can't print characters when running!
             if l["isotype"] != "":
                 strain_data.append(l)
 
@@ -219,14 +228,16 @@ if "strains" in update:
     else:
         with db.atomic():
             for line in lines:
+                print(line)
                 l = {k: correct_values(k, v) for k, v in line.items()}
-                strain_set = "|".join([x["strain"] for x in lines if line["isotype"] == x["isotype"]])
-                previous_names = '|'.join([x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
+                l = {k: v.encode("UTF-8") for k, v in l.items() if type(v) == str}
+                strain_set = "|".join(
+                    [x["strain"] for x in lines if line["isotype"] == x["isotype"]])
+                previous_names = '|'.join(
+                    [x["previous_names"] for x in lines if line["isotype"] == x["isotype"]])
                 try:
-                    s = strain.get(strain = l["strain"])
+                    s = strain.get(strain=l["strain"])
                 except:
                     s = strain()
                 [setattr(s, k, autoconvert(v)) for k, v in l.items()]
                 s.save()
-
-
