@@ -131,6 +131,7 @@ else:
 
 version = [x for x in yaml.load(open(".travis.yml", 'r').read())['before_install'] if 'VERSION' in x][0].split("=")[1]
 app.config['version'] = version.split(".")[0].replace("-",".").replace("version.","")
+app.config["TEMPLATE_AUTO_RELOAD"] = True
 api = Api(app)
 build = "20170531"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
@@ -191,7 +192,6 @@ def comma_filter(value):
 
 @app.template_filter('format_release')
 def format_release_filter(value):
-    print(value)
     return datetime.strptime(str(value), '%Y%m%d').strftime('%Y-%m-%d')
 
 from task import *

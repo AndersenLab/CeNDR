@@ -13,11 +13,11 @@ from flask import render_template
 @app.route('/data/<string:release>')
 @cache.memoize(50)
 def data_page(release = releases[0]):
+    from cendr import releases
     bcs = OrderedDict([("Data", None)])
     title = "Data"
-    from cendr import build
     strain_listing = strain.select().filter(
-        strain.isotype != None).order_by(strain.isotype).execute()
+        strain.isotype != None, strain.release <= release).order_by(strain.isotype).execute()
     return render_template('data.html', **locals())
 
 

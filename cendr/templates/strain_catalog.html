@@ -119,6 +119,7 @@
             <table class="table table-hover table-striped">
                 <thead>
                     <tr>
+                        <th style="width: 20px;">#</th>
                         <th style="width: 20px;">
                             <input type="checkbox" id="checkAll" />
                         </th>
@@ -145,6 +146,7 @@
                 <tbody class="searchable">
                     {% for isotype, strains in strain_listing|groupby('isotype') %}
                     <tr>
+                        <td>{{ loop.index }}</td>
                         <td>
                             <input type="checkbox" name="item" id="{{ isotype }}" value="{{ isotype }}" info="{{ isotype + " " + strains|join(" ") }}" class="ind_strain" />
                         </td>

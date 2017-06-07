@@ -12,6 +12,32 @@
 {% block content %}
 <div class="row">
     <div class="col-md-12">
+        <ul class="nav nav-pills">
+            <h3>Releases</h3>
+            {% for rel in releases %}
+            <li {% if rel == release %}class="active"{% endif %}><a href="{{ url_for('data_page', release = rel) }}">{{ rel }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<hr />
+<div>
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#summary" role="tab" data-toggle="tab">VCF Summary</a></li>
+    <li role="presentation"><a href="#phylogeny" role="tab" data-toggle="tab">Phylogeny</a></li>
+    <li role="presentation"><a href="#download" role="tab" data-toggle="tab">Download</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="summary">Variant Summary</div>
+    <div role="tabpanel" class="tab-pane" id="phylogeny">Phylogeny</div>
+    <div role="tabpanel" class="tab-pane" id="download">
+
+
+<div class="row">
+    <div class="col-md-12">
         <div class="row">
 
         <div class="col-md-4">
@@ -41,8 +67,8 @@
 
             <h4>VCF</h4>
             <p>The file below is a single <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> containing SNVs for all wild isolates.</p>
-            <p><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
-            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz">WI.{{ build }}.snpeff.vcf.gz</a></strong></p>
+            <p><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
+            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz">WI.{{ release }}.vcf.gz</a></strong></p>
 
             <div style = "clear:both;"></div>
           
@@ -131,7 +157,7 @@
                         {% endif %}
 
                           <td>
-                      <a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/tsv/WI.{{ isotype }}.{{ build }}.tsv">WI.{{ isotype }}.{{ build }}.tsv</a>
+                      <a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ release }}/tsv/WI.{{ isotype }}.{{ release }}.tsv">WI.{{ isotype }}.{{ release }}.tsv</a>
                       </td>
 
                     </td>
@@ -141,6 +167,12 @@
         </table>
     </div>
 </div>
+
+</div>{# Download content #}
+  </div>{# /Download Tab #}
+
+
+</div>{# Tab Set #}
 
 
 <!-- VCF Modal Example -->
@@ -158,18 +190,18 @@
 
         <strong>Query a the first 10kb on chromosome II</strong>
 <pre>
-bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz II:1-10000
+bcftools view http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:1-10000
 </pre>
 
 <strong>Output a tab-delimited file of genotypes</strong>
 <pre>
-bcftools view http://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz II:1-10000 | \
+bcftools view http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:1-10000 | \
 bcftools query --print-header -f '%CHROM\t%POS\t[%TGT\t]\n'
 </pre>
 
 <strong>Look for deleterious variants within a region in CB4856.</strong>
 <pre>
-bcftools view --samples CB4856 http://storage.googleapis.com/andersen_dist/vcf/all/{{ build }}/WI.{{ build }}.snpeff.vcf.gz II:804000-807000 | \
+bcftools view --samples CB4856 http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:804000-807000 | \
 egrep '^#|HIGH' -  | \
 egrep '^#|1\/1' -  | \
 bcftools query -f '%CHROM\t%POS\t[%TGT\t%GT\t]%ANN\n' -
