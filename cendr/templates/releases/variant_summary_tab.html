@@ -1,0 +1,46 @@
+<br />
+<br />
+
+<p>The following statistics were generated with <code>bcftools stats</code>. The soft-filtered VCF for this release has had records and genotypes annotated but no data has been removed. The hard-filtered VCF removes records and genotypes that have been annotated with filters.</p>
+
+<p>The hard-filtered VCF has stripped records and genotypes that have had filters applied.</p>
+{% set vcf = 'hard-filtered' %}
+
+<table id='variant_summary_table' class='table table-hover table-condensed'>
+<thead>
+    <tr>
+        <th>Variable</th>
+        <th style='text-align: right;'>Soft-Filtered</th>
+        <th style='text-align: right;'>Hard-Filtered</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td><strong>Samples</strong></td>
+        <td>{{ vcf_summary['soft-filtered']['number_of_samples']|int  }}</td>
+        <td>{{ vcf_summary['hard-filtered']['number_of_samples']|int  }}</td>
+    </tr>
+    <tr>
+        <td><strong>SNVs</strong></td>
+        <td style='text-align:right;'>{{ vcf_summary['soft-filtered']['number_of_SNPs']|int|comma  }}</td>
+        <td style='text-align:right;'>{{ vcf_summary['hard-filtered']['number_of_SNPs']|int|comma  }}</td>
+    </tr>
+    <tr>
+        <td><strong>Ts</strong></td>
+        <td>{{ vcf_summary['soft-filtered']['ts']|int|comma  }}</td>
+        <td>{{ vcf_summary['hard-filtered']['ts']|int|comma  }}</td>
+    </tr>
+    <tr>
+        <td><strong>Tv</strong></td>
+        <td>{{ vcf_summary['soft-filtered']['tv']|int|comma  }}</td>
+        <td>{{ vcf_summary['hard-filtered']['tv']|int|comma  }}</td>
+    </tr>
+    <tr>
+        <td><strong>Ts/Tv</strong></td>
+        <td>{{ vcf_summary['soft-filtered']['tstv']  }}</td>
+        <td>{{ vcf_summary['hard-filtered']['tstv']  }}</td>
+    </tr>
+
+</tbody>
+</table>
+

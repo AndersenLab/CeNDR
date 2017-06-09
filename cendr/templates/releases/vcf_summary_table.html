@@ -1,0 +1,29 @@
+<table class='table table-hover table-condensed'>
+<tbody>
+    <tr>
+        <td><strong>Samples</strong></td>
+        <td>{{ vcf_summary[vcf]['number_of_samples']|int  }}</td>
+    </tr>
+    <tr>
+        <td><strong>SNVs</strong></td>
+        <td style='text-align:right;'>{{ vcf_summary[vcf]['number_of_SNPs']|int|comma  }}</td>
+    </tr>
+    <tr>
+        <td><strong>Ts/Tv</strong></td>
+        <td style='text-align:right;'>{{ vcf_summary[vcf]['number_of_multiallelic_sites']|int|comma  }}</td>
+    </tr>
+    <tr>
+        <td><strong>Ts/Tv</strong></td>
+        <td>{{ vcf_summary[vcf]['ts']|int|comma  }}</td>
+    </tr>
+    <tr>
+        <td><strong>Ts/Tv</strong></td>
+        <td>{{ vcf_summary[vcf]['tv']|int|comma  }}</td>
+    </tr>
+    <tr>
+        <td><strong>Ts/Tv</strong></td>
+        <td>{{ vcf_summary[vcf]['tstv']  }}</td>
+    </tr>
+
+</tbody>
+</table>

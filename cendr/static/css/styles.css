@@ -1,6 +1,10 @@
 /* @override 
   http://localhost:4000/assets/css/styles.css */
 
+#variant_summary_table tr td:nth-child(2), #variant_summary_table tr td:nth-child(3) {
+  text-align: right;
+}
+
 .col-list { 
     display: block;
     width: 25%;

@@ -22,197 +22,37 @@
 </div>
 <hr />
 <div>
+
+<div class="row">
+    <div class="col-md-12">
+        
+
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#summary" role="tab" data-toggle="tab">VCF Summary</a></li>
+    <li role="presentation" class="active"><a href="#download" role="tab" data-toggle="tab">Download</a></li>
+    <li role="presentation"><a href="#summary" role="tab" data-toggle="tab">VCF Summary</a></li>
     <li role="presentation"><a href="#phylogeny" role="tab" data-toggle="tab">Phylogeny</a></li>
-    <li role="presentation"><a href="#download" role="tab" data-toggle="tab">Download</a></li>
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="summary">Variant Summary</div>
-    <div role="tabpanel" class="tab-pane" id="phylogeny">Phylogeny</div>
-    <div role="tabpanel" class="tab-pane" id="download">
 
-
-<div class="row">
-    <div class="col-md-12">
-        <div class="row">
-
-        <div class="col-md-4">
-            <h3>Alignment Data</h3>
-            <p>We aligned all wild isolate genomes to the WS245 version of the N2 genome. These data are stored using the <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> and <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> formats. <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> files are substantially smaller than <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> files.</p>
-
-            <p><a href="http://biobits.org/samtools_primer.html"  target="_blank">Learn about alignment data here</a>.</p>
-
-            <p>CRAM files are substantially smaller than BAM files, but require the reference to be converted to BAM files. We are currently using WS245 (<strong><a href="https://northwestern.box.com/shared/static/ijlhhd1hwlbr5vvasjg35yjux1p5n01g.gz">Download</a></strong>).
-
-        <h4>Downloading All Alignment Data</h4>
-            <p>Interested in downloading everything? Use the scripts below! Before these scripts will work, you need to download and install <strong>wget</strong>. We recommend using <a href="http://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for("help_item",filename="FAQ")}}">FAQ</a> for details on installing <strong>wget</strong>. </p>
-            <ul>
-                <li><a href="{{ url_for("download_script", filetype="bam") }}">Download BAMs</a></li>
-                <li><a href="{{ url_for("download_script", filetype="cram") }}">Download CRAMs</a></li>
-            </ul>
-            </p>
-
-        </div>
-
-
-        <div class="col-md-4">
-            <h3>Variant Data</h3>
-            <p>We used samtools to identify single-nucleotide variant  (SNV) sites as compared to the N2 reference genome (WS245). Variant data are provided as <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> or tab-delimited files.</p>
-
-            <p><a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat" >Learn more about VCF files here</a>.</p>
-
-            <h4>VCF</h4>
-            <p>The file below is a single <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> containing SNVs for all wild isolates.</p>
-            <p><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
-            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz">WI.{{ release }}.vcf.gz</a></strong></p>
-
-            <div style = "clear:both;"></div>
-          
-            <p>You can also access specific regions of <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> files (rather then the entire file) from the command line: <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
-              See Example
-            </button></p>
-
-            <h4>Methods</h4>
-            <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('help_item', filename = "Methods") }}">here</a>.
-
-        </div>
-        </br>
-        <div class="col-md-4">
-                 <div class="panel panel-default">
-                        <div class="panel-heading">Strain Data</div>
-                        <div class="panel-body">
-                            Strain Data including isolation location, isotype information, and more is available for download.<br /><br />
-                            <a href="{{ url_for('strain_metadata') }}" type="button" class="btn btn-default btn-block btn-success">Download Strain Data</a>
-                        </div>
-                    </div>
-
-            <h4>Included Variants</h4>
-            <p>Currently, we have performed variant calling across all wild isolates. We are working to add additional variant classes including insertion/deletion, structural, transposon, and additional variant classes.</p>
-            <h4>Transposon Data</h4>
-            <p>We have recently performed an anaysis characterizing Transposon variation in <em>C. elegans</em>. The dataset will be further integrated with the site resources as time goes on. For now, the raw data are available below.</p>
-            <a href="https://storage.googleapis.com/andersenlab.org/publications/2017Laricchia/tes_cender.bed" type="button" class="btn btn-default btn-block btn-success">Download Transposon Data</a>
-        </div>
-        </div>
-        <hr />
-        <input id="filter" type="text" class="form-control pull-right" style = "width:200px;" placeholder="Enter Strain Name" action="#">
-        <table class="table table-hover table-striped">
-            <thead>
-                <tr>
-                        <th style='width: 20px;'>#</th>
-                        <th style="width: 200px;">
-                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
-                            Reference Strain
-                            </span>
-                        </th>
-                        <th style="width: 200px;">
-                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
-                            Isotype
-                            </span>
-                        </th>
-                        <th style="width: 200px;">
-                        <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Individually isolated strains; If strains are assigned to the same isotype they are > 99.93% genetically identical">
-                        Strains
-                        </span></th>
-                    </th>
-                    <th style="width: 200px;">BAM</th>
-                    <th style="width: 200px;">CRAM</th>
-                    <th>Tab-delimited variants</th>
-                </tr>
-            </thead>
-            <div style="height: 30px;" ></div>
-            <tbody class="searchable">
-                {% for isotype, strains in strain_listing|groupby('isotype') %}
-                <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>
-                            {% for s in strains %}
-                                {% if s.reference_strain %}
-                                    <strong>
-                                    {{ s }}
-                                    </strong>
-                                {% endif %}
-                            {% endfor %}
-                        </td>
-
-                    <td><a href="{{ url_for('isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-                    <td>{% for s in strains %}
-                                {{ s }}
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% if strains[0].bam_file %}
-                            <a href="{{ strains[0].bam_file }}">{{ isotype }}.bam</a>
-                            <strong>/</strong> <a href="{{ strains[0].bam_index }}">.bai</a> 
-                        {% endif %}
-                    </td>
-                    <td>
-
-                        {% if strains[0].cram_file %}
-                            <a href="{{ strains[0].cram_file }}">{{ isotype }}.cram</a>
-                            <strong>/</strong> <a href="{{ strains[0].cram_index }}">.crai</a> 
-                        {% endif %}
-
-                          <td>
-                      <a href="https://storage.googleapis.com/andersen_dist/vcf/all/{{ release }}/tsv/WI.{{ isotype }}.{{ release }}.tsv">WI.{{ isotype }}.{{ release }}.tsv</a>
-                      </td>
-
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div role="tabpanel" class="tab-pane active" id="download">
+        {% include('releases/download_tab.html') %}
     </div>
-</div>
+    <div role="tabpanel" class="tab-pane" id="summary">
+        {% include('releases/variant_summary_tab.html') %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="phylogeny">Phylogeny</div>
 
-</div>{# Download content #}
-  </div>{# /Download Tab #}
-
-
+        
 </div>{# Tab Set #}
 
-
-<!-- VCF Modal Example -->
-
-<div id="cli_example" class="modal fade" style="z-index:1000000" tabindex="-1" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Fetching variant data from the command line</h4>
-      </div>
-      <div class="modal-body">
-        <p>Variant data can be fetched remotely using <strong>bcftools</strong> version 1.2+. If you don't have bcftools installed, you can learn how to install it <a href="https://github.com/samtools/bcftools/wiki/HOWTOs" target="_blank">here</a>.</p>
-        <p><strong>bcftools</strong> will download the index file and use it to fetch the specified region. Below are some examples.</p>
-
-        <strong>Query a the first 10kb on chromosome II</strong>
-<pre>
-bcftools view http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:1-10000
-</pre>
-
-<strong>Output a tab-delimited file of genotypes</strong>
-<pre>
-bcftools view http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:1-10000 | \
-bcftools query --print-header -f '%CHROM\t%POS\t[%TGT\t]\n'
-</pre>
-
-<strong>Look for deleterious variants within a region in CB4856.</strong>
-<pre>
-bcftools view --samples CB4856 http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:804000-807000 | \
-egrep '^#|HIGH' -  | \
-egrep '^#|1\/1' -  | \
-bcftools query -f '%CHROM\t%POS\t[%TGT\t%GT\t]%ANN\n' -
-</pre>
+    </div>{# Download content #}
+</div>{# /Download Tab #}
 
 
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
+{% include('releases/vcf_modal.html') %}
 
 
 {% endblock %} 

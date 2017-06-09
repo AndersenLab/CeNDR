@@ -17,6 +17,7 @@ import requests
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
 
 

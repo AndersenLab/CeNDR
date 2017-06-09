@@ -1,6 +1,7 @@
 from cendr import app, cache, releases
 from cendr import api
 from flask import make_response, Response
+import requests
 from cendr.models import strain, report, homologene, mapping, trait
 from cendr.views.api.correlation import get_correlated_genes
 from collections import OrderedDict
@@ -18,6 +19,9 @@ def data_page(release = releases[0]):
     title = "Data"
     strain_listing = strain.select().filter(
         strain.isotype != None, strain.release <= release).order_by(strain.isotype).execute()
+    # Fetch variant data
+    url = "https://storage.googleapis.com/elegansvariation.org/releases/{release}/multiqc_bcftools_stats.json".format(release=release)
+    vcf_summary = requests.get(url).json()
     return render_template('data.html', **locals())
 
 

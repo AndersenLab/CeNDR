@@ -1,0 +1,32 @@
+<!-- VCF Modal Example -->
+<div id="cli_example" class="modal fade" style="z-index:1000000" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Fetching variant data from the command line</h4>
+            </div>
+            <div class="modal-body">
+                <p>Variant data can be fetched remotely using <strong>bcftools</strong> version 1.2+. If you don't have bcftools installed, you can learn how to install it <a href="https://github.com/samtools/bcftools/wiki/HOWTOs" target="_blank">here</a>.</p>
+                <p><strong>bcftools</strong> will download the index file and use it to fetch the specified region. Below are some examples.</p>
+                <strong>Query a the first 10kb on chromosome II</strong>
+                <pre>
+bcftools view http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:1-10000
+</pre>
+                <strong>Output a tab-delimited file of genotypes</strong>
+                <pre>
+bcftools view http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:1-10000 | \
+bcftools query --print-header -f '%CHROM\t%POS\t[%TGT\t]\n'
+</pre>
+                <strong>Look for deleterious variants within a region in CB4856.</strong>
+<pre>
+bcftools view --samples CB4856 http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:804000-807000 | \
+egrep '^#|HIGH' -  | \
+egrep '^#|1\/1' -  | \
+bcftools query -f '%CHROM\t%POS\t[%TGT\t%GT\t]%ANN\n' -
+</pre>
+
+            </div>{# modal body #}
+        </div>{# modal content #}
+    </div>{# modal dialog #}
+</div>{# modal #}
