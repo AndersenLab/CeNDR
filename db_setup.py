@@ -9,9 +9,19 @@ import sys
 reload(sys)
 import urllib2
 from gcloud import datastore
-ds = datastore.Client(project="andersen-lab")
 sys.setdefaultencoding('utf-8')
 from cendr.models import *
+from cendr import get_ds
+
+ds = get_ds()
+
+elevation_api = ds.get(ds.key('credential','elevation'))['apiKey']
+def fetch_elevation(lat, lng):
+    global elevation_api
+    query = "https://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lng}&{elevation_api}"
+    result = requests.get(query.format(lat=lat, lng=lng, elevation_api=elevation_api)).json()
+    return requests.get(query.format(lat=lat, lng=lng, elevation_api=elevation_api)).json()['results'][0]['elevation']
+
 
 #=======#
 # Setup #
@@ -231,6 +241,11 @@ if "strains" in update:
             for line in lines:
                 l = {k: correct_values(k, v) for k, v in line.items()}
                 l.update({k: v.encode('iso-8859-1') for k, v in l.items() if type(v) == str})
+
+                # fetch elevation
+                if l['latitude'] not in ["NA", "", None, "None"]:
+                    l['elevation'] = fetch_elevation(l['latitude'], l['longitude'])
+
                 if 'isotype' in l and l['isotype']:
                     strain_set = "|".join(
                         [x["strain"] for x in lines if line["isotype"] == x["isotype"]])
