@@ -42,7 +42,8 @@ def download_script(filetype):
 def browser(region = "III:11746923-11750250", tracks="mh", query = None):
     bcs = OrderedDict([("Data", "/data"), ("Browser", None)])
     title = "Browser" 
-    from cendr import build
+    from cendr import releases
+    build = releases[0]
     
     isotype_listing = list(strain.select(strain.isotype).distinct().filter(
                                     strain.isotype != None).order_by(strain.isotype).dicts().execute())
