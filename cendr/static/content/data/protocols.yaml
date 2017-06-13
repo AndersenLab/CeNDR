@@ -17,10 +17,3 @@ Maintenance:
 
   - name: Chunking Worms
     link: content/protocols/ChunkingWorms.pdf
-
-Nematode Isolation:
-  - name: Isolating Wild Isolates
-    link: content/protocols/IsolatingWildIsolates.pdf
-
-  - name: Shipping Strains
-    link: content/protocols/ShippingStrains.pdf
