@@ -186,7 +186,7 @@ class WI(Model):
 
     class Meta:
         database = db
-        db_table = "WI_20160408c"
+        db_table = "WI_20170531"
         indexes = (
             (('CHROM', 'POS', 'variant','FILTER', 'feature_id', 'annotation','gene_id', 'gene_name', 'putative_impact'), False),
             )
