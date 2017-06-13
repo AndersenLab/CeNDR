@@ -1,13 +1,15 @@
 
 from flask_restful import Resource
 from cendr.models import wb_gene, WI
-from cendr import api
-from cendr import cache
+from cendr.models import interval_summary_cache as isc
+from cendr import api, cache, releases, app
 from peewee import *
 from collections import OrderedDict
 from collections import Counter
 from collections import defaultdict
 from flask import jsonify
+import json
+
 
 # Genes
 @cache.memoize(timeout=500)
@@ -44,7 +46,7 @@ api.add_resource(
 
 # Variants
 @cache.memoize(timeout=500)
-def get_variant_count(chrom, start, end, filter=True):
+def get_variant_count(chrom, start, end, filter=True, release=releases[0]):
     """
         Return the number of variants within an interval
     """
@@ -134,7 +136,7 @@ def get_gene_w_impact(chrom, start, end):
 
 
 @cache.memoize(timeout=500)
-def variant_interval_summary(chrom, start, end):
+def variant_interval_summary(chrom, start, end, release = releases[0]):
     r = {}
     r["chrom"] = chrom
     r["start"] = start
@@ -149,12 +151,15 @@ def variant_interval_summary(chrom, start, end):
     return r
 
 
-class get_interval_summary(Resource):
-    def get(self, chrom, start, end):
-        interval = variant_interval_summary(chrom, start, end)
-        return jsonify(interval)
+@app.route('/api/interval/<string:chrom>/<int:start>/<int:end>')
+def get_interval_summary(chrom, start, end, release = releases[0]):
+    interval = "{chrom}:{start}-{end}".format(**locals())
+    cache_isc = list(isc.filter(isc.interval == interval, isc.release == release ).dicts().execute())
 
-
-api.add_resource(get_interval_summary,
-                 '/api/interval/<string:chrom>/<int:start>/<int:end>')
+    if len(cache_isc) > 0:
+        return jsonify(json.loads(cache_isc[0]['summary']))
+    else:
+        summary = variant_interval_summary(chrom, start, end)
+        isc(interval = interval, release = release, summary = json.dumps(summary)).save()
+    return jsonify(summary)
 

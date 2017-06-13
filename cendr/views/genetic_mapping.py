@@ -21,7 +21,7 @@ from gcloud import storage
 import os
 import time
 from collections import Counter
-
+import requests
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
@@ -292,15 +292,17 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     t = trait.get(report = r, trait_slug = trait_slug)
 
     # phenotype data
-    phenotype_data = list(trait_value.select(strain.strain, trait_value.value)
-            .join(trait)
-            .join(report)
-            .switch(trait_value)
-            .join(strain)
-            .where(report.report_slug == r.report_slug)
-            .where(trait.trait_slug == t.trait_slug)
-            .dicts()
-            .execute())
+    #phenotype_data = list(trait_value.select(strain.strain, trait_value.value)
+    #        .join(trait)
+    #        .join(report)
+    #        .switch(trait_value)
+    #        .join(strain)
+    #        .where(report.report_slug == r.report_slug)
+    #        .where(trait.trait_slug == t.trait_slug)
+    #        .dicts()
+    #        .execute())
+    phenotype_data = map(autoconvert, [x.split('\t')[2] for x in requests.get('https://storage.googleapis.com/cendr/{report_slug}/{trait_slug}/tables/phenotype.tsv'.format(**locals())).text.splitlines()[1:]])
+    print(phenotype_data)
 
     if rerun == "rerun":
         t.status = "queue"

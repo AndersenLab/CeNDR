@@ -1,10 +1,8 @@
 # NEW API
-from cendr import app, build, get_vcf
+from cendr import app, get_vcf
 from cyvcf2 import VCF
 from flask import jsonify, request, Response
 import re
-import sys
-from cendr.models import wb_gene
 from cendr.views.api.gene import gene_search
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
@@ -64,6 +62,7 @@ ann_cols = ['allele',
             'protein_position',
             'distance_to_feature']
 
+
 @app.route('/api/variant', methods=["GET", "POST"])
 def variant_api():
     query = request.args
@@ -74,7 +73,6 @@ def variant_api():
              'sample_tracks': query['sample_tracks'].split("_"),
              'output': query['output']}
     app.logger.info(query)
-    version = request.args.get('version') or  build
     samples = query['sample_tracks']
     if not samples[0]:
         samples = "N2"

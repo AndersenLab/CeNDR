@@ -114,6 +114,16 @@ class trait_value(Model):
         database = db
 
 
+
+class interval_summary_cache(Model):
+    interval = CharField(index = True)
+    summary = TextField()
+    release = IntegerField(index = True)
+
+    class Meta:
+        database = db
+
+
 class mapping(Model):
     """ Results of mappings. Unique on peak IDs and markers. """
     chrom = CharField(index = True)

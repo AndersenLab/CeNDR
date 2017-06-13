@@ -109,6 +109,11 @@
       <li><strong><a href='{{ url_for('interval_download', report_slug = report_slug, trait_slug = trait_slug) }}'>Variant Correlation</a></strong></li>
       {% endif %}
 
+      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ report_data[0].version }}/cegwas/snps.Rda'>Mapping SNVs</a></strong></li>
+
+      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ report_data[0].version }}/cegwas/kinship.Rda'>Kinship Matrix</a></strong></li>
+
+
     </ul>
     </div>
     <div class='col-md-6'>
@@ -159,21 +164,13 @@
 <div id ="vis"></div>
 
 <script>
-var phenotypeJSON = {{ phenotype_data|tojson}};
-var phenotypeValues = Array();
-for (var i=0; i < phenotypeJSON.length; i++) {
-  phenotypeValues.push(phenotypeJSON[i].value);
-}
+var phenotype_data = {{ phenotype_data|tojson}};
+
 var phenotype_histogram = [
   {
-    x: phenotypeValues,
+    x: phenotype_data,
     type: 'histogram',
-    autobinx: false,
-    xbins: {
-      size: 1,
-      start: 0,
-      end: Math.max(...phenotypeValues) + 1
-    },
+    autobinx: true,
     marker: {
       color: 'rgb(66,139,202)',  
     },

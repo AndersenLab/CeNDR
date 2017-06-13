@@ -21,7 +21,8 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
 
 
-releases = ["20170531", "20160408"]
+releases = ["20170531",
+            "20160408"]
 
 
 def get_vcf(release = releases[0]):
@@ -134,7 +135,6 @@ version = [x for x in yaml.load(open(".travis.yml", 'r').read())['before_install
 app.config['version'] = version.split(".")[0].replace("-",".").replace("version.","")
 app.config["TEMPLATE_AUTO_RELOAD"] = True
 api = Api(app)
-build = "20170531"
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
