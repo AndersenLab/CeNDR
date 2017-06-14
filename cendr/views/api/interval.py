@@ -152,9 +152,9 @@ def variant_interval_summary(chrom, start, end, release = releases[0]):
 
 
 @app.route('/api/interval/<string:chrom>/<int:start>/<int:end>')
-def get_interval_summary(chrom, start, end, release = releases[0]):
+def get_interval_summary(chrom, start, end, release=releases[0]):
     interval = "{chrom}:{start}-{end}".format(**locals())
-    cache_isc = list(isc.filter(isc.interval == interval, isc.release == release ).dicts().execute())
+    cache_isc = list(isc.filter(isc.interval == interval, isc.release == release).dicts().execute())
 
     if len(cache_isc) > 0:
         return jsonify(json.loads(cache_isc[0]['summary']))
