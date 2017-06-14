@@ -34,6 +34,7 @@ def run_command(command, l):
         l.log_text(e, severity = "Info")
         return e
 
+
 def fetch_metadata(key, sub = 'attributes/'):
     metadata_server = "http://metadata.google.internal/computeMetadata/v1/instance/" + sub
     metadata_flavor = {'Metadata-Flavor' : 'Google'}
@@ -121,7 +122,7 @@ def run_pipeline():
                                     BF = row["BF"],
                                     interval_start = row["startPOS"],
                                     interval_end = row["endPOS"],
-                                    version = "0.1",
+                                    version = release,
                                     reference = "WS245").save()
 
         # Refresh mysql connection

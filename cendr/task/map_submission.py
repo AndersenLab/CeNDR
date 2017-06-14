@@ -1,4 +1,4 @@
-from cendr import app
+from cendr import app, releases
 from cendr.models import *
 from flask import request, abort
 import string
@@ -75,10 +75,12 @@ def create_mapping_instance(gce_name, params):
         body=config).execute()
     return instance
 
+
 def instance_count():
     instances = compute.instances().list(project='andersen-lab', zone = 'us-central1-a').execute()['items']
     mapping_instances = [x['name'] for x in instances if x['name'].startswith("cendr")]
     return len(mapping_instances)
+
 
 @app.route("/cronmapping")
 def launch_mapping(verify_request = True):

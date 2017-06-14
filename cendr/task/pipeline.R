@@ -31,7 +31,7 @@ update_status <- function(status) {
   try(invisible(dbDisconnect(db$con)), silent = T)
 }
 
-report_trait_strain_tbl <- tbl(db, "report_trait_strain_value")
+report_trait_strain_tbl <- tbl(db, "report_trait_strain_value_20170531")
 
 # Then reference a tbl within that src
 input_trait <- collect(report_trait_strain_tbl %>%
