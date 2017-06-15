@@ -4,16 +4,13 @@ from gcloud import datastore
 current_build = 20160408
 
 try:
-    from cendr import get_db
-    db = get_db()
+    from cendr import db
 except:
     from playhouse.pool import PooledMySQLDatabase
     ds = datastore.Client(project="andersen-lab")
     dbname = "cegwas_v2"
     credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
-    def get_db():
-        return PooledMySQLDatabase(dbname, stale_timeout=300, **credentials)
-    db = get_db()
+    db = PooledMySQLDatabase(dbname, stale_timeout=300, **credentials)
 
 
 class strain(Model):

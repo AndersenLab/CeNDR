@@ -51,22 +51,20 @@ def get_google_sheet():
 
 ds = get_ds()
 
-
 credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
 
-def get_db():
-    return PooledMySQLDatabase(dbname, stale_timeout=300, **credentials)
-
-db = get_db()
+db = PooledMySQLDatabase(dbname, stale_timeout=300, **credentials)
 
 @app.before_request
-def db_connect():
-    g.db =  get_db()
-    g.db.connect()
+def connect_db():
+    if db.is_closed():
+        db.connect()
+
 
 @app.teardown_request
 def db_disconnect(exception):
-    if hasattr(g, 'db'): g.db.close()
+    if not db.is_closed():
+        db.close()
 
 
 biotypes = {

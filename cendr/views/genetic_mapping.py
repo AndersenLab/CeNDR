@@ -114,7 +114,7 @@ def process_gwa():
     data = req["trait_data"]
     del req["trait_data"]
     req["release"] = release_dict[req["release"]]
-    req["version"] = 1
+    req["version"] = 20170531
     trait_names = data[0][1:]
     strain_set = []
     trait_keep = []
@@ -146,11 +146,13 @@ def process_gwa():
         for col, t in enumerate(trait_set):
             for row, s in enumerate(strain_set):
                 if t and s and is_number(data[1:][row][col + 1]):
+                    val =  autoconvert(data[1:][row][col + 1])
+                    print(s)
+                    trait_value(trait = t, strain = s, value = val).save()
                     trait_data.append({"trait": t,
                                        "strain": s,
-                                       "value": autoconvert(data[1:][row][col + 1])})
-
-        trait_value.insert_many(trait_data).execute()
+                                       "value": val})
+        #trait_value.insert_many(trait_data).execute()
     for t in trait_keep:
         req["trait_name"] = t
         req["trait_slug"] = slugify(t)
