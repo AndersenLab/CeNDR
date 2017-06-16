@@ -56,15 +56,13 @@ credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
 db = PooledMySQLDatabase(dbname, max_connections=32, stale_timeout=300, **credentials)
 
 @app.before_request
-def connect_db():
-    if db.is_closed():
-        db.connect()
+def tearup():
+    db.connect()
 
 
 @app.teardown_request
-def db_disconnect(exception):
-    if not db.is_closed():
-        db.close()
+def teardown(exception):
+    db.close()
 
 
 biotypes = {
