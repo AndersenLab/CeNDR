@@ -54,27 +54,17 @@ ds = get_ds()
 
 credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
 
-db = PooledMySQLDatabase(dbname, max_connections=32, stale_timeout=300, **credentials)
-
+db = MySQLDatabase(dbname, **credentials)
 
 @app.before_request
-def tearup():
-    tries = 10
-    pause = 0.05
-    for t in xrange(tries):
-        try:
-            db.connect()
-            return
-        except ValueError:
-            # no connection in pool
-            if t + 1 == tries:
-                raise
-            time.sleep(pause)
+def _db_connect():
+    db.connect()
 
 
 @app.teardown_request
-def teardown(exception):
-    db.close()
+def _db_close(exc):
+    if not db.is_closed():
+        db.close()
 
 
 biotypes = {
