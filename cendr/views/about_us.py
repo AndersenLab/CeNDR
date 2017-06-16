@@ -33,6 +33,19 @@ def about():
     return render_template('about.html', **locals())
 
 
+@app.route('/getting_started/')
+@cache.cached()
+def getting_started():
+    # About us Page - directs to other pages.
+    title = "Getting Started"
+    bcs = OrderedDict([("About", url_for("about")), ("Getting Started", "")])
+    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
+        .filter(strain.latitude.is_null() == False).execute())
+    strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
+    return render_template('getting_started.html', **locals())
+
+
+
 
 @app.route('/about/panel/')
 @cache.cached()
