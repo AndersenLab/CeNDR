@@ -1,0 +1,119 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+  <link rel="stylesheet" href="/static/css/leaflet.css" />
+  <link rel="stylesheet" href="/static/css/leaflet-search.css" />
+  <script src="/static/js/leaflet.js"></script>
+  <script src="/static/js/leaflet-search.js"></script>
+{% endblock %}
+
+
+{% block content %}
+
+  <div class="row">
+
+  <div class="col-md-12">
+
+<h2>Measure the twelve divergent wild strains in your trait of interest</h2>
+
+<div class='row'>
+<div class='col-md-6 col-sm-6'>
+<p>For researchers with <em>C. elegans</em> experience, we recommend starting with the divergent set of twelve wild isolates. These strains should be assayed in your favorite trait(s) of interest in replicates that sample across independent NGM growth plates, bleaches or strain preparations, days, and food preparations. In this way, you can model how much of the trait variation is from strain differences rather than experimental differences. This step is key to have a successful project. An example for how to calculate this variability can be found here (link to Andersen G3). Your likelihood of success depends (in part) on an assay with the lowest variation from experimental conditions as possible. As any geneticist knows, it's all about the trait! We recommend optimizing the trait for scale (tens to hundreds of strains per assay) and decreased experimental variability. If the trait variation from strain is greater than 20% of the total variation, then you might have a successful mapping.</p>
+</div>
+<div class='col-md-6 col-sm-6'>
+<img src='/static/img/12.png' style='width:100%'>
+</div>
+</div>
+
+<h2>Measure the phenotypes of wild strains and map by association</h2>
+
+<div class='row'>
+<div class='col-md-6 col-sm-6'>
+<p>Once you have an optimized assay, you can start a mapping experiment. We recommend 48 wild strains at a time. Once you receive the strains into your lab, please freeze them ASAP. Repeated passages lead to strain evolution and opportunities for strain confusion. We make five copies of each wild strain and keep them at 15ºC. For any assay, only one plate from 15ºC is used to chunk animals for phenotyping. Strains are only passaged three times per year and then discarded. Before any assay, we recommend passaging the strains to reduce the effects of starvation on the trait of interest. After strains are assayed, discard the strain. Never keep passaged strains for future assays.</p>
+
+<p>Measure as many wild strains as possible in your trait of interest in the level of replication required to get a reproducible assessment of phenotype. Record the trait values for each strain. Once normalized for replicates, these data can be copy and pasted into the association mapping portal. Press "submit" to map. If you are not redirected to a reports page after clicking the submit button, please notify us via the feedback form.</p>
+
+<p>Throughout the process if you encounter problems with CeNDR or find parts of the site/approach confusing, please submit a feedback request. If you do not hear back from your request within 48 hours, please email Erik (email link) directly. </p>
+
+<p>Thank you for studying <em>C. elegans</em> natural diversity and best of luck on your experiments!</p>
+</div>
+<div class='col-md-6 col-sm-6'>
+<img src='/static/img/48.png' style='width:100%'>
+</div>
+</div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+
+
+{% block script %}
+
+<script>
+
+// Icons
+var icon_norm = L.icon({
+    iconUrl: '/static/img/icons/marker.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+var icon_hover = L.icon({
+    iconUrl: '/static/img/icons/selected.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+// Default click_s
+var click_s = {
+  target: {
+    options: {strain: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: ""},
+    setIcon: function(){},
+  },
+  latlng: { lat: "", lng: ""},
+}
+
+
+  ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
+  MB_ATTR = 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+    '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+    'Imagery © <a href="http://mapbox.com">Mapbox</a>';
+  MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
+  OSM_URL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+  var southWest = L.latLng(-90, -180),
+    northEast = L.latLng(90, 180),
+    bounds = L.latLngBounds(southWest, northEast);
+
+  var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -50], 2);
+  L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
+  strain_info = [];
+  strain_names = [];
+  markers = [];
+
+ data = {{ strain_listing|safe }}
+ strain_info = data;
+ data.forEach(function(d) {
+  strain_names.push(d.strain);
+   m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
+                                         strain: d.strain,
+                                         title: d.strain,
+                                         isotype: d.isotype,
+                                         isolation_date : d.isolation_date,
+                                         loc : d.location,
+                                         landscape: d.landscape,
+                                         substrate: d.substrate,
+                                         comma: ",  ",
+                                         isolated_by: d.isolated_by }).addTo(map)
+  markers.push(m);
+ });
+var strain_layer = L.layerGroup(markers);
+
+</script>
+
+{% endblock %}
