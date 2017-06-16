@@ -53,7 +53,7 @@ ds = get_ds()
 
 credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
 
-db = PooledMySQLDatabase(dbname, stale_timeout=300, **credentials)
+db = PooledMySQLDatabase(dbname, max_connections=32, stale_timeout=300, **credentials)
 
 @app.before_request
 def connect_db():
