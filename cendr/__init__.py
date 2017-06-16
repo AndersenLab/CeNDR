@@ -13,6 +13,7 @@ from playhouse.pool import PooledMySQLDatabase
 import MySQLdb
 import _mysql
 import requests
+import time
 
 
 # Caching
@@ -55,9 +56,20 @@ credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
 
 db = PooledMySQLDatabase(dbname, max_connections=32, stale_timeout=300, **credentials)
 
+
 @app.before_request
 def tearup():
-    db.connect()
+    tries = 10
+    pause = 0.05
+    for t in xrange(tries):
+        try:
+            db.connect()
+            return
+        except ValueError:
+            # no connection in pool
+            if t + 1 == tries:
+                raise
+            time.sleep(pause)
 
 
 @app.teardown_request
