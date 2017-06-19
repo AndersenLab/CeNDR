@@ -12,6 +12,7 @@ zlib1g-dev \
 libbz2-dev \
 liblzma-dev \
 fuse \
+tabix \
 && rm -rf /var/lib/apt/lists/*
 
 ENV BCFTOOLS_BIN="bcftools-1.4.tar.bz2" \
