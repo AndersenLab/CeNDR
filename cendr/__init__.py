@@ -56,7 +56,11 @@ db = MySQLDatabase(dbname, **credentials)
 
 @app.before_request
 def _db_connect():
-    db.connect()
+    try:
+        db.connect()
+    except:
+        time.sleep(1)
+        db.connect()
 
 
 @app.teardown_request
