@@ -9,7 +9,6 @@ import json
 import yaml
 import os
 from gcloud import datastore
-from playhouse.pool import PooledMySQLDatabase
 import MySQLdb
 import _mysql
 import requests
@@ -53,7 +52,6 @@ def get_google_sheet():
 ds = get_ds()
 
 credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
-
 db = MySQLDatabase(dbname, **credentials)
 
 @app.before_request
