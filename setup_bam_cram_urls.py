@@ -7,9 +7,6 @@ import os
 from threading import Thread, Event
 import webbrowser
 from wsgiref.simple_server import WSGIServer, WSGIRequestHandler, make_server
-import json
-import yaml
-from collections import defaultdict
 from cendr import get_ds
 from cendr.models import *
 
@@ -18,7 +15,7 @@ from boxsdk import OAuth2, Client
 
 ### SET ME ###
 bam_folder_id = "28886940493"
-cram_folder_id = "28886940493"
+cram_folder_id = "29453955051"
 
 ds = get_ds()
 box_cred = ds.get(ds.key("credential", 'box'))
@@ -78,7 +75,7 @@ def authenticate():
 if __name__ == '__main__':
     client = Client(authenticate())
     bam = client.folder(folder_id=bam_folder_id).get_items(limit = 100000)
-    #cram = client.folder(folder_id=cram_folder_id).get_items(limit = 100000)
+    cram = client.folder(folder_id=cram_folder_id).get_items(limit = 100000)
     cram = []
     fileset = bam + cram
     for x in fileset:
