@@ -10,7 +10,7 @@ except:
     ds = datastore.Client(project="andersen-lab")
     dbname = "cegwas_v2"
     credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
-    db = MySQLDatabase(dbname, stale_timeout=300, **credentials)
+    db = MySQLDatabase(dbname, **credentials)
 
 
 class strain(Model):
