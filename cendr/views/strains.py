@@ -130,11 +130,11 @@ def calculate_total(item_list):
     item_price_list = {}
     for i in sorted(item_list):
         if i == "set_divergent":
-            item_price_list[i] = 100
+            item_price_list[i] = 160
         elif i.startswith("set"):
-            item_price_list[i] = 400
+            item_price_list[i] = 640
         else:
-            item_price_list[i] = 10
+            item_price_list[i] = 15
     return item_price_list
 
 
@@ -165,6 +165,7 @@ def order_page():
         if len(missing_fields) == 0 and warning is None:
             ds = get_ds()
             o = ds.get(ds.key("cendr-order", "count"))
+            
             o["order-number"] += 1
             ds.put(o)
             order = {}
