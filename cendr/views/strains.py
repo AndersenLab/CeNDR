@@ -173,6 +173,7 @@ def order_page():
             order['items'] = '\n'.join(
                 sorted([u"{k}:{v}".format(k=k, v=v) for k, v in items.items()]))
             order['shipping_service'] = request.form['shipping_service']
+            order['shipping_account'] = request.form['shipping_account']
             order['total'] = total
             shipping = ""
             if order['shipping_service'] == '$65 Flat Fee':
