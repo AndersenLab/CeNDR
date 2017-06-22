@@ -161,7 +161,6 @@ def order_page():
                     warning = "Missing Some Fields"
         if request.form['shipping_service'] in ['UPS','FEDEX'] and not request.form['shipping_account']:
             warning = "No shipping account provided for " + request.form['shipping_service']
-        print(warning)
         if len(missing_fields) == 0 and warning is None:
             ds = get_ds()
             o = ds.get(ds.key("cendr-order", "count"))
