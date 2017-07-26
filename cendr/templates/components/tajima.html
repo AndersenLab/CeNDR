@@ -36,6 +36,8 @@ var layout = {
   hovermode: 'closest'
 };
 
+tajima_plot = document.getElementById("tajima");
+Plotly.newPlot(tajima_plot, [{mode: [], marker: []}], layout, {displayModeBar: false, displaylogo: false});
 
 function update_tajima_plot(chrom, start, end) {
   orig_start = start;
@@ -51,12 +53,13 @@ function update_tajima_plot(chrom, start, end) {
   $.ajax({
     url: "/api/tajima/" + chrom + "/" + start + "/" + end,
     contentType: 'application/json',
-    success:function(data) {
+    success: function(data) {
       data["mode"] = "markers";
       data["marker"] = {size: 5};
       layout.xaxis.title = chrom;
       layout.xaxis.range = [orig_start, orig_end];
-      Plotly.newPlot('tajima', [data], layout, {displayModeBar: false, displaylogo: false});
+      tajima_plot.data = [data];
+      Plotly.redraw(tajima_plot);
   }
 });
 }
