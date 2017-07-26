@@ -200,19 +200,6 @@ class WI(Model):
             )
         
 
-class tajimaD(Model):
-    CHROM = CharField(index=True)
-    BIN_START = IntegerField(index=True)
-    BIN_END = IntegerField(index=True)
-    N_Sites = IntegerField(index=True)
-    N_SNPs = IntegerField(index=True)
-    TajimaD = FloatField(index=True)
-
-    class Meta:
-        database = db
-        db_table = "WI_{current_build}_tajimad".format(current_build = current_build)
-
-
 class wb_gene(Model):
     CHROM = CharField(index = True, max_length = 5)
     start = IntegerField(index = True)
@@ -246,13 +233,3 @@ class wb_orthologs(Model):
     method = CharField(index=True) # Method used to assign ortholog
     class Meta:
         database = db
-
-def autoconvert(s):
-    if s is None or s == "" or s == "NA":
-        return None
-    for fn in (float, int):
-        try:
-            return fn(s)
-        except ValueError:
-            pass
-    return s

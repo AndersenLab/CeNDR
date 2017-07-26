@@ -2,6 +2,17 @@
 
 --- 
 
+### v1.1.1 ()
+
+* Fixed Drawing of the Tajimas D plot on report pages.
+
+### v1.1.0 (2017-06-16)
+
+* A revamped genome browser, which offers the ability to download data in a tab-delimited format (TSV).
+* The release of a larger set of strains (our 2017-05-31 set). The site now has 249 isotypes available, and a fourth set of strains.
+* The Data page has been renamed as the 'releases' page to reflect the fact that our set of genomic data continues to evolve.
+* Many other bug-fixes and minor enhancements.
+
 ### v1.0.9 (2017-01-24)
 
 * Released transposon data.

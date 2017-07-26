@@ -1,18 +1,16 @@
+import json
+import os
+import time
+import re
+import requests
+import yaml
 from flask import Flask, g
 from peewee import *
 from flask_restful import Api
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import date
 from flask_cache import Cache
-from jinja2 import contextfilter
-import json
-import yaml
-import os
 from gcloud import datastore
-import MySQLdb
-import _mysql
-import requests
-import time
 
 
 # Caching
@@ -23,6 +21,8 @@ dbname = "cegwas_v2" # don't remove, imported elsewhere.
 
 releases = ["20170531",
             "20160408"]
+
+app.config['CURRENT_RELEASE'] = releases[0]
 
 
 def get_vcf(release = releases[0]):
@@ -35,19 +35,6 @@ def get_ds():
             g.ds = datastore.Client(project="andersen-lab")
         return g.ds
 
-def get_google_sheet():
-    with app.app_context():
-        if not hasattr(g, 'gc'):
-            import gspread
-            from oauth2client.service_account import ServiceAccountCredentials
-            ds = get_ds()
-            sa = ds.get(ds.key("credential", "service_account"))
-            sa = json.loads(sa["json"])
-            scope = ['https://spreadsheets.google.com/feeds']
-            credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
-            gc = gspread.authorize(credentials)
-            g.gc = gc
-        return g.gc
 
 ds = get_ds()
 
@@ -104,14 +91,15 @@ def autoconvert(s):
             pass
     return s
 
-class CustomEncoder(json.JSONEncoder):
 
+class CustomEncoder(json.JSONEncoder):
     def default(self, o):
         if type(o) == decimal.Decimal:
             return float(o)
         if isinstance(o, datetime.date):
             return str(o)
         return super(CustomEncoder, self).default(o)
+
 
 if os.getenv('HOME') == "/root":
     # Running on server
@@ -122,7 +110,9 @@ if os.getenv('HOME') == "/root":
     app.config["debug"] = False
     from flask_sslify import SSLify
     # Ignore leading slash of urls; skips must use start of path
-    sslify = SSLify(app, skips=['strains/global-strain-map', '.well-known', 'cronmapping'])
+    sslify = SSLify(app, skips=['strains/global-strain-map',
+                                '.well-known',
+                                'cronmapping'])
 else:
     # Running locally
     cache = Cache(app, config={'CACHE_TYPE': 'simple'})
@@ -132,20 +122,37 @@ else:
     toolbar = DebugToolbarExtension(app)
 
 
-version = [x for x in yaml.load(open(".travis.yml", 'r').read())['before_install'] if 'VERSION' in x][0].split("=")[1]
-app.config['version'] = version.split(".")[0].replace("-",".").replace("version.","")
-app.config["TEMPLATE_AUTO_RELOAD"] = True
+version = re.search("VERSION=version-(.*)\n", open(".travis.yml", 'r').read()) \
+            .group(1) \
+            .replace('-', '.')
+
+app.config['VERSION'] = version
+app.config['TEMPLATE_AUTO_RELOAD'] = True
 api = Api(app)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+
+
+def get_google_order_sheet():
+    with app.app_context():
+        if not hasattr(g, 'gc'):
+            import gspread
+            from oauth2client.service_account import ServiceAccountCredentials
+            ds = get_ds()
+            sa = ds.get(ds.key("credential", "service_account"))
+            sa = json.loads(sa["json"])
+            scope = ['https://spreadsheets.google.com/feeds']
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(sa, scope)
+            gc = gspread.authorize(credentials)
+            g.gc = gc
+        return gc.open_by_key("1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM").worksheet("orders")
+
 
 def add_to_order_ws(row):
     """
         Stores order info in a google sheet.
     """
-    gc = get_google_sheet()
-    orders = gc.open_by_key("1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM")
-    ws = orders.worksheet("orders")
+    ws = get_google_order_sheet()
     index = sum([1 for x in ws.col_values(1) if x]) + 1
 
     header_row = filter(len, ws.row_values(1))
@@ -159,10 +166,9 @@ def add_to_order_ws(row):
     row = map(str, row)
     ws.insert_row(values, index)
 
+
 def lookup_order(invoice_hash):
-    gc = get_google_sheet()
-    orders = gc.open_by_key("1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM")
-    ws = orders.worksheet("orders")
+    ws = get_google_order_sheet()
     find_row = ws.findall(invoice_hash)
     if len(find_row) > 0:
         row = ws.row_values(find_row[0].row)
