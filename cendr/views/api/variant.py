@@ -132,7 +132,7 @@ def variant_api():
                 del INFO['ANN']
 
             gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
-            gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set if x[1] != 2] # Filter missing (2)
+            gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set]
             ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
             rec_out = {
                 "CHROM": record.CHROM,
@@ -150,8 +150,9 @@ def variant_api():
                 rec_out["phylop"] = float(INFO['phylop'])
             if len(rec_out['ANN']) > 0 or 'ALL' in query['variant_impact']:
                 output_data.append(rec_out)
-            elif i == 1000 and query['output'] != "tsv":
+            if i == 1000 and query['output'] != "tsv":
                 return jsonify(output_data)
+        print(output_data)
         if query['output'] == 'tsv':
             filename = '_'.join([query['chrom'], str(query['start']), str(query['end'])])
             build_output = OrderedDict()

@@ -11,19 +11,18 @@
       href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
 
 <!-- IGV CSS -->
-<link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.8/igv-1.0.8.css">
+<link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.9/igv-1.0.9.css">
 
 <!-- jQuery JS -->
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
 
 
-<script type="text/javascript" src="//igv.org/web/release/1.0.8/igv-1.0.8.js"></script>
+<script type="text/javascript" src="//igv.org/web/release/1.0.9/igv-1.0.9.min.js"></script>
 
 <style>
 
 .label {
-  color: black;
   width: 80px;
   height: 18px;
   line-height: 12px;
@@ -31,26 +30,37 @@
   display: inline-block;
 }
 
+.gt-2 {
+    background-color: white;
+    border: 1px dotted black;
+    color: black;
+}
+
 .gt-0.PASS {
   background-color: rgba(194,194,214,1.0);
   border: 1px solid black;
+  color: black;
 }
 .gt-3.PASS {
   background-color: rgba(0, 102, 255,1.0);
   border: 1px solid black;
+  color: white;
 }
 
 .gt-0:not(.PASS) {
   background-color: rgba(194,194,214,0.25);
   border: 1px dotted black;
+  color: black;
 }
 .gt-3:not(.PASS) {
   background-color: rgba(0, 102, 255,0.25);
   border: 1px dotted black;
+  color: black;
 }
 
 .het {
   background-color: #ffff00;
+  color: black;
 }
 
 .gt_set {
@@ -505,43 +515,44 @@ function refresh_variants(download = false) {
           success: function(msg) {
               
               $.each(msg, function(k, rec) {
-                console.log(rec);
 
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
 
                 $.each(rec['ANN'], function(annk, ann) {
+                        if (ann["gene_id"] != null) 
+                        {
+                          ann["gene_id"] = "<a href='/gene/" + ann["gene_id"] + "'>" + ann["gene_id"] + "</a>";
+                        }
+                        if (ann.impact != undefined) {
+                          impact = `<span style='color: white;' class='label label-${var_impact_class[ann.impact]}'>${ann.impact}</span>`
+                        } else {
+                          impact = ""
+                        }
+                        items = [`${rec["CHROM"]}:${Number(rec["POS"]).toLocaleString('en')}`,
+                                 `${rec["REF"]} / ${rec["ALT"].join(",")}`,
+                                 rec["FILTER"],
+                                 ann.gene_name,
+                                 ann.gene_id,
+                                 ann.feature_id,
+                                 ann.aa_change,
+                                 ann.transcript_biotype,
+                                 ann.effect.split("&").join(", "),
+                                 impact];
 
-                if (ann["gene_id"] != null) 
-                {
-                  ann["gene_id"] = "<a href='/gene/" + ann["gene_id"] + "'>" + ann["gene_id"] + "</a>";
-                }
-                if (ann.impact != undefined) {
-                  impact = `<span style='color: white;' class='label label-${var_impact_class[ann.impact]}'>${ann.impact}</span>`
-                } else {
-                  impact = ""
-                }
-                items = [`${rec["CHROM"]}:${Number(rec["POS"]).toLocaleString('en')}`,
-                         `${rec["REF"]} / ${rec["ALT"].join(",")}`,
-                         rec["FILTER"],
-                         ann.gene_name,
-                         ann.gene_id,
-                         ann.feature_id,
-                         ann.aa_change,
-                         ann.transcript_biotype,
-                         ann.effect.split("&").join(", "),
-                         impact];
+                        additional_fields = [ann.gene_name + ": " , ann.filter]
+                        if (rec['FILTER'] != "PASS") {
+                          fail_variant_class = 'class="warning"'
+                        } else {
+                          fail_variant_class = ""
+                        }
+                        $("#variants > tbody").append(`<tr ${fail_variant_class}><td>${items.join("</td><td>")}</td></tr>`);
+                    }
+                );
 
-                additional_fields = [ann.gene_name + ": " , ann.filter]
-                if (rec['FILTER'] != "PASS") {
-                  fail_variant_class = 'class="warning"'
-                } else {
-                  fail_variant_class = ""
-                }
-                $("#variants > tbody").append(`<tr ${fail_variant_class}><td>${items.join("</td><td>")}</td></tr>`);
-                
-   
+
+                console.log(rec)
                 if ($(".list-all-strains").prop('checked') == true) {
                     gt_panel = $(".isotype-item input").map(
                     function () {return this.value;}).get();
@@ -549,11 +560,7 @@ function refresh_variants(download = false) {
                     gt_panel = $(".isotype-item input:checked").map(
                     function () {return this.value;}).get();
                 }
-                
-
-                
-
-
+                            
                 if (gt_panel.length > 0) {
                   gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
                     // Append genotypes
@@ -576,7 +583,7 @@ function refresh_variants(download = false) {
                         </div>
                       </td></tr>`);
                 }
-              });
+
             });
 
 
