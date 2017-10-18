@@ -4,6 +4,7 @@ import time
 import re
 import requests
 import yaml
+import decimal
 from flask import Flask, g
 from peewee import *
 from flask_restful import Api
@@ -80,6 +81,8 @@ def json_serial(obj):
     if isinstance(obj, date):
         serial = obj.isoformat()
         return serial
+    if type(obj) == decimal.Decimal:
+        return float(obj)
     raise TypeError("Type not serializable")
 
 
