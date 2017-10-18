@@ -22,25 +22,50 @@
 
 <style>
 
-.gt-0 {
-  background-color: rgba(194,194,214,1.0);
-  border: 1px solid black;
+.label {
   color: black;
-}
-.gt-3 {
-  background-color: rgba(0, 102, 255,1.0);
-  border: 1px solid black;
-  color: black;
+  width: 80px;
+  height: 18px;
+  line-height: 12px;
+  margin-bottom: 4px;
+  display: inline-block;
 }
 
-.gt-0 .mapping_quality,.min_depth,.dv_dp,.het {
+.gt-0.PASS {
+  background-color: rgba(194,194,214,1.0);
+  border: 1px solid black;
+}
+.gt-3.PASS {
+  background-color: rgba(0, 102, 255,1.0);
+  border: 1px solid black;
+}
+
+.gt-0:not(.PASS) {
   background-color: rgba(194,194,214,0.25);
-  border: none;
+  border: 1px dotted black;
 }
-.gt-3 .mapping_quality,.min_depth,.dv_dp,.het{
+.gt-3:not(.PASS) {
   background-color: rgba(0, 102, 255,0.25);
-  border: none;
+  border: 1px dotted black;
 }
+
+.het {
+  background-color: #ffff00;
+}
+
+.gt_set {
+  border-right: 1px dotted #b3b3b3;
+}
+
+th {
+  white-space: nowrap;
+}
+
+#variants {
+  font-size: 12px;
+}
+
+
 
 </style>
 
@@ -113,6 +138,10 @@
       <div class="col-md-4">
         <h5>Strains <a href="{{ url_for('help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
+        <div class="checkbox">
+            <label><input type="checkbox" class="list-all-strains" value="list-all-strains" />List all strain genotypes </label>
+        </div>
+
         <form class="form-inline pull-xs-right">
 
           <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360" autocomplete="off">
@@ -165,16 +194,17 @@
 <div class="col-md-12 col-lg-12">
 <h3>Variants</h3>
 
-<button id='download' class='btn btn-primary pull-right'>Download</button>
-
 <table class="table table-striped table-hover" id="variants">
 
-<p><small>Maximum of 1000 variants from the region will be listed. Variants without a black border have a filter applied, and are less reliable.</small></p>
-  
+<button id='download' class='btn btn-primary btn-xs pull-right'>Download</button>
+<p><small>A Maximum of 1000 variants from the region will be listed. Heterozygous calls are likely errors. When rows are yellow, it indicates the entire variant failed QC.</small></p>
+
+</div>
 <thead>
   <tr>
     <th>CHROM:POS</th>
     <th>REF / ALT</th>
+    <th>Filter</th>
     <th>Gene Name</th>
     <th>WormBase ID</th>
     <th>Sequence</th>
@@ -189,7 +219,21 @@
 </tbody>
 
 </table>
-      
+
+
+<small>Genotypes are shown as follows</small>
+<div class='panel'>
+<div class="panel panel-default">
+  <div class="panel-body">
+    <span class="label gt-0 PASS">Passing REF</span>&nbsp;
+    <span class="label gt-3 PASS">Passing ALT</span>&nbsp;
+    <span class="label gt-0 mapping_quality min_depth dv_dp het">Failing REF</span>&nbsp;
+    <span class="label gt-3 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
+    <span class="label gt-1 het">Heterozygous</span>
+  </div>
+</div>
+
+
       </div>
   </div>
 {% endblock %}
@@ -298,7 +342,7 @@ trackset = {"Genes": {
 $(document).ready(function () {
       {% for k,v in impact_items %}
         {% if v in var_eff %}
-          $('.track-select[value="{{ v }}"]').prop('checked',true);
+          $('.track-select[value="{{ v }}"]').prop('checked', true);
         {% endif %}
       {% endfor %}
 
@@ -386,6 +430,27 @@ function process_gene_search() {
     }
 }
 
+
+function gt_label(gt) {
+  // Generates a genotype label
+  r = ""
+  classes = [];
+  classes.push(`gt-${gt["GT"]}`);
+  classes.push(gt["FT"].split(";").join(" "));
+  r += `<div class='label ${classes.join(" ")}'>`;
+  r += gt["SAMPLE"] + " : " + gt["TGT"];
+  r += "</div>";
+  return r
+}
+
+function draw_gt_set(genotype_set, genotype_val) {
+    return genotype_set.filter(function(gt) { return gt['GT'] == genotype_val })
+                       .map( gt_label )
+                       .join(" ");
+
+}
+
+var xhr;
 function refresh_variants(download = false) {
     region = $(".igvNavigationSearchInput").val();
     if (/[IVXMtDNA]+:[0-9,]+-[0-9,]+/g.exec(region) != null) {
@@ -403,7 +468,7 @@ function refresh_variants(download = false) {
       track_set = $.extend(normal_tracks, variant_impact, sample_tracks);
       tracks = "";
       for (track in track_set) {
-           if ($(".track-select[value="+track+"]").prop("checked") == true){
+           if ($(`.track-select[value=${track}]`).prop("checked") == true){
               tracks += track_set[track];
            }
       }
@@ -413,7 +478,9 @@ function refresh_variants(download = false) {
               'start': parseInt(start),
               'end': parseInt(end),
               'variant_impact': variant_impact.join('_'),
-              'sample_tracks': sample_tracks.join('_')}
+              'sample_tracks': sample_tracks.join('_'),
+              'list-all-strains': $('.list-all-strains').prop('checked')
+             }
 
       if (download == true) {
           data['output'] = 'tsv';
@@ -421,10 +488,16 @@ function refresh_variants(download = false) {
           console.log(url);
           window.open(url, sprintf("%s_%s_%s.csv", chrom, start, end));
       } else {
+
         $("#variants > tbody").html("");
         data['output'] = 'json';
         data =  $.param(data);
-        $.ajax({
+
+        if(xhr) {
+          xhr.abort();
+        }
+
+        xhr = $.ajax({
           url: "{{ url_for('variant_api') }}",
           data: data,
           method: "GET",
@@ -432,6 +505,7 @@ function refresh_variants(download = false) {
           success: function(msg) {
               
               $.each(msg, function(k, rec) {
+                console.log(rec);
 
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
@@ -444,40 +518,63 @@ function refresh_variants(download = false) {
                   ann["gene_id"] = "<a href='/gene/" + ann["gene_id"] + "'>" + ann["gene_id"] + "</a>";
                 }
                 if (ann.impact != undefined) {
-                  impact = "<span style='color: white;' class='label label-" + var_impact_class[ann.impact] + "'>" + ann.impact + "</span>"
+                  impact = `<span style='color: white;' class='label label-${var_impact_class[ann.impact]}'>${ann.impact}</span>`
                 } else {
                   impact = ""
                 }
-                items = [rec["CHROM"] + ":" + Number(rec["POS"]).toLocaleString('en'),
-                         rec["REF"] + " / " + rec["ALT"].join(","),
+                items = [`${rec["CHROM"]}:${Number(rec["POS"]).toLocaleString('en')}`,
+                         `${rec["REF"]} / ${rec["ALT"].join(",")}`,
+                         rec["FILTER"],
                          ann.gene_name,
                          ann.gene_id,
                          ann.feature_id,
-                         ann.hgvs_p,
+                         ann.aa_change,
                          ann.transcript_biotype,
                          ann.effect.split("&").join(", "),
                          impact];
 
                 additional_fields = [ann.gene_name + ": " , ann.filter]
-                $("#variants > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>");
-                checked_isotypes = $(".isotype-item input:checked").map(
-                    function () {return this.value;}).get();
+                if (rec['FILTER'] != "PASS") {
+                  fail_variant_class = 'class="warning"'
+                } else {
+                  fail_variant_class = ""
+                }
+                $("#variants > tbody").append(`<tr ${fail_variant_class}><td>${items.join("</td><td>")}</td></tr>`);
                 
-                if (checked_isotypes.length > 0) {
-                  gts = rec["GT"].filter(function(i) { return checked_isotypes.includes(i["SAMPLE"]) });
-                  // Construct gt view
-                  gtset = gts.map( function(gt) {
+   
+                if ($(".list-all-strains").prop('checked') == true) {
+                    gt_panel = $(".isotype-item input").map(
+                    function () {return this.value;}).get();
+                } else {
+                    gt_panel = $(".isotype-item input:checked").map(
+                    function () {return this.value;}).get();
+                }
+                
 
-                    r = ""
-                    classes = [];
-                    classes.push("gt-" + gt["GT"]);
-                    classes.push(gt["FT"].split(";"));
-                    r += "<span class='label " + classes.join(" ") + "'>";
-                    r += gt["SAMPLE"] + " : " + gt["TGT"];
-                    r += "</span>";
-                    return r}).join(" ");
+                
 
-                  $("#variants > tbody").append("<tr><td style='border-top:none;' colspan='9'>" + gtset + "</td>" + "</tr>");
+
+                if (gt_panel.length > 0) {
+                  gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
+                    // Append genotypes
+                    $("#variants > tbody").append(
+                      `<tr><td style='border-top:none;' colspan='10'>
+                        <div class='row'>
+                          <div class='col-md-5 gt_set'>
+                              <h5>Reference</h5>
+                              ${draw_gt_set(gts, 0)}
+                          </div>
+                          <div class='col-md-5 gt_set'>
+                              <h5>Alternative</h5>
+                              ${draw_gt_set(gts, 3)}
+                          </div>
+                          <div class='col-md-2 gt_set'>
+                              <h5>Other</h5>
+                              ${draw_gt_set(gts, 1)}
+                              ${draw_gt_set(gts, 2)}
+                          </div>
+                        </div>
+                      </td></tr>`);
                 }
               });
             });

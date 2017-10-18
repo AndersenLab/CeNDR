@@ -47,14 +47,14 @@ def getting_started():
 
 
 
-@app.route('/about/panel/')
+@app.route('/about/committee/')
 @cache.cached()
-def panel():
+def committee():
 	# Scientific Panel Page
-    title = "Scientific Advisory Panel"
+    title = "Scientific Advisory Committee"
     bcs = OrderedDict([("About", url_for("about")), ("Panel", "")])
-    panel_data = yaml.load(open("cendr/static/content/data/advisory-panel.yaml", 'r'))
-    return render_template('panel.html', **locals())
+    committee_data = yaml.load(open("cendr/static/content/data/advisory-committee.yaml", 'r'))
+    return render_template('committee.html', **locals())
 
 
 @app.route('/about/staff/')

@@ -1,10 +1,9 @@
 dateutils
-flask-appconfig
-Flask-Cache
+Flask-Cache==0.13.1
 flask-debugtoolbar
 flask-restful
 Flask-SSLify
-Flask==0.12.1
+Flask==0.12.2
 gcloud==0.18.3
 google-api-python-client
 gspread==0.4.1

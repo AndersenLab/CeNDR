@@ -71,10 +71,14 @@ def variant_api():
              'end': int(query['end']),
              'variant_impact': query['variant_impact'].split("_"),
              'sample_tracks': query['sample_tracks'].split("_"),
-             'output': query['output']}
+             'output': query['output'],
+             'list-all-strains': query['list-all-strains']
+            }
     app.logger.info(query)
     samples = query['sample_tracks']
-    if not samples[0]:
+    if query['list-all-strains'] == 'true':
+        samples = "ALL"
+    elif not samples[0]:
         samples = "N2"
     else:
         samples = ','.join(samples)
@@ -94,7 +98,8 @@ def variant_api():
     # Query Severity
 
     # Query samples
-    comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
+    if samples != 'ALL':
+        comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
     app.logger.info(' '.join(comm))
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
@@ -108,7 +113,7 @@ def variant_api():
 
         v = VCF(f.name)
 
-        if samples:
+        if samples and samples != "ALL":
             samples = samples.split(",")
             incorrect_samples = [x for x in samples if x not in v.samples]
             if incorrect_samples:
@@ -116,6 +121,7 @@ def variant_api():
 
         for i, record in enumerate(v):
             INFO = dict(record.INFO)
+
             ANN = []
             if "ANN" in INFO.keys():
                 ANN_set = INFO['ANN'].split(",")
@@ -133,6 +139,7 @@ def variant_api():
                 "POS": record.POS,
                 "REF": record.REF,
                 "ALT": record.ALT,
+                "FILTER": record.FILTER or 'PASS', # record.FILTER is 'None' for PASS
                 "GT": gt_set,
                 "AF": INFO["AF"],
                 "ANN": ANN
@@ -151,7 +158,7 @@ def variant_api():
             output = []
             header = False
             for rec in output_data:
-                for k in ['CHROM', 'POS', "REF", "ALT", "phastcons", "phylop", "AF"]:
+                for k in ['CHROM', 'POS', "REF", "ALT", "FILTER", "phastcons", "phylop", "AF"]:
                     if k == 'ALT':
                         build_output[k]  = ','.join(rec[k])
                     else:

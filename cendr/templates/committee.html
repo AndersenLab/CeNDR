@@ -1,0 +1,16 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+{% for m in committee_data %}
+  <div class="row">
+        <div class="col-md-12">
+          <img src="/static/img/committee/{{ m.photo }}" style="width: 150px; height: 170px;" alt="{{ m.first_name }}" class="thumbnail hidden-xs lab-member-photo" />
+          <img src="/static/img/committee/{{ m.photo }}" style="width: 150px; height: 170px;" alt="{{ m.first_name }}" class="thumbnail visible-xs lab-member-photo-small" />
+          <br />
+        	<h4><a href="{{ m.website }}">{{ m.first_name }} {{ m.last_name }}</a></h4>
+          <h4><small>{{m.title}}</small></h4>
+          <br />
+        {% endfor %}
+        </div>
+    </div>
+{% endblock %}

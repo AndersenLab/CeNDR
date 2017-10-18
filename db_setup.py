@@ -18,10 +18,27 @@ ds = get_ds()
 elevation_api = ds.get(ds.key('credential','elevation'))['apiKey']
 def fetch_elevation(lat, lng):
     global elevation_api
-    query = "https://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lng}&{elevation_api}"
+    query = "https://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lng}&key={elevation_api}"
     result = requests.get(query.format(lat=lat, lng=lng, elevation_api=elevation_api)).json()
-    return requests.get(query.format(lat=lat, lng=lng, elevation_api=elevation_api)).json()['results'][0]['elevation']
+    print(result)
+    return result['results'][0]['elevation']
 
+def boolify(s):
+    if s == 'True':
+        return True
+    if s == 'False':
+        return False
+    if s == '':
+        return None
+    raise ValueError("huh?")
+
+def autoconvert(s):
+    for fn in (boolify, int, float):
+        try:
+            return fn(s)
+        except:
+            pass
+    return s
 
 #=======#
 # Setup #
@@ -60,29 +77,6 @@ if "db" in update:
         if reset_db:
             db.drop_tables(table_list, safe=True)
         db.create_tables(table_list, safe=True)
-
-
-##########
-# TAJIMA #
-##########
-
-if "tajima" in update:
-    if reset_db:
-        db.drop_tables([tajimaD], safe=True)
-        db.create_tables([tajimaD], safe=True)
-    with open("data/WI_{current_build}.tajima.tsv".format(current_build=current_build), 'r') as csvfile:
-        reader = csv.DictReader(csvfile, delimiter='\t')
-        tajima_d = []
-        for index, line in enumerate(reader):
-            if index > 0:
-                for k, v in line.items():
-                    if k != 'CHROM' and k != 'TajimaD':
-                        line[k] = int(v)
-                line['TajimaD'] = round(float(line['TajimaD']), 3)
-                tajima_d.append(line)
-
-    with db.atomic():
-        tajimaD.insert_many(tajima_d).execute()
 
 
 ####################
@@ -255,6 +249,6 @@ if "strains" in update:
                         s = strain.get(strain=l["strain"])
                     except:
                         s = strain()
-                    [setattr(s, k, autoconvert(v)) for k, v in l.items()]
-                    print(l['isotype'])
+                    [setattr(s, k, v) for k, v in l.items()]
+                    print(s.strain)
                     s.save()
