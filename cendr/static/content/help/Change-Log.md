@@ -2,9 +2,10 @@
 
 --- 
 
-### v1.1.1 ()
+### v1.1.1 (2017-10-18)
 
 * Fixed Drawing of the Tajimas D plot on report pages.
+* Added ability to view all genotypes on the variant viewer
 
 ### v1.1.0 (2017-06-16)
 
