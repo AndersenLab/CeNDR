@@ -11,7 +11,6 @@ from flask_debugtoolbar import DebugToolbarExtension
 from datetime import date
 from flask_cache import Cache
 from gcloud import datastore
-from flask_recaptcha import ReCaptcha
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -41,9 +40,6 @@ ds = get_ds()
 
 # recaptcha
 app.config.update(dict(ds.get(ds.key('credential', 'recaptcha'))))
-app.config['RECAPTCHA_ENABLED'] = True
-recaptcha = ReCaptcha(app=app)
-
 
 credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
 db = MySQLDatabase(dbname, **credentials)

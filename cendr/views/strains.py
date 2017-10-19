@@ -1,4 +1,4 @@
-from cendr import app, get_ds, cache, add_to_order_ws, lookup_order, send_mail, recaptcha
+from cendr import app, get_ds, cache, add_to_order_ws, lookup_order, send_mail
 from cendr import json_serial
 from flask import render_template, request, url_for, redirect, Response, abort
 from cendr.models import strain
@@ -7,6 +7,7 @@ import json
 import yaml
 from cendr.emails import order_submission
 from datetime import datetime
+from requests import post
 import pytz
 import hashlib
 
@@ -125,7 +126,6 @@ def protocols():
 #
 # Strain Ordering Pages
 #
-
 def calculate_total(item_list):
     item_price_list = {}
     for i in sorted(item_list):
@@ -142,85 +142,83 @@ def calculate_total(item_list):
 def order_page():
     bcs = OrderedDict([("Strain", "/strain/"), ("Order", "")])
     title = "Order"
-    strain_listing = list(set(request.form.getlist('item')))
-    if (len(strain_listing) == 0):
-        return redirect(url_for("strain_listing_page"))
     items = request.form.getlist("item")
     # Retreive SKU's for prices
     items = calculate_total(items)
     total = sum(items.values())
-    field_list = ['name', 'phone', 'email', 'shipping_service', 'address']
-    warning = None
-
-    try:
-        if request.form['g-recaptcha-response']:
-            r = requests.post('https://www.google.com/recaptcha/api/siteverify',
+    strain_listing = list(set(request.form.getlist('item')))
+    if not strain_listing:
+        return redirect(url_for("strain_listing_page"))
+    if request.method == 'POST':
+        field_list = ['name', 'phone', 'email', 'shipping_service', 'address']
+        warning = None
+        captcha_passed = False
+        if 'g-recaptcha-response' in request.form:
+            resp = post('https://www.google.com/recaptcha/api/siteverify',
                           data = {'secret' : app.config['RECAPTCHA_SECRET_KEY'],
                                   'response' : request.form['g-recaptcha-response']})
-            if r.json['success']:
+            if resp.json()['success']:
                 captcha_passed = True
-        else:
-            captcha_passed = False
-    except:
-        captcha_passed = False
+            else:
+                captcha_passed = False
+                warning = "Failed to pass captcha"
+            if 'shipping_service' in request.form and captcha_passed:
+                # Check that all pieces are filled out.
+                missing_fields = []
+                for i in field_list:
+                    if i in request.form:
+                        if not request.form[i]:
+                            missing_fields.append(i)
+                            warning = "Missing Some Fields"
+                if request.form['shipping_service'] in ['UPS','FEDEX'] and not request.form['shipping_account']:
+                    warning = "No shipping account provided for " + request.form['shipping_service']
+                if len(missing_fields) == 0 and warning is None:
+                    ds = get_ds()
+                    o = ds.get(ds.key("cendr-order", "count"))
+                    
+                    o["order-number"] += 1
+                    ds.put(o)
+                    order = {}
+                    for k in field_list:
+                        order[k] = request.form[k]
+                    order['items'] = '\n'.join(
+                        sorted([u"{k}:{v}".format(k=k, v=v) for k, v in items.items()]))
+                    order['shipping_service'] = request.form['shipping_service']
+                    order['shipping_account'] = request.form['shipping_account']
+                    order['total'] = total
+                    shipping = ""
+                    if order['shipping_service'] == '$65 Flat Fee':
+                        order['total'] += 65
+                        shipping = "\nShipping\n=========\n$65"
+                    order['date'] = datetime.now(pytz.timezone("America/Chicago"))
+                    order['order_number'] = o['order-number']
+                    order['is_donation'] = False
+                    order['date'] = datetime.now(pytz.timezone(
+                        "America/Chicago")).date().isoformat()
+                    order['invoice_hash'] = hashlib.sha1(str(order)).hexdigest()[0:10]
+                    order["url"] = "http://elegansvariation.org/order/" + \
+                        order["invoice_hash"]
+                    send_mail({"from": "no-reply@elegansvariation.org",
+                               "to": [order["email"]],
+                               "cc": ['dec@u.northwestern.edu',
+                                      'robyn.tanny@northwestern.edu',
+                                      'erik.andersen@northwestern.edu',
+                                      'g-gilmore@northwestern.edu',
+                                      'irina.iacobut@northwestern.edu'],
+                               "subject": "CeNDR Order #" + str(order["order_number"]),
+                               "text": order_submission.format(invoice_hash=order['invoice_hash'],
+                                                               name=order['name'],
+                                                               address=order[
+                                                                   'address'],
+                                                               items=order['items'],
+                                                               total=order['total'],
+                                                               date=order['date'],
+                                                               shipping=shipping)})
 
-    if 'shipping_service' in request.form and captcha_passed:
-        # Check that all pieces are filled out.
-        missing_fields = []
-        for i in field_list:
-            if i in request.form:
-                if not request.form[i]:
-                    missing_fields.append(i)
-                    warning = "Missing Some Fields"
-        if request.form['shipping_service'] in ['UPS','FEDEX'] and not request.form['shipping_account']:
-            warning = "No shipping account provided for " + request.form['shipping_service']
-        if len(missing_fields) == 0 and warning is None:
-            ds = get_ds()
-            o = ds.get(ds.key("cendr-order", "count"))
-            
-            o["order-number"] += 1
-            ds.put(o)
-            order = {}
-            for k in field_list:
-                order[k] = request.form[k]
-            order['items'] = '\n'.join(
-                sorted([u"{k}:{v}".format(k=k, v=v) for k, v in items.items()]))
-            order['shipping_service'] = request.form['shipping_service']
-            order['shipping_account'] = request.form['shipping_account']
-            order['total'] = total
-            shipping = ""
-            if order['shipping_service'] == '$65 Flat Fee':
-                order['total'] += 65
-                shipping = "\nShipping\n=========\n$65"
-            order['date'] = datetime.now(pytz.timezone("America/Chicago"))
-            order['order_number'] = o['order-number']
-            order['is_donation'] = False
-            order['date'] = datetime.now(pytz.timezone(
-                "America/Chicago")).date().isoformat()
-            order['invoice_hash'] = hashlib.sha1(str(order)).hexdigest()[0:10]
-            order["url"] = "http://elegansvariation.org/order/" + \
-                order["invoice_hash"]
-            send_mail({"from": "no-reply@elegansvariation.org",
-                       "to": [order["email"]],
-                       "cc": ['dec@u.northwestern.edu',
-                              'robyn.tanny@northwestern.edu',
-                              'erik.andersen@northwestern.edu',
-                              'g-gilmore@northwestern.edu',
-                              'irina.iacobut@northwestern.edu'],
-                       "subject": "CeNDR Order #" + str(order["order_number"]),
-                       "text": order_submission.format(invoice_hash=order['invoice_hash'],
-                                                       name=order['name'],
-                                                       address=order[
-                                                           'address'],
-                                                       items=order['items'],
-                                                       total=order['total'],
-                                                       date=order['date'],
-                                                       shipping=shipping)})
+                    # Save to google sheet
+                    add_to_order_ws(order)
 
-            # Save to google sheet
-            add_to_order_ws(order)
-
-            return redirect(url_for("order_confirmation", invoice_hash=order['invoice_hash']), code=302)
+                    return redirect(url_for("order_confirmation", invoice_hash=order['invoice_hash']), code=302)
 
     return render_template('order.html', **locals())
 

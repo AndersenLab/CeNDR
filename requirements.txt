@@ -1,5 +1,4 @@
 dateutils
-flask-recaptcha==0.4.2
 Flask-Cache==0.13.1
 flask-debugtoolbar
 flask-restful

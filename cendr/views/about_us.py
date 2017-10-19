@@ -1,4 +1,4 @@
-from cendr import app, json_serial, cache, get_ds, add_to_order_ws, send_mail, recaptcha
+from cendr import app, json_serial, cache, get_ds, add_to_order_ws, send_mail
 from flask import render_template, url_for, Markup, request, redirect
 import markdown
 import yaml
@@ -9,7 +9,7 @@ from collections import OrderedDict
 from datetime import datetime
 import pytz
 import hashlib
-import requests
+from requests import post
 
 
 @app.context_processor
@@ -91,48 +91,50 @@ def statistics():
 @app.route('/about/donate/', methods=['GET','POST'])
 def donate():
     # Process donation.
-    try:
-        if request.form['g-recaptcha-response']:
-            r = requests.post('https://www.google.com/recaptcha/api/siteverify',
+    if request.method == 'POST':
+        captcha_passed = False
+        if 'g-recaptcha-response' in request.form:
+            resp = post('https://www.google.com/recaptcha/api/siteverify',
                           data = {'secret' : app.config['RECAPTCHA_SECRET_KEY'],
                                   'response' : request.form['g-recaptcha-response']})
-            if r.json['success']:
+            if resp.json()['success']:
                 captcha_passed = True
-        else:
-            captcha_passed = False
-    except:
-        captcha_passed = False
-    
-    if request.form and captcha_passed:
-        ds = get_ds()
-        donation_amount = str(int(request.form['donation_amount']))
-        o = ds.get(ds.key("cendr-order", "count"))
-        o["order-number"] += 1
-        ds.put(o)
-        order = {}
-        order["order_number"] = o["order-number"]
-        order["email"] = request.form["email"]
-        order["address"] = request.form["address"]
-        order["name"] = request.form["name"]
-        order["items"] = u"{k}:{v}".format(k = "CeNDR strain and data support", v = donation_amount)
-        order["total"] = donation_amount
-        order["is_donation"] = True
-        order["date"] = datetime.now(pytz.timezone("America/Chicago")).date().isoformat()
-        order["invoice_hash"] = hashlib.sha1(str(order)).hexdigest()[0:10]
-        order["url"] = "http://elegansvariation.org/order/" + order["invoice_hash"]
-        send_mail({"from":"no-reply@elegansvariation.org",
-           "to": [order["email"]],
-           "cc": ['dec@u.northwestern.edu',
-                  'robyn.tanny@northwestern.edu',
-                  'erik.andersen@northwestern.edu',
-                  'g-gilmore@northwestern.edu',
-                  'irina.iacobut@northwestern.edu'],
-           "subject":"CeNDR Order #" + str(order["order_number"]),
-           "text": donate_submission.format(invoice_hash=order["invoice_hash"],
-                                         donation_amount=donation_amount)})
+            else:
+                captcha_passed = False
+                warning = "Failed to pass captcha"
 
-        add_to_order_ws(order)
-        return redirect(url_for("order_confirmation", invoice_hash=order["invoice_hash"]), code=302)
+        
+        if request.form and captcha_passed:
+            ds = get_ds()
+            donation_amount = str(int(request.form['donation_amount']))
+            o = ds.get(ds.key("cendr-order", "count"))
+            o["order-number"] += 1
+            ds.put(o)
+            order = {}
+            order["order_number"] = o["order-number"]
+            order["email"] = request.form["email"]
+            order["address"] = request.form["address"]
+            order["name"] = request.form["name"]
+            order["items"] = u"{k}:{v}".format(k = "CeNDR strain and data support", v = donation_amount)
+            order["total"] = donation_amount
+            order["is_donation"] = True
+            order["date"] = datetime.now(pytz.timezone("America/Chicago")).date().isoformat()
+            order["invoice_hash"] = hashlib.sha1(str(order)).hexdigest()[0:10]
+            order["url"] = "http://elegansvariation.org/order/" + order["invoice_hash"]
+            send_mail({"from":"no-reply@elegansvariation.org",
+               "to": [order["email"]],
+               "cc": ['dec@u.northwestern.edu',
+                      'robyn.tanny@northwestern.edu',
+                      'erik.andersen@northwestern.edu',
+                      'g-gilmore@northwestern.edu',
+                      'irina.iacobut@northwestern.edu'],
+               "cc": ['dec@u.northwestern.edu'],
+               "subject":"CeNDR Order #" + str(order["order_number"]),
+               "text": donate_submission.format(invoice_hash=order["invoice_hash"],
+                                             donation_amount=donation_amount)})
+
+            add_to_order_ws(order)
+            return redirect(url_for("order_confirmation", invoice_hash=order["invoice_hash"]), code=302)
 
     title = "Donate"
     bcs = OrderedDict([("About", url_for("about")), ("Donate", None)])
