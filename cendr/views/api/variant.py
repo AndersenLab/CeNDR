@@ -152,7 +152,6 @@ def variant_api():
                 output_data.append(rec_out)
             if i == 1000 and query['output'] != "tsv":
                 return jsonify(output_data)
-        print(output_data)
         if query['output'] == 'tsv':
             filename = '_'.join([query['chrom'], str(query['start']), str(query['end'])])
             build_output = OrderedDict()

@@ -5,11 +5,11 @@
 <div class="row">
 
 
-      <div class="col-md-8">
+      <div class="col-md-6">
         {{ render_markdown("donate.md") }}
       </div>
 
-      <div class="col-md-4">
+      <div class="col-md-6">
 
        <div class="panel panel-default">
           <div class="panel-heading">Donate</div>
@@ -51,12 +51,15 @@ Chicago, IL. 60657" value="{{ request.form['address'] }}"></textarea>
 
 
 <br />
-
-
-
+    <div class='text-center'>
+            {{ recaptcha }}
+    </div>
+<br />
             <button type="submit" value="Checkout" class="btn btn-primary btn-block" id="purchase" disabled>
                             <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Donate
               </button>
+
+
 
           </form>
 

@@ -3,7 +3,6 @@ import os
 import time
 import re
 import requests
-import yaml
 import decimal
 from flask import Flask, g
 from peewee import *
@@ -12,7 +11,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from datetime import date
 from flask_cache import Cache
 from gcloud import datastore
-
+from flask_recaptcha import ReCaptcha
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -24,6 +23,7 @@ releases = ["20170531",
             "20160408"]
 
 app.config['CURRENT_RELEASE'] = releases[0]
+
 
 
 def get_vcf(release = releases[0]):
@@ -38,6 +38,13 @@ def get_ds():
 
 
 ds = get_ds()
+
+# recaptcha
+recaptcha_credentials = dict(ds.get(ds.key('credential', 'recaptcha')))
+recaptcha = ReCaptcha(site_key = recaptcha_credentials['RECAPTCHA_SITE_KEY'],
+                      secret_key = recaptcha_credentials['RECAPTCHA_SECRET_KEY'])
+recaptcha.init_app(app)
+
 
 credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
 db = MySQLDatabase(dbname, **credentials)
