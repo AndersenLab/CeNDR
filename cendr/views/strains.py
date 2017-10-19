@@ -1,4 +1,4 @@
-from cendr import app, get_ds, cache, add_to_order_ws, lookup_order, send_mail
+from cendr import app, get_ds, cache, add_to_order_ws, lookup_order, send_mail, recaptcha
 from cendr import json_serial
 from flask import render_template, request, url_for, redirect, Response, abort
 from cendr.models import strain
@@ -151,7 +151,20 @@ def order_page():
     total = sum(items.values())
     field_list = ['name', 'phone', 'email', 'shipping_service', 'address']
     warning = None
-    if 'shipping_service' in request.form:
+
+    try:
+        if request.form['g-recaptcha-response']:
+            r = requests.post('https://www.google.com/recaptcha/api/siteverify',
+                          data = {'secret' : app.config['RECAPTCHA_SECRET_KEY'],
+                                  'response' : request.form['g-recaptcha-response']})
+            if r.json['success']:
+                captcha_passed = True
+        else:
+            captcha_passed = False
+    except:
+        captcha_passed = False
+
+    if 'shipping_service' in request.form and captcha_passed:
         # Check that all pieces are filled out.
         missing_fields = []
         for i in field_list:

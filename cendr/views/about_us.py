@@ -1,4 +1,4 @@
-from cendr import app, json_serial, cache, get_ds, add_to_order_ws, send_mail
+from cendr import app, json_serial, cache, get_ds, add_to_order_ws, send_mail, recaptcha
 from flask import render_template, url_for, Markup, request, redirect
 import markdown
 import yaml
@@ -6,11 +6,10 @@ import json
 from cendr.models import strain, report, mapping, trait
 from cendr.emails import donate_submission
 from collections import OrderedDict
-from gcloud.datastore.entity import Entity
 from datetime import datetime
-from cendr.emails import donate_submission
 import pytz
 import hashlib
+import requests
 
 
 @app.context_processor
@@ -92,7 +91,19 @@ def statistics():
 @app.route('/about/donate/', methods=['GET','POST'])
 def donate():
     # Process donation.
-    if request.form:
+    try:
+        if request.form['g-recaptcha-response']:
+            r = requests.post('https://www.google.com/recaptcha/api/siteverify',
+                          data = {'secret' : app.config['RECAPTCHA_SECRET_KEY'],
+                                  'response' : request.form['g-recaptcha-response']})
+            if r.json['success']:
+                captcha_passed = True
+        else:
+            captcha_passed = False
+    except:
+        captcha_passed = False
+    
+    if request.form and captcha_passed:
         ds = get_ds()
         donation_amount = str(int(request.form['donation_amount']))
         o = ds.get(ds.key("cendr-order", "count"))
@@ -121,7 +132,6 @@ def donate():
                                          donation_amount=donation_amount)})
 
         add_to_order_ws(order)
-
         return redirect(url_for("order_confirmation", invoice_hash=order["invoice_hash"]), code=302)
 
     title = "Donate"

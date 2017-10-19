@@ -40,10 +40,9 @@ def get_ds():
 ds = get_ds()
 
 # recaptcha
-recaptcha_credentials = dict(ds.get(ds.key('credential', 'recaptcha')))
-recaptcha = ReCaptcha(site_key = recaptcha_credentials['RECAPTCHA_SITE_KEY'],
-                      secret_key = recaptcha_credentials['RECAPTCHA_SECRET_KEY'])
-recaptcha.init_app(app)
+app.config.update(dict(ds.get(ds.key('credential', 'recaptcha'))))
+app.config['RECAPTCHA_ENABLED'] = True
+recaptcha = ReCaptcha(app=app)
 
 
 credentials = dict(ds.get(ds.key("credential", 'cegwas-data')))
