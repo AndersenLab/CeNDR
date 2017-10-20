@@ -16,7 +16,8 @@
 <!-- jQuery JS -->
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-
+<script>$.widget.bridge('uitooltip', $.ui.tooltip);</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
 
 <script type="text/javascript" src="//igv.org/web/release/1.0.9/igv-1.0.9.min.js"></script>
 
@@ -209,6 +210,18 @@ th {
 <button id='download' class='btn btn-primary btn-xs pull-right'>Download</button>
 <p><small>A Maximum of 1000 variants from the region will be listed. Heterozygous calls are likely errors. When rows are yellow, it indicates the entire variant failed QC.</small></p>
 
+<small>Hovering over a failing genotype will list the filter applied. Genotypes are shown as follows:</small>
+<div class='panel'>
+<div class="panel panel-default">
+  <div class="panel-body">
+    <span class="label gt-0 PASS">Passing REF</span>&nbsp;
+    <span class="label gt-3 PASS">Passing ALT</span>&nbsp;
+    <span class="label gt-0 mapping_quality min_depth dv_dp het">Failing REF</span>&nbsp;
+    <span class="label gt-3 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
+    <span class="label gt-1 het">Heterozygous</span>
+  </div>
+</div>
+
 </div>
 <thead>
   <tr>
@@ -229,19 +242,6 @@ th {
 </tbody>
 
 </table>
-
-
-<small>Genotypes are shown as follows</small>
-<div class='panel'>
-<div class="panel panel-default">
-  <div class="panel-body">
-    <span class="label gt-0 PASS">Passing REF</span>&nbsp;
-    <span class="label gt-3 PASS">Passing ALT</span>&nbsp;
-    <span class="label gt-0 mapping_quality min_depth dv_dp het">Failing REF</span>&nbsp;
-    <span class="label gt-3 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
-    <span class="label gt-1 het">Heterozygous</span>
-  </div>
-</div>
 
 
       </div>
@@ -440,14 +440,18 @@ function process_gene_search() {
     }
 }
 
-
 function gt_label(gt) {
   // Generates a genotype label
   r = ""
   classes = [];
   classes.push(`gt-${gt["GT"]}`);
-  classes.push(gt["FT"].split(";").join(" "));
-  r += `<div class='label ${classes.join(" ")}'>`;
+  FT = gt["FT"].split(";").join(" ");
+  classes.push(FT);
+  tt = "";
+  if (gt['FT'] != ['PASS']) {
+      tt = ` data-placement='bottom' title='${FT}' `;
+  }
+  r += `<div class='label ttop ${classes.join(" ")}' ${tt} >`;
   r += gt["SAMPLE"] + " : " + gt["TGT"];
   r += "</div>";
   return r
@@ -567,21 +571,19 @@ function refresh_variants(download = false) {
                     $("#variants > tbody").append(
                       `<tr><td style='border-top:none;' colspan='10'>
                         <div class='row'>
-                          <div class='col-md-5 gt_set'>
+                          <div class='col-md-12 gt_set'>
                               <h5>Reference</h5>
                               ${draw_gt_set(gts, 0)}
-                          </div>
-                          <div class='col-md-5 gt_set'>
                               <h5>Alternative</h5>
                               ${draw_gt_set(gts, 3)}
-                          </div>
-                          <div class='col-md-2 gt_set'>
                               <h5>Other</h5>
                               ${draw_gt_set(gts, 1)}
                               ${draw_gt_set(gts, 2)}
                           </div>
                         </div>
                       </td></tr>`);
+                    // enable tooltips
+                    $('.ttop').tooltip();
                 }
 
             });
@@ -650,10 +652,7 @@ setTimeout(refresh_variants, 1000);
 });
 
 
-</script>
 
-
-<script type="text/javascript">
 $(document).ready(function() {
 
     (function($) {
@@ -679,6 +678,8 @@ $(document).ready(function() {
     });
 
 });
+
+
 
 
 
