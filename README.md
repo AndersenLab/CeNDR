@@ -18,4 +18,3 @@ docker build -t cendr .
 ```
 docker run -it --publish 5000:8080 cendr
 ```
-test
