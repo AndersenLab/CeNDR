@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.1.2 (2017-12-05)
+
+* Fixed a bug preventing the download button from working properly.
+
 ### v1.1.1 (2017-10-18)
 
 * Fixed Drawing of the Tajimas D plot on report pages.

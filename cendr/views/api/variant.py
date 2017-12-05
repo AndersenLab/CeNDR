@@ -162,11 +162,11 @@ def variant_api():
                     if k == 'ALT':
                         build_output[k]  = ','.join(rec[k])
                     else:
-                        build_output[k]  = rec[k]
+                        build_output[k]  = rec.get(k) or "NA"
                 if rec['ANN']:
                     for ann in rec['ANN']:
                         for k in ann_cols:
-                            build_output[k] = ann[k]
+                            build_output[k] = ann.get(k) or "NA"
                 else:
                     for k in ann_cols:
                         build_output[k] = ""
