@@ -92,7 +92,7 @@ if "homologene" in update:
     db.create_tables([homologene], safe=True)
 
     response = requests.get(
-        'http://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data')
+        'https://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data')
 
     elegans_set = {}
 

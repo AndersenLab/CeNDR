@@ -20,7 +20,7 @@ def tajima(chrom, start, end):
             }
 
     """
-    url = "http://storage.googleapis.com/elegansvariation.org/releases/{release}/tajima/WI.{release}.tajima.bed.gz".format(release = app.config['CURRENT_RELEASE'])
+    url = "https://storage.googleapis.com/elegansvariation.org/releases/{release}/tajima/WI.{release}.tajima.bed.gz".format(release = app.config['CURRENT_RELEASE'])
     comm =['tabix', url, "{chrom}:{start}-{end}".format(**locals())]
     out, err = Popen(comm, stdout = PIPE, stderr = PIPE).communicate()
     out = [x.split("\t") for x in out.splitlines()]

@@ -1,5 +1,5 @@
 ## Collect Nematodes As A Citizen Scientist! ##
-The <em>Caenorhabditis</em> research community is looking for new wild strains from throughout the world! **If you would like to help us**, please feel free to [contact us](http://elegansvariation.org/about/staff/).
+The <em>Caenorhabditis</em> research community is looking for new wild strains from throughout the world! **If you would like to help us**, please feel free to [contact us](https://elegansvariation.org/about/staff/).
 
 We will send you everything you need to isolate your own nematodes. After you mail the samples back to us, we will tell you (as much as we can) about what species you found.
 
@@ -11,17 +11,17 @@ We will send you everything you need to isolate your own nematodes. After you ma
 4. Wrap up the plates with provided parafilm.
 5. Mail them back to me at my expense.
 
-Download the full instructions [here](http://andersenlab.org/files/WormCollecting.pdf)
+Download the full instructions [here](https://andersenlab.org/files/WormCollecting.pdf)
 
 If you would like materials to collect your own nematodes, please fill out this [form](https://docs.google.com/forms/d/15JXAQptqCSenZMyqHHOKQH1wJe7m0n8_Q0nHMe0eTUY/viewform?formkey=dERCQ1lsamU1ZFNtOGJJUkJqVzZOOVE6MQ#gid=0).
 
 
-The Andersen laboratory uses a Biosafety level 3 facility for the isolation of nematodes from foreign soil and rotting plant debris. We have received APHIS permits (both international and interstate) which allow us to have foreign samples shipped to Northwestern for processing. Please see our [standard operating procedure](http://andersenlab.org/files/USDA_SOP.pdf) for additional information.
+The Andersen laboratory uses a Biosafety level 3 facility for the isolation of nematodes from foreign soil and rotting plant debris. We have received APHIS permits (both international and interstate) which allow us to have foreign samples shipped to Northwestern for processing. Please see our [standard operating procedure](https://andersenlab.org/files/USDA_SOP.pdf) for additional information.
 
 ### APHIS Permits ###
 
-* [APHIS - Interstate](http://andersenlab.org/files/APHISDom.pdf)
-* [APHIS - International](http://andersenlab.org/files/APHISIntl.pdf)
+* [APHIS - Interstate](https://andersenlab.org/files/APHISDom.pdf)
+* [APHIS - International](https://andersenlab.org/files/APHISIntl.pdf)
 
 ### Additional Protocols  ###
-* [Sampling and Isolation of _C. elegans_ from the Natural Habitat](http://elegansvariation.org/static/content/protocols/SamplingIsolationC.elegansNaturalHabitat.pdf)
+* [Sampling and Isolation of _C. elegans_ from the Natural Habitat](https://elegansvariation.org/static/content/protocols/SamplingIsolationC.elegansNaturalHabitat.pdf)

@@ -6,10 +6,10 @@
             <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> formats.
             <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> files are substantially smaller than
             <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> files.</p>
-        <p><a href="http://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data here</a>.</p>
+        <p><a href="https://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data here</a>.</p>
         <p>CRAM files are substantially smaller than BAM files, but require the reference to be converted to BAM files. We are currently using WS245 (<strong><a href="https://northwestern.box.com/shared/static/ijlhhd1hwlbr5vvasjg35yjux1p5n01g.gz">Download</a></strong>).
             <h4>Downloading All Alignment Data</h4>
-            <p>Interested in downloading everything? Use the scripts below! Before these scripts will work, you need to download and install <strong>wget</strong>. We recommend using <a href="http://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "help_item",filename="FAQ ")}}">FAQ</a> for details on installing <strong>wget</strong>. </p>
+            <p>Interested in downloading everything? Use the scripts below! Before these scripts will work, you need to download and install <strong>wget</strong>. We recommend using <a href="https://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "help_item",filename="FAQ ")}}">FAQ</a> for details on installing <strong>wget</strong>. </p>
             <ul>
                 <li><a href="{{ url_for("download_script", filetype="bam") }}">Download BAMs</a></li>
                 <li><a href="{{ url_for( "download_script", filetype="cram") }}">Download CRAMs</a></li>
@@ -20,7 +20,7 @@
         <h3>Variant Data</h3>
         <p>We used samtools to identify single-nucleotide variant (SNV) sites as compared to the N2 reference genome (WS245). Variant data are provided as
             <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> or tab-delimited files.</p>
-        <p><a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat">Learn more about VCF files here</a>.</p>
+        <p><a href="https://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat">Learn more about VCF files here</a>.</p>
         <h4>VCF</h4>
         <p>The file below is a single
             <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> containing SNVs for all wild isolates.</p>

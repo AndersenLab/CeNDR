@@ -50,9 +50,9 @@
   <td>{{ order["shipping_service"] }}</td>
   <td>
   {% if order['tracking'] and order['shipping_service'] == "UPS" %}
-      <a href="http://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order['tracking'] }}">{{ order['tracking'] }}</a>
+      <a href="https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order['tracking'] }}">{{ order['tracking'] }}</a>
   {% elif order['tracking'] and order['shipping_service'] == "FEDEX" %}
-      <a href="http://www.fedex.com/Tracking?action=track&tracknumbers={{ order['tracking'] }}">{{ order['tracking'] }}</a>
+      <a href="https://www.fedex.com/Tracking?action=track&tracknumbers={{ order['tracking'] }}">{{ order['tracking'] }}</a>
   {% else %}
       Not yet assigned
   {% endif %}
