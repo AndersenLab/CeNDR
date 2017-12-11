@@ -5,7 +5,7 @@ runtime_config:
   python_version: 2
 
 api_version: 1
-threadsafe: yes
+threadsafe: true
 skip_files:
   - ^(.*/)?.*vcf\.gz$
   - ^(.*/)?.*vcf$
@@ -17,6 +17,12 @@ skip_files:
   - ^.*pyc$  
   - ^scripts/.*$
   - ^tests/.*$
+
+
+resources:
+  cpu: 2
+  memory_gb: 2.3
+  disk_size_gb: 10
 
 
 automatic_scaling:
@@ -34,13 +40,4 @@ handlers:
 
 - url: .*
   script: run.app  # a WSGI application in the main module's global scope
- 
-builtins:
-- remote_api: on
 
-health_check:
-  enable_health_check: True
-  check_interval_sec: 5
-  timeout_sec: 4
-  unhealthy_threshold: 2
-  healthy_threshold: 2
