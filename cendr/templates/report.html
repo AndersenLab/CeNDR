@@ -247,8 +247,8 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 {% for row in mapping_results %}
 {% set peak_index = loop.index0 %}
 <tr chrom="{{ row.chrom }}" start="{{ row.interval_start }}" end="{{ row.interval_end }}" class="text-right">
-  <td class="text-left"><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
-  <td class='text-right'><a href="http://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
+  <td class="text-left"><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
+  <td class='text-right'><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
   <td>{{ row.log10p|round(2) }}</td>
   <td>{{ row.variance_explained|round(3) * 100 }}%</td>
   <td data='msg.variants' class='dat_{{ peak_index }}'>-</td>
@@ -557,10 +557,10 @@ function update_gene_list(chrom, start, end) {
       $.each(msg["gene_list"], function(k,v) {
 
       if (v["locus"] != "") {
-        v["locus"] = "<a href='http://www.wormbase.org/species/c_elegans/gene/" + v["locus"] + "'>" + v["locus"] + "</a>";
+        v["locus"] = "<a href='https://www.wormbase.org/species/c_elegans/gene/" + v["locus"] + "'>" + v["locus"] + "</a>";
       }
       if (v["Name"] != "") {
-        v["Name"] = "<a href='http://www.wormbase.org/species/c_elegans/gene/" + v["Name"] + "'>" + v["Name"] + "</a>";
+        v["Name"] = "<a href='https://www.wormbase.org/species/c_elegans/gene/" + v["Name"] + "'>" + v["Name"] + "</a>";
       }
 
 

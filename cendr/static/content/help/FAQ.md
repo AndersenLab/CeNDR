@@ -5,7 +5,7 @@ The BAM and CRAM download scripts require wget. Once you have wget, follow the i
 
 #### Mac OS or Linux
 
-__wget__ can be obtained using <a href="http://brew.sh/">homebrew</a> on Mac OSX. Install homebrew, then type:
+__wget__ can be obtained using <a href="https://brew.sh/">homebrew</a> on Mac OSX. Install homebrew, then type:
 
 <pre>
 brew install wget
@@ -18,7 +18,7 @@ Install [Cygwin](www.cygwin). Then install the wget package.
 
 ### How do I use the API?
 
-The Application Programming Interface (API) can be used to access the CeNDR database and make a variety of queries. The API [documentation](http://docs.elegansvariation.apiary.io/) details the types of queries you can make and provides examples in a variety of languages. If you are unfamiliar with APIs and how they work, I recommend taking a look at [this guide](https://sunlightfoundation.com/blog/2015/09/08/what-are-apis-why-they-matter-and-how-to-use-them/). 
+The Application Programming Interface (API) can be used to access the CeNDR database and make a variety of queries. The API [documentation](https://docs.elegansvariation.apiary.io/) details the types of queries you can make and provides examples in a variety of languages. If you are unfamiliar with APIs and how they work, I recommend taking a look at [this guide](https://sunlightfoundation.com/blog/2015/09/08/what-are-apis-why-they-matter-and-how-to-use-them/). 
 
 R can be used to make queries to the API. See the examples below:
 

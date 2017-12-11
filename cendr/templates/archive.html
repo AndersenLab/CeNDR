@@ -1,0 +1,91 @@
+{% extends "_layouts/default.html" %}
+{% block custom_head %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
+  <script src="/static/js/moment.min.js"></script>
+  <link rel="stylesheet" href="/static/css/cal-heatmap.css" />
+  <script src="/static/js/cal-heatmap.min.js"></script>
+{% endblock %}
+{% block content %}
+<h3>2016</h3>
+  <div id="archive_date"></div>
+  <br></br>
+  <table class="table table-hover table-striped">
+  <thead>
+    <tr>
+      <th>Report Name</th>
+      <th>Trait Name</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for i in report_data %}
+      {% if i.release == 0 %}
+        <tr>
+          <td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.report_name }}</a></td>
+          <td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.trait_name }}</a></td>
+          <td>{{ i["submission_complete"].date() }}</td>
+        </tr>
+      {% endif %}
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+var cal = new CalHeatMap();
+cal.init({
+  itemSelector: "#archive_date",
+  domain: "month",
+  subDomainTextFormat: "%d",
+  subDomain: "x_day",
+  data: {{ date_set|tojson|safe }},
+  start: new Date(2016, 2,1),
+  cellSize: 20,
+  cellPadding: 5,
+  domainGutter: 20,
+  range: 5,
+  label: {height: 50},
+  domainLabelFormat: function(date) {
+    moment.locale("en");
+    return moment(date).format("MMMM").toUpperCase();
+  },
+  cellRadius: 3,
+  displayLegend: false,
+  domainDynamicDimension: false,
+  previousSelector: "#example-g-PreviousDomain-selector",
+  nextSelector: "#example-g-NextDomain-selector",
+  subDomainTextFormat: "%d",
+  legend: [1, 3, 10, 15],
+  onClick: function(x) {
+            date = x.toISOString().split("T")[0];
+            $.ajax({
+              url: "/api/report/date/" + date,
+
+            }).done(function(r) {
+              console.log(r);
+            })
+        }
+});
+
+$("body").ready(function () {
+
+setTimeout(function() {
+  $("g").map(function() {
+    title_text = $(this).children("title").text();
+    var re = /^[0-9]+.*/
+    if (re.test(title_text)) {
+      items = title_text.split(" ")[0] + " report(s)";
+      $(this).attr("data-toggle", "tooltip");
+      $(this).attr("data-placement", "bottom");
+      $(this).attr("data-title", items);
+      $(this).tooltip({"container":"body"})
+    }
+  });
+}, 2000);
+
+});
+
+
+
+</script>
+{% endblock %}

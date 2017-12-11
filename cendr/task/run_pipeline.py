@@ -36,7 +36,7 @@ def run_command(command, l):
 
 
 def fetch_metadata(key, sub = 'attributes/'):
-    metadata_server = "http://metadata.google.internal/computeMetadata/v1/instance/" + sub
+    metadata_server = "https://metadata.google.internal/computeMetadata/v1/instance/" + sub
     metadata_flavor = {'Metadata-Flavor' : 'Google'}
     return requests.get(metadata_server + key, headers = metadata_flavor).text
 

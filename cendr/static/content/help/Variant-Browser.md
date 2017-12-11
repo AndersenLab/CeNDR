@@ -15,7 +15,7 @@ Shows transcripts of genes.
 
 #### Conservation Tracks
 
-The UCSC genome browser provides a [good explanation](http://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=cons46way) of the phyloP and phastCons tracks and how to interpret them.
+The UCSC genome browser provides a [good explanation](https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=cons46way) of the phyloP and phastCons tracks and how to interpret them.
 
 ##### phyloP
 
@@ -47,7 +47,7 @@ The variants track shows variation across the species for all isotypes sequenced
 <a name="variant-effects"></a>
 ### Variant Effects
 
-There are three tracks (LOW, MODERATE, HIGH) that can be used to show variants and their predicted impacts as annotated by [SnpEff](http://snpeff.sourceforge.net/). The tracks are color coded based on severity as follows:
+There are three tracks (LOW, MODERATE, HIGH) that can be used to show variants and their predicted impacts as annotated by [SnpEff](https://snpeff.sourceforge.net/). The tracks are color coded based on severity as follows:
 
 <div class='text-center'>
   <label><div class="legend-box" style="background-color: #66d866;"> </div> LOW</label>&nbsp;&nbsp;

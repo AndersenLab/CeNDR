@@ -118,38 +118,38 @@
 <script>
 
 $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", function(msg) {
-  link_set = {Wormbase: "http://www.wormbase.org/species/c_elegans/gene/{{ gene_record["Name"] }}"}
+  link_set = {Wormbase: "https://www.wormbase.org/species/c_elegans/gene/{{ gene_record["Name"] }}"}
   $.each(msg["fields"]["xrefs"]["data"], function(k, d) {
     if (k == "AceView") {
       id = d["gene"]["ids"][0];
-      link = "http://www.ncbi.nlm.nih.gov/IEB/Research/Acembly/av.cgi?db=worm&q=" + id;
+      link = "https://www.ncbi.nlm.nih.gov/IEB/Research/Acembly/av.cgi?db=worm&q=" + id;
       link_set[k] = link;
     } else if(k == "NCBI") {
       id = d["gene"]["ids"][0];
-      link = "http://www.ncbi.nlm.nih.gov/gene/?term=" + id;
+      link = "https://www.ncbi.nlm.nih.gov/gene/?term=" + id;
       link_set[k] = link;
     } else if(k == "NDB") {
       id = d["locus_tag"]["ids"][0];
-      link = "http://www.wormbase.org/species/c_elegans/gene/" + id;
+      link = "https://www.wormbase.org/species/c_elegans/gene/" + id;
       link_set[k] = link
     } else if(k == "RefSeq") {
       id = d["mRNA"]["ids"][0];
-      link = "http://www.ncbi.nlm.nih.gov/protein/" + id;
+      link = "https://www.ncbi.nlm.nih.gov/protein/" + id;
       link_set[k] = link
       id = d["protein"]["ids"][0];
-      link = "http://www.ncbi.nlm.nih.gov/protein/NP_498558.1" + id;
+      link = "https://www.ncbi.nlm.nih.gov/protein/NP_498558.1" + id;
       link_set[k] = link;
     } else if (k == "TREEFAM") {
       id = d["TREEFAM_ID"]["ids"][0]
-      link = "http://www.treefam.org/family/" + id;
+      link = "https://www.treefam.org/family/" + id;
       link_set[k] = link;
     } else if (k == "UniProt") {
       id = d["UniProtAcc"]["ids"][0]
-      link = "http://www.ebi.uniprot.org/entry/" + id;
+      link = "https://www.ebi.uniprot.org/entry/" + id;
       link_set[k] = link;
     } else if (k == "WormQTL") {
       id = d["gene"]["ids"][0];
-      link = "http://www.wormqtl.org/molgenis.do?__target=QtlFinderPublic2&select=QtlFinderPublic2&p=" + id;
+      link = "https://www.wormqtl.org/molgenis.do?__target=QtlFinderPublic2&select=QtlFinderPublic2&p=" + id;
       link_set[k] = link;
     }
 
@@ -173,10 +173,10 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", 
 $.getJSON("/api/omim/{{ gene_record["Name"] }}", function(msg) {
   omim_table = "";
   $.each(msg["omim_diseases"], function(k,v) {
-    omim_table += "<tr><td>Disease</td><td><a href='http://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
+    omim_table += "<tr><td>Disease</td><td><a href='https://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
   });
   $.each(msg["omim_genes"], function(k,v) {
-    omim_table += "<tr><td>Gene</td><td><a href='http://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
+    omim_table += "<tr><td>Gene</td><td><a href='https://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
   });
   $("#omim > tbody").html(omim_table)
 })
@@ -192,7 +192,7 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/gene_ontology", f
     grouping = grouping.replace("_", " ");
     $.each(v, function(i, term) {
       term_d = term["term_description"][0];
-      term_set += "<tr><td>" + grouping + "</td><td><a href='http://amigo.geneontology.org/amigo/term/" + term_d["id"] + "'>" + term_d["id"] + "</a></td><td>" + term_d["label"] + "</td></tr>";
+      term_set += "<tr><td>" + grouping + "</td><td><a href='https://amigo.geneontology.org/amigo/term/" + term_d["id"] + "'>" + term_d["id"] + "</a></td><td>" + term_d["label"] + "</td></tr>";
     });
   });
   $("#gene_ontology > tbody").html(term_set)
@@ -216,7 +216,7 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/phenotype", funct
         } else {
           evidence_class = i['text']['class'];
         }
-        ptable += " <a href='http://www.wormbase.org/search/phenotype/" + i['text']["id"] + "' class='label label-primary'>" + evidence_class + ": " + i['text']["label"] + "</a>"
+        ptable += " <a href='https://www.wormbase.org/search/phenotype/" + i['text']["id"] + "' class='label label-primary'>" + evidence_class + ": " + i['text']["label"] + "</a>"
       });
     });
     ptable += "</td></tr>";

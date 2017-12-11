@@ -6,7 +6,7 @@
   photo: Erik_C_Andersen.jpg
   cv: https://github.com/AndersenLab/cv/blob/master/Andersen_CV.pdf?raw=true
   email: Erik.Andersen@northwestern.edu
-  website: "http://www.andersenlab.org"
+  website: "https://www.andersenlab.org"
   github: synmuv
 
 - first_name: Robyn
@@ -21,7 +21,7 @@
   group: Graduate Students
   pub_names: ["Cook DE"]
   photo: Daniel_E_Cook.jpg
-  website: http://www.danielecook.com
+  website: https://www.danielecook.com
   email: Dec@u.northwestern.edu
   github: danielecook
 
