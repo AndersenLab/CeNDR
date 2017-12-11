@@ -28,7 +28,6 @@ def gene_search(gene, search = False):
 @app.route('/api/genome/search/<string:gene>') # Seach for IGV Browser
 @app.route('/api/gene/<string:gene>')
 def api_get_gene(gene):
-    print(request.path)
     if request.path.startswith('/api/genome/search/'):
         result = gene_search(gene)
         return jsonify({"result": [{"chromosome": result['CHROM'],

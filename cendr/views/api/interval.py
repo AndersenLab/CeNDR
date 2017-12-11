@@ -35,13 +35,10 @@ def get_gene_interval_summary(chrom, start, end, include_list = False):
     return result
 
 
-class api_gene_list(Resource):
-    def get(self, chrom, start, end):
-        result = get_gene_interval_summary(chrom, start, end, True)
-        return jsonify(result)
-
-api.add_resource(
-    api_gene_list, '/api/genelist/<string:chrom>/<int:start>/<int:end>')
+@app.route('/api/genelist/<string:chrom>/<int:start>/<int:end>')
+def api_gene_list(chrom, start, end):
+    result = get_gene_interval_summary(chrom, start, end, True)
+    return jsonify(result)
 
 
 # Variants
@@ -62,17 +59,13 @@ def get_variant_count(chrom, start, end, filter=True, release=releases[0]):
         .group_by() \
         .distinct().count()
 
-
-class api_variant_count(Resource):
-    def get(self, chrom, start, end, filter=True):
-        if type(filter) == unicode:
-            filter = {'true': True, 'false': False}[filter.lower()]
-        result = get_variant_count(chrom, start, end, filter)
-        return jsonify(result)
-
-urls = ['/api/variant/count/<string:chrom>/<int:start>/<int:end>',
-        '/api/variant/count/<string:chrom>/<int:start>/<int:end>/<string:filter>']
-api.add_resource(api_variant_count, *urls)
+@app.route('/api/variant/count/<string:chrom>/<int:start>/<int:end>')
+@app.route('/api/variant/count/<string:chrom>/<int:start>/<int:end>/<string:filter>')
+def api_variant_count(chrom, start, end, filter=True):
+    if type(filter) == unicode:
+        filter = {'true': True, 'false': False}[filter.lower()]
+    result = get_variant_count(chrom, start, end, filter)
+    return jsonify(result)
 
 
 def count_column(q):

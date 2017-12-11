@@ -9,7 +9,7 @@ from peewee import *
 from flask_restful import Api
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import date
-from flask_cache import Cache
+from flask_caching import Cache
 from gcloud import datastore
 
 # Caching
@@ -207,6 +207,7 @@ def comma_filter(value):
 def format_release_filter(value):
     return datetime.strptime(str(value), '%Y%m%d').strftime('%Y-%m-%d')
 
-from task import *
-from views import *
-from cegwas import *
+from cendr.task import *
+from cendr.views import *
+from cendr.views.api import *
+from cendr.cegwas import *

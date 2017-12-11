@@ -1,6 +1,5 @@
-from flask_restful import Resource
 from cendr.models import strain
-from cendr import api, cache
+from cendr import app, cache
 from flask import jsonify
 from collections import OrderedDict
 
@@ -9,49 +8,39 @@ PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
                       for x in strain._meta.sorted_fields if x.name != "id"]
 
 
-class strain_api(Resource):
-    @cache.memoize(50)
-    def get(self):
-        """
-            Return information for all strains.
-        """
-        strain_data = list(strain.select(
-            *PEEWEE_FIELDS_LIST).tuples().execute())
-        response = [OrderedDict(zip(FIELDS, x)) for x in strain_data]
-        return jsonify(response)
+@app.route('/api/strain')
+@cache.memoize(50)
+def strain_api():
+    """
+        Return information for all strains.
+    """
+    strain_data = list(strain.select(
+        *PEEWEE_FIELDS_LIST).tuples().execute())
+    response = [OrderedDict(zip(FIELDS, x)) for x in strain_data]
+    return jsonify(response)
 
 
-api.add_resource(strain_api, '/api/strain')
+@app.route('/api/strain/<string:strain_name>')
+@cache.memoize(50)
+def strain_ind_api(strain_name):
+    """
+        Return information for an individual strain.
+    """
+    strain_data = list(strain.select(
+        *PEEWEE_FIELDS_LIST).filter(strain.strain == strain_name)
+                            .tuples()
+                            .execute())
+    response = OrderedDict(zip(FIELDS, strain_data[0]))
+    return jsonify(response)
 
 
-class strain_ind_api(Resource):
-    @cache.memoize(50)
-    def get(self, strain_name):
-        """
-            Return information for an individual strain.
-        """
-        strain_data = list(strain.select(
-            *PEEWEE_FIELDS_LIST).filter(strain.strain == strain_name)
-                                .tuples()
-                                .execute())
-        response = OrderedDict(zip(FIELDS, strain_data[0]))
-        print response, "RESPONSE"
-        return jsonify(response)
-
-
-api.add_resource(strain_ind_api, '/api/strain/<string:strain_name>')
-
-
-class isotype_ind_api(Resource):
-    @cache.memoize(50)
-    def get(self, isotype_name):
-        """
-            Return all strains within an isotype.
-        """
-        strain_data = list(strain.select(
-            strain.strain).filter(strain.isotype == isotype_name).execute())
-        response = [x.strain for x in strain_data]
-        return jsonify(response)
-
-
-api.add_resource(isotype_ind_api, '/api/strain/isotype/<string:isotype_name>')
+@app.route('/api/strain/isotype/<string:isotype_name>')
+@cache.memoize(50)
+def isotype_ind_api(isotype_name):
+    """
+        Return all strains within an isotype.
+    """
+    strain_data = list(strain.select(
+        strain.strain).filter(strain.isotype == isotype_name).execute())
+    response = [x.strain for x in strain_data]
+    return jsonify(response)

@@ -1,5 +1,5 @@
 from cendr import app, cache, get_ds
-from models import trait, report
+from cendr.models import trait, report
 from flask import render_template, request, Markup, url_for, Response, redirect
 import markdown
 from datetime import datetime
@@ -7,7 +7,7 @@ import os
 from collections import OrderedDict
 import dateutil
 from werkzeug.contrib.atom import AtomFeed
-from urlparse import urljoin
+from urllib.parse import urljoin
 
 
 def make_external(url):

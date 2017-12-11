@@ -1,6 +1,6 @@
 from flask_restful import Resource
 from cendr.models import WI, mapping_correlation
-from cendr import api, cache
+from cendr import app, cache
 from peewee import *
 from collections import OrderedDict
 from collections import Counter
@@ -62,12 +62,8 @@ def get_correlated_genes(r, t, chrom, start, end):
     return max_corr
 
 
-class get_mapping_correlation(Resource):
-    def get(self, report, trait):
-        interval = get_correlated_genes(report, trait)
-        return jsonify(interval)
-
-
-api.add_resource(get_mapping_correlation,
-                 '/api/correlation/<string:report>/<string:trait>')
+@app.route('/api/correlation/<string:report>/<string:trait>')
+def get_mapping_correlation(report, trait):
+    interval = get_correlated_genes(report, trait)
+    return jsonify(interval)
 

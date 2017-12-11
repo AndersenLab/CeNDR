@@ -1,9 +1,10 @@
 from flask_restful import Resource
 from cendr import api, cache
-import cPickle
+import pickle
 import base64
 import zlib
 from cendr.models import WI, strain
+from cendr import app
 from flask import jsonify
 
 
@@ -11,7 +12,7 @@ def decode_gt(gt):
     """
         Decode compressed genotypes
     """
-    return cPickle.loads(zlib.decompress(base64.b64decode(gt)))
+    return pickle.loads(zlib.decompress(base64.b64decode(gt)))
 
 
 def get_gt(chrom, pos):
@@ -72,20 +73,17 @@ def gt_from_interval(chrom, start, end, var_eff):
         i["GT"] = decode_gt(i["GT"])
     return result
 
-
-class api_get_gt(Resource):
-    def get(self, chrom, pos):
+@app.route('/api/variant/gt/<string:chrom>/<int:pos>')
+def api_get_gt(chrom, pos):
         """
             Retrieve a single genotype.
         """
         gt = get_gt(chrom, pos)
         return jsonify(gt)
 
-api.add_resource(api_get_gt, '/api/variant/gt/<string:chrom>/<int:pos>')
 
-
-class strain_gt_locations(Resource):
-    def get(self, chrom, pos):
+@app.route('/api/variant/gtloc/<string:chrom>/<int:pos>')
+def strain_gt_locations(chrom, pos):
         """
             Retreive genotypes with location information
         """
@@ -93,25 +91,18 @@ class strain_gt_locations(Resource):
         return jsonify(result)
 
 
-api.add_resource(strain_gt_locations,
-                 '/api/variant/gtloc/<string:chrom>/<int:pos>')
-
 
 #
 # Get Genotypes from Interval
 #
 
+@app.route('/api/variant/gt/<string:chrom>/<int:start>/<int:end>/<string:tracks>')
+@app.route('/api/variant/gt/<string:chrom>/<int:start>/<int:end>/')
+@app.route('/api/variant/gt/<string:chrom>/<int:start>/<int:end>')
+def fetch_gt_from_interval(chrom, start, end, tracks="ALL"):
+    if tracks != "ALL":
+        putative_impact = {'l': 'LOW', 'm': 'MODERATE', 'h': 'HIGH'}
+        tracks = [putative_impact[x] if x else '' for x in tracks]
+    result = gt_from_interval(chrom, start, end, tracks)
+    return jsonify(result)
 
-class fetch_gt_from_interval(Resource):
-    def get(self, chrom, start, end, tracks="ALL"):
-        if tracks != "ALL":
-            putative_impact = {'l': 'LOW', 'm': 'MODERATE', 'h': 'HIGH'}
-            tracks = [putative_impact[x] if x else '' for x in tracks]
-        result = gt_from_interval(chrom, start, end, tracks)
-        return jsonify(result)
-
-urls = ['/api/variant/gt/<string:chrom>/<int:start>/<int:end>/<string:tracks>',
-        '/api/variant/gt/<string:chrom>/<int:start>/<int:end>/',
-        '/api/variant/gt/<string:chrom>/<int:start>/<int:end>']
-
-api.add_resource(fetch_gt_from_interval, *urls)

@@ -105,7 +105,7 @@ def variant_api():
     if not out and err:
         app.logger.error(err)
         return err, 400
-    tfile = NamedTemporaryFile(mode='w+b', bufsize=10000)
+    tfile = NamedTemporaryFile(mode='w+b')
     with tfile as f:
         f.write(out)
         f.flush()

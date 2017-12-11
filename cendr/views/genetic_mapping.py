@@ -4,7 +4,7 @@ from cendr import dbname
 from cendr import autoconvert
 from cendr.task.map_submission import launch_mapping
 from cendr.models import db, report, strain, trait, trait_value, mapping
-from api import *
+from cendr import api
 from cendr.emails import mapping_submission
 from datetime import date, datetime
 import pytz
@@ -147,7 +147,6 @@ def process_gwa():
             for row, s in enumerate(strain_set):
                 if t and s and is_number(data[1:][row][col + 1]):
                     val =  autoconvert(data[1:][row][col + 1])
-                    print(s)
                     trait_value(trait = t, strain = s, value = val).save()
                     trait_data.append({"trait": t,
                                        "strain": s,
@@ -303,7 +302,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     #        .where(trait.trait_slug == t.trait_slug)
     #        .dicts()
     #        .execute())
-    phenotype_data = map(autoconvert, [x.split('\t')[2] for x in requests.get('https://storage.googleapis.com/cendr/{report_slug}/{trait_slug}/tables/phenotype.tsv'.format(**locals())).text.splitlines()[1:]])
+    phenotype_data = list(map(autoconvert, [x.split('\t')[2] for x in requests.get('https://storage.googleapis.com/cendr/{report_slug}/{trait_slug}/tables/phenotype.tsv'.format(**locals())).text.splitlines()[1:]]))
     print(phenotype_data)
 
     if rerun == "rerun":
@@ -330,6 +329,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     #######################
     var_corr = []
     for m in mapping_results:
+        from cendr.views.api import correlation
         var_corr.append(correlation.get_correlated_genes(r, t, m["chrom"], m["interval_start"], m["interval_end"]))
     tbl_color = {"LOW": 'success', "MODERATE": 'warning', "HIGH": 'danger'}
 
