@@ -20,13 +20,15 @@ app.config.from_object(getattr(config, os.environ['APP_CONFIG']))
 cache = Cache(app, config=app.config['CACHE'])
 
 
+# Setup application
+
+
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
 
 releases = ["20170531",
             "20160408"]
 
 app.config['CURRENT_RELEASE'] = releases[0]
-
 
 
 def get_vcf(release = releases[0]):
@@ -38,6 +40,7 @@ def get_ds():
         if not hasattr(g, 'ds'):
             g.ds = datastore.Client(project="andersen-lab")
         return g.ds
+
 
 ds = get_ds()
 
@@ -204,6 +207,7 @@ from base.views.about import about_bp
 
 app.register_blueprint(about_bp, url_prefix='/about')
 
+from base.utils.auth import *
 from base.task import *
 from base.views import *
 from base.views.api import *
