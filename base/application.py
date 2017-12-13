@@ -1,19 +1,15 @@
 import json
 import os
 import time
-import re
 import requests
 import decimal
 from base import config
 from flask import Flask, g
 from peewee import *
-from flask_restful import Api
 from flask_debugtoolbar import DebugToolbarExtension
 from datetime import date
 from flask_caching import Cache
 from gcloud import datastore
-from flask import Blueprint, render_template, abort
-from jinja2 import TemplateNotFound
 from flask_caching import Cache
 
 # Caching
@@ -42,7 +38,6 @@ def get_ds():
         if not hasattr(g, 'ds'):
             g.ds = datastore.Client(project="andersen-lab")
         return g.ds
-
 
 ds = get_ds()
 

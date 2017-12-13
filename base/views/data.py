@@ -41,11 +41,9 @@ def browser(region = "III:11746923-11750250", tracks="mh", query = None):
     title = "Browser" 
     from base import releases
     build = releases[0]
-    
     isotype_listing = list(strain.select(strain.isotype).distinct().filter(
                                     strain.isotype != None).order_by(strain.isotype).dicts().execute())
     isotypes = [x["isotype"] for x in isotype_listing]
-    
     return render_template('browser.html', **locals())
 
 

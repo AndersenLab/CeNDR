@@ -3,33 +3,33 @@
 
 {% block content %}
      
-      {% for m in staff_data %}
+      {% for staff in staff_data %}
       <div class="row">
       <div class="col-md-12">
-		<img src="/static/img/staff/{{ m.photo }}" alt="{{ m.first_name }}" class="thumbnail hidden-xs lab-member-photo" />
-		<img src="/static/img/staff/{{ m.photo }}" alt="{{ m.first_name }}" class="thumbnail visible-xs lab-member-photo-small" />
-		<h4 id="{{ m.first_name }} {{ m.last_name }}">{{ m.first_name }} {{ m.last_name }} <small>{{ m.title }}</small></h4>
-		{% if m.cv %}
-		<i class="glyphicon glyphicon-file"></i> <a class="btn btn-primary btn-xs" href="{{ m.cv }}"><em>Curriculum Vitae</em></a><br />
+		<img src="{{ gs_static('img/staff/' + staff.photo) }}" alt="{{ staff.first_name }}" class="thumbnail hidden-xs lab-member-photo" />
+		<img src="{{ gs_static('img/staff/' + staff.photo) }}" alt="{{ staff.first_name }}" class="thumbnail visible-xs lab-member-photo-small" />
+		<h4 id="{{ staff.first_name }} {{ staff.last_name }}">{{ staff.first_name }} {{ staff.last_name }} <small>{{ staff.title }}</small></h4>
+		{% if staff.cv %}
+		<i class="glyphicon glyphicon-file"></i> <a class="btn btn-primary btn-xs" href="{{ staff.cv }}"><em>Curriculum Vitae</em></a><br />
 		{% endif %}
 
 		<!-- email -->
-		{% if m.email %}
-		<span style="white-space:nowrap;"><i class="glyphicon glyphicon-envelope"></i> <a href="mailto:{{ m.email }}">{{ m.email }}</a></span><br />
+		{% if staff.email %}
+		<span style="white-space:nowrap;"><i class="glyphicon glyphicon-envelope"></i> <a href="mailto:{{ staff.email }}">{{ staff.email }}</a></span><br />
 		{% endif %}
 		
 		<!-- website -->
-		{% if m.website %}
-		<i class="glyphicon glyphicon-home"></i> <a href="{{ m.website }}">{{ m.website }}</a><br />
+		{% if staff.website %}
+		<i class="glyphicon glyphicon-home"></i> <a href="{{ staff.website }}">{{ staff.website }}</a><br />
 		{% endif %}
 
 		<!-- github -->
-		{% if m.github %}
-		<img src="/static/img/icons/github.png" style="width:16px; "/> <a href="https://github.com/{{ m.github }}">{{ m.github }}</a><br />
+		{% if staff.github %}
+		<img src="/static/img/icons/github.png" style="width:16px; "/> <a href="https://github.com/{{ staff.github }}">{{ staff.github }}</a><br />
 		{% endif %}
 
       <br />
-<p>{{ m.description }}</p>
+<p>{{ staff.description }}</p>
 
 
 

@@ -1,11 +1,12 @@
 {% extends "_layouts/default.html" %}
 
-
 {% block content %}
 <div class="row">
-      <div class="col-md-8">
-      {{ render_markdown("funding.md") }}
-      <br></br>
-      </div>
+	{% for funder in funding_set %}
+        <div class="col-md-6 text-center">
+        	<a href='{{ funder.url }}'><img src='{{ gs_static('img/funding/' + funder.image) }}' alt="{{ funder.name }}" /></a>
+        <br></br>
+        </div>
+    {% endfor %}
 </div>
 {% endblock %}

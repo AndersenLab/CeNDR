@@ -5,6 +5,7 @@ import yaml
 import json
 from base.models import strain, report, mapping, trait
 from base.emails import donate_submission
+from base.utils.data import load_yaml
 from collections import OrderedDict
 from datetime import datetime
 import pytz
@@ -25,7 +26,7 @@ def utility_processor():
 
 
 @about_bp.route('/')
-#@cache.cached()
+@cache.cached()
 def about():
 	# About us Page - directs to other pages.
     title = "About"
@@ -53,7 +54,7 @@ def getting_started():
 def committee():
 	# Scientific Panel Page
     title = "Scientific Advisory Committee"
-    committee_data = yaml.load(open("base/static/content/data/advisory-committee.yaml", 'r'))
+    committee_data = load_yaml("advisory-committee.yaml")
     return render_template('committee.html', **locals())
 
 
@@ -62,7 +63,7 @@ def committee():
 def staff():
 	# Staff Page
     title = "Staff"
-    staff_data = yaml.load(open("base/static/content/data/staff.yaml", 'r'))
+    staff_data = load_yaml("staff.yaml")
     return render_template('staff.html', **locals())
 
 
@@ -100,8 +101,7 @@ def donate():
             else:
                 captcha_passed = False
                 warning = "Failed to pass captcha"
-
-        
+    
         if request.form and captcha_passed:
             ds = get_ds()
             donation_amount = str(int(request.form['donation_amount']))
@@ -142,5 +142,7 @@ def donate():
 @cache.cached()
 def funding():
     title = "Funding"
-    staff_data = yaml.load(open("cendr/static/content/markdown/funding.md", 'r'))
+    funding_set = load_yaml('funding.yaml')
     return render_template('funding.html', **locals())
+
+

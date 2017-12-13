@@ -112,7 +112,7 @@ def strain_submission_page():
 def protocols():
     title = "Protocols"
     protocols = yaml.load(
-        open("cendr/static/content/data/protocols.yaml", 'r'))
+        open("base/static/content/data/protocols.yaml", 'r'))
     return render_template('protocols.html', **locals())
 
 
