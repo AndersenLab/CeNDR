@@ -17,7 +17,6 @@ app = Flask(__name__, static_url_path='/static')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
 
-
 releases = ["20170531",
             "20160408"]
 
@@ -133,7 +132,6 @@ version = re.search("VERSION=version-(.*)\n", open(".travis.yml", 'r').read()) \
 
 app.config['VERSION'] = version
 app.config['TEMPLATE_AUTO_RELOAD'] = True
-api = Api(app)
 app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 

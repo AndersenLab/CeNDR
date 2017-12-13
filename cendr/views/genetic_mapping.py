@@ -4,7 +4,6 @@ from cendr import dbname
 from cendr import autoconvert
 from cendr.task.map_submission import launch_mapping
 from cendr.models import db, report, strain, trait, trait_value, mapping
-from cendr import api
 from cendr.emails import mapping_submission
 from datetime import date, datetime
 import pytz
