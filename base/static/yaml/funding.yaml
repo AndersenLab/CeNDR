@@ -1,0 +1,6 @@
+- name: Northwestern
+  url: https://www.northwestern.edu
+  image: NU.svg
+- name: Weinberg
+  url: https://www.weinberg.northwestern.edu/
+  image: weinberg.png

@@ -1,0 +1,24 @@
+# Photos should be stored in the static location under static/img/committee/
+- first_name: Marie-Anne 
+  last_name: Félix
+  photo: Marie.png
+  title: Institut de Biologie de l'École Normale Supérieure
+  website: https://www.ibens.ens.fr/spip.php?rubrique29&lang=en
+
+- first_name: Matthew
+  last_name: Rockman
+  photo: MatthewRockman.jpg
+  title: New York University
+  website: https://biology.as.nyu.edu/object/MatthewRockman
+
+- first_name: Ann
+  last_name: Rougvie
+  photo: Rougvie_Ann.jpg
+  title: University of Minnesota
+  website: https://cbs.umn.edu/contacts/ann-rougvie-phd
+
+- first_name: Paul
+  last_name: Sternberg
+  photo: Sternberg.jpg
+  title: Howard Hughes Medical Institute; California Institute of Technology
+  website: https://wormlab.caltech.edu/
