@@ -1,0 +1,80 @@
+<header>
+
+<nav class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation" style="z-index:5000;{% if config.debug %}background-color:blue;{% endif %}">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/">CeNDR</a>
+    </div>
+
+
+<!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+
+      <ul class="nav navbar-nav navbar-right" >
+        <li class="dropdown">
+          <a href="{{ url_for("about.about") }}" role="button" aria-haspopup="true" aria-expanded="false">About<span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a href="{{ url_for("about.about") }}">About CeNDR</a></li>
+            <li><a href="{{ url_for("about.staff") }}">Staff</a></li>
+            <li><a href="{{ url_for("about.committee") }}">Scientific Advisory Committee</a></li>
+            <li><a href="{{ url_for("about.statistics") }}">Site Statistics</a></li>
+            <li><a href="{{ url_for("about.donate") }}">Donate</a></li>
+            <li><a href="{{ url_for("about.funding") }}">Funding</a></li>
+          </ul>
+        </li>
+
+        <li class="dropdown">
+          <a href="{{ url_for("map_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a href="{{ url_for("map_page")}}">Global Strain Map</a></li>
+            <li><a href="{{ url_for("strain_listing_page")}}">Strain Catalog</a></li>
+            <li><a href="{{ url_for("protocols") }}">Protocols</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="{{ url_for('strain_submission_page') }}">Submit Strains</a></li>
+          </ul>
+        </li>
+
+        <li class="dropdown">
+        <a href="{{ url_for("data_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Data<span class="caret"></span></a>
+        <ul class="dropdown-menu dropdown-menu-left">
+          <li><a href="{{ url_for("browser") }}">Variant Browser</a></li>
+          <li><a href="{{ url_for("data_page") }}">Releases</a></li>
+          <li><a href="https://docs.elegansvariation.apiary.io/">API</a></li>
+        </ul>
+        </li>
+
+        <li class="dropdown">
+          <a href="{{ url_for("public_mapping")}}" role="button" aria-haspopup="true" aria-expanded="false">Genetic Mapping<span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a href="{{ url_for("gwa")}}">Perform Mapping</a></li>
+            <li><a href="{{ url_for("public_mapping")}}">Public Mappings</a></li>
+            <!--<li role="separator" class="divider"></li>-->
+            <!--<li><a href="{{ url_for("status_page")}}">Mapping Queue</a></li>-->
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          <a href="{{ url_for("outreach") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Outreach</a>
+        </li>
+
+        <li class="nav-item">
+          <a href="{{ url_for("help_item") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+        </li>
+        
+        <li class="nav-item">
+          <a href="{{ url_for("contact") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Contact Us</a>
+        </li>
+      </ul>
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container-fluid -->
+</nav>
+
+</header>

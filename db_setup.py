@@ -10,8 +10,8 @@ reload(sys)
 import urllib2
 from gcloud import datastore
 sys.setdefaultencoding('utf-8')
-from cendr.models import *
-from cendr import get_ds
+from base.models import *
+from base import get_ds
 
 ds = get_ds()
 

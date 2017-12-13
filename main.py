@@ -1,4 +1,4 @@
-from cendr import app
+from base import app
 
 @app.errorhandler(500)
 def server_error(e):
@@ -11,4 +11,6 @@ def server_error(e):
 if __name__ == '__main__':
     # This is used when running locally. Gunicorn is used to run the
     # application on Google App Engine. See entrypoint in app.yaml.
+    app.jinja_env.auto_reload = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.run(host='127.0.0.1', port=8080, debug=True)

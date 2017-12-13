@@ -7,8 +7,8 @@ import os
 from threading import Thread, Event
 import webbrowser
 from wsgiref.simple_server import WSGIServer, WSGIRequestHandler, make_server
-from cendr import get_ds
-from cendr.models import *
+from base import get_ds
+from base.models import *
 
 from boxsdk import OAuth2, Client
 
