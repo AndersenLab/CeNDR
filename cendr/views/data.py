@@ -1,5 +1,4 @@
 from cendr import app, cache, releases
-from cendr import api
 from flask import make_response, Response
 import requests
 from cendr.models import strain, report, homologene, mapping, trait
