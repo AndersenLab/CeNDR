@@ -215,3 +215,4 @@ from base.task import *
 from base.views import *
 from base.views.api import *
 from base.cegwas import *
+from base.utils.command import *
