@@ -10,8 +10,7 @@ from datetime import datetime
 import pytz
 import hashlib
 from requests import post
-from flask import Blueprint, render_template, abort
-from jinja2 import TemplateNotFound
+from flask import Blueprint
 
 about_bp = Blueprint('about',
            __name__,
@@ -30,7 +29,6 @@ def utility_processor():
 def about():
 	# About us Page - directs to other pages.
     title = "About"
-    bcs = OrderedDict([("About", None)])
     strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
         .filter(strain.latitude.is_null() == False).execute())
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
@@ -42,7 +40,6 @@ def about():
 def getting_started():
     # About us Page - directs to other pages.
     title = "Getting Started"
-    #bcs = OrderedDict([("About", url_for("about.about_main")), ("Getting Started", "")])
     strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
         .filter(strain.latitude.is_null() == False).execute())
     strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
@@ -56,7 +53,6 @@ def getting_started():
 def committee():
 	# Scientific Panel Page
     title = "Scientific Advisory Committee"
-    #bcs = OrderedDict([("About", url_for("about")), ("Panel", "")])
     committee_data = yaml.load(open("base/static/content/data/advisory-committee.yaml", 'r'))
     return render_template('committee.html', **locals())
 
@@ -66,7 +62,6 @@ def committee():
 def staff():
 	# Staff Page
     title = "Staff"
-    #bcs = OrderedDict([("About", url_for("about") ), ("Staff", "")])
     staff_data = yaml.load(open("base/static/content/data/staff.yaml", 'r'))
     return render_template('staff.html', **locals())
 
@@ -76,8 +71,6 @@ def staff():
 @cache.cached()
 def statistics():
     title = "Site Statistics"
-    #bcs = OrderedDict([("About", url_for("about")), ("Statistics", None)])
-
     # Number of reports
     n_reports = report.select().count()
     n_traits = trait.select().count()
@@ -93,7 +86,7 @@ def statistics():
 
 
 
-@about_bp.route('/donate/', methods=['GET','POST'])
+@about_bp.route('/donate/', methods=['GET', 'POST'])
 def donate():
     # Process donation.
     if request.method == 'POST':
@@ -142,7 +135,6 @@ def donate():
             return redirect(url_for("order_confirmation", invoice_hash=order["invoice_hash"]), code=302)
 
     title = "Donate"
-    bcs = OrderedDict([("About", url_for("about")), ("Donate", None)])
     return render_template('donate.html', **locals())
     
 
@@ -150,6 +142,5 @@ def donate():
 @cache.cached()
 def funding():
     title = "Funding"
-    bcs = OrderedDict([("About", url_for("about") ), ("Funding", "")])
     staff_data = yaml.load(open("cendr/static/content/markdown/funding.md", 'r'))
     return render_template('funding.html', **locals())

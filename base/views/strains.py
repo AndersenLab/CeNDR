@@ -21,8 +21,6 @@ import hashlib
 @cache.memoize(50)
 def map_page():
     title = "Global Strain Map"
-    bcs = OrderedDict(
-        [("Strain", url_for("strain_listing_page")), ("Global-Strain-Map", "")])
     strain_list_dicts = []
     strain_listing = list(strain.select().filter(strain.reference_strain == True)
                           .filter(strain.latitude.is_null() == False).execute())
@@ -77,7 +75,6 @@ def isotype_page(isotype_name):
 @app.route('/strain/')
 @cache.memoize(50)
 def strain_listing_page():
-    bcs = OrderedDict([("Strain", None)])
     title = "Strain Catalog"
 
     if 'warning' in request.args:
@@ -102,8 +99,6 @@ def strain_listing_page():
 
 @app.route('/strain/submit/')
 def strain_submission_page():
-    bcs = OrderedDict(
-        [("Strain", url_for("strain_listing_page")), ("Strain Submission", "")])
     title = "Strain Submission"
     return render_template('strain_submission.html', **locals())
 
@@ -116,8 +111,6 @@ def strain_submission_page():
 @cache.cached(timeout=50)
 def protocols():
     title = "Protocols"
-    bcs = OrderedDict(
-        [("Strain", url_for("strain_listing_page")), ("Protocols", "")])
     protocols = yaml.load(
         open("cendr/static/content/data/protocols.yaml", 'r'))
     return render_template('protocols.html', **locals())
@@ -140,7 +133,6 @@ def calculate_total(item_list):
 
 @app.route('/order', methods=['GET', 'POST'])
 def order_page():
-    bcs = OrderedDict([("Strain", "/strain/"), ("Order", "")])
     title = "Order"
     items = request.form.getlist("item")
     # Retreive SKU's for prices

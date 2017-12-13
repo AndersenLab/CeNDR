@@ -14,10 +14,14 @@ from flask_caching import Cache
 from gcloud import datastore
 from flask import Blueprint, render_template, abort
 from jinja2 import TemplateNotFound
+from flask_caching import Cache
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
 app.config.from_object(getattr(config, os.environ['APP_CONFIG']))
+
+# Setup cache
+cache = Cache(app, config=app.config['CACHE'])
 
 
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
@@ -129,16 +133,6 @@ else:
     app.config["debug"] = True
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
-
-
-version = re.search("VERSION=version-(.*)\n", open(".travis.yml", 'r').read()) \
-            .group(1) \
-            .replace('-', '.')
-
-app.config['VERSION'] = version
-app.config['TEMPLATE_AUTO_RELOAD'] = True
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
-app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 
 def get_google_order_sheet():

@@ -47,7 +47,7 @@ def sortedfiles(path):
 @app.route('/')
 @cache.cached(timeout=50)
 def main():
-    page_title = "Caenorhabditis elegans Natural Diversity Resource"
+    title = "Caenorhabditis elegans Natural Diversity Resource"
     files = sortedfiles("base/static/content/news/")
     latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
         trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())

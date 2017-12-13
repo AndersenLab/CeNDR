@@ -1,71 +1,68 @@
 <!DOCTYPE html>
-<html>
-<head>
-  {% include "_includes/head.html" %}
-  {% block custom_head %}{% endblock %}
-  {% block style %}{% endblock %}
-  </head>
+<html lang='en-us'>
+    <head>
+      {% include "_includes/head.html" %}
+      {% block custom_head %}{% endblock %}
+      {% block style %}{% endblock %}
+    </head>
     <body>
-  {% include "_includes/navbar.html" %}
-     <div class="page-content">
-      <div class="wrap">
 
+    {% include "_includes/navbar.html" %}
 
+    <div class="page-content">
+        <div class="wrap">
+            <div class="container-fluid">
+                <div class='content'>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div id="alert"></div>
+                            {% if request.blueprint %}
+                                {% if title %}
+                                    <h2>{{ title }}{% if subtitle %} <small>{{subtitle}}</small>{% endif %}{% block title_right %}{% endblock %}</h2>
+                                {% endif %}
+                            {% endif %}
+                            {% if warning %}
+                                <div class="alert alert-warning">
+                                    {{ warning }}
+                                </div>
+                            {% endif %}
 
-<div class="container-fluid">
-  <div class='content'>
-    <div class="row">
-      <div class="col-md-12">
+                          {# BREADCRUMB #}
+                          {% if request.blueprint %}
+                          <ol class="breadcrumb">
+                              <li><a href="/">Home</a></li>
+                                {% if title.lower() != request.blueprint.lower() %}
+                                <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
+                                {% endif %}
+                              <li><strong>{{ title }}</strong></li>
+                            </ol>
+                            {% endif %}
+                        </div>
+                    </div>
+                <div id="feedback" class='hidden-print'>
+                  <div id="feedback-tab" onclick= "window.open('https://goo.gl/forms/rfWz4AlCIP');">
+                    Feedback
+                  </div>
+                </div>
+                    {% block content %}{% endblock %}
+                </div>
+                    {% block script %}{% endblock %}
 
+                <script type="text/javascript">
+                    function set_alert(alert_type, title, text) {
+                      $("#alert").hide().html("<div class='alert alert-dismissible alert-" + alert_type + "'><button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>" + title + "</strong> " + text + "</div>").fadeIn();
+                    } 
 
-      <div id="alert"></div>
-      {% if title %}
-  <h2>{{ title }}{% if subtitle %} <small>{{subtitle}}</small>{% endif %}{% block title_right %}{% endblock %}</h2>
-      {% endif %}
-      {% if warning %}
-        <div class="alert alert-warning">
-          {{ warning }}
-        </div>
-      {% endif %}
-      <ol class="breadcrumb">
-          <li><a href="/">Home</a></li>
-          <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
-          <li><strong>{{ title }}</strong></li>
-        </ol>
-      
-
-        </div>
-
-    </div>
-    <div id="feedback" class='hidden-print'>
-      <div id="feedback-tab" onclick= "window.open('https://goo.gl/forms/rfWz4AlCIP');">
-        Feedback
-      </div>
-  </div>
-{% block content %}{% endblock %}
-</div>
-{% block script %}{% endblock %}
-
-
-<script type="text/javascript">
-
-function set_alert(alert_type, title, text) {
-  $("#alert").hide().html("<div class='alert alert-dismissible alert-" + alert_type + "'><button type='button' class='close' data-dismiss='alert' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>" + title + "</strong> " + text + "</div>").fadeIn();
-} 
-
-$(document).ready(function () 
-    {
-        $('[data-toggle="tooltip"]').tooltip();
-    }
-);
-
-</script>
-
-
-  {% include "_includes/footer.html" %} 
-</div>
-  
-  </div><!-- closes wrap-->
-  </div><!-- closes page-content-->
+                    $(document).ready(function () 
+                        {
+                            $('[data-toggle="tooltip"]').tooltip();
+                        }
+                    );
+                </script>
+                
+                {% include "_includes/footer.html" %} 
+            </div>
+        </div><!-- closes wrap-->
+    </div><!-- closes page-content-->
     </body>
 </html>

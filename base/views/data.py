@@ -14,7 +14,6 @@ from flask import render_template
 @cache.memoize(50)
 def data_page(release = releases[0]):
     from base import releases
-    bcs = OrderedDict([("Data", None)])
     title = "Data"
     strain_listing = strain.select().filter(
         strain.isotype != None, strain.release <= release).order_by(strain.isotype).execute()
@@ -39,7 +38,6 @@ def download_script(filetype):
 @app.route('/data/browser/<region>')
 @app.route('/data/browser/<region>/<query>')
 def browser(region = "III:11746923-11750250", tracks="mh", query = None):
-    bcs = OrderedDict([("Data", "/data"), ("Browser", None)])
     title = "Browser" 
     from base import releases
     build = releases[0]

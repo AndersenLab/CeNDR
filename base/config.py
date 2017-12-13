@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+import re
 import datetime
 
-
 class base_config(object):
-	pass
+	VERSION = re.search("VERSION=version-(.*)\n", open(".travis.yml", 'r').read()) \
+                .group(1) \
+                .replace('-', '.')
 
 
 class local(base_config):
@@ -15,3 +17,6 @@ class local(base_config):
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_NAME = 'cendr'
     PERMANENT_SESSION_LIFETIME = datetime.timedelta(31)
+    CACHE = {'CACHE_TYPE': 'simple'}
+    DEBUG_TB_INTERCEPT_REDIRECTS = False
+    TEMPLATE_AUTO_RELOAD = False
