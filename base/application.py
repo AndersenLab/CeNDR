@@ -190,7 +190,8 @@ def send_mail(data):
         data=data)
 
 
-
+def gs_static(url, prefix='static'):
+    return f"https://storage.googleapis.com/elegansvariation.org/{prefix}/{url}"
 #
 # Custom Filters
 #
@@ -212,3 +213,9 @@ from base.task import *
 from base.views import *
 from base.views.api import *
 from base.cegwas import *
+
+
+# Inject globals
+@app.context_processor
+def inject():
+    return dict(gs_static=gs_static)
