@@ -1,10 +1,6 @@
-from flask_restful import Resource
 from base.models import WI, mapping_correlation
-from base import app, cache
+from base.application import app, cache
 from peewee import *
-from collections import OrderedDict
-from collections import Counter
-from collections import defaultdict
 from flask import jsonify
 
 @cache.memoize(500)

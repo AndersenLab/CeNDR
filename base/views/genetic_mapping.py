@@ -1,7 +1,7 @@
-from base import app, cache, send_mail
-from base import ds
-from base import dbname
-from base import autoconvert
+from base.application import app, cache, send_mail
+from base.application import ds
+from base.application import dbname
+from base.application import autoconvert
 from base.task.map_submission import launch_mapping
 from base.models import db, report, strain, trait, trait_value, mapping
 from base.emails import mapping_submission

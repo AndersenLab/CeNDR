@@ -1,5 +1,5 @@
 # NEW API
-from base import app, get_vcf
+from base.application import app, get_vcf
 from cyvcf2 import VCF
 from flask import jsonify, request, Response
 import re

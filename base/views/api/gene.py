@@ -1,4 +1,4 @@
-from base import app, cache
+from base.application import app, cache
 from flask import jsonify, request
 from base.models import homologene, wb_orthologs, wb_gene
 

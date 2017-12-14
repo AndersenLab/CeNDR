@@ -2,7 +2,7 @@
 from flask_restful import Resource
 from base.models import wb_gene, WI
 from base.models import interval_summary_cache as isc
-from base import api, cache, releases, app
+from base.application import api, cache, releases, app
 from peewee import *
 from collections import OrderedDict
 from collections import Counter

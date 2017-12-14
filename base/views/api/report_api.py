@@ -1,4 +1,4 @@
-from base import api, cache, app
+from base.application import cache, app
 from peewee import fn, JOIN
 from flask import jsonify
 from base.models import trait, report, db, mapping

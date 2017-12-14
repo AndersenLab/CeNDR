@@ -1,10 +1,9 @@
 from flask_restful import Resource
-from base import api, cache
+from base.application import app, cache
 import pickle
 import base64
 import zlib
 from base.models import WI, strain
-from base import app
 from flask import jsonify
 
 

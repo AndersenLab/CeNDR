@@ -11,6 +11,7 @@ from datetime import date
 from flask_caching import Cache
 from gcloud import datastore
 from flask_caching import Cache
+from flask_sqlalchemy import SQLAlchemy
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -19,8 +20,12 @@ app.config.from_object(getattr(config, os.environ['APP_CONFIG']))
 # Setup cache
 cache = Cache(app, config=app.config['CACHE'])
 
+# Database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cendr.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db_2 = SQLAlchemy(app)
 
-# Setup application
+from base.models2 import *
 
 
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
@@ -203,18 +208,19 @@ def comma_filter(value):
 def format_release_filter(value):
     return datetime.strptime(str(value), '%Y%m%d').strftime('%Y-%m-%d')
 
-from base.views.about import about_bp
 
+# Inject globals
+@app.context_processor
+def inject():
+    return dict(gs_static=gs_static)
+
+# About Pages
+from base.views.about import about_bp
 app.register_blueprint(about_bp, url_prefix='/about')
 
 from base.utils.auth import *
 from base.task import *
 from base.views import *
 from base.views.api import *
-from base.cegwas import *
+from base.manage import (initdb)
 
-
-# Inject globals
-@app.context_processor
-def inject():
-    return dict(gs_static=gs_static)

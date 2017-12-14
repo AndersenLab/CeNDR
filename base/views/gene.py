@@ -1,4 +1,4 @@
-from base import app, cache
+from base.application import app, cache
 from base.models import wb_gene, WI, mapping, trait, report
 from collections import OrderedDict
 from flask import render_template, request, redirect, url_for

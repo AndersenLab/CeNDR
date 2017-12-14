@@ -1,7 +1,7 @@
 import os
 import markdown
 import dateutil
-from base import app, cache, get_ds
+from base.application import app, cache, get_ds
 from base.models import trait, report
 from flask import render_template, request, Markup, url_for, Response, redirect
 from datetime import datetime

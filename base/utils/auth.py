@@ -1,8 +1,7 @@
 import json
 import gspread
-from base.application import app
-from flask import g
 from oauth2client.service_account import ServiceAccountCredentials
+
 
 def get_service_account_credentials():
     return json.loads(open("client-secret.json", 'r').read())
@@ -10,11 +9,11 @@ def get_service_account_credentials():
 
 def authenticate_google_sheets():
     """
-        Uses service account credentials to authorize access to 
+        Uses service account credentials to authorize access to
         google sheets.
 
-        In order for this to work you must share the worksheet with the 
-        travis service-account: cendr-travis-ci@andersen-lab.iam.gserviceaccount.com
+        In order for this to work you must share the worksheet with the
+        service account: cendr-travis-ci@andersen-lab.iam.gserviceaccount.com
     """
     service_credentials = get_service_account_credentials()
     scope = ['https://spreadsheets.google.com/feeds']

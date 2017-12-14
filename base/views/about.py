@@ -1,4 +1,4 @@
-from base import app, json_serial, cache, get_ds, add_to_order_ws, send_mail
+from base.application import app, json_serial, cache, get_ds, add_to_order_ws, send_mail
 from flask import render_template, url_for, Markup, request, redirect
 import markdown
 import yaml

@@ -1,5 +1,5 @@
 from base.models import strain
-from base import app, cache
+from base.application import app, cache
 from flask import jsonify
 from collections import OrderedDict
 

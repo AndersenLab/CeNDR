@@ -1,5 +1,5 @@
 from flask import jsonify
-from base import app
+from base.application import app
 from subprocess import Popen, PIPE
 
 

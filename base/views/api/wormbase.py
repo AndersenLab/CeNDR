@@ -1,11 +1,7 @@
 from base.models import strain, wb_gene
-from base import app, cache
-from base import ds
-from base import api
+from base.application import app, cache, ds
 from flask import Response, jsonify
-from collections import OrderedDict
 import requests
-import json
 from xml.dom import minidom
 
 @app.route('/api/wormbase/<path:r>')
