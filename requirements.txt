@@ -12,7 +12,7 @@ chardet==3.0.4
 click==6.7
 crcmod==1.7
 cryptography==2.1.4
-Cython==0.27.3
+cython==0.27.3
 cyvcf2==0.8.4
 dateutils==0.6.6
 decorator==4.1.2
