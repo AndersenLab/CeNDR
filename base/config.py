@@ -21,4 +21,4 @@ class local(base_config):
              'CACHE_KEY_PREFIX': base_config.VERSION,
              'CACHE_DIR': '_cache'}
     DEBUG_TB_INTERCEPT_REDIRECTS = False
-    TEMPLATE_AUTO_RELOAD = False
+    TEMPLATE_AUTO_RELOAD = True

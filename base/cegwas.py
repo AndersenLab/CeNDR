@@ -40,6 +40,3 @@ def show_all_attrs(value):
         res.append('%r - %r\n<br>' % (k, getattr(value, k)))
     return '\n'.join(res)
 
-def sortedfiles(path):
-    return sorted([x for x in os.listdir(path) if not x.startswith(".")], reverse = True)
-

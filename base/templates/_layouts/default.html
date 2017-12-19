@@ -28,7 +28,7 @@
                             {% endif %}
 
                           {# BREADCRUMB #}
-                          {% if request.blueprint %}
+                          {% if request.blueprint and request.path != "/" %}
                           <ol class="breadcrumb">
                               <li><a href="/">Home</a></li>
                                 {% if title.lower() != request.blueprint.lower() %}

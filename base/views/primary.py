@@ -1,8 +1,6 @@
 from base.application import app, json_serial, cache, get_ds, add_to_order_ws, send_mail
 from flask import render_template, url_for, Markup, request, redirect
-import markdown
-import yaml
-import json
+import os
 from base.models import strain, report, mapping, trait
 from base.emails import donate_submission
 from base.utils.data import load_yaml
@@ -13,25 +11,28 @@ import hashlib
 from requests import post
 from flask import Blueprint
 
-main_bp = Blueprint('main',
+primary_bp = Blueprint('primary',
                     __name__,
-                    template_folder='main')
+                    template_folder='primary')
 
+
+def sortedfiles(path):
+    return sorted([x for x in os.listdir(path) if not x.startswith(".")], reverse = True)
 
 # Homepage
-@app.route('/')
+@primary_bp.route('/')
 @cache.cached(timeout=50)
 def main():
     title = "Caenorhabditis elegans Natural Diversity Resource"
     files = sortedfiles("base/static/content/news/")
-    latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
-        trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
+    #latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
+    #    trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('home.html', **locals())
 
 
 
 
-@main_bp.route("/.well-known/acme-challenge/<acme>")
+@primary_bp.route("/.well-known/acme-challenge/<acme>")
 def le(acme):
     ds = get_ds()
     try:
@@ -41,61 +42,36 @@ def le(acme):
         return Response("Error", mimetype = "text/plain")
 
 
-@main_bp.route("/Software")
+@primary_bp.route("/Software")
 def reroute_software():
     return redirect(url_for('help_item', filename = "Software"))
 
-@main_bp.route("/news/")
-@main_bp.route("/news/<filename>/")
+@primary_bp.route("/news/")
+@primary_bp.route("/news/<filename>/")
 def news_item(filename = ""):
     files = sortedfiles("cendr/static/content/news/")
     #sorts the thing in the right order on the webpage after clicking on the server
     if not filename:
         filename = files[0].strip(".md")
     title = filename[11:].strip(".md").replace("-", " ")
-    bcs = OrderedDict([("News", None), (title, None)])
     return render_template('news_item.html', **locals())
 
 
-@main_bp.route("/help/")
-@main_bp.route("/help/<filename>/")
+@primary_bp.route("/help/")
+@primary_bp.route("/help/<filename>/")
 def help_item(filename = ""):
     files = ["FAQ", "Variant-Browser", "Variant-Prediction", "Methods", "Software", "Change-Log"]
     if not filename:
         filename = "FAQ"
     title = filename.replace("-", " ")
-    bcs = OrderedDict([("Help","/help"), (title, None)])
     return render_template('help_item.html', **locals())
 
 
-@main_bp.route('/feed.atom')
+@primary_bp.route('/feed.atom')
 def feed():
     feed = AtomFeed('CeNDR News',
                     feed_url=request.url, url=request.url_root)
     files = sortedfiles("cendr/static/content/news/") #files is a list of file names
-    # tuple_files=[]
-    # for filename in files:
-    #    tuple1=(datetime.strptime(filename[:10], "%Y-%m-%d"), filename[11:].strip(".md").replace("-", " "), filename)
-    #    if len(tuple_files)==0:
-    #        tuple_files.append(tuple1)
-    #    else:
-    #        for i in range(len(tuple_files)):
-    #            if tuple1>tuple_files[i]:
-    #                tuple_files.insert(i, tuple1)
-    #            elif i==len(tuple_files):
-    #                tuple_files.append(tuple1)
-
-    # for filename in tuple_files:
-    #    title = filename[1]
-    #    content = render_markdown(filename[2].strip(".md"), "cendr/static/content/news/")
-    #    date_published = filename[0]
-    #    feed.add(title, unicode(content),
-    #             content_type='html',
-    #             author="CeNDR News",
-    #             url=make_external(
-    #                 url_for("news_item", filename=filename[2].strip(".md"))),
-    #             updated=date_published,
-    #             published=date_published)
     for filename in files:
         title = filename[11:].strip(".md").replace("-", " ")
         content = render_markdown(filename.strip(".md"), "cendr/static/content/news/")
@@ -112,29 +88,25 @@ def feed():
 
 
 
-@main_bp.route('/outreach/')
-@cache.cached()
+@primary_bp.route('/outreach/')
 def outreach():
     title = "Outreach"
-    bcs = OrderedDict([("Outreach", "")])
     return render_template('outreach.html', **locals())
 
 
 
 
-@main_bp.route('/contact-us/')
-@cache.cached()
+@primary_bp.route('/contact-us/')
 def contact():
     title = "Contact Us"
-    bcs = OrderedDict([("Contact", None)])
     return render_template('contact.html', **locals())
 
 
-@main_bp.errorhandler(404)
+@primary_bp.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
 
 
-@main_bp.errorhandler(500)
+@primary_bp.errorhandler(500)
 def internal_server_error(e):
     return render_template('500.html'), 500

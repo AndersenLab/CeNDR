@@ -222,8 +222,8 @@ app.register_blueprint(about_bp, url_prefix='/about')
 
 
 # Main Pages - Homepage, Outreach, Contact
-from base.views.main import main_bp
-app.register_blueprint(main_bp, url_prefix='')
+from base.views.primary import primary_bp
+app.register_blueprint(primary_bp, url_prefix='')
 
 
 
