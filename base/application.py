@@ -25,6 +25,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cendr.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db_2 = SQLAlchemy(app)
 
+
 from base.models2 import *
 
 
@@ -214,9 +215,19 @@ def format_release_filter(value):
 def inject():
     return dict(gs_static=gs_static)
 
+
 # About Pages
 from base.views.about import about_bp
 app.register_blueprint(about_bp, url_prefix='/about')
+
+
+# Main Pages - Homepage, Outreach, Contact
+from base.views.main import main_bp
+app.register_blueprint(main_bp, url_prefix='')
+
+
+
+
 
 from base.utils.auth import *
 from base.task import *
@@ -224,3 +235,6 @@ from base.views import *
 from base.views.api import *
 from base.manage import (initdb)
 
+
+print(app)
+print(dir(app))

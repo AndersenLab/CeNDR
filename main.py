@@ -1,4 +1,4 @@
-from base import app
+from base.application import app
 
 @app.errorhandler(500)
 def server_error(e):

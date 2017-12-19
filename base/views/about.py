@@ -30,9 +30,9 @@ def utility_processor():
 def about():
 	# About us Page - directs to other pages.
     title = "About"
-    strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
-        .filter(strain.latitude.is_null() == False).execute())
-    strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
+    #strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
+    #    .filter(strain.latitude.is_null() == False).execute())
+    #strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
     return render_template('about.html', **locals())
 
 

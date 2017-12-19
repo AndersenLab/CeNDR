@@ -1,8 +1,5 @@
 from base.application import db_2
 
-#ase = db_2.declarative_base()
-
-
 
 class strain_m(db_2.Model):
     __tablename__ = "strain"
@@ -42,7 +39,7 @@ class wormbase_gene_m(db_2.Model):
     exon_id = db_2.Column(db_2.String(30), nullable=True, index=True)
     exon_number = db_2.Column(db_2.Integer(), nullable=True)
     protein_id = db_2.Column(db_2.String(30), nullable=True, index=True)
-    
+
     def __repr__(self):
         return f"{self.name} [{self.chrom}:{self.start}-{self.end}]"
 

@@ -1,4 +1,4 @@
-__all__ = ['app', 'manage']
+__all__ = ['application', 'manage']
 
 
 
