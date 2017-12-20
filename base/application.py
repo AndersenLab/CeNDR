@@ -2,16 +2,16 @@ import json
 import os
 import time
 import requests
-import decimal
+from peewee import *
 from base import config
 from flask import Flask, g
-from peewee import *
 from flask_debugtoolbar import DebugToolbarExtension
-from datetime import date
 from flask_caching import Cache
 from gcloud import datastore
 from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
+from base.utils.data import json_encoder
+
 
 # Caching
 app = Flask(__name__, static_url_path='/static')
@@ -25,8 +25,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cendr.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db_2 = SQLAlchemy(app)
 
-
-from base.models2 import *
+# json encoder
+app.json_encoder = json_encoder
 
 
 dbname = "cegwas_v2" # don't remove, imported elsewhere.
@@ -89,17 +89,6 @@ biotypes = {
 }
 
 
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, date):
-        serial = obj.isoformat()
-        return serial
-    if type(obj) == decimal.Decimal:
-        return float(obj)
-    raise TypeError("Type not serializable")
-
-
 def autoconvert(s):
     for fn in (int, float):
         try:
@@ -108,14 +97,6 @@ def autoconvert(s):
             pass
     return s
 
-
-class CustomEncoder(json.JSONEncoder):
-    def default(self, o):
-        if type(o) == decimal.Decimal:
-            return float(o)
-        if isinstance(o, datetime.date):
-            return str(o)
-        return super(CustomEncoder, self).default(o)
 
 
 if os.getenv('HOME') == "/root":

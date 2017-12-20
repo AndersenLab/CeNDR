@@ -1,4 +1,4 @@
-from base.application import app, json_serial, cache, get_ds, add_to_order_ws, send_mail
+from base.application import app, cache, get_ds, add_to_order_ws, send_mail
 from flask import render_template, url_for, Markup, request, redirect
 import markdown
 import yaml
@@ -12,6 +12,7 @@ import pytz
 import hashlib
 from requests import post
 from flask import Blueprint
+from base.views.api.api_strain import get_reference_strains
 
 about_bp = Blueprint('about',
            __name__,
@@ -30,10 +31,10 @@ def utility_processor():
 def about():
 	# About us Page - directs to other pages.
     title = "About"
-    #strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
-    #    .filter(strain.latitude.is_null() == False).execute())
+
+    strain_listing = get_reference_strains(known_origin=True)
     #strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
-    return render_template('about.html', **locals())
+    return render_template('about/about.html', **locals())
 
 
 @about_bp.route('/getting_started/')
@@ -43,8 +44,8 @@ def getting_started():
     title = "Getting Started"
     strain_listing = list(strain.select().filter(strain.isotype.is_null() == False)
         .filter(strain.latitude.is_null() == False).execute())
-    strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
-    return render_template('getting_started.html', **locals())
+    #strain_listing = json.dumps([x.__dict__["_data"] for x in strain_listing], default=json_serial)
+    return render_template('about/getting_started.html', **locals())
 
 
 
@@ -55,7 +56,7 @@ def committee():
 	# Scientific Panel Page
     title = "Scientific Advisory Committee"
     committee_data = load_yaml("advisory-committee.yaml")
-    return render_template('committee.html', **locals())
+    return render_template('about/committee.html', **locals())
 
 
 @about_bp.route('/staff/')
@@ -64,7 +65,7 @@ def staff():
 	# Staff Page
     title = "Staff"
     staff_data = load_yaml("staff.yaml")
-    return render_template('staff.html', **locals())
+    return render_template('about/staff.html', **locals())
 
 
 

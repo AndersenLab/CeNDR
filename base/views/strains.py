@@ -1,8 +1,7 @@
-from base.application import app, get_ds, cache, add_to_order_ws, lookup_order, send_mail, json_serial
+from base.application import app, get_ds, cache, add_to_order_ws, lookup_order, send_mail
 from flask import render_template, request, url_for, redirect, Response, abort
 from base.models import strain
 from collections import OrderedDict
-import json
 import yaml
 from base.emails import order_submission
 from datetime import datetime
@@ -23,8 +22,8 @@ def map_page():
     strain_list_dicts = []
     strain_listing = list(strain.select().filter(strain.reference_strain == True)
                           .filter(strain.latitude.is_null() == False).execute())
-    strain_listing = json.dumps([x.__dict__["_data"]
-                                 for x in strain_listing], default=json_serial)
+    #strain_listing = json.dumps([x.__dict__["_data"]
+    #                             for x in strain_listing], default=json_serial)
     return render_template('map.html', **locals())
 
 
@@ -62,8 +61,8 @@ def isotype_page(isotype_name):
     rec = list(strain.filter(strain.isotype == isotype_name)
                .order_by(strain.latitude).dicts().execute())
     ref_strain = [x for x in rec if x["reference_strain"] == True][0]
-    strain_json_output = json.dumps(
-        [x for x in rec if x["latitude"] != None],  default=json_serial)
+    #strain_json_output = json.dumps(
+    #    [x for x in rec if x["latitude"] != None],  default=json_serial)
     return render_template('strain.html', **locals())
 
 
