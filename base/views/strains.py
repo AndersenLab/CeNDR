@@ -24,6 +24,7 @@ def map_page():
                           .filter(strain.latitude.is_null() == False).execute())
     #strain_listing = json.dumps([x.__dict__["_data"]
     #                             for x in strain_listing], default=json_serial)
+    app.json.dumps(strain_listing)
     return render_template('map.html', **locals())
 
 

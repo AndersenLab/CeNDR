@@ -37,7 +37,7 @@ def strain_ind_api(strain_name):
 
 
 @app.route('/api/isotype')
-def get_reference_strains(known_origin=False):
+def get_isotypes(known_origin=False):
     """
         Returns a list of strains.
         ONE strain per isotype. This is the reference strain.

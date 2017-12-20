@@ -1,7 +1,7 @@
 import os
 from click import echo, style
 from base.application import app, db_2
-from base.models2 import wormbase_gene_m
+from base.models2 import strain_m, wormbase_gene_m
 from base.db.etl_strains import fetch_andersen_strains
 from base.db.etl_wormbase import fetch_gene_gtf
 
@@ -36,6 +36,6 @@ def initdb():
     # Load Strains #
     ################
     e('Loading strains...', 'white')
-    db_2.session.bulk_insert_mappings(db_2.strain_m, fetch_andersen_strains())
+    db_2.session.bulk_insert_mappings(strain_m, fetch_andersen_strains())
     db_2.session.commit()
-    e(f"Inserted {db_2.strain_m.query.count()} strains", "blue")
+    e(f"Inserted {strain_m.query.count()} strains", "blue")
