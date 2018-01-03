@@ -1,9 +1,10 @@
-from flask import json, jsonify
+from flask import json, jsonify, request
 from base.models import strain
 from base.models2 import strain_m
 from base.application import app, cache
 from collections import OrderedDict
 from logzero import logger
+from base.utils.decorators import jsonify_request
 
 FIELDS = [x.name for x in strain._meta.sorted_fields if x.name != "id"]
 PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
@@ -11,37 +12,20 @@ PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
 
 
 @app.route('/api/strain')
-@cache.memoize(50)
-def strain_api():
-    """
-        Return information for all strains.
-    """
-    strain_data = list(strain.select(
-        *PEEWEE_FIELDS_LIST).tuples().execute())
-    response = [OrderedDict(zip(FIELDS, x)) for x in strain_data]
-    return jsonify(response)
-
-
 @app.route('/api/strain/<string:strain_name>')
-@cache.memoize(50)
-def strain_ind_api(strain_name):
-    """
-        Return information for an individual strain.
-    """
-    strain_data = list(strain.select(
-        *PEEWEE_FIELDS_LIST).filter(strain.strain == strain_name)
-                            .tuples()
-                            .execute())
-    response = OrderedDict(zip(FIELDS, strain_data[0]))
-    return jsonify(response)
-
-
-@app.route('/api/strain')
-def get_all_strains():
+@app.route('/api/isotype/<string:isotype_name>')
+@jsonify_request
+def get_all_strains(strain_name=None, isotype_name=None):
     """
         Return the full strain database set
     """
-    return strain_m.query.all()
+    if strain_name:
+        results = strain_m.query.filter(strain_m.strain == strain_name).first()
+    elif isotype_name:
+        results = strain_m.query.filter(strain_m.isotype == isotype_name).all()
+    else:
+        results = strain_m.query.all()
+    return results
 
 
 @app.route('/api/isotype')
@@ -66,17 +50,4 @@ def get_isotypes(known_origin=False):
                                           strain_m.sampled_by) \
                            .filter(strain_m.reference_strain == True, strain_m.latitude != None) \
                            .all()
-    return json.dumps(result)
-
-
-
-@app.route('/api/strain/isotype/<string:isotype_name>')
-@cache.memoize(50)
-def isotype_ind_api(isotype_name):
-    """
-        Return all strains within an isotype.
-    """
-    strain_data = list(strain.select(
-        strain.strain).filter(strain.isotype == isotype_name).execute())
-    response = [x.strain for x in strain_data]
-    return jsonify(response)
+    return jsonify(result)
