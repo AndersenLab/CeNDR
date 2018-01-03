@@ -1,6 +1,14 @@
+"""
+
+    This set of views are the 'about' pages of the CeNDR site
+    and additional miscellaneous extra pages (e.g. getting started)
+
+
+"""
 import hashlib
 import markdown
 import pytz
+import uuid
 from flask import Blueprint
 from datetime import datetime
 from requests import post
@@ -78,18 +86,15 @@ def donate():
         if request.form and captcha_passed:
             ds = get_ds()
             donation_amount = str(int(request.form['donation_amount']))
-            o = ds.get(ds.key("cendr-order", "count"))
-            o["order-number"] += 1
-            ds.put(o)
-            order = {}
-            order["order_number"] = o["order-number"]
-            order["email"] = request.form["email"]
-            order["address"] = request.form["address"]
-            order["name"] = request.form["name"]
+            # order_number is generated as a unique string
+            order = {'order_number': str(uuid.uuid4()).split("-")[0],
+                     'email': request.form['email'],
+                     'address': request.form['address'],
+                     'name': request.form['name'],
+                     'total': donation_amount,
+                     'is_donation': True}
             order["items"] = u"{k}:{v}".format(
                 k="CeNDR strain and data support", v=donation_amount)
-            order["total"] = donation_amount
-            order["is_donation"] = True
             order["date"] = datetime.now(pytz.timezone(
                 "America/Chicago")).date().isoformat()
             order["invoice_hash"] = hashlib.sha1(str(order)).hexdigest()[0:10]
