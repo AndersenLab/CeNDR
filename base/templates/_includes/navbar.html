@@ -31,13 +31,13 @@
         </li>
 
         <li class="dropdown">
-          <a href="{{ url_for("map_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
+          <a href="{{ url_for("strain.map_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="{{ url_for("map_page")}}">Global Strain Map</a></li>
-            <li><a href="{{ url_for("strain_listing_page")}}">Strain Catalog</a></li>
-            <li><a href="{{ url_for("protocols") }}">Protocols</a></li>
+            <li><a href="{{ url_for("strain.map_page")}}">Global Strain Map</a></li>
+            <li><a href="{{ url_for("strain.strain_catalog")}}">Strain Catalog</a></li>
+            <li><a href="{{ url_for("strain.protocols") }}">Protocols</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="{{ url_for('strain_submission_page') }}">Submit Strains</a></li>
+            <li><a href="{{ url_for("strain.strain_submission_page") }}">Submit Strains</a></li>
           </ul>
         </li>
 

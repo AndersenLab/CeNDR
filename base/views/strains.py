@@ -1,31 +1,43 @@
-from base.application import app, get_ds, cache, add_to_order_ws, lookup_order, send_mail
+from base.application import get_ds, cache, add_to_order_ws, lookup_order, send_mail
 from flask import render_template, request, url_for, redirect, Response, abort
-from base.models import strain
-from collections import OrderedDict
+from base.models2 import strain_m
 import yaml
 from base.emails import order_submission
 from datetime import datetime
 from requests import post
 import pytz
 import hashlib
+from flask import Blueprint
+from base.views.api.api_strain import get_isotypes, get_all_strains
+from collections import defaultdict
+from decimal import Decimal
+
+strain_bp = Blueprint('strain',
+                       __name__,
+                      template_folder='strain')
 
 
 #
 # Global Strain Map
 #
 
+@strain_bp.route('/')
+def strain():
+    """
+        Redirect base route to the global strain map
+    """
+    return redirect(url_for('strain.map_page'))
 
-@app.route('/strain/global-strain-map/')
+@strain_bp.route('/global-strain-map/')
 @cache.memoize(50)
 def map_page():
+    """
+        Global strain map shows the locations of all wild isolates
+        within the SQLite database.
+    """
     title = "Global Strain Map"
-    strain_list_dicts = []
-    strain_listing = list(strain.select().filter(strain.reference_strain == True)
-                          .filter(strain.latitude.is_null() == False).execute())
-    #strain_listing = json.dumps([x.__dict__["_data"]
-    #                             for x in strain_listing], default=json_serial)
-    app.json.dumps(strain_listing)
-    return render_template('map.html', **locals())
+    strain_listing = get_isotypes(known_origin=True)
+    return render_template('strain/global_strain_map.html', **locals())
 
 
 #
@@ -33,19 +45,24 @@ def map_page():
 #
 
 
-@app.route('/strain/strain_data.tsv')
+@strain_bp.route('/strain_data.tsv')
 def strain_metadata():
-    strain_listing = list(strain.select().filter(
-        strain.isotype != None).tuples().execute())
-
+    """
+        Dumps strain dataset; Normalizes lat/lon on the way out.
+    """
+    col_list = list(strain_m.__mapper__.columns)
     def generate():
-        yield '\t'.join(strain._meta.sorted_field_names[1:21]) + "\n"
-        for row in strain_listing:
-            row = list(row)
-            for k, f in enumerate(row):
-                if type(f) == unicode:
-                    row[k] = f.encode('utf-8', 'ignore')
-            yield '\t'.join(map(str, row[1:21])) + "\n"
+        first = True
+        if first:
+            first = False
+            header = [x.name for x in list(strain_m.__mapper__.columns)]
+            yield ('\t'.join(header) + "\n").encode('utf-8')
+        for row in get_all_strains():
+            if row.longitude:
+                row.latitude = row.latitude.normalize()
+                row.longitude = row.longitude.normalize()
+            row = [getattr(row, column.name) for column in col_list]
+            yield ('\t'.join(map(str, row)) + "\n").encode('utf-8')
     return Response(generate(), mimetype="text/tab-separated-values")
 
 
@@ -53,7 +70,7 @@ def strain_metadata():
 # Isotype View
 #
 
-@app.route('/strain/<isotype_name>/')
+@strain_bp.route('/<isotype_name>/')
 @cache.memoize(50)
 def isotype_page(isotype_name):
     page_title = isotype_name
@@ -64,54 +81,49 @@ def isotype_page(isotype_name):
     ref_strain = [x for x in rec if x["reference_strain"] == True][0]
     #strain_json_output = json.dumps(
     #    [x for x in rec if x["latitude"] != None],  default=json_serial)
-    return render_template('strain.html', **locals())
+    return render_template('strain/strain.html', **locals())
 
 
 #
 # Strain Catalog
 #
 
-@app.route('/strain/')
+@strain_bp.route('/catalog')
 @cache.memoize(50)
-def strain_listing_page():
+def strain_catalog():
     title = "Strain Catalog"
 
     if 'warning' in request.args:
         warning = request.args["warning"]
 
-    strain_listing = strain.select(strain.strain,
-                                   strain.reference_strain,
-                                   strain.isotype,
-                                   strain.release,
-                                   strain.previous_names,
-                                   strain.set_1,
-                                   strain.set_2,
-                                   strain.set_3,
-                                   strain.set_4,
-                                   strain.set_divergent).filter(strain.isotype != None).order_by(strain.isotype).execute()
-    return render_template('strain_catalog.html', **locals())
+    strain_listing = get_all_strains()
+    strain_sets = defaultdict(list)
+    return render_template('strain/strain_catalog.html', **locals())
 
 #
 # Strain Submission
 #
 
 
-@app.route('/strain/submit/')
+@strain_bp.route('/submit/')
 def strain_submission_page():
+    """
+        Google form for submitting strains
+    """
     title = "Strain Submission"
-    return render_template('strain_submission.html', **locals())
+    return render_template('strain/strain_submission.html', **locals())
 
 
 #
 # Protocols
 #
 
-@app.route("/strain/protocols/")
+@strain_bp.route("/protocols/")
 @cache.cached(timeout=50)
 def protocols():
     title = "Protocols"
     protocols = yaml.load(
-        open("base/static/content/data/protocols.yaml", 'r'))
+        open("base/static/yaml/protocols.yaml", 'r'))
     return render_template('protocols.html', **locals())
 
 
@@ -130,7 +142,7 @@ def calculate_total(item_list):
     return item_price_list
 
 
-@app.route('/order', methods=['GET', 'POST'])
+@strain_bp.route('/order', methods=['GET', 'POST'])
 def order_page():
     title = "Order"
     items = request.form.getlist("item")
@@ -139,7 +151,7 @@ def order_page():
     total = sum(items.values())
     strain_listing = list(set(request.form.getlist('item')))
     if not strain_listing:
-        return redirect(url_for("strain_listing_page"))
+        return redirect(url_for("strain.strain_catalog"))
     if request.method == 'POST':
         field_list = ['name', 'phone', 'email', 'shipping_service', 'address']
         warning = None
@@ -214,7 +226,7 @@ def order_page():
     return render_template('order.html', **locals())
 
 
-@app.route("/order/<invoice_hash>/")
+@strain_bp.route("/order/<invoice_hash>/")
 def order_confirmation(invoice_hash):
     order = lookup_order(invoice_hash)
     if order:

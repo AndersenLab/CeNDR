@@ -22,8 +22,12 @@ class local(base_config):
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_NAME = 'cendr'
     PERMANENT_SESSION_LIFETIME = datetime.timedelta(31)
-    CACHE = {'CACHE_TYPE': 'filesystem',
+    CACHE = {'CACHE_TYPE': 'null',
              'CACHE_KEY_PREFIX': base_config.VERSION,
              'CACHE_DIR': '_cache'}
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     TEMPLATE_AUTO_RELOAD = True
+
+
+class production(base_config):
+    pass

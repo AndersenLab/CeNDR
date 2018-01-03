@@ -7,7 +7,7 @@
           <div class="col-md-8 col-xsm-offset-1">
             <h5><strong>Hover over or click a pin to see information about a <i>C. elegans</i> wild isolate</strong></h5>
           </div>
-        </div>_
+        </div>
       <div class="col-md-8">
               <div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
       </div>
@@ -35,7 +35,7 @@
                 <li class="list-group-item"><strong>Sampled By</strong> <div class="sampled_by pull-right"></div><div style="clear:both;"></div></li>
               </ul>
         </div>
-        <a class="btn btn-primary btn-s btn-block" href="{{ url_for("strain_submission_page") }}" role="button">Submit Strains</a></p>
+        <a class="btn btn-primary btn-s btn-block" href='{{ url_for("strain.strain_submission_page") }}' role="button">Submit Strains</a></p>
       </div>
 </div>
 {% endblock %}
@@ -63,7 +63,18 @@ var icon_hover = L.icon({
 // Default click_s
 var click_s = {
   target: {
-    options: {strain: "", release: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", sampled_by: "", elevation: ""},
+    options: {strain: "",
+              release: "",
+              title: "",
+              isotype: "",
+              landscape: "",
+              loc: "",
+              comma: "",
+              isolation_date: "",
+              location: "",
+              substrate: "",
+              sampled_by: "",
+              elevation: ""},
     setIcon: function(){},
   },
   latlng: { lat: "", lng: ""},
@@ -143,6 +154,7 @@ function restore_click_locked_content(m) {
  strain_info = data;
  data.forEach(function(d) {
   strain_names.push(d.strain);
+  console.log(d.release);
    m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
                                          strain: d.strain,
                                          title: d.strain,

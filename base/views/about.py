@@ -34,7 +34,9 @@ def utility_processor():
 @about_bp.route('/')
 @cache.cached()
 def about():
-    # About us Page - directs to other pages.
+    """
+        About us Page - Gives an overview of CeNDR
+    """
     title = "About"
 
     strain_listing = get_isotypes(known_origin=True)
@@ -44,7 +46,10 @@ def about():
 @about_bp.route('/getting_started/')
 @cache.cached()
 def getting_started():
-    # About us Page - directs to other pages.
+    """
+        Getting Started - provides information on how to get started
+        with CeNDR
+    """
     title = "Getting Started"
     strain_listing = get_isotypes(known_origin=True)
     return render_template('about/getting_started.html', **locals())
@@ -53,7 +58,9 @@ def getting_started():
 @about_bp.route('/committee/')
 @cache.cached()
 def committee():
-    # Scientific Panel Page
+    """
+        Scientific Panel Page
+    """
     title = "Scientific Advisory Committee"
     committee_data = load_yaml("advisory-committee.yaml")
     return render_template('about/committee.html', **locals())
@@ -62,7 +69,9 @@ def committee():
 @about_bp.route('/staff/')
 @cache.cached()
 def staff():
-    # Staff Page
+    """
+        Staff Page
+    """
     title = "Staff"
     staff_data = load_yaml("staff.yaml")
     return render_template('about/staff.html', **locals())
@@ -70,7 +79,9 @@ def staff():
 
 @about_bp.route('/donate/', methods=['GET', 'POST'])
 def donate():
-    # Process donation.
+    """
+        Process donation
+    """
     if request.method == 'POST':
         captcha_passed = False
         if 'g-recaptcha-response' in request.form:

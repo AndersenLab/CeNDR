@@ -5,7 +5,7 @@ from datetime import datetime
 from flask import Blueprint
 
 primary_bp = Blueprint('primary',
-                    __name__)
+                       __name__)
 
 
 def sortedfiles(path):
@@ -16,7 +16,7 @@ def sortedfiles(path):
 @primary_bp.route('/')
 @cache.cached(timeout=50)
 def main():
-    title = "Caenorhabditis elegans Natural Diversity Resource"
+    page_title = "Caenorhabditis elegans Natural Diversity Resource"
     files = sortedfiles("base/static/content/news/")
     #latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
     #    trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())

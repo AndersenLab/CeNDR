@@ -36,6 +36,14 @@ def strain_ind_api(strain_name):
     return jsonify(response)
 
 
+@app.route('/api/strain')
+def get_all_strains():
+    """
+        Return the full strain database set
+    """
+    return strain_m.query.all()
+
+
 @app.route('/api/isotype')
 def get_isotypes(known_origin=False):
     """
@@ -49,7 +57,13 @@ def get_isotypes(known_origin=False):
                                           strain_m.reference_strain,
                                           strain_m.isotype,
                                           strain_m.latitude,
-                                          strain_m.longitude) \
+                                          strain_m.longitude,
+                                          strain_m.release,
+                                          strain_m.isolation_date,
+                                          strain_m.elevation,
+                                          strain_m.substrate,
+                                          strain_m.landscape,
+                                          strain_m.sampled_by) \
                            .filter(strain_m.reference_strain == True, strain_m.latitude != None) \
                            .all()
     return json.dumps(result)

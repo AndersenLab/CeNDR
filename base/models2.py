@@ -22,6 +22,15 @@ class strain_m(db_2.Model):
     notes = db_2.Column(db_2.String(), nullable=True)
     sets = db_2.Column(db_2.String(), nullable=True)
 
+    def __repr__(self):
+        return self.strain
+
+    def list_sets(self):
+        if self.sets:
+            return self.sets.split(",")
+        else:
+            return []
+
 
 class wormbase_gene_m(db_2.Model):
     __tablename__ = 'wormbase_gene'

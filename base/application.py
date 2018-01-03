@@ -109,7 +109,6 @@ if os.getenv('HOME') == "/root":
     from flask_sslify import SSLify
     # Ignore leading slash of urls; skips must use start of path
     sslify = SSLify(app, skips=['strains/global-strain-map',
-                                '.well-known',
                                 'cronmapping'])
 else:
     # Running locally
@@ -177,30 +176,22 @@ def send_mail(data):
 
 def gs_static(url, prefix='static'):
     return f"https://storage.googleapis.com/elegansvariation.org/{prefix}/{url}"
-#
-# Custom Filters
-#
-
-@app.template_filter('comma')
-def comma_filter(value):
-    return "{:,.0f}".format(value)
-
-
-@app.template_filter('format_release')
-def format_release_filter(value):
-    return datetime.strptime(str(value), '%Y%m%d').strftime('%Y-%m-%d')
-
 
 # Inject globals
 @app.context_processor
 def inject():
     return dict(gs_static=gs_static)
 
+# Template filters
+from base.utils.template_filters import *
 
 # About Pages
 from base.views.about import about_bp
 app.register_blueprint(about_bp, url_prefix='/about')
 
+# Strain Pages
+from base.views.strains import strain_bp
+app.register_blueprint(strain_bp, url_prefix='/strain')
 
 # Main Pages - Homepage, Outreach, Contact
 from base.views.primary import primary_bp
@@ -210,7 +201,7 @@ app.register_blueprint(primary_bp, url_prefix='')
 
 
 
-from base.utils.auth import *
+#from base.utils.auth import *
 from base.task import *
 from base.views import *
 from base.views.api import *

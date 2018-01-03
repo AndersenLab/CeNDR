@@ -17,7 +17,7 @@ from datetime import datetime
 
 @app.route('/strain/')
 @cache.memoize(50)
-def strain_listing_page():
+def strain.strain_catalog():
     bcs = OrderedDict([("Strain", None)])
     title = "Strain Catalog"
 
@@ -59,7 +59,7 @@ def order_page():
     title = "Order"
     strain_listing = list(set(request.form.getlist('item')))
     if (len(strain_listing) == 0):
-        return redirect(url_for("strain_listing_page"))
+        return redirect(url_for("strain.strain_catalog"))
     items = request.form.getlist("item")
     # Retreive SKU's for prices
     items = calculate_total(items)
