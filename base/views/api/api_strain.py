@@ -29,6 +29,7 @@ def get_all_strains(strain_name=None, isotype_name=None):
 
 
 @app.route('/api/isotype')
+@jsonify_request
 def get_isotypes(known_origin=False):
     """
         Returns a list of strains.
@@ -50,4 +51,4 @@ def get_isotypes(known_origin=False):
                                           strain_m.sampled_by) \
                            .filter(strain_m.reference_strain == True, strain_m.latitude != None) \
                            .all()
-    return jsonify(result)
+    return result

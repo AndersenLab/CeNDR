@@ -23,7 +23,8 @@ def fetch_elevations(lat, lon):
     """
     result = requests.get(f"https://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lon}&key={ELEVATION_API_KEY}")
     if result.ok:
-        return result.json()['results'][0]['elevation']
+        elevation = result.json()['results'][0]['elevation']
+        return elevation
 
 
 def fetch_andersen_strains():

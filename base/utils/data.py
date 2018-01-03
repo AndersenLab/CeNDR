@@ -1,3 +1,4 @@
+import json
 import yaml
 import decimal
 import datetime
@@ -41,3 +42,9 @@ class json_encoder(json.JSONEncoder):
             return str(o.isoformat())
         return json.JSONEncoder.default(self, o)
 
+
+def dump_json(data):
+    """
+        Use to dump json on internal requests.
+    """
+    return json.dumps(data, cls=json_encoder)

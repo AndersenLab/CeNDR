@@ -1,5 +1,5 @@
 from base.application import get_ds, cache, add_to_order_ws, lookup_order, send_mail
-from flask import render_template, request, url_for, redirect, Response, abort
+from flask import render_template, request, url_for, redirect, Response, abort, jsonify
 from base.models2 import strain_m
 import yaml
 from base.emails import order_submission
@@ -9,8 +9,10 @@ import pytz
 import hashlib
 from flask import Blueprint
 from base.views.api.api_strain import get_isotypes, get_all_strains
+from base.utils.data import dump_json
 from collections import defaultdict
 from decimal import Decimal
+from logzero import logger
 
 strain_bp = Blueprint('strain',
                        __name__,
@@ -37,6 +39,8 @@ def map_page():
     """
     title = "Global Strain Map"
     strain_listing = get_isotypes(known_origin=True)
+    strain_listing = dump_json(strain_listing)
+    logger.info(strain_listing)
     return render_template('strain/global_strain_map.html', **locals())
 
 
@@ -58,9 +62,6 @@ def strain_metadata():
             header = [x.name for x in list(strain_m.__mapper__.columns)]
             yield ('\t'.join(header) + "\n").encode('utf-8')
         for row in get_all_strains():
-            if row.longitude:
-                row.latitude = row.latitude.normalize()
-                row.longitude = row.longitude.normalize()
             row = [getattr(row, column.name) for column in col_list]
             yield ('\t'.join(map(str, row)) + "\n").encode('utf-8')
     return Response(generate(), mimetype="text/tab-separated-values")

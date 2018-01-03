@@ -45,3 +45,11 @@ def google_storage():
         Fetch google storage credentials
     """
     return storage.Client(project='andersen-lab')
+
+
+def get_releases():
+    """
+        Returns the set of releases
+        stored in the elegansvariation.org/releases bucket
+    """
+    
