@@ -2,90 +2,80 @@
 
 {% block content %}
 
-<div class="row">
-      <div class="col-md-8">
-          <h2>{{ obj }}<small>&nbsp;&nbsp;isotype</small></h2>
-          <ol class="breadcrumb">
-            <li><a href="{{ url_for('main') }}">Home</a></li>
-            <li><a href="{{ url_for('strain.strain_catalog') }}">strain</a></li>
-            <li class="active" data-toggle="tooltip"  data-placement="bottom" title="{{ page_type }}">{{ obj }}</li>
-          </ol>
-
-<div class="row">
-<div class="col-md-6">
-
-<h4>Strains</h4>
-<ul>
-{% for i in rec %}
-{% if i.reference_strain %}
-  <li><strong><abbr data-toggle="tooltip"  data-placement="bottom" title="reference strain">{{ i.strain }}</abbr></strong></li>
-{% else %}
-  <li>{{ i.strain }}</li>
-{% endif %}
-{% endfor %}
-</ul>
-<br />
-{% if rec[0].previous_names %}
-<h4>Alternative Names</h4>
-<ul>
-{% for i in rec[0].previous_names.split("|") %}
-  <li>{{ i }}</li>
-{% endfor %}
-</ul>
-{% endif %}
-
-
-</div>
-<div class="col-md-6">
-<h4>Data</h4>
-{% if ref_strain.bam_file -%}
-  <li><a href = "{{ ref_strain.bam_file }}">{{ obj }}.bam</a> <strong> / </strong> <a href="{{ ref_strain.bam_index }}">.bai</a> </li>
-  {% endif %}
-{% if ref_strain.cram_file -%}
-  <li><a href = "{{ ref_strain.cram_file }}">{{ obj }}.cram</a> <strong> / </strong> <a href="{{ ref_strain.cram_index }}">.crai</a> </li>
-{% endif %}
-{% if ref_strain.variant_file %}
-  <li><a href = "#">{{ obj }}.variants.tsv</a></li>
-{% endif %}
-</div>
-</div>
-
-      </div>
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>{{ page_type }} Information</strong></div>
-              <ul class="list-group">
-                <li class="list-group-item" style="padding:0px;">
-                {% if rec[0].latitude %}
-                  <div id="map" style="height: 200px; width:100%"></div>
-                {% else %}
-                  <div style="height: 200px; background-color: #73AFE4; width:100%; text-align: center; line-height: 195px; "><strong>No Location</strong></div>
+<div class='row'>
+    <div class='col-md-8'>
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Strains</h4>
+                <ul>
+                {% for i in isotype %}
+                    {% if i.reference_strain %}
+                      <li><strong><abbr data-toggle="tooltip"  data-placement="bottom" title="reference strain">{{ i.strain }}</abbr></strong></li>
+                    {% else %}
+                      <li>{{ i.strain }}</li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+                <br />
+                {% if isotype[0].previous_names %}
+                <h4>Alternative Names</h4>
+                <ul>
+                {% for i in isotype[0].previous_names.split("|") %}
+                  <li>{{ i }}</li>
+                {% endfor %}
+                </ul>
                 {% endif %}
-                
-                </li>
-                                <li class="list-group-item">
-                <strong>
-                <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
-                           Isotype
-                </span>
-                </strong> 
-                        <div class="isotype pull-right"> {{ ref_strain["isotype"] }}</div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
-                            Reference Strain
-                            </span></strong> 
-                            <div class="strain pull-right">{{ ref_strain["strain"]}}</div><div style="clear:both;"></div></li>
+            </div>{# col-md-6 #}
 
-                <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset isotype originally released with."><strong>Release</strong></span> <div class="pull-right">{{ ref_strain['release']|format_release }}</div></li>
-                <li class="list-group-item"><strong>Isolation Date</strong> <div class="strain pull-right">{{ ref_strain["isolation_date"] }}</div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Lat/Lon</strong> <div class="lat pull-right">{{ ref_strain["latitude"] }}, {{ ref_strain["longitude"] }}</div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right">{{ ref_strain["elevation"] }} M<div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ ref_strain["location"] }}</div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Landscape</strong> <div class="location pull-right">{{ ref_strain["landscape"] }}</div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Substrate</strong> <div class="location pull-right">{{ ref_strain["substrate"] }}</div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ ref_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
-              </ul>
-        </div>
-      </div>
+            <div class="col-md-6">
+                <h4>Data</h4>
+                  <li>{{ reference_strain.bam_url() }}</li>
+                {% if reference_strain.variant_file %}
+                  <li><a href = "#">{{ obj }}.variants.tsv</a></li>
+                {% endif %}
+            </div>{# col-md-6 #}
+        </div>{# row #}
+    </div>{# col-md-8 #}
+
+    <div class='col-md-4'>
+        <div class="panel panel-default">
+            <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" />
+                <strong>
+                    {{ page_type }} Information
+                </strong>
+            </div>
+            <ul class="list-group">
+            <li class="list-group-item" style="padding:0px;">
+            {% if isotype[0].latitude %}
+              <div id="map" style="height: 200px; width:100%"></div>
+            {% else %}
+              <div style="height: 200px; background-color: #73AFE4; width:100%; text-align: center; line-height: 195px; "><strong>No Location</strong></div>
+            {% endif %}
+
+            </li>
+                            <li class="list-group-item">
+            <strong>
+            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+                       Isotype
+            </span>
+            </strong> 
+                    <div class="isotype pull-right"> {{ reference_strain["isotype"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                        Reference Strain
+                        </span></strong> 
+                        <div class="strain pull-right">{{ reference_strain["strain"]}}</div><div style="clear:both;"></div></li>
+
+            <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset isotype originally released with."><strong>Release</strong></span> <div class="pull-right">{{ reference_strain['release']|format_release }}</div></li>
+            <li class="list-group-item"><strong>Isolation Date</strong> <div class="strain pull-right">{{ reference_strain["isolation_date"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Lat/Lon</strong> <div class="lat pull-right">{{ reference_strain["latitude"] }}, {{ reference_strain["longitude"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right">{{ reference_strain["elevation"] }} M<div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ reference_strain["location"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Landscape</strong> <div class="location pull-right">{{ reference_strain["landscape"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Substrate</strong> <div class="location pull-right">{{ reference_strain["substrate"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ reference_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
+            </ul>
+        </div>{# /panel #}
+    </div>{# col-md-4 #}
 </div>
 
 

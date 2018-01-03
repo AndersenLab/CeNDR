@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import datetime
-from base.utils.data import json_encoder
-
+from base.utils.data_utils import json_encoder
 
 class base_config(object):
     VERSION = re.search("VERSION=version-(.*)\n", open(".travis.yml", 'r').read()) \
@@ -10,7 +9,6 @@ class base_config(object):
                 .replace('-', '.')
 
     json_encoder = json_encoder
-
 
 
 class local(base_config):

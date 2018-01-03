@@ -15,7 +15,7 @@ from requests import post
 from base.application import app, cache, get_ds, add_to_order_ws, send_mail
 from flask import render_template, url_for, Markup, request, redirect
 from base.emails import donate_submission
-from base.utils.data import load_yaml
+from base.utils.data_utils import load_yaml
 from base.views.api.api_strain import get_isotypes
 
 about_bp = Blueprint('about',

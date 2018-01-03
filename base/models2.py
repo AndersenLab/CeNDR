@@ -1,4 +1,6 @@
+from flask import Markup
 from base.application import db_2
+from base.constants import BAM_URL_PREFIX
 
 
 class strain_m(db_2.Model):
@@ -30,6 +32,22 @@ class strain_m(db_2.Model):
             return self.sets.split(",")
         else:
             return []
+
+    def bam_url(self):
+        """
+            Return bam / bam_index url set
+        """
+
+        url_set = Markup(f"""
+                        <a href="{BAM_URL_PREFIX}/{self.isotype}.bam">
+                            BAM
+                        </a>
+                        /
+                        <a href="{BAM_URL_PREFIX}/{self.isotype}.bam.bai">
+                            bai
+                        </a>
+                   """.strip())
+        return url_set
 
 
 class wormbase_gene_m(db_2.Model):

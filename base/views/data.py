@@ -5,6 +5,12 @@ from base.models import strain, report, homologene, mapping, trait
 from base.views.api.correlation import get_correlated_genes
 from collections import OrderedDict
 from flask import render_template
+from base.views.api.api_strain import get_isotypes, query_strains
+from base.constants import RELEASES
+
+#
+# Data Page
+#
 
 
 @app.route('/Data/')
@@ -13,21 +19,26 @@ from flask import render_template
 @app.route('/data/<string:release>')
 @cache.memoize(50)
 def data_page(release = releases[0]):
-    from base import releases
     title = "Data"
-    strain_listing = strain.select().filter(
-        strain.isotype != None, strain.release <= release).order_by(strain.isotype).execute()
+    strain_listing = query_strains(release=release)
     # Fetch variant data
     url = "https://storage.googleapis.com/elegansvariation.org/releases/{release}/multiqc_bcftools_stats.json".format(release=release)
     vcf_summary = requests.get(url).json()
-    return render_template('data.html', **locals())
+    VARS = {'title': title,
+            'strain_listing': strain_listing,
+            'vcf_summary': vcf_summary,
+            'RELEASES': RELEASES}
+    return render_template('data.html', **VARS)
 
+
+#
+# Download Script
+#
 
 @app.route('/data/download/<filetype>.sh')
 @cache.memoize(50)
 def download_script(filetype):
-    strain_listing = strain.select().filter(
-        strain.isotype != None).order_by(strain.isotype).execute()
+    strain_listing = query_strains(release=release)
     download_page = render_template('download_script.sh', **locals())
     response = make_response(download_page)
     response.headers["Content-Type"] = "text/plain"
@@ -39,11 +50,9 @@ def download_script(filetype):
 @app.route('/data/browser/<region>/<query>')
 def browser(region = "III:11746923-11750250", tracks="mh", query = None):
     title = "Browser" 
-    from base import releases
     build = releases[0]
-    isotype_listing = list(strain.select(strain.isotype).distinct().filter(
-                                    strain.isotype != None).order_by(strain.isotype).dicts().execute())
-    isotypes = [x["isotype"] for x in isotype_listing]
+    isotype_listing = get_isotypes(list_only=True)
+    print(isotype_listing)
     return render_template('browser.html', **locals())
 
 

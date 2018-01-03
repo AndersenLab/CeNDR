@@ -14,8 +14,8 @@
     <div class="col-md-12">
         <ul class="nav nav-pills">
             <h3>Releases</h3>
-            {% for rel in releases %}
-            <li {% if rel == release %}class="active"{% endif %}><a href="{{ url_for('data_page', release = rel) }}">{{ rel }}</a></li>
+            {% for RELEASE in RELEASES %}
+            <li {% if rel == release %}class="active"{% endif %}><a href="{{ url_for('data_page', release = RELEASE) }}">{{ RELEASE }}</a></li>
             {% endfor %}
         </ul>
     </div>

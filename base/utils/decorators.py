@@ -5,7 +5,7 @@ from logzero import logger
 
 def jsonify_request(func):
     """
-        API function - 
+        API function -
             Checks to see if there is a request and if
             there is, returns JSON of result.
     """

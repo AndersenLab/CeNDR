@@ -1,5 +1,9 @@
-from base.application import get_ds, cache, add_to_order_ws, lookup_order, send_mail
-from flask import render_template, request, url_for, redirect, Response, abort, jsonify
+from base.application import (get_ds,
+                              cache,
+                              add_to_order_ws,
+                              lookup_order,
+                              send_mail)
+from flask import render_template, request, url_for, redirect, Response, abort
 from base.models2 import strain_m
 import yaml
 from base.emails import order_submission
@@ -8,10 +12,9 @@ from requests import post
 import pytz
 import hashlib
 from flask import Blueprint
-from base.views.api.api_strain import get_isotypes, get_all_strains
-from base.utils.data import dump_json
+from base.views.api.api_strain import get_isotypes, query_strains
+from base.utils.data_utils import dump_json
 from collections import defaultdict
-from decimal import Decimal
 from logzero import logger
 
 strain_bp = Blueprint('strain',
@@ -30,6 +33,7 @@ def strain():
     """
     return redirect(url_for('strain.map_page'))
 
+
 @strain_bp.route('/global-strain-map/')
 @cache.memoize(50)
 def map_page():
@@ -37,11 +41,9 @@ def map_page():
         Global strain map shows the locations of all wild isolates
         within the SQLite database.
     """
-    title = "Global Strain Map"
-    strain_listing = get_isotypes(known_origin=True)
-    strain_listing = dump_json(strain_listing)
-    logger.info(strain_listing)
-    return render_template('strain/global_strain_map.html', **locals())
+    VARS = {'title': "Global Strain Map",
+            'strain_listing': dump_json(get_isotypes(known_origin=True))}
+    return render_template('strain/global_strain_map.html', **VARS)
 
 
 #
@@ -61,7 +63,7 @@ def strain_metadata():
             first = False
             header = [x.name for x in list(strain_m.__mapper__.columns)]
             yield ('\t'.join(header) + "\n").encode('utf-8')
-        for row in get_all_strains():
+        for row in query_strains():
             row = [getattr(row, column.name) for column in col_list]
             yield ('\t'.join(map(str, row)) + "\n").encode('utf-8')
     return Response(generate(), mimetype="text/tab-separated-values")
@@ -71,18 +73,16 @@ def strain_metadata():
 # Isotype View
 #
 
-@strain_bp.route('/<isotype_name>/')
+@strain_bp.route('/isotype/<isotype_name>/')
 @cache.memoize(50)
 def isotype_page(isotype_name):
-    page_title = isotype_name
-    page_type = "isotype"
-    obj = isotype_name
-    rec = list(strain.filter(strain.isotype == isotype_name)
-               .order_by(strain.latitude).dicts().execute())
-    ref_strain = [x for x in rec if x["reference_strain"] == True][0]
-    #strain_json_output = json.dumps(
-    #    [x for x in rec if x["latitude"] != None],  default=json_serial)
-    return render_template('strain/strain.html', **locals())
+    isotype = query_strains(isotype_name = isotype_name)
+    VARS = {"title": isotype_name,
+            "isotype": isotype,
+            "isotype_name": isotype_name,
+            "reference_strain": [x for x in isotype if x.reference_strain][0],
+            "strain_json_output": dump_json(isotype)}
+    return render_template('strain/strain.html', **VARS)
 
 
 #
@@ -93,13 +93,10 @@ def isotype_page(isotype_name):
 @cache.memoize(50)
 def strain_catalog():
     title = "Strain Catalog"
-
-    if 'warning' in request.args:
-        warning = request.args["warning"]
-
-    strain_listing = get_all_strains()
-    strain_sets = defaultdict(list)
-    return render_template('strain/strain_catalog.html', **locals())
+    VARS = {"title": "Strain Catalog",
+            "warning": request.args.get('warning'),
+            "strain_listing": query_strains()}
+    return render_template('strain/strain_catalog.html', **VARS)
 
 #
 # Strain Submission

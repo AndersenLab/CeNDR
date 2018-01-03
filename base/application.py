@@ -10,7 +10,7 @@ from flask_caching import Cache
 from gcloud import datastore
 from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
-from base.utils.data import json_encoder
+from base.utils.data_utils import json_encoder
 
 
 # Caching
