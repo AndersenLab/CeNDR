@@ -1,6 +1,7 @@
 from flask import Markup
 from base.application import db_2
 from base.constants import BAM_URL_PREFIX
+from sqlalchemy import or_
 
 
 class strain_m(db_2.Model):
@@ -55,53 +56,49 @@ class wormbase_gene_m(db_2.Model):
     id = db_2.Column(db_2.Integer, primary_key=True)
     seqname = db_2.Column(db_2.String(20), index=True)
     feature = db_2.Column(db_2.String(30), index=True)
-    start = db_2.Column(db_2.Integer())
-    end = db_2.Column(db_2.Integer())
+    start = db_2.Column(db_2.Integer(), index=True)
+    end = db_2.Column(db_2.Integer(), index=True)
     strand = db_2.Column(db_2.String(1))
     frame = db_2.Column(db_2.Integer(), nullable=True)
     gene_id = db_2.Column(db_2.String(), nullable=True)
     gene_biotype = db_2.Column(db_2.String(30), nullable=True)
+    locus_name = db_2.Column(db_2.String(30), index=True)
     transcript_id = db_2.Column(db_2.String(30), nullable=True, index=True)
     transcript_biotype = db_2.Column(db_2.String(), index=True)
     exon_id = db_2.Column(db_2.String(30), nullable=True, index=True)
     exon_number = db_2.Column(db_2.Integer(), nullable=True)
     protein_id = db_2.Column(db_2.String(30), nullable=True, index=True)
 
+    @classmethod
+    def resolve_gene_id(cls, query):
+        """
+            query - a locus name or transcript ID
+            output - a wormbase gene ID
+
+            Example:
+            wormbase_gene_m.resolve_gene_id('pot-2') --> WBGene00010195
+        """
+        result = cls.query.filter(or_(cls.transcript_id == query, cls.locus_name == query)).first()
+        if result:
+            return result.gene_id
+
     def __repr__(self):
-        return f"{self.name} [{self.chrom}:{self.start}-{self.end}]"
+        return f"{self.gene_id} [{self.seqname}:{self.start}-{self.end}]"
 
-"""
-class wb_gene(Model):
-    CHROM = db_2.Column(db_2.String(), index = True, max_length = 5)
-    start = IntegerField(index = True)
-    end = IntegerField(index = True)
-    Name = db_2.Column(db_2.String(), index = True)
-    sequence_name = db_2.Column(db_2.String(), index = True)
-    biotype = db_2.Column(db_2.String(), index = True)
-    locus = db_2.Column(db_2.String(), index = True, default = None, null = True)
 
-    class Meta:
-        database = db
+class homologs_m(db_2.Model):
+    id = db_2.Column(db_2.Integer, primary_key=True)
+    gene_id = db_2.Column(db_2.String(40), index=True)
+    gene_name = db_2.Column(db_2.String(40), index=True)
+    homolog_species = db_2.Column(db_2.String(50), index=True)
+    homolog_taxon_id = db_2.Column(db_2.Integer, index=True, nullable=True) # If available    
+    homolog_gene = db_2.Column(db_2.String(50), index=True)
+    homolog_source = db_2.Column(db_2.String(40))
+    is_ortholog = db_2.Column(db_2.Boolean(), index=True)
 
-class homologene(Model):
-    HID = IntegerField(index=True)
-    taxon_id = IntegerField(index=True)
-    gene_id = IntegerField(index=True) # entrez
-    gene_symbol = db_2.Column(db_2.String(), index=True)
-    protein_gi = IntegerField(index=True)
-    protein_accession = db_2.Column(db_2.String(), index=True)
-    species = db_2.Column(db_2.String(), index=True)
-    ce_gene_name = db_2.Column(db_2.String(), default=False)
-    class Meta:
-        database = db
+    def is_ortholog(self):
+        pass
 
-class wb_orthologs(Model):
-    wbid = db_2.Column(db_2.String(), index=True)
-    ce_gene_name = db_2.Column(db_2.String(), index=True)
-    species = db_2.Column(db_2.String(), index=True)
-    ortholog = db_2.Column(db_2.String(), index=True)
-    gene_symbol = db_2.Column(db_2.String(), index=True)
-    method = db_2.Column(db_2.String(), index=True) # Method used to assign ortholog
-    class Meta:
-        database = db
-"""
+    def __repr__(self):
+        return f"homolog: {self.homologene}"
+

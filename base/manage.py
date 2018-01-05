@@ -1,11 +1,10 @@
 import os
 from click import secho
 from base.application import app, db_2
-from base.models2 import strain_m, wormbase_gene_m
+from base.models2 import strain_m, wormbase_gene_m, homologs_m
 from base.db.etl_strains import fetch_andersen_strains
-from base.db.etl_wormbase import fetch_gene_gtf
-
-
+from base.db.etl_wormbase import fetch_gene_gtf, fetch_orthologs
+from base.db.etl_homologene import fetch_homologene
 
 @app.cli.command()
 def initdb():
@@ -28,6 +27,14 @@ def initdb():
                                .all()
     gene_summary = '\n'.join([f"{k}: {v}" for k, v in gene_summary])
     secho(f"============\nGene Summary\n------------\n{gene_summary}\n============")
+
+    ###############################
+    # Load homologs and orthologs #
+    ###############################
+    secho('Loading homologs from homologene', fg='white')
+    db_2.session.bulk_insert_mappings(homologs_m, fetch_homologene())
+    secho('Loading orthologs from WormBase', fg='white')
+    db_2.session.bulk_insert_mappings(homologs_m, fetch_orthologs())
     
     ################
     # Load Strains #
