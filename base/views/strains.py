@@ -192,7 +192,7 @@ def order_page():
                         order['total'] += 65
                         shipping = "\nShipping\n=========\n$65"
                     order['date'] = datetime.now(pytz.timezone("America/Chicago"))
-                    order['order_number'] = o['order-number']
+                    #order['order_number'] = o['order-number']
                     order['is_donation'] = False
                     order['date'] = datetime.now(pytz.timezone(
                         "America/Chicago")).date().isoformat()
@@ -232,7 +232,7 @@ def order_confirmation(invoice_hash):
                           for x in order['items'].split("\n")}
         if order is None:
             abort(404)
-        page_title = "Invoice Number: " + str(order['order_number'])
+        title = f"Invoice Number: {order['invoice_hash']}"
         return render_template('order_confirm.html', **locals())
     else:
         abort(404)

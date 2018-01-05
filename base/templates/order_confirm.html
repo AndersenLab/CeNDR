@@ -42,7 +42,7 @@
   <th>Shipping Service</th> 
   <th>Tracking</th>
   {% endif %}
-  <th>Order ID</th>
+  <th>Invoice ID</th>
   <th>Order Date</th>
   </tr>
   <tr>
@@ -58,7 +58,7 @@
   {% endif %}
   </td>
   {% endif %}
-  <td>{{ order["order_number"] }}</td>
+  <td>{{ order["invoice_hash"] }}</td>
   <td>{{ order['date'] }}</td>
   </tr>
   </table>

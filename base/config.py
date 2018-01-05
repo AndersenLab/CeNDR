@@ -2,6 +2,9 @@
 import re
 import datetime
 from base.utils.data_utils import json_encoder
+from base.utils.gcloud import get_item
+
+recaptcha = get_item("credential", "recaptcha")
 
 class base_config(object):
     VERSION = re.search("VERSION=version-(.*)\n", open(".travis.yml", 'r').read()) \
@@ -9,6 +12,9 @@ class base_config(object):
                 .replace('-', '.')
 
     json_encoder = json_encoder
+    RECAPTCHA_PUBLIC_KEY = recaptcha.get("RECAPTCHA_PUBLIC_KEY")
+    RECAPTCHA_PRIVATE_KEY = recaptcha.get("RECAPTCHA_PRIVATE_KEY")
+    SECRET_KEY = recaptcha.get("RECAPTCHA_PRIVATE_KEY")
 
 
 class local(base_config):
@@ -25,6 +31,7 @@ class local(base_config):
              'CACHE_DIR': '_cache'}
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     TEMPLATE_AUTO_RELOAD = True
+
 
 
 class production(base_config):

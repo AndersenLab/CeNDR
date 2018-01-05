@@ -11,6 +11,7 @@ from gcloud import datastore
 from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from base.utils.data_utils import json_encoder
+from base.utils.gcloud import google_datastore
 
 
 # Caching
@@ -44,7 +45,7 @@ def get_vcf(release = releases[0]):
 def get_ds():
     with app.app_context():
         if not hasattr(g, 'ds'):
-            g.ds = datastore.Client(project="andersen-lab")
+            g.ds = google_datastore()
         return g.ds
 
 

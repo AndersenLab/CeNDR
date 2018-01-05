@@ -1,0 +1,28 @@
+{% macro render_field(field, form_prefix=None, form_suffix=None) %}
+  <div class="form-group {% if field.errors %}has-error{% endif %}">
+    {{ field.label }}
+    {% if form_prefix or form_suffix %}
+    <div class="input-group">
+        {% endif %}
+        {% if form_prefix %}
+            <span class="input-group-addon">{{ form_prefix }}</span>
+        {% endif %}
+
+                {{ field(class="form-control", **kwargs) }}
+
+        {% if form_suffix %}
+            <span class="input-group-addon">{{ form_prefix }}</span>
+        {% endif %}
+    {% if form_prefix or form_suffix %}
+    </div>
+    {% endif %}
+
+    {% for error in field.errors %}
+        <p class='text-danger'>
+            {{ error|safe|e }}
+        </p>
+    {% endfor %}
+
+
+  </div>
+{% endmacro %}
