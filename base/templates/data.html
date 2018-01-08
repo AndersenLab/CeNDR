@@ -15,7 +15,7 @@
         <ul class="nav nav-pills">
             <h3>Releases</h3>
             {% for RELEASE in RELEASES %}
-            <li {% if rel == release %}class="active"{% endif %}><a href="{{ url_for('data_page', release = RELEASE) }}">{{ RELEASE }}</a></li>
+                <li {% if RELEASE == selected_release %}class="active"{% endif %}><a href="{{ url_for('data.data', selected_release = RELEASE) }}">{{ RELEASE }}</a></li>
             {% endfor %}
         </ul>
     </div>
@@ -44,7 +44,7 @@
         {% include('releases/variant_summary_tab.html') %}
     </div>
     <div role="tabpanel" class="tab-pane" id="phylogeny">
-        <img style='width:100%' src='https://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/phylo/genome.svg'>
+        <img style='width:100%' src='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/phylo/genome.svg'>
     </div>
 
         
@@ -77,19 +77,6 @@ $(document).ready(function() {
     }(jQuery));
 
 });
-
-// highlight_set_buttons = function() {
-//     set_names = ["set_heritability", "set_1", "set_2", "set_3", "set_4"];
-//     for (i in set_names) {
-//         if ($("." + set_names[i] + ":checkbox:checked").length == $("." + set_names[i]).length) {
-//             $("#" + set_names[i]).addClass("btn-success");
-//         } else {
-//             $("#" + set_names[i]).removeClass("btn-success");
-//         }
-//     }
-// }
-
-
 
 $(document).ready(function() {
     $('#filter').keydown(function(event) {

@@ -83,7 +83,7 @@ th {
     <div class="well">
     <div class="row">
       <div class="col-md-2">
-      <h5>Tracks <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}#standard-tracks"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+      <h5>Tracks <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}#standard-tracks"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
       {% for i in ["Genes", "Transcripts"] %}
         <div class="checkbox">
           <label><input type="checkbox" checked class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
@@ -95,7 +95,7 @@ th {
         </div>
       {% endfor %}
 
-        <h5>Variant Impact <a href="{{ url_for('help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+        <h5>Variant Impact <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
 
         <div class="checkbox">
@@ -141,7 +141,7 @@ th {
       </div>
 
       <div class="col-md-4">
-        <h5>Strains <a href="{{ url_for('help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+        <h5>Strains <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
         <div class="checkbox">
             <label><input type="checkbox" class="list-all-strains" value="list-all-strains" />List all strain genotypes </label>
@@ -600,7 +600,6 @@ function refresh_variants(download = false) {
 }
 
 $("#download").click(function() {
-  console.log("download")
     refresh_variants(download=true);
 });
 

@@ -1,4 +1,4 @@
-from base.application import app, cache, releases
+from base.application import cache, releases
 from flask import make_response, Response
 import requests
 from base.models import strain, report, homologene, mapping, trait
@@ -6,28 +6,38 @@ from base.views.api.correlation import get_correlated_genes
 from collections import OrderedDict
 from flask import render_template
 from base.views.api.api_strain import get_isotypes, query_strains
-from base.constants import RELEASES
+from base.constants import CURRENT_RELEASE, RELEASES
+from flask import Blueprint, url_for, redirect
+
+
+data_bp = Blueprint('data',
+                    __name__,
+                    template_folder='data')
+
 
 #
 # Data Page
 #
 
-
-@app.route('/Data/')
-@app.route('/data/')
-@app.route('/Data/<string:release>')
-@app.route('/data/<string:release>')
+@data_bp.route('/')
+@data_bp.route('/release/<string:selected_release>')
+@data_bp.route('/release/<string:selected_release>')
 @cache.memoize(50)
-def data_page(release = releases[0]):
+def data(selected_release=CURRENT_RELEASE):
+    """
+        Default data page - lists
+        available releases.
+    """
     title = "Data"
-    strain_listing = query_strains(release=release)
+    strain_listing = query_strains(release=selected_release)
     # Fetch variant data
-    url = "https://storage.googleapis.com/elegansvariation.org/releases/{release}/multiqc_bcftools_stats.json".format(release=release)
+    url = "https://storage.googleapis.com/elegansvariation.org/releases/{selected_release}/multiqc_bcftools_stats.json".format(selected_release=selected_release)
     vcf_summary = requests.get(url).json()
     VARS = {'title': title,
             'strain_listing': strain_listing,
             'vcf_summary': vcf_summary,
-            'RELEASES': RELEASES}
+            'RELEASES': RELEASES,
+            'selected_release': selected_release}
     return render_template('data.html', **VARS)
 
 
@@ -35,28 +45,30 @@ def data_page(release = releases[0]):
 # Download Script
 #
 
-@app.route('/data/download/<filetype>.sh')
-@cache.memoize(50)
-def download_script(filetype):
-    strain_listing = query_strains(release=release)
+@data_bp.route('/download/download_bams.sh')
+@cache.cached(timeout=50)
+def download_script():
+    strain_listing = query_strains(release=CURRENT_RELEASE)
     download_page = render_template('download_script.sh', **locals())
     response = make_response(download_page)
     response.headers["Content-Type"] = "text/plain"
     return response
 
+#
+# Browser
+#
 
-@app.route('/data/browser/')
-@app.route('/data/browser/<region>')
-@app.route('/data/browser/<region>/<query>')
-def browser(region = "III:11746923-11750250", tracks="mh", query = None):
-    title = "Browser" 
+@data_bp.route('/browser/')
+@data_bp.route('/browser/<region>')
+@data_bp.route('/browser/<region>/<query>')
+def browser(region="III:11746923-11750250", tracks="mh", query = None):
+    title = "Genome Browser"
     build = releases[0]
     isotype_listing = get_isotypes(list_only=True)
-    print(isotype_listing)
     return render_template('browser.html', **locals())
 
 
-@app.route('/data/interval/<report_slug>/<trait_slug>')
+@data_bp.route('/interval/<report_slug>/<trait_slug>')
 def interval_download(report_slug, trait_slug):
     """
         Return interval data.

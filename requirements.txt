@@ -28,6 +28,7 @@ Flask-RESTful==0.3.6
 flask-shell-ipython==0.3.0
 Flask-SQLAlchemy==2.3.2
 Flask-SSLify==0.1.5
+Flask-WTF==0.14.2
 funcsigs==1.0.2
 future==0.16.0
 futures==3.1.1
@@ -106,3 +107,4 @@ uritemplate==3.0.0
 urllib3==1.22
 wcwidth==0.1.7
 Werkzeug==0.13
+WTForms==2.1

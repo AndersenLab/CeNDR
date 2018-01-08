@@ -13,4 +13,6 @@ WORMBASE_BUILD = "WS261"
 RELEASES = ["20170531",
             "20160408"]
 
+CURRENT_RELEASE = RELEASES[0]
+
 BAM_URL_PREFIX = "https://elegansvariation.org.s3.amazonaws.com/bam"

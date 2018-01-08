@@ -2,31 +2,23 @@
     <div class="col-md-4">
         <h3>Alignment Data</h3>
         <p>We aligned all wild isolate genomes to the WS245 version of the N2 genome. These data are stored using the
-            <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> and
-            <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> formats.
-            <abbr data-toggle="tooltip" data-placement="bottom" title="Compressed sequence Alignment/Map format">CRAM</abbr> files are substantially smaller than
-            <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr> files.</p>
-        <p><a href="https://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data here</a>.</p>
-        <p>CRAM files are substantially smaller than BAM files, but require the reference to be converted to BAM files. We are currently using WS245 (<strong><a href="https://northwestern.box.com/shared/static/ijlhhd1hwlbr5vvasjg35yjux1p5n01g.gz">Download</a></strong>).
+            <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr>  format.</p>
+        <p><a href="https://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data</a></p>
             <h4>Downloading All Alignment Data</h4>
-            <p>Interested in downloading everything? Use the scripts below! Before these scripts will work, you need to download and install <strong>wget</strong>. We recommend using <a href="https://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "primary.help_item",filename="FAQ ")}}">FAQ</a> for details on installing <strong>wget</strong>. </p>
-            <ul>
-                <li><a href="{{ url_for("download_script", filetype="bam") }}">Download BAMs</a></li>
-                <li><a href="{{ url_for( "download_script", filetype="cram") }}">Download CRAMs</a></li>
-            </ul>
-        </p>
+            <p>You can download all alignment data using the script below. Before this script will work, you need to download and install <strong>wget</strong>. We recommend using <a href="https://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "primary.help_item",filename="FAQ ")}}">FAQ</a> for details on installing <strong>wget</strong>.</p>
+            <p><a href="{{ url_for("data.download_script") }}">download_bams.sh</a></p>
     </div>
     <div class="col-md-4">
         <h3>Variant Data</h3>
         <p>We used samtools to identify single-nucleotide variant (SNV) sites as compared to the N2 reference genome (WS245). Variant data are provided as
             <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> or tab-delimited files.</p>
-        <p><a href="https://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat">Learn more about VCF files here</a>.</p>
+        <p><a href="https://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat">Learn more about VCF files</a></p>
         <h4>VCF</h4>
         <p>The file below is a single
             <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> containing SNVs for all wild isolates.</p>
         <p>
-            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
-            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz">WI.{{ release }}.vcf.gz</a></strong></p>
+            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/WI.{{ selected_release }}.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
+            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/WI.{{ selected_release }}.vcf.gz">WI.{{ selected_release }}.vcf.gz</a></strong></p>
         <div style="clear:both;"></div>
         <p>You can also access specific regions of
             <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> files (rather then the entire file) from the command line:
@@ -95,13 +87,13 @@
                 {% endfor %}
             </td>
             <td><a href="{{ url_for('strain.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-            <td>{% for s in strains %} {{ s }} {% endfor %}
+            <td>{% for strain in strains %} {{ strain }} {% endfor %}
             </td>
             <td>
                 {{ strains[0].bam_url() }}
             </td>
             <td>
-                <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/isotype_tsv/{{ isotype }}.{{ release }}.tsv">{{ isotype }}.{{ release }}.tsv</a>
+                <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/isotype_tsv/{{ isotype }}.{{ selected_release }}.tsv">{{ isotype }}.{{ selected_release }}.tsv</a>
             </td>
         </tr>
         {% endfor %}

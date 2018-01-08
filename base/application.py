@@ -4,7 +4,7 @@ import time
 import requests
 from peewee import *
 from base import config
-from flask import Flask, g
+from flask import Flask, g, url_for, redirect
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_caching import Cache
 from gcloud import datastore
@@ -193,6 +193,17 @@ app.register_blueprint(about_bp, url_prefix='/about')
 # Strain Pages
 from base.views.strains import strain_bp
 app.register_blueprint(strain_bp, url_prefix='/strain')
+
+# Data Pages
+from base.views.data import data_bp
+app.register_blueprint(data_bp, url_prefix='/data')
+
+@app.route("/Data/")
+def reroute_data():
+    """
+        Data page redirect
+    """
+    return redirect(url_for('data.data'))
 
 # Main Pages - Homepage, Outreach, Contact
 from base.views.primary import primary_bp

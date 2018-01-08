@@ -85,7 +85,7 @@ function set_panel_from_search(m) {
   click_s.target.setIcon(icon_norm)
   s = m.layer.options
   $(".strain").text(s.strain);
-  $(".isotype").html("<strong><a href='/strain/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".isotype").html("<strong><a href='/strain/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
   $(".release").text(s.release);
   $(".isolation_date").text(s.isolation_date);
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
@@ -107,7 +107,7 @@ function set_panel_content(m) {
   comma = s.comma;
   latlng = m.latlng.lat + comma + m.latlng;
   $(".strain").text(s.strain);
-  $(".isotype").html("<strong><a href='/strain/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".isotype").html("<strong><a href='/strain/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
   $(".release").text(s.release);
   $(".isolation_date").text(s.isolation_date);
   $(".comma").text(s.comma)
