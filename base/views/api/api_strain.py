@@ -1,14 +1,7 @@
-from flask import json, jsonify, request
 from base.models import strain
 from base.models2 import strain_m
-from base.application import app, cache
-from collections import OrderedDict
-from logzero import logger
+from base.application import app
 from base.utils.decorators import jsonify_request
-
-FIELDS = [x.name for x in strain._meta.sorted_fields if x.name != "id"]
-PEEWEE_FIELDS_LIST = [getattr(strain, x.name)
-                      for x in strain._meta.sorted_fields if x.name != "id"]
 
 
 @app.route('/api/strain')
@@ -52,6 +45,7 @@ def get_isotypes(known_origin=False, list_only=False):
         result = strain_m.query.with_entities(strain_m.isotype) \
                                .filter(strain_m.reference_strain == True, strain_m.latitude != None) \
                                .all()
+        result = [x for tupl in result for x in tupl]
     else:
         result = strain_m.query.with_entities(strain_m.strain,
                                               strain_m.reference_strain,

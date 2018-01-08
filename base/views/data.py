@@ -61,11 +61,13 @@ def download_script():
 @data_bp.route('/browser/')
 @data_bp.route('/browser/<region>')
 @data_bp.route('/browser/<region>/<query>')
-def browser(region="III:11746923-11750250", tracks="mh", query = None):
-    title = "Genome Browser"
-    build = releases[0]
-    isotype_listing = get_isotypes(list_only=True)
-    return render_template('browser.html', **locals())
+def browser(region="III:11746923-11750250", query = None):
+    VARS = {'title': "Genome Browser",
+            'build': CURRENT_RELEASE,
+            'isotype_listing': get_isotypes(list_only=True),
+            'region': region,
+            'query': query}
+    return render_template('browser.html', **VARS)
 
 
 @data_bp.route('/interval/<report_slug>/<trait_slug>')

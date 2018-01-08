@@ -12,7 +12,7 @@ import requests
 from base.db.etl_wormbase import get_gene_ids
 from urllib.request import urlretrieve, urlopen
 from tempfile import NamedTemporaryFile
-from base.models2 import wormbase_gene_m
+from base.models2 import wormbase_gene_summary_m
 
 
 # Homologene database
@@ -83,7 +83,7 @@ def fetch_homologene():
         if homolog_id in elegans_set.keys() and tax_id != 6239:
             # Try to resolve the wormbase WB ID if possible.
             gene_name = elegans_set[homolog_id]
-            gene_id = wormbase_gene_m.resolve_gene_id(gene_name) or line[2]
+            gene_id = wormbase_gene_summary_m.resolve_gene_id(gene_name) or line[2]
             yield {'gene_id': gene_id,
                    'gene_name': gene_name,
                    'homolog_species': taxon_ids[tax_id],

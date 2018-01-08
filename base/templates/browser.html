@@ -38,6 +38,7 @@
   border: 1px solid black;
   color: black;
 }
+
 .gt-3.PASS {
   background-color: rgba(0, 102, 255,1.0);
   border: 1px solid black;
@@ -49,6 +50,7 @@
   border: 1px dotted black;
   color: black;
 }
+
 .gt-3:not(.PASS) {
   background-color: rgba(0, 102, 255,0.25);
   border: 1px dotted black;
@@ -157,7 +159,7 @@ th {
           
           <tbody class="searchable">
 
-            {% for isotype in isotypes %}
+            {% for isotype in isotype_listing %}
 
               <tr class="isotype-select">
 
@@ -325,7 +327,7 @@ trackset = {"Genes": {
                 visibilityWindow: 20000
             },
 
-            {% for isotype in isotypes %}
+            {% for isotype in isotype_listing %}
             {{ isotype }} : {
               name: "{{ isotype }}",
               url: "//storage.googleapis.com/elegansvariation.org/releases/{{ build }}/tracks/isotype/{{ isotype }}.{{ build }}.vcf.gz",
@@ -521,7 +523,7 @@ function refresh_variants(download = false) {
                 $.each(rec['ANN'], function(annk, ann) {
                         if (ann["gene_id"] != null) 
                         {
-                          ann["gene_id"] = "<a href='/gene/" + ann["gene_id"] + "'>" + ann["gene_id"] + "</a>";
+                          ann["gene_id"] = `<a href='/gene/${ann["gene_id"]}'>${ann["gene_id"]}</a>`;
                         }
                         if (ann.impact != undefined) {
                           impact = `<span style='color: white;' class='label label-${var_impact_class[ann.impact]}'>${ann.impact}</span>`
