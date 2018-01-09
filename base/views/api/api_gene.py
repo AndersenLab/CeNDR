@@ -6,7 +6,7 @@ from base.utils.decorators import jsonify_request
 
 
 @app.route('/api/gene/<string:query>')
-#@jsonify_request
+@jsonify_request
 def query_homolog(query=""):
     """
         Return homologs from a query

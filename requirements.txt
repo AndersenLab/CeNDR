@@ -1,6 +1,7 @@
 aniso8601==1.3.0
 appnope==0.1.0
 argcomplete==1.9.3
+arrow==0.12.0
 asn1crypto==0.23.0
 backports.shutil-get-terminal-size==1.0.0
 blinker==1.4
@@ -106,5 +107,5 @@ Unidecode==0.4.21
 uritemplate==3.0.0
 urllib3==1.22
 wcwidth==0.1.7
-Werkzeug==0.13
+Werkzeug==0.14.1
 WTForms==2.1
