@@ -23,7 +23,6 @@ Address
 Items
 =====
 {items}
-{shipping}
 
 Total
 =====

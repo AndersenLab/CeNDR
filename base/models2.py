@@ -1,7 +1,8 @@
 from flask import Markup
 from base.application import db_2
 from base.constants import BAM_URL_PREFIX
-from sqlalchemy import or_
+from sqlalchemy import or_, func
+
 
 
 class strain_m(db_2.Model):
@@ -54,10 +55,11 @@ class strain_m(db_2.Model):
 class wormbase_gene_m(db_2.Model):
     __tablename__ = 'wormbase_gene'
     id = db_2.Column(db_2.Integer, primary_key=True)
-    seqname = db_2.Column(db_2.String(20), index=True)
-    feature = db_2.Column(db_2.String(30), index=True)
+    chrom = db_2.Column(db_2.String(20), index=True)
+    chrom_num = db_2.Column(db_2.Integer(), index=True)  # For sorting purposes
     start = db_2.Column(db_2.Integer(), index=True)
     end = db_2.Column(db_2.Integer(), index=True)
+    feature = db_2.Column(db_2.String(30), index=True)
     strand = db_2.Column(db_2.String(1))
     frame = db_2.Column(db_2.Integer(), nullable=True)
     gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary_m.gene_id'), nullable=False)
@@ -68,6 +70,7 @@ class wormbase_gene_m(db_2.Model):
     exon_id = db_2.Column(db_2.String(30), nullable=True, index=True)
     exon_number = db_2.Column(db_2.Integer(), nullable=True)
     protein_id = db_2.Column(db_2.String(30), nullable=True, index=True)
+    arm_or_center = db_2.Column(db_2.String(12), index=True)
 
     gene_summary = db_2.relationship("wormbase_gene_summary_m", backref='gene_components')
 
@@ -83,14 +86,17 @@ class wormbase_gene_summary_m(db_2.Model):
         (not exons/introns/etc.)
     """
     id = db_2.Column(db_2.Integer, primary_key=True)
-    gene_id = db_2.Column(db_2.String(25), index=True)
-    gene_id_type = db_2.Column(db_2.String(15), index=False)
-    start = db_2.Column(db_2.Integer(), index=True)
     chrom = db_2.Column(db_2.String(7), index=True)
+    chrom_num = db_2.Column(db_2.Integer(), index=True)
+    start = db_2.Column(db_2.Integer(), index=True)
     end = db_2.Column(db_2.Integer(), index=True)
     locus = db_2.Column(db_2.String(30), index=True)
+    gene_id = db_2.Column(db_2.String(25), index=True)
+    gene_id_type = db_2.Column(db_2.String(15), index=False)
     sequence_name = db_2.Column(db_2.String(30), index=True)
     biotype = db_2.Column(db_2.String(30), nullable=True)
+    gene_symbol = db_2.column_property(func.coalesce(locus, sequence_name, gene_id))
+    arm_or_center = db_2.Column(db_2.String(12), index=True)
 
     @classmethod
     def resolve_gene_id(cls, query):
@@ -119,8 +125,16 @@ class homologs_m(db_2.Model):
     homolog_gene = db_2.Column(db_2.String(50), index=True)
     homolog_source = db_2.Column(db_2.String(40))
 
-    gene_summary2 = db_2.relationship("wormbase_gene_summary_m", backref='homologs')
+    gene_summary = db_2.relationship("wormbase_gene_summary_m", backref='homologs', lazy='joined')
 
+    def unnest(self):
+        """
+            Used with the gene API - returns
+            an unnested homolog datastructure combined with the wormbase gene summary model.
+        """
+        self.__dict__.update(self.gene_summary.__dict__)
+        self.__dict__['gene_summary'] = None
+        return self
 
     def __repr__(self):
         return f"homolog: {self.gene_name} -- {self.homolog_gene}"

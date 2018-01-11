@@ -4,14 +4,13 @@ import time
 import requests
 from peewee import *
 from base import config
-from flask import Flask, g, url_for, redirect
+from flask import Flask, g, render_template
 from flask_debugtoolbar import DebugToolbarExtension
-from flask_caching import Cache
-from gcloud import datastore
 from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from base.utils.data_utils import json_encoder
 from base.utils.gcloud import google_datastore
+from base.utils.text_utils import render_markdown
 
 
 # Caching
@@ -22,8 +21,6 @@ app.config.from_object(getattr(config, os.environ['APP_CONFIG']))
 cache = Cache(app, config=app.config['CACHE'])
 
 # Database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cendr.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db_2 = SQLAlchemy(app)
 
 # json encoder
@@ -157,6 +154,7 @@ def add_to_order_ws(row):
 def lookup_order(invoice_hash):
     ws = get_google_order_sheet()
     find_row = ws.findall(invoice_hash)
+    print(ws)
     if len(find_row) > 0:
         row = ws.row_values(find_row[0].row)
         header_row = ws.row_values(1)
@@ -181,7 +179,8 @@ def gs_static(url, prefix='static'):
 # Inject globals
 @app.context_processor
 def inject():
-    return dict(gs_static=gs_static)
+    return dict(gs_static=gs_static,
+                render_markdown=render_markdown)
 
 # Template filters
 from base.utils.template_filters import *
@@ -194,6 +193,10 @@ app.register_blueprint(about_bp, url_prefix='/about')
 from base.views.strains import strain_bp
 app.register_blueprint(strain_bp, url_prefix='/strain')
 
+# Order Pages
+from base.views.order import order_bp
+app.register_blueprint(order_bp, url_prefix='/order')
+
 # Data Pages
 from base.views.data import data_bp
 app.register_blueprint(data_bp, url_prefix='/data')
@@ -202,16 +205,18 @@ app.register_blueprint(data_bp, url_prefix='/data')
 from base.views.primary import primary_bp
 app.register_blueprint(primary_bp, url_prefix='')
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 
 
-#from base.utils.auth import *
+# from base.utils.auth import *
 from base.task import *
 from base.views import *
 from base.views.api import *
 from base.manage import (initdb)
-
-
-print(app)
-print(dir(app))
