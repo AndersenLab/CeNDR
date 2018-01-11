@@ -6,6 +6,7 @@ from base.utils.gcloud import get_item
 
 recaptcha = get_item("credential", "recaptcha")
 
+
 class base_config(object):
     VERSION = re.search("VERSION=version-(.*)\n", open(".travis.yml", 'r').read()) \
                 .group(1) \
@@ -15,9 +16,12 @@ class base_config(object):
     RECAPTCHA_PUBLIC_KEY = recaptcha.get("RECAPTCHA_PUBLIC_KEY")
     RECAPTCHA_PRIVATE_KEY = recaptcha.get("RECAPTCHA_PRIVATE_KEY")
     SECRET_KEY = recaptcha.get("RECAPTCHA_PRIVATE_KEY")
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///cendr.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class local(base_config):
+    SQLALCHEMY_ECHO=False
     ADDRESS = "http://localhost:5000"
     JSON_SORT_KEYS = True
     DEBUG = True
@@ -31,8 +35,13 @@ class local(base_config):
              'CACHE_DIR': '_cache'}
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     TEMPLATE_AUTO_RELOAD = True
+    CC_EMAILS = ["danielecook@gmail.com"]
 
 
 
 class production(base_config):
-    pass
+    CC_EMAILS = ['dec@u.northwestern.edu',
+                 'robyn.tanny@northwestern.edu',
+                 'erik.andersen@northwestern.edu',
+                 'g-gilmore@northwestern.edu',
+                 'irina.iacobut@northwestern.edu']

@@ -9,7 +9,10 @@ Author: Daniel E. Cook
 import os
 import yaml
 import decimal
+import pytz
 import datetime
+import hashlib
+from datetime import datetime as dt
 from flask import g
 from gcloud import storage
 from flask import json, request
@@ -68,3 +71,9 @@ def sorted_files(path):
     """
     return sorted([x for x in os.listdir(path) if not x.startswith(".")], reverse=True)
 
+
+def hash_it(object, length):
+    return hashlib.sha1(str(hash(frozenset(object))).encode('utf-8')).hexdigest()[0:length]
+
+def chicago_date():
+    return dt.now(pytz.timezone("America/Chicago")).date().isoformat()

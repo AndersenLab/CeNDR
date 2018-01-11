@@ -38,7 +38,7 @@
 
 <table class='table table-bordered'>
   <tr>
-  {% if order['is_donation'] == "FALSE" %}
+  {% if order_obj['is_donation'] == "FALSE" %}
   <th>Shipping Service</th> 
   <th>Tracking</th>
   {% endif %}
@@ -46,20 +46,20 @@
   <th>Order Date</th>
   </tr>
   <tr>
-  {% if order['is_donation'] == "FALSE" %} 
-  <td>{{ order["shipping_service"] }}</td>
+  {% if order_obj['is_donation'] == "FALSE" %} 
+  <td>{{ order_obj["shipping_service"] }}</td>
   <td>
-  {% if order['tracking'] and order['shipping_service'] == "UPS" %}
-      <a href="https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order['tracking'] }}">{{ order['tracking'] }}</a>
-  {% elif order['tracking'] and order['shipping_service'] == "FEDEX" %}
-      <a href="https://www.fedex.com/Tracking?action=track&tracknumbers={{ order['tracking'] }}">{{ order['tracking'] }}</a>
+  {% if order_obj['tracking'] and order_obj['shipping_service'] == "UPS" %}
+      <a href="https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order_obj['tracking'] }}">{{ order_obj['tracking'] }}</a>
+  {% elif order_obj['tracking'] and order_obj['shipping_service'] == "FEDEX" %}
+      <a href="https://www.fedex.com/Tracking?action=track&tracknumbers={{ order_obj['tracking'] }}">{{ order_obj['tracking'] }}</a>
   {% else %}
       Not yet assigned
   {% endif %}
   </td>
   {% endif %}
-  <td>{{ order["invoice_hash"] }}</td>
-  <td>{{ order['date'] }}</td>
+  <td>{{ order_obj["invoice_hash"] }}</td>
+  <td>{{ order_obj['date'] }}</td>
   </tr>
   </table>
 
@@ -67,7 +67,7 @@
    <ul class="list-group">
     <li class="list-group-item">
       <h4 class="list-group-item-heading">Address</h4>
-      <p class="list-group-item-text">{{ order['name'] }}<br />{{ order['address'].replace("\n", "<br />")|safe }}</p>
+      <p class="list-group-item-text">{{ order_obj['name'] }}<br />{{ order_obj['address'].replace("\n", "<br />")|safe }}</p>
       <br />
     </li>
 
@@ -89,7 +89,7 @@
                 </tr>
             </thead>
             <tbody class="searchable"> 
-                {% for k, v in order["items"].items() %}
+                {% for k, v in order_obj["items"].items() %}
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>{{ k }}</td>
@@ -97,7 +97,7 @@
                 </tr>
                 {% endfor %}
 
-                {% if order['shipping_service'] == "$65 Flat Fee"%}
+                {% if order_obj['shipping_service'] == "$65 Flat Fee"%}
                 <tr> 
                   <td> - </td>
                   <td> $65 Shipping Flat Fee</td>
@@ -108,7 +108,7 @@
                 <tr>
                 <td><strong>Total</strong></td>
                 <td></td>
-                <td class="price text-right"><strong>{{ order["total"] }}</strong></td>
+                <td class="price text-right"><strong>{{ order_obj["total"] }}</strong></td>
                 </tr>
             </tbody>
         </table>

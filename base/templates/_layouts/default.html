@@ -41,7 +41,9 @@
                           {% if request.blueprint and request.path != "/" %}
                           <ol class="breadcrumb">
                               <li><a href="/">Home</a></li>
+                                {% if title %}
                                 {% if title.lower() != request.blueprint.lower() %}
+                                {% endif %}
                                 <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
                                 {% endif %}
                               <li><strong>{{ title }}</strong></li>
