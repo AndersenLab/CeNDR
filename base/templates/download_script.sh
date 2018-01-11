@@ -7,6 +7,6 @@
 #
 
 {% for isotype, strains in strain_listing|groupby('isotype') -%}
-wget https://elegansvariation.org.s3.amazonaws.com/bam/{{ strains[0].isotype }}.bam
-wget https://elegansvariation.org.s3.amazonaws.com/bam/{{ strains[0].isotype }}.bam.bai
+wget http://elegansvariation.org.s3.amazonaws.com/bam/{{ strains[0].isotype }}.bam
+wget http://elegansvariation.org.s3.amazonaws.com/bam/{{ strains[0].isotype }}.bam.bai
 {% endfor -%}

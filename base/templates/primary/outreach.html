@@ -4,13 +4,13 @@
 {% block content %}
 <div class="row">
       <div class="col-md-8">
-      {{render_markdown("outreach.md")}}
+      {{ render_markdown("outreach.md") }}
       <br></br>
       </div>
 
       <div class="col-md-4">
         <br>
-        <a class="btn btn-primary btn-block" href="{{ url_for("strain_submission_page") }}" role="button">Submit Strains</a>
+        <a class="btn btn-primary btn-block" href="{{ url_for("strain.strain_submission_page") }}" role="button">Submit Strains</a>
         </p>
         <div class="thumbnail img-responsive">
           <img src="/static/img/outreach/HappyPicking.jpg" />

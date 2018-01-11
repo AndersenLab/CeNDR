@@ -2,6 +2,11 @@
 
 --- 
 
+### v1.2.0 (2018-XX-XX)
+
+* Moved codebase to Python 3.
+* Switched database to a single SQLite flatfile.
+
 ### v1.1.2 (2017-12-05)
 
 * Fixed a bug preventing the download button from working properly.

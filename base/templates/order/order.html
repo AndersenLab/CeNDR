@@ -1,0 +1,79 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+
+        <table class="table table-hover table-striped" style="table-layout: fixed">
+            <thead>
+                <tr>
+                    <th style="width: 40px">#</th>
+                    <th style="width 200px;">Strain/Set</th>
+                    <th class="price">Price</th>
+                </tr>
+            </thead>
+            <tbody class="searchable">
+                {% for item, price in form.item_price() %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ item }}</td>
+                    <td class="price">${{'%0.2f'| format(price|float)}}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                <td><strong>Total</strong></td>
+                <td></td>
+                <td class="price"><strong>${{'%0.2f'| format(form.total|float)}}</strong></td> 
+                </tr>
+            </tbody>
+        </table>
+        <div class ="well well-sm">
+          <p> If you are ordering a ready-made set, the strains will be sent as frozen stocks on dry-ice. Please select a shipping carrier from the drop-down menu and enter an account number. If you are ordering a customized set of strains, these strains will be sent on plates. </p>
+        </div>
+    </div>
+</div>
+<div class="row">
+
+{% from "macros.html" import render_field %}
+
+<form id='form-submit'  method="POST">
+
+    <div class="col-lg-6">
+                {# Renders list of strains being ordered #}
+                {% for item in form.items %}
+                    {{ item }}
+                {% endfor %}
+
+                {{ form.csrf_token }}
+                {{ render_field(form.name) }}
+                {{ render_field(form.phone, placeholder="(847)-867-5309") }}
+                {{ render_field(form.address, placeholder="123 Sheridan Rd.\nChicago IL. 60657") }}
+    </div>
+
+    <div class="col-lg-6">
+                {{ render_field(form.email) }}
+                {{ render_field(form.shipping_service) }}
+                {{ render_field(form.shipping_account) }}
+                {{ render_field(form.payment) }}
+    </div>
+
+
+</div>
+
+
+<div class='row'>
+  <div class="form-group">
+    <div class="col-sm-4 col-sm-offset-4">
+    <br />
+      {# render_field(form.recaptcha) #}
+      <button value="Checkout" class="btn btn-primary btn-block" ><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Order</button>
+      <br />
+      <div  id="helpBlock" class="help-block"><strong>Note: </strong>You will still need to send a check to complete your order.</span>
+    </div>{# /col-sm-4 #}
+  </div>{# /form-group #}
+</div>
+</form>
+
+</div>
+</div>
+{% endblock %}

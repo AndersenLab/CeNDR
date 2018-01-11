@@ -111,7 +111,6 @@ p {
 
 .container-fluid {
   height: 100%;
-  max-width: 1000px;
 }
 
 /* Loading Spinner */
@@ -186,7 +185,7 @@ p {
 
 /* Browser */
 
-tr.isotype-select td, tr.isotype-select, tr.isotype-select label {
+tr.isotype-select {
   width: 100%;
   display: block;
 }
@@ -202,14 +201,25 @@ td.isotype-item label {
 }
 
 #browser_strain_list {
-  height: 240px;
-  width: 100%;
-  overflow-y: scroll;
-  display: block;
   border: 1px solid #999999;
+  display: block;
+  width: 100%;
 }
 
+#browser_strain_list thead, #browser_strain_list tbody { display: block; }
+
 #browser_strain_list tbody {
+    height: 240px;       /* Just for the demo          */
+    overflow-y: auto;    /* Trigger vertical scroll    */
+    overflow-x: hidden;  /* Hide the horizontal scroll */
+}
+
+#browser_strain_list td {
+  width: 100%;
+  white-space: nowrap;
+}
+
+#browser_strain_list label {
   display: block;
 }
 
@@ -332,6 +342,25 @@ article {
 }
 .internal-td {
   padding: 0px;
+}
+
+.track-isotype-td {
+  width: 50%;
+}
+
+
+.track-isotype-select label {
+  display: block;
+}
+
+#checkout.affix {
+    position: fixed;
+    top: 20px;
+    width: 228px;
+}
+
+.price {
+    text-align: right;
 }
 
 

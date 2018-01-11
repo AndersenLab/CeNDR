@@ -7,7 +7,7 @@
 
       <ul class="list-group">
         {% for f in files %}
-        <a class="list-group-item {% if f == filename %}active{% endif %}" href="{{ url_for('help_item', filename = f) }}">
+        <a class="list-group-item {% if f == filename %}active{% endif %}" href="{{ url_for('primary.help_item', filename = f) }}">
             <strong>{{ f.replace("-", " ") }}</strong>
           </a>
 
@@ -18,6 +18,6 @@
 
     </div>
     <div class="col-md-9">
-      {{ render_markdown(filename + ".md", directory = "cendr/static/content/help/") }}
+      {{ render_markdown(filename + ".md", directory = "base/static/content/help/") }}
     </div>
 {% endblock %}

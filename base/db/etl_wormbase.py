@@ -13,9 +13,9 @@ import gzip
 from gtfparse import read_gtf_as_dataframe
 from urllib.request import urlretrieve, urlopen
 from tempfile import NamedTemporaryFile
-from base.constants import WORMBASE_BUILD
+from base.constants import WORMBASE_BUILD, CHROM_NUMERIC
+from base.utils.genetic_utils import arm_or_center
 from base.models2 import wormbase_gene_summary_m
-
 
 # Gene GTF defines biotype, start, stop, etc.
 # The GTF does not include locus names (pot-2, etc), so we download them in the get_gene_ids function.
@@ -56,8 +56,12 @@ def fetch_gene_gtf():
 
     gene_ids = get_gene_ids()
     # Add locus column
+    # Rename seqname to chrom
+    gene_gtf = gene_gtf.rename({'seqname':'chrom'}, axis='columns')
     gene_gtf = gene_gtf.assign(locus=[gene_ids.get(x) for x in gene_gtf.gene_id])
-
+    gene_gtf = gene_gtf.assign(chrom_num=[CHROM_NUMERIC[x] for x in gene_gtf.chrom])
+    gene_gtf = gene_gtf.assign(pos = (((gene_gtf.end - gene_gtf.start)/2) + gene_gtf.start).map(int))
+    gene_gtf['arm_or_center'] = gene_gtf.apply(lambda row: arm_or_center(row['chrom'], row['pos']), axis=1)
     for row in gene_gtf.to_dict('records'):
         yield row
 
@@ -84,6 +88,14 @@ def fetch_gene_gff_summary():
                 gene.update(zip(["chrom", "start", "end"],
                                 [line[0], line[3], line[4]]))
                 gene = {k.lower(): v for k, v in gene.items() if k in WB_GENE_FIELDSET}
+                
+                # Change add chrom_num
+                gene['chrom_num'] = CHROM_NUMERIC[gene['chrom']]
+                gene['start'] = int(gene['start'])
+                gene['end'] = int(gene['end'])
+                # Annotate gene with arm/center
+                gene_pos = int(((gene['end'] - gene['start'])/2) + gene['start'])
+                gene['arm_or_center'] = arm_or_center(gene['chrom'], gene_pos)
                 if 'id' in gene.keys():
                     gene_id_type, gene_id = gene['id'].split(":")
                     gene['gene_id_type'], gene['gene_id'] = gene['id'].split(":")

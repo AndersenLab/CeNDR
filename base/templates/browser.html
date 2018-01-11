@@ -155,27 +155,36 @@ th {
 
         </form>
 
-        <table id='browser_strain_list' class="table table-striped table-hover table">
+        <table id='browser_strain_list' class="table table-striped table-hover table-condensed">
           
           <tbody class="searchable">
 
             {% for isotype in isotype_listing %}
 
-              <tr class="isotype-select">
-
-              <td class='isotype-item'><label><input type="checkbox" class="track-select sample-track" value="{{ isotype }}" /> {{ isotype }}</label></td>
-
-              </tr>
+            <tr>
+              <td>
+                {{ isotype }}
+              </td>
+              <td>
+                  <label>
+                  <input type="checkbox" class="track-select isotype-item sample-track" value="{{ isotype }}" />
+                  VCF</label>
+              </td>
+              <td>
+                  <label>
+                  <input type="checkbox" class="track-select sample-track-alignment" value="{{ isotype }}_bam" />
+                  BAM</label>
+              </td>
+            </tr>
 
             {% endfor %}
 
           </tbody>
 
         </table>
-
+        </div>
       </div>
 
-    </div>
      
     </div>
 </div>{# Close col #}
@@ -201,7 +210,7 @@ th {
 <div class="col-md-12 col-lg-12">
 <h3>Variants</h3>
 
-<table class="table table-striped table-hover" id="variants">
+<table class="table table-striped table-hover class="table-responsive"" id="variants">
 
 <button id='download' class='btn btn-primary btn-xs pull-right'>Download</button>
 <p><small>A Maximum of 1000 variants from the region will be listed. Heterozygous calls are likely errors. When rows are yellow, it indicates the entire variant failed QC.</small></p>
@@ -339,6 +348,13 @@ trackset = {"Genes": {
               visibilityWindow: 20000,
               searchable: false
             },
+            {{ isotype }}_bam : {
+              name: "{{ isotype }}",
+              url: "//elegansvariation.org.s3.amazonaws.com/bam/{{ isotype }}.bam",
+              order: 100,
+              visibilityWindow: 20000,
+              searchable: false
+            },
             {% endfor %}
 
 
@@ -406,35 +422,37 @@ function process_gene_search() {
     } else {
       $("#orthologs").html("");
       $.ajax({
-           url: "/api/gene/search/" + gene,
+           url: "/api/gene/browser-search/" + gene,
            method: "GET",
            contentType: 'application/xml',
            }).done(function(msg) {
             console.log(msg);
             row = Array();
-            $.each(msg, function(i,x) {
-              if ("CHROM" in x) {
-                 link = x["CHROM"] + ":" + x["start"] + "-" + x["end"];
+            $.each(msg, function(i,row) {
+              if ("chrom" in row) {
+                 link = row["chrom"] + ":" + row["start"] + "-" + row["end"];
               } else {
-                  link = x["ce_gene_name"];
+                  link = row["locus"];
               }
-              gene_name = "<a link='" + link + "' class='ortholink'>" + x["ce_gene_name"] + "</a>";
-              row = [gene_name, x["gene_symbol"], x["species"], x["source"]];
-              row = "<tr><td>" + row.join("</td><td>") + "</td></tr>";
-              $("#orthologs").append(row);
+              gene_name = `<a link='${link}' class='ortholink'>${row["locus"]}</a>`;
+              homolog_species = row["homolog_species"] || "<em>C. elegans</em>";
+              homolog_source = row["homolog_source"] || "Wormbase";
+              result = [gene_name, row['homolog_gene'] || row["gene_symbol"], homolog_species, row["homolog_source"] || "Wormbase"];
+              result = "<tr><td>" + result.join("</td><td>") + "</td></tr>";
+              $("#orthologs").append(result);
             });
             $("#search-table").fadeIn();
-
-            // Make links work!  
-            $(".ortholink").on("click", function() {
-              igv.browser.search($(this).attr("link"))
-              // Update tables and URL
-              refresh_variants();
-            });
-
             });
     }
 }
+
+// Make links work!  
+$(".container-fluid").on("click", ".ortholink", function() {
+  igv.browser.search($(this).attr("link"))
+  // Update tables and URL
+  refresh_variants();
+});
+
 
 function gt_label(gt) {
   // Generates a genotype label
@@ -470,6 +488,9 @@ function refresh_variants(download = false) {
 
       sample_tracks = []
       $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
+
+      sample_tracks_alignment = []
+      $(".sample-track-alignment:checked").each(function() { sample_tracks_alignment.push(this.value) })
 
       normal_tracks = []
       $(".normal-track:checked").each(function() { normal_tracks.push(this.value) })
@@ -554,13 +575,13 @@ function refresh_variants(download = false) {
 
                 console.log(rec)
                 if ($(".list-all-strains").prop('checked') == true) {
-                    gt_panel = $(".isotype-item input").map(
+                    gt_panel = $(".isotype-item").map(
                     function () {return this.value;}).get();
                 } else {
-                    gt_panel = $(".isotype-item input:checked").map(
+                    gt_panel = $(".isotype-item:checked").map(
                     function () {return this.value;}).get();
                 }
-                            
+                
                 if (gt_panel.length > 0) {
                   gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
                     // Append genotypes

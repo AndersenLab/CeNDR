@@ -1,12 +1,33 @@
-import json
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Author: Daniel E. Cook
+
+
+
+"""
+import os
 import yaml
 import decimal
 import datetime
-from logzero import logger
 from flask import g
 from gcloud import storage
-from sqlalchemy.ext.declarative import DeclarativeMeta
-from flask import json
+from flask import json, request
+
+
+def flatten_dict(d, max_depth=1):
+    def expand(key, value):
+        if hasattr(value, "__dict__"):
+            value = value.__dict__
+            print(value)
+        if isinstance(value, dict) and max_depth > 0:
+            return [ (key + '.' + k, v) for k, v in flatten_dict(value, max_depth - 1).items() ]
+        else:
+            return [ (key, value) ]
+
+    items = [ item for k, v in d.items() for item in expand(k, v) ]
+
+    return dict(items)
 
 
 def load_yaml(yaml_file):
@@ -25,18 +46,9 @@ def get_gs():
 
 class json_encoder(json.JSONEncoder):
     def default(self, o):
-        if isinstance(o.__class__, DeclarativeMeta):
-            data = {}
-            fields = o.__json__() if hasattr(o, '__json__') else dir(o)
-            for field in [f for f in fields if not f.startswith('_') and f not in ['metadata', 'query', 'query_class']]:
-                value = o.__getattribute__(field)
-                try:
-                    json.dumps(value)
-                    data[field] = value
-                except TypeError:
-                    data[field] = None
-            return data
-        elif type(o) == decimal.Decimal:
+        if hasattr(o, "__dict__"):
+            return {k: v for k,v in o.__dict__.items() if k != "id" and not k.startswith("_")}
+        if type(o) == decimal.Decimal:
             return float(o)
         elif isinstance(o, datetime.date):
             return str(o.isoformat())
@@ -48,3 +60,11 @@ def dump_json(data):
         Use to dump json on internal requests.
     """
     return json.dumps(data, cls=json_encoder)
+
+
+def sorted_files(path):
+    """
+        Sorts files
+    """
+    return sorted([x for x in os.listdir(path) if not x.startswith(".")], reverse=True)
+

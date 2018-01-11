@@ -11,8 +11,10 @@ def jsonify_request(func):
     """
     @wraps(func)
     def jsonify_the_request(*args, **kwargs):
-        logger.info(request.path)
-        if request.path.startswith("/api"):
+        as_list = kwargs.get("as_list")
+        if 'as_list' in kwargs:
+            kwargs.pop("as_list")
+        if request.path.startswith("/api") and not as_list:
             return jsonify(func(*args, **kwargs))
         else:
             return func(*args, **kwargs)

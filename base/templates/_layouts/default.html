@@ -11,10 +11,20 @@
 
     <div class="page-content">
         <div class="wrap">
-            <div class="container-fluid">
+            <div class="container{% if fluid_container %}-fluid{% endif %}">
                 <div class='content'>
                     <div class="row">
                         <div class="col-md-12">
+                            <div id="messages-wrap">
+                              <div id="messages">
+                                {% for category, msg in get_flashed_messages(with_categories=true) %}
+                                <div class="flash-{{ category }} alert alert-dismissable alert-{{ category }} flash-banner">
+                                    <p>{{ msg }}</p>
+                                </div>
+                                {% endfor %}
+                              </div>
+                            </div>{# /messages-wrap #}
+
                             <div id="alert"></div>
                             {% if request.blueprint %}
                                 {% if title %}
