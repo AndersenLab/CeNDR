@@ -66,7 +66,8 @@ def browser(region="III:11746923-11750250", query = None):
             'build': CURRENT_RELEASE,
             'isotype_listing': get_isotypes(list_only=True),
             'region': region,
-            'query': query}
+            'query': query,
+            'fluid_container': True}
     return render_template('browser.html', **VARS)
 
 

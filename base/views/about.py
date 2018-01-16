@@ -18,6 +18,8 @@ from flask import render_template, url_for, Markup, request, redirect
 from base.emails import donate_submission
 from base.utils.data_utils import load_yaml
 from base.views.api.api_strain import get_isotypes
+from base.utils.data_utils import chicago_date, hash_it
+
 
 about_bp = Blueprint('about',
                      __name__,
@@ -51,9 +53,9 @@ def getting_started():
         Getting Started - provides information on how to get started
         with CeNDR
     """
-    title = "Getting Started"
-    strain_listing = get_isotypes(known_origin=True)
-    return render_template('about/getting_started.html', **locals())
+    VARS = {"title": "Getting Started",
+            "strain_listing": get_isotypes(known_origin=True)}
+    return render_template('about/getting_started.html', **VARS)
 
 
 @about_bp.route('/committee/')
@@ -78,46 +80,33 @@ def staff():
     return render_template('about/staff.html', **locals())
 
 
-def hash_it(object, length):
-    return hashlib.sha1(str(hash(frozenset(object))).encode('utf-8')).hexdigest()[0:length]
-
-def chicago_date():
-    return datetime.now(pytz.timezone("America/Chicago")).date().isoformat()
-
 @about_bp.route('/donate/', methods=['GET', 'POST'])
 def donate():
     """
         Process donation
     """
+    title = "Donate"
     form = donation_form(request.form)
 
     if form.validate_on_submit():
-        ds = get_ds()
         # order_number is generated as a unique string
-        order = {}
-        order.update(request.form.to_dict())
-        order['is_donation'] = True
-        order["items"] = u"{k}:{v}".format(
-            k="CeNDR strain and data support", v=order.get('total'))
-        order["date"] = chicago_date()
-        order["invoice_hash"] = hash_it(order, length=8)
-        order["url"] = f"https://elegansvariation.org/order/{order['invoice_hash']}"
-        #send_mail({"from": "no-reply@elegansvariation.org",
-        #           "to": [order["email"]],
-        #           "cc": ['dec@u.northwestern.edu',
-        #                  'robyn.tanny@northwestern.edu',
-        #                  'erik.andersen@northwestern.edu',
-        #                  'g-gilmore@northwestern.edu',
-        #                  'irina.iacobut@northwestern.edu'],
-        #           "cc": ['dec@u.northwestern.edu'],
-        #           "subject": "CeNDR Order #" + str(order["order_number"]),
-        #           "text": donate_submission.format(invoice_hash=order["invoice_hash"],
-        #                                            donation_amount=donation_amount)})
+        order_obj = {"is_donation": True,
+                 "date": chicago_date()}
+        order_obj['items'] = u"{}:{}".format("CeNDR strain and data support", form.data.get('total'))
+        order_obj.update(form.data)
+        order_obj['invoice_hash'] = hash_it(order_obj, length=8)
+        order_obj['url'] = f"https://elegansvariation.org/order/{order_obj['invoice_hash']}"
+        send_mail({"from": "no-reply@elegansvariation.org",
+                   "to": [order_obj["email"]],
+                   "cc": app.config.get("CC_EMAILS"),
+                   "cc": ['dec@u.northwestern.edu'],
+                   "subject": f"CeNDR Dontaion #{order_obj['invoice_hash']}",
+                   "text": donate_submission.format(invoice_hash=order_obj["invoice_hash"],
+                                                    donation_amount=order_obj.get('total'))})
 
-        add_to_order_ws(order)
-        return redirect(url_for("strain.order_confirmation", invoice_hash=order["invoice_hash"]), code=302)
+        add_to_order_ws(order_obj)
+        return redirect(url_for("order.order_confirmation", invoice_hash=order_obj["invoice_hash"]), code=302)
 
-    title = "Donate"
     return render_template('donate.html', **locals())
 
 

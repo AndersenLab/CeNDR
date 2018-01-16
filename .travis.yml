@@ -4,13 +4,13 @@ python:
 - '3.6'
 cache:
 - pip
-before_install:
+install:
 - openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv
   -in client-secret.json.enc -out client-secret.json -d
 - export VERSION=version-1-2-0
 - pip install --upgrade pip
+- pip install cython numpy
 - mkdir -p lib
-install:
 - pip install -r requirements.txt -t lib/
 script:
 - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"

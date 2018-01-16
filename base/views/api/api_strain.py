@@ -4,9 +4,9 @@ from base.application import app
 from base.utils.decorators import jsonify_request
 
 
-@app.route('/api/strain')
+@app.route('/api/strain/')
 @app.route('/api/strain/<string:strain_name>')
-@app.route('/api/isotype/<string:isotype_name>')
+@app.route('/api/strain/isotype/<string:isotype_name>')
 @jsonify_request
 def query_strains(strain_name=None, isotype_name=None, release=None):
     """
