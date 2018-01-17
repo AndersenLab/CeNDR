@@ -19,7 +19,7 @@ data_bp = Blueprint('data',
 # Data Page
 #
 
-@data_bp.route('/')
+@data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
 @data_bp.route('/release/<string:selected_release>')
 @cache.memoize(50)
@@ -28,7 +28,7 @@ def data(selected_release=CURRENT_RELEASE):
         Default data page - lists
         available releases.
     """
-    title = "Data"
+    title = "Releases"
     strain_listing = query_strains(release=selected_release)
     # Fetch variant data
     url = "https://storage.googleapis.com/elegansvariation.org/releases/{selected_release}/multiqc_bcftools_stats.json".format(selected_release=selected_release)

@@ -72,11 +72,11 @@ def variant_api():
              'variant_impact': query['variant_impact'].split("_"),
              'sample_tracks': query['sample_tracks'].split("_"),
              'output': query['output'],
-             'list-all-strains': query['list-all-strains']
+             'list-all-strains': query['list-all-strains'] == 'true'
             }
     app.logger.info(query)
     samples = query['sample_tracks']
-    if query['list-all-strains'] == 'true':
+    if query['list-all-strains']:
         samples = "ALL"
     elif not samples[0]:
         samples = "N2"

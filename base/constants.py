@@ -2,10 +2,11 @@
 """
 
 This page is intended to store application constants that change
-very infrequently (if ever). 
+very infrequently (if ever).
 
 Author: Daniel E. Cook (danielecook@gmail.com)
 """
+
 
 # PRICES
 class PRICES:
@@ -14,15 +15,13 @@ class PRICES:
     STRAIN = 15
     SHIPPING = 65
 
+
 # BUILDS AND RELEASES
 WORMBASE_BUILD = "WS261"
 RELEASES = ["20170531",
             "20160408"]
 CURRENT_RELEASE = RELEASES[0]
 
-
-# URLS
-BAM_URL_PREFIX = "https://elegansvariation.org.s3.amazonaws.com/bam"
 
 # Maps chromosome in roman numerals to integer
 CHROM_NUMERIC = {"I": 1,
@@ -32,3 +31,41 @@ CHROM_NUMERIC = {"I": 1,
                  "V": 5,
                  "X": 6,
                  "MtDNA": 7}
+
+
+class URLS:
+    """
+        URLs are stored here so they can be easily integrated into the database
+        for provenance purposes.
+    """
+
+    #
+    # AWS URLS
+    #
+    BAM_URL_PREFIX = "https://elegansvariation.org.s3.amazonaws.com/bam"
+
+    #
+    # Wormbase URLs
+    #
+
+    # Gene GTF
+    GENE_GTF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_BUILD}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_BUILD}.canonical_geneset.gtf.gz"
+
+    # GENE GFF_URL
+    GENE_GFF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_BUILD}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_BUILD}.annotations.gff3.gz"
+
+    # Maps wormbase ID to locus name
+    GENE_IDS_URL = f"ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/annotation/geneIDs/c_elegans.PRJNA13758.current.geneIDs.txt.gz"
+
+    # Lists C. elegans orthologs
+    ORTHOLOG_URL = f"ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/PRJNA13758/annotation/orthologs/c_elegans.PRJNA13758.current_development.orthologs.txt"
+
+    #
+    # Ortholog URLs
+    #
+
+    # Homologene
+    HOMOLOGENE_URL = 'https://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data'
+
+    # Taxon IDs
+    TAXON_ID_URL = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz'

@@ -1,7 +1,17 @@
 from flask import Markup
 from base.application import db_2
-from base.constants import BAM_URL_PREFIX
+from base.constants import URLS
 from sqlalchemy import or_, func
+
+
+
+class metadata_m(db_2.Model):
+    """
+        Table for storing information about other tables
+    """
+    __tablename__ = "metadata"
+    key = db_2.Column(db_2.String(50), index=True, primary_key=True)
+    value = db_2.Column(db_2.String)
 
 
 
@@ -41,11 +51,11 @@ class strain_m(db_2.Model):
         """
 
         url_set = Markup(f"""
-                        <a href="{BAM_URL_PREFIX}/{self.isotype}.bam">
+                        <a href="{URLS.BAM_URL_PREFIX}/{self.isotype}.bam">
                             BAM
                         </a>
                         /
-                        <a href="{BAM_URL_PREFIX}/{self.isotype}.bam.bai">
+                        <a href="{URLS.BAM_URL_PREFIX}/{self.isotype}.bam.bai">
                             bai
                         </a>
                    """.strip())
@@ -138,4 +148,5 @@ class homologs_m(db_2.Model):
 
     def __repr__(self):
         return f"homolog: {self.gene_name} -- {self.homolog_gene}"
+
 

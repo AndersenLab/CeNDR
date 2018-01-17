@@ -33,8 +33,12 @@ def authenticate_google_sheets():
 
 
 def get_google_sheet(google_sheet):
-    # In order for this to work you must share the worksheet with the travis service-account. 
-    # cendr-travis-ci@andersen-lab.iam.gserviceaccount.com
-    # Note that the GOOGLE_SHEET dict is used above and expects the key to match the worksheet.
+    """
+        In order for this to work you must share the worksheet with the travis service-account. 
+        cendr-travis-ci@andersen-lab.iam.gserviceaccount.com
+        
+        Note that the GOOGLE_SHEET dict is used above and expects the key to match the worksheet.
+    """
     gsheet = authenticate_google_sheets()
-    return gsheet.open_by_key(GOOGLE_SHEETS[google_sheet]).worksheet(google_sheet)
+    google_sheets_key = GOOGLE_SHEETS[google_sheet]
+    return gsheet.open_by_key(google_sheets_key).worksheet(google_sheet)

@@ -20,6 +20,9 @@ def store_item(kind, name, **kwargs):
 
 
 def query_item(kind, filters=None, projection=()):
+    """
+        Filter items from google datastore using a query
+    """
     # filters:
     # [("var_name", "=", 1)]
     ds = google_datastore()
@@ -32,7 +35,7 @@ def query_item(kind, filters=None, projection=()):
 
 def get_item(kind, name):
     """
-        returns item by kind and name
+        returns item by kind and name from google datastore
     """
     ds = google_datastore()
     result = ds.get(ds.key(kind, name))

@@ -219,4 +219,4 @@ def internal_server_error(e):
 from base.task import *
 from base.views import *
 from base.views.api import *
-from base.manage import (initdb)
+from base.manage import (init_db)

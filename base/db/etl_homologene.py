@@ -9,15 +9,10 @@ import re
 import tarfile
 import csv
 import requests
-from base.db.etl_wormbase import get_gene_ids
-from urllib.request import urlretrieve, urlopen
+from urllib.request import urlretrieve
 from tempfile import NamedTemporaryFile
 from base.models2 import wormbase_gene_summary_m
-
-
-# Homologene database
-HOMOLOGENE_URL = 'https://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data'
-TAXON_ID_URL = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz'
+from base.constants import URLS
 
 
 def fetch_taxon_ids():
@@ -25,13 +20,13 @@ def fetch_taxon_ids():
         Downloads mapping of taxon-ids to species names.
     """
     taxon_file = NamedTemporaryFile(suffix='tar')
-    out, err = urlretrieve(TAXON_ID_URL, taxon_file.name)
+    out, err = urlretrieve(URLS.TAXON_ID_URL, taxon_file.name)
     tar = tarfile.open(out)
     # Read names file
     names_dmp = tar.extractfile('names.dmp')
     names_dmp = names_dmp.read().decode('utf-8').splitlines()
     lines = [re.split('\t\|[\t]?', x) for x in names_dmp]
-    taxon_ids = {int(l[0]):l[1] for l in lines if l[3] == 'scientific name'}
+    taxon_ids = {int(l[0]): l[1] for l in lines if l[3] == 'scientific name'}
     return taxon_ids
 
 
@@ -58,21 +53,10 @@ def fetch_homologene():
           * gene_symbol = Gene Symbol
           * species = species name
     """
-    response = requests.get(HOMOLOGENE_URL)
+    response = requests.get(URLS.HOMOLOGENE_URL)
     response_csv = list(csv.reader(response.content.decode('utf-8').splitlines(), delimiter='\t'))
-    
-    taxon_ids = fetch_taxon_ids()
 
-    # In this loop we add the homologene id (line[0]) if there's a c_elegans gene
-    # (line[1]) in the group.
-    fields = ['homologene',
-              'taxon_id',
-              'gene_id',
-              'gene_symbol',
-              'protein_gi',
-              'protein_accession',
-              'species',
-              'locus_name']
+    taxon_ids = fetch_taxon_ids()
 
     # First, fetch records with a homolog ID that possesses a C. elegans gene.
     elegans_set = dict([[int(x[0]), x[3]] for x in response_csv if x[1] == '6239'])
@@ -91,4 +75,3 @@ def fetch_homologene():
                    'homolog_gene': line[3],
                    'homolog_source': "Homologene",
                    'is_ortholog': False}
-

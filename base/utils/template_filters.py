@@ -5,6 +5,7 @@ from base.application import app
 # Custom Filters
 #
 
+
 @app.template_filter('comma')
 def comma_filter(value):
     return "{:,.0f}".format(value)

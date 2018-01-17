@@ -18,6 +18,10 @@ CHROM_ARM_CENTER = {'I': (527, 3331, 7182, 3835, 197),
 
 
 def arm_or_center(chrom, pos):
+    """
+        Determines whether a position is on the
+        arm or center of a chromosome.
+    """
     if chrom == 'MtDNA':
         return None
     ca = CHROM_ARM_CENTER[chrom]
