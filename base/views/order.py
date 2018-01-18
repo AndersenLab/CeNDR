@@ -15,7 +15,7 @@ from base.application import app, cache
 from base.utils.email import send_email, ORDER_SUBMISSION_EMAIL
 from base.utils.google_sheets import add_to_order_ws, lookup_order
 from base.utils.gcloud import get_item
-from flask import render_template, request, url_for, redirect, Blueprint, abort, flash
+from flask import render_template, request, url_for, redirect, Blueprint, abort, flash, session
 from collections import OrderedDict
 from datetime import datetime
 from base.utils.data_utils import chicago_date, hash_it
@@ -48,6 +48,8 @@ def order_page():
     """
 
     form = order_form()
+    if session.get('user') and not form.email.data:
+        form.email.data = session.get('user')['user_email']
 
     # Fetch items
     items = form.items.data
@@ -72,10 +74,10 @@ def order_page():
         order_obj['invoice_hash'] = hash_it(order_obj, length=8)
         order_obj["url"] = "https://elegansvariation.org/order/" + order_obj["invoice_hash"]
         send_email({"from": "no-reply@elegansvariation.org",
-                   "to": [order_obj["email"]],
-                   "cc": app.config.get("CC_EMAILS"),
-                   "subject": "CeNDR Order #" + str(order_obj["invoice_hash"]),
-                   "text": order_submission.format(**order_obj)})
+                    "to": [order_obj["email"]],
+                    "cc": app.config.get("CC_EMAILS"),
+                    "subject": "CeNDR Order #" + str(order_obj["invoice_hash"]),
+                    "text": ORDER_SUBMISSION_EMAIL.format(**order_obj)})
 
         # Save to google sheet
         add_to_order_ws(order_obj)

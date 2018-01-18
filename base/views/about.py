@@ -10,7 +10,7 @@ from flask import Blueprint
 from base.application import app, cache
 from base.utils.google_sheets import add_to_order_ws
 from base.forms import donation_form
-from flask import render_template, url_for, Markup, request, redirect
+from flask import render_template, url_for, Markup, request, redirect, session
 
 from base.views.api.api_strain import get_isotypes
 
@@ -85,6 +85,10 @@ def donate():
     """
     title = "Donate"
     form = donation_form(request.form)
+
+    # Autofill email
+    if session.get('user') and not form.email.data:
+        form.email.data = session.get('user')['user_email']
 
     if form.validate_on_submit():
         # order_number is generated as a unique string
