@@ -32,6 +32,10 @@ CHROM_NUMERIC = {"I": 1,
                  "X": 6,
                  "MtDNA": 7}
 
+# WI Strain Info Dataset
+GOOGLE_SHEETS = {"orders": "1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM",
+                 "WI": "1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI"}
+
 
 class URLS:
     """

@@ -12,6 +12,7 @@ import decimal
 import pytz
 import datetime
 import hashlib
+import uuid
 from datetime import datetime as dt
 from flask import g
 from gcloud import storage
@@ -28,7 +29,7 @@ def flatten_dict(d, max_depth=1):
         else:
             return [ (key, value) ]
 
-    items = [ item for k, v in d.items() for item in expand(k, v) ]
+    items = [item for k, v in d.items() for item in expand(k, v)]
 
     return dict(items)
 
@@ -75,5 +76,10 @@ def sorted_files(path):
 def hash_it(object, length):
     return hashlib.sha1(str(hash(frozenset(object))).encode('utf-8')).hexdigest()[0:length]
 
+
 def chicago_date():
     return dt.now(pytz.timezone("America/Chicago")).date().isoformat()
+
+
+def unique_id():
+    return uuid.uuid4().hex

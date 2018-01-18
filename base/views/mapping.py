@@ -1,10 +1,10 @@
-from base.application import app, cache, send_mail
-from base.application import ds
-from base.application import dbname
+from base.application import app, cache
+
+from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
+
 from base.application import autoconvert
 from base.task.map_submission import launch_mapping
 from base.models import db, report, strain, trait, trait_value, mapping
-from base.emails import mapping_submission
 from datetime import date, datetime
 import pytz
 from dateutil.relativedelta import relativedelta
@@ -22,6 +22,13 @@ import time
 from collections import Counter
 import requests
 
+from flask import Blueprint
+
+mapping_bp = Blueprint('mapping',
+                       __name__,
+                       template_folder='mapping')
+
+
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, decimal.Decimal):
@@ -31,25 +38,17 @@ class CustomEncoder(json.JSONEncoder):
         return super(CustomEncoder, self).default(o)
 
 
-@app.route('/genetic-mapping/submit/')
-def gwa():
-    title = "Perform Mapping"
-    bcs = OrderedDict([("Perform-Mapping", None)])
+from base.views.api.api_strain import query_strains
 
-    # Generate list of allowable strains
-    query = strain.select(strain.strain,
-                          strain.isotype,
-                          strain.previous_names).filter(strain.isotype.is_null() == False).execute()
-    qresults = list(itertools.chain(
-        *[[x.strain, x.isotype, x.previous_names] for x in query]))
-    qresults = set([x for x in qresults if x != None])
-    qresults = list(itertools.chain(*[x.split("|") for x in qresults]))
-
-    embargo_release = (datetime.now(
-            pytz.timezone("America/Chicago")) + relativedelta(years = 1)).strftime("%m/%d/%Y")
-
-    strain_list = json.dumps(qresults)
-    return render_template('gwa.html', **locals())
+@mapping_bp.route('/perform-mapping/')
+def mapping():
+    """
+        This is the mapping submission page.
+    """
+    VARS = {'page_title': 'Perform Mapping',
+            'strain_list': query_strains(list_only=True)
+            }
+    return render_template('genetic_mapping.html', **VARS)
 
 
 def valid_url(url, encrypt):
@@ -99,7 +98,7 @@ def resolve_strain_isotype(q):
                 return None
 
 
-@app.route('/process_gwa/', methods=['POST'])
+@mapping_bp.route('/process_gwa/', methods=['POST'])
 def process_gwa():
     release_dict = {"public": 0, "embargo12": 1,  "private": 2}
     req = request.get_json()
@@ -165,15 +164,15 @@ def process_gwa():
         report_slug = req["report_hash"]
     else:
         report_slug = req["report_slug"]
-    send_mail({"from":"no-reply@elegansvariation.org",
+    send_email({"from":"no-reply@elegansvariation.org",
                    "to":[req["email"]],
                    "subject":"CeNDR Mapping Report - " + req["report_slug"],
-                   "text": mapping_submission.format(report_slug=report_slug)})
+                   "text": MAPPING_SUBMISSION_EMAIL.format(report_slug=report_slug)})
 
     return str(json.dumps(req))
 
 
-@app.route('/validate_url/', methods=['POST'])
+@mapping_bp.route('/validate_url/', methods=['POST'])
 def validate_url():
     """
         Generates URLs from report names and validates them.
@@ -182,11 +181,10 @@ def validate_url():
     return json.dumps(report_namecheck(req["report_name"]))
 
 
-@app.route('/Genetic-Mapping/public/', methods=['GET'])
+@mapping_bp.route('/Genetic-Mapping/public/', methods=['GET'])
 def public_mapping():
     query = request.args.get("query")
     if query is not None:
-        bcs = OrderedDict([("Public Mappings", url_for('public_mapping')), ("Search", None)])
         title = "Search: " + query
         subtitle = "results"
         q = "%" + query + "%"
@@ -241,9 +239,9 @@ def public_mapping():
 
 
 
-@app.route("/report/<report_slug>/")
-@app.route("/report/<report_slug>/<trait_slug>")
-@app.route("/report/<report_slug>/<trait_slug>/<rerun>")
+@mapping_bp.route("/report/<report_slug>/")
+@mapping_bp.route("/report/<report_slug>/<trait_slug>")
+@mapping_bp.route("/report/<report_slug>/<trait_slug>/<rerun>")
 def trait_view(report_slug, trait_slug="", rerun = None):
 
     report_data = list(report.select(report,
@@ -358,7 +356,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
 
     return render_template('report.html', **locals())
 
-@app.route('/report_progress/', methods=['POST'])
+@mapping_bp.route('/report_progress/', methods=['POST'])
 def report_progress():
     """
         Generates URLs from report names and validates them.
@@ -372,7 +370,7 @@ def report_progress():
     return json.dumps(current_status)
 
 
-@app.route('/genetic-mapping/status/')
+@mapping_bp.route('/genetic-mapping/status/')
 def status_page():
     # queue
     bcs = OrderedDict([("Status", None)])

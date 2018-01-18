@@ -1,8 +1,9 @@
 from base.models import strain, wb_gene
-from base.application import app, cache, ds
+from base.application import app, cache
 from flask import Response, jsonify
 import requests
 from xml.dom import minidom
+from base.utils.gcloud import get_item
 
 @app.route('/api/wormbase/<path:r>')
 @cache.memoize(50)
@@ -28,7 +29,7 @@ def omim(gene_name):
             omim_genes = r["gene"]
         if "disease" in r:
             omim_diseases = r["disease"]
-        api_key = ds.get(ds.key("credential", "OMIM"))["apiKey"]
+        api_key = get_item("credential", "OMIM")["apiKey"]
         omim_url = "http://api.omim.org/api/entry?mimNumber={omim_ids}&apiKey={api_key}"
         omim_url = omim_url.format(omim_ids = ','.join(omim_genes + omim_diseases), api_key = api_key)
         omim_results = requests.get(omim_url).text

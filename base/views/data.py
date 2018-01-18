@@ -1,4 +1,4 @@
-from base.application import cache, releases
+from base.application import cache
 from flask import make_response, Response
 import requests
 from base.models import strain, report, homologene, mapping, trait

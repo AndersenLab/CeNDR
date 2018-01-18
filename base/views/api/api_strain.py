@@ -8,7 +8,7 @@ from base.utils.decorators import jsonify_request
 @app.route('/api/strain/<string:strain_name>')
 @app.route('/api/strain/isotype/<string:isotype_name>')
 @jsonify_request
-def query_strains(strain_name=None, isotype_name=None, release=None):
+def query_strains(strain_name=None, isotype_name=None, release=None, list_only=False):
     """
         Return the full strain database set
 
@@ -26,6 +26,9 @@ def query_strains(strain_name=None, isotype_name=None, release=None):
         results = base_query.filter(strain_m.isotype == isotype_name).all()
     else:
         results = base_query.all()
+
+    if list_only:
+        results = [x.strain for x in results]
     return results
 
 

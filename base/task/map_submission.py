@@ -1,4 +1,4 @@
-from base.application import app, releases
+from base.application import app
 from base.models import *
 from flask import request, abort
 import string

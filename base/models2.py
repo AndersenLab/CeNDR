@@ -1,7 +1,37 @@
 from flask import Markup
+from sqlalchemy import or_, func
+
 from base.application import db_2
 from base.constants import URLS
-from sqlalchemy import or_, func
+from base.utils.gcloud import get_item, store_item
+
+
+class datastore_model(object):
+    """
+        Base datastore model
+
+        Google datastore is used to store dynamic information
+        such as users and reports.
+    """
+
+    def __init__(self, kind, name):
+        self.kind = kind
+        self.name = name
+        item = get_item(kind, name)
+        if item:
+            self._exists = True
+            self.update(item)
+        else:
+            self._exists = False
+
+    def save(self):
+        item_data = {k: v for k, v in self.__dict__.items() if k not in ['kind', 'name'] and not k.startswith("_")}
+        store_item(self.kind, self.name, **item_data)
+
+
+
+class user_m(datastore_model):
+    pass
 
 
 

@@ -46,9 +46,9 @@
     </div>
     <div class="col-md-4 col-sm-4">
       <div class="thumbnail" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px">
-        <a href="{{ url_for("gwa") }}" ><img src="/static/img/main/map_data.png" alt="perform gwa" style="border-radius: 5px 5px 0px 0px;"></a>
+        <a href="{{ url_for("mapping.mapping") }}" ><img src="/static/img/main/map_data.png" alt="perform gwa" style="border-radius: 5px 5px 0px 0px;"></a>
         <div class="caption">
-          <p><a href="{{ url_for("gwa") }}" class="btn btn-primary btn-block" role="button">Perform Mapping</a></p>
+          <p><a href="{{ url_for("mapping.mapping") }}" class="btn btn-primary btn-block" role="button">Perform Mapping</a></p>
           <p>Map your own traits using genome-wide association.</p>
         </div>
       </div>
@@ -70,7 +70,7 @@
 <div class="panel panel-default">
 
  <div class="panel-heading">
- <form class="pull-right" action ="{{ url_for('public_mapping') }}" method="get" name="login">
+ <form class="pull-right" action ="{{ url_for('mapping.public_mapping') }}" method="get" name="login">
   <div class="form-group">
     <input type="search" style="margin-top:3px;" class="form-control" name="query" placeholder="Find Mappings" value="{% if query %}{{ query }}{% endif %}">
   </div>

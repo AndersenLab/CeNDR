@@ -13,9 +13,11 @@ from dateutil import parser
 from base.utils.google_sheets import get_google_sheet
 from base.utils.gcloud import get_item
 from logzero import logger
+from base.application import app
 
 # Not a constant!
-ELEVATION_API_KEY = get_item('credential', 'elevation').get('apiKey')
+with app.app_context():
+    ELEVATION_API_KEY = get_item('credential', 'elevation').get('apiKey')
 
 
 @lru_cache(maxsize=32)

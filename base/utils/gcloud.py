@@ -1,3 +1,5 @@
+import json
+from flask import g
 from gcloud import datastore, storage
 
 
@@ -5,15 +7,17 @@ def google_datastore():
     """
         Fetch google datastore credentials
     """
-    return datastore.Client(project='andersen-lab')
+    if not hasattr(g, 'ds'):
+        g.ds = datastore.Client(project='andersen-lab')
+    return g.ds
 
 
 def store_item(kind, name, **kwargs):
     ds = google_datastore()
     m = datastore.Entity(key=ds.key(kind, name))
     for key, value in kwargs.items():
-        if type(value) == str:
-            m[key] = unicode(value)
+        if type(value) == dict:
+            m[key] = 'JSON:' + json.dumps(value)
         else:
             m[key] = value
     ds.put(m)
@@ -39,8 +43,16 @@ def get_item(kind, name):
     """
     ds = google_datastore()
     result = ds.get(ds.key(kind, name))
-    return {k:v for k,v in result.items() if v}
-
+    try:
+        result_out = {}
+        for k, v in result.items():
+            if v.startswith("JSON:"):
+                result_out[k] = json.loads(v[5:])
+            elif v:
+                result_out[k] = v
+        return result_out
+    except AttributeError:
+        return None
 
 
 def google_storage():

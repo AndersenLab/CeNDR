@@ -11,11 +11,12 @@ import yaml
 import pytz
 import hashlib
 from base.forms import order_form
-from base.application import app, cache, add_to_order_ws, lookup_order, send_mail
+from base.application import app, cache
+from base.utils.email import send_email, ORDER_SUBMISSION_EMAIL
+from base.utils.google_sheets import add_to_order_ws, lookup_order
 from base.utils.gcloud import get_item
 from flask import render_template, request, url_for, redirect, Blueprint, abort, flash
 from collections import OrderedDict
-from base.emails import order_submission
 from datetime import datetime
 from base.utils.data_utils import chicago_date, hash_it
 from logzero import logger
@@ -70,7 +71,7 @@ def order_page():
         order_obj['items'] = '\n'.join(sorted([u"{}:{}".format(k, v) for k, v in form.item_price()]))
         order_obj['invoice_hash'] = hash_it(order_obj, length=8)
         order_obj["url"] = "https://elegansvariation.org/order/" + order_obj["invoice_hash"]
-        send_mail({"from": "no-reply@elegansvariation.org",
+        send_email({"from": "no-reply@elegansvariation.org",
                    "to": [order_obj["email"]],
                    "cc": app.config.get("CC_EMAILS"),
                    "subject": "CeNDR Order #" + str(order_obj["invoice_hash"]),

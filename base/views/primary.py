@@ -10,10 +10,10 @@ import os
 from flask import render_template, url_for, request, redirect, Blueprint
 from base.utils.text_utils import render_markdown
 from base.utils.data_utils import sorted_files
-from base.application import cache
 from datetime import datetime
 from urllib.parse import urljoin
 from werkzeug.contrib.atom import AtomFeed
+from flask import session
 
 
 primary_bp = Blueprint('primary',
@@ -21,13 +21,14 @@ primary_bp = Blueprint('primary',
 
 # Homepage
 @primary_bp.route('/')
-@cache.cached(timeout=50)
 def primary():
     page_title = "Caenorhabditis elegans Natural Diversity Resource"
     files = sorted_files("base/static/content/news/")
+    VARS = {'page_title': page_title,
+            'files': files}
     #latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
     #    trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
-    return render_template('primary/home.html', **locals())
+    return render_template('primary/home.html', **VARS)
 
 
 @primary_bp.route("/Software")
@@ -81,14 +82,12 @@ def feed():
 
 
 @primary_bp.route('/outreach/')
-@cache.cached(timeout=50)
 def outreach():
     title = "Outreach"
     return render_template('primary/outreach.html', **locals())
 
 
 @primary_bp.route('/contact-us/')
-@cache.cached(timeout=50)
 def contact():
     title = "Contact Us"
     return render_template('contact.html', **locals())

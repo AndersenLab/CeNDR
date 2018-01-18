@@ -45,6 +45,9 @@ def init_db():
                 key_val = metadata_m(key=var,
                                      value=','.join(getattr(constants, var)))
                 db_2.session.add(key_val)
+            elif type(current_var) == dict:
+                key_val = metadata_m(key=var,
+                                     value=';'.join([f"{k}:{v}" for k, v in getattr(constants, var).items()]))
             else:
                 key_val = metadata_m(key=var, value=str(getattr(constants, var)))
                 db_2.session.add(key_val)

@@ -1,12 +1,12 @@
-from base.application import (cache,
-                              add_to_order_ws,
-                              lookup_order,
-                              send_mail)
+from base.application import cache
 from flask import render_template, request, url_for, redirect, Response
 from base.models2 import strain_m
 import yaml
 from flask import Blueprint
 from base.views.api.api_strain import get_isotypes, query_strains
+
+from base.utils.email import send_email
+from base.utils.google_sheets import add_to_order_ws, lookup_order
 from base.utils.data_utils import dump_json
 
 strain_bp = Blueprint('strain',

@@ -5,20 +5,18 @@
 
 
 """
-import hashlib
 import markdown
-import pytz
-import uuid
 from flask import Blueprint
-from datetime import datetime
-from requests import post
-from base.application import app, cache, get_ds, add_to_order_ws, send_mail
+from base.application import app, cache
+from base.utils.google_sheets import add_to_order_ws
 from base.forms import donation_form
 from flask import render_template, url_for, Markup, request, redirect
-from base.emails import donate_submission
-from base.utils.data_utils import load_yaml
+
 from base.views.api.api_strain import get_isotypes
-from base.utils.data_utils import chicago_date, hash_it
+
+from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
+from base.utils.data_utils import load_yaml, chicago_date, hash_it
+from base.utils.google_sheets import add_to_order_ws
 
 
 about_bp = Blueprint('about',
@@ -96,12 +94,12 @@ def donate():
         order_obj.update(form.data)
         order_obj['invoice_hash'] = hash_it(order_obj, length=8)
         order_obj['url'] = f"https://elegansvariation.org/order/{order_obj['invoice_hash']}"
-        send_mail({"from": "no-reply@elegansvariation.org",
-                   "to": [order_obj["email"]],
-                   "cc": app.config.get("CC_EMAILS"),
-                   "cc": ['dec@u.northwestern.edu'],
-                   "subject": f"CeNDR Dontaion #{order_obj['invoice_hash']}",
-                   "text": donate_submission.format(invoice_hash=order_obj["invoice_hash"],
+        send_email({"from": "no-reply@elegansvariation.org",
+                    "to": [order_obj["email"]],
+                    "cc": app.config.get("CC_EMAILS"),
+                    "cc": ['dec@u.northwestern.edu'],
+                    "subject": f"CeNDR Dontaion #{order_obj['invoice_hash']}",
+                    "text": DONATE_SUBMISSION_EMAIL.format(invoice_hash=order_obj["invoice_hash"],
                                                     donation_amount=order_obj.get('total'))})
 
         add_to_order_ws(order_obj)

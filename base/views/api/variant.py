@@ -1,5 +1,5 @@
 # NEW API
-from base.application import app, get_vcf
+from base.application import app
 from cyvcf2 import VCF
 from flask import jsonify, request, Response
 import re
@@ -7,6 +7,7 @@ from base.views.api.gene import gene_search
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 from collections import OrderedDict
+from base.constants import RELEASES
 
 ANN_header = ["allele",
               "effect",
@@ -23,6 +24,10 @@ ANN_header = ["allele",
               "protein_position",
               "distance_to_feature",
               "error"]
+
+
+def get_vcf(release=RELEASES[0]):
+    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/WI.{release}.vcf.gz".format(release=release)
 
 
 def get_region(region):

@@ -1,14 +1,13 @@
-
-from flask_restful import Resource
 from base.models import wb_gene, WI
 from base.models import interval_summary_cache as isc
-from base.application import api, cache, releases, app
-from peewee import *
+from base.application import cache, app
 from collections import OrderedDict
 from collections import Counter
 from collections import defaultdict
 from flask import jsonify
 import json
+
+from base.constants import RELEASES
 
 
 # Genes
@@ -35,15 +34,15 @@ def get_gene_interval_summary(chrom, start, end, include_list = False):
     return result
 
 
-@app.route('/api/genelist/<string:chrom>/<int:start>/<int:end>')
-def api_gene_list(chrom, start, end):
-    result = get_gene_interval_summary(chrom, start, end, True)
-    return jsonify(result)
+#@app.route('/api/genelist/<string:chrom>/<int:start>/<int:end>')
+#def api_gene_list(chrom, start, end):
+#    result = get_gene_interval_summary(chrom, start, end, True)
+#    return jsonify(result)
 
 
 # Variants
 @cache.memoize(timeout=500)
-def get_variant_count(chrom, start, end, filter=True, release=releases[0]):
+def get_variant_count(chrom, start, end, filter=True, release=RELEASES[0]):
     """
         Return the number of variants within an interval
     """
@@ -59,13 +58,13 @@ def get_variant_count(chrom, start, end, filter=True, release=releases[0]):
         .group_by() \
         .distinct().count()
 
-@app.route('/api/variant/count/<string:chrom>/<int:start>/<int:end>')
-@app.route('/api/variant/count/<string:chrom>/<int:start>/<int:end>/<string:filter>')
-def api_variant_count(chrom, start, end, filter=True):
-    if type(filter) == unicode:
-        filter = {'true': True, 'false': False}[filter.lower()]
-    result = get_variant_count(chrom, start, end, filter)
-    return jsonify(result)
+#@app.route('/api/variant/count/<string:chrom>/<int:start>/<int:end>')
+#@app.route('/api/variant/count/<string:chrom>/<int:start>/<int:end>/<string:filter>')
+#def api_variant_count(chrom, start, end, filter=True):
+#    if type(filter) == unicode:
+#        filter = {'true': True, 'false': False}[filter.lower()]
+#    result = get_variant_count(chrom, start, end, filter)
+#    return jsonify(result)
 
 
 def count_column(q):
@@ -129,7 +128,7 @@ def get_gene_w_impact(chrom, start, end):
 
 
 @cache.memoize(timeout=500)
-def variant_interval_summary(chrom, start, end, release = releases[0]):
+def variant_interval_summary(chrom, start, end, release = RELEASES[0]):
     r = {}
     r["chrom"] = chrom
     r["start"] = start
@@ -145,7 +144,7 @@ def variant_interval_summary(chrom, start, end, release = releases[0]):
 
 
 @app.route('/api/interval/<string:chrom>/<int:start>/<int:end>')
-def get_interval_summary(chrom, start, end, release=releases[0]):
+def get_interval_summary(chrom, start, end, release=RELEASES[0]):
     interval = "{chrom}:{start}-{end}".format(**locals())
     cache_isc = list(isc.filter(isc.interval == interval, isc.release == release).dicts().execute())
 

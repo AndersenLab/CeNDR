@@ -1,0 +1,19 @@
+{% extends "_layouts/default.html" %}
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+      <h1 class='text-center'>Please Login</h1>
+      <hr />
+        <br />
+
+      <div class="list-group login-collection">
+          <a href="{{ url_for('login_github', service_name='github') }}" class="list-group-item list-group-item-action"><i class='fa fa-github'></i> Github</a>
+          <a href="{{ url_for('login_google', service_name='google') }}"" class="list-group-item list-group-item-action"><i class='fa fa-google'></i> Google</a>
+    </div>
+
+    </div>
+  </div>
+
+
+{% endblock %}

@@ -1,14 +1,7 @@
 import gspread
 import json
 from oauth2client.service_account import ServiceAccountCredentials
-
-
-
-# WI Strain Info Dataset
-GOOGLE_SHEETS = {"orders": "1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM",
-                 "WI": "1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI"}
-
-
+from base.constants import GOOGLE_SHEETS
 
 
 def get_service_account_credentials():
@@ -42,3 +35,46 @@ def get_google_sheet(google_sheet):
     gsheet = authenticate_google_sheets()
     google_sheets_key = GOOGLE_SHEETS[google_sheet]
     return gsheet.open_by_key(google_sheets_key).worksheet(google_sheet)
+
+
+def get_google_order_sheet():
+    """
+        Return the google orders spreadsheet
+    """
+    return get_google_sheet(GOOGLE_SHEETS['orders']).worksheet("orders")
+
+
+def add_to_order_ws(row):
+    """
+        Stores order info in a google sheet.
+    """
+    ws = get_google_order_sheet()
+    index = sum([1 for x in ws.col_values(1) if x]) + 1
+
+    header_row = filter(len, ws.row_values(1))
+    values = []
+    for x in header_row:
+        if x in row.keys():
+            values.append(row[x])
+        else:
+            values.append("")
+
+    row = map(str, row)
+    ws.insert_row(values, index)
+
+
+def lookup_order(invoice_hash):
+    """
+        Lookup an order by its hash
+    """
+    ws = get_google_order_sheet()
+    find_row = ws.findall(invoice_hash)
+    print(ws)
+    if len(find_row) > 0:
+        row = ws.row_values(find_row[0].row)
+        header_row = ws.row_values(1)
+        result = dict(zip(header_row, row))
+        return {k: v for k, v in result.items() if v}
+    else:
+        return None
+

@@ -6,7 +6,7 @@
       {% block style %}{% endblock %}
     </head>
     <body>
-
+    {% set user = session.get('user') or None %}
     {% include "_includes/navbar.html" %}
 
     <div class="page-content">
@@ -76,5 +76,6 @@
             </div>
         </div><!-- closes wrap-->
     </div><!-- closes page-content-->
+    {{ user }}
     </body>
 </html>
