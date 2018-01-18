@@ -1,5 +1,6 @@
 import os
-from flask import Flask, render_template
+import json
+from flask import Flask, render_template, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
@@ -104,6 +105,10 @@ app.register_blueprint(mapping_bp, url_prefix='/mapping')
 from base.views.primary import primary_bp
 app.register_blueprint(primary_bp, url_prefix='')
 
+# User Pages
+from base.views.user import user_bp
+app.register_blueprint(user_bp, url_prefix='/user')
+
 # Authentication
 from base.auth import *
 
@@ -114,7 +119,8 @@ def inject():
         Used to inject variables that
         need to be accessed globally
     """
-    return dict(gs_static=gs_static,
+    return dict(json=json,
+                gs_static=gs_static,
                 render_markdown=render_markdown)
 
 

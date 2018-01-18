@@ -15,6 +15,7 @@ def query_strains(strain_name=None, isotype_name=None, release=None, list_only=F
         strain_name - Returns data for only one strain
         isotype_name - Returns data for all strains of an isotype
         release - Filters results released prior to release data
+        list_only - Return list of strains only (internal use).
     """
     base_query = strain_m.query
     if release:

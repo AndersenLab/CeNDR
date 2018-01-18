@@ -5,7 +5,8 @@ from wtforms import (StringField,
                      IntegerField,
                      SelectField,
                      FieldList,
-                     HiddenField)
+                     HiddenField,
+                     RadioField)
 from wtforms.validators import Required, Length, Email, DataRequired
 from wtforms.validators import ValidationError
 from base.constants import PRICES
@@ -79,3 +80,19 @@ class order_form(Form):
         for item, price in self.item_price():
             total_price += price
         return total_price
+
+
+class mapping_submission_form(Form):
+    """
+        Form for mapping submission
+    """
+    report_name = StringField('Report Name', [Required(), Length(min=1, max=50)])
+    is_public = RadioField('Release', choices=[("True", 'public'), ("False", 'private')])
+    description = TextAreaField('Description', [Length(min=1, max=1000)])
+    phenotype_data = HiddenField()
+
+    def validate_phenotype_data(form, field):
+        pass
+
+
+

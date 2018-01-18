@@ -71,7 +71,7 @@
         </li>
         {% if user %}
             <li class="dropdown">
-              <a href="#" role="button" aria-haspopup="true" aria-expanded="false">{{ user['user_email'] }}<span class="caret"></span></a>
+              <a href="{{ url_for('user.user', username=user['username']) }}" role="button" aria-haspopup="true" aria-expanded="false">{{ user['username'] }}<span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-left">
                 <li><a href="{{ url_for('logout') }}" class='nav-link' role='button'>Logout</a></li>
               </ul>

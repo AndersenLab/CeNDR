@@ -29,8 +29,20 @@ class datastore_model(object):
         store_item(self.kind, self.name, **item_data)
 
 
+class report_m(datastore_model):
+    """
+        The report model - for creating and retreiving
+        information on reports
+    """
+    pass
+
+
 
 class user_m(datastore_model):
+    """
+        The User model - for creating and retrieving
+        information on users.
+    """
     pass
 
 

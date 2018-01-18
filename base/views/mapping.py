@@ -1,3 +1,9 @@
+import itertools
+import hashlib
+import decimal
+import os
+import time
+
 from base.application import app, cache
 
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
@@ -11,16 +17,14 @@ from dateutil.relativedelta import relativedelta
 from peewee import JOIN
 from flask import render_template, request, redirect, url_for
 from collections import OrderedDict
-import hashlib
-import decimal
-import itertools
 from slugify import slugify
 import simplejson as json
 from gcloud import storage
-import os
-import time
 from collections import Counter
 import requests
+from base.forms import mapping_submission_form
+from base.views.api.api_strain import query_strains
+
 
 from flask import Blueprint
 
@@ -38,17 +42,24 @@ class CustomEncoder(json.JSONEncoder):
         return super(CustomEncoder, self).default(o)
 
 
-from base.views.api.api_strain import query_strains
 
-@mapping_bp.route('/perform-mapping/')
+@mapping_bp.route('/perform-mapping/', methods=['GET', 'POST'])
 def mapping():
     """
         This is the mapping submission page.
     """
-    VARS = {'page_title': 'Perform Mapping',
-            'strain_list': query_strains(list_only=True)
-            }
-    return render_template('genetic_mapping.html', **VARS)
+
+    form = mapping_submission_form(request.form)
+
+    VARS = {'title': 'Perform Mapping',
+            'strain_list': query_strains(list_only=True),
+            'form': form}
+
+    if form.validate_on_submit():
+        print("Great")
+        print(form.data)
+
+    return render_template('mapping.html', **VARS)
 
 
 def valid_url(url, encrypt):
@@ -369,37 +380,3 @@ def report_progress():
                           .execute())[0]["status"]
     return json.dumps(current_status)
 
-
-@mapping_bp.route('/genetic-mapping/status/')
-def status_page():
-    # queue
-    bcs = OrderedDict([("Status", None)])
-    title = "Status"
-    queue = get_queue()
-    ql = [json.loads(x["body"]) for x in queue.peek(max=100)["messages"]]
-    qsize = queue.size()
-
-    from googleapiclient import discovery
-    from oauth2client.client import GoogleCredentials
-    credentials = GoogleCredentials.get_application_default()
-    compute = discovery.build('compute', 'v1', credentials=credentials)
-
-    # Get instance list
-    instances = compute.instances().list(project="andersen-lab", zone="us-central1-a",
-                                         filter="status eq RUNNING").execute()
-    if 'items' in instances:
-        instances = [x["name"] for x in instances["items"]]
-    else:
-        instances = []
-    workers = []
-    for w in instances:
-        query = ds.query(kind="Worker")
-        query.add_filter('full_name', '=', w + ".c.andersen-lab.internal")
-        worker_list = list(query.fetch())
-        if len(worker_list) > 0:
-            workers.append(worker_list[0])
-
-    recently_complete = list(report.select(report, trait).filter(trait.submission_complete != None).join(trait).order_by(
-        trait.submission_complete.desc()).limit(10).dicts().execute())
-
-    return render_template('status.html', **locals())

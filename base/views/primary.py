@@ -7,13 +7,12 @@ Author: Daniel E. Cook
 
 """
 import os
-from flask import render_template, url_for, request, redirect, Blueprint
+from flask import render_template, url_for, request, redirect, Blueprint, session
 from base.utils.text_utils import render_markdown
 from base.utils.data_utils import sorted_files
 from datetime import datetime
 from urllib.parse import urljoin
 from werkzeug.contrib.atom import AtomFeed
-from flask import session
 
 
 primary_bp = Blueprint('primary',

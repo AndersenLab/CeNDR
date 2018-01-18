@@ -22,7 +22,6 @@ data_bp = Blueprint('data',
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
 @data_bp.route('/release/<string:selected_release>')
-@cache.memoize(50)
 def data(selected_release=CURRENT_RELEASE):
     """
         Default data page - lists

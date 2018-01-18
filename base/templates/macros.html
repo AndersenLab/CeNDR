@@ -7,9 +7,11 @@
         {% if form_prefix %}
             <span class="input-group-addon">{{ form_prefix }}</span>
         {% endif %}
-
-                {{ field(class="form-control", **kwargs) }}
-
+                {% if field.type == 'RadioField' %}
+                    {{ field(**kwargs) }}
+                {% else %}
+                    {{ field(class="form-control", **kwargs) }}
+                {% endif %}
         {% if form_suffix %}
             <span class="input-group-addon">{{ form_prefix }}</span>
         {% endif %}

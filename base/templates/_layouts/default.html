@@ -44,7 +44,12 @@
                                 {% if title %}
                                 {% if title.lower() != request.blueprint.lower() %}
                                 {% endif %}
-                                <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
+                                    {% if request.blueprint == 'user' and session.get('user')%}
+                                    {# Direct to user profile #}
+                                    <li>User</li>
+                                    {% else %}
+                                    <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
+                                    {% endif %}
                                 {% endif %}
                               <li><strong>{{ title }}</strong></li>
                             </ol>

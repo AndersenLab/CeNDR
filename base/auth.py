@@ -14,6 +14,7 @@ from base.utils.email import send_email
 from base.utils.gcloud import store_item, get_item
 from base.models2 import user_m
 from base.utils.data_utils import unique_id
+from slugify import slugify
 
 
 oauth = OAuth(app)
@@ -114,6 +115,7 @@ def authorized(service_name):
         user.user_info = user_info
         user.email_confirmation_code = unique_id()
         user.user_id = unique_id()[0:8]
+        user.username = slugify("{}_{}".format(user_email.split("@")[0], unique_id()[0:4]))
     # Update user with login service
     setattr(user, service_name, True)
     user.last_login = arrow.utcnow().datetime
