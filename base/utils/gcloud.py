@@ -16,7 +16,7 @@ def store_item(kind, name, **kwargs):
     ds = google_datastore()
     m = datastore.Entity(key=ds.key(kind, name))
     for key, value in kwargs.items():
-        if type(value) == dict:
+        if isinstance(value, dict):
             m[key] = 'JSON:' + json.dumps(value)
         else:
             m[key] = value

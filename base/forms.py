@@ -81,6 +81,31 @@ class order_form(Form):
             total_price += price
         return total_price
 
+import json
+import pandas as pd
+from base.views.api.api_strain import query_strains
+def process_phenotype_data(input_data):
+    try:
+        data = json.loads(input_data)
+    except ValueError as e:
+        raise ValidationError(e.msg)
+    # Read in data
+    headers = data.pop(0)
+    df = pd.DataFrame(data, columns=headers) \
+           .dropna(thresh=1) \
+           .dropna(thresh=1, axis=1)
+    rows, columns = df.shape
+    if rows < 30:
+        raise ValidationError("A minimum of 30 strains are required.")
+
+    # Resolve isotypes
+    #print(df)
+    #print(query_strains(df[['STRAIN']], list_only=True, as_scaler=True))
+    df = df.assign(isotype=[query_strains(x, resolve_isotype=True) for x in df.STRAIN])
+    print(df)
+
+
+
 
 class mapping_submission_form(Form):
     """
@@ -88,11 +113,12 @@ class mapping_submission_form(Form):
     """
     report_name = StringField('Report Name', [Required(), Length(min=1, max=50)])
     is_public = RadioField('Release', choices=[("True", 'public'), ("False", 'private')])
-    description = TextAreaField('Description', [Length(min=1, max=1000)])
+    description = TextAreaField('Description', [Length(min=0, max=1000)])
     phenotype_data = HiddenField()
 
     def validate_phenotype_data(form, field):
-        pass
+        phenotype_data = form.phenotype_data.data
+        data = process_phenotype_data(phenotype_data)
 
 
 

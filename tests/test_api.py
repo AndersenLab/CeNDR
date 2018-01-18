@@ -5,5 +5,5 @@ import sys
 from base.views.api import *
 
 
-def test_one():
+def test_function():
     assert 1 == 1

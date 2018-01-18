@@ -1,6 +1,6 @@
+import werkzeug
 from functools import wraps
 from flask import request, jsonify
-from logzero import logger
 
 
 def jsonify_request(func):

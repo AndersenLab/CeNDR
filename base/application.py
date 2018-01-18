@@ -97,7 +97,7 @@ app.register_blueprint(order_bp, url_prefix='/order')
 from base.views.data import data_bp
 app.register_blueprint(data_bp, url_prefix='/data')
 
-# Mapping Pages - 
+# Mapping Pages -
 from base.views.mapping import mapping_bp
 app.register_blueprint(mapping_bp, url_prefix='/mapping')
 

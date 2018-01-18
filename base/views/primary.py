@@ -6,8 +6,7 @@ Author: Daniel E. Cook
 
 
 """
-import os
-from flask import render_template, url_for, request, redirect, Blueprint, session
+from flask import render_template, url_for, request, redirect, Blueprint
 from base.utils.text_utils import render_markdown
 from base.utils.data_utils import sorted_files
 from datetime import datetime
@@ -18,14 +17,17 @@ from werkzeug.contrib.atom import AtomFeed
 primary_bp = Blueprint('primary',
                        __name__)
 
-# Homepage
+
 @primary_bp.route('/')
 def primary():
+    """
+        The home page
+    """
     page_title = "Caenorhabditis elegans Natural Diversity Resource"
     files = sorted_files("base/static/content/news/")
     VARS = {'page_title': page_title,
             'files': files}
-    #latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
+    # latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
     #    trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
     return render_template('primary/home.html', **VARS)
 
@@ -39,9 +41,10 @@ def reroute_software():
 @primary_bp.route("/news/")
 @primary_bp.route("/news/<filename>/")
 def news_item(filename=""):
+    """
+        News
+    """
     files = sorted_files("base/static/content/news/")
-    # sorts the thing in the right order on the webpage 
-    # after clicking on the server
     if not filename:
         filename = files[0].strip(".md")
     title = filename[11:].strip(".md").replace("-", " ")
@@ -51,12 +54,14 @@ def news_item(filename=""):
 @primary_bp.route("/help/")
 @primary_bp.route("/help/<filename>/")
 def help_item(filename=""):
+    """
+        Help
+    """
     files = ["FAQ", "Variant-Browser", "Variant-Prediction", "Methods", "Software", "Change-Log"]
     if not filename:
         filename = "FAQ"
     title = filename.replace("-", " ")
     return render_template('help_item.html', **locals())
-
 
 
 @primary_bp.route('/feed.atom')
@@ -90,4 +95,3 @@ def outreach():
 def contact():
     title = "Contact Us"
     return render_template('contact.html', **locals())
-

@@ -4,8 +4,6 @@ import decimal
 import os
 import time
 
-from base.application import app, cache
-
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
 from base.application import autoconvert
@@ -52,7 +50,7 @@ def mapping():
     form = mapping_submission_form(request.form)
 
     VARS = {'title': 'Perform Mapping',
-            'strain_list': query_strains(list_only=True),
+            'strain_list': query_strains(all_strain_names=True),
             'form': form}
 
     if form.validate_on_submit():
