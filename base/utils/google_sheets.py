@@ -25,7 +25,7 @@ def authenticate_google_sheets():
     return gspread.authorize(credentials)
 
 
-def get_google_sheet(google_sheet):
+def get_google_sheet(google_sheet_key, worksheet):
     """
         In order for this to work you must share the worksheet with the travis service-account. 
         cendr-travis-ci@andersen-lab.iam.gserviceaccount.com
@@ -33,15 +33,14 @@ def get_google_sheet(google_sheet):
         Note that the GOOGLE_SHEET dict is used above and expects the key to match the worksheet.
     """
     gsheet = authenticate_google_sheets()
-    google_sheets_key = GOOGLE_SHEETS[google_sheet]
-    return gsheet.open_by_key(google_sheets_key).worksheet(google_sheet)
+    return gsheet.open_by_key(google_sheet_key).worksheet(worksheet)
 
 
 def get_google_order_sheet():
     """
         Return the google orders spreadsheet
     """
-    return get_google_sheet(GOOGLE_SHEETS['orders']).worksheet("orders")
+    return get_google_sheet(GOOGLE_SHEETS['orders'], 'orders')
 
 
 def add_to_order_ws(row):
