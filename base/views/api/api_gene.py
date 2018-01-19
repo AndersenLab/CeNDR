@@ -88,6 +88,18 @@ def combined_search(query=""):
 
     """
 
-    return query_gene(query, as_list=True) + query_homolog(query, as_list=True)
+    return query_gene(query, as_python=True) + query_homolog(query, as_python=True)
+
+
+@app.route('/api/browser/search/<string:gene>') # Seach for IGV Browser
+@jsonify_request
+def api_igv_search(gene):
+    """
+        API gene search for IGV
+    """
+    result = lookup_gene(gene, as_python=True)
+    return {'result': [{"chromosome": result.chrom,
+            "start": result.start,
+            "end": result.end}]}
 
 

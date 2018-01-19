@@ -6,6 +6,12 @@
   text-align: right;
 }
 
+.bold {
+    font-weight: bold;
+}
+
+
+
 .col-list { 
     display: block;
     width: 25%;

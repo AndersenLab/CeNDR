@@ -2,11 +2,30 @@
 
 {% block content %}
 <div class="row">
+    <div class='col-md-12'>
    {{ user }}
 
    <h4>Submitted Mappings</h4>
-   {% for report in user_obj.reports() %}
-    {{ report['created_on'] }}
-   {% endfor %}
+   <table class='table table-striped table-condensed table-hover'>
+    <thead>
+        <tr>
+            <th>Report</th>
+            <th>Status</th>
+            <th>CeNDR Version</th>
+            <th>Description</th>
+            <th>Submitted</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for report in user_obj.reports() %}
+        <tr>
+            <td>{{ report['report_slug'] }}</td>
+            <td>{{ report['status'] }}</td>
+            <td>{{ report['CeNDR-Version'] }}</td>
+            <td>{{ report['description'] }}</td>
+            <td><span style='white-space: nowrap'>{{ report['created_on'].strftime("%Y-%m-%d&nbsp;%H:%m")|safe }}</span></td>
+        {% endfor %}
+    </table>
+    </div>
 </div>
 {% endblock %}

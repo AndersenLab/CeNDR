@@ -11,10 +11,17 @@ def jsonify_request(func):
     """
     @wraps(func)
     def jsonify_the_request(*args, **kwargs):
-        as_list = kwargs.get("as_list")
-        if 'as_list' in kwargs:
-            kwargs.pop("as_list")
-        if request.path.startswith("/api") and not as_list:
+        """
+            Wraps API functions
+
+            If you provide an 'as_python' = True
+            argument, the response will be a python object
+            and the as_python argument will be discarded.
+        """
+        as_python = kwargs.get("as_python")
+        if 'as_python' in kwargs:
+            kwargs.pop('as_python')
+        if request.path.startswith("/api") and not as_python:
             return jsonify(func(*args, **kwargs))
         else:
             return func(*args, **kwargs)

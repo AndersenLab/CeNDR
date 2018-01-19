@@ -210,7 +210,7 @@ th {
 <div class="col-md-12 col-lg-12">
 <h3>Variants</h3>
 
-<table class="table table-striped table-hover class="table-responsive"" id="variants">
+<table class="table table-hover table-condensed table-bordered table-responsive" id="variants">
 
 <button id='download' class='btn btn-primary btn-xs pull-right'>Download</button>
 <p><small>A Maximum of 1000 variants from the region will be listed. Heterozygous calls are likely errors. When rows are yellow, it indicates the entire variant failed QC.</small></p>
@@ -371,7 +371,7 @@ $(document).ready(function () {
         var div = $("#browser")[0],
                 options = {
                     search: {
-                      url: "/api/genome/search/$FEATURE$",
+                      url: "/api/browser/search/$FEATURE$",
                       coords: 1,
                       resultsField: 'result'
                     },
@@ -429,16 +429,17 @@ function process_gene_search() {
             console.log(msg);
             row = Array();
             $.each(msg, function(i,row) {
-              if ("chrom" in row) {
-                 link = row["chrom"] + ":" + row["start"] + "-" + row["end"];
-              } else {
-                  link = row["locus"];
-              }
-              gene_name = `<a link='${link}' class='ortholink'>${row["locus"]}</a>`;
-              homolog_species = row["homolog_species"] || "<em>C. elegans</em>";
-              homolog_source = row["homolog_source"] || "Wormbase";
-              result = [gene_name, row['homolog_gene'] || row["gene_symbol"], homolog_species, row["homolog_source"] || "Wormbase"];
-              result = "<tr><td>" + result.join("</td><td>") + "</td></tr>";
+                if ("chrom" in row) {
+                   link = row["chrom"] + ":" + row["start"] + "-" + row["end"];
+                } else {
+                    link = row["locus"];
+                }
+                gene_name = `<a link='${link}' class='ortholink'>${row["locus"]}</a>`;
+                homolog_species = row["homolog_species"] || "<em>C. elegans</em>";
+                homolog_source = row["homolog_source"] || "Wormbase";
+                result = [gene_name, row['homolog_gene'] || row["gene_symbol"], homolog_species, row["homolog_source"] || "Wormbase"]  ;
+                result = "<tr><td>" + result.join("</td><td>") + "</td></tr>";
+                position = row["chrom"] + ":" + row["start"];
               $("#orthologs").append(result);
             });
             $("#search-table").fadeIn();
@@ -536,12 +537,14 @@ function refresh_variants(download = false) {
           success: function(msg) {
               
               $.each(msg, function(k, rec) {
-
+                var td_rowspan = 1;
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
 
+                var is_first = true;
                 $.each(rec['ANN'], function(annk, ann) {
+
                         if (ann["gene_id"] != null) 
                         {
                           ann["gene_id"] = `<a href='/gene/${ann["gene_id"]}'>${ann["gene_id"]}</a>`;
@@ -551,10 +554,8 @@ function refresh_variants(download = false) {
                         } else {
                           impact = ""
                         }
-                        items = [`${rec["CHROM"]}:${Number(rec["POS"]).toLocaleString('en')}`,
-                                 `${rec["REF"]} / ${rec["ALT"].join(",")}`,
-                                 rec["FILTER"],
-                                 ann.gene_name,
+
+                        items = [ann.gene_name,
                                  ann.gene_id,
                                  ann.feature_id,
                                  ann.aa_change,
@@ -562,18 +563,29 @@ function refresh_variants(download = false) {
                                  ann.effect.split("&").join(", "),
                                  impact];
 
+                        if (is_first) {
+                            td_rowspan = rec['ANN'].length;
+                            variant_items = [`${rec["CHROM"]}:${Number(rec["POS"]).toLocaleString('en')}`,
+                                             `${rec["REF"]} / ${rec["ALT"].join(",")}`,
+                                             rec["FILTER"]]
+                            is_first = false;
+                            rowspan_td = `<td class='bold' rowspan=${td_rowspan}>`;
+                            variant_items = rowspan_td + variant_items.join(`</td>${rowspan_td}`) + "</td>"
+                            console.log(items);
+                        } else {
+                            variant_items = ""
+                        }
+
                         additional_fields = [ann.gene_name + ": " , ann.filter]
                         if (rec['FILTER'] != "PASS") {
                           fail_variant_class = 'class="warning"'
                         } else {
                           fail_variant_class = ""
                         }
-                        $("#variants > tbody").append(`<tr ${fail_variant_class}><td>${items.join("</td><td>")}</td></tr>`);
+                        $("#variants > tbody").append(`<tr ${fail_variant_class}>${variant_items}<td>${items.join("</td><td>")}</td></tr>`);
                     }
                 );
 
-
-                console.log(rec)
                 if ($(".list-all-strains").prop('checked') == true) {
                     gt_panel = $(".isotype-item").map(
                     function () {return this.value;}).get();

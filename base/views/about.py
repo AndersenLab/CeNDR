@@ -109,7 +109,7 @@ def donate():
         add_to_order_ws(order_obj)
         return redirect(url_for("order.order_confirmation", invoice_hash=order_obj["invoice_hash"]), code=302)
 
-    return render_template('donate.html', **locals())
+    return render_template('about/donate.html', **locals())
 
 
 @about_bp.route('/funding/')

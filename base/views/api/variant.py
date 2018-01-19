@@ -3,7 +3,7 @@ from base.application import app
 from cyvcf2 import VCF
 from flask import jsonify, request, Response
 import re
-from base.views.api.gene import gene_search
+#from base.views.api.gene import gene_search
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 from collections import OrderedDict
