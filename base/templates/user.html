@@ -6,12 +6,15 @@
    {{ user }}
 
    <h4>Submitted Mappings</h4>
+
    <table class='table table-striped table-condensed table-hover'>
     <thead>
         <tr>
             <th>Report</th>
             <th>Status</th>
+            <th>Public</th>
             <th>CeNDR Version</th>
+            <th>Data Version</th>
             <th>Description</th>
             <th>Submitted</th>
         </tr>
@@ -19,9 +22,11 @@
     <tbody>
         {% for report in user_obj.reports() %}
         <tr>
-            <td>{{ report['report_slug'] }}</td>
-            <td>{{ report['status'] }}</td>
-            <td>{{ report['CeNDR-Version'] }}</td>
+            <td><a href='{{ url_for("mapping.report", report_slug=report.report_slug) }}'>{{ report.report_slug }}</a></td>
+            <td>{{ report.status }}</td>
+            <td><i>{% if report.is_public %}<i class='glyphicon glyphicon-ok'>{% endif %}</td>
+            <td>{{ report.version_cendr }}</td>
+            <td>{{ report.version_release }}</td>
             <td>{{ report['description'] }}</td>
             <td><span style='white-space: nowrap'>{{ report['created_on'].strftime("%Y-%m-%d&nbsp;%H:%m")|safe }}</span>
             </td>
