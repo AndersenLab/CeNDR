@@ -6,9 +6,7 @@ from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from base.utils.data_utils import json_encoder
 from base.utils.text_utils import render_markdown
-
-# Version
-VERSION = os.environ['GAE_VERSION'].replace("-", '.')
+from base.constants import CENDR_VERSION
 
 # Create
 app = Flask(__name__, static_url_path='/static')
@@ -121,7 +119,7 @@ def inject():
         Used to inject variables that
         need to be accessed globally
     """
-    return dict(version=VERSION,
+    return dict(version=CENDR_VERSION,
                 json=json,
                 gs_static=gs_static,
                 render_markdown=render_markdown)

@@ -17,7 +17,7 @@ from wtforms.validators import ValidationError
 from base.models2 import report_m
 from base.constants import PRICES
 from base.views.api.api_strain import query_strains
-from base.utils.data_utils import is_number, clean
+from base.utils.data_utils import is_number, clean_variable_name, list_duplicates
 from slugify import slugify
 from gcloud.exceptions import BadRequest
 
@@ -33,7 +33,6 @@ class donation_form(Form):
     email = StringField('Email', [Email(), Length(min=3, max=100)])
     total = IntegerField('Donation Amount')
     recaptcha = RecaptchaField()
-
 
 
 SHIPPING_OPTIONS = [('UPS', 'UPS'),
@@ -68,7 +67,6 @@ class order_form(Form):
         elif form.shipping_service.data == "Flat Rate Shipping" and field.data:
             raise ValidationError("No shipping account number is needed if you are using flat-rate shipping.")
 
-
     def item_price(self):
         """
             Fetch item and its price
@@ -93,9 +91,11 @@ class order_form(Form):
             total_price += price
         return total_price
 
+
 #
 # Perform Mapping Form
 #
+
 
 class TraitData(HiddenField):
     """
@@ -116,21 +116,22 @@ class TraitData(HiddenField):
             data = json.loads(input_data[0])
         except ValueError as e:
             raise ValidationError(e.msg)
+
         # Read in data
         headers = data.pop(0)
         df = pd.DataFrame(data, columns=headers) \
-               .query("STRAIN != ''") \
                .replace('', np.nan) \
-               .dropna(thresh=1) \
-               .dropna(thresh=1, axis=1)
+               .dropna(how='all') \
+               .dropna(how='all', axis=1)
+        self.strain_list = list(df.STRAIN)
 
+        logger.info(df)
 
         # Resolve isotypes and insert as second column
         df = df.assign(ISOTYPE=[query_strains(x, resolve_isotype=True) for x in df.STRAIN])
         isotype_col = df.pop("ISOTYPE")
         df.insert(1, "ISOTYPE", isotype_col)
         self.processed_data = df
-        logger.info(df)
 
 
 def validate_duplicate_strain(form, field):
@@ -196,13 +197,20 @@ def validate_numeric_columns(form, field):
         Validates that trait fields are numeric
     """
     df = form.trait_data.processed_data
+    non_numeric_values = []
     for x in df.columns[2:]:
-        if not x:
-            raise ValidationError(f"Missing trait name")
         if any(df[x].map(is_number) == False):
-            non_numeric_values = df[x][df[x].map(is_number) == False].tolist()
-            form.trait_data.error_items.extend(non_numeric_values)
-            raise ValidationError(f"The \'{x}\' trait has non-numeric values: {non_numeric_values}")
+            non_numeric_values.extend(df[x][df[x].map(is_number) == False].tolist())
+    if non_numeric_values:
+        form.trait_data.error_items.extend(non_numeric_values)
+        raise ValidationError(f"Trait(s) have non-numeric values: {non_numeric_values}")
+
+
+def validate_column_name_exists(form, field):
+    df = form.trait_data.processed_data
+    for n, x in enumerate(df.columns[2:]):
+        if not x:
+            raise ValidationError(f"Missing trait name in column {n+2}")
 
 
 def validate_column_names(form, field):
@@ -211,11 +219,22 @@ def validate_column_names(form, field):
         safe for R
     """
     df = form.trait_data.processed_data
-    for x in df.columns[1:]:
-        malformed_cols = [x for x in df.columns[1:] if clean(x) != x and x]
+    for x in df.columns[2:]:
+        malformed_cols = [x for x in df.columns[2:] if clean_variable_name(x) != x and x]
         if malformed_cols:
             form.trait_data.error_items.extend(malformed_cols)
-            raise ValidationError(f"trait names must begin with a letter and can only contain letters, numbers, and underscores. These columns need to be renamed: {malformed_cols}")
+            raise ValidationError(f"Trait names must begin with a letter and can only contain letters, numbers, dashes, and underscores. These columns need to be renamed: {malformed_cols}")
+
+
+def validate_unique_colnames(form, field):
+    """
+        Validates that column names are unique.
+    """
+    df = form.trait_data.processed_data
+    duplicate_col_names = list_duplicates(df.columns[1:])
+    if duplicate_col_names:
+        form.trait_data.error_items.extend(duplicate_col_names)
+        raise ValidationError(f"Duplicate column names: {duplicate_col_names}")
 
 
 def validate_report_name_unique(form, field):
@@ -228,8 +247,31 @@ def validate_report_name_unique(form, field):
     except BadRequest:
         raise ValidationError(f"Invalid report name.")
     if report._exists:
-        raise ValidationError(f"That report name is not available. Choose a unique report name.")
+        raise ValidationError(f"That report name is not available. Choose a unique report name")
 
+
+def validate_missing_isotype(form, field):
+    """
+        Checks to see whether data is
+        provided for an isotype that does not exist.
+    """
+    df = form.trait_data.processed_data
+    blank_strains = list(df[df.STRAIN.isnull()].apply(lambda row: sum(row.isnull()), axis=1).index+1)
+    if blank_strains:
+        raise ValidationError(f"Missing strain(s) on row(s): {blank_strains}")
+
+
+def validate_strain_w_no_data(form, field):
+    """
+        Checks to see whether any strains are present
+        that have no associated trait data.
+    """
+    df = form.trait_data.processed_data
+    null_counts = df.apply(lambda row: sum(row.isnull()), axis=1)
+    missing_trait_data = (len(df.columns) - null_counts == 2)
+    blank_traits = list(df[missing_trait_data & df.STRAIN.notnull() == True].STRAIN)
+    if blank_traits:
+        raise ValidationError(f"Strain(s) with no trait data: {blank_traits}")
 
 
 class mapping_submission_form(Form):
@@ -246,4 +288,8 @@ class mapping_submission_form(Form):
                                        validate_duplicate_isotype,
                                        validate_isotypes,
                                        validate_numeric_columns,
-                                       validate_column_names])
+                                       validate_column_names,
+                                       validate_unique_colnames,
+                                       validate_column_name_exists,
+                                       validate_missing_isotype,
+                                       validate_strain_w_no_data])

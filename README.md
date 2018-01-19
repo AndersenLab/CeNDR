@@ -6,15 +6,14 @@
 
 ![cendr website](https://storage.googleapis.com/elegansvariation.org/static/img/misc/screenshot.png)
 
-
 ## Building docker container
 
-```
+```bash
 docker build -t cendr .
 ```
 
 ## Running the docker container
 
-```
+```bash
 docker run -it --publish 5000:8080 cendr
 ```

@@ -14,10 +14,12 @@ import pytz
 import datetime
 import hashlib
 import uuid
+from collections import Counter
 from datetime import datetime as dt
 from flask import g
 from gcloud import storage
 from flask import json, request
+from slugify import slugify
 
 
 def flatten_dict(d, max_depth=1):
@@ -86,7 +88,7 @@ def unique_id():
     return uuid.uuid4().hex
 
 
-def clean(string):
+def clean_variable_name(string):
     """
         Clean variable names
     """
@@ -95,6 +97,9 @@ def clean(string):
 
     # Remove leading characters until we find a letter or underscore
     string = re.sub('^[^a-zA-Z_]+', '', string)
+
+    # Finally, slugify if necessary.
+    string = slugify(string)
 
     return string
 
@@ -108,3 +113,11 @@ def is_number(s):
         return False
 
     return True
+
+
+def list_duplicates(input_list):
+    """
+        Return the set of duplicates in a list
+    """
+    counts = Counter(input_list)
+    return [x for x, v in counts.items() if v > 1]

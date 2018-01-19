@@ -6,7 +6,7 @@ import arrow
 
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
-from base.application import autoconvert, VERSION
+from base.application import autoconvert
 from base.task.map_submission import launch_mapping
 from base.models2 import report_m
 from base.models import db, report, strain, trait, trait_value, mapping
@@ -24,6 +24,10 @@ import requests
 from base.forms import mapping_submission_form
 from logzero import logger
 from flask import session, flash, Blueprint
+from base.utils.data_utils import unique_id
+from base.constants import (REPORT_VERSION,
+                            CURRENT_RELEASE,
+                            CENDR_VERSION)
 
 
 mapping_bp = Blueprint('mapping',
@@ -56,7 +60,10 @@ def mapping():
     if form.validate_on_submit() and user:
         form.data.pop("csrf_token")
         report_slug = slugify(form.report_name.data)
+        trait_list = list(form.trait_data.processed_data.columns[2:])
+        strain_list = form.trait_data.strain_list
         report = report_m(report_slug)
+        is_public = form.is_public.data == 'True'
         trait_data = form.trait_data.processed_data.to_csv(index=False, sep="\t", na_rep="NA")
         report_data = {'report_slug': slugify(form.report_name.data),
                        'report_name': form.report_name.data,
@@ -66,39 +73,50 @@ def mapping():
                        'username': user['username'],
                        'user_id': user['user_id'],
                        'user_email': user['user_email'],
-                       'CeNDR-Version': VERSION,
-                       'status': 'submitted'}
+                       'status': 'submitted',
+                       'is_public': is_public,
+                       'trait_list': trait_list,
+                       'strain_list': strain_list,
+                       'version_cendr': CENDR_VERSION,
+                       'version_report': REPORT_VERSION,
+                       'version_release': CURRENT_RELEASE,
+                       'version_cegwas': '...'}
+        if is_public is False:
+            report_data['secret_hash'] = unique_id()[0:8]
+        logger.info(report_data)
         report_data = {k: v for k, v in report_data.items() if v}
         report.__dict__.update(report_data)
         report.save()
         flash("Successfully submitted mapping!", 'success')
-
-        pass
+        return redirect(url_for('mapping.report',
+                                report_slug=report_slug,
+                                trait_slug=trait_list[0]))
 
     return render_template('mapping.html', **VARS)
 
 
-def valid_url(url, encrypt):
-    url_out = slugify(url)
-    if report.filter(report.report_slug == url_out).count() > 0:
-        return {'error': "Report name reserved."}
-    if encrypt:
-        url_out = str(hashlib.sha224(url_out).hexdigest()[0:20])
-    if len(url_out) > 40:
-        return {'error': "Report name may not be > 40 characters."}
-    else:
-        return url_out
+@mapping_bp.route("/report/<report_slug>/")
+@mapping_bp.route("/report/<report_slug>/<trait_slug>")
+@mapping_bp.route("/report/<report_slug>/<trait_slug>/<rerun>")
+def report(report_slug, trait_slug=None, rerun=None):
+    report = report_m(report_slug)
+    logger.info(report)
 
+    if not trait_slug:
+        # Redirect to the first trait
+        return redirect(url_for('mapping.report',
+                                report_slug=report_slug,
+                                trait_slug=report.trait_list[0]))
 
-def report_namecheck(report_name):
-    report_slug = slugify(report_name)
-    report_hash = str(hashlib.sha224(report_slug).hexdigest()[0:20])
-    if report.filter(report.report_slug == report_slug).count() > 0:
-        return {'error': "Report name reserved."}
-    if len(report_slug) > 40:
-        return {'error': "Report name may not be > 40 characters."}
-    else:
-        return {"report_slug": report_slug, "report_hash": report_hash}
+    VARS = {
+        'title': report.report_name,
+        'subtitle': trait_slug,
+        'trait_slug': trait_slug,
+        'report': report
+    }
+
+    report_template = f"reports/{report.version_report}.html"
+    return render_template(report_template, **VARS)
 
 
 
@@ -244,9 +262,6 @@ def public_mapping():
 
 
 
-@mapping_bp.route("/report/<report_slug>/")
-@mapping_bp.route("/report/<report_slug>/<trait_slug>")
-@mapping_bp.route("/report/<report_slug>/<trait_slug>/<rerun>")
 def trait_view(report_slug, trait_slug="", rerun = None):
 
     report_data = list(report.select(report,

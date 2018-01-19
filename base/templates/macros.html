@@ -28,3 +28,30 @@
 
   </div>
 {% endmacro %}
+
+
+
+{% macro render_table(header, rows, table_class="") %}
+    
+<table class='table {{ table_class }}'>
+    {% if header %}
+        <thead>
+            <tr>
+                {% for col in header %}
+                <td>{{ col }}</td>
+                {% endfor %}
+            </tr>
+        </table>
+    {% endif %}
+    <tbody>
+    {% for row in rows %}
+        <tr>
+        {% for col in row %}
+                <td>{{ col }}</td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endmacro %}

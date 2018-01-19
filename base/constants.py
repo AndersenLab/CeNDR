@@ -6,7 +6,7 @@ very infrequently (if ever).
 
 Author: Daniel E. Cook (danielecook@gmail.com)
 """
-
+import os
 
 # PRICES
 class PRICES:
@@ -35,6 +35,13 @@ CHROM_NUMERIC = {"I": 1,
 # WI Strain Info Dataset
 GOOGLE_SHEETS = {"orders": "1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM",
                  "WI": "1V6YHzblaDph01sFDI8YK_fP0H7sVebHQTXypGdiQIjI"}
+
+
+# Report version = The current HTML template to use for reports.
+REPORT_VERSION = "v2"
+
+# CeNDR Version
+CENDR_VERSION = os.environ['GAE_VERSION'].replace("-", '.')
 
 
 class URLS:

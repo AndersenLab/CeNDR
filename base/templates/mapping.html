@@ -5,62 +5,55 @@
 <form method="POST" action=".">
 
 <div class="row">
+    <div class="col-md-6">
+    {% if session.get('user') %}
 
-<div class="col-md-6">
+        {% from "macros.html" import render_field %}
 
-{% if session.get('user') %}
+        {{ form.csrf_token }}
 
-    {% from "macros.html" import render_field %}
+        {{ render_field(form.report_name, autocomplete='off') }}
 
-    {{ form.csrf_token }}
+        {{ render_field(form.description, placeholder='In this experiment...') }}
 
-    {{ render_field(form.report_name, autocomplete='off') }}
+        {{ render_field(form.is_public) }}
 
-    {{ render_field(form.description, placeholder='In this experiment...') }}
+        {{ form.trait_data }}
 
-    {{ render_field(form.is_public) }}
+        <div class="alert alert-info">
+            Reports are now stored in your <a href=''>user profile</a>.
+        </div>
 
-    {{ form.trait_data }}
-
-    <div class="alert alert-info">
-        Reports are now stored in your <a href=''>user profile</a>.
+        <small class="text-muted avail_url"></small>
+            <strong>Browser Compatibility</strong> 
+            <p>This submission page may not work with every browser. We have tested this page and found it to work with:
+            <ul>
+                <li>Google Chrome</li>
+                <li>Firefox</li>
+                <li>Safari</li>
+            </ul>
     </div>
 
-    <small class="text-muted avail_url"></small>
 
-  
-  
-
-        <strong>Browser Compatibility</strong> 
-        <p>This submission page may not work with every browser. We have tested this page and found it to work with:
-        <ul>
-        <li>Google Chrome</li>
-        <li>Firefox</li>
-        <li>Safari</li>
-        </ul>
-</div>
-
-
-<div class="col-md-6">
-<div class="panel panel-default">
-<div class="panel-heading"><em>C. elegans</em> association mapping</div>
-<div class="panel-body">
-<h4>Directions</h4>
-<ol>
-  <li>Enter the required information to the left. </li>
-  <li>Enter strain name and phenotype data below by dragging and dropping from your spreadsheet. Strain names must be approved names from this site. Names in red need to be edited to match strains in the collection.</li>
-  <li>Click submit to map your trait</li>
-  <li>Mappings can take up to 15 minutes. Please be patient. Up to five traits can be mapped in parallel at this time.</li>
-  <li><a href="{{ url_for('primary.contact') }}">Contact us</a> with problems, questions, or suggestions.</li>
-</ol>
-<hr />
-<h4>DISCLAIMER</h4>
- <p>Although strains from other sources might have the same name as strains used in this resource, genotypes might be confused or names altered. For best association mapping results, please use the strains created as a part of this resource. All sequenced strains are the same as those sent through this resource. Additionally, association mapping results need to be analyzed with care. Allele frequency skews, small sample sizes, or phenotypes similar to genomic positions can cause spurious mapping results, among other issues. Please be critical of mapping data.</p>
-</div>
-</div>
-
-</div>
-</div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading"><em>C. elegans</em> association mapping</div>
+            <div class="panel-body">
+            <h4>Directions</h4>
+            <ol>
+              <li>Enter the required information to the left. </li>
+              <li>Enter strain name and phenotype data below by dragging and dropping from your spreadsheet. Strain names must be approved names from this site. Names in red need to be edited to match strains in the collection.</li>
+              <li>Click submit to map your trait</li>
+              <li>Mappings can take up to 15 minutes. Please be patient. Up to five traits can be mapped in parallel at this time.</li>
+              <li><a href="{{ url_for('primary.contact') }}">Contact us</a> with problems, questions, or suggestions.</li>
+            </ol>
+            <hr />
+            <h4>DISCLAIMER</h4>
+             <p>Although strains from other sources might have the same name as strains used in this resource, genotypes might be confused or names altered. For best association mapping results, please use the strains created as a part of this resource. All sequenced strains are the same as those sent through this resource. Additionally, association mapping results need to be analyzed with care. Allele frequency skews, small sample sizes, or phenotypes similar to genomic positions can cause spurious mapping results, among other issues. Please be critical of mapping data.</p>
+            </div>{# / panel-body #}
+        </div>{# /panel #}
+    </div>{# /col-md-6 #}
+</div>{# /row #}
 
 
 <div class="row">
@@ -73,10 +66,12 @@
                         <small class="text-muted">Copy and Paste your dataset into the table above.</small>
                         <br />
                         <br />
-      </div>
-</div>
+      </div>{# /col-md-12 #}
+</div>{# /row #}
+
+
 <div class="row">
-<div class="col-md-12">
+    <div class="col-md-12">
     {% if form.trait_data.errors %}
     <h4>ERRORS</h4>
     <p>Please fix the errors in your data before submitting again.</p>
@@ -86,13 +81,14 @@
             {% endfor %}
         </ul>
     {% endif %}
-    </div>
-</div>
-<div class="col-md-6">
-            <div id="errors" class="text-danger"></div>
-      </div>
+    </div>{# /col-md-12 #}
+</div>{# /row #}
 
-</div>
+<div class='row'>
+    <div class="col-md-6">
+        <div id="errors" class="text-danger"></div>
+    </div>{# /col-md-6 #}
+</div>{# /row #}
 
 <div class='row'>
 <br />

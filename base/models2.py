@@ -21,7 +21,6 @@ class datastore_model(object):
         self.name = name
         self.exclude_from_indexes = None
         item = get_item(self.kind, name)
-        print(item)
         if item:
             self._exists = True
             self.__dict__.update(item)
@@ -45,8 +44,8 @@ class report_m(datastore_model):
     """
     kind = 'report'
     def __init__(self, *args, **kwargs):
-        self.exclude_from_indexes = ('trait_data',)
         super(report_m, self).__init__(*args, **kwargs)
+        self.exclude_from_indexes = ('trait_data',)
 
     def humanize(self):
         return arrow.get(self.created_on).humanize()

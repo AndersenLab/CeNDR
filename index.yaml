@@ -1,0 +1,7 @@
+indexes:
+
+- kind: report
+  properties:
+  - name: user_id
+  - name: created_on
+    direction: desc
