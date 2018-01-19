@@ -38,21 +38,8 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
         results = [x.strain for x in results] + previous_strain_names
     if resolve_isotype:
         if results:
-            print(results, "RESULTS")
             return results.isotype
     return results
-
-
-def resolve_strain(query):
-    """
-        Resolve train name
-    """
-
-    base_query.query.filter(or_(strain_m.previous_names.like(f"%{strain_name},%"),
-                              strain_m.previous_names.like(f"%,{strain_name},"),
-                              strain_m.previous_names.like(f"%{strain_name}",
-                              strain_m.previous_names == strain_name,
-                              strain_m.strain == strain_name))).first()
 
 
 @app.route('/api/isotype')

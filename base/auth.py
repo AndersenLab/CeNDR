@@ -15,6 +15,7 @@ from base.utils.gcloud import store_item, get_item
 from base.models2 import user_m
 from base.utils.data_utils import unique_id
 from slugify import slugify
+from logzero import logger
 
 
 oauth = OAuth(app)
@@ -109,7 +110,7 @@ def authorized(service_name):
         user_email = user_info['google']['email'].lower()
    
     # Create or get existing user.
-    user = user_m('users', user_email)
+    user = user_m(user_email)
     if not user._exists:
         user.user_email = user_email
         user.user_info = user_info
@@ -121,8 +122,8 @@ def authorized(service_name):
     user.last_login = arrow.utcnow().datetime
     user.save()
 
-    session['user'] = user.__dict__
-    print(session)
+    session['user'] = user
+    logger.info(session)
 
     flash("Successfully logged in!", 'success')
     return redirect(url_for('primary.primary'))

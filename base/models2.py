@@ -1,9 +1,10 @@
+import arrow
 from flask import Markup
 from sqlalchemy import or_, func
 
 from base.application import db_2
 from base.constants import URLS
-from base.utils.gcloud import get_item, store_item
+from base.utils.gcloud import get_item, store_item, query_item
 
 
 class datastore_model(object):
@@ -12,21 +13,29 @@ class datastore_model(object):
 
         Google datastore is used to store dynamic information
         such as users and reports.
+
+        Note that the 'kind' must be defined within sub
     """
 
-    def __init__(self, kind, name):
-        self.kind = kind
+    def __init__(self, name):
         self.name = name
-        item = get_item(kind, name)
+        self.exclude_from_indexes = None
+        item = get_item(self.kind, name)
+        print(item)
         if item:
             self._exists = True
-            self.update(item)
+            self.__dict__.update(item)
         else:
             self._exists = False
+        print(self._exists)
 
     def save(self):
+        self._exists = True
         item_data = {k: v for k, v in self.__dict__.items() if k not in ['kind', 'name'] and not k.startswith("_")}
         store_item(self.kind, self.name, **item_data)
+
+    def __repr__(self):
+        return f"<{self.kind}:{self.name}>"
 
 
 class report_m(datastore_model):
@@ -34,8 +43,13 @@ class report_m(datastore_model):
         The report model - for creating and retreiving
         information on reports
     """
-    pass
+    kind = 'report'
+    def __init__(self, *args, **kwargs):
+        self.exclude_from_indexes = ('trait_data',)
+        super(report_m, self).__init__(*args, **kwargs)
 
+    def humanize(self):
+        return arrow.get(self.created_on).humanize()
 
 
 class user_m(datastore_model):
@@ -43,7 +57,14 @@ class user_m(datastore_model):
         The User model - for creating and retrieving
         information on users.
     """
-    pass
+    kind = 'user'
+    def __init__(self, *args, **kwargs):
+        super(user_m, self).__init__(*args, **kwargs)
+
+    def reports(self):
+        filters = [('user_id', '=', self.user_id)]
+        # Note this requires a composite index defined very precisely.
+        return query_item('report', filters=filters, order=['user_id', '-created_on'])
 
 
 

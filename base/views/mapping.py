@@ -1,13 +1,14 @@
-import itertools
 import hashlib
 import decimal
 import os
 import time
+import arrow
 
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
-from base.application import autoconvert
+from base.application import autoconvert, VERSION
 from base.task.map_submission import launch_mapping
+from base.models2 import report_m
 from base.models import db, report, strain, trait, trait_value, mapping
 from datetime import date, datetime
 import pytz
@@ -21,10 +22,9 @@ from gcloud import storage
 from collections import Counter
 import requests
 from base.forms import mapping_submission_form
-from base.views.api.api_strain import query_strains
+from logzero import logger
+from flask import session, flash, Blueprint
 
-
-from flask import Blueprint
 
 mapping_bp = Blueprint('mapping',
                        __name__,
@@ -46,16 +46,34 @@ def mapping():
     """
         This is the mapping submission page.
     """
-
     form = mapping_submission_form(request.form)
 
     VARS = {'title': 'Perform Mapping',
-            'strain_list': query_strains(all_strain_names=True),
             'form': form}
 
-    if form.validate_on_submit():
-        print("Great")
-        print(form.data)
+    user = session.get('user')
+
+    if form.validate_on_submit() and user:
+        form.data.pop("csrf_token")
+        report_slug = slugify(form.report_name.data)
+        report = report_m(report_slug)
+        trait_data = form.trait_data.processed_data.to_csv(index=False, sep="\t", na_rep="NA")
+        report_data = {'report_slug': slugify(form.report_name.data),
+                       'report_name': form.report_name.data,
+                       'description': form.description.data,
+                       'trait_data': trait_data,
+                       'created_on': arrow.utcnow().datetime,
+                       'username': user['username'],
+                       'user_id': user['user_id'],
+                       'user_email': user['user_email'],
+                       'CeNDR-Version': VERSION,
+                       'status': 'submitted'}
+        report_data = {k: v for k, v in report_data.items() if v}
+        report.__dict__.update(report_data)
+        report.save()
+        flash("Successfully submitted mapping!", 'success')
+
+        pass
 
     return render_template('mapping.html', **VARS)
 
@@ -82,29 +100,7 @@ def report_namecheck(report_name):
     else:
         return {"report_slug": report_slug, "report_hash": report_hash}
 
-def is_number(s):
-    try:
-        float(s)
-        return True
-    except ValueError:
-        return False
 
-
-def resolve_strain_isotype(q):
-    try:
-        return strain.get(strain.strain == q)
-    except:
-        try:
-            return strain.get(strain.isotype == q)
-        except:
-            strain_name = list(strain.filter((strain.previous_names.regexp('^(' + q + ')\|')) |
-                                        (strain.previous_names.regexp('\|(' + q + ')$')) |
-                                        (strain.previous_names.regexp('\|(' + q + ')\|')) |
-                                        (strain.previous_names == q)).execute())
-            if len(strain_name) > 0:
-                return strain_name[0]
-            else:
-                return None
 
 
 @mapping_bp.route('/process_gwa/', methods=['POST'])

@@ -7,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from base.utils.data_utils import json_encoder
 from base.utils.text_utils import render_markdown
 
+# Version
+VERSION = os.environ['GAE_VERSION'].replace("-", '.')
 
 # Create
 app = Flask(__name__, static_url_path='/static')
@@ -119,7 +121,8 @@ def inject():
         Used to inject variables that
         need to be accessed globally
     """
-    return dict(json=json,
+    return dict(version=VERSION,
+                json=json,
                 gs_static=gs_static,
                 render_markdown=render_markdown)
 

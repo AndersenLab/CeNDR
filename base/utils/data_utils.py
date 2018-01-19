@@ -7,6 +7,7 @@ Author: Daniel E. Cook
 
 """
 import os
+import re
 import yaml
 import decimal
 import pytz
@@ -83,3 +84,27 @@ def chicago_date():
 
 def unique_id():
     return uuid.uuid4().hex
+
+
+def clean(string):
+    """
+        Clean variable names
+    """
+    # Remove invalid characters
+    string = re.sub('[^0-9a-zA-Z_]', '', string)
+
+    # Remove leading characters until we find a letter or underscore
+    string = re.sub('^[^a-zA-Z_]+', '', string)
+
+    return string
+
+
+def is_number(s):
+    if not s:
+        return None
+    try:
+        complex(s)  # for int, long, float and complex
+    except (ValueError, TypeError):
+        return False
+
+    return True
