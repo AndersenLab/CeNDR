@@ -25,6 +25,12 @@ try:
     trait.started_on = arrow.utcnow().datetime
     trait.run_status = "Running"
     trait.save()
+
+    # Get cegwas version
+    comm = ['Rscript', 'library(tidyverse);(devtools::session_info()$packages %>% dplyr::filter(package == "cegwas") %>% dplyr::select(version, source) %>% dplyr::mutate(v = glue::glue("{version}:{source}")))$v']
+    out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
+    trait.cegwas_version = out
+
     comm = ['Rscript', 'pipeline.R']
     process = Popen(comm, stdout=PIPE, stderr=STDOUT)
     with process.stdout as proc:
