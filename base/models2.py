@@ -1,7 +1,7 @@
 import arrow
 import pandas as pd
 from io import StringIO
-from flask import Markup
+from flask import Markup, url_for
 from sqlalchemy import or_, func
 
 from base.application import db_2
@@ -78,6 +78,10 @@ class trait_m(datastore_model):
         self._ecs = get_aws_client('ecs')
         self._logs = get_aws_client('logs')
         super(trait_m, self).__init__(*args, **kwargs)
+
+    def version_link(self):
+        release_link = url_for('data.data', selected_release= self.data_release)
+        return Markup(f"<a href='{release_link}'>{self.data_release}</a>")
 
 
     def run_task(self):
@@ -170,6 +174,7 @@ class trait_m(datastore_model):
             Returns formatted task log
         """
         logs = self.get_task_log()
+        yield f"####-##-## ##:##:## Task ID: {self.name}"
         if logs:
             for log in logs:
                 timestamp = int(str(log['timestamp'])[:-3])
@@ -177,6 +182,16 @@ class trait_m(datastore_model):
                 yield f"{event_time} {log['message']}"
         else:
             return []
+
+    def duration(self):
+        """
+            Calculate how long the run took
+        """
+        if self.completed_on and self.started_on:
+            diff = (self.completed_on - self.started_on)
+            minutes, seconds = divmod(diff.seconds, 60*60*24)
+            return "{:0>2d}m {:0>2d}s".format(minutes, seconds)
+
 
 """
 

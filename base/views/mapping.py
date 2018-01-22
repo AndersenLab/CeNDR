@@ -101,7 +101,7 @@ def mapping():
                'created_on': arrow.utcnow().datetime,
                'version_cendr': CENDR_VERSION,
                'version_report': REPORT_VERSION,
-               'version_release': CURRENT_RELEASE,
+               'data_release': CURRENT_RELEASE,
                'version_cegwas': '...',
             })
             task_id = trait.run_task()
@@ -116,15 +116,15 @@ def mapping():
         flash("Successfully submitted mapping!", 'success')
         return redirect(url_for('mapping.report',
                                 report_slug=report_slug,
-                                trait_slug=trait_list[0]))
+                                trait_name=trait_list[0]))
 
     return render_template('mapping.html', **VARS)
 
 
 @mapping_bp.route("/report/<report_slug>/")
-@mapping_bp.route("/report/<report_slug>/<trait_slug>")
-@mapping_bp.route("/report/<report_slug>/<trait_slug>/<rerun>")
-def report(report_slug, trait_slug=None, rerun=None):
+@mapping_bp.route("/report/<report_slug>/<trait_name>")
+@mapping_bp.route("/report/<report_slug>/<trait_name>/<rerun>")
+def report(report_slug, trait_name=None, rerun=None):
     """
         This view will handle logic of handling legacy reports
         and v2 reports.
@@ -142,24 +142,24 @@ def report(report_slug, trait_slug=None, rerun=None):
         
 
     # Fetch trait
-    trait_task_id = report.trait_task_ids.get(trait_slug)
+    trait_task_id = report.trait_task_ids.get(trait_name)
     trait = trait_m(trait_task_id)
 
-    if not trait_slug:
+    if not trait_name:
         # Redirect to the first trait
         return redirect(url_for('mapping.report',
                                 report_slug=report_slug,
-                                trait_slug=report.trait_list[0]))
+                                trait_name=report.trait_list[0]))
 
-    phenotype_plot = plotly_distplot(report._trait_df, trait_slug)
+    phenotype_plot = plotly_distplot(report._trait_df, trait_name)
 
     VARS = {
         'title': report.report_name,
-        'subtitle': trait_slug,
-        'trait_slug': trait_slug,
+        'subtitle': trait_name,
+        'trait_name': trait_name,
         'report': report,
         'trait': trait,
-        'strain_count': report._trait_df[trait_slug].dropna(how='any').count(),
+        'strain_count': report.trait_strain_count(trait_name),
         'plot': phenotype_plot
     }
 
@@ -226,7 +226,7 @@ def process_gwa():
         #trait_value.insert_many(trait_data).execute()
     for t in trait_keep:
         req["trait_name"] = t
-        req["trait_slug"] = slugify(t)
+        req["trait_name"] = slugify(t)
         req["db_name"] = dbname
         req["submission_date"] = datetime.now(
             pytz.timezone("America/Chicago")).isoformat()
@@ -262,7 +262,7 @@ def public_mapping():
         title = "Search: " + query
         subtitle = "results"
         q = "%" + query + "%"
-        results = trait.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(mapping).join(report).dicts().filter((trait.trait_slug % q) |
+        results = trait.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(mapping).join(report).dicts().filter((trait.trait_name % q) |
                                     (trait.trait_name % q) |
                                     (report.report_name % q) |
                                     (report.report_slug % q)).order_by(mapping.log10p.desc())
@@ -274,7 +274,7 @@ def public_mapping():
                                     report.report_name,
                                     report.report_slug,
                                     trait.trait_name,
-                                    trait.trait_slug,
+                                    trait.trait_name,
                                     trait.status,
                                     trait.submission_complete,
                                     trait.submission_date,
@@ -313,7 +313,7 @@ def public_mapping():
 
 
 
-def trait_view(report_slug, trait_slug="", rerun = None):
+def trait_view(report_slug, trait_name="", rerun = None):
 
     report_data = list(report.select(report,
                                      trait,
@@ -341,24 +341,24 @@ def trait_view(report_slug, trait_slug="", rerun = None):
         report_url_slug = report_data[0]["report_hash"]
 
      
-    if not trait_slug:
-        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=report_data[0]["trait_slug"] ))
+    if not trait_name:
+        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_name=report_data[0]["trait_name"] ))
     else:
         try:
-            trait_data = [x for x in report_data if x["trait_slug"] == trait_slug][0]
+            trait_data = [x for x in report_data if x["trait_name"] == trait_name][0]
         except:
             # Redirect user to first trait if it can't be found.
-            return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=report_data[0]["trait_slug"] ))
+            return redirect(url_for("trait_view", report_slug=report_url_slug, trait_name=report_data[0]["trait_name"] ))
 
     page_title = trait_data["report_name"] + " > " + trait_data["trait_name"]
     title = trait_data["report_name"]
     subtitle = trait_data["trait_name"]
     # Define report and trait slug 
     report_slug = trait_data["report_slug"] # don't remove
-    trait_slug = trait_data["trait_slug"] # don't remove
+    trait_name = trait_data["trait_name"] # don't remove
 
     r = report.get(report_slug = report_slug)
-    t = trait.get(report = r, trait_slug = trait_slug)
+    t = trait.get(report = r, trait_name = trait_name)
 
     # phenotype data
     #phenotype_data = list(trait_value.select(strain.strain, trait_value.value)
@@ -367,10 +367,10 @@ def trait_view(report_slug, trait_slug="", rerun = None):
     #        .switch(trait_value)
     #        .join(strain)
     #        .where(report.report_slug == r.report_slug)
-    #        .where(trait.trait_slug == t.trait_slug)
+    #        .where(trait.trait_name == t.trait_name)
     #        .dicts()
     #        .execute())
-    phenotype_data = list(map(autoconvert, [x.split('\t')[2] for x in requests.get('https://storage.googleapis.com/cendr/{report_slug}/{trait_slug}/tables/phenotype.tsv'.format(**locals())).text.splitlines()[1:]]))
+    phenotype_data = list(map(autoconvert, [x.split('\t')[2] for x in requests.get('https://storage.googleapis.com/cendr/{report_slug}/{trait_name}/tables/phenotype.tsv'.format(**locals())).text.splitlines()[1:]]))
     print(phenotype_data)
 
     if rerun == "rerun":
@@ -378,9 +378,9 @@ def trait_view(report_slug, trait_slug="", rerun = None):
         t.save()
         launch_mapping(verify_request = False)
         # Return user to current trait
-        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_slug=trait_slug))
+        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_name=trait_name))
 
-    report_trait = "%s/%s" % (report_slug, trait_slug)
+    report_trait = "%s/%s" % (report_slug, trait_name)
     base_url = "https://storage.googleapis.com/cendr/" + report_trait
 
     # Fetch significant mappings
@@ -389,7 +389,7 @@ def trait_view(report_slug, trait_slug="", rerun = None):
                                   .join(report)
                                   .filter(
                                             (report.report_slug == report_slug), 
-                                            (trait.trait_slug == trait_slug)
+                                            (trait.trait_name == trait_name)
                                           ).dicts().execute())
 
     #######################
@@ -435,7 +435,7 @@ def report_progress():
     req = request.get_json()
     current_status = list(trait.select(trait.status)
                           .join(report)
-                          .filter(trait.trait_slug == req["trait_slug"], (report.report_slug == req["report_slug"]) | (report.report_hash == req["report_slug"]))
+                          .filter(trait.trait_name == req["trait_name"], (report.report_slug == req["report_slug"]) | (report.report_hash == req["report_slug"]))
                           .dicts()
                           .execute())[0]["status"]
     return json.dumps(current_status)

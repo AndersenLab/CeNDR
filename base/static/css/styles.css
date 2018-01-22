@@ -369,6 +369,7 @@ article {
 
 .log {
     font-family: monospace;
+    display: none;
 }
 
 
