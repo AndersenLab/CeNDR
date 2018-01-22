@@ -8,13 +8,13 @@ from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
 from base.application import autoconvert
 from base.task.map_submission import launch_mapping
-from base.models2 import report_m
+from base.models2 import report_m, trait_m
 from base.models import db, report, strain, trait, trait_value, mapping
 from datetime import date, datetime
 import pytz
 from dateutil.relativedelta import relativedelta
 from peewee import JOIN
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, abort
 from collections import OrderedDict
 from slugify import slugify
 import simplejson as json
@@ -23,11 +23,15 @@ from collections import Counter
 import requests
 from base.forms import mapping_submission_form
 from logzero import logger
-from flask import session, flash, Blueprint
+from flask import session, flash, Blueprint, g
 from base.utils.data_utils import unique_id
 from base.constants import (REPORT_VERSION,
                             CURRENT_RELEASE,
                             CENDR_VERSION)
+
+from base.utils.gcloud import query_item
+
+from base.utils.plots import plotly_distplot
 
 
 mapping_bp = Blueprint('mapping',
@@ -65,28 +69,50 @@ def mapping():
         report = report_m(report_slug)
         is_public = form.is_public.data == 'True'
         trait_data = form.trait_data.processed_data.to_csv(index=False, sep="\t", na_rep="NA")
+        report_name = form.report_name.data
         report_data = {'report_slug': slugify(form.report_name.data),
-                       'report_name': form.report_name.data,
+                       'report_name': report_name,
                        'description': form.description.data,
                        'trait_data': trait_data,
                        'created_on': arrow.utcnow().datetime,
                        'username': user['username'],
                        'user_id': user['user_id'],
                        'user_email': user['user_email'],
-                       'status': 'submitted',
                        'is_public': is_public,
                        'trait_list': trait_list,
-                       'strain_list': strain_list,
-                       'version_cendr': CENDR_VERSION,
-                       'version_report': REPORT_VERSION,
-                       'version_release': CURRENT_RELEASE,
-                       'version_cegwas': '...'}
+                       'strain_list': strain_list}
         if is_public is False:
             report_data['secret_hash'] = unique_id()[0:8]
-        logger.info(report_data)
         report_data = {k: v for k, v in report_data.items() if v}
         report.__dict__.update(report_data)
+        
+        # Begin a transaction
+        transaction = g.ds.transaction()
+        transaction.begin()
+
+        # Now generate and run trait tasks
+        report.trait_task_ids = {}
+        for trait_name in report.trait_list:
+            trait = trait_m()
+            trait.__dict__.update({
+               'report': g.ds.key('report', report_name),
+               'report_name': report_name,
+               'trait_name': trait_name,
+               'created_on': arrow.utcnow().datetime,
+               'version_cendr': CENDR_VERSION,
+               'version_report': REPORT_VERSION,
+               'version_release': CURRENT_RELEASE,
+               'version_cegwas': '...',
+            })
+            task_id = trait.run_task()
+            # Update the report to contain the set of the
+            # latest task runs
+            
+            report.trait_task_ids.update({trait_name: task_id})
         report.save()
+        transaction.commit()
+
+
         flash("Successfully submitted mapping!", 'success')
         return redirect(url_for('mapping.report',
                                 report_slug=report_slug,
@@ -99,8 +125,25 @@ def mapping():
 @mapping_bp.route("/report/<report_slug>/<trait_slug>")
 @mapping_bp.route("/report/<report_slug>/<trait_slug>/<rerun>")
 def report(report_slug, trait_slug=None, rerun=None):
+    """
+        This view will handle logic of handling legacy reports
+        and v2 reports.
+
+    """
     report = report_m(report_slug)
-    logger.info(report)
+    if not report._exists and not report.is_public:
+        # User is using private link - lookup using 'secret_hash'
+        report = list(query_item('report', filters=[('secret_hash', '=', report_slug)]))
+        if report:
+            report = report_m(report[0].key.name)
+            # Now fetch the task_run
+        else:
+            return abort(404)
+        
+
+    # Fetch trait
+    trait_task_id = report.trait_task_ids.get(trait_slug)
+    trait = trait_m(trait_task_id)
 
     if not trait_slug:
         # Redirect to the first trait
@@ -108,14 +151,22 @@ def report(report_slug, trait_slug=None, rerun=None):
                                 report_slug=report_slug,
                                 trait_slug=report.trait_list[0]))
 
+    phenotype_plot = plotly_distplot(report._trait_df, trait_slug)
+
     VARS = {
         'title': report.report_name,
         'subtitle': trait_slug,
         'trait_slug': trait_slug,
-        'report': report
+        'report': report,
+        'trait': trait,
+        'strain_count': report._trait_df[trait_slug].dropna(how='any').count(),
+        'plot': phenotype_plot
     }
 
-    report_template = f"reports/{report.version_report}.html"
+    # To handle report data, functions specific
+    # to the version will be required.
+
+    report_template = f"reports/{trait.version_report}.html"
     return render_template(report_template, **VARS)
 
 

@@ -7,10 +7,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <link rel="stylesheet" href="/static/css/leaflet.css" />
 <script src="/static/js/leaflet.js"></script>
-{# for plottable #}
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.3.0/d3.min.js"></script>
 <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
@@ -104,16 +102,15 @@
         <div class='row'>
             <div class='col-md-6'>
                 {% from "macros.html" import render_table %}
-                {% set rows = [['Data Release', report.version_release],
-                               ['CeNDR Version', report.version_cendr],
-                               ['Report Version', report.version_report],
-                               ['cegwas Version', report.version_cegwas]] %}
+                {% set rows = [['Data Release', trait.version_release],
+                               ['CeNDR Version', trait.version_cendr],
+                               ['Report Version', trait.version_report],
+                               ['cegwas Version', trait.version_cegwas]] %}
                 {{ render_table(header=None, rows=rows, table_class='table-striped table-bordered') }}
 
-                {% set rows = [['Strains', report.strain_list|length],
+                {% set rows = [['Strains', strain_count],
                                ['Traits', report.trait_list|length]] %}
                 {{ render_table(header=None, rows=rows, table_class='table-striped table-bordered') }}
-
             </div>{# /col-md-6 #}
             <div class='col-md-6'>
 
@@ -121,18 +118,18 @@
                     <tbody>
                         <tr>
                             <td>Submitted</td>
-                            <td>{{ report.created_on.strftime("%Y-%m-%d&nbsp;&nbsp; %H:%m")|safe }} UTC</td>
+                            <td>{{ trait.created_on.strftime("%Y-%m-%d&nbsp;&nbsp; %H:%m:%S")|safe }} UTC</td>
                         </tr>
                         <tr>
                             <td>Started </td>
                             <td>{% if report.started_on %}
-                                {{ report.started_on.strftime("%Y-%m-%d&nbsp;&nbsp; %H:%m")|safe }} UTC
+                                {{ trait.started_on.strftime("%Y-%m-%d&nbsp;&nbsp; %H:%m:%S")|safe }} UTC
                             {% endif %}</td>
                         </tr>
                         <tr>
                             <td>Completed </td>
                             <td>{% if report.completed_on %}
-                                {{ report.completed_on.strftime("%Y-%m-%d&nbsp;&nbsp; %H:%m")|safe }} UTC
+                                {{ trait.completed_on.strftime("%Y-%m-%d&nbsp;&nbsp; %H:%m:%S")|safe }} UTC
                             {% endif %}</td>
                         </tr>
                         <tr>
@@ -143,7 +140,6 @@
                 </table>
             </div>
         </div>{# /row #}
-
 
         <div class="row">
             <div class='col-md-12'>
@@ -160,6 +156,18 @@
     </div>{# /panel-body #}
 </div>{# /panel #}
 
+
+<h4>Log</h4>
+<div class='log well'>
+    {% for line in trait.get_formatted_task_log() %}
+        {{ line }}<br />
+    {% endfor %}
+</div>
+
+
+
+<h2>Phenotype</h2>
+{{ plot|safe }}
 
 
 

@@ -1,11 +1,13 @@
 import arrow
+import pandas as pd
+from io import StringIO
 from flask import Markup
 from sqlalchemy import or_, func
 
 from base.application import db_2
 from base.constants import URLS
 from base.utils.gcloud import get_item, store_item, query_item
-
+from base.utils.aws import get_aws_client
 
 class datastore_model(object):
     """
@@ -17,17 +19,16 @@ class datastore_model(object):
         Note that the 'kind' must be defined within sub
     """
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name=None):
         self.exclude_from_indexes = None
-        item = get_item(self.kind, name)
-        if item:
-            self._exists = True
-            self.__dict__.update(item)
-        else:
-            self._exists = False
-        print(self._exists)
-
+        self._exists = False
+        if name:
+            self.name = name
+            item = get_item(self.kind, name)
+            if item:
+                self._exists = True
+                self.__dict__.update(item)
+        
     def save(self):
         self._exists = True
         item_data = {k: v for k, v in self.__dict__.items() if k not in ['kind', 'name'] and not k.startswith("_")}
@@ -46,11 +47,147 @@ class report_m(datastore_model):
     def __init__(self, *args, **kwargs):
         super(report_m, self).__init__(*args, **kwargs)
         self.exclude_from_indexes = ('trait_data',)
+        # Read trait data in upon initialization.
+        if hasattr(self, 'trait_data'):
+            self._trait_df = pd.read_csv(StringIO(self.trait_data), sep='\t')
+
+    def trait_strain_count(self, trait_slug):
+        """
+            Return number of strains submitted for a trait.
+        """
+        return self._trait_df[trait_slug].count()
 
     def humanize(self):
         return arrow.get(self.created_on).humanize()
 
 
+class trait_m(datastore_model):
+    """
+        Trait class corresponds to a trait analysis within a report.
+        This class contains methods for submitting jobs and fetching results
+        for an analysis.
+
+        If a task is re-run the report will only display the latest version.
+    """
+    kind = 'trait'
+    def __init__(self, *args, **kwargs):
+        """
+            The trait_m object adopts the task
+            ID assigned by AWS Fargate.
+        """
+        self._ecs = get_aws_client('ecs')
+        self._logs = get_aws_client('logs')
+        super(trait_m, self).__init__(*args, **kwargs)
+
+
+    def run_task(self):
+        """
+            Runs the task
+        """
+        task_fargate = self._ecs.run_task(
+        taskDefinition='cendr-map',
+        overrides={
+            'containerOverrides': [
+                {
+                    'name': 'cegwas',
+                    'command': [
+                        'python3',
+                        'run.py'
+                    ],
+                    'environment': [
+                        {
+                            'name': 'GOOGLE_APPLICATION_CREDENTIALS',
+                            'value': 'gcloud_fargate.json'
+                        },
+                        {
+                            'name': 'REPORT_NAME',
+                            'value': self.report_name
+                        },
+                        {
+                            'name': 'TRAIT_NAME',
+                            'value': self.trait_name
+                        }
+                    ],
+                }
+            ],
+        },
+        count=1,
+        launchType='FARGATE',
+        networkConfiguration={
+            'awsvpcConfiguration': {
+                'subnets': [
+                    'subnet-77581612',
+                ],
+                'securityGroups': [
+                    'sg-75e7860a'
+                ],
+                'assignPublicIp': 'ENABLED'
+            }
+        }
+        )
+        try:
+            task_fargate = task_fargate['tasks'][0]
+        except KeyError:
+            # Something went wrong.
+            return None
+
+        # Generate trait_m model
+        self.report_trait = "{}:{}".format(self.report_name, self.trait_name)
+        self.name = task_fargate['taskArn'].split("/")[1]
+        self.task_info = task_fargate
+        self.created_on = arrow.utcnow().datetime
+
+        self.save()
+        # Return the task ID
+        return self.name
+
+    def status(self):
+        """
+            Fetch the status of the task
+        """
+        task_status = self._ecs.describe_tasks(tasks=[self.name])['tasks'][0]
+        return task_status
+
+
+    def get_task_log(self):
+        """
+            Returns the task log associated with
+            the task.
+        """
+        try:
+            print(f"ecs/cegwas/{self.name}")
+            print('/ecs/cendr-map')
+            log = self._logs.get_log_events(logGroupName='/ecs/cendr-map',
+                                            logStreamName=f"ecs/cegwas/{self.name}",
+                                            limit=10000)
+            return log.get('events')
+        except self._logs.exceptions.ResourceNotFoundException:
+            return None
+
+
+    def get_formatted_task_log(self):
+        """
+            Returns formatted task log
+        """
+        logs = self.get_task_log()
+        if logs:
+            for log in logs:
+                timestamp = int(str(log['timestamp'])[:-3])
+                event_time = arrow.Arrow.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%m:%S")
+                yield f"{event_time} {log['message']}"
+        else:
+            return []
+
+"""
+
+from base.models2 import trait_m
+
+t = trait_m()
+t.report_name = 'test-report'
+t.trait_name = 'yeah1'
+t.run_task()
+
+"""
 class user_m(datastore_model):
     """
         The User model - for creating and retrieving

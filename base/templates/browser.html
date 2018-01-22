@@ -210,7 +210,6 @@ th {
 <div class="col-md-12 col-lg-12">
 <h3>Variants</h3>
 
-<table class="table table-hover table-condensed table-bordered table-responsive" id="variants">
 
 <button id='download' class='btn btn-primary btn-xs pull-right'>Download</button>
 <p><small>A Maximum of 1000 variants from the region will be listed. Heterozygous calls are likely errors. When rows are yellow, it indicates the entire variant failed QC.</small></p>
@@ -226,26 +225,24 @@ th {
     <span class="label gt-1 het">Heterozygous</span>
   </div>
 </div>
-
 </div>
-<thead>
-  <tr>
-    <th>CHROM:POS</th>
-    <th>REF / ALT</th>
-    <th>Filter</th>
-    <th>Gene Name</th>
-    <th>WormBase ID</th>
-    <th>Sequence</th>
-    <th>Coding Change</th>
-    <th>Biotype</th>
-    <th>Annotation</th>
-    <th>Impact</th>
-  </tr>
-</thead>
 
-<tbody>
-</tbody>
-
+<table class="table table-hover table-striped table-condensed table-bordered table-responsive" id="variants">
+    <thead>
+      <tr>
+        <th>CHROM:POS</th>
+        <th>REF / ALT</th>
+        <th>Filter</th>
+        <th>Gene Name</th>
+        <th>WormBase ID</th>
+        <th>Sequence</th>
+        <th>Coding Change</th>
+        <th>Biotype</th>
+        <th>Annotation</th>
+        <th>Impact</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
 </table>
 
 
@@ -571,7 +568,6 @@ function refresh_variants(download = false) {
                             is_first = false;
                             rowspan_td = `<td class='bold' rowspan=${td_rowspan}>`;
                             variant_items = rowspan_td + variant_items.join(`</td>${rowspan_td}`) + "</td>"
-                            console.log(items);
                         } else {
                             variant_items = ""
                         }

@@ -64,3 +64,6 @@ target/
 *.json
 
 tmp/
+
+# Service accounts
+gcloud_fargate.json

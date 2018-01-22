@@ -25,12 +25,10 @@ class base_config(object):
 
         # Github
         local_cred = get_item("credential", "local")
-        print(local_cred)
         GITHUB_CLIENT_ID = local_cred.get('GITHUB_CLIENT_ID')
         GITHUB_CLIENT_SECRET = local_cred.get('GITHUB_CLIENT_SECRET')
         GOOGLE_CLIENT_ID = local_cred.get('GOOGLE_CLIENT_ID')
         GOOGLE_CLIENT_SECRET = local_cred.get('GOOGLE_CLIENT_SECRET')
-
 
 
 class local(base_config):
@@ -38,7 +36,7 @@ class local(base_config):
     ADDRESS = "http://localhost:5000"
     JSON_SORT_KEYS = True
     DEBUG = True
-    SESSION_COOKIE_PATH='/'
+    SESSION_COOKIE_PATH = '/'
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_NAME = 'elegansvariation.org'
@@ -49,7 +47,6 @@ class local(base_config):
     DEBUG_TB_INTERCEPT_REDIRECTS = False
     TEMPLATE_AUTO_RELOAD = True
     CC_EMAILS = ["danielecook@gmail.com"]
-
 
 
 class production(base_config):

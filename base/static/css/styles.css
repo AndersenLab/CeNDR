@@ -10,8 +10,6 @@
     font-weight: bold;
 }
 
-
-
 .col-list { 
     display: block;
     width: 25%;
@@ -367,6 +365,10 @@ article {
 
 .price {
     text-align: right;
+}
+
+.log {
+    font-family: monospace;
 }
 
 

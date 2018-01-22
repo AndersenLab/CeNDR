@@ -1,7 +1,8 @@
 import json
 from flask import g
+from base.utils.data_utils import dump_json
 from gcloud import datastore, storage
-
+from logzero import logger
 
 def google_datastore():
     """
@@ -22,7 +23,7 @@ def store_item(kind, name, **kwargs):
         m = datastore.Entity(key=ds.key(kind, name))
     for key, value in kwargs.items():
         if isinstance(value, dict):
-            m[key] = 'JSON:' + json.dumps(value)
+            m[key] = 'JSON:' + dump_json(value)
         else:
             m[key] = value
     ds.put(m)
@@ -35,7 +36,7 @@ def query_item(kind, filters=None, projection=(), order=None):
     # filters:
     # [("var_name", "=", 1)]
     ds = google_datastore()
-    query = ds.query(kind=kind, projection=projection, order=order)
+    query = ds.query(kind=kind, projection=projection)
     if order:
         query.order = order
     if filters:
@@ -50,6 +51,7 @@ def get_item(kind, name):
     """
     ds = google_datastore()
     result = ds.get(ds.key(kind, name))
+    logger.info(f"datastore: {kind} - {name}")
     try:
         result_out = {'_exists': True}
         for k, v in result.items():
@@ -57,6 +59,7 @@ def get_item(kind, name):
                 result_out[k] = json.loads(v[5:])
             elif v:
                 result_out[k] = v
+
         return result_out
     except AttributeError:
         return None
