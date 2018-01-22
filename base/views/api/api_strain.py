@@ -3,7 +3,7 @@ from base.models2 import strain_m
 from base.application import app
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_
-
+from logzero import logger
 
 @app.route('/api/strain/')
 @app.route('/api/strain/<string:strain_name>')
@@ -22,7 +22,7 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
     base_query = strain_m.query
     if release:
         base_query = base_query.filter(strain_m.release <= release)
-    if strain_name:
+    if strain_name or resolve_isotype:
         results = base_query.filter(or_(strain_m.previous_names.like(f"%{strain_name}|%"),
                                         strain_m.previous_names.like(f"%,{strain_name}|"),
                                         strain_m.previous_names.like(f"%{strain_name}"),

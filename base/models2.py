@@ -9,6 +9,8 @@ from base.constants import URLS
 from base.utils.gcloud import get_item, store_item, query_item
 from base.utils.aws import get_aws_client
 
+from logzero import logger
+
 class datastore_model(object):
     """
         Base datastore model
@@ -46,7 +48,7 @@ class report_m(datastore_model):
     kind = 'report'
     def __init__(self, *args, **kwargs):
         super(report_m, self).__init__(*args, **kwargs)
-        self.exclude_from_indexes = ('trait_data',)
+        self.exclude_from_indexes = ('trait_data', 'strain_list')
         # Read trait data in upon initialization.
         if hasattr(self, 'trait_data'):
             self._trait_df = pd.read_csv(StringIO(self.trait_data), sep='\t')
@@ -59,6 +61,42 @@ class report_m(datastore_model):
 
     def humanize(self):
         return arrow.get(self.created_on).humanize()
+
+
+    def fetch_traits(self, trait_name=None, latest=True):
+        """
+            Fetches trait/task records associated with a report.
+
+            Args:
+                trait_name - Fetches a specific trait
+                latest - Returns only the first record of each trait.
+
+            Returns
+                If a trait name is given, and latest - ONE result
+                If latest - one result for each trait
+                if neight - all tasks associated with a report.
+        """
+        report_filter = [('report_slug','=', self.name)]
+        if trait_name:
+            trait_list = [trait_name]
+        else:
+            trait_list = self.trait_list
+        result_out = []
+        for trait in trait_list:
+            trait_filters = report_filter + [('trait_name', '=', trait)]
+            results = list(query_item('trait',
+                                      filters=trait_filters,
+                                      order=['report_slug', 'trait_name', '-created_on']))
+            if results:
+                if trait_name and latest:
+                    result_out = trait_m(results[0].key.name)
+                elif latest:
+                    result_out.append(trait_m(results[0].key.name))
+                else:
+                    for result in results:
+                        result_out.append(result)
+        return result_out
+
 
 
 class trait_m(datastore_model):
@@ -187,10 +225,12 @@ class trait_m(datastore_model):
         """
             Calculate how long the run took
         """
-        if self.completed_on and self.started_on:
+        if hasattr(self, 'completed_on') and hasattr(self, 'started_on'):
             diff = (self.completed_on - self.started_on)
             minutes, seconds = divmod(diff.seconds, 60*60*24)
             return "{:0>2d}m {:0>2d}s".format(minutes, seconds)
+        else:
+            return None
 
 
 """

@@ -5,3 +5,18 @@ indexes:
   - name: user_id
   - name: created_on
     direction: desc
+
+
+- kind: trait
+  properties:
+  - name: report_name
+  - name: created_on
+    direction: desc
+
+
+- kind: trait
+  properties:
+  - name: report_slug
+  - name: trait_name
+  - name: created_on
+    direction: desc

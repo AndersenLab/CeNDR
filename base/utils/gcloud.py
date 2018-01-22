@@ -16,7 +16,6 @@ def google_datastore():
 def store_item(kind, name, **kwargs):
     ds = google_datastore()
     exclude = kwargs.pop('exclude_from_indexes')
-    print(kwargs)
     if exclude:
         m = datastore.Entity(key=ds.key(kind, name), exclude_from_indexes=exclude)
     else:

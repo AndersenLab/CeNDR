@@ -1,6 +1,6 @@
 #!
 
-library(rdatastore)
+#library(rdatastore)
 library(devtools)
 
 # Output session info
@@ -15,4 +15,4 @@ TRAIT_NAME <- Sys.getenv('TRAIT_NAME')
 GOOGLE_APPLICATION_CREDENTIALS <- Sys.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
 
-rdatastore::authenticate_datastore_service('gcloud-project.json', 'andersen-lab')
+#rdatastore::authenticate_datastore_service('gcloud-project.json', 'andersen-lab')

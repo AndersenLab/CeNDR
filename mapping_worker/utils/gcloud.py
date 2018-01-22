@@ -11,7 +11,7 @@ import json
 import pandas as pd
 from io import StringIO
 from gcloud import datastore, storage
-
+from logzero import logger
 
 def get_item(kind, name):
     """
@@ -35,7 +35,6 @@ def get_item(kind, name):
 def store_item(kind, name, **kwargs):
     ds = datastore.Client(project='andersen-lab')
     exclude = kwargs.pop('exclude_from_indexes')
-    print(kwargs)
     if exclude:
         m = datastore.Entity(key=ds.key(kind, name), exclude_from_indexes=exclude)
     else:
@@ -46,6 +45,22 @@ def store_item(kind, name, **kwargs):
         else:
             m[key] = value
     ds.put(m)
+
+
+def query_item(kind, filters=None, projection=(), order=None):
+    """
+        Filter items from google datastore using a query
+    """
+    # filters:
+    # [("var_name", "=", 1)]
+    ds = datastore.Client(project='andersen-lab')
+    query = ds.query(kind=kind, projection=projection)
+    if order:
+        query.order = order
+    if filters:
+        for var, op, val in filters:
+            query.add_filter(var, op, val)
+    return query.fetch()
 
 
 class datastore_model(object):
@@ -67,7 +82,6 @@ class datastore_model(object):
             self.__dict__.update(item)
         else:
             self._exists = False
-        print(self._exists)
 
     def save(self):
         self._exists = True
@@ -99,6 +113,41 @@ class report_m(datastore_model):
 
     def humanize(self):
         return arrow.get(self.created_on).humanize()
+
+
+    def fetch_traits(self, trait_name=None, latest=True):
+        """
+            Fetches trait/task records associated with a report.
+
+            Args:
+                trait_name - Fetches a specific trait
+                latest - Returns only the first record of each trait.
+
+            Returns
+                If a trait name is given, and latest - ONE result
+                If latest - one result for each trait
+                if neight - all tasks associated with a report.
+        """
+        report_filter = [('report_slug', '=', self.name)]
+        if trait_name:
+            trait_list = [trait_name]
+        else:
+            trait_list = self.trait_list
+        result_out = []
+        for trait in trait_list:
+            trait_filters = report_filter + [('trait_name', '=', trait)]
+            results = list(query_item('trait',
+                                      filters=trait_filters,
+                                      order=['report_slug', 'trait_name', '-created_on']))
+            if results:
+                if trait_name and latest:
+                    result_out = trait_m(results[0].key.name)
+                elif latest:
+                    result_out.append(trait_m(results[0].key.name))
+                else:
+                    for result in results:
+                        result_out.append(result)
+        return result_out
 
 
 class trait_m(datastore_model):

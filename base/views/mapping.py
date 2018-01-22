@@ -85,33 +85,31 @@ def mapping():
             report_data['secret_hash'] = unique_id()[0:8]
         report_data = {k: v for k, v in report_data.items() if v}
         report.__dict__.update(report_data)
-        
-        # Begin a transaction
+
+        # Begin a transaction so nothing is saved unless the tasks start
+        # running.
         transaction = g.ds.transaction()
         transaction.begin()
 
         # Now generate and run trait tasks
-        report.trait_task_ids = {}
         for trait_name in report.trait_list:
             trait = trait_m()
             trait.__dict__.update({
-               'report': g.ds.key('report', report_name),
                'report_name': report_name,
+               'report_slug': report_slug,
                'trait_name': trait_name,
                'created_on': arrow.utcnow().datetime,
                'version_cendr': CENDR_VERSION,
                'version_report': REPORT_VERSION,
                'data_release': CURRENT_RELEASE,
                'version_cegwas': '...',
+               'run_status': 'Queued'
             })
-            task_id = trait.run_task()
+            trait.run_task()
             # Update the report to contain the set of the
             # latest task runs
-            
-            report.trait_task_ids.update({trait_name: task_id})
         report.save()
         transaction.commit()
-
 
         flash("Successfully submitted mapping!", 'success')
         return redirect(url_for('mapping.report',
@@ -139,17 +137,15 @@ def report(report_slug, trait_name=None, rerun=None):
             # Now fetch the task_run
         else:
             return abort(404)
-        
-
-    # Fetch trait
-    trait_task_id = report.trait_task_ids.get(trait_name)
-    trait = trait_m(trait_task_id)
 
     if not trait_name:
         # Redirect to the first trait
         return redirect(url_for('mapping.report',
                                 report_slug=report_slug,
                                 trait_name=report.trait_list[0]))
+
+    # Fetch trait
+    trait = report.fetch_traits(trait_name=trait_name)
 
     phenotype_plot = plotly_distplot(report._trait_df, trait_name)
 

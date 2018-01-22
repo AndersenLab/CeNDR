@@ -139,8 +139,9 @@
                             {% endif %}</td>
                         </tr>
                         <tr>
+                            {% set duration = trait.duration() %}
                             <td>Duration</td>
-                            <td>{{ trait.duration() }}</td>
+                            <td>{% if duration %}{{ trait.duration() }}{% endif %}</td>
                         </tr>
                         <tr>
                             <td>Log</td>
