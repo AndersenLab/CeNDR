@@ -7,11 +7,6 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-<link rel="stylesheet" href="/static/css/leaflet.css" />
-<script src="/static/js/leaflet.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.3.0/d3.min.js"></script>
-<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
 {% endblock %}
 
 {% block style %}
@@ -147,9 +142,28 @@
                             <td>Log</td>
                             <td><a href='javascript:$(".log").slideToggle();'>View Log</a></td>
                         </tr>
-
                     </body>
                 </table>
+
+
+                <table class='table table-striped table-bordered meta-table'>
+                    <tbody>
+                        <tr>
+                            <td>Report Mode</td>
+                            <td>{% if report.is_public %}public{% else %}private{% endif %}</td>
+                        </tr>
+                        <tr>
+                            <td>Share</td>
+                            <td>{% if report.is_public %}
+                                    {{ request.url_root.strip('/') }}{{ url_for('mapping.report', report_slug=report.report_slug, trait_name=trait_name) }}
+                                {% else %}
+                                    {{ request.url_root.strip('/') }}{{ url_for('mapping.report', report_slug=report.secret_hash, trait_name=trait_name) }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
             </div>
         </div>{# /row #}
 

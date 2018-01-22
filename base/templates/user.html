@@ -11,9 +11,9 @@
     <thead>
         <tr>
             <th>Report</th>
+            <th>Traits</th>
             <th>Status</th>
             <th>Public</th>
-            <th>CeNDR Version</th>
             <th>Data Version</th>
             <th>Description</th>
             <th>Submitted</th>
@@ -23,12 +23,11 @@
         {% for report in user_obj.reports() %}
         <tr>
             <td><a href='{{ url_for("mapping.report", report_slug=report.report_slug) }}'>{{ report.report_slug }}</a></td>
-            <td>{{ report.status }}</td>
+            <td>{% for trait, status in report.fetch_trait_status().items() %}<a href="{{ url_for('mapping.report', report_slug=report.report_slug, trait_name=trait) }}">{{ trait }}</a></br />{% endfor %}</td>
+            <td>{% for trait, status in report.fetch_trait_status().items() %}[ {{ status }} ]<br />{% endfor %}
             <td><i>{% if report.is_public %}<i class='glyphicon glyphicon-ok'>{% endif %}</td>
-            <td>{{ report.version_cendr }}</td>
-            <td>{{ report.version_release }}</td>
-            <td>{{ report['description'] }}</td>
-            <td><span style='white-space: nowrap'>{{ report['created_on'].strftime("%Y-%m-%d&nbsp;%H:%m")|safe }}</span>
+            <td>{{ report.description }}</td>
+            <td><span style='white-space: nowrap'>{{ report['created_on'].strftime("%Y-%m-%d&nbsp;%H:%m:%S")|safe }}</span>
             </td>
         </tr>
         {% endfor %}

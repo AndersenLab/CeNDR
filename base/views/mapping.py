@@ -60,14 +60,15 @@ def mapping():
             'form': form}
 
     user = session.get('user')
-
+    logger.info(type(form.is_public.data))
     if form.validate_on_submit() and user:
         form.data.pop("csrf_token")
         report_slug = slugify(form.report_name.data)
         trait_list = list(form.trait_data.processed_data.columns[2:])
         strain_list = form.trait_data.strain_list
         report = report_m(report_slug)
-        is_public = form.is_public.data == 'True'
+        is_public = form.is_public.data
+        logger.info(is_public)
         trait_data = form.trait_data.processed_data.to_csv(index=False, sep="\t", na_rep="NA")
         report_name = form.report_name.data
         report_data = {'report_slug': slugify(form.report_name.data),

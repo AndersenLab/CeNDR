@@ -5,18 +5,21 @@
 
 
 """
+import datetime
 import markdown
+import numpy as np
+import pandas as pd
 from flask import Blueprint
-from base.application import app, cache
-from base.utils.google_sheets import add_to_order_ws
-from base.forms import donation_form
 from flask import render_template, url_for, Markup, request, redirect, session
 
+from base.application import app, db_2, cache
+from base.models2 import strain_m
+from base.forms import donation_form
 from base.views.api.api_strain import get_isotypes
-
+from base.utils.google_sheets import add_to_order_ws
 from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
 from base.utils.data_utils import load_yaml, chicago_date, hash_it
-from base.utils.google_sheets import add_to_order_ws
+from base.utils.plots import time_series_strain_isotype_plot
 
 
 about_bp = Blueprint('about',
@@ -117,4 +120,22 @@ def donate():
 def funding():
     title = "Funding"
     funding_set = load_yaml('funding.yaml')
-    return render_template('funding.html', **locals())
+    return render_template('about/funding.html', **locals())
+
+
+@about_bp.route('/statistics')
+def statistics():
+    title = "Statistics"
+
+    #
+    # Strain collections plot
+    #
+    df = pd.read_sql_table('strain', db_2.engine)
+    strain_collection_plot = time_series_strain_isotype_plot(df)
+
+    VARS = {'title': title,
+            'strain_collection_plot': strain_collection_plot}
+
+    return render_template('about/statistics.html', **VARS)
+
+

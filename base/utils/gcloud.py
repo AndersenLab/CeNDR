@@ -4,12 +4,19 @@ from base.utils.data_utils import dump_json
 from gcloud import datastore, storage
 from logzero import logger
 
-def google_datastore():
+
+def google_datastore(open=False):
     """
         Fetch google datastore credentials
+
+        Args:
+            open - Return the client without storing it in the g object.
     """
+    client = datastore.Client(project='andersen-lab')
+    if open:
+        return client
     if not hasattr(g, 'ds'):
-        g.ds = datastore.Client(project='andersen-lab')
+        g.ds = client
     return g.ds
 
 

@@ -8,6 +8,7 @@ from base.application import db_2
 from base.constants import URLS
 from base.utils.gcloud import get_item, store_item, query_item
 from base.utils.aws import get_aws_client
+from gcloud.datastore.entity import Entity
 
 from logzero import logger
 
@@ -21,15 +22,26 @@ class datastore_model(object):
         Note that the 'kind' must be defined within sub
     """
 
-    def __init__(self, name=None):
+    def __init__(self, name_or_obj=None):
+        """
+            Args:
+                name_or_obj - A name for a new datastore item
+                              or an existing one to initialize
+                              using the datastore_model class.
+        """
         self.exclude_from_indexes = None
         self._exists = False
-        if name:
-            self.name = name
-            item = get_item(self.kind, name)
+        if type(name_or_obj) == Entity:
+            self.__dict__.update(name_or_obj)
+            self.kind = name_or_obj.key.kind
+            self.name = name_or_obj.key.name
+        elif name_or_obj:
+            self.name = name_or_obj
+            item = get_item(self.kind, name_or_obj)
             if item:
                 self._exists = True
                 self.__dict__.update(item)
+
         
     def save(self):
         self._exists = True
@@ -76,7 +88,7 @@ class report_m(datastore_model):
                 If latest - one result for each trait
                 if neight - all tasks associated with a report.
         """
-        report_filter = [('report_slug','=', self.name)]
+        report_filter = [('report_slug', '=', self.name)]
         if trait_name:
             trait_list = [trait_name]
         else:
@@ -97,6 +109,18 @@ class report_m(datastore_model):
                         result_out.append(result)
         return result_out
 
+
+    def fetch_trait_status(self):
+        """
+            If traits-tasks are still being run
+            this function will fetch and update their status.
+
+            Once they have completed it will cache the result    
+        """
+        traits = self.fetch_traits(latest=True)
+        self.trait_run_status = {x.trait_name: x.run_status for x in traits}
+        self.save()
+        return self.trait_run_status
 
 
 class trait_m(datastore_model):
@@ -255,7 +279,10 @@ class user_m(datastore_model):
     def reports(self):
         filters = [('user_id', '=', self.user_id)]
         # Note this requires a composite index defined very precisely.
-        return query_item('report', filters=filters, order=['user_id', '-created_on'])
+        results = query_item('report', filters=filters, order=['user_id', '-created_on'])
+
+        # Generate report objects
+        return [report_m(x) for x in results]
 
 
 

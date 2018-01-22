@@ -281,7 +281,7 @@ class mapping_submission_form(Form):
     report_name = StringField('Report Name', [Required(),
                                               Length(min=1, max=50),
                                               validate_report_name_unique])
-    is_public = RadioField('Release', choices=[("True", 'public'), ("False", 'private')])
+    is_public = RadioField('Release', choices=[(True, 'public'), (False, 'private')], coerce=bool)
     description = TextAreaField('Description', [Length(min=0, max=1000)])
     trait_data = TraitData(validators=[validate_row_length,
                                        validate_duplicate_strain,
