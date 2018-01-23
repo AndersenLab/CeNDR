@@ -89,23 +89,6 @@ def unique_id():
     return uuid.uuid4().hex
 
 
-def clean_variable_name(string):
-    """
-        Clean variable names
-    """
-    logger.info(string)
-    # Remove invalid characters
-    string = re.sub('[^0-9a-zA-Z_]', '', string)
-
-    # Remove leading characters until we find a letter or underscore
-    string = re.sub('^[^a-zA-Z_]+', '', string)
-
-    # Finally, slugify if necessary.
-    string = slugify(string)
-    logger.info(string)
-    return string
-
-
 def is_number(s):
     if not s:
         return None

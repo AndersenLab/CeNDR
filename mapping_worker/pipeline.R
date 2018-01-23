@@ -1,5 +1,4 @@
-#!
-
+#!/usr/env/R
 library(devtools)
 library(memoise)
 library(cegwas)
@@ -7,7 +6,8 @@ library(tidyverse)
 library(jsonlite)
 
 # Output session info
-devtools::session_info()
+session <- devtools::session_info()
+session
 
 # Get variables
 REPORT_NAME <- Sys.getenv('REPORT_NAME')
@@ -19,60 +19,57 @@ source("constants.R")
 
 df <- readr::read_tsv("df.tsv")
 
-# Perform mapping
-mapping <- cegwas::cegwas_map(df, mapping_snp_set = FALSE)
+# Cache the function to increase speed
+gwas <- function(df,
+                 session_packages=session$packages,
+                 r_version=session$platform$version,
+                 r_system=session$platform$system) {
+  mapping <- cegwas::cegwas_map(df, mapping_snp_set = FALSE)
+}
+mgwas <- memoise(gwas, cache=cache_s3("cendr-cache"))
 
-is_significant = any(results$aboveBF == 1)
+mapping <- mgwas(df)
 
-if (!is_significant) {
-  
-  readr::write_tsv(mapping, "tables/mapping.tsv", na = "")
-  
-  #==================================#
-  # Manhattan Plot - Not significant #
-  #==================================#
-  
-  # Store mapping.tsv results
-  readr::write_tsv(mapping, "tables/mapping.tsv", na = "")
-  
-  # Remove MtDNA
-  mapping <- mapping %>% dplyr::filter(CHROM != "MtDNA")
-  
-  ggplot(mapping) +
-    ggplot2::aes(x = POS/1e6, y = log10p) +
-    ggplot2::geom_point() +
-    ggplot2::facet_grid(.~CHROM, scales = "free_x", space = "free_x") +
-    ggplot2::theme_bw() +
-    ggplot2::geom_hline(aes(yintercept = BF), color = "#FF0000", size = 1)+
-    theme_bw() +
-    pub_theme +
-    theme(plot.margin = unit(c(0.0,0.5,0.5,0),"cm"),
-          panel.spacing = unit(0.8, "lines"),
-          strip.background = element_blank(),
-          axis.title.x = ggplot2::element_text(margin=margin(15,0,0,0), size=18, color="black"),
-          axis.title.y = ggplot2::element_text(margin=margin(0,15,0,5), size=18, color="black"),
-          panel.background = ggplot2::element_rect(color = "black", size= 0.50),
-          axis.ticks= element_line(color = "black", size = 0.25),
-          panel.border = element_rect(size=1, color = "black")) +
-    ggplot2::labs(x = "Genomic Position (Mb)",
-                  y = expression(-log[10](p)))
+readr::write_tsv(mapping, "tables/mapping.tsv", na = "")
+
+is_significant = any(mapping$aboveBF == 1)
+
+#
+# Manhattan plot
+#
+
+# Filter MtDNA for plotting purposes
+ggplot(mapping %>% dplyr::filter(CHROM != "MtDNA")) +
+  ggplot2::aes(x = POS/1e6, y = log10p) +
+  ggplot2::geom_point() +
+  ggplot2::facet_grid(.~CHROM, scales = "free_x", space = "free_x") +
+  ggplot2::theme_bw() +
+  ggplot2::geom_hline(aes(yintercept = BF), color = "#FF0000", size = 1)+
+  theme_bw() +
+  PUB_THEME +
+  theme(plot.margin = unit(c(0.0,0.5,0.5,0),"cm"),
+        panel.spacing = unit(0.8, "lines"),
+        strip.background = element_blank(),
+        axis.title.x = ggplot2::element_text(margin=margin(15,0,0,0), size=18, color="black"),
+        axis.title.y = ggplot2::element_text(margin=margin(0,15,0,5), size=18, color="black"),
+        panel.background = ggplot2::element_rect(color = "black", size= 0.50),
+        axis.ticks= element_line(color = "black", size = 0.25),
+        panel.border = element_rect(size=1, color = "black")) +
+  ggplot2::labs(x = "Genomic Position (Mb)",
+                y = expression(-log[10](p)))
 
 ggsave("figures/Manhattan.png", width = 10, height = 5)
-quit(save = "no", status = 0)
+
+if (!is_significant) {
+    quit(save = "no", status = 0)
 }
 
-# All code below is processed for significant mappings
-
-proc_mappings <- cegwas::process_mappings(mapping, trait) %>%
-               dplyr::mutate(marker = gsub("_", ":", marker)) 
-
-readr::write_tsv(proc_mappings, "tables/mapping.tsv", na = "")
-
-# Remove MtDNA
-proc_mappings <- proc_mappings %>% dplyr::filter(CHROM != "MtDNA")
 #================================================#
 # Process Peaks and Manhattan Plot - Significant #
 #================================================#
+
+# Remove MtDNA
+mapping <- mapping %>% dplyr::filter(CHROM != "MtDNA")
 
 peaks <- na.omit(proc_mappings) %>%
 dplyr::distinct(peak_id, .keep_all = TRUE) %>%
@@ -90,21 +87,9 @@ mapping_intervals <- proc_mappings %>%
             dplyr::select(marker, CHROM, POS, report, trait, var.exp, log10p, BF, startPOS, endPOS, version, reference) %>%
             dplyr::distinct(.keep_all = T)
 readr::write_tsv(mapping_intervals, "tables/mapping_intervals.tsv")
-# Manhattan Plot
-mplot <- cegwas::manplot(proc_mappings, "#666666")
-mplot[[1]] +
-theme_bw() +
-pub_theme +
-theme(plot.margin = unit(c(0.0,0.5,0.5,0),"cm"),
-    panel.margin = unit(0.75, "lines"),
-    strip.background = element_blank(),
-    axis.title.x = ggplot2::element_text(margin=margin(15,0,0,0), size=18, color="black"),
-    axis.title.y = ggplot2::element_text(margin=margin(0,15,0,5), size=18, color="black"),
-    panel.border = element_rect(size=1, color = "black")) +
-ggplot2::labs(x = "Genomic Position (Mb)",
-            y = expression(-log[10](p))) +
-theme(plot.title = ggplot2::element_blank())
-ggsave("figures/Manhattan.png", width = 10, height = 5)
+
+
+
 # PxG Plot
 pg_plot <- pxg_plot(proc_mappings, color_strains = NA)
 pg_plot[[1]] +

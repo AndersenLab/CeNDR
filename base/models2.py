@@ -152,6 +152,8 @@ class trait_m(datastore_model):
         """
             Runs the task
         """
+        # Fargate credentials
+        #fargate_user = get_item('credential', 'aws_fargate')
         task_fargate = self._ecs.run_task(
         taskDefinition='cendr-map',
         overrides={
@@ -174,7 +176,15 @@ class trait_m(datastore_model):
                         {
                             'name': 'TRAIT_NAME',
                             'value': self.trait_name
-                        }
+                        }#,
+                        #{
+                        #    'name': 'AWS_ACCESS_KEY_ID',
+                        #    'value': fargate_user['aws_access_key_id']
+                        #},
+                        #{
+                        #    'name': 'AWS_SECRET_ACCESS_KEY_ID',
+                        #    'value': fargate_user['aws_secret_access_key']
+                        #}
                     ],
                 }
             ],

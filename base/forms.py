@@ -17,9 +17,10 @@ from wtforms.validators import ValidationError
 from base.models2 import report_m
 from base.constants import PRICES
 from base.views.api.api_strain import query_strains
-from base.utils.data_utils import is_number, clean_variable_name, list_duplicates
+from base.utils.data_utils import is_number, list_duplicates
 from slugify import slugify
 from gcloud.exceptions import BadRequest
+
 
 from logzero import logger
 
@@ -222,7 +223,7 @@ def validate_column_names(form, field):
     """
     df = form.trait_data.processed_data
     for x in df.columns[2:]:
-        malformed_cols = [x for x in df.columns[2:] if clean_variable_name(x) != x and x]
+        malformed_cols = [x for x in df.columns[2:] if slugify(x) != x and slugify(x)]
         if malformed_cols:
             form.trait_data.error_items.extend(malformed_cols)
             raise ValidationError(f"Trait names must begin with a letter and can only contain letters, numbers, dashes, and underscores. These columns need to be renamed: {malformed_cols}")

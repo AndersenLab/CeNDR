@@ -38,6 +38,9 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
         results = [x.strain for x in results] + previous_strain_names
     if resolve_isotype:
         if results:
+            # LSJ1/LSJ2 prev. N2; So N2 needs to be specific.
+            if strain_name == 'N2':
+                return 'N2'
             return results.isotype
     return results
 
