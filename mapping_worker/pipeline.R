@@ -39,12 +39,7 @@ is_significant = any(mapping$aboveBF == 1)
 #
 
 # Filter MtDNA for plotting purposes
-ggplot(mapping %>% dplyr::filter(CHROM != "MtDNA")) +
-  ggplot2::aes(x = POS/1e6, y = log10p) +
-  ggplot2::geom_point() +
-  ggplot2::facet_grid(.~CHROM, scales = "free_x", space = "free_x") +
-  ggplot2::theme_bw() +
-  ggplot2::geom_hline(aes(yintercept = BF), color = "#FF0000", size = 1)+
+cegwas::manplot(mapping %>% dplyr::filter(CHROM != "MtDNA"))[[1]] +
   theme_bw() +
   PUB_THEME +
   theme(plot.margin = unit(c(0.0,0.5,0.5,0),"cm"),
@@ -56,7 +51,8 @@ ggplot(mapping %>% dplyr::filter(CHROM != "MtDNA")) +
         axis.ticks= element_line(color = "black", size = 0.25),
         panel.border = element_rect(size=1, color = "black")) +
   ggplot2::labs(x = "Genomic Position (Mb)",
-                y = expression(-log[10](p)))
+                y = expression(-log[10](p)),
+                title = "")
 
 ggsave("figures/Manhattan.png", width = 10, height = 5)
 
