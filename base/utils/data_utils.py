@@ -20,6 +20,7 @@ from flask import g
 from gcloud import storage
 from flask import json, request
 from slugify import slugify
+from logzero import logger
 
 
 def flatten_dict(d, max_depth=1):
@@ -92,6 +93,7 @@ def clean_variable_name(string):
     """
         Clean variable names
     """
+    logger.info(string)
     # Remove invalid characters
     string = re.sub('[^0-9a-zA-Z_]', '', string)
 
@@ -100,7 +102,7 @@ def clean_variable_name(string):
 
     # Finally, slugify if necessary.
     string = slugify(string)
-
+    logger.info(string)
     return string
 
 

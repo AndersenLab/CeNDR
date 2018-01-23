@@ -131,6 +131,7 @@ class TraitData(HiddenField):
         df = df.assign(ISOTYPE=[query_strains(x, resolve_isotype=True) for x in df.STRAIN])
         isotype_col = df.pop("ISOTYPE")
         df.insert(1, "ISOTYPE", isotype_col)
+        logger.info(df)
         self.processed_data = df
 
 
@@ -153,6 +154,7 @@ def validate_duplicate_isotype(form, field):
     """
     df = form.trait_data.processed_data
     dup_isotypes = df.STRAIN[df.ISOTYPE.duplicated()]
+    logger.info(df[df.ISOTYPE.duplicated()])
     if dup_isotypes.any():
         dup_isotypes = dup_isotypes.values
         form.trait_data.error_items.extend(dup_isotypes)
