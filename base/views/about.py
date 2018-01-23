@@ -19,7 +19,7 @@ from base.views.api.api_strain import get_isotypes
 from base.utils.google_sheets import add_to_order_ws
 from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
 from base.utils.data_utils import load_yaml, chicago_date, hash_it
-from base.utils.plots import time_series_strain_isotype_plot
+from base.utils.plots import time_series_plot
 
 
 about_bp = Blueprint('about',
@@ -130,8 +130,14 @@ def statistics():
     #
     # Strain collections plot
     #
-    df = pd.read_sql_table('strain', db_2.engine)
-    strain_collection_plot = time_series_strain_isotype_plot(df)
+
+    df = strain_m.cum_sum_strain_isotype()
+    strain_collection_plot = time_series_plot(df,
+                                              x_title='Year',
+                                              y_title='Count',
+                                              range=[datetime.datetime(1995, 10, 17),
+                                                     datetime.datetime.today()]
+                                              )
 
     VARS = {'title': title,
             'strain_collection_plot': strain_collection_plot}

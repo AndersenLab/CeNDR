@@ -58,7 +58,6 @@ def plotly_distplot(df, column):
     fig.data[2]['text'] = labels
     fig.data[2]['hoverinfo'] = 'x+text'
 
-
     plot = plotly.offline.plot(fig,
                                output_type='div',
                                include_plotlyjs=False,
@@ -67,50 +66,32 @@ def plotly_distplot(df, column):
     return plot
 
 
-def time_series_strain_isotype_plot(df):
+def time_series_plot(df, x_title=None, y_title=None, range=None):
     """
-        Create a time-series plot of strains and isotypes collected over time
+        Pass in a dataframe (df) with:
+            First column - dates (x-axis)
+            2nd, 3rd, 4th, etc. columns - values
 
         Args:
             df - the strain dataset
     """
-    cumulative_isotype = df[['isotype', 'isolation_date']].sort_values(['isolation_date'], axis=0) \
-                                                          .drop_duplicates(['isotype']) \
-                                                          .groupby(['isolation_date'], as_index=True) \
-                                                          .count() \
-                                                          .cumsum() \
-                                                          .reset_index()
-    cumulative_isotype = cumulative_isotype.append({'isolation_date': np.datetime64(datetime.datetime.today().strftime("%Y-%m-%d")),
-                                                    'isotype': len(df['isotype'].unique())}, ignore_index=True)
-    cumulative_strain = df[['strain', 'isolation_date']].sort_values(['isolation_date'], axis=0) \
-                                                        .drop_duplicates(['strain']) \
-                                                        .dropna(how='any') \
-                                                        .groupby(['isolation_date']) \
-                                                        .count() \
-                                                        .cumsum() \
-                                                        .reset_index()
-    cumulative_strain = cumulative_strain.append({'isolation_date': np.datetime64(datetime.datetime.today().strftime("%Y-%m-%d")),
-                                                  'strain': len(df['strain'].unique())}, ignore_index=True)
-    df = cumulative_isotype.set_index('isolation_date') \
-                           .join(cumulative_strain.set_index('isolation_date')) \
-                           .reset_index()
-
     trace_set = []
     for column in df.columns[1:][::-1]:
-        trace_set.append(go.Scatter(
-                                    x=df[df.columns[0]],
+        trace_set.append(go.Scatter(x=df[df.columns[0]],
                                     y=df[column],
                                     name=column,
                                     opacity=0.8
                                     )
-                        )
+                         )
 
-    layout = go.Layout(xaxis=dict(range=[datetime.datetime(1995, 10, 17),
-                                         datetime.datetime.today()],
-                                  title='Year'),
-                       yaxis=dict(title='Count'),
-                       margin={'t': 0, 'r': 0, 'l': 80, 'b': 60},
-                       )
+    layout = go.Layout(margin={'t': 0, 'r': 0, 'l': 80, 'b': 60},
+                       xaxis={})
+    if range:
+        layout['xaxis']['range'] = range
+    if x_title:
+        layout['xaxis']['title'] = x_title
+    if y_title:
+        layout['yaxis']['title'] = y_title
 
     fig = go.Figure(data=trace_set, layout=layout)
     return plotly.offline.plot(fig,
