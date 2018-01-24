@@ -26,8 +26,9 @@ from logzero import logger
 from flask import session, flash, Blueprint, g
 from base.utils.data_utils import unique_id
 from base.constants import (REPORT_VERSION,
-                            CURRENT_RELEASE,
-                            CENDR_VERSION)
+                            DATA_RELEASE,
+                            CENDR_VERSION,
+                            WORMBASE_VERSION)
 
 from base.utils.gcloud import query_item
 
@@ -68,7 +69,6 @@ def mapping():
         strain_list = form.trait_data.strain_list
         report = report_m(report_slug)
         is_public = form.is_public.data
-        logger.info(is_public)
         trait_data = form.trait_data.processed_data.to_csv(index=False, sep="\t", na_rep="NA")
         report_name = form.report_name.data
         report_data = {'report_slug': slugify(form.report_name.data),
@@ -100,11 +100,11 @@ def mapping():
                'report_slug': report_slug,
                'trait_name': trait_name,
                'created_on': arrow.utcnow().datetime,
-               'version_cendr': CENDR_VERSION,
-               'version_report': REPORT_VERSION,
-               'data_release': CURRENT_RELEASE,
-               'version_cegwas': '...',
-               'run_status': 'Queued'
+               'run_status': 'Queued',
+               'CENDR_VERSION': CENDR_VERSION,
+               'REPORT_VERSION': REPORT_VERSION,
+               'DATA_RELEASE': DATA_RELEASE,
+               'WORMBASE_VERSION': WORMBASE_VERSION
             })
             trait.run_task()
         # Update the report to contain the set of the
@@ -150,10 +150,6 @@ def report(report_slug, trait_name=None, rerun=None):
 
     phenotype_plot = plotly_distplot(report._trait_df, trait_name)
 
-    # Fetch peak marker data for generating the PxG plot
-    peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv")
-    pxg = pxg_plot(peak_marker_data)
-
     VARS = {
         'title': report.report_name,
         'subtitle': trait_name,
@@ -161,14 +157,22 @@ def report(report_slug, trait_name=None, rerun=None):
         'report': report,
         'trait': trait,
         'strain_count': report.trait_strain_count(trait_name),
-        'plot': phenotype_plot,
-        'pxg': pxg
+        'phenotype_plot': phenotype_plot,
     }
 
+
+    # If the mapping is complete:
+    if trait.is_complete:
+        # Fetch peak marker data for generating the PxG plot
+        
+        # PxG Plot
+        peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv")
+        VARS['pxg_plot'] = pxg_plot(peak_marker_data, trait_name)
+        
     # To handle report data, functions specific
     # to the version will be required.
 
-    report_template = f"reports/{trait.version_report}.html"
+    report_template = f"reports/{trait.REPORT_VERSION}.html"
     return render_template(report_template, **VARS)
 
 

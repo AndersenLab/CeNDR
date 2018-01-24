@@ -166,11 +166,12 @@ class trait_m(datastore_model):
             Stores uploaded files.
         """
         gs = storage.Client(project='andersen-lab')
-        cendr_bucket = gs.get_bucket("cendr")
+        cendr_bucket = gs.get_bucket("elegansvariation.org")
         for fname in file_list:
-            print(f"Uploading {fname} to {self.name}/{fname}")
             base_name = os.path.basename(fname)
-            cendr_bucket.blob(f"{self.name}/{base_name}").upload_from_filename(fname)
+            report_base = f"reports/{self.REPORT_VERSION}/{self.name}/{base_name}"
+            print(f"Uploading {fname} to {report_base}")
+            cendr_bucket.blob(report_base).upload_from_filename(fname)
         
         # Update self to store file list
         self.file_list = file_list

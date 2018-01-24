@@ -65,7 +65,7 @@ cegwas::manplot(mapping %>% dplyr::filter(CHROM != "MtDNA"))[[1]] +
                 y = expression(-log[10](p)),
                 title = "")
 
-ggsave("data/Manhattan.png", width = 10, height = 5)
+ggsave("data/Manhattan.png", width = 10, height = 5, dpi=175)
 
 if (!is_significant) {
     quit(save = "no", status = 0)
@@ -95,8 +95,29 @@ peaks <- na.omit(mapping) %>%
                   variance_explained = var.exp,
                   interval_length)
 
+n_peaks <- nrow(peaks)
+
+readr::write_tsv("data/peak_summary.tsv")
+
+# Generate phenotype/genotype data for PxG Boxplots.
+snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%             
+  dplyr::mutate(TRAIT = TRAIT_NAME) %>%
+  dplyr::rowwise() %>%
+  dplyr::mutate(TGT = .data[[.data$GT]]) %>%
+  dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
+  dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
+  dplyr::mutate(GT = glue::glue("{GT} ({TGT})")) %>%
+  dplyr::inner_join(df) %>%
+  dplyr::distinct() %>% readr::write_tsv("data/peak_markers.tsv")
+
+
 # Generate a summary for each interval
-interval_summary <- cegwas::interval_summary("II:12825015-15276626")
+m_interval_summary <- function(interval,
+) {
+  cegwas::interval_summary(interval, )
+}
+
+interval_summary <- cegwas::interval_summary("II:12825015-12925015")
 
 #============================#
 # Generate data for PxG Plot #
@@ -115,37 +136,28 @@ readr::write_tsv(mapping_intervals, "data/mapping_intervals.tsv")
 # Fetch peak marker genotypes for generation of box plots
 peak_markers <- snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
                   
-  peak_markers %>% dplyr::mutate(TRAIT = TRAIT_NAME) %>%
-                  dplyr::rowwise() %>%
-                  dplyr::mutate(TGT = .data[[.data$GT]]) %>%
-                  dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
-                  dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
-                  dplyr::mutate(GT = glue::glue("{GT} ({TGT})")) %>%
-                  dplyr::inner_join(df) %>%
-                  dplyr::distinct()
+peak_markers %>% dplyr::mutate(TRAIT = TRAIT_NAME) %>%
+              dplyr::rowwise() %>%
+              dplyr::mutate(TGT = .data[[.data$GT]]) %>%
+              dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
+              dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
+              dplyr::mutate(GT = glue::glue("{GT} ({TGT})")) %>%
+              dplyr::inner_join(df) %>%
+              dplyr::distinct()
 
 readr::write_tsv(peak_markers, "data/peak_markers.tsv")
 
-# PxG Plot
-pg_plot <- cegwas::pxg_plot(mapping, color_strains = NA)[[1]] +
-                   labs(y=TRAIT_NAME) +
-                   PUB_THEME +
-theme(plot.margin = unit(c(0.0,0.5,0.5,0),"cm"),
-    strip.background = element_blank(),
-    axis.title.y = element_text(vjust=2.5),
-    panel.border = element_rect(size=1, color = "black"))  +
-theme(legend.position = "none",
-                  plot.title = ggplot2::element_blank())
-ggsave("figures/PxG.png", width = 10, height = 5)
-# Plot Peak LD if more than one peak.
+#============================#
+# Generate data for PxG Plot #
+#============================#
 if(nrow(peaks) > 1){
-plot_peak_ld(proc_mappings)
-ggsave("figures/LD.png", width = 14, height = 11)
+    plot_peak_ld(mapping)
+    ggsave("data/LD.png", width = 14, height = 11)
 }
 # Get interval variants
 update_status("Fine Mapping")
 proc_variants <- function(proc_mappings) {
-process_correlations(variant_correlation(proc_mappings, quantile_cutoff_high = 0.75, quantile_cutoff_low = 0.25, condition_trait = F))
+    process_correlations(variant_correlation(proc_mappings, quantile_cutoff_high = 0.75, quantile_cutoff_low = 0.25, condition_trait = F))
 }
 mproc_variants <- memoise(proc_variants, cache = cache_datastore(project = "andersen-lab", cache = "rcache"))
 interval_variants <- mproc_variants(proc_mappings)

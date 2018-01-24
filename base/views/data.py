@@ -6,7 +6,7 @@ from base.views.api.correlation import get_correlated_genes
 from collections import OrderedDict
 from flask import render_template
 from base.views.api.api_strain import get_isotypes, query_strains
-from base.constants import CURRENT_RELEASE, RELEASES
+from base.constants import DATA_RELEASE, RELEASES
 from flask import Blueprint, url_for, redirect
 
 
@@ -22,7 +22,7 @@ data_bp = Blueprint('data',
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
 @data_bp.route('/release/<string:selected_release>')
-def data(selected_release=CURRENT_RELEASE):
+def data(selected_release=DATA_RELEASE):
     """
         Default data page - lists
         available releases.
@@ -47,7 +47,7 @@ def data(selected_release=CURRENT_RELEASE):
 @data_bp.route('/download/download_bams.sh')
 @cache.cached(timeout=50)
 def download_script():
-    strain_listing = query_strains(release=CURRENT_RELEASE)
+    strain_listing = query_strains(release=DATA_RELEASE)
     download_page = render_template('download_script.sh', **locals())
     response = make_response(download_page)
     response.headers["Content-Type"] = "text/plain"
@@ -62,7 +62,7 @@ def download_script():
 @data_bp.route('/browser/<region>/<query>')
 def browser(region="III:11746923-11750250", query = None):
     VARS = {'title': "Genome Browser",
-            'build': CURRENT_RELEASE,
+            'build': DATA_RELEASE,
             'isotype_listing': get_isotypes(list_only=True),
             'region': region,
             'query': query,
@@ -82,21 +82,21 @@ def interval_download(report_slug, trait_slug):
                .join(mapping) \
                .where(
                         (report.report_slug == report_slug)
-                        & 
+                        &
                         (mapping.trait == t)
                     ) \
                .dicts()
                .execute())
         yield "\t".join(["report", "trait", "CHROM_POS", "REF", "ALT",
                          "gene_id", "locus", "feature_id", "transcript_biotype",
-                         "annotation", "putative_impact", "hgvs_p", 
+                         "annotation", "putative_impact", "hgvs_p",
                          "correlation"]) + "\n"
         for i in intervals:
             for cor in get_correlated_genes(r, t, i["chrom"], i["interval_start"], i["interval_end"]):
                 for variant in cor["variant_set"]:
                     line = map(str, [r.report_slug,
                                      t.trait_slug,
-                                     variant["CHROM_POS"], 
+                                     variant["CHROM_POS"],
                                      variant["REF"],
                                      variant["ALT"],
                                      variant["gene_id"],

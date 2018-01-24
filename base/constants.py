@@ -17,10 +17,11 @@ class PRICES:
 
 
 # BUILDS AND RELEASES
-WORMBASE_BUILD = "WS261"
-RELEASES = ["20170531",
-            "20160408"]
-CURRENT_RELEASE = RELEASES[0]
+RELEASES = [("20170531", "WS261"),
+            ("20160408", "WS245")]
+
+# The most recent release
+DATA_RELEASE, WORMBASE_VERSION = RELEASES[0]
 
 
 # Maps chromosome in roman numerals to integer
@@ -60,10 +61,10 @@ class URLS:
     #
 
     # Gene GTF
-    GENE_GTF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_BUILD}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_BUILD}.canonical_geneset.gtf.gz"
+    GENE_GTF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_VERSION}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_VERSION}.canonical_geneset.gtf.gz"
 
     # GENE GFF_URL
-    GENE_GFF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_BUILD}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_BUILD}.annotations.gff3.gz"
+    GENE_GFF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_VERSION}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_VERSION}.annotations.gff3.gz"
 
     # Maps wormbase ID to locus name
     GENE_IDS_URL = f"ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/annotation/geneIDs/c_elegans.PRJNA13758.current.geneIDs.txt.gz"

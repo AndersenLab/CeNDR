@@ -128,12 +128,13 @@ class report_m(datastore_model):
 
             Once they have completed it will cache the result    
         """
+        trait_run_status_set = []
         if hasattr(self, 'trait_run_status'):
             trait_run_status_set = [x == 'Complete' for x in self.trait_run_status.values()]
-            if not any(trait_run_status_set):
-                traits = self.fetch_traits(latest=True)
-                self.trait_run_status = {x.trait_name: x.run_status for x in traits}
-                self.save()
+        if not any(trait_run_status_set):
+            traits = self.fetch_traits(latest=True)
+            self.trait_run_status = {x.trait_name: x.run_status for x in traits}
+            self.save()
         return self.trait_run_status
 
 
@@ -159,8 +160,8 @@ class trait_m(datastore_model):
         """
             Returns the data version link.
         """
-        release_link = url_for('data.data', selected_release=self.data_release)
-        return Markup(f"<a href='{release_link}'>{self.data_release}</a>")
+        release_link = url_for('data.data', selected_release=self.DATA_RELEASE)
+        return Markup(f"<a href='{release_link}'>{self.DATA_RELEASE}</a>")
 
     def run_task(self):
         """
@@ -233,12 +234,18 @@ class trait_m(datastore_model):
         # Return the task ID
         return self.name
 
+
     def status(self):
         """
             Fetch the status of the task
         """
         task_status = self._ecs.describe_tasks(tasks=[self.name])['tasks'][0]
         return task_status
+
+
+    @property
+    def is_complete(self):
+        return self.run_status == "Complete"
 
 
     def get_task_log(self):
@@ -282,18 +289,34 @@ class trait_m(datastore_model):
         else:
             return None
 
+    @property
+    def gs_base_url(self):
+        """
+            Returns the google storage base URL
+        """
+        return f"reports/{self.REPORT_VERSION}/{self.name}"
+
     def get_gs_as_dataset(self, fname):
         """
             Downloads a dataset stored as a TSV
             from the folder associated with the trait
-            on google storage.
+            on google storage and return it as a
+            pandas dataframe.
         """
         gs = google_storage()
-        cendr_bucket = gs.get_bucket("cendr")
-        blob = cendr_bucket.blob(f"{self.name}/{fname}")
+        cendr_bucket = gs.get_bucket("elegansvariation.org")
+        blob = cendr_bucket.blob(f"{self.gs_base_url}/{fname}")
         dataset = str(blob.download_as_string(), 'utf-8')
         return pd.read_csv(StringIO(dataset), sep="\t")
 
+
+    def figure(self, fname):
+        """
+            Return the figure URL. May change with updates
+            to report versions.
+        """
+        gs_url = f"{self.gs_base_url}/{fname}"
+        return f"https://storage.googleapis.com/elegansvariation.org/{gs_url}"
 
 """
 

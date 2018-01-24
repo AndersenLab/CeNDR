@@ -45,6 +45,9 @@ try:
 
     print(f"R exited with code {exitcode}")
 
+    # Mark trait significant/insignificant
+    trait.is_significant = True
+
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))
 

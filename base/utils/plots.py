@@ -48,17 +48,18 @@ def plotly_distplot(df, column):
     fig = ff.create_distplot([data],
                              [data.name],
                              bin_size=bin_size,
-                             histnorm='probability')
+                             histnorm='count',
+                             show_curve=False)
+    logger.info(fig['data'])
 
     # Update axis labels
-    fig['layout']['yaxis1']['title'] = "Pr(x)"
+    fig['layout']['yaxis1']['title'] = "Count"
     fig['layout']['xaxis1']['title'] = data.name
     fig['layout']['showlegend'] = False
-    fig['layout']['margin'] = {'t': 0, 'r': 0, 'l': 80, 'b': 60}
+    fig['layout']['margin'] = {'t': 20, 'r': 0, 'l': 80, 'b': 80}
     fig.data[0]['hoverinfo'] = 'x+y'
-    fig.data[1]['hoverinfo'] = 'x+y'
-    fig.data[2]['text'] = labels
-    fig.data[2]['hoverinfo'] = 'x+text'
+    fig.data[1]['text'] = labels
+    fig.data[1]['hoverinfo'] = 'x+text'
 
     plot = plotly.offline.plot(fig,
                                output_type='div',
@@ -103,9 +104,14 @@ def time_series_plot(df, x_title=None, y_title=None, range=None):
                                config={"displayModeBar": False})
 
 
-def pxg_plot(df):
+def pxg_plot(df, trait_name):
     """
         Generates a phenotype x genotype plot
+
+        Must be feed a dataframe with the markers and genotypes.
+
+        Args:
+            trait_name - The name of the trait (Y-axis)
     """
     peak_markers = set(df.MARKER)
     colors = ['rgba(93, 164, 214, 0.65)',
@@ -126,7 +132,6 @@ def pxg_plot(df):
             gset = mset[mset.GT==gt]
             gset = gset.assign(x=(marker_n + gt_n + offset)*1.0)
             gset = gset.assign(x_distr=gset.x + (np.random.standard_normal(len(gset.GT))/15)-0.75)
-            logger.info(gset)
             trace = go.Box(
                 name=marker+str(marker_n) + str(gt_n),
                 y=gset.TRAIT,
@@ -178,35 +183,34 @@ def pxg_plot(df):
                     size=25
                 )
         )
-        logger.info(max(df.TRAIT)-10)
-        logger.info(offset)
         trace_set.append(trace_marker_label)
         offset += 2.5
 
     layout = go.Layout(
         hovermode='closest',
         xaxis=dict(
+            title="Genotype",
             tickmode='array',
             tickvals=tickvals,
             ticktext=ticktext,
         ),
         yaxis1=dict(
-            domain=[0, 0.7]
+            domain=[0, 0.7],
+            title=trait_name
         ),
         yaxis2=dict(
             domain=[0.7, 1],
             visible=False
         ),
         margin=dict(
-            l=40,
-            r=30,
+            l=80,
+            r=80,
             b=80,
-            t=100,
+            t=0,
         ),
         showlegend=False
     )
 
-    
     fig = go.Figure(data=trace_set, layout=layout)
     return plotly.offline.plot(fig,
                                output_type='div',

@@ -100,9 +100,9 @@
                 {% set rows = [['Report Name', report.report_name],
                                ['Trait Name', trait.trait_name],
                                ['Data release', trait.version_link()],
-                               ['CeNDR version', trait.version_cendr],
-                               ['Report version', trait.version_report],
-                               ['cegwas version', trait.version_cegwas]] %}
+                               ['CeNDR version', trait.CENDR_VERSION],
+                               ['Report version', trait.REPORT_VERSION],
+                               ['cegwas version','']] %}
                 {{ render_table(header=None, rows=rows, table_class='table-striped table-bordered meta-table') }}
 
                 {% set rows = [['Strains for trait "{}"'.format(trait.trait_name), strain_count],
@@ -182,6 +182,27 @@
     </div>{# /panel-body #}
 </div>{# /panel #}
 
+<div id="report" data-toggle="tab">
+    <nav id="report_nav" data-offset-top="385" data-spy="affix" class="navbar navbar-default" style="z-index:10000">
+      <div class="container-fluid">
+       <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="#phenotype">Phenotype</a></li>
+            <li><a href="#manhattan">Manhattan</a></li>
+            {% if mapping_results|length > 0 %}
+            <li><a href="#intervals">Intervals</a></li>
+            <li><a href="#pxg">PxG</a></li>
+            {% if mapping_results|length > 1 %}
+            <li><a href="#ld">LD</a></li>
+            {% endif %}
+            <li><a href="#peak_summary">Peak Summary</a></li>
+            {% endif %}
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+
 
 
 <div class='log'>
@@ -194,17 +215,73 @@
 </div>
 
 
+<h2 id="phenotype" name="phenotype">Phenotype</h2> 
+{{ phenotype_plot|safe }}
 
-<h2>Phenotype</h2>
-{{ plot|safe }}
+{% if trait.is_significant %}
 
-{{ pxg|safe }}
+  Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
+
+{% else %}
+
+  <p>Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped.</p>
+
+  <p>If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.</p>
+
+{% endif %}
+
+<h2 id="manhattan" name="Manhattan">Manhattan</h2> 
+
+<img class='img img-responsive'src='{{ trait.figure("Manhattan.png") }}' alt='Manhattan Plot' />
+
+{% if trait.is_significant %}
+
+<img class="report" src="{{ base_url }}/figures/Manhattan.png" />
+
+<p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
+
+{% else %}
+
+<img class="report" src="{{ base_url }}/figures/Manhattan.png" />
+
+<p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as <img src='/static/img/report/bf.png' style="height: 30px;" />.</p>
+
+{% endif %}
+
+<h3 id="pxg">Phenotype-by-Genotype</h3>
+
+{{ pxg_plot|safe }}
+
+<p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. </p>
+
+<h2 id="peak_summary">Peak Summary</h2>
+
+
+    <h2>Tajima</h2>
 
 
 
-<h2>Tajima</h2>
+</div>
+{% endblock %}
 
+{% block script %}
+<script>
+var offsetHeight = 71;
+// Scrolling
+$('body').scrollspy({offset: 100}); 
+// Add smooth scrolling to all links inside a navbar
+  $("#report_nav li a").on('click', function(event){
 
+  //event.preventDefault();
+  link = $(this).attr('href').replace("#","")
+  var scrollPos = $(`[id='${link}']`).offset().top - (offsetHeight - 1);
+  $('html, body').animate({
+    scrollTop: scrollPos
+  }, 800, function(){
 
+    return false;
+  });
+});
 
+</script>
 {% endblock %}
