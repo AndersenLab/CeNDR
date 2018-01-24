@@ -131,6 +131,8 @@ def pxg_plot(df):
                 name=marker+str(marker_n) + str(gt_n),
                 y=gset.TRAIT,
                 x=gset.x,
+                xaxis='x1',
+                yaxis='y1',
                 hoverinfo="all",
                 boxpoints='outlier',
                 fillcolor=colors[gt_n],
@@ -145,6 +147,8 @@ def pxg_plot(df):
                 #name=marker+str(marker_n) + str(gt_n),
                 y=gset.TRAIT,
                 x=gset.x_distr,
+                xaxis='x1',
+                yaxis='y1',
                 text=gset.STRAIN,
                 hoverinfo="text+y",
                 mode='markers',
@@ -162,16 +166,18 @@ def pxg_plot(df):
         # Add marker labels
         trace_marker_label = go.Scatter(
                 name=marker,
-                y=[max(df.TRAIT)*1.5],
+                y=[1],
                 x=[marker_n + offset-1],
+                yaxis='y2',
                 text=[marker],
-                mode='lines+text+x+y',
+                hoverinfo='none',
+                mode='text',
                 textposition='bottom',
                 textfont=dict(
                     family='courier',
                     size=25
-                    )
-            )
+                )
+        )
         logger.info(max(df.TRAIT)-10)
         logger.info(offset)
         trace_set.append(trace_marker_label)
@@ -183,6 +189,13 @@ def pxg_plot(df):
             tickmode='array',
             tickvals=tickvals,
             ticktext=ticktext,
+        ),
+        yaxis1=dict(
+            domain=[0, 0.7]
+        ),
+        yaxis2=dict(
+            domain=[0.7, 1],
+            visible=False
         ),
         margin=dict(
             l=40,
