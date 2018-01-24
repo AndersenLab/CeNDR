@@ -63,6 +63,7 @@ def get_item(kind, name):
         for k, v in result.items():
             if isinstance(v, str) and v.startswith("JSON:"):
                 result_out[k] = json.loads(v[5:])
+                print(result_out)
             elif v:
                 result_out[k] = v
 
@@ -71,9 +72,13 @@ def get_item(kind, name):
         return None
 
 
-def google_storage():
+def google_storage(open=False):
     """
         Fetch google storage credentials
     """
-    return storage.Client(project='andersen-lab')
-
+    client = storage.Client(project='andersen-lab')
+    if open:
+        return client
+    if not hasattr(g, 'gs'):
+        g.gs = client
+    return g.gs

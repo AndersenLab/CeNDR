@@ -6,12 +6,14 @@ Author: Daniel E. Cook
 Utility functions for running the task
 
 """
+import os
 import arrow
 import json
 import pandas as pd
 from io import StringIO
 from gcloud import datastore, storage
 from logzero import logger
+
 
 def get_item(kind, name):
     """
@@ -114,7 +116,6 @@ class report_m(datastore_model):
     def humanize(self):
         return arrow.get(self.created_on).humanize()
 
-
     def fetch_traits(self, trait_name=None, latest=True):
         """
             Fetches trait/task records associated with a report.
@@ -156,3 +157,21 @@ class trait_m(datastore_model):
         associated with a report.
     """
     kind = 'trait'
+
+    def upload_files(self, file_list):
+        """
+            Used to upload files from pipeline to the
+            reports bucket.
+
+            Stores uploaded files.
+        """
+        gs = storage.Client(project='andersen-lab')
+        cendr_bucket = gs.get_bucket("cendr")
+        for fname in file_list:
+            print(f"Uploading {fname} to {self.name}/{fname}")
+            base_name = os.path.basename(fname)
+            cendr_bucket.blob(f"{self.name}/{base_name}").upload_from_filename(fname)
+        
+        # Update self to store file list
+        self.file_list = file_list
+

@@ -1,4 +1,5 @@
 import arrow
+import json
 import pandas as pd
 import numpy as np
 import datetime
@@ -8,7 +9,7 @@ from sqlalchemy import or_, func
 
 from base.application import db_2
 from base.constants import URLS
-from base.utils.gcloud import get_item, store_item, query_item
+from base.utils.gcloud import get_item, store_item, query_item, google_storage
 from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
 
@@ -34,7 +35,15 @@ class datastore_model(object):
         self.exclude_from_indexes = None
         self._exists = False
         if type(name_or_obj) == Entity:
-            self.__dict__.update(name_or_obj)
+            # Parse JSON fields when instantiating without
+            # loading from gcloud.
+            result_out = {}
+            for k, v in name_or_obj.items():
+                if isinstance(v, str) and v.startswith("JSON:"):
+                    result_out[k] = json.loads(v[5:])
+                elif v:
+                    result_out[k] = v
+            self.__dict__.update(result_out)
             self.kind = name_or_obj.key.kind
             self.name = name_or_obj.key.name
         elif name_or_obj:
@@ -119,9 +128,12 @@ class report_m(datastore_model):
 
             Once they have completed it will cache the result    
         """
-        traits = self.fetch_traits(latest=True)
-        self.trait_run_status = {x.trait_name: x.run_status for x in traits}
-        self.save()
+        if hasattr(self, 'trait_run_status'):
+            trait_run_status_set = [x == 'Complete' for x in self.trait_run_status.values()]
+            if not any(trait_run_status_set):
+                traits = self.fetch_traits(latest=True)
+                self.trait_run_status = {x.trait_name: x.run_status for x in traits}
+                self.save()
         return self.trait_run_status
 
 
@@ -144,65 +156,67 @@ class trait_m(datastore_model):
         super(trait_m, self).__init__(*args, **kwargs)
 
     def version_link(self):
-        release_link = url_for('data.data', selected_release= self.data_release)
+        """
+            Returns the data version link.
+        """
+        release_link = url_for('data.data', selected_release=self.data_release)
         return Markup(f"<a href='{release_link}'>{self.data_release}</a>")
-
 
     def run_task(self):
         """
             Runs the task
         """
         # Fargate credentials
-        #fargate_user = get_item('credential', 'aws_fargate')
+        # fargate_user = get_item('credential', 'aws_fargate')
         task_fargate = self._ecs.run_task(
-        taskDefinition='cendr-map',
-        overrides={
-            'containerOverrides': [
-                {
-                    'name': 'cegwas',
-                    'command': [
-                        'python3',
-                        'run.py'
+            taskDefinition='cendr-map',
+            overrides={
+                'containerOverrides': [
+                    {
+                        'name': 'cegwas',
+                        'command': [
+                            'python3',
+                            'run.py'
+                        ],
+                        'environment': [
+                            {
+                                'name': 'GOOGLE_APPLICATION_CREDENTIALS',
+                                'value': 'gcloud_fargate.json'
+                            },
+                            {
+                                'name': 'REPORT_NAME',
+                                'value': self.report_name
+                            },
+                            {
+                                'name': 'TRAIT_NAME',
+                                'value': self.trait_name
+                            }#,
+                            #{
+                            #    'name': 'AWS_ACCESS_KEY_ID',
+                            #    'value': fargate_user['aws_access_key_id']
+                            #},
+                            #{
+                            #    'name': 'AWS_SECRET_ACCESS_KEY_ID',
+                            #    'value': fargate_user['aws_secret_access_key']
+                            #}
+                        ],
+                    }
+                ],
+            },
+            count=1,
+            launchType='FARGATE',
+            networkConfiguration={
+                'awsvpcConfiguration': {
+                    'subnets': [
+                        'subnet-77581612',
                     ],
-                    'environment': [
-                        {
-                            'name': 'GOOGLE_APPLICATION_CREDENTIALS',
-                            'value': 'gcloud_fargate.json'
-                        },
-                        {
-                            'name': 'REPORT_NAME',
-                            'value': self.report_name
-                        },
-                        {
-                            'name': 'TRAIT_NAME',
-                            'value': self.trait_name
-                        }#,
-                        #{
-                        #    'name': 'AWS_ACCESS_KEY_ID',
-                        #    'value': fargate_user['aws_access_key_id']
-                        #},
-                        #{
-                        #    'name': 'AWS_SECRET_ACCESS_KEY_ID',
-                        #    'value': fargate_user['aws_secret_access_key']
-                        #}
+                    'securityGroups': [
+                        'sg-75e7860a'
                     ],
+                    'assignPublicIp': 'ENABLED'
                 }
-            ],
-        },
-        count=1,
-        launchType='FARGATE',
-        networkConfiguration={
-            'awsvpcConfiguration': {
-                'subnets': [
-                    'subnet-77581612',
-                ],
-                'securityGroups': [
-                    'sg-75e7860a'
-                ],
-                'assignPublicIp': 'ENABLED'
             }
-        }
-        )
+            )
         try:
             task_fargate = task_fargate['tasks'][0]
         except KeyError:
@@ -267,6 +281,18 @@ class trait_m(datastore_model):
             return "{:0>2d}m {:0>2d}s".format(minutes, seconds)
         else:
             return None
+
+    def get_gs_as_dataset(self, fname):
+        """
+            Downloads a dataset stored as a TSV
+            from the folder associated with the trait
+            on google storage.
+        """
+        gs = google_storage()
+        cendr_bucket = gs.get_bucket("cendr")
+        blob = cendr_bucket.blob(f"{self.name}/{fname}")
+        dataset = str(blob.download_as_string(), 'utf-8')
+        return pd.read_csv(StringIO(dataset), sep="\t")
 
 
 """

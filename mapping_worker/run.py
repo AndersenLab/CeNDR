@@ -6,19 +6,23 @@ Author: Daniel E. Cook
 
 
 """
+import glob
 import os
 import arrow
 from utils.gcloud import report_m
 from subprocess import Popen, STDOUT, PIPE
 
+# Create a data directory
+if not os.path.exists('data'):
+    os.makedirs('data')
 
-def create_dir(directory):
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-
-create_dir("figures")
-create_dir("tables")
+def run_comm(comm):
+    print("Running comm")
+    process = Popen(comm, stdout=PIPE, stderr=STDOUT)
+    with process.stdout as proc:
+        for line in proc:
+            print(str(line, 'utf-8').strip())
+    return process
 
 # Define variables
 report_name = os.environ['REPORT_NAME']
@@ -36,12 +40,15 @@ try:
     trait.save()
 
     comm = ['Rscript', 'pipeline.R']
-    process = Popen(comm, stdout=PIPE, stderr=STDOUT)
-    with process.stdout as proc:
-        for line in proc:
-            print(str(line, 'utf-8').strip())
+    process = run_comm(comm)
     exitcode = process.wait()
+
     print(f"R exited with code {exitcode}")
+
+    # Upload datasets
+    trait.upload_files(glob.glob("data/*"))
+
+
 except Exception as e:
     trait.error_message = e
     trait.run_status = "Error"

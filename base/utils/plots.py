@@ -15,6 +15,9 @@ import plotly.graph_objs as go
 import numpy as np
 import pandas as pd
 
+from plotly import tools
+from logzero import logger
+
 
 def to_unix_time(dt):
     """
@@ -35,8 +38,7 @@ def plotly_distplot(df, column):
             data - A Numpy Series to be plotted
     """
     df = df[['STRAIN', column]].dropna(how='any').sort_values([column])
-    print(df)
-    labels = df['STRAIN']
+    labels = df.STRAIN
     data = df[column]
 
     # Plotly does not do a very good job calculating bin-size,
@@ -99,3 +101,103 @@ def time_series_plot(df, x_title=None, y_title=None, range=None):
                                include_plotlyjs=False,
                                show_link=False,
                                config={"displayModeBar": False})
+
+
+def pxg_plot(df):
+    """
+        Generates a phenotype x genotype plot
+    """
+    peak_markers = set(df.MARKER)
+    colors = ['rgba(93, 164, 214, 0.65)',
+              'rgba(255, 65, 54, 0.65)',
+              'rgba(207, 114, 255, 0.65)',
+              'rgba(127, 96, 0, 0.65)']
+    trace_set = []
+    ticktext = []
+    tickvals = []
+    offset = 0.0
+    df.GT = pd.Categorical(df.GT)
+    for marker_n, marker in enumerate(peak_markers):
+        mset = df[df.MARKER==marker]
+        for gt_n, gt in enumerate(set(mset.GT)):
+            x_coord = marker_n + gt_n + offset
+            tickvals.append(x_coord)
+            ticktext.append(gt)
+            gset = mset[mset.GT==gt]
+            gset = gset.assign(x=(marker_n + gt_n + offset)*1.0)
+            gset = gset.assign(x_distr=gset.x + (np.random.standard_normal(len(gset.GT))/15)-0.75)
+            logger.info(gset)
+            trace = go.Box(
+                name=marker+str(marker_n) + str(gt_n),
+                y=gset.TRAIT,
+                x=gset.x,
+                hoverinfo="all",
+                boxpoints='outlier',
+                fillcolor=colors[gt_n],
+                whiskerwidth=0.2,
+                marker=dict(
+                    color=colors[gt_n],
+                    opacity=0.5
+                ),
+                line=dict(width=2)
+            )
+            trace_jitter = go.Scatter(
+                #name=marker+str(marker_n) + str(gt_n),
+                y=gset.TRAIT,
+                x=gset.x_distr,
+                text=gset.STRAIN,
+                hoverinfo="text+y",
+                mode='markers',
+                marker=dict(
+                    color=colors[gt_n],
+                    size=5,
+                    opacity=0.8,
+                    line=dict(width=1)
+                ),
+            )
+            trace_set.append(trace)
+            trace_set.append(trace_jitter)
+            offset += 1
+
+        # Add marker labels
+        trace_marker_label = go.Scatter(
+                name=marker,
+                y=[max(df.TRAIT)*1.5],
+                x=[marker_n + offset-1],
+                text=[marker],
+                mode='lines+text+x+y',
+                textposition='bottom',
+                textfont=dict(
+                    family='courier',
+                    size=25
+                    )
+            )
+        logger.info(max(df.TRAIT)-10)
+        logger.info(offset)
+        trace_set.append(trace_marker_label)
+        offset += 2.5
+
+    layout = go.Layout(
+        hovermode='closest',
+        xaxis=dict(
+            tickmode='array',
+            tickvals=tickvals,
+            ticktext=ticktext,
+        ),
+        margin=dict(
+            l=40,
+            r=30,
+            b=80,
+            t=100,
+        ),
+        showlegend=False
+    )
+
+    
+    fig = go.Figure(data=trace_set, layout=layout)
+    return plotly.offline.plot(fig,
+                               output_type='div',
+                               include_plotlyjs=False,
+                               show_link=False,
+                               config={"displayModeBar": False})
+

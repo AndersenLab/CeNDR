@@ -31,7 +31,7 @@ from base.constants import (REPORT_VERSION,
 
 from base.utils.gcloud import query_item
 
-from base.utils.plots import plotly_distplot
+from base.utils.plots import pxg_plot, plotly_distplot
 
 
 mapping_bp = Blueprint('mapping',
@@ -107,8 +107,8 @@ def mapping():
                'run_status': 'Queued'
             })
             trait.run_task()
-            # Update the report to contain the set of the
-            # latest task runs
+        # Update the report to contain the set of the
+        # latest task runs
         report.save()
         transaction.commit()
 
@@ -150,6 +150,10 @@ def report(report_slug, trait_name=None, rerun=None):
 
     phenotype_plot = plotly_distplot(report._trait_df, trait_name)
 
+    # Fetch peak marker data for generating the PxG plot
+    peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv")
+    pxg = pxg_plot(peak_marker_data)
+
     VARS = {
         'title': report.report_name,
         'subtitle': trait_name,
@@ -157,7 +161,8 @@ def report(report_slug, trait_name=None, rerun=None):
         'report': report,
         'trait': trait,
         'strain_count': report.trait_strain_count(trait_name),
-        'plot': phenotype_plot
+        'plot': phenotype_plot,
+        'pxg': pxg
     }
 
     # To handle report data, functions specific
@@ -368,7 +373,6 @@ def trait_view(report_slug, trait_name="", rerun = None):
     #        .dicts()
     #        .execute())
     phenotype_data = list(map(autoconvert, [x.split('\t')[2] for x in requests.get('https://storage.googleapis.com/cendr/{report_slug}/{trait_name}/tables/phenotype.tsv'.format(**locals())).text.splitlines()[1:]]))
-    print(phenotype_data)
 
     if rerun == "rerun":
         t.status = "queue"
