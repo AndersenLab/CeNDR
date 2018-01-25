@@ -16,8 +16,8 @@ def infinite_dict():
 
 
 class AnnotationSeries(Series):
-
-    our_column_names = ('_ANN', )
+    # https://stackoverflow.com/q/48435082/2615190
+    our_column_names = ('_ANN' )
 
     ANN_fields = ["allele",
                   "effect",
@@ -35,22 +35,17 @@ class AnnotationSeries(Series):
                   "distance_to_feature",
                   "error"]
 
+
     def __new__(cls, *args, **kwargs):
-        if kwargs.get('name', None) in cls.our_column_names:
-            print("INITIALIZING COLUMN")
+        if kwargs.get('name', '') in cls.our_column_names:
             obj = object.__new__(cls)
             obj.__init__(*args, **kwargs)
             return obj
         return pd.Series(*args, **kwargs)
 
+
     def __eq__(self, other):
-        logger.info(other)
-        return self.apply(lambda row: other in row)
-
-    def equal(self, other):
-        logger.info(other)
-        return self.apply(lambda row: other in row)
-
+        return self.apply(lambda row: other in row if type(row) == list else False)
 
     @property
     def _constructor(self):
@@ -61,10 +56,23 @@ class AnnotationSeries(Series):
         return VCF_DataFrame
 
     @property
+    def allele(self):
+        ann_column_index = self.ANN_fields.index('allele')
+        result = self.apply(lambda row: [x[ann_column_index] for x in row] if type(row) == list else np.nan)
+        return AnnotationSeries(data=result, name='_ANN')
+
+    @property
+    def allele(self):
+        ann_column_index = self.ANN_fields.index('allele')
+        result = self.apply(lambda row: [x[ann_column_index] for x in row] if type(row) == list else np.nan)
+        return AnnotationSeries(data=result, name='_ANN')
+
+
+    @property
     def impact(self):
         ann_column_index = self.ANN_fields.index('impact')
         result = self.apply(lambda row: [x[ann_column_index] for x in row] if type(row) == list else np.nan)
-        return AnnotationSeries(data=result)
+        return AnnotationSeries(data=result, name='_ANN')
 
 
 
@@ -137,7 +145,7 @@ class VCF_DataFrame(DataFrame):
             var_line = {attr: getattr(line, attr) for attr in attrs if hasattr(line, attr)}
             var_line['FT'] = np.array(line.format("FT"))
             var_line['DP'] = np.array(line.format("DP").flatten())
-            var_line['gt_types'] = line.gt_types
+            var_line['gt_types'] = np.array(line.gt_types, np.int8)
             var_line['gt_bases'] = line.gt_bases
             ANN = line.INFO.get("ANN")
             if ANN:
@@ -170,6 +178,9 @@ class VCF_DataFrame(DataFrame):
 
 
     def subset_samples(self, samples, prune_non_snps=True, inplace=False):
+        """
+            Subset samples
+        """
         sample_bool_keep = np.isin(self.samples, samples)
         df = self.copy()
         # Subset gt_types
@@ -187,7 +198,10 @@ class VCF_DataFrame(DataFrame):
         df.num_called = df.gt_bases.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.']) == False))
         df.call_rate = df.gt_types.apply(lambda row: np.sum(row != 3)/row.size)
 
-        if prune_non_snps:
+
+        if prune_non_snps and len(samples) > 1:
+            if len(samples) == 1:
+                logger.warning("Subsetting on one sample - not pruning monomorphic SNPs.")
             original_size = df.size
             df = df._prune_non_snps()
             pruned_snps = original_size - df.size
