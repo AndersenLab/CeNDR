@@ -234,6 +234,9 @@ class VCF_DataFrame(DataFrame):
         # Add num missing column
         dataset['num_missing'] = dataset.gt_bases.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.'])))
 
+        # Use ordered CHROM
+        dataset.CHROM = pd.Categorical(dataset.CHROM, ordered=True)
+
         # Add samples
         dataset.samples = np.array(vcf.samples)
 
