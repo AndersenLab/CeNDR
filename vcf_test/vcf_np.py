@@ -1,4 +1,5 @@
 import os
+import warnings
 import json
 import re
 import pandas as pd
@@ -15,25 +16,46 @@ def infinite_dict():
 
 
 
+ANN_FIELDS = ["allele",
+              "effect",
+              "impact",
+              "gene_name",
+              "gene_id",
+              "feature_type",
+              "feature_id",
+              "transcript_biotype",
+              "exon_intron_rank",
+              "nt_change",
+              "aa_change",
+              "cdna_pos",
+              "protein_position",
+              "distance_to_feature",
+              "error"]
+
+
+class AnnotationItem(Series):
+
+    @property
+    def _constructor(self):
+        return AnnotationItem
+
+    @property
+    def _constructor_expanddim(self):
+        return VCF_DataFrame
+
+    def __eq__(self, other):
+        logger.info(self)
+        return AnnotationItem(self.apply(lambda row: other in row if type(row) == list else False))
+
+    @property
+    def length(self):
+        result = self.apply(lambda row: len(row) if type(row) == list else 0)
+        return AnnotationItem(data=result)
+
+
 class AnnotationSeries(Series):
     # https://stackoverflow.com/q/48435082/2615190
-    our_column_names = ('_ANN' )
-
-    ANN_fields = ["allele",
-                  "effect",
-                  "impact",
-                  "gene_name",
-                  "gene_id",
-                  "feature_type",
-                  "feature_id",
-                  "transcript_biotype",
-                  "exon_intron_rank",
-                  "nt_change",
-                  "aa_change",
-                  "cDNA_position/cDNA_len",
-                  "protein_position",
-                  "distance_to_feature",
-                  "error"]
+    our_column_names = ('ANN')
 
 
     def __new__(cls, *args, **kwargs):
@@ -45,6 +67,7 @@ class AnnotationSeries(Series):
 
 
     def __eq__(self, other):
+        logger.info(self)
         return self.apply(lambda row: other in row if type(row) == list else False)
 
     @property
@@ -55,46 +78,98 @@ class AnnotationSeries(Series):
     def _constructor_expanddim(self):
         return VCF_DataFrame
 
-    @property
-    def allele(self):
-        ann_column_index = self.ANN_fields.index('allele')
+    def _fetch_field(self, field):
+        """
+            Highly redundant - but I could
+            figure out a way to dynamically specify properties.
+        """
+        ann_column_index = ANN_FIELDS.index(field)
         result = self.apply(lambda row: [x[ann_column_index] for x in row] if type(row) == list else np.nan)
-        return AnnotationSeries(data=result, name='_ANN')
+        return AnnotationSeries(data=result, name='ANN')
 
     @property
     def allele(self):
-        ann_column_index = self.ANN_fields.index('allele')
-        result = self.apply(lambda row: [x[ann_column_index] for x in row] if type(row) == list else np.nan)
-        return AnnotationSeries(data=result, name='_ANN')
+        result = self._fetch_field('allele')
+        return AnnotationItem(data=result, name='ANN')
 
+    @property
+    def effect(self):
+        result = self._fetch_field('effect')
+        return AnnotationItem(data=result, name='ANN')
 
     @property
     def impact(self):
-        ann_column_index = self.ANN_fields.index('impact')
-        result = self.apply(lambda row: [x[ann_column_index] for x in row] if type(row) == list else np.nan)
-        return AnnotationSeries(data=result, name='_ANN')
+        result = self._fetch_field('impact')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def gene_name(self):
+        result = self._fetch_field('gene_name')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def gene_id(self):
+        result = self._fetch_field('gene_id')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def feature_type(self):
+        result = self._fetch_field('feature_type')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def feature_id(self):
+        result = self._fetch_field('feature_id')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def transcript_biotype(self):
+        result = self._fetch_field('transcript_biotype')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def exon_intron_rank(self):
+        result = self._fetch_field('exon_intron_rank')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def nt_change(self):
+        result = self._fetch_field('nt_change')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def aa_change(self):
+        result = self._fetch_field('aa_change')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def cnda_pos(self):
+        result = self._fetch_field('cnda_pos')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def protein_pos(self):
+        result = self._fetch_field('protein_pos')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def distance_to_feature(self):
+        result = self._fetch_field('distance_to_feature')
+        return AnnotationItem(data=result, name='ANN')
+
+    @property
+    def error(self):
+        result = self._fetch_field('error')
+        return AnnotationItem(data=result, name='ANN')
+
+
 
 
 
 class VCF_DataFrame(DataFrame):
 
-    _metadata = ['samples']
-
-    ANN_fields = ["allele",
-                  "effect",
-                  "impact",
-                  "gene_name",
-                  "gene_id",
-                  "feature_type",
-                  "feature_id",
-                  "transcript_biotype",
-                  "exon_intron_rank",
-                  "nt_change",
-                  "aa_change",
-                  "cDNA_position/cDNA_len",
-                  "protein_position",
-                  "distance_to_feature",
-                  "error"]
+    _metadata = ['samples', 'messages']
+    messages = []
 
 
     def __init__(self, *args, **kwargs):
@@ -122,9 +197,15 @@ class VCF_DataFrame(DataFrame):
         """
         attrs = ['CHROM',
                  'POS',
+                 'ID',
                  'REF',
                  'ALT',
+                 'QUAL',
                  'FILTER',
+                 #'INFO',
+                 'FORMAT',
+                 'start',
+                 'end',
                  'aaf',
                  'nucl_diversity',
                  'is_snp',
@@ -135,8 +216,6 @@ class VCF_DataFrame(DataFrame):
                  'num_hom_ref',
                  'num_hom_alt',
                  'ploidy',
-                 'start',
-                 'end',
                  'is_transition']
 
         rows = []
@@ -144,12 +223,12 @@ class VCF_DataFrame(DataFrame):
         for line in vcf(interval):
             var_line = {attr: getattr(line, attr) for attr in attrs if hasattr(line, attr)}
             var_line['FT'] = np.array(line.format("FT"))
-            var_line['DP'] = np.array(line.format("DP").flatten())
+            var_line['DP'] = np.array(line.format("DP").flatten(), np.int32)
             var_line['gt_types'] = np.array(line.gt_types, np.int8)
             var_line['gt_bases'] = line.gt_bases
             ANN = line.INFO.get("ANN")
             if ANN:
-                var_line['_ANN'] = [x.split("|") for x in ANN.split(",")]
+                var_line['ANN'] = [x.split("|") for x in ANN.split(",")]
             rows.append(var_line)
         dataset = VCF_DataFrame.from_dict(rows)
         # Add num missing column
@@ -201,11 +280,11 @@ class VCF_DataFrame(DataFrame):
 
         if prune_non_snps and len(samples) > 1:
             if len(samples) == 1:
-                logger.warning("Subsetting on one sample - not pruning monomorphic SNPs.")
+                self.messages.append("Subsetting on one sample - not pruning monomorphic SNPs.")
             original_size = df.size
             df = df._prune_non_snps()
             pruned_snps = original_size - df.size
-            secho(f"Pruned SNPs: {pruned_snps}", fg='green')
+            self.messages.append(f"Pruned SNPs: {pruned_snps}")
 
         # Update samples
         df.samples = self.samples[np.isin(self.samples, samples)]
@@ -228,33 +307,6 @@ class VCF_DataFrame(DataFrame):
             pos = list(map(int, pos))
             return chrom, pos[0], pos[1]
         return chrom, None, None
-
-
-    def ANN(self, field, eq=None):
-        """
-            Constructs a nested ndarray([field, field], ...) of 
-            the specified field.
-
-            Args:
-                field - The fieldname to pull out of all variant annotations from the ANN field.
-                eq - If specified, returns a vector True/False if eq is found in any of the ANN field annotations.
-        """
-        ann_column_index = self.ANN_fields.index(field)
-        field_result = self._ANN.apply(lambda row: [x[ann_column_index] for x in row] if type(row) == list else np.nan)
-        if eq:
-            return field_result.apply(lambda row: eq in row if type(row) == list else False)
-        else:
-            return field_result
-
-    def ANN_count(self, field, unique=True):
-        """
-            Outputs the distribution of values for each label
-
-            Args:
-                unique - If set to False, will output the total number of field labels
-                         for annotations.
-        """
-        self.ANN(field)
 
 
     def interval(self, interval):
@@ -282,13 +334,13 @@ class VCF_DataFrame(DataFrame):
 
         # Impact
         impact = results['variants']['impact']
-        impact['total'] = Counter(sum(df.ANN("impact").dropna(), []))
-        impact['unique'] = Counter(sum(df.ANN("impact").dropna().apply(lambda x: list(set(x))), []))
+        impact['total'] = Counter(sum(df.ANN.impact.dropna(), []))
+        impact['unique'] = Counter(sum(df.ANN.impact.dropna().apply(lambda x: list(set(x))), []))
         
         # FILTER summary
         impact = results['variants']['impact']
-        impact['total'] = Counter(sum(df.ANN("impact").dropna(), []))
-        impact['unique'] = Counter(sum(df.ANN("impact").dropna().apply(lambda x: list(set(x))), []))
+        impact['total'] = Counter(sum(df.ANN.impact.dropna(), []))
+        impact['unique'] = Counter(sum(df.ANN.impact.dropna().apply(lambda x: list(set(x))), []))
 
         # Summary
         summary = results['variants']
@@ -324,6 +376,21 @@ class VCF_DataFrame(DataFrame):
         # Genes
         return json.dumps(results)
 
+    #def __repr__(self, *args, **kwargs):
+    #    """
+    #        Specialized repr to display warning
+    #        messages beneath output data frames
+    #    """
+    #    super(VCF_DataFrame, self).__repr__(*args, **kwargs)
+    #    if self.messages:
+    #        for msg in self.messages:
+    #            secho(msg, fg='green')
+    #    self.messages = []
+    #    return ""
+
+    #@property
+    #def PASS(self):
+    #    return self.apply(lambda row: row.FILTER == "PASS")
 
 
 
@@ -331,11 +398,8 @@ v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "I:1-10000")
 
 df = v
 
-v.ANN("impact")
-v.ANN("impact", "HIGH")
-v.ANN("gene_name")
+df.subset_samples(df.samples[0:5])
 
-
-v.genome_summary()
+#v.genome_summary()
 
 
