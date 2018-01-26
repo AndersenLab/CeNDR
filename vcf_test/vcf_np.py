@@ -33,6 +33,10 @@ ANN_FIELDS = ["allele",
               "error"]
 
 
+def FILTER_formatter(x):
+    return f"{x}--G"
+
+
 class AnnotationItem(Series):
 
     @property
@@ -57,7 +61,6 @@ class AnnotationSeries(Series):
     # https://stackoverflow.com/q/48435082/2615190
     our_column_names = ('ANN')
 
-
     def __new__(cls, *args, **kwargs):
         if kwargs.get('name', '') in cls.our_column_names:
             obj = object.__new__(cls)
@@ -67,7 +70,6 @@ class AnnotationSeries(Series):
 
 
     def __eq__(self, other):
-        logger.info(self)
         return self.apply(lambda row: other in row if type(row) == list else False)
 
     @property
@@ -170,7 +172,7 @@ class VCF_DataFrame(DataFrame):
 
     _metadata = ['samples', 'messages']
     messages = []
-
+    formatters = {'FILTER': FILTER_formatter}
 
     def __init__(self, *args, **kwargs):
         super(VCF_DataFrame, self).__init__(*args, **kwargs)
@@ -224,7 +226,7 @@ class VCF_DataFrame(DataFrame):
             var_line = {attr: getattr(line, attr) for attr in attrs if hasattr(line, attr)}
             var_line['FT'] = np.array(line.format("FT"))
             var_line['DP'] = np.array(line.format("DP").flatten(), np.int32)
-            var_line['gt_types'] = np.array(line.gt_types, np.int8)
+            var_line['gt_types'] = line.gt_types.astype(np.int8)
             var_line['gt_bases'] = line.gt_bases
             ANN = line.INFO.get("ANN")
             if ANN:
@@ -395,13 +397,94 @@ class VCF_DataFrame(DataFrame):
     #def PASS(self):
     #    return self.apply(lambda row: row.FILTER == "PASS")
 
+    @staticmethod
+    def _sub_values(row, find, replace):
+        """
+            Substitute values in an array
+        """
+        np.place(row, row==find, replace)
+        return row
+
+
+    def concordance(self):
+        """
+            Calculate the concordance of genotypes across all samples.
+
+            Currently functions with ploidy == 1 or 2
+
+            A homozygous REF (e.g. AA) and heterozygous (AG) call
+            are treated as dicordant.
+        """
+        df = self
+
+        # Convert gt_types to float so nan values can be
+        # added.
+        df.gt_types = df.gt_types.apply(lambda row: row.astype(float)) \
+                                 .apply(lambda row: self._sub_values(row, 3.0, np.nan))
+        
+        
+
+        called_gtypes = sum(df.gt_types.apply(lambda row: np.isnan(row) == False))
+        
+        # cf
+        cf = sum(df.gt_types.apply(lambda row: (row[:,None] == row)))
+        cf = DataFrame(cf, columns=df.samples, index=df.samples)
+        cf.index.name = "sample_a"
+        cf.columns.name = "sample_b"
+        cf = cf.stack()
+        cf = DataFrame(cf, columns=['concordant_gt']).reset_index()
+        n_called_a = pd.DataFrame(called_gtypes, columns=['gt_called_a'], index=df.samples)
+        n_called_b = pd.DataFrame(called_gtypes, columns=['gt_called_b'], index=df.samples)
+        n_called_a.index.name = 'sample_a'
+        n_called_b.index.name = 'sample_b'
+        cf = cf.join(n_called_a, on='sample_a').join(n_called_b, on='sample_b')
+        
+        cf['minimum_gt'] = cf.apply(lambda row: min(row.gt_called_a, row.gt_called_b), axis=1)
+        cf['concordance'] = cf['concordant_gt'] / cf['minimum_gt']
+
+        return cf
+
+
+    def hard_filter(self):
+        """
+            The hard filter method does two things:
+                (1) Removes all columns where
+                    FILTER != PASS (which is represented as None in pandas-vcf)
+                (2) Sets FT (genotype-level) variants to NaN.
+        """
+        df = self
+
+        df.gt_types = df.gt_types.apply(lambda row: row.astype(float)) \
+                                 .apply(lambda row: self._sub_values(row, 3.0, np.nan)) \
+
+        # Format genotypes and filters.
+        GT_filter = np.vstack(df.FT.apply(lambda row: row != "PASS").values)
+        GT_vals = np.vstack(df.gt_types.apply(lambda row: row.astype(float)).values)
+        
+        # Apply nan filter to FT != PASS
+        GT_vals[GT_filter] = np.nan
+
+        # Re-integrate genotypes
+        df.gt_types = Series(list(GT_vals))
+
+        # FILTER columns
+        df = df[df.FILTER.isnull()]
+
+        return df
+
+
+    def to_fasta(self):
+        """
+            Generates a FASTA file
+        """
+
 
 
 v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "I:1-10000")
 
-df = v
+#v.concordance()
 
-df.subset_samples(df.samples[0:5])
+#df.subset_samples(df.samples[0:5])
 
 #v.genome_summary()
 
