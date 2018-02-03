@@ -4,6 +4,17 @@ import json
 import re
 import pandas as pd
 import numpy as np
+import itertools
+import multiprocessing as mp
+#import dask.dataframe as dd
+#from dask.delayed import delayed
+
+import glob
+import pyarrow.parquet as pq
+
+
+
+from functools import partial
 from collections import defaultdict, Counter
 from cyvcf2 import VCF
 from pandas import DataFrame, Series
@@ -33,8 +44,13 @@ ANN_FIELDS = ["allele",
               "error"]
 
 
-def FILTER_formatter(x):
-    return f"{x}--G"
+def grouper(n, iterable):
+    it = iter(iterable)
+    while True:
+       chunk = tuple(itertools.islice(it, n))
+       if not chunk:
+           return
+       yield chunk
 
 
 class AnnotationItem(Series):
@@ -59,7 +75,7 @@ class AnnotationItem(Series):
 
 class AnnotationSeries(Series):
     # https://stackoverflow.com/q/48435082/2615190
-    our_column_names = ('ANN')
+    our_column_names = ('ANN',)
 
     def __new__(cls, *args, **kwargs):
         if kwargs.get('name', '') in cls.our_column_names:
@@ -165,14 +181,83 @@ class AnnotationSeries(Series):
         return AnnotationItem(data=result, name='ANN')
 
 
+def initialize(df):
+    df['num_missing2'] = df.gt_bases.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.'])))
+    return df
 
+
+def _read_vcf(interval, filename=None):
+    """
+        Reads in a VCF chunk
+    """
+
+    def make_dir(directory):
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+    attrs = ['CHROM',
+             'POS',
+             'ID',
+             'REF',
+             'ALT',
+             'QUAL',
+             'FILTER',
+             #'INFO',
+             'FORMAT',
+             'start',
+             'end',
+             'aaf',
+             'nucl_diversity',
+             'is_snp',
+             'is_indel',
+             'call_rate',
+             'num_called',
+             'num_het',
+             'num_hom_ref',
+             'num_hom_alt',
+             'ploidy',
+             'is_transition']
+
+    vcf = VCF(filename, gts012=True)
+    rows = []
+    logger.info(interval)
+    for i, line in enumerate(vcf(interval)):
+        var_line = {}
+        var_line = {attr: getattr(line, attr) for attr in attrs if hasattr(line, attr)}
+        # Currently string lists must be encoded using python.
+        var_line['FT'] = list(line.format("FT"))
+        var_line['TGT'] = list(line.gt_bases)
+
+        var_line['DP'] = line.format("DP").flatten().astype(np.int64)
+        var_line['GT'] = line.gt_types.astype(np.int64)
+        ANN = line.INFO.get("ANN")
+        if ANN:
+            var_line['ANN'] = [x.split("|") for x in ANN.split(",")]
+        rows.append(var_line)
+    dataset = DataFrame.from_dict(rows)
+
+    chrom, start, end = re.split(r"[:-]", interval)
+    dataset.to_parquet(fname=f"dataset/{chrom}-{start}-{end}.parq")
+
+    # Return number of blank lines to generate
+
+def chunk_genome(chunk_size, seqnames, seqlens):
+    """?data
+        Chunk contigs
+    """
+    for chrom, size in list(zip(seqnames, seqlens)):
+        for chunk in range(1, size, chunk_size):
+            if chunk + chunk_size > size:
+                chunk_end = size
+            else:
+                chunk_end = chunk + chunk_size-1
+            yield f"{chrom}:{chunk}-{chunk_end}"
 
 
 class VCF_DataFrame(DataFrame):
 
     _metadata = ['samples', 'messages']
     messages = []
-    formatters = {'FILTER': FILTER_formatter}
 
     def __init__(self, *args, **kwargs):
         super(VCF_DataFrame, self).__init__(*args, **kwargs)
@@ -197,58 +282,34 @@ class VCF_DataFrame(DataFrame):
             interval:
                 An interval of the VCF to use (chrom:start-end)
         """
-        attrs = ['CHROM',
-                 'POS',
-                 'ID',
-                 'REF',
-                 'ALT',
-                 'QUAL',
-                 'FILTER',
-                 #'INFO',
-                 'FORMAT',
-                 'start',
-                 'end',
-                 'aaf',
-                 'nucl_diversity',
-                 'is_snp',
-                 'is_indel',
-                 'call_rate',
-                 'num_called',
-                 'num_het',
-                 'num_hom_ref',
-                 'num_hom_alt',
-                 'ploidy',
-                 'is_transition']
-
-        rows = []
         vcf = VCF(filename, gts012=True)
-        for line in vcf(interval):
-            var_line = {attr: getattr(line, attr) for attr in attrs if hasattr(line, attr)}
-            var_line['FT'] = np.array(line.format("FT"))
-            var_line['DP'] = np.array(line.format("DP").flatten(), np.int32)
-            var_line['gt_types'] = line.gt_types.astype(np.int8)
-            var_line['gt_bases'] = line.gt_bases
-            ANN = line.INFO.get("ANN")
-            if ANN:
-                var_line['ANN'] = [x.split("|") for x in ANN.split(",")]
-            rows.append(var_line)
-        dataset = VCF_DataFrame.from_dict(rows)
+        pool = mp.Pool(processes=8)
+        read_vcf = partial(_read_vcf, filename=filename)
+        #results = pool.map(read_vcf, chunk_genome(10000, vcf.seqnames, vcf.seqlens))
+        results = pool.map(read_vcf, chunk_genome(10000, vcf.seqnames, [100000]*7))
+        #dataset = pd.concat([pd.read_parquet(x) for x in glob.glob("dataset/*")])
+
+        #for d in result
+
         # Add num missing column
-        dataset['num_missing'] = dataset.gt_bases.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.'])))
+        dataset['num_missing'] = dataset.GT.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.'])))
+
+        dataset.to_parquet("out.parquet", engine='fastparquet')
 
         # Use ordered CHROM
-        dataset.CHROM = pd.Categorical(dataset.CHROM, ordered=True)
+        dataset.CHROM = pd.Categorical(dataset.CHROM,
+                                       ordered=True,
+                                       categories=vcf.seqnames)
+
+        
+        dataset.REF = pd.Categorical(dataset.REF)
+        dataset.FILTER = pd.Categorical(dataset.FILTER)
+
 
         # Add samples
         dataset.samples = np.array(vcf.samples)
-
-        return dataset
-
-
-    def n_variants(self, chrom, start, end):
-        query_string = f"CHROM == '{chrom}' & POS > {start} & POS < {end}"
-        return self.query(query_string).CHROM.count()
-
+        #dataset = initialize(dataset)
+        return VCF_DataFrame(dataset)
 
 
     def _prune_non_snps(self):
@@ -257,7 +318,6 @@ class VCF_DataFrame(DataFrame):
             Also will remove sites that are all missing.
         """
         non_snps = self.gt_types.apply(lambda x: len(np.unique(x)) > 1)
-        logger.info(non_snps.size)
         return self[non_snps]
 
 
@@ -268,19 +328,20 @@ class VCF_DataFrame(DataFrame):
         sample_bool_keep = np.isin(self.samples, samples)
         df = self.copy()
         # Subset gt_types
-        df.gt_types = df.gt_types.apply(lambda row: row[sample_bool_keep])
+        df.GT = df.GT.apply(lambda row: row[sample_bool_keep])
         df.gt_bases = df.gt_bases.apply(lambda row: row[sample_bool_keep])
         df.DP = df.DP.apply(lambda row: row[sample_bool_keep])
         df.FT = df.FT.apply(lambda row: row[sample_bool_keep])
 
         # Update variables
-        df.num_hom_ref = df.gt_types.apply(lambda row: np.sum(row == 0))
-        df.num_het = df.gt_types.apply(lambda row: np.sum(row == 1))
-        df.num_hom_alt = df.gt_types.apply(lambda row: np.sum(row == 2))
+        df.num_hom_ref = df.GT.apply(lambda row: np.sum(row == 0))
+        df.num_het = df.GT.apply(lambda row: np.sum(row == 1))
+        df.num_hom_alt = df.GT.apply(lambda row: np.sum(row == 2))
         df.num_missing = df.gt_bases.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.'])))
+        df.missing_rate = df.num_missing
         # Do not change '==' to 'is'; numpy doesn't use 'in'.
         df.num_called = df.gt_bases.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.']) == False))
-        df.call_rate = df.gt_types.apply(lambda row: np.sum(row != 3)/row.size)
+        df.call_rate = df.GT.apply(lambda row: np.sum(row != 3)/row.size)
 
 
         if prune_non_snps and len(samples) > 1:
@@ -424,10 +485,10 @@ class VCF_DataFrame(DataFrame):
         
         
 
-        called_gtypes = sum(df.gt_types.apply(lambda row: np.isnan(row) == False))
+        called_gtypes = sum(df.GT.apply(lambda row: np.isnan(row) == False))
         
         # cf
-        cf = sum(df.gt_types.apply(lambda row: (row[:,None] == row)))
+        cf = sum(df.GT.apply(lambda row: (row[:,None] == row)))
         cf = DataFrame(cf, columns=df.samples, index=df.samples)
         cf.index.name = "sample_a"
         cf.columns.name = "sample_b"
@@ -454,18 +515,18 @@ class VCF_DataFrame(DataFrame):
         """
         df = self
 
-        df.gt_types = df.gt_types.apply(lambda row: row.astype(float)) \
+        df.GT = df.GT.apply(lambda row: row.astype(float)) \
                                  .apply(lambda row: self._sub_values(row, 3.0, np.nan)) \
 
         # Format genotypes and filters.
         GT_filter = np.vstack(df.FT.apply(lambda row: row != "PASS").values)
-        GT_vals = np.vstack(df.gt_types.apply(lambda row: row.astype(float)).values)
+        GT_vals = np.vstack(df.GT.apply(lambda row: row.astype(float)).values)
         
         # Apply nan filter to FT != PASS
         GT_vals[GT_filter] = np.nan
 
         # Re-integrate genotypes
-        df.gt_types = Series(list(GT_vals))
+        df.GT = Series(list(GT_vals))
 
         # FILTER columns
         df = df[df.FILTER.isnull()]
@@ -473,14 +534,23 @@ class VCF_DataFrame(DataFrame):
         return df
 
 
-    def to_fasta(self):
+    def to_fasta(self, filename=None):
         """
             Generates a FASTA file
         """
+        df = self
+        for sample, row in zip(df.samples, np.vstack(df.gt_bases.values).T):
+            print(f">{sample}")
+            seq = Series(row).apply(lambda row: np.str.replace(row, "|", "/")) \
+                       .apply(lambda row: np.str.split(row, "/")) \
+                       .apply(lambda row: row[0] if len(set(row)) == 1 else "N")
+            print(''.join(seq.values).replace(".", "N"))
 
 
 
-v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "I:1-10000")
+v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz")
+
+#v.to_parquet("out.parq")
 
 #v.concordance()
 
