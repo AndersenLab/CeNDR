@@ -1,9 +1,11 @@
 import json
+import hashlib
+import base64
 from flask import g
 from base.utils.data_utils import dump_json
 from gcloud import datastore, storage
 from logzero import logger
-
+from gcloud.storage import blob
 
 def google_datastore(open=False):
     """
@@ -74,7 +76,10 @@ def get_item(kind, name):
 
 def google_storage(open=False):
     """
-        Fetch google storage credentials
+        Fetch google datastore credentials
+
+        Args:
+            open - Return the client without storing it in the g object.
     """
     client = storage.Client(project='andersen-lab')
     if open:
@@ -82,3 +87,32 @@ def google_storage(open=False):
     if not hasattr(g, 'gs'):
         g.gs = client
     return g.gs
+
+
+def get_md5(fname):
+    """
+        Generates an md5sum that should match the google storage md5sum.
+    """
+    hash = hashlib.md5()
+    with open(fname, 'rb') as f:
+        for chunk in iter(lambda: f.read(2**20), b''):
+            hash.update(chunk)
+    return str(base64.b64encode(hash.digest()), 'utf-8')
+
+
+
+def upload_file(name, fname):
+    """
+        Upload a file to the CeNDR bucket
+
+        Args:
+            name - The name of the blob (server-side)
+            fname - The filename to upload (client-side)
+    """
+    gs = google_storage()
+    cendr_bucket = gs.get_bucket("elegansvariation.org")
+    blob = cendr_bucket.blob(name)
+    blob.upload_from_filename(fname)
+    return blob
+
+

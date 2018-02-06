@@ -14,6 +14,7 @@ from base.utils.google_sheets import get_google_sheet
 from base.utils.gcloud import get_item
 from logzero import logger
 from base.application import app
+from base.constants import GOOGLE_SHEETS
 
 # Not a constant!
 with app.app_context():
@@ -46,7 +47,7 @@ def fetch_andersen_strains():
         - Strain sets are concatenated with ','
         - Fetches elevation for each strain
     """
-    WI = get_google_sheet("WI")
+    WI = get_google_sheet(GOOGLE_SHEETS['WI'])
     strain_records = WI.get_all_records()
     strain_records = list(filter(lambda x: x.get('isotype') not in ['', None, 'NA'], strain_records))
     for n, record in enumerate(strain_records):

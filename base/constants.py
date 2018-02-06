@@ -21,7 +21,7 @@ RELEASES = [("20170531", "WS261"),
             ("20160408", "WS245")]
 
 # The most recent release
-DATA_RELEASE, WORMBASE_VERSION = RELEASES[0]
+DATASET_RELEASE, WORMBASE_VERSION = RELEASES[0]
 
 
 # Maps chromosome in roman numerals to integer

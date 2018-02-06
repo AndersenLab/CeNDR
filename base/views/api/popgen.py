@@ -1,7 +1,7 @@
 from flask import jsonify
 from base.application import app
 from subprocess import Popen, PIPE
-from base.constants import DATA_RELEASE
+from base.constants import DATASET_RELEASE
 
 
 @app.route('/api/tajima/<string:chrom>/<int:start>/<int:end>')
@@ -21,7 +21,7 @@ def tajima(chrom, start, end):
             }
 
     """
-    url = "https://storage.googleapis.com/elegansvariation.org/releases/{DATA_RELEASE}/tajima/WI.{DATA_RELEASE}.tajima.bed.gz".format(DATA_RELEASE=DATA_RELEASE)
+    url = "https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/tajima/WI.{DATASET_RELEASE}.tajima.bed.gz".format(DATASET_RELEASE=DATASET_RELEASE)
     comm = ['tabix', url, "{chrom}:{start}-{end}".format(**locals())]
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     out = [x.split("\t") for x in out.splitlines()]

@@ -1,7 +1,8 @@
 import os
 import arrow
-import gunicorn  # Ignore - this is here so pipreqs imports
+import gunicorn  # Do not remove this line - this is here so pipreqs imports
 from click import secho
+from base.utils.gcloud import upload_file, google_storage, get_md5
 from base.application import app, db_2
 from base.models2 import (metadata_m,
                           strain_m,
@@ -33,8 +34,7 @@ def init_db():
     # Set metadata #
     ################
     secho('Inserting metadata', fg="green")
-    date_created = metadata_m(key="date_created", value=arrow.utcnow().datetime.isoformat())
-    db_2.session.add(date_created)
+    today = arrow.utcnow().date().isoformat()
     for var in vars(constants):
         if not var.startswith("_"):
             # For nested constants:
@@ -46,7 +46,7 @@ def init_db():
                     db_2.session.add(key_val)
             elif type(current_var) == list:
                 key_val = metadata_m(key=var,
-                                     value=','.join(getattr(constants, var)))
+                                     value=str(getattr(constants, var)))
                 db_2.session.add(key_val)
             elif type(current_var) == dict:
                 key_val = metadata_m(key=var,
@@ -86,6 +86,30 @@ def init_db():
     db_2.session.bulk_insert_mappings(strain_m, fetch_andersen_strains())
     db_2.session.commit()
     secho(f"Inserted {strain_m.query.count()} strains", fg="blue")
+
+    #############
+    # Upload DB #
+    #############
+    
+    # Generate an md5sum of the database that can be compared with
+    # what is already on google storage.
+    local_md5_hash = get_md5("base/cendr.db")
+    secho(f"Database md5 (base64) hash: {local_md5_hash}")
+    gs = google_storage()
+    cendr_bucket = gs.get_bucket("elegansvariation.org")
+    db_releases = list(cendr_bucket.list_blobs(prefix='db/'))[1:]
+    for db in db_releases:
+        if db.md5_hash == local_md5_hash:
+            secho("An identical database already exists")
+            raise Exception(f"{db.name} has an identical md5sum as the database generated. Skipping upload")
+
+    # Upload the file using todays date for archiving purposes
+    secho('Uploading Database', fg='green')
+    blob = upload_file(f"db/{today}.db", "base/cendr.db")
+
+    # Copy the database to _latest.db
+    cendr_bucket.copy_blob(blob, cendr_bucket, "db/_latest.db")
+
     diff = int((arrow.utcnow() - start).total_seconds())
     secho(f"{diff} seconds")
 

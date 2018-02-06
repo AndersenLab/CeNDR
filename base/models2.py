@@ -160,8 +160,8 @@ class trait_m(datastore_model):
         """
             Returns the data version link.
         """
-        release_link = url_for('data.data', selected_release=self.DATA_RELEASE)
-        return Markup(f"<a href='{release_link}'>{self.DATA_RELEASE}</a>")
+        release_link = url_for('data.data', selected_release=self.DATASET_RELEASE)
+        return Markup(f"<a href='{release_link}'>{self.DATASET_RELEASE}</a>")
 
     def run_task(self):
         """

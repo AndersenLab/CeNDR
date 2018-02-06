@@ -26,7 +26,7 @@ from logzero import logger
 from flask import session, flash, Blueprint, g
 from base.utils.data_utils import unique_id
 from base.constants import (REPORT_VERSION,
-                            DATA_RELEASE,
+                            DATASET_RELEASE,
                             CENDR_VERSION,
                             WORMBASE_VERSION)
 
@@ -103,7 +103,7 @@ def mapping():
                'run_status': 'Queued',
                'CENDR_VERSION': CENDR_VERSION,
                'REPORT_VERSION': REPORT_VERSION,
-               'DATA_RELEASE': DATA_RELEASE,
+               'DATASET_RELEASE': DATASET_RELEASE,
                'WORMBASE_VERSION': WORMBASE_VERSION
             })
             trait.run_task()
