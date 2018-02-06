@@ -27,7 +27,7 @@ RUN curl -fsSL https://github.com/samtools/bcftools/releases/download/$BCFTOOLS_
 && tar xvjf /opt/$BCFTOOLS_BIN -C /opt/ \
 && cd /opt/bcftools-$BCFTOOLS_VERSION \
 && make \
-&& make install 
+&& make install 2>&1
 
 # Create a virtualenv for dependencies. This isolates these packages from
 # system-level packages.
@@ -38,6 +38,11 @@ RUN virtualenv /env
 ENV VIRTUAL_ENV /env
 ENV PATH /env/bin:$PATH
 
+# Use python3.6!
+RUN update-alternatives --install /usr/bin/python python /opt/python3.6/bin/python3.6 2 \
+    && ln -f /opt/python3.6/bin/python3.6 /env/bin/python \
+    && ln -f /opt/python3.6/bin/pip3.6 /env/bin/pip
+
 # Copy the application's requirements.txt and run pip to install all
 # dependencies into the virtualenv.
 ADD requirements.txt /app/requirements.txt
@@ -45,5 +50,6 @@ RUN pip install -r /app/requirements.txt
 
 # Add the application source code.
 ADD . /app
+
 
 CMD gunicorn --log-file log.txt -b :$PORT main:app

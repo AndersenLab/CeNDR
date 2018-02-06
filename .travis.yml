@@ -11,7 +11,7 @@ install:
 script:
 - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
 - export PYTHONPATH
-- wget -O base/cendr.db https://storage.googleapis.com/elegansvariation.org/db/_latest.db
+- wget --quiet -O base/cendr.db https://storage.googleapis.com/elegansvariation.org/db/_latest.db
 deploy:
   provider: gae
   version: ${VERSION}
