@@ -13,6 +13,9 @@ libbz2-dev \
 liblzma-dev \
 fuse \
 tabix \
+graphviz \
+libgraphviz-dev \
+pkg-config \
 && rm -rf /var/lib/apt/lists/*
 
 ENV BCFTOOLS_BIN="bcftools-1.4.tar.bz2" \

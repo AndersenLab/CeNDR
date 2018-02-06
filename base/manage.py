@@ -1,5 +1,6 @@
 import os
 import arrow
+import gunicorn  # Ignore - this is here so pipreqs imports
 from click import secho
 from base.application import app, db_2
 from base.models2 import (metadata_m,
@@ -14,6 +15,8 @@ from base.db.etl_wormbase import (fetch_gene_gtf,
 from base.db.etl_homologene import fetch_homologene
 from base import constants
 
+# Do not remove gunicorn import
+secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
 
 @app.cli.command()
 def init_db():

@@ -42,7 +42,6 @@
   <th>Shipping Service</th> 
   <th>Tracking</th>
   {% endif %}
-  <th>Invoice ID</th>
   <th>Order Date</th>
   </tr>
   <tr>
@@ -58,7 +57,6 @@
   {% endif %}
   </td>
   {% endif %}
-  <td>{{ order_obj["invoice_hash"] }}</td>
   <td>{{ order_obj['date'] }}</td>
   </tr>
   </table>

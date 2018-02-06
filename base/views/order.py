@@ -37,7 +37,7 @@ order_bp = Blueprint('order',
 
 @order_bp.route("/")
 def order():
-    return redirect(url_for('strain.catalog'))
+    return redirect(url_for('strain.strain_catalog'))
 
 
 
