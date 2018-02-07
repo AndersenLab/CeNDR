@@ -141,10 +141,36 @@ def update_credentials():
             'env_config.zip',
             '--key',
             zip_creds['key'],
-            '--iv', zip_creds['iv']]
+            '--iv',
+            zip_creds['iv']]
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     secho(str(out, 'utf-8'), fg='green')
     if err:
         exit(secho(str(err, 'utf-8'), fg='red'))
     os.remove("env_config.zip")
 
+
+@app.cli.command()
+def decrypt_credentials():
+    secho("Decrypting env_config.zip.enc", fg='green')
+    zip_creds = get_item('credential', 'travis-ci-cred')
+    comm = ['travis',
+            'encrypt-file',
+            'env_config.zip.enc',
+            '--force',
+            '--key',
+            zip_creds['key'],
+            '--iv',
+            zip_creds['iv'],
+            '--decrypt']
+    out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
+    secho(str(out, 'utf-8'), fg='green')
+    if err:
+        exit(secho(str(err, 'utf-8'), fg='red'))
+    secho("Unzipping env_config.zip", fg='green')
+    comm = ['unzip', '-qo', 'env_config.zip']
+    out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
+    secho(str(out, 'utf-8'), fg='green')
+    if err:
+        exit(secho(str(err, 'utf-8'), fg='red'))
+    os.remove("env_config.zip")

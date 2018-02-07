@@ -14,13 +14,13 @@ import pytz
 import datetime
 import hashlib
 import uuid
+import os
+import json
+import zipfile
 from collections import Counter
 from datetime import datetime as dt
 from flask import g
 from gcloud import storage
-from flask import json, request
-from slugify import slugify
-from logzero import logger
 
 
 def flatten_dict(d, max_depth=1):
@@ -106,3 +106,18 @@ def list_duplicates(input_list):
     """
     counts = Counter(input_list)
     return [x for x, v in counts.items() if v > 1]
+
+
+def zipdir(directory, fname):
+    """
+    Zips a directory
+
+    Args:
+        path - The directory to zip
+        fname - The output filename
+
+    """
+    with zipfile.ZipFile(fname, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                zipf.write(os.path.join(root, file))
