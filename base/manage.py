@@ -30,6 +30,7 @@ from subprocess import Popen, PIPE
 # Do not remove gunicorn import
 secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
 
+
 @app.cli.command()
 def init_db():
     """Initialize the database."""
