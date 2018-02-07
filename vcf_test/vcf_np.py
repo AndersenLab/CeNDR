@@ -280,10 +280,7 @@ class VCF_DataFrame(DataFrame):
         vcf = VCF(filename, gts012=True)
         pool = mp.Pool(processes=8)
         read_vcf = partial(_read_vcf, filename=filename)
-        results = pool.map(read_vcf, chunk_genome(10000, vcf.seqnames, vcf.seqlens))
-        #results = pool.map(read_vcf, chunk_genome(100000, vcf.seqnames[:6], [1000000]*6))
-        for chunk in chunk_genome(100000, vcf.seqnames, [10000]*7):
-            read_vcf(chunk)
+        pool.map(read_vcf, chunk_genome(1000000, vcf.seqnames, vcf.seqlens))
         dataset = []
         for chrom in vcf.seqnames:
             dataset.append(pd.concat([pd.read_parquet(x) for x in glob.glob(f"dataset/{chrom}-*")]))
