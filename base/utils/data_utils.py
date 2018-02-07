@@ -15,11 +15,10 @@ import datetime
 import hashlib
 import uuid
 import os
-import json
 import zipfile
 from collections import Counter
 from datetime import datetime as dt
-from flask import g
+from flask import g, json
 from gcloud import storage
 
 

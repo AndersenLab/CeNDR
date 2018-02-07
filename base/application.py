@@ -10,7 +10,8 @@ from base.utils.text_utils import render_markdown
 from base.constants import CENDR_VERSION, APP_CONFIG
 
 # Create
-app = Flask(__name__, static_url_path='/static')
+app = Flask(__name__,
+            static_url_path='/static')
 
 # Configuration - First load non-sensitive configuration info
 app.config['json_encoder'] = json_encoder
@@ -22,6 +23,7 @@ APP_CONFIG_VARS = yaml.load(open(f"env_config/{APP_CONFIG}.yaml").read())
 
 app.config.update(BASE_VARS)
 app.config.update(APP_CONFIG_VARS)
+print(app.config)
 
 # Setup cache
 cache = Cache(app, config=app.config['CACHE'])
@@ -31,7 +33,6 @@ db_2 = SQLAlchemy(app)
 
 # Set the json_encoder
 app.json_encoder = json_encoder
-
 
 biotypes = {
     "miRNA" : "microRNA",
