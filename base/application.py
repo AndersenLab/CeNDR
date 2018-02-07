@@ -7,7 +7,7 @@ from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from base.utils.data_utils import json_encoder
 from base.utils.text_utils import render_markdown
-from base.constants import CENDR_VERSION
+from base.constants import CENDR_VERSION, APP_CONFIG
 
 # Create
 app = Flask(__name__, static_url_path='/static')
@@ -18,7 +18,7 @@ app.config['json_encoder'] = json_encoder
 # Load Credentials
 # (BASE_VARS are the same regardless of whether we are debugging or in production)
 BASE_VARS = yaml.load(open("env_config/base.yaml").read())
-APP_CONFIG_VARS = yaml.load(open(f"env_config/{os.environ['APP_CONFIG']}.yaml").read())
+APP_CONFIG_VARS = yaml.load(open(f"env_config/{APP_CONFIG}.yaml").read())
 
 app.config.update(BASE_VARS)
 app.config.update(APP_CONFIG_VARS)
