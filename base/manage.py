@@ -1,8 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Author: Daniel E. Cook
+
+
+
+"""
 import os
 import arrow
 import gunicorn  # Do not remove this line - this is here so pipreqs imports
 from click import secho
-from base.utils.gcloud import upload_file, google_storage, get_md5
+from gcloud import datastore
+from base.utils.gcloud import upload_file, get_item, google_storage, get_md5
+from base.utils.data_utils import zipdir
 from base.application import app, db_2
 from base.models2 import (metadata_m,
                           strain_m,
@@ -15,6 +25,7 @@ from base.db.etl_wormbase import (fetch_gene_gtf,
                                   fetch_orthologs)
 from base.db.etl_homologene import fetch_homologene
 from base import constants
+from subprocess import Popen, PIPE
 
 # Do not remove gunicorn import
 secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
@@ -113,4 +124,27 @@ def init_db():
     diff = int((arrow.utcnow() - start).total_seconds())
     secho(f"{diff} seconds")
 
+
+@app.cli.command()
+def update_credentials():
+    """
+        Update the credentials zip file
+    """
+    secho("Zipping env_config", fg='green')
+    zipdir('env_config/', 'env_config.zip')
+    zip_creds = get_item('credential', 'travis-ci-cred')
+    secho("Encrypting credentials", fg='green')
+    if os.path.exists("env_config.zip.enc"):
+        os.remove("env_config.zip.enc")
+    comm = ['travis',
+            'encrypt-file',
+            'env_config.zip',
+            '--key',
+            zip_creds['key'],
+            '--iv', zip_creds['iv']]
+    out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
+    secho(str(out, 'utf-8'), fg='green')
+    if err:
+        exit(secho(str(err, 'utf-8'), fg='red'))
+    os.remove("env_config.zip")
 

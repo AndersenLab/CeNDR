@@ -5,14 +5,10 @@ python:
 cache:
 - pip
 before_install:
-- mkdir env_config
-- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv
-  -in enc/client-secret.json.enc -out client-secret.json -d
-- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv
-  -in enc/production.yaml.enc -out env_config/production.yaml -d
-- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv
-  -in enc/base.yaml.enc -out env_config/base.yaml -d
-- export VERSION=production-1-2-0
+- openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv
+  -in env_config.zip.enc -out env_config.zip -d
+- unzip -qo env_config.zip
+- export VERSION=${TRAVIS_BRANCH}-1-2-0
 - export GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
 script:
 - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
