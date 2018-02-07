@@ -4,7 +4,7 @@ python:
 - '3.6'
 cache:
 - pip
-install:
+before_install:
 - mkdir env_config
 - openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv -in env_config_enc/base.yaml.enc -out env_config/base.yaml -d
 - openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv -in env_config_enc/production.yaml.enc -out env_config/production.yaml -d
