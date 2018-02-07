@@ -6,9 +6,12 @@ cache:
 - pip
 before_install:
 - mkdir env_config
-- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv -in env_config_enc/base.yaml.enc -out env_config/base.yaml -d
-- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv -in env_config_enc/production.yaml.enc -out env_config/production.yaml -d
-- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv -in client-secret.json.enc -out client-secret.json -d
+- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv
+  -in enc/client-secret.json.enc -out client-secret.json -d
+- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv
+  -in enc/production.yaml.enc -out env_config/production.yaml -d
+- openssl aes-256-cbc -K $encrypted_d05b1deeaa37_key -iv $encrypted_d05b1deeaa37_iv
+  -in enc/base.yaml.enc -out env_config/base.yaml -d
 - export VERSION=production-1-2-0
 - export GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
 script:
@@ -17,7 +20,7 @@ script:
 - wget --quiet -O base/cendr.db https://storage.googleapis.com/elegansvariation.org/db/_latest.db
 deploy:
   provider: gae
-  version: ${VERSION}
+  version: "${VERSION}"
   project: andersen-lab
   keyfile: client-secret.json
   on: master
