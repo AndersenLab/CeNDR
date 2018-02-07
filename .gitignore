@@ -69,3 +69,5 @@ tmp/
 gcloud_fargate.json
 
 mapping_worker/.envrc
+
+env_config/

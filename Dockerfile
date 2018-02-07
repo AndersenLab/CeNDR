@@ -52,4 +52,4 @@ RUN pip install -r /app/requirements.txt
 ADD . /app
 
 
-CMD gunicorn --log-file log.txt -b :$PORT main:app
+CMD gunicorn -b :$PORT main:app

@@ -14,7 +14,7 @@
     <div class="col-md-12">
         <ul class="nav nav-pills">
             <h3>Releases</h3>
-            {% for RELEASE in RELEASES %}
+            {% for RELEASE, WB_VERSION in RELEASES %}
                 <li {% if RELEASE == selected_release %}class="active"{% endif %}><a href="{{ url_for('data.data', selected_release = RELEASE) }}">{{ RELEASE }}</a></li>
             {% endfor %}
         </ul>

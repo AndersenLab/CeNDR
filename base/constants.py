@@ -43,6 +43,7 @@ REPORT_VERSION = "v2"
 
 # CeNDR Version
 CENDR_VERSION = os.environ['GAE_VERSION'].replace("-", '.')
+APP_CONFIG = os.environ['APP_CONFIG']
 
 
 class URLS:

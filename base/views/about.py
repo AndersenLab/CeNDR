@@ -36,7 +36,6 @@ def utility_processor():
 
 
 @about_bp.route('/')
-@cache.cached()
 def about():
     """
         About us Page - Gives an overview of CeNDR
@@ -48,7 +47,6 @@ def about():
 
 
 @about_bp.route('/getting_started/')
-@cache.cached()
 def getting_started():
     """
         Getting Started - provides information on how to get started
@@ -60,7 +58,6 @@ def getting_started():
 
 
 @about_bp.route('/committee/')
-@cache.cached()
 def committee():
     """
         Scientific Panel Page
@@ -71,7 +68,6 @@ def committee():
 
 
 @about_bp.route('/staff/')
-@cache.cached()
 def staff():
     """
         Staff Page
@@ -96,7 +92,7 @@ def donate():
     if form.validate_on_submit():
         # order_number is generated as a unique string
         order_obj = {"is_donation": True,
-                 "date": chicago_date()}
+                     "date": chicago_date()}
         order_obj['items'] = u"{}:{}".format("CeNDR strain and data support", form.data.get('total'))
         order_obj.update(form.data)
         order_obj['invoice_hash'] = hash_it(order_obj, length=8)
@@ -104,10 +100,9 @@ def donate():
         send_email({"from": "no-reply@elegansvariation.org",
                     "to": [order_obj["email"]],
                     "cc": app.config.get("CC_EMAILS"),
-                    "cc": ['dec@u.northwestern.edu'],
                     "subject": f"CeNDR Dontaion #{order_obj['invoice_hash']}",
                     "text": DONATE_SUBMISSION_EMAIL.format(invoice_hash=order_obj["invoice_hash"],
-                                                    donation_amount=order_obj.get('total'))})
+                                                           donation_amount=order_obj.get('total'))})
 
         add_to_order_ws(order_obj)
         return redirect(url_for("order.order_confirmation", invoice_hash=order_obj["invoice_hash"]), code=302)
@@ -116,7 +111,6 @@ def donate():
 
 
 @about_bp.route('/funding/')
-@cache.cached()
 def funding():
     title = "Funding"
     funding_set = load_yaml('funding.yaml')

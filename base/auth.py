@@ -24,7 +24,7 @@ github = oauth.remote_app(
     'github',
     consumer_key=app.config['GITHUB_CLIENT_ID'],
     consumer_secret=app.config['GITHUB_CLIENT_SECRET'],
-    request_token_params={'scope': 'user:email,gist'},
+    request_token_params={'scope': 'user:email'},
     base_url='https://api.github.com/',
     request_token_url=None,
     access_token_method='POST',

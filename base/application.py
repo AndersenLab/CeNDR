@@ -1,5 +1,6 @@
 import os
 import json
+import yaml
 from flask import Flask, render_template, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_caching import Cache
@@ -11,9 +12,17 @@ from base.constants import CENDR_VERSION
 # Create
 app = Flask(__name__, static_url_path='/static')
 
-# Configuration
+# Configuration - First load non-sensitive configuration info
 from base import config
-app.config.from_object(getattr(config, os.environ['APP_CONFIG']))
+app.config.from_object(config.base_config)
+
+# Load Credentials
+# (BASE_VARS are the same regardless of whether we are debugging or in production)
+BASE_VARS = yaml.load(open("env_config/base.yaml").read())
+APP_CONFIG_VARS = yaml.load(open(f"env_config/{os.environ['APP_CONFIG']}.yaml").read())
+
+app.config.update(BASE_VARS)
+app.config.update(APP_CONFIG_VARS)
 
 # Setup cache
 cache = Cache(app, config=app.config['CACHE'])
@@ -53,13 +62,7 @@ def autoconvert(s):
 
 
 
-if os.getenv('HOME') == "/root":
-    # Running on server
-    # cache = Cache(app, config={'CACHE_TYPE': 'gaememcached'})
-    # Cache service not yet available - use simple for now.
-    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
-    app.debug = False
-    app.config["debug"] = False
+if app.config['DEBUG'] is False:
     from flask_sslify import SSLify
     # Ignore leading slash of urls; skips must use start of path
     sslify = SSLify(app, skips=['strains/global-strain-map',
