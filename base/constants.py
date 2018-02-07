@@ -42,8 +42,8 @@ GOOGLE_SHEETS = {"orders": "1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM",
 REPORT_VERSION = "v2"
 
 # CeNDR Version
-CENDR_VERSION = os.environ['GAE_VERSION'].replace("-", '.')
-APP_CONFIG = os.environ['APP_CONFIG']
+APP_CONFIG, CENDR_VERSION = os.environ['GAE_VERSION'].split("-", 1)
+CENDR_VERSION = CENDR_VERSION.replace("-", '.')
 
 
 class URLS:
