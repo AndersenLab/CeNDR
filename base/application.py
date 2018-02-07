@@ -13,8 +13,7 @@ from base.constants import CENDR_VERSION
 app = Flask(__name__, static_url_path='/static')
 
 # Configuration - First load non-sensitive configuration info
-from base import config
-app.config.from_object(config.base_config)
+app.config['json_encoder'] = json_encoder
 
 # Load Credentials
 # (BASE_VARS are the same regardless of whether we are debugging or in production)
