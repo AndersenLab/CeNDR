@@ -6,12 +6,9 @@ import pandas as pd
 import numpy as np
 import itertools
 import multiprocessing as mp
-#import dask.dataframe as dd
-#from dask.delayed import delayed
 
 import glob
 import pyarrow.parquet as pq
-
 
 
 from functools import partial
@@ -47,10 +44,10 @@ ANN_FIELDS = ["allele",
 def grouper(n, iterable):
     it = iter(iterable)
     while True:
-       chunk = tuple(itertools.islice(it, n))
-       if not chunk:
-           return
-       yield chunk
+        chunk = tuple(itertools.islice(it, n))
+        if not chunk:
+            return
+        yield chunk
 
 
 class AnnotationItem(Series):
@@ -181,12 +178,7 @@ class AnnotationSeries(Series):
         return AnnotationItem(data=result, name='ANN')
 
 
-def initialize(df):
-    df['num_missing2'] = df.gt_bases.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.'])))
-    return df
-
-
-def _read_vcf(interval, filename=None):
+def _read_vcf(interval, filename=None, seqnames=None):
     """
         Reads in a VCF chunk
     """
@@ -202,8 +194,6 @@ def _read_vcf(interval, filename=None):
              'ALT',
              'QUAL',
              'FILTER',
-             #'INFO',
-             'FORMAT',
              'start',
              'end',
              'aaf',
@@ -235,6 +225,11 @@ def _read_vcf(interval, filename=None):
             var_line['ANN'] = [x.split("|") for x in ANN.split(",")]
         rows.append(var_line)
     dataset = DataFrame.from_dict(rows)
+
+    # Convert to categorical
+    dataset.REF = pd.Categorical(dataset.REF)
+    dataset.FILTER = pd.Categorical(dataset.FILTER)
+
 
     chrom, start, end = re.split(r"[:-]", interval)
     dataset.to_parquet(fname=f"dataset/{chrom}-{start}-{end}.parq")
@@ -285,12 +280,15 @@ class VCF_DataFrame(DataFrame):
         vcf = VCF(filename, gts012=True)
         pool = mp.Pool(processes=8)
         read_vcf = partial(_read_vcf, filename=filename)
-        #results = pool.map(read_vcf, chunk_genome(10000, vcf.seqnames, vcf.seqlens))
-        results = pool.map(read_vcf, chunk_genome(10000, vcf.seqnames, [100000]*7))
-        #dataset = pd.concat([pd.read_parquet(x) for x in glob.glob("dataset/*")])
-
-        #for d in result
-
+        results = pool.map(read_vcf, chunk_genome(10000, vcf.seqnames, vcf.seqlens))
+        #results = pool.map(read_vcf, chunk_genome(100000, vcf.seqnames[:6], [1000000]*6))
+        for chunk in chunk_genome(100000, vcf.seqnames, [10000]*7):
+            read_vcf(chunk)
+        dataset = []
+        for chrom in vcf.seqnames:
+            dataset.append(pd.concat([pd.read_parquet(x) for x in glob.glob(f"dataset/{chrom}-*")]))
+        dataset = pd.concat(dataset)
+        
         # Add num missing column
         dataset['num_missing'] = dataset.GT.apply(lambda row: np.sum(np.isin(row, ['./.', '.|.'])))
 

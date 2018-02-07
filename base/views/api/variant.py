@@ -7,7 +7,7 @@ import re
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 from collections import OrderedDict
-from base.constants import RELEASES
+from base.constants import DATASET_RELEASE
 
 ANN_header = ["allele",
               "effect",
@@ -26,7 +26,7 @@ ANN_header = ["allele",
               "error"]
 
 
-def get_vcf(release=RELEASES[0]):
+def get_vcf(release=DATASET_RELEASE):
     return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/WI.{release}.vcf.gz".format(release=release)
 
 
