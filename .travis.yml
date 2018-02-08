@@ -12,7 +12,7 @@ before_install:
 - export APP_CONFIG=master
 - if [ "${TRAVIS_BRANCH}" != "master" ]; then export APP_CONFIG=development; fi;
 - export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
-- export GOOGLE_APPLICATION_CREDENTIALS=client-secret.json
+- export GOOGLE_APPLICATION_CREDENTIALS=env_config/client-secret.json
 script:
 - PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
 - export PYTHONPATH
@@ -21,7 +21,7 @@ deploy:
   provider: gae
   version: "${GAE_VERSION}"
   project: andersen-lab
-  keyfile: client-secret.json
+  keyfile: env_config/client-secret.json
   on:
     all_branches: true
   no_promote: true
