@@ -1,23 +1,12 @@
-import os
-import warnings
 import json
 import re
 import pandas as pd
 import numpy as np
 import itertools
-import multiprocessing as mp
-
-import glob
-import pyarrow.parquet as pq
-
-
-from functools import partial
 from collections import defaultdict, Counter
 from cyvcf2 import VCF
 from pandas import DataFrame, Series
 from logzero import logger
-from click import secho
-
 
 def infinite_dict():
     return defaultdict(infinite_dict)
@@ -61,7 +50,6 @@ class AnnotationItem(Series):
         return VCF_DataFrame
 
     def __eq__(self, other):
-        logger.info(self)
         return AnnotationItem(self.apply(lambda row: other in row if type(row) == list else False))
 
     @property
@@ -260,7 +248,7 @@ class VCF_DataFrame(DataFrame):
         # Add samples
         dataset = VCF_DataFrame(dataset)
         dataset.samples = np.array(vcf.samples)
-        dataset.allele_set = dataset.TGT.apply(lambda x: set([a for a in sum([re.split("\||\/", i) for i in x], []) if a != '.']))
+        dataset['allele_set'] = dataset.TGT.apply(lambda x: set([a for a in sum([re.split("\||\/", i) for i in x], []) if a != '.']))
         return dataset
 
     def _prune_non_snps(self):
@@ -497,4 +485,4 @@ class VCF_DataFrame(DataFrame):
 
 
 
-v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "V:16562936-16662936")
+v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "V:0-1000000").interval_summary()

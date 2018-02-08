@@ -9,6 +9,8 @@ Author: Daniel E. Cook
 import glob
 import os
 import arrow
+import pandas as pd
+from interval import process_interval
 from utils.gcloud import report_m
 from subprocess import Popen, STDOUT, PIPE
 
@@ -33,7 +35,7 @@ trait = report.fetch_traits(trait_name=trait_name, latest=True)
 
 
 try:
-    report._trait_df[['STRAIN', trait_name]].to_csv('df.tsv', sep='\t', index=False)
+    report._trait_df[['STRAIN', 'ISOTYPE', trait_name]].to_csv('df.tsv', sep='\t', index=False)
     # Update report start time
     trait.started_on = arrow.utcnow().datetime
     trait.run_status = "Running"
@@ -47,6 +49,12 @@ try:
 
     # Mark trait significant/insignificant
     trait.is_significant = True
+
+    # Generate peak summaries
+    peak_summary = pd.read_csv("data/peak_summary.tsv", sep='\t')
+
+    for mapping_interval in list(peak_summary.interval.values):
+        process_interval(mapping_interval)
 
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))

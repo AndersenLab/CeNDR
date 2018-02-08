@@ -4,14 +4,7 @@ library(memoise)
 library(cegwas)
 library(tidyverse)
 library(jsonlite)
-library(rdatastore)
-
-# Setup RDatastore
-rdatastore::authenticate_datastore_service("gcloud_fargate.json", 'andersen-lab')
-credentials <- rdatastore::lookup("credential", 'aws_fargate')
-
-Sys.setenv("AWS_ACCESS_KEY_ID" = credentials$aws_access_key_id,
-           "AWS_SECRET_ACCESS_KEY" = credentials$aws_secret_access_key)
+library(aws.s3)
 
 # Output session info
 session <- devtools::session_info()
@@ -36,12 +29,16 @@ gwas <- function(df,
                  r_system=session$platform$system) {
   mapping <- cegwas::cegwas_map(df, mapping_snp_set = FALSE)
 }
-mgwas <- memoise::memoise(gwas, cache=cache_s3("cendr-cache"))
+
 
 # Perform the mapping
-mapping <- mgwas(df)
+mapping <- gwas(df)
 
-readr::write_tsv(mapping, "data/mapping.tsv", na = "")
+mapping %>% 
+    dplyr::mutate(trait = TRAIT_NAME) %>%
+    dplyr::mutate(marker = gsub("_", ":", marker)) %>%
+readr::write_tsv(.,
+                 "data/mapping.tsv", na = "")
 
 is_significant = any(mapping$aboveBF == 1)
 
@@ -76,13 +73,13 @@ if (!is_significant) {
 #===============#
 
 # Remove MtDNA
-mapping <- mapping %>% dplyr::filter(CHROM != "MtDNA")
-mapping <- mapping %>% dplyr::mutate(marker = gsub("_", ":", marker))
+mapping <- mapping %>% dplyr::filter(CHROM != "MtDNA") %>%
+                       dplyr::mutate(marker = gsub("_", ":", marker)) %>%
+                       dplyr::mutate(trait = TRAIT_NAME)
 
 peaks <- na.omit(mapping) %>%
     dplyr::distinct(peak_id, .keep_all = TRUE) %>%
     dplyr::select(marker, CHROM, POS, startPOS, endPOS, log10p, trait, var.exp) %>%
-    dplyr::mutate(marker = gsub("_", ":", marker)) %>%
     dplyr::mutate(query = paste0(CHROM, ":",startPOS, "-",endPOS)) %>%
     dplyr::mutate(interval_length=endPOS - startPOS) %>%
     dplyr::arrange(desc(log10p)) %>%
@@ -97,7 +94,7 @@ peaks <- na.omit(mapping) %>%
 
 n_peaks <- nrow(peaks)
 
-readr::write_tsv("data/peak_summary.tsv")
+readr::write_tsv(peaks, "data/peak_summary.tsv")
 
 # Generate phenotype/genotype data for PxG Boxplots.
 snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%             
@@ -111,13 +108,8 @@ snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
   dplyr::distinct() %>% readr::write_tsv("data/peak_markers.tsv")
 
 
-# Generate a summary for each interval
-m_interval_summary <- function(interval,
-) {
-  cegwas::interval_summary(interval, )
-}
+# Generate interval summaries
 
-interval_summary <- cegwas::interval_summary("II:12825015-12925015")
 
 #============================#
 # Generate data for PxG Plot #

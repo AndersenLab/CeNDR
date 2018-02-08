@@ -214,7 +214,6 @@
 
 
     <h2 id="phenotype" name="phenotype">Phenotype</h2> 
-    
     {{ phenotype_plot|safe }}
 
     {% if trait.is_significant %}
@@ -246,8 +245,6 @@
     <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as <img src='/static/img/report/bf.png' style="height: 30px;" />.</p>
 
     {% endif %}
-
-    <h3 id="intervals">QTL Genomic Region of Interest</h3>
 
     <h3 id="pxg">Phenotype-by-Genotype</h3>
 

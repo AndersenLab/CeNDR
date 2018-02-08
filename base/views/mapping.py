@@ -172,7 +172,7 @@ def report(report_slug, trait_name=None, rerun=None):
     # To handle report data, functions specific
     # to the version will be required.
 
-    report_template = f"reports/{trait.REPORT_VERSION}.html"
+    report_template = f"reports/{trait.REPORT_VERSION}/{trait.REPORT_VERSION}.html"
     return render_template(report_template, **VARS)
 
 
