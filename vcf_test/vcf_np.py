@@ -396,9 +396,8 @@ class VCF_DataFrame(DataFrame):
         for transcript_biotype in set(sum(df.ANN.transcript_biotype.dropna().values, [])):
             gene['transcript_biotype'][transcript_biotype] = list(set(sum(df[df.ANN.transcript_biotype == transcript_biotype].ANN.gene_id.dropna().values, [])))
 
-        print(json.dumps(results, indent=4, sort_keys=True))
-        # Genes
-        return json.dumps(results)
+        return results
+
 
     @staticmethod
     def _sub_values(row, find, replace):

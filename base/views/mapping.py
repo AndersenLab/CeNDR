@@ -7,9 +7,7 @@ import arrow
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
 from base.application import autoconvert
-from base.task.map_submission import launch_mapping
 from base.models2 import report_m, trait_m
-from base.models import db, report, strain, trait, trait_value, mapping
 from datetime import date, datetime
 import pytz
 from dateutil.relativedelta import relativedelta

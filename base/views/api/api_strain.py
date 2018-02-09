@@ -1,4 +1,3 @@
-from base.models import strain
 from base.models2 import strain_m
 from base.application import app
 from base.utils.decorators import jsonify_request

@@ -18,7 +18,9 @@ GOOGLE_APPLICATION_CREDENTIALS <- Sys.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 # Define Constants
 source("constants.R")
 
-df <- readr::read_tsv("df.tsv")
+df <- readr::read_tsv("df.tsv") %>%
+      dplyr::select(1,3)
+
 # Make trait name just 'TRAIT'
 names(df) <- c("STRAIN", 'TRAIT')
 
@@ -32,13 +34,18 @@ gwas <- function(df,
 
 
 # Perform the mapping
-mapping <- gwas(df)
+if(!file.exists("mapping.Rdata")) {
+  mapping <- gwas(df)
+  save(mapping, file='mapping.Rdata')
+} else {
+  load("mapping.Rdata")
+}
 
 mapping %>% 
     dplyr::mutate(trait = TRAIT_NAME) %>%
     dplyr::mutate(marker = gsub("_", ":", marker)) %>%
 readr::write_tsv(.,
-                 "data/mapping.tsv", na = "")
+                 "data/mapping.tsv.gz", na = "")
 
 is_significant = any(mapping$aboveBF == 1)
 
@@ -94,7 +101,7 @@ peaks <- na.omit(mapping) %>%
 
 n_peaks <- nrow(peaks)
 
-readr::write_tsv(peaks, "data/peak_summary.tsv")
+readr::write_tsv(peaks, "data/peak_summary.tsv.gz")
 
 # Generate phenotype/genotype data for PxG Boxplots.
 snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%             
@@ -105,11 +112,7 @@ snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
   dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
   dplyr::mutate(GT = glue::glue("{GT} ({TGT})")) %>%
   dplyr::inner_join(df) %>%
-  dplyr::distinct() %>% readr::write_tsv("data/peak_markers.tsv")
-
-
-# Generate interval summaries
-
+  dplyr::distinct() %>% readr::write_tsv("data/peak_markers.tsv.gz")
 
 #============================#
 # Generate data for PxG Plot #
@@ -117,27 +120,26 @@ snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
 
 # Save mapping Intervals
 mapping_intervals <- mapping %>% 
-            dplyr::mutate(report = args$report_slug, BF = BF, version = 0.1, reference = "WS245") %>%
+            dplyr::mutate(report = REPORT_NAME, BF = BF) %>%
             dplyr::group_by(peak_id) %>%
             dplyr::filter(!is.na(peak_id), log10p == max(log10p)) %>%
-            dplyr::select(marker, CHROM, POS, report, trait, var.exp, log10p, BF, startPOS, endPOS, version, reference) %>%
+            dplyr::select(marker, CHROM, POS, report, trait, var.exp, log10p, BF, startPOS, endPOS) %>%
             dplyr::distinct(.keep_all = T)
 
-readr::write_tsv(mapping_intervals, "data/mapping_intervals.tsv")
+readr::write_tsv(mapping_intervals, "data/mapping_intervals.tsv.gz")
 
 # Fetch peak marker genotypes for generation of box plots
 peak_markers <- snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
-                  
-peak_markers %>% dplyr::mutate(TRAIT = TRAIT_NAME) %>%
-              dplyr::rowwise() %>%
-              dplyr::mutate(TGT = .data[[.data$GT]]) %>%
-              dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
-              dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
-              dplyr::mutate(GT = glue::glue("{GT} ({TGT})")) %>%
-              dplyr::inner_join(df) %>%
-              dplyr::distinct()
+                dplyr::mutate(TRAIT = TRAIT_NAME) %>%
+                dplyr::rowwise() %>%
+                dplyr::mutate(TGT = .data[[.data$GT]]) %>%
+                dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
+                dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
+                dplyr::mutate(GT = glue::glue("{GT} ({TGT})")) %>%
+                dplyr::inner_join(df) %>%
+                dplyr::distinct()
 
-readr::write_tsv(peak_markers, "data/peak_markers.tsv")
+readr::write_tsv(peak_markers, "data/peak_markers.tsv.gz")
 
 #============================#
 # Generate data for PxG Plot #
@@ -146,21 +148,22 @@ if(nrow(peaks) > 1){
     plot_peak_ld(mapping)
     ggsave("data/LD.png", width = 14, height = 11)
 }
-# Get interval variants
-update_status("Fine Mapping")
-proc_variants <- function(proc_mappings) {
-    process_correlations(variant_correlation(proc_mappings, quantile_cutoff_high = 0.75, quantile_cutoff_low = 0.25, condition_trait = F))
+
+# Get interval correlations
+if (!file.exists('interval.Rdata')) {
+interval_variants <- process_correlations(variant_correlation(mapping,
+                                                              condition_trait = F))
+  save(interval_variants, file='interval.Rdata')
+} else {
+  load('interval.Rdata')
 }
-mproc_variants <- memoise(proc_variants, cache = cache_datastore(project = "andersen-lab", cache = "rcache"))
-interval_variants <- mproc_variants(proc_mappings)
 # Don't write huge interval variant file anymore.
-# readr::write_tsv(interval_variants, "tables/interval_variants.tsv")
 # Condense Interval Variants File
 interval_variants %>%
-dplyr::select(CHROM, POS, gene_id, num_alt_allele, num_strains, corrected_spearman_cor) %>%
-dplyr::mutate(num_alt_allele = as.integer(num_alt_allele)) %>%
-dplyr::distinct(.keep_all = T) %>%
-readr::write_tsv("tables/interval_variants_db.tsv")
+    dplyr::select(CHROM, POS, gene_id, num_alt_allele, num_strains, spearman_cor_p, corrected_spearman_cor_p) %>%
+    dplyr::mutate(num_alt_allele = as.integer(num_alt_allele)) %>%
+    dplyr::distinct(.keep_all = T) %>%
+    readr::write_tsv("data/interval_variants.tsv.gz")
 
 
 

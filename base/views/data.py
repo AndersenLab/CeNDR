@@ -1,7 +1,6 @@
 from base.application import cache
 from flask import make_response, Response
 import requests
-from base.models import strain, report, homologene, mapping, trait
 from base.views.api.correlation import get_correlated_genes
 from collections import OrderedDict
 from flask import render_template

@@ -138,8 +138,5 @@ def internal_server_error(e):
     return render_template('500.html'), 500
 
 
-# from base.utils.auth import *
-from base.task import *
-#from base.views import *
 from base.views.api import *
 from base.manage import (init_db)

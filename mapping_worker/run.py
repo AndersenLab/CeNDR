@@ -10,7 +10,7 @@ import glob
 import os
 import arrow
 import pandas as pd
-from interval import process_interval
+from utils.interval import process_interval
 from utils.gcloud import report_m
 from subprocess import Popen, STDOUT, PIPE
 
@@ -19,7 +19,6 @@ if not os.path.exists('data'):
     os.makedirs('data')
 
 def run_comm(comm):
-    print("Running comm")
     process = Popen(comm, stdout=PIPE, stderr=STDOUT)
     with process.stdout as proc:
         for line in proc:
@@ -46,6 +45,8 @@ try:
     exitcode = process.wait()
 
     print(f"R exited with code {exitcode}")
+    if exitcode != 0:
+        raise Exception("R error")
 
     # Mark trait significant/insignificant
     trait.is_significant = True

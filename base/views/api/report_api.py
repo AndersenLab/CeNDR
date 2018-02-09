@@ -1,7 +1,6 @@
 from base.application import cache, app
 from peewee import fn, JOIN
 from flask import jsonify
-from base.models import trait, report, db, mapping
 from dateutil.parser import parse
 from flask_restful import Resource
 

@@ -1,4 +1,3 @@
-from base.models import WI, mapping_correlation
 from base.application import app, cache
 from peewee import *
 from flask import jsonify

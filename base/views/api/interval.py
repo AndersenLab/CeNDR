@@ -1,5 +1,3 @@
-from base.models import wb_gene, WI
-from base.models import interval_summary_cache as isc
 from base.application import cache, app
 from collections import OrderedDict
 from collections import Counter
