@@ -1,6 +1,6 @@
 from flask import request
 from base.models2 import homologs_m, wormbase_gene_summary_m
-from base.application import app, db_2
+from base.application import app
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_, func
 

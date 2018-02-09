@@ -9,10 +9,6 @@
 
 <script>
 
-//
-// Tajima D
-//
-
 var data = [];
 var layout = {
   margin: {
@@ -22,8 +18,8 @@ var layout = {
   },
   xaxis: {
     domain: [0, 1],
-    title: "{{ mapping_results.0.chrom }}",
-    range: [ {{ mapping_results.0.interval_start }}, {{ mapping_results.0.interval_end }} ],
+    title: "{{ first_peak.chrom }}",
+    range: [ {{ first_peak.interval_start }}, {{ first_peak.interval_end }} ],
     fixedrange: false,
     anchor: "x1"
   },
@@ -63,7 +59,6 @@ function update_tajima_plot(chrom, start, end) {
   }
 });
 }
-
 
 $("#tajima").bind('plotly_relayout', function(event, eventdata) {
   chrom = $(".peak-tab.active").attr("peak").split(":")[0];

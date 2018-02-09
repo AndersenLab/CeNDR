@@ -234,8 +234,6 @@
 
     {% if trait.is_significant %}
 
-    <img class="report" src="{{ base_url }}/figures/Manhattan.png" />
-
     <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
 
     {% else %}
@@ -258,14 +256,14 @@
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-    {% for peak in mapping_results %}
-        <li role="presentation" peak="{{ peak.chrom }}:{{ peak.pos }}" class='peak-tab {% if loop.first %}active{% endif %}'><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</a></li>
+    {% for peak in mapping_results.to_dict('records') %}
+        <li role="presentation" peak="{{ peak.peak_pos }}" class='peak-tab {% if loop.first %}active{% endif %}'><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.interval }}</a></li>
     {% endfor %}
     </ul>
 
     <!-- Tab panes -->
     <div class="tab-content">
-    {% for peak in mapping_results %}
+    {% for peak in mapping_results.to_dict('records') %}
     {% set peak_index = loop.index0 %}
     <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
     <br />
@@ -300,8 +298,8 @@
                   {% for i in ["protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "tRNA", "lincRNA", "rRNA", "scRNA", "snoRNA", "snRNA", "asRNA", "Coding", "Noncoding"] %}
                   <tr>
                     <td class='text-left'>
-                    {% if i in biotypes.keys() %}
-                      <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ biotypes[i] }}'>{{ i }}</abbr>
+                    {% if i in BIOTYPES.keys() %}
+                      <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[i] }}'>{{ i }}</abbr>
                     {% else %}
                     {{ i }}
                     {% endif %}
@@ -316,7 +314,7 @@
                   <tr>
                     <td colspan = "6">
                     <p style="text-align">Numbers listed under Moderate and High Impact correspond to the number of genes within the interval that have at least 1 variant classified as having a moderate or high impact.</p>
-                    <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
+                    <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
                     </td>
                   </tr>
             </tbody>
@@ -340,6 +338,7 @@
             </tr>
         </thead>
     <tbody>
+        {#
     {% for gene in var_corr[peak_index] %}
           <tr>
             <td>
@@ -387,6 +386,7 @@
     {% endfor %}
       </tbody>
     </table>
+    #}
 
     </div>
   {% endfor %}

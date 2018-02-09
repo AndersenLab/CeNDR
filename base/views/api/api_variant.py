@@ -1,13 +1,17 @@
-# NEW API
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Author: Daniel E. Cook
+"""
+import re
 from base.application import app
 from cyvcf2 import VCF
 from flask import jsonify, request, Response
-import re
-#from base.views.api.gene import gene_search
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 from collections import OrderedDict
 from base.constants import DATASET_RELEASE
+from base.utils.decorators import jsonify_request
 
 ANN_header = ["allele",
               "effect",
@@ -69,6 +73,7 @@ ann_cols = ['allele',
 
 
 @app.route('/api/variant', methods=["GET", "POST"])
+@jsonify_request
 def variant_api():
     query = request.args
     query = {'chrom': query['chrom'],
@@ -95,8 +100,6 @@ def variant_api():
 
     if start >= end:
         return "Invalid start and end region values", 400
-    #if end - start > 1e5:
-    #    return jsonify('error': "You can only query a maximum of 100 kb"), 400
 
     region = "{chrom}:{start}-{end}".format(**locals())
     comm = ["bcftools", "view", vcf, region]
@@ -130,8 +133,6 @@ def variant_api():
             ANN = []
             if "ANN" in INFO.keys():
                 ANN_set = INFO['ANN'].split(",")
-                if len(ANN_set) == 0 and not output_all_variants:
-                    break
                 for ANN_rec in ANN_set:
                     ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
                 del INFO['ANN']
@@ -144,7 +145,7 @@ def variant_api():
                 "POS": record.POS,
                 "REF": record.REF,
                 "ALT": record.ALT,
-                "FILTER": record.FILTER or 'PASS', # record.FILTER is 'None' for PASS
+                "FILTER": record.FILTER or 'PASS',  # record.FILTER is 'None' for PASS
                 "GT": gt_set,
                 "AF": INFO["AF"],
                 "ANN": ANN
@@ -156,18 +157,18 @@ def variant_api():
             if len(rec_out['ANN']) > 0 or 'ALL' in query['variant_impact']:
                 output_data.append(rec_out)
             if i == 1000 and query['output'] != "tsv":
-                return jsonify(output_data)
+                return output_data
         if query['output'] == 'tsv':
-            filename = '_'.join([query['chrom'], str(query['start']), str(query['end'])])
+            filename = f"{query['chrom']}-{query['start']}-{query['end']}.tsv"
             build_output = OrderedDict()
             output = []
             header = False
             for rec in output_data:
                 for k in ['CHROM', 'POS', "REF", "ALT", "FILTER", "phastcons", "phylop", "AF"]:
                     if k == 'ALT':
-                        build_output[k]  = ','.join(rec[k])
+                        build_output[k] = ','.join(rec[k])
                     else:
-                        build_output[k]  = rec.get(k) or "NA"
+                        build_output[k] = rec.get(k) or "NA"
                 if rec['ANN']:
                     for ann in rec['ANN']:
                         for k in ann_cols:
@@ -183,9 +184,6 @@ def variant_api():
                 if header is False:
                     output.append('\t'.join(build_output.keys()))
                     header = True
-
                 output.append('\t'.join(map(str,build_output.values())))
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
-        return jsonify(output_data)
-
-
+        return output_data

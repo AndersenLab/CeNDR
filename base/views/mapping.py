@@ -6,6 +6,7 @@ import arrow
 
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
+from base.constants import BIOTYPES
 from base.application import autoconvert
 from base.models2 import report_m, trait_m
 from datetime import date, datetime
@@ -148,6 +149,11 @@ def report(report_slug, trait_name=None, rerun=None):
 
     phenotype_plot = plotly_distplot(report._trait_df, trait_name)
 
+    peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
+    try:
+        first_peak = peak_summary[0]
+    except:
+        first_peak = None
     VARS = {
         'title': report.report_name,
         'subtitle': trait_name,
@@ -156,6 +162,10 @@ def report(report_slug, trait_name=None, rerun=None):
         'trait': trait,
         'strain_count': report.trait_strain_count(trait_name),
         'phenotype_plot': phenotype_plot,
+        'mapping_results': peak_summary,
+        'first_peak': first_peak,
+        
+        'BIOTYPES': BIOTYPES
     }
 
 

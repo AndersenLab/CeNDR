@@ -294,7 +294,7 @@ class trait_m(datastore_model):
         """
             Returns the google storage base URL
         """
-        return f"reports/{self.REPORT_VERSION}/{self.name}"
+        return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.REPORT_VERSION}/{self.name}"
 
     def get_gs_as_dataset(self, fname):
         """
@@ -303,11 +303,7 @@ class trait_m(datastore_model):
             on google storage and return it as a
             pandas dataframe.
         """
-        gs = google_storage()
-        cendr_bucket = gs.get_bucket("elegansvariation.org")
-        blob = cendr_bucket.blob(f"{self.gs_base_url}/{fname}")
-        dataset = str(blob.download_as_string(), 'utf-8')
-        return pd.read_csv(StringIO(dataset), sep="\t")
+        return pd.read_csv(f"{self.gs_base_url}/{fname}", sep="\t")
 
 
     def figure(self, fname):
@@ -316,7 +312,7 @@ class trait_m(datastore_model):
             to report versions.
         """
         gs_url = f"{self.gs_base_url}/{fname}"
-        return f"https://storage.googleapis.com/elegansvariation.org/{gs_url}"
+        return f"{gs_url}"
 
 """
 

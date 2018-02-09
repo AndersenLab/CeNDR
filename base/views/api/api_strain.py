@@ -2,7 +2,7 @@ from base.models2 import strain_m
 from base.application import app
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_
-from logzero import logger
+
 
 @app.route('/api/strain/')
 @app.route('/api/strain/<string:strain_name>')
