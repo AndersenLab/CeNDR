@@ -25,7 +25,7 @@
 // Genotype Location
 //
 
-var geo_gt = {{ geo_gt|safe }}
+//var geo_gt = {{ geo_gt|safe }}
 
 // Icons
 var icon_norm = L.icon({
@@ -63,15 +63,13 @@ var strain_layer = L.layerGroup();
 var gt_set = {"0/0": "-", "1/1": "-"}
 
 
-
-function update_geo_map(chrom, pos) {
+function update_geo_map(peak) {
   map.removeLayer(strain_layer);
-  chrom_pos = chrom + ":" + pos;
   markers = [];
   ref_counter = 0;
   alt_counter = 0;
   other = 0
-  $.each(geo_gt[chrom_pos], function(k, d) {
+  $.each(geo_gt[peak], function(k, d) {
       if (d.GT == '0/0') {
         ref_counter += 1;
       } else if (d.GT == '1/1') {

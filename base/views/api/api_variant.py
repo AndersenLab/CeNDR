@@ -74,18 +74,34 @@ ann_cols = ['allele',
 
 @app.route('/api/variant', methods=["GET", "POST"])
 @jsonify_request
-def variant_api():
-    query = request.args
-    query = {'chrom': query['chrom'],
-             'start': int(query['start']),
-             'end': int(query['end']),
-             'variant_impact': query['variant_impact'].split("_"),
-             'sample_tracks': query['sample_tracks'].split("_"),
-             'output': query['output'],
-             'list-all-strains': query['list-all-strains'] == 'true'
-            }
-    app.logger.info(query)
-    samples = query['sample_tracks']
+def variant_query(query=None, samples="N2"):
+    """
+    Used to query a VCF and return results in a dictionary.
+
+    """
+    if query:
+        # Query in Python
+        chrom, start, end = re.split(':|\-', query)
+        query = {'chrom': chrom,
+                 'start': int(start),
+                 'end': int(end),
+                 'variant_impact': ['ALL'],
+                 'sample_list': ['QX1211'],
+                 'output': "",
+                 'list-all-strains': True
+                }
+    else:
+        # Query from Browser
+        query = request.args
+        query = {'chrom': query['chrom'],
+                 'start': int(query['start']),
+                 'end': int(query['end']),
+                 'variant_impact': query['variant_impact'].split("_"),
+                 'sample_list': query['sample_list'].split("_"),
+                 'output': query['output'],
+                 'list-all-strains': query['list-all-strains'] == 'true'
+                }
+    samples = query['sample_list']
     if query['list-all-strains']:
         samples = "ALL"
     elif not samples[0]:
@@ -108,7 +124,6 @@ def variant_api():
     # Query samples
     if samples != 'ALL':
         comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
-    app.logger.info(' '.join(comm))
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
         app.logger.error(err)
@@ -184,6 +199,7 @@ def variant_api():
                 if header is False:
                     output.append('\t'.join(build_output.keys()))
                     header = True
-                output.append('\t'.join(map(str,build_output.values())))
+                output.append('\t'.join(map(str, build_output.values())))
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
+        app.logger.info(output_data)
         return output_data

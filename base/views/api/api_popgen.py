@@ -3,17 +3,18 @@ from base.application import app
 from subprocess import Popen, PIPE
 from base.constants import DATASET_RELEASE
 from logzero import logger
+from base.views.api.api_variant import variant_query
+from base.views.api.api_strain import get_isotypes
 
-
-@app.route('/api/tajima/<string:chrom>/<int:start>/<int:end>')
+@app.route('/api/popgen/tajima/<string:chrom>/<int:start>/<int:end>')
 def tajima(chrom, start, end):
     """
-        PARAMETERS
+        Args:
             chrom
             start
             end
 
-        RETURNS:
+        Output:
             JSON dict of x (position) and y (Tajima's scores) for
             the specified interval.
             {
@@ -33,3 +34,16 @@ def tajima(chrom, start, end):
     response = {"x": [x[0] for x in data],
                 "y": [x[1] for x in data]}
     return jsonify(response)
+
+
+@app.route('/api/popgen/gt/<string:chrom>/<int:pos>')
+def get_allele_geo(chrom, pos, isotypes=None):
+    """
+        
+    """
+    try:
+        result = variant_query(f"{chrom}:{pos}-{pos+1}", as_python=True)[0]
+    except KeyError:
+        return []
+    isotypes = get_isotypes(known_origin=True, as_python=True)
+    return 1/0
