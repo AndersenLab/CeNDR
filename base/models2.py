@@ -342,8 +342,15 @@ class user_m(datastore_model):
         return [report_m(x) for x in results]
 
 
+class DictSerializable(object):
+    def _asdict(self):
+        result = {}
+        for key in self.__mapper__.c.keys():
+            result[key] = getattr(self, key)
+        return result
 
-class metadata_m(db_2.Model):
+
+class metadata_m(DictSerializable, db_2.Model):
     """
         Table for storing information about other tables
     """
@@ -353,7 +360,7 @@ class metadata_m(db_2.Model):
 
 
 
-class strain_m(db_2.Model):
+class strain_m(DictSerializable, db_2.Model):
     __tablename__ = "strain"
     strain = db_2.Column(db_2.String(25), primary_key=True)
     reference_strain = db_2.Column(db_2.Boolean(), index=True)
@@ -430,8 +437,12 @@ class strain_m(db_2.Model):
                                .reset_index()
         return df
 
+    def as_dict(self):
+        return { c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-class wormbase_gene_m(db_2.Model):
+
+
+class wormbase_gene_m(DictSerializable, db_2.Model):
     __tablename__ = 'wormbase_gene'
     id = db_2.Column(db_2.Integer, primary_key=True)
     chrom = db_2.Column(db_2.String(20), index=True)
@@ -458,7 +469,7 @@ class wormbase_gene_m(db_2.Model):
         return f"{self.gene_id}:{self.feature} [{self.seqname}:{self.start}-{self.end}]"
 
 
-class wormbase_gene_summary_m(db_2.Model):
+class wormbase_gene_summary_m(DictSerializable, db_2.Model):
     """
         This is a condensed version of the wormbase_gene_m model;
         It is constructed out of convenience and only defines the genes
@@ -492,7 +503,7 @@ class wormbase_gene_summary_m(db_2.Model):
 
 
 
-class homologs_m(db_2.Model):
+class homologs_m(DictSerializable, db_2.Model):
     """
         The homologs database combines 
     """

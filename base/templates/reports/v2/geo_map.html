@@ -69,10 +69,10 @@ function update_geo_map(peak) {
   ref_counter = 0;
   alt_counter = 0;
   other = 0
-  $.each(geo_gt[peak], function(k, d) {
-      if (d.GT == '0/0') {
+  $.each(geo_gt[peak], function(k, record) {
+      if (record.GT == 0) {
         ref_counter += 1;
-      } else if (d.GT == '1/1') {
+      } else if (record.GT == 3) {
         alt_counter += 1;
       }
       else {

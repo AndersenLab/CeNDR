@@ -2,9 +2,9 @@ from flask import jsonify
 from base.application import app
 from subprocess import Popen, PIPE
 from base.constants import DATASET_RELEASE
-from logzero import logger
 from base.views.api.api_variant import variant_query
 from base.views.api.api_strain import get_isotypes
+from base.utils.decorators import jsonify_request
 
 @app.route('/api/popgen/tajima/<string:chrom>/<int:start>/<int:end>')
 def tajima(chrom, start, end):
@@ -37,13 +37,24 @@ def tajima(chrom, start, end):
 
 
 @app.route('/api/popgen/gt/<string:chrom>/<int:pos>')
+@jsonify_request
 def get_allele_geo(chrom, pos, isotypes=None):
     """
-        
+        Args:
+            chrom
+            pos
+            isotypes
     """
     try:
-        result = variant_query(f"{chrom}:{pos}-{pos+1}", as_python=True)[0]
+        variant = variant_query(f"{chrom}:{pos}-{pos+1}", as_python=True)[0]
     except KeyError:
         return []
-    isotypes = get_isotypes(known_origin=True, as_python=True)
-    return 1/0
+
+    isotypes = get_isotypes(known_origin=True, as_python=True, as_dict=True)
+    isotypes = {x['isotype']: x for x in isotypes}
+    for gt in variant['GT']:
+        try:
+            gt.update(isotypes[gt['SAMPLE']])
+        except KeyError:
+            pass
+    return isotypes

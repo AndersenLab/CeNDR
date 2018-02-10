@@ -46,7 +46,7 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
 
 @app.route('/api/isotype')
 @jsonify_request
-def get_isotypes(known_origin=False, list_only=False):
+def get_isotypes(known_origin=False, list_only=False, as_dict=False):
     """
         Returns a list of strains when reference_strain == True;
 
@@ -55,6 +55,7 @@ def get_isotypes(known_origin=False, list_only=False):
         Args:
             known_origin: Returns only strains with a known origin
             list_only: Returns a list of isotypes (internal use)
+            as_dict: Return result as dictionaries
     """
     if list_only:
         result = strain_m.query.with_entities(strain_m.isotype) \
@@ -73,6 +74,9 @@ def get_isotypes(known_origin=False, list_only=False):
                                               strain_m.substrate,
                                               strain_m.landscape,
                                               strain_m.sampled_by) \
-                               .filter(strain_m.reference_strain == True, strain_m.latitude != None) \
-                               .all()
+                               .filter(strain_m.reference_strain == True, strain_m.latitude != None)
+    if as_dict:
+        result = [x._asdict() for x in result.all()]
+    else:
+        result = result.all()
     return result
