@@ -6,10 +6,12 @@ Author: Daniel E. Cook
 
 
 """
+import sys
 import glob
 import os
 import arrow
 import pandas as pd
+import traceback
 from utils.interval import process_interval
 from utils.gcloud import report_m
 from subprocess import Popen, STDOUT, PIPE
@@ -41,12 +43,12 @@ try:
     trait.save()
 
     comm = ['Rscript', 'pipeline.R']
-    process = run_comm(comm)
-    exitcode = process.wait()
+    #process = run_comm(comm)
+    #exitcode = process.wait()
 
     print(f"R exited with code {exitcode}")
-    if exitcode != 0:
-        raise Exception("R error")
+    #if exitcode != 0:
+    #    raise Exception("R error")
 
     # Mark trait significant/insignificant
     trait.is_significant = True
@@ -60,12 +62,14 @@ try:
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))
 
-
+    trait.status = "Complete"
 except Exception as e:
-    trait.error_message = e
+    traceback.print_exc()
+    trait.error_message = str(e)
+    trait.error_traceback = traceback.format_exc()
     trait.run_status = "Error"
-else:
-    trait.run_status = "Complete"
+    trait.completed_on = arrow.utcnow().datetime
 finally:
     trait.completed_on = arrow.utcnow().datetime
+    print(trait)
     trait.save()

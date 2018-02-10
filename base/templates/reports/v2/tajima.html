@@ -47,7 +47,7 @@ function update_tajima_plot(chrom, start, end) {
     end = 0;
   }
   $.ajax({
-    url: "/api/tajima/" + chrom + "/" + start + "/" + end,
+    url: "/api/popgen/tajima/" + chrom + "/" + start + "/" + end,
     contentType: 'application/json',
     success: function(data) {
       data["mode"] = "markers";

@@ -513,7 +513,7 @@ function refresh_variants(download = false) {
 
       if (download == true) {
           data['output'] = 'tsv';
-          url =  "{{ url_for('variant_api') }}?" + $.param(data);
+          url =  "{{ url_for('variant_query') }}?" + $.param(data);
           console.log(url);
           window.open(url, sprintf("%s_%s_%s.csv", chrom, start, end));
       } else {
@@ -527,7 +527,7 @@ function refresh_variants(download = false) {
         }
 
         xhr = $.ajax({
-          url: "{{ url_for('variant_api') }}",
+          url: "{{ url_for('variant_query') }}",
           data: data,
           method: "GET",
           contentType: "application/json",

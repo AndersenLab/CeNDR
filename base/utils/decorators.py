@@ -19,9 +19,10 @@ def jsonify_request(func):
             and the as_python argument will be discarded.
         """
         as_python = kwargs.get("as_python")
+        as_tsv = request.args.get('output') == 'tsv'
         if 'as_python' in kwargs:
             kwargs.pop('as_python')
-        if request.path.startswith("/api") and not as_python:
+        if request.path.startswith("/api") and not as_python and not as_tsv:
             return jsonify(func(*args, **kwargs))
         else:
             return func(*args, **kwargs)
