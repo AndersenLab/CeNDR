@@ -57,4 +57,4 @@ def get_allele_geo(chrom, pos, isotypes=None):
             gt.update(isotypes[gt['SAMPLE']])
         except KeyError:
             pass
-    return isotypes
+    return variant
