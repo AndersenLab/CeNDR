@@ -1,0 +1,110 @@
+<h3>Global Distribution</h3>
+
+<div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
+<p>
+    <img style="margin:10px; width:25px;" src="/static/img/icons/marker.png" /><strong>Reference (<span id="ref_gt"></span>)</strong>
+    <img style="margin:10px; width:25px;" src="/static/img/icons/selected.png" /><strong>Alternative (<span id="alt_gt"></span>)</strong>
+
+    <p><small>Isotypes that were included in this trait mapping are opaque/solid. Translucent markers represent isotypes that were not submitted in this trait mapping.</small></p>
+</p>
+<div class="progress">
+    <div class="progress-bar progress-bar-success" id="ref_percent" role="progressbar" style="background-color:#C0382A">
+        Reference
+        <p class="text"></p>
+    </div>
+    <div class="progress-bar progress-bar-warning" id="var_percent" role="progressbar" style="background-color:#0066FF">
+        Variant
+        <p class="text"></p>
+    </div>
+</div>
+
+
+<script defer>
+
+//var geo_gt = {{ geo_gt|safe }}
+
+// Icons
+var icon_norm = L.icon({
+    iconUrl: '/static/img/icons/marker.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+var icon_hover = L.icon({
+    iconUrl: '/static/img/icons/selected.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+gt_icon = {0: icon_norm, 2: icon_hover}
+
+ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
+MB_ATTR = 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+  '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+  'Imagery © <a href="http://mapbox.com">Mapbox</a>';
+MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
+OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+OSM_ATTRIB = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+var southWest = L.latLng(-90, -180),
+  northEast = L.latLng(90, 180),
+  bounds = L.latLngBounds(southWest, northEast);
+
+var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -100], 2);
+L.tileLayer(MB_URL,
+            {attribution: MB_ATTR,
+             id: 'mapbox.streets',
+             continuousWorld: false,
+             worldCopyJump: true,
+         }).addTo(map);
+
+var strain_layer = L.layerGroup();
+var gt_set = {0: "-", 3: "-"}
+
+
+function update_geo_map() {
+    map.removeLayer(strain_layer);
+    markers = [];
+    request_url = `/api/popgen/gt/${chrom}/${pos}`;
+    $.getJSON(request_url, function(data) {
+        console.log(data);
+        $.each(data.GT, function(i, gt) {
+            var opacity = (isotypes.indexOf(gt.SAMPLE) > 0 ? 1.0 : 0.3)
+            marker = L.marker([gt.latitude,
+                               gt.longitude],
+                          { 
+                            icon: gt_icon[gt.GT],
+                            tgt: gt.TGT,
+                            gt: gt.GT,
+                            title: gt.SAMPLE,
+                            opacity: opacity
+                          });
+            marker.bindTooltip(`${gt.SAMPLE} (${gt.TGT})`, {sticky: true})
+            markers.push(marker);
+        })
+    strain_layer = L.layerGroup(markers).addTo(map);
+    
+    $("#ref_gt").html(data['REF']);
+    $("#alt_gt").html(data['ALT'].join('/'));
+
+    total = Object.values(data.GT_Summary).reduce((a, v)=>a+v)
+    console.log(Object.keys(data.GT_Summary));
+    $.each(Object.keys(data.GT_Summary), function(i, v) {
+        n_isotypes = data.GT_Summary[v]        
+        if (v == 0) {
+            $("#ref_percent").width((data.GT_Summary[v]/total)*100 + '%');
+            $("#ref_percent").text(`Reference [n=${n_isotypes}]`);
+        } else if (v == 2) {
+            $("#var_percent").width((data.GT_Summary[v]/total)*100 + '%');
+            $("#var_percent").text(`Variant [n=${n_isotypes}]`);
+        }
+    })
+    });
+
+
+}
+
+
+</script>

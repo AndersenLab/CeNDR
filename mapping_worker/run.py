@@ -7,11 +7,14 @@ Author: Daniel E. Cook
 
 """
 import sys
+import gzip
 import glob
 import os
 import arrow
 import pandas as pd
 import traceback
+import json
+from logzero import logger
 from utils.interval import process_interval
 from utils.gcloud import report_m
 from subprocess import Popen, STDOUT, PIPE
@@ -43,10 +46,10 @@ try:
     trait.save()
 
     comm = ['Rscript', 'pipeline.R']
-    #process = run_comm(comm)
-    #exitcode = process.wait()
+    # process = run_comm(comm)
+    # exitcode = process.wait()
 
-    print(f"R exited with code {exitcode}")
+    #print(f"R exited with code {exitcode}")
     #if exitcode != 0:
     #    raise Exception("R error")
 
@@ -54,10 +57,16 @@ try:
     trait.is_significant = True
 
     # Generate peak summaries
-    peak_summary = pd.read_csv("data/peak_summary.tsv", sep='\t')
+    peak_summary = pd.read_csv("data/peak_summary.tsv.gz", sep='\t')
 
+    # Generate interval summary
+    mapping_interval_set = {}
     for mapping_interval in list(peak_summary.interval.values):
-        process_interval(mapping_interval)
+        logger.info(f"Generating interval summary for {mapping_interval}")
+        mapping_interval_set[mapping_interval] = process_interval(mapping_interval)
+
+    with open(f"data/interval_summary.json", 'w') as f:
+        f.write(json.dumps(mapping_interval_set))
 
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))

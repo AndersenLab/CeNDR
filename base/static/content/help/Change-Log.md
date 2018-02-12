@@ -6,6 +6,8 @@
 
 * Moved codebase to Python 3.
 * Switched database to a single SQLite flatfile.
+* Added tooltips to report maps.
+* Colored markers on allele distribution map by whether the isotype was included in mapping.
 
 ### v1.1.2 (2017-12-05)
 

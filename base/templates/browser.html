@@ -27,7 +27,7 @@
   display: inline-block;
 }
 
-.gt-2 {
+.gt-3 {
     background-color: white;
     border: 1px dotted black;
     color: black;
@@ -39,7 +39,7 @@
   color: black;
 }
 
-.gt-3.PASS {
+.gt-2.PASS {
   background-color: rgba(0, 102, 255,1.0);
   border: 1px solid black;
   color: white;
@@ -51,7 +51,7 @@
   color: black;
 }
 
-.gt-3:not(.PASS) {
+.gt-2:not(.PASS) {
   background-color: rgba(0, 102, 255,0.25);
   border: 1px dotted black;
   color: black;
@@ -219,9 +219,9 @@ th {
 <div class="panel panel-default">
   <div class="panel-body">
     <span class="label gt-0 PASS">Passing REF</span>&nbsp;
-    <span class="label gt-3 PASS">Passing ALT</span>&nbsp;
+    <span class="label gt-2 PASS">Passing ALT</span>&nbsp;
     <span class="label gt-0 mapping_quality min_depth dv_dp het">Failing REF</span>&nbsp;
-    <span class="label gt-3 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
+    <span class="label gt-2 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
     <span class="label gt-1 het">Heterozygous</span>
   </div>
 </div>

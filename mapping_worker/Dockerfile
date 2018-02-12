@@ -8,7 +8,7 @@ RUN Rscript -e 'devtools::install_github("Andersenlab/cegwas")'
 RUN Rscript -e 'install.packages(c("memoise", "aws.s3", "genetics"))'
 
 RUN pip3 install cython
-RUN pip3 install cyvcf2
+RUN pip3 install cyvcf2 logzero sqlalchemy
 
 ADD . ${HOME}
 

@@ -26,10 +26,17 @@ from base.db.etl_wormbase import (fetch_gene_gtf,
 from base.db.etl_homologene import fetch_homologene
 from base import constants
 from subprocess import Popen, PIPE
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from base.models2 import wormbase_gene_summary_m
 
 # Do not remove gunicorn import
 secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
 
+# Mapping worker database
+db_mapping_worker = create_engine('sqlite:///mapping_worker/genes.db')
+wormbase_gene_summary_m.metadata.create_all(db_mapping_worker)
+db_mapping_worker_session = sessionmaker(bind=db_mapping_worker)()
 
 @app.cli.command()
 def init_db():
@@ -38,6 +45,8 @@ def init_db():
     secho('Initializing Database', fg="green")
     if os.path.exists("base/cendr.db"):
         os.remove("base/cendr.db")
+    if os.path.exists("base/mapping_worker/genes.db"):
+        os.remove("base/mapping_worker/genes.db")
     db_2.create_all()
 
     secho('Created cendr.db', fg="green")
@@ -74,6 +83,9 @@ def init_db():
     ##############
     secho('Loading summary gene table', fg='green')
     db_2.session.bulk_insert_mappings(wormbase_gene_summary_m, fetch_gene_gff_summary())
+    secho('Loading summary gene table - for mapping worker', fg='green')
+    db_mapping_worker_session.bulk_insert_mappings(wormbase_gene_summary_m, fetch_gene_gff_summary())
+    db_mapping_worker_session.close()
     secho('Loading gene table', fg='green')
     db_2.session.bulk_insert_mappings(wormbase_gene_m, fetch_gene_gtf())
     gene_summary = db_2.session.query(wormbase_gene_m.feature,

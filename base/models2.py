@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import numpy as np
 import datetime
+import requests
 from io import StringIO
 from flask import Markup, url_for
 from sqlalchemy import or_, func
@@ -304,6 +305,13 @@ class trait_m(datastore_model):
             pandas dataframe.
         """
         return pd.read_csv(f"{self.gs_base_url}/{fname}", sep="\t")
+
+
+    def get_gs_as_json(self, fname):
+        """
+            Downloads a google-storage file as json
+        """
+        return requests.get(f"{self.gs_base_url}/{fname}").json()
 
 
     def figure(self, fname):

@@ -50,7 +50,6 @@ def plotly_distplot(df, column):
                              bin_size=bin_size,
                              histnorm='count',
                              show_curve=False)
-    logger.info(fig['data'])
 
     # Update axis labels
     fig['layout']['yaxis1']['title'] = "Count"
