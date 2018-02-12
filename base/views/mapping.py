@@ -151,9 +151,13 @@ def report(report_slug, trait_name=None, rerun=None):
 
     peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
     try:
-        first_peak = peak_summary[0]
+        first_peak = peak_summary.iloc[0]
     except:
         first_peak = None
+
+    interval_summary = trait.get_gs_as_json("interval_summary.json")
+    logger.info(interval_summary)
+
     VARS = {
         'title': report.report_name,
         'subtitle': trait_name,
@@ -163,110 +167,24 @@ def report(report_slug, trait_name=None, rerun=None):
         'strain_count': report.trait_strain_count(trait_name),
         'phenotype_plot': phenotype_plot,
         'mapping_results': peak_summary,
+        'isotypes': list(report._trait_df.ISOTYPE.values),
         'first_peak': first_peak,
-        
+        'interval_summary': interval_summary,
         'BIOTYPES': BIOTYPES
     }
-
 
     # If the mapping is complete:
     if trait.is_complete:
         # Fetch peak marker data for generating the PxG plot
-        
         # PxG Plot
         peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv")
         VARS['pxg_plot'] = pxg_plot(peak_marker_data, trait_name)
-        
+
     # To handle report data, functions specific
     # to the version will be required.
 
-    report_template = f"reports/{trait.REPORT_VERSION}/{trait.REPORT_VERSION}.html"
+    report_template = f"reports/{trait.REPORT_VERSION}.html"
     return render_template(report_template, **VARS)
-
-
-
-
-@mapping_bp.route('/process_gwa/', methods=['POST'])
-def process_gwa():
-    release_dict = {"public": 0, "embargo12": 1,  "private": 2}
-    req = request.get_json()
-
-    # Add Validation
-    rep_names = report_namecheck(req["report_name"])
-    req["report_slug"] = rep_names["report_slug"]
-    req["report_hash"] = rep_names["report_hash"]
-    if 'error' in rep_names.keys():
-        return ''
-    data = req["trait_data"]
-    del req["trait_data"]
-    req["release"] = release_dict[req["release"]]
-    req["version"] = 20170531
-    trait_names = data[0][1:]
-    strain_set = []
-    trait_keep = []
-    with db.atomic():
-        report_rec = report(**req)
-        report_rec.save()
-        trait_data = []
-
-        for row in data[1:]:
-            if row[0] is not None and row[0] != "":
-                q = row[0].strip().replace("(", "\(").replace(")", "\)")
-                strain_name = resolve_strain_isotype(q)
-                strain_set.append(strain_name)
-
-        trait_set = data[0][1:]
-        for n, t in enumerate(trait_set):
-            trait_vals = [row[n + 1]
-                          for row in data[1:] if row[n + 1]]
-            if t and len(trait_vals) > 0:
-                submit_time = datetime.now(pytz.timezone("America/Chicago"))
-                trait_keep.append(t)
-                trait_set[n] = trait.insert(report=report_rec,
-                                            trait_name=t,
-                                            trait_slug=slugify(t),
-                                            status="queue",
-                                            submission_date=submit_time).execute()
-            else:
-                trait_set[n] = None
-        for col, t in enumerate(trait_set):
-            for row, s in enumerate(strain_set):
-                if t and s and is_number(data[1:][row][col + 1]):
-                    val =  autoconvert(data[1:][row][col + 1])
-                    trait_value(trait = t, strain = s, value = val).save()
-                    trait_data.append({"trait": t,
-                                       "strain": s,
-                                       "value": val})
-        #trait_value.insert_many(trait_data).execute()
-    for t in trait_keep:
-        req["trait_name"] = t
-        req["trait_name"] = slugify(t)
-        req["db_name"] = dbname
-        req["submission_date"] = datetime.now(
-            pytz.timezone("America/Chicago")).isoformat()
-        # Submit job to task queue.
-        launch_mapping(verify_request = False)
-        req["success"] = True
-        # Send user email
-    if req["release"] > 0:
-        report_slug = req["report_hash"]
-    else:
-        report_slug = req["report_slug"]
-    send_email({"from":"no-reply@elegansvariation.org",
-                   "to":[req["email"]],
-                   "subject":"CeNDR Mapping Report - " + req["report_slug"],
-                   "text": MAPPING_SUBMISSION_EMAIL.format(report_slug=report_slug)})
-
-    return str(json.dumps(req))
-
-
-@mapping_bp.route('/validate_url/', methods=['POST'])
-def validate_url():
-    """
-        Generates URLs from report names and validates them.
-    """
-    req = request.get_json()
-    return json.dumps(report_namecheck(req["report_name"]))
 
 
 @mapping_bp.route('/Genetic-Mapping/public/', methods=['GET'])
@@ -439,17 +357,4 @@ def trait_view(report_slug, trait_name="", rerun = None):
     from base import biotypes
 
     return render_template('report.html', **locals())
-
-@mapping_bp.route('/report_progress/', methods=['POST'])
-def report_progress():
-    """
-        Generates URLs from report names and validates them.
-    """
-    req = request.get_json()
-    current_status = list(trait.select(trait.status)
-                          .join(report)
-                          .filter(trait.trait_name == req["trait_name"], (report.report_slug == req["report_slug"]) | (report.report_hash == req["report_slug"]))
-                          .dicts()
-                          .execute())[0]["status"]
-    return json.dumps(current_status)
 

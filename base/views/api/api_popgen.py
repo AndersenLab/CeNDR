@@ -6,7 +6,9 @@ from base.views.api.api_variant import variant_query
 from base.views.api.api_strain import get_isotypes
 from base.utils.decorators import jsonify_request
 
+
 @app.route('/api/popgen/tajima/<string:chrom>/<int:start>/<int:end>')
+@jsonify_request
 def tajima(chrom, start, end):
     """
         Args:
@@ -33,7 +35,7 @@ def tajima(chrom, start, end):
     data = [(int(x[2]) + 50000, float(x[5])) for x in out]
     response = {"x": [x[0] for x in data],
                 "y": [x[1] for x in data]}
-    return jsonify(response)
+    return response
 
 
 @app.route('/api/popgen/gt/<string:chrom>/<int:pos>')
@@ -46,15 +48,19 @@ def get_allele_geo(chrom, pos, isotypes=None):
             isotypes
     """
     try:
-        variant = variant_query(f"{chrom}:{pos}-{pos+1}", as_python=True)[0]
-    except KeyError:
+        variant = variant_query(f"{chrom}:{pos}-{pos+1}")[0]
+    except IndexError:
         return []
 
-    isotypes = get_isotypes(known_origin=True, as_python=True, as_dict=True)
-    isotypes = {x['isotype']: x for x in isotypes}
+    isotypes = get_isotypes(known_origin=True)
+    isotypes = {x._asdict()['isotype']: x for x in isotypes}
     for gt in variant['GT']:
         try:
-            gt.update(isotypes[gt['SAMPLE']])
+            isotype_loc = {'latitude': isotypes[gt['SAMPLE']].latitude,
+                           'longitude': isotypes[gt['SAMPLE']].longitude,
+                           'elevation': isotypes[gt['SAMPLE']].elevation}
+            gt.update(isotype_loc)
         except KeyError:
             pass
+    variant['GT'] = [x for x in variant['GT'] if x.get('latitude')]
     return variant

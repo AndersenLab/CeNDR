@@ -6,12 +6,14 @@ Author: Daniel E. Cook
 import re
 from base.application import app
 from cyvcf2 import VCF
-from flask import jsonify, request, Response
+from flask import request, Response
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 from collections import OrderedDict
 from base.constants import DATASET_RELEASE
 from base.utils.decorators import jsonify_request
+from collections import Counter
+from logzero import logger
 
 ANN_header = ["allele",
               "effect",
@@ -34,26 +36,6 @@ def get_vcf(release=DATASET_RELEASE):
     return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/WI.{release}.vcf.gz".format(release=release)
 
 
-def get_region(region):
-    region = region.replace(",", "")
-    m = re.match("^([0-9A-Za-z]+):([0-9]+)-([0-9]+)$", region)
-    if m:
-        chrom = m.group(1)
-        start = int(m.group(2))
-        end = int(m.group(3))
-        gene = None
-    else:
-        # Resolve gene/location
-        gene = gene_search(region)
-        if not gene:
-            return "Invalid region", 400
-        chrom = gene["CHROM"]
-        start = gene["start"]
-        end = gene["end"]
-    region = "{chrom}:{start}-{end}".format(**locals())
-    return region, chrom, start, end, gene
-
-
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
 
 
@@ -74,11 +56,12 @@ ann_cols = ['allele',
 
 @app.route('/api/variant', methods=["GET", "POST"])
 @jsonify_request
-def variant_query(query=None, samples="N2"):
+def variant_query(query=None, samples=["N2"]):
     """
     Used to query a VCF and return results in a dictionary.
 
     """
+    logger.info(request.args)
     if query:
         # Query in Python
         chrom, start, end = re.split(':|\-', query)
@@ -86,21 +69,23 @@ def variant_query(query=None, samples="N2"):
                  'start': int(start),
                  'end': int(end),
                  'variant_impact': ['ALL'],
-                 'sample_list': ['QX1211'],
+                 'sample_list': samples,
                  'output': "",
                  'list-all-strains': True
                 }
     else:
         # Query from Browser
         query = request.args
+        logger.info(query)
         query = {'chrom': query['chrom'],
                  'start': int(query['start']),
                  'end': int(query['end']),
                  'variant_impact': query['variant_impact'].split("_"),
-                 'sample_list': query['sample_list'].split("_"),
+                 'sample_list': query['sample_tracks'].split("_"),
                  'output': query['output'],
                  'list-all-strains': query['list-all-strains'] == 'true'
                 }
+        logger.info(query)
     samples = query['sample_list']
     if query['list-all-strains']:
         samples = "ALL"
@@ -119,6 +104,7 @@ def variant_query(query=None, samples="N2"):
 
     region = "{chrom}:{start}-{end}".format(**locals())
     comm = ["bcftools", "view", vcf, region]
+    logger.info(comm)
     # Query Severity
 
     # Query samples
@@ -134,7 +120,7 @@ def variant_query(query=None, samples="N2"):
         f.flush()
         output_data = []
 
-        v = VCF(f.name)
+        v = VCF(f.name, gts012=True)
 
         if samples and samples != "ALL":
             samples = samples.split(",")
@@ -163,7 +149,8 @@ def variant_query(query=None, samples="N2"):
                 "FILTER": record.FILTER or 'PASS',  # record.FILTER is 'None' for PASS
                 "GT": gt_set,
                 "AF": INFO["AF"],
-                "ANN": ANN
+                "ANN": ANN,
+                "GT_Summary": Counter(record.gt_types.tolist())
             }
             if 'phastcons' in INFO:
                 rec_out["phastcons"] = float(INFO['phastcons'])
@@ -201,5 +188,4 @@ def variant_query(query=None, samples="N2"):
                     header = True
                 output.append('\t'.join(map(str, build_output.values())))
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
-        app.logger.info(output_data)
         return output_data
