@@ -30,8 +30,6 @@
     width: 100%;
 }
 
-
-
 /* Keep Header Scroll */
 #variant_list table {
     width: 100%;
@@ -79,9 +77,8 @@
         <h4>Traits</h4>
         {# Traits #}
             {% for trait in report.trait_list %} 
-
-            <a href="{{ url_for('mapping.report', report_slug = report.report_slug, trait_name = trait) }}" type="button" class="btn btn-sm {% if trait_name == trait %} btn-primary {% else %} btn-link {% endif %}"><strong>{{ trait }}</strong></a>     
-        {% endfor %}
+                <a href="{{ url_for('mapping.report', report_slug = report.report_slug, trait_name = trait) }}" type="button" class="btn btn-sm {% if trait_name == trait %} btn-primary {% else %} btn-link {% endif %}"><strong>{{ trait }}</strong></a>
+            {% endfor %}
         <br /><br />
     </div>{# /col-md-12 #}
 </div>{# /row #}
@@ -263,14 +260,15 @@
 
     <!-- Tab panes -->
     <div class="tab-content">
+        {{ interval_summary }}
     {% for peak in mapping_results.to_dict('records') %}
     {% set peak_index = loop.index0 %}
     <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
     <br />
     <br />
     <ul>
-      <li><strong>Peak Interval</strong> &nbsp;{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
-      <li><strong>Peak Position</strong> &nbsp;{{ peak.chrom}}:{{ peak.pos }}</li>
+      <li><strong>Peak Interval</strong> &nbsp;{{ peak.interval }}</li>
+      <li><strong>Peak Position</strong> &nbsp;{{ peak.peak_pos }}</li>
       <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%</li>
     </ul>
     <div class="row">
@@ -287,21 +285,23 @@
                 </tr>
                 </thead>
                 <tbody class='peak_{{ loop.index0 }} text-right'>
+
+                    {{ gene }}
                     <tr>
                         <td class='text-left'><strong>Total</strong></td>
-                        <td data='msg.gene_biotype.total' class='dat_{{ peak_index }}'>-</td>
-                        <td data='msg.gene_w_variants_biotype.total' class='dat_{{ peak_index }}'>-</td>
-                        <td data='msg.gene_by_impact.total.MODERATE' class='dat_{{ peak_index }}'>-</td>
-                        <td data='msg.gene_by_impact.total.HIGH' class='dat_{{ peak_index }}'>-</td>
-                        <td data='msg.variants' class='dat_{{ peak_index }}'>-</td>
+                        <td>{{ genes_w_variants|default("-") }}</td>
+                        <td class='dat_{{ peak_index }}'>-</td>
+                        <td class='dat_{{ peak_index }}'>-</td>
+                        <td class='dat_{{ peak_index }}'>-</td>
+                        <td class='dat_{{ peak_index }}'>-</td>
                     </tr>
-                  {% for i in ["protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "tRNA", "lincRNA", "rRNA", "scRNA", "snoRNA", "snRNA", "asRNA", "Coding", "Noncoding"] %}
+                  {% for biotype in ["protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "tRNA", "lincRNA", "rRNA", "scRNA", "snoRNA", "snRNA", "asRNA", "Coding", "Noncoding"] %}
                   <tr>
                     <td class='text-left'>
-                    {% if i in BIOTYPES.keys() %}
-                      <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[i] }}'>{{ i }}</abbr>
+                    {% if biotype in BIOTYPES.keys() %}
+                      <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[biotype] }}'>{{ biotype }}</abbr>
                     {% else %}
-                    {{ i }}
+                    {{ biotype }}
                     {% endif %}
                     </td>
                     <td data='msg.gene_biotype.biotype_summary.{{ i }}' class='dat_{{ peak_index }}'>-</td>
@@ -393,9 +393,9 @@
   </div>
 
 
-    {% include 'reports/v2/geo_map.html' %}
+    {% include 'reports/geo_map.html' %}
 
-    {% include 'reports/v2/tajima.html' %}
+    {% include 'reports/tajima.html' %}
 
 
   </div>
@@ -422,6 +422,34 @@ $('body').scrollspy({offset: 100});
     return false;
   });
 });
+
+// Tab switching
+
+// Load initial map and Tajima
+var isotypes = {{ isotypes|tojson }}
+var peak = "{{ first_peak.peak_pos }}";
+var chrom = peak.split(":")[0]
+var pos = parseInt(peak.split(":")[1])
+$(document).ready(function() {
+    update_geo_map();
+
+    // Load initial position
+
+});
+
+// Monitor peak tabs
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+  peak = $(e.target).parent().attr("peak");
+  chrom = peak.split(":")[0];
+  pos = peak.split(":")[1];
+  interval = $(".peak-tab.active").children("a").html()
+  start = parseInt(interval.split(":")[1].split("-")[0]);
+  end = parseInt(interval.split(":")[1].split("-")[1]);
+  update_geo_map(chrom, pos);
+  update_tajima_plot(chrom, start, end);
+  update_gene_list(chrom, start, end);
+});
+
 
 </script>
 {% endblock %}

@@ -7,7 +7,7 @@
 
 <p>Tajima's D is plotted across the most significant QTL genomic region of interest. Tajima's D suggests if a genomic region has an excess or paucity of rare variation. Values close to zero indicate that variation is drifting and not selected. Values less than zero suggest that rare variants are present, which could have arose during a selective sweep, population expansion after a bottleneck, or linkage to a swept allele. Values greater than zero suggest that balancing selection could have occurred or recent population contractions.</p>
 
-<script>
+<script defer>
 
 var data = [];
 var layout = {
@@ -61,9 +61,6 @@ function update_tajima_plot(chrom, start, end) {
 }
 
 $("#tajima").bind('plotly_relayout', function(event, eventdata) {
-  chrom = $(".peak-tab.active").attr("peak").split(":")[0];
-  start = parseInt(eventdata["xaxis.range[0]"]);
-  end = parseInt(eventdata["xaxis.range[1]"]);
   update_tajima_plot(chrom, start, end);
 });
 

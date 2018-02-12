@@ -83,7 +83,6 @@ function update_geo_map(chrom, pos) {
       total = ref_counter + alt_counter + other
       refer_percent = (ref_counter/total) * 100
       alter_percent = (alt_counter/total) * 100
-
       m = L.marker([d.latitude, d.longitude], { icon: gt_icon[d.GT], tgt: d.TGT, gt: d.GT, title: d.isotype});
       markers.push(m);
       gt_set[d.GT] = d.TGT.split("/")[0];
