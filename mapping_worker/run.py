@@ -46,12 +46,12 @@ try:
     trait.save()
 
     comm = ['Rscript', 'pipeline.R']
-    # process = run_comm(comm)
-    # exitcode = process.wait()
+    process = run_comm(comm)
+    exitcode = process.wait()
 
-    #print(f"R exited with code {exitcode}")
-    #if exitcode != 0:
-    #    raise Exception("R error")
+    print(f"R exited with code {exitcode}")
+    if exitcode != 0:
+        raise Exception("R error")
 
     # Mark trait significant/insignificant
     trait.is_significant = True

@@ -84,6 +84,14 @@ mapping <- mapping %>% dplyr::filter(CHROM != "MtDNA") %>%
                        dplyr::mutate(marker = gsub("_", ":", marker)) %>%
                        dplyr::mutate(trait = TRAIT_NAME)
 
+CHROM_INT = list("I"=1,
+                 "II"=2,
+                 "III"=3,
+                 "IV"=4,
+                 "V"=5,
+                 "X"=6,
+                 "MtDNA"=7)
+
 peaks <- na.omit(mapping) %>%
     dplyr::distinct(peak_id, .keep_all = TRUE) %>%
     dplyr::select(marker, CHROM, POS, startPOS, endPOS, log10p, trait, var.exp) %>%
@@ -97,7 +105,15 @@ peaks <- na.omit(mapping) %>%
                   interval = query,
                   peak_log10p = log10p,
                   variance_explained = var.exp,
-                  interval_length)
+                  interval_length) %>%
+    tidyr::separate(peak_pos,
+                    sep=":",
+                    into=c("CHROM", "POS"),
+                    remove=FALSE) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(CHROM_INT=CHROM_INT[CHROM][[1]]) %>%
+    dplyr::arrange(CHROM_INT, POS) %>%
+    dplyr::select(-CHROM_INT)
 
 n_peaks <- nrow(peaks)
 
@@ -144,25 +160,34 @@ readr::write_tsv(peak_markers, "data/peak_markers.tsv.gz")
 #============================#
 # Generate data for PxG Plot #
 #============================#
-if(nrow(peaks) > 1){
+if (n_peaks > 1) {
     plot_peak_ld(mapping)
     ggsave("data/LD.png", width = 14, height = 11)
 }
 
 # Get interval correlations
 if (!file.exists('interval.Rdata')) {
-interval_variants <- process_correlations(variant_correlation(mapping,
-                                                              condition_trait = F))
-  save(interval_variants, file='interval.Rdata')
+    vc <- variant_correlation(mapping,
+                              condition_trait = F)
+    interval_variants <- dplyr::bind_rows(vc) %>% 
+                         dplyr::arrange(corrected_spearman_cor_p,
+                                        desc(pheno_value)) %>%
+                         dplyr::distinct(CHROM,
+                                         POS,
+                                         REF,
+                                         ALT,
+                                         gene_id,
+                                         trait,
+                                         effect,
+                                         nt_change,
+                                         aa_change, .keep_all = TRUE)
+    save(interval_variants, file='interval.Rdata')
 } else {
-  load('interval.Rdata')
+    load('interval.Rdata')
 }
 # Don't write huge interval variant file anymore.
 # Condense Interval Variants File
 interval_variants %>%
-    dplyr::select(CHROM, POS, gene_id, num_alt_allele, num_strains, spearman_cor_p, corrected_spearman_cor_p) %>%
-    dplyr::mutate(num_alt_allele = as.integer(num_alt_allele)) %>%
-    dplyr::distinct(.keep_all = T) %>%
     readr::write_tsv("data/interval_variants.tsv.gz")
 
 
