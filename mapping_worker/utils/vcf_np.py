@@ -17,9 +17,23 @@ from collections import defaultdict, Counter
 from cyvcf2 import VCF
 from pandas import DataFrame, Series
 from logzero import logger
+from functools import reduce
 
 def infinite_dict():
     return defaultdict(infinite_dict)
+
+
+def flatten_cols(df):
+    """
+        Flattens hierarchical columns
+
+        Stack Overflow: 14507794
+    """
+    df.columns = [
+        '_'.join(tuple(map(str, t))).rstrip('_') 
+        for t in df.columns.values
+        ]
+    return df
 
 
 
@@ -178,8 +192,7 @@ class AnnotationSeries(Series):
 
 class VCF_DataFrame(DataFrame):
 
-    _metadata = ['samples', 'messages']
-    messages = []
+    _metadata = ['samples', 'interval', 'chrom', 'start', 'end']
 
     attrs = ['CHROM',
              'POS',
@@ -258,6 +271,12 @@ class VCF_DataFrame(DataFrame):
         # Add samples
         dataset = VCF_DataFrame(dataset)
         dataset.samples = np.array(vcf.samples)
+        if interval:
+            dataset.interval = interval
+            chrom, start, end = re.split(":|\-", interval)
+            dataset.chrom = chrom
+            dataset.start = int(start)
+            dataset.end = int(end)
         dataset['allele_set'] = dataset.TGT.apply(lambda x: set([a for a in sum([re.split("\||\/", i) for i in x], []) if a != '.']))
         return dataset
 
@@ -314,7 +333,7 @@ class VCF_DataFrame(DataFrame):
             self.samples = df.samples
             self = df
         else:
-            return VCF_DataFrame(df)
+            return df
 
     def _parse_interval(interval):
         """
@@ -328,16 +347,16 @@ class VCF_DataFrame(DataFrame):
             return chrom, pos[0], pos[1]
         return chrom, None, None
 
-    def interval(self, interval):
-        """
-            Filters a VCF on an interval
-        """
-        chrom, start, end = self._parse_interval(interval)
-        if chrom and start and end:
-            query_string = f"CHROM == '{chrom}' & POS > {start} & POS < {end}"
-        elif chrom:
-            query_string = f"CHROM == '{chrom}'"
-        return self.query(query_string)
+    #def interval(self, interval):
+    #    """
+    #        Filters a VCF on an interval
+    #    """
+    #    chrom, start, end = self._parse_interval(interval)
+    #    if chrom and start and end:
+    #        query_string = f"CHROM == '{chrom}' & POS > {start} & POS < {end}"
+    #    elif chrom:
+    #        query_string = f"CHROM == '{chrom}'"
+    #    return self.query(query_string)
 
     def interval_summary(self, interval=None, deep=False):
         """
@@ -415,11 +434,57 @@ class VCF_DataFrame(DataFrame):
                 filter_crit = (df.ANN.impact == impact) & (df.ANN.transcript_biotype == transcript_biotype)
                 gene['impact-biotype'][impact][transcript_biotype] = list(set(sum(df[filter_crit].ANN.gene_id.dropna().values, [])))
 
-        
-
-        print(json.dumps(results, indent=4, sort_keys=True))
         # Genes
         return json.dumps(results)
+
+
+    def interval_summary_table(self):
+        df = self
+        genes = pd.read_csv("genes.tsv.gz")
+        interval_genes = genes[(genes.chrom == df.chrom) & (genes.start > df.start) & (genes.end < df.end) ]
+        biotypes_set = list(set(sum(df.ANN.transcript_biotype.dropna().values, [])))
+
+        for biotype in biotypes_set:
+            df[biotype] = df.ANN.transcript_biotype == biotype
+
+        df['gene_id'] = df.ANN.gene_id.dropna().apply(lambda x: list(set(x))[0])
+
+        ALL_gene_count = interval_genes[['biotype', 'gene_id']].groupby(['biotype'], as_index=False) \
+                                                               .agg(['count'])
+        ALL_gene_count = flatten_cols(ALL_gene_count).rename(index=str, columns={"gene_id_count": "gene_count"}) \
+                                                     .reset_index()
+
+        GENE_count = df[biotypes_set + ['gene_id']].groupby(['gene_id']) \
+                                                   .agg(['max']) \
+                                                   .agg(['sum']) \
+                                                   .transpose() \
+                                                   .reset_index() \
+                                                   .rename(index=str, columns={"sum": "gene_w_variants", "level_0": "biotype"}) \
+                                                   .drop("level_1", axis=1)
+
+        LMH_set = []
+        for x in ["MODIFIER", "LOW", "MODERATE", "HIGH"]:
+            lmh_df = df[biotypes_set + ['gene_id']][df.ANN.impact == x].groupby(['gene_id']) \
+                                               .agg(['max']) \
+                                               .agg(['sum']) \
+                                               .transpose() \
+                                               .reset_index() \
+                                               .rename(index=str, columns={"sum": f"gene_w_{x}_variants", "level_0": "biotype"}) \
+                                               .drop("level_1", axis=1)
+            LMH_set.append(lmh_df)
+
+
+        VARIANT_count = df[biotypes_set].agg(['sum']) \
+                                        .transpose() \
+                                        .reset_index() \
+                                        .rename(index=str, columns={"sum": "variants", "index": "biotype"}) 
+
+        dfs = [ALL_gene_count, GENE_count] + LMH_set + [VARIANT_count]
+        merged = reduce(lambda left, right: pd.merge(left, right, how='outer', on='biotype'), dfs)
+        merged.iloc[:,1:] = merged.iloc[:,1:].fillna(0).astype(int)
+        merged['interval'] = df.interval
+        return merged.sort_values('variants', ascending=False)
+
 
     @staticmethod
     def _sub_values(row, find, replace):
@@ -490,7 +555,7 @@ class VCF_DataFrame(DataFrame):
         # FILTER columns
         df = df[df.FILTER.isnull()]
 
-        return VCF_DataFrame(df)
+        return df
 
     def to_fasta(self, filename=None):
         """
@@ -503,3 +568,5 @@ class VCF_DataFrame(DataFrame):
                              .apply(lambda row: np.str.split(row, "/")) \
                              .apply(lambda row: row[0] if len(set(row)) == 1 else "N")
             print(''.join(seq.values).replace(".", "N"))
+
+v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "I:1-10000")

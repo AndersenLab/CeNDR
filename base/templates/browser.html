@@ -227,7 +227,7 @@ th {
 </div>
 </div>
 
-<table class="table table-hover table-striped table-condensed table-bordered table-responsive" id="variants">
+<table style='border-radius: 5px' class="table table-hover table-striped table-condensed table-bordered table-responsive" id="variants">
     <thead>
       <tr>
         <th>CHROM:POS</th>
@@ -347,7 +347,7 @@ trackset = {"Genes": {
             },
             {{ isotype }}_bam : {
               name: "{{ isotype }}",
-              url: "//elegansvariation.org.s3.amazonaws.com/bam/{{ isotype }}.bam",
+              url: "https://elegansvariation.org.s3.amazonaws.com/bam/{{ isotype }}.bam",
               order: 100,
               visibilityWindow: 20000,
               searchable: false

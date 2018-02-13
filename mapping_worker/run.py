@@ -59,18 +59,14 @@ try:
     # Generate peak summaries
     peak_summary = pd.read_csv("data/peak_summary.tsv.gz", sep='\t')
 
-    # Generate interval summary
-    mapping_interval_set = {}
-    for mapping_interval in list(peak_summary.interval.values):
-        logger.info(f"Generating interval summary for {mapping_interval}")
-        mapping_interval_set[mapping_interval] = process_interval(mapping_interval)
-
-    with open(f"data/interval_summary.json", 'w') as f:
-        f.write(json.dumps(mapping_interval_set))
+    # Generate and save the interval summary
+    interval_sums = [process_interval(x) for x in list(peak_summary.interval.values)]
+    pd.concat(interval_sums) \
+      .sort_values(['interval', 'variants'], ascending=False) \
+      .to_csv("data/interval_summary.tsv.gz", compression='gzip', index=False)
 
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))
-
     trait.status = "Complete"
 except Exception as e:
     traceback.print_exc()

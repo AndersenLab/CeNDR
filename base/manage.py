@@ -9,6 +9,7 @@ Author: Daniel E. Cook
 import os
 import arrow
 import gunicorn  # Do not remove this line - this is here so pipreqs imports
+import pandas as pd
 from click import secho
 from gcloud import datastore
 from base.utils.gcloud import upload_file, get_item, google_storage, get_md5
@@ -82,9 +83,10 @@ def init_db():
     # Load Genes #
     ##############
     secho('Loading summary gene table', fg='green')
-    db_2.session.bulk_insert_mappings(wormbase_gene_summary_m, fetch_gene_gff_summary())
-    secho('Loading summary gene table - for mapping worker', fg='green')
-    db_mapping_worker_session.bulk_insert_mappings(wormbase_gene_summary_m, fetch_gene_gff_summary())
+    genes = list(fetch_gene_gff_summary())
+    db_2.session.bulk_insert_mappings(wormbase_gene_summary_m, genes)
+    secho('Save gene table for mapping worker', fg='green')
+    pd.DataFrame(genes).to_csv("mapping_worker/genes.tsv.gz", compression='gzip', index=False)
     db_mapping_worker_session.close()
     secho('Loading gene table', fg='green')
     db_2.session.bulk_insert_mappings(wormbase_gene_m, fetch_gene_gtf())

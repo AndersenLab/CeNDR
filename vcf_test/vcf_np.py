@@ -7,10 +7,10 @@ from collections import defaultdict, Counter
 from cyvcf2 import VCF
 from pandas import DataFrame, Series
 from logzero import logger
+from utils.models import wormbase_gene_summary_m
 
 def infinite_dict():
     return defaultdict(infinite_dict)
-
 
 
 ANN_FIELDS = ["allele",
@@ -168,7 +168,7 @@ class AnnotationSeries(Series):
 
 class VCF_DataFrame(DataFrame):
 
-    _metadata = ['samples', 'messages']
+    _metadata = ['samples', 'interval']
     messages = []
 
     attrs = ['CHROM',
@@ -248,6 +248,7 @@ class VCF_DataFrame(DataFrame):
         # Add samples
         dataset = VCF_DataFrame(dataset)
         dataset.samples = np.array(vcf.samples)
+        dataset.interval = interval
         dataset['allele_set'] = dataset.TGT.apply(lambda x: set([a for a in sum([re.split("\||\/", i) for i in x], []) if a != '.']))
         return dataset
 
@@ -399,6 +400,10 @@ class VCF_DataFrame(DataFrame):
         return results
 
 
+    def interval_sum():
+        pass
+
+
     @staticmethod
     def _sub_values(row, find, replace):
         """
@@ -484,4 +489,4 @@ class VCF_DataFrame(DataFrame):
 
 
 
-v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "V:0-1000000").interval_summary()
+v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "V:1-10000").interval_summary()
