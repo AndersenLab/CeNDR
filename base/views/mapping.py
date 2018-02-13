@@ -6,7 +6,7 @@ import arrow
 
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
-from base.constants import BIOTYPES
+from base.constants import BIOTYPES, TABLE_COLORS
 from base.application import autoconvert
 from base.models2 import report_m, trait_m
 from datetime import date, datetime
@@ -144,7 +144,7 @@ def report(report_slug, trait_name=None, rerun=None):
                                 report_slug=report_slug,
                                 trait_name=report.trait_list[0]))
 
-    # Fetch trait
+    # Fetch trait and report data
     trait = report.fetch_traits(trait_name=trait_name)
 
     phenotype_plot = plotly_distplot(report._trait_df, trait_name)
@@ -156,7 +156,8 @@ def report(report_slug, trait_name=None, rerun=None):
         first_peak = None
 
     interval_summary = trait.get_gs_as_json("interval_summary.json")
-    logger.info(interval_summary)
+
+    variant_correlation = trait.get_gs_as_dataset("interval_variants.tsv.gz")
 
     VARS = {
         'title': report.report_name,
@@ -170,7 +171,9 @@ def report(report_slug, trait_name=None, rerun=None):
         'isotypes': list(report._trait_df.ISOTYPE.values),
         'first_peak': first_peak,
         'interval_summary': interval_summary,
-        'BIOTYPES': BIOTYPES
+        'variant_correlation': variant_correlation,
+        'BIOTYPES': BIOTYPES,
+        'TABLE_COLORS': TABLE_COLORS
     }
 
     # If the mapping is complete:
@@ -330,7 +333,6 @@ def trait_view(report_slug, trait_name="", rerun = None):
     for m in mapping_results:
         from base.views.api import correlation
         var_corr.append(correlation.get_correlated_genes(r, t, m["chrom"], m["interval_start"], m["interval_end"]))
-    tbl_color = {"LOW": 'success', "MODERATE": 'warning', "HIGH": 'danger'}
 
 
     #######################

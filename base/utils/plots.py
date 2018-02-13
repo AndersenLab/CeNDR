@@ -23,7 +23,7 @@ def to_unix_time(dt):
     """
         Convenience function for conversion to timestamp
     """
-    epoch =  datetime.datetime.utcfromtimestamp(0)
+    epoch = datetime.datetime.utcfromtimestamp(0)
     return (dt - epoch).total_seconds() * 1000
 
 

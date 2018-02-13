@@ -24,18 +24,9 @@ df <- readr::read_tsv("df.tsv") %>%
 # Make trait name just 'TRAIT'
 names(df) <- c("STRAIN", 'TRAIT')
 
-# Cache the function to increase speed
-gwas <- function(df,
-                 session_packages=session$packages,
-                 r_version=session$platform$version,
-                 r_system=session$platform$system) {
-  mapping <- cegwas::cegwas_map(df, mapping_snp_set = FALSE)
-}
-
-
 # Perform the mapping
 if(!file.exists("mapping.Rdata")) {
-  mapping <- gwas(df)
+  mapping <- cegwas::cegwas_map(df, mapping_snp_set = FALSE)
   save(mapping, file='mapping.Rdata')
 } else {
   load("mapping.Rdata")
@@ -168,10 +159,9 @@ if (n_peaks > 1) {
 # Get interval correlations
 if (!file.exists('interval.Rdata')) {
     vc <- variant_correlation(mapping,
-                              condition_trait = F)
-    interval_variants <- dplyr::bind_rows(vc) %>% 
-                         dplyr::arrange(corrected_spearman_cor_p,
-                                        desc(pheno_value)) %>%
+                              condition_trait = F,
+                              variant_severity = c("LOW", "MODERATE", "HIGH"))
+    interval_variants <- dplyr::bind_rows(vc) %>%
                          dplyr::distinct(CHROM,
                                          POS,
                                          REF,
@@ -179,8 +169,30 @@ if (!file.exists('interval.Rdata')) {
                                          gene_id,
                                          trait,
                                          effect,
+                                         impact,
                                          nt_change,
-                                         aa_change, .keep_all = TRUE)
+                                         aa_change, .keep_all = TRUE) %>%
+                         dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
+                         dplyr::group_by(peak, gene_id) %>%
+                         dplyr::mutate(n_variants = n()) %>%
+                         dplyr::mutate(max_gene_corr_p = max(corrected_spearman_cor_p)) %>%
+                         dplyr::filter(max_gene_corr_p < 0.1) %>%
+                         dplyr::arrange(max_gene_corr_p) %>%
+                         dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
+                         dplyr::mutate(max_gene_corr_p = -log10(max_gene_corr_p),
+                                       corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
+                         dplyr::arrange(desc(max_gene_corr_p),
+                                        gene_id,
+                                        desc(corrected_spearman_cor_p)) %>%
+                         dplyr::select(-n,
+                                       -strain,
+                                       -GT,
+                                       -FILTER,
+                                       -FT,
+                                       -pheno_value,
+                                       -corrected_pheno,
+                                       -startPOS,
+                                       -endPOS)
     save(interval_variants, file='interval.Rdata')
 } else {
     load('interval.Rdata')

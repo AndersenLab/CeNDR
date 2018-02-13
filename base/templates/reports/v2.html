@@ -50,7 +50,7 @@
 }
 
 #gene_list tbody, #variant_list tbody {
-    height: 500px;
+    height: 700px;
     overflow-y: auto;
 }
 
@@ -65,6 +65,10 @@
 
 .meta-table td:nth-child(2) {
     text-align: right;
+}
+
+.corr-row td:nth-child(1) {
+    background-color: inherit !important;
 }
 
 </style>
@@ -227,15 +231,13 @@
 
     <h2 id="manhattan" name="Manhattan">Manhattan</h2> 
 
-    <img class='img img-responsive'src='{{ trait.figure("Manhattan.png") }}' alt='Manhattan Plot' />
+    <img class='img img-responsive'src='{{ trait.file_url("Manhattan.png") }}' alt='Manhattan Plot' />
 
     {% if trait.is_significant %}
 
     <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
 
     {% else %}
-
-    <img class="report" src="{{ base_url }}/figures/Manhattan.png" />
 
     <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as <img src='/static/img/report/bf.png' style="height: 30px;" />.</p>
 
@@ -251,15 +253,16 @@
     {% if mapping_results|length > 1 %}
     <h2 id="ld">Linkage Disequilibrium</h2>
     <div class='row'>
-        <div class='col-md-8 col-md-offset-2' class='text-center'>
-            <img class='img img-responsive' src='{{ trait.figure("LD.png") }}' alt='LD Plot' />
+        <div class='col-md-8 col-md-offset-2 text-center'>
             <br />
-            <p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers:</p>
+            <img class='img img-responsive' src='{{ trait.file_url("LD.png") }}' alt='LD Plot' />
+            <br />
             <img style='width: 50%;' src='https://elegansvariation.org/static/img/report/tajimad.png' alt="LD Calc" />
             <br />
-            <p>D is the raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
         </div>
     </div>
+    <p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers.</p>
+    <p>D is the raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
 
 
     {% endif %}
@@ -343,69 +346,53 @@
 
     <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
 
-    <table class="table table-hover table-striped" id="variant_list" style="table-layout: fixed">
+    <strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Download Table</a></strong>
+    <table class="table table-hover table-striped" id="variant_list" style="border: 1px solid #b3b3b3;">
         <thead>
             <tr>
-                <th>Gene Name</th>
-                <th>Wormbase ID</th>
-                <th>Biotype</th>
-                <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The total number of variants with Moderate/High predicted effects'>Total Variants</abbr></th>
-                <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The Maximum correlation among all variants examined'>Max. Correlation</abbr></th>
-                <th>Toggle Variants</th>
+                <th>Gene</th>
+                <th><strong>CHROM:POS (REF/ALT)</strong></th>
+                <th><strong>Impact</strong></th>
+                <th><strong>Effect</strong></th>
+                <th><strong>AA Change</strong></th>
+                <th><abbr data-toggle='tooltip' data-placement='top' data-original-title="The maximum p-value for variants in each gene from Spearman's Rank-Sum correlation test with trait data">-log10( p-value )</abbr></th>
             </tr>
         </thead>
-    <tbody>
-        {#
-    {% for gene in var_corr[peak_index] %}
-          <tr>
-            <td>
-              {% if gene["gene_name"] %}
-                  <a href="{{ url_for("gene", gene_name=gene["gene_name"]) }}">{{ gene["gene_name"] }}</a>
-              {% else %}
-                  {{ gene["feature_id"] }}&nbsp;
-              {% endif %}
-            </td>
-            <td><a href="{{ url_for("gene", gene_name=gene["gene_id"]) }}">{{ gene["gene_id"] }}</a></td>
-            <td>{{ gene["transcript_biotype"] }}</td>
-            <td>{{ gene["n_variants"] }}</td>
-            <td>{{ gene["max_corr"]|round(3) }}</td>
-            <td><a class='show_genes' gene="{{ gene["gene_id"] }}" href='#show'>Variants</a></td>
-          </tr>
-          <tr class='{{ gene["gene_id"] }}' style="display: none;">
-            <td colspan="5" style="padding:0px; width: 100%">
-              <table  class="table table-hover table-striped table-condensed internal-table">
-                <thead>
-                  <tr>
-                  <th>CHROM:POS</th>
-                  <th>REF/ALT</th>
-                  <th>Predicted Effect</th>
-                  <th>Annotation</th>
-                  <th>Putative Impact</th>
-                  <th>Correlation</th>
-                  </tr>
-                </thead>
-                <tbody style="height: inherit;">
-    {% for variant in gene["variant_set"] %}
-          <tr class='{{ tbl_color[variant["putative_impact"]] }}'>
-            <td>{{ variant["CHROM_POS"] }}</td>
-            <td>{{ variant["REF"] }} / {{ variant["ALT"] }}</td>
-            <td>{{ variant["hgvs_p"] }}</td>
-            <td>{{ variant["annotation"] }}</td>
-            <td>{{ variant["putative_impact"] }}</td>
-            <td>{{ variant["correlation"]|round(3) }}</td>
-          </tr>
-          {% endfor %}
-                </tbody>
-              </table>
-              <br />
-            </td>
-          </tr>
-    {% endfor %}
-      </tbody>
+        <tbody>
+            {% for row in variant_correlation[variant_correlation.peak == peak.interval].to_dict('records') %}
+                {% if loop.changed(row['gene_id']) %}
+                <tr>
+                    <td colspan="6" style='width: 100%; border-top: 2px ridge #999999;'>
+                        <div class='pull-right'>
+                            Max p-value = {{ row["max_gene_corr_p"]|round(3) }} <br />
+                            {{ row['n_variants'] }} variant(s)
+                        </div>
+                        {% if row["gene_name"] %}
+                            <strong>
+                                <a href="{{ url_for("gene.gene", gene_name=row['gene_id']) }}">
+                                    {{ row["gene_name"] }}
+                                </a>
+                            </strong>
+                            <br /> {{ row["gene_id"] }}</a>
+                        {% else %}
+                            <strong><a href="{{ url_for("gene.gene", gene_name=row['gene_id']) }}">{{ row["gene_id"] }}</a></strong>
+                        {% endif %} -- <em>{{ row['transcript_biotype'] }}</em>
+                        <br />
+                    </td>
+                </tr>
+                {% endif %}
+                <tr class='corr-row {{ TABLE_COLORS[row["impact"]] }} tr_row'>
+                    <td></td>
+                    <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"] }} / {{ row["ALT"] }})</td>
+                    <td>{{ row["impact"] }}</td>
+                    <td>{{ row["effect"] }}</td>
+                    <td>{{ row["aa_change"] }}</td>
+                    <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
-    #}
 
-    </div>
   {% endfor %}
   </div>
 

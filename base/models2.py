@@ -314,7 +314,7 @@ class trait_m(datastore_model):
         return requests.get(f"{self.gs_base_url}/{fname}").json()
 
 
-    def figure(self, fname):
+    def file_url(self, fname):
         """
             Return the figure URL. May change with updates
             to report versions.

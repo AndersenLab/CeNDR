@@ -87,6 +87,10 @@ app.register_blueprint(data_bp, url_prefix='/data')
 from base.views.mapping import mapping_bp
 app.register_blueprint(mapping_bp, url_prefix='/mapping')
 
+# Gene Pages
+from base.views.gene import gene_bp
+app.register_blueprint(gene_bp, url_prefix='/gene')
+
 # Main Pages - Homepage, Outreach, Contact
 from base.views.primary import primary_bp
 app.register_blueprint(primary_bp, url_prefix='')

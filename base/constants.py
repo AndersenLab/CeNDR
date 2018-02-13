@@ -102,3 +102,7 @@ BIOTYPES = {
     "ncRNA" : "Non-coding RNA",
     "scRNA" : "Small cytoplasmic RNA"
 }
+
+TABLE_COLORS = {"LOW": 'success',
+                "MODERATE": 'warning',
+                "HIGH": 'danger'}

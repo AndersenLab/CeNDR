@@ -1,14 +1,15 @@
-from base.application import app, cache
-from base.models import wb_gene, WI, mapping, trait, report
+from base.application import cache
 from collections import OrderedDict
-from flask import render_template, request, redirect, url_for
+from flask import render_template, Blueprint
 
 #
 # Gene View
-# 
+#
+gene_bp = Blueprint('gene',
+                    __name__,
+                    template_folder='gene')
 
-
-@app.route('/gene/<gene_name>/')
+@gene_bp.route('/gene/<gene_name>/')
 @cache.memoize(50)
 def gene(gene_name):
     title = gene_name
