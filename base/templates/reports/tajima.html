@@ -19,7 +19,8 @@ var layout = {
   xaxis: {
     domain: [0, 1],
     title: "{{ first_peak.chrom }}",
-    range: [ {{ first_peak.interval_start }}, {{ first_peak.interval_end }} ],
+    range: [ {{ first_peak.interval.split(":")[1].split("-")[0] }},
+             {{ first_peak.interval.split(":")[1].split("-")[1] }} ],
     fixedrange: false,
     anchor: "x1"
   },
@@ -35,7 +36,7 @@ var layout = {
 tajima_plot = document.getElementById("tajima");
 Plotly.newPlot(tajima_plot, [{mode: [], marker: []}], layout, {displayModeBar: false, displaylogo: false});
 
-function update_tajima_plot(chrom, start, end) {
+function update_tajima_plot() {
   orig_start = start;
   orig_end = end;
   start = start - 500000;
@@ -47,7 +48,7 @@ function update_tajima_plot(chrom, start, end) {
     end = 0;
   }
   $.ajax({
-    url: "/api/popgen/tajima/" + chrom + "/" + start + "/" + end,
+    url: `/api/popgen/tajima/${chrom}/${start}/${end}`,
     contentType: 'application/json',
     success: function(data) {
       data["mode"] = "markers";

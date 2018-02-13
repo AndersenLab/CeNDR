@@ -42,7 +42,7 @@ try:
     report._trait_df[['STRAIN', 'ISOTYPE', trait_name]].to_csv('df.tsv', sep='\t', index=False)
     # Update report start time
     trait.started_on = arrow.utcnow().datetime
-    trait.run_status = "Running"
+    trait.status = "Running"
     trait.save()
 
     comm = ['Rscript', 'pipeline.R']
@@ -63,7 +63,7 @@ try:
     interval_sums = [process_interval(x) for x in list(peak_summary.interval.values)]
     pd.concat(interval_sums) \
       .sort_values(['interval', 'variants'], ascending=False) \
-      .to_csv("data/interval_summary.tsv.gz", compression='gzip', index=False)
+      .to_csv("data/interval_summary.tsv.gz", sep="\t", compression='gzip', index=False)
 
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))
@@ -72,9 +72,9 @@ except Exception as e:
     traceback.print_exc()
     trait.error_message = str(e)
     trait.error_traceback = traceback.format_exc()
-    trait.run_status = "Error"
+    trait.status = "Error"
     trait.completed_on = arrow.utcnow().datetime
 finally:
     trait.completed_on = arrow.utcnow().datetime
-    print(trait)
+    logger.info(trait)
     trait.save()

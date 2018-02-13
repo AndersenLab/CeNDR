@@ -127,16 +127,16 @@ class report_m(datastore_model):
             If traits-tasks are still being run
             this function will fetch and update their status.
 
-            Once they have completed it will cache the result    
+            Once they have completed it will cache the result
         """
-        trait_run_status_set = []
-        if hasattr(self, 'trait_run_status'):
-            trait_run_status_set = [x == 'Complete' for x in self.trait_run_status.values()]
-        if not any(trait_run_status_set):
+        trait_status_set = []
+        if hasattr(self, 'trait_status'):
+            trait_status_set = [x == 'Complete' for x in self.trait_status.values()]
+        if not any(trait_status_set):
             traits = self.fetch_traits(latest=True)
-            self.trait_run_status = {x.trait_name: x.run_status for x in traits}
+            self.trait_status = {x.trait_name: x.status for x in traits}
             self.save()
-        return self.trait_run_status
+        return self.trait_status
 
 
 class trait_m(datastore_model):

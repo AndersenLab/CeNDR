@@ -71,11 +71,21 @@
     background-color: inherit !important;
 }
 
+.table-nice {
+    border: 1px solid #ccc;
+    margin: 5px 0px;
+    transition: 0.5s;
+    background-color: #fff;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    border-collapse: separate;
+}
+
 </style>
 {% endblock %}
 
 {% block content %}
-
+<div class='scrollspy'>
 <div class="row">
     <div class='col-md-12'>
         <h4>Traits</h4>
@@ -116,7 +126,7 @@
                     <tbody>
                         <tr>
                             <td>Status</td>
-                            <td>{{ trait.run_status }}</td>
+                            <td>{{ trait.status }}</td>
                         </tr>
                         <tr>
                             <td>Submitted</td>
@@ -183,6 +193,15 @@
     </div>{# /panel-body #}
 </div>{# /panel #}
 
+<div class='log'>
+    <h4>Log</h4>
+    <div class='well'>
+        {% for line in trait.get_formatted_task_log() %}
+            {{ line }}<br />
+        {% endfor %}
+    </div>
+</div>
+
 <div id="report" data-toggle="tab">
     <nav id="report_nav" data-offset-top="385" data-spy="affix" class="navbar navbar-default" style="z-index:10000">
       <div class="container-fluid">
@@ -191,10 +210,10 @@
           <ul class="nav navbar-nav">
             <li><a href="#phenotype">Phenotype</a></li>
             <li><a href="#manhattan">Manhattan</a></li>
-            {% if mapping_results|length > 0 %}
+            {% if n_peaks > 0 %}
             <li><a href="#intervals">Intervals</a></li>
             <li><a href="#pxg">PxG</a></li>
-            {% if mapping_results|length > 1 %}
+            {% if n_peaks > 1 %}
             <li><a href="#ld">LD</a></li>
             {% endif %}
             <li><a href="#peak_summary">Peak Summary</a></li>
@@ -203,16 +222,6 @@
         </div><!-- /.navbar-collapse -->
       </div><!-- /.container-fluid -->
     </nav>
-
-    <div class='log'>
-        <h4>Log</h4>
-        <div class='well'>
-            {% for line in trait.get_formatted_task_log() %}
-                {{ line }}<br />
-            {% endfor %}
-        </div>
-    </div>
-
 
     <h2 id="phenotype" name="phenotype">Phenotype</h2> 
     {{ phenotype_plot|safe }}
@@ -250,7 +259,7 @@
     <p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. </p>
 
 
-    {% if mapping_results|length > 1 %}
+    {% if n_peaks > 1 %}
     <h2 id="ld">Linkage Disequilibrium</h2>
     <div class='row'>
         <div class='col-md-8 col-md-offset-2 text-center'>
@@ -267,134 +276,136 @@
 
     {% endif %}
 
-    <h2 id="peak_summary">Peak Summary</h2>
+    <h2 id="peak_summary" class='scroll-title'>Peak Summary</h2>
 
     <p><strong>Switch between peaks below.</strong></p>
-
+    </div>{#/ scrollspy #}
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-    {% for peak in mapping_results.to_dict('records') %}
-        <li role="presentation" peak="{{ peak.peak_pos }}" class='peak-tab {% if loop.first %}active{% endif %}'><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.interval }}</a></li>
+    {% for peak in peak_summary.to_dict('records') %}
+        <li role="presentation" peak="{{ peak.peak_pos }}" class="peak-tab {% if loop.first %} active{% endif %}">
+            <a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">
+                {{ peak.interval }}
+            </a>
+        </li>
     {% endfor %}
     </ul>
 
-    <!-- Tab panes -->
+    {# Tab panes #}
     <div class="tab-content">
-        {{ interval_summary }}
-    {% for peak in mapping_results.to_dict('records') %}
-    {% set peak_index = loop.index0 %}
-    <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
-    <br />
-    <br />
-    <ul>
-      <li><strong>Peak Interval</strong> &nbsp;{{ peak.interval }}</li>
-      <li><strong>Peak Position</strong> &nbsp;{{ peak.peak_pos }}</li>
-      <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%</li>
-    </ul>
-    <div class="row">
-        <div class="col-md-12">
-          <table class="peak_summary table table-hover table-striped" style="table-layout: fixed">
-                <thead>
-                <tr>
-                    <th>Biotype</th>
-                    <th># Genes</th>
-                    <th># Genes w/ variants</th>
-                    <th>>=1 Moderate Impact</th>
-                    <th>>=1 High Impact</th>
-                    <th># Variants</th>
-                </tr>
-                </thead>
-                <tbody class='peak_{{ loop.index0 }} text-right'>
+    {% for peak in peak_summary.to_dict('records') %}
+        <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
+            <h3>Interval Summary</h3>
+            <ul>
+              <li><strong>Peak Interval</strong> &nbsp;{{ peak.interval }}</li>
+              <li><strong>Peak Position</strong> &nbsp;{{ peak.peak_pos }}</li>
+              <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%</li>
+            </ul>
+            <div class="row">
+                <div class="col-md-12">
+                    <strong><a href='{{ trait.file_url("interval_summary.tsv.gz") }}'>Download Table</a></strong>
+                    <table class="peak_summary table table-hover table-striped table-nice" style="table-layout: fixed">
+                        <thead>
+                            <tr class='text-nowrap'>
+                                <th>Biotype</th>
+                                <th class='text-right'># Genes</th>
+                                <th class='text-right'># Genes w/ variants</th>
+                                {% for impact in ["MODIFIER", "LOW", "MODERATE", "HIGH"] %}
+                                <th class='text-right'>
+                                    <abbr data-toggle='tooltip' title='Genes with one or more {{ impact.lower() }}-impact variants.'>
+                                        {{ impact }} +
+                                    </abbr>
+                                </th>
+                                {% endfor %}
+                                <th class='text-right'># Variants</th>
+                            </tr>
+                        </thead>
+                        <tbody class='peak_{{ loop.index0 }} text-right'>
+                        {% set interval_summary_peak = interval_summary[interval_summary.interval == peak.interval].drop('interval', axis=1) %}
+                            <tr class='text-bold'>
+                                {% for col in interval_summary_peak %}
+                                    {% if col == 'biotype' %}
+                                        <td><strong>Total</strong></td>
+                                    {% else %}
+                                        <td><strong>{{ interval_summary_peak[col].sum() }}</strong></td>
+                                    {% endif %}
 
-                    {{ gene }}
-                    <tr>
-                        <td class='text-left'><strong>Total</strong></td>
-                        <td>{{ genes_w_variants|default("-") }}</td>
-                        <td class='dat_{{ peak_index }}'>-</td>
-                        <td class='dat_{{ peak_index }}'>-</td>
-                        <td class='dat_{{ peak_index }}'>-</td>
-                        <td class='dat_{{ peak_index }}'>-</td>
-                    </tr>
-                  {% for biotype in ["protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "tRNA", "lincRNA", "rRNA", "scRNA", "snoRNA", "snRNA", "asRNA", "Coding", "Noncoding"] %}
-                  <tr>
-                    <td class='text-left'>
-                    {% if biotype in BIOTYPES.keys() %}
-                      <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[biotype] }}'>{{ biotype }}</abbr>
-                    {% else %}
-                    {{ biotype }}
-                    {% endif %}
-                    </td>
-                    <td data='msg.gene_biotype.biotype_summary.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                    <td data='msg.gene_w_variants_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                    <td data='msg.gene_by_impact.MODERATE.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                    <td data='msg.gene_by_impact.HIGH.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                    <td data='msg.variant_in_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                  </tr>
-                  {% endfor %}
-                  <tr>
-                    <td colspan = "6">
-                    <p style="text-align">Numbers listed under Moderate and High Impact correspond to the number of genes within the interval that have at least 1 variant classified as having a moderate or high impact.</p>
-                    <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
-                    </td>
-                  </tr>
-            </tbody>
-        </table>
-        </div>
-    </div>
-      
-    <h3>Variants</h3>
+                                {% endfor %}
+                            </tr>
+                        {% for i, row in interval_summary_peak.iterrows() %}
+                            <tr>
+                                <td class='text-left'>
+                                    {% if row.biotype in BIOTYPES.keys() %}
+                                        <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[row.biotype] }}'>{{ row.biotype }}</abbr>
+                                    {% else %}
+                                        {{ row.biotype }}
+                                    {% endif %}
+                                </td>
+                                {% for k, i in list(row.iteritems())[1:] %}
+                                        <td>{{ i }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+              
+                    <h3>Variants</h3>
 
-    <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
+                    <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
 
-    <strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Download Table</a></strong>
-    <table class="table table-hover table-striped" id="variant_list" style="border: 1px solid #b3b3b3;">
-        <thead>
-            <tr>
-                <th>Gene</th>
-                <th><strong>CHROM:POS (REF/ALT)</strong></th>
-                <th><strong>Impact</strong></th>
-                <th><strong>Effect</strong></th>
-                <th><strong>AA Change</strong></th>
-                <th><abbr data-toggle='tooltip' data-placement='top' data-original-title="The maximum p-value for variants in each gene from Spearman's Rank-Sum correlation test with trait data">-log10( p-value )</abbr></th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in variant_correlation[variant_correlation.peak == peak.interval].to_dict('records') %}
-                {% if loop.changed(row['gene_id']) %}
-                <tr>
-                    <td colspan="6" style='width: 100%; border-top: 2px ridge #999999;'>
-                        <div class='pull-right'>
-                            Max p-value = {{ row["max_gene_corr_p"]|round(3) }} <br />
-                            {{ row['n_variants'] }} variant(s)
-                        </div>
-                        {% if row["gene_name"] %}
-                            <strong>
-                                <a href="{{ url_for("gene.gene", gene_name=row['gene_id']) }}">
-                                    {{ row["gene_name"] }}
-                                </a>
-                            </strong>
-                            <br /> {{ row["gene_id"] }}</a>
-                        {% else %}
-                            <strong><a href="{{ url_for("gene.gene", gene_name=row['gene_id']) }}">{{ row["gene_id"] }}</a></strong>
-                        {% endif %} -- <em>{{ row['transcript_biotype'] }}</em>
-                        <br />
-                    </td>
-                </tr>
-                {% endif %}
-                <tr class='corr-row {{ TABLE_COLORS[row["impact"]] }} tr_row'>
-                    <td></td>
-                    <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"] }} / {{ row["ALT"] }})</td>
-                    <td>{{ row["impact"] }}</td>
-                    <td>{{ row["effect"] }}</td>
-                    <td>{{ row["aa_change"] }}</td>
-                    <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    <strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Download Table</a></strong>
+                    <table class="table table-hover table-striped table-nice" id="variant_list" style="border: 1px solid #b3b3b3;">
+                        <thead>
+                            <tr>
+                                <th>Gene</th>
+                                <th><strong>CHROM:POS (REF/ALT)</strong></th>
+                                <th><strong>Impact</strong></th>
+                                <th><strong>Effect</strong></th>
+                                <th><strong>AA Change</strong></th>
+                                <th><abbr data-toggle='tooltip' data-placement='top' data-original-title="The maximum p-value for variants in each gene from Spearman's Rank-Sum correlation test with trait data">-log10( p-value )</abbr></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in variant_correlation[variant_correlation.peak == peak.interval].to_dict('records') %}
+                                {% if loop.changed(row['gene_id']) %}
+                                <tr>
+                                    <td colspan="6" style='width: 100%; border-top: 2px ridge #999999;'>
+                                        <div class='pull-right'>
+                                            Max -log10(p-value) = {{ row["max_gene_corr_p"]|round(3) }} <br />
+                                            {{ row['n_variants'] }} variant(s)
+                                        </div>
+                                        {% if row["gene_name"] %}
+                                            <strong>
+                                                <a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}">
+                                                    {{ row["gene_name"] }}
+                                                </a>
+                                            </strong>
+                                            <br /> {{ row["gene_id"] }}</a>
+                                        {% else %}
+                                            <strong><a href="{{ url_for("gene.gene", gene_name=row['gene_id']) }}">{{ row["gene_id"] }}</a></strong>
+                                        {% endif %} -- <em>{{ row['transcript_biotype'] }}</em>
+                                        <br />
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                <tr class='corr-row {{ TABLE_COLORS[row["impact"]] }} tr_row'>
+                                    <td></td>
+                                    <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"] }} / {{ row["ALT"] }})</td>
+                                    <td>{{ row["impact"] }}</td>
+                                    <td>{{ row["effect"] }}</td>
+                                    <td>{{ row["aa_change"] }}</td>
+                                    <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>{# /col-md-12 #}
+            </div>{# /row #}
+        </div>{#/ tab-panel #}
+        {% endfor %}
+    </div>{# /tab-content #}
 
-  {% endfor %}
-  </div>
+
 
 
     {% include 'reports/geo_map.html' %}
@@ -402,21 +413,26 @@
     {% include 'reports/tajima.html' %}
 
 
-  </div>
-
 
 </div>
 {% endblock %}
 
 {% block script %}
 <script>
+
+{# Load first peak data #}
+var isotypes = {{ isotypes|tojson }}
+var chrom = "{{ first_peak.chrom }}"
+var start = {{ first_peak.start }};
+var end = {{ first_peak.end }};
+var pos = {{ first_peak.pos }};
+
 var offsetHeight = 71;
-// Scrolling
-$('body').scrollspy({offset: 100}); 
+
+{# Scrolling #}
+$('body').scrollspy({offset: 100, target: ".navbar"}); 
 // Add smooth scrolling to all links inside a navbar
   $("#report_nav li a").on('click', function(event){
-
-  //event.preventDefault();
   link = $(this).attr('href').replace("#","")
   var scrollPos = $(`[id='${link}']`).offset().top - (offsetHeight - 1);
   $('html, body').animate({
@@ -427,18 +443,9 @@ $('body').scrollspy({offset: 100});
   });
 });
 
-// Tab switching
-
-// Load initial map and Tajima
-var isotypes = {{ isotypes|tojson }}
-var peak = "{{ first_peak.peak_pos }}";
-var chrom = peak.split(":")[0]
-var pos = parseInt(peak.split(":")[1])
 $(document).ready(function() {
     update_geo_map();
-
-    // Load initial position
-
+    update_tajima_plot();
 });
 
 // Monitor peak tabs
@@ -449,9 +456,8 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
   interval = $(".peak-tab.active").children("a").html()
   start = parseInt(interval.split(":")[1].split("-")[0]);
   end = parseInt(interval.split(":")[1].split("-")[1]);
-  update_geo_map(chrom, pos);
-  update_tajima_plot(chrom, start, end);
-  update_gene_list(chrom, start, end);
+  update_geo_map();
+  update_tajima_plot();
 });
 
 

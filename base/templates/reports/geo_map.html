@@ -69,7 +69,6 @@ function update_geo_map() {
     markers = [];
     request_url = `/api/popgen/gt/${chrom}/${pos}`;
     $.getJSON(request_url, function(data) {
-        console.log(data);
         $.each(data.GT, function(i, gt) {
             var opacity = (isotypes.indexOf(gt.SAMPLE) > 0 ? 1.0 : 0.3)
             marker = L.marker([gt.latitude,
@@ -90,7 +89,6 @@ function update_geo_map() {
     $("#alt_gt").html(data['ALT'].join('/'));
 
     total = Object.values(data.GT_Summary).reduce((a, v)=>a+v)
-    console.log(Object.keys(data.GT_Summary));
     $.each(Object.keys(data.GT_Summary), function(i, v) {
         n_isotypes = data.GT_Summary[v]        
         if (v == 0) {
