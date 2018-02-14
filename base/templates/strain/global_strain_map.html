@@ -2,42 +2,40 @@
 
 
 {% block content %}
-<div class="row">
-        <div class="row text-center">
-          <div class="col-md-8 col-xsm-offset-1">
-            <h5><strong>Hover over or click a pin to see information about a <i>C. elegans</i> wild isolate</strong></h5>
-          </div>
-        </div>
-      <div class="col-md-8">
-              <div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
-      </div>
-      <div class="col-md-4">
-        <div class="panel panel-default">
-          <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
-              <ul class="list-group">
-                <li class="list-group-item">
-                <strong>
-                <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
-                            Isotype
-                </span>
-                </strong> 
-                        <div class="isotype pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
-                            Reference Strain
-                            </span></strong> 
-                            <div class="strain pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset isotype originally released with."><strong>Release</strong> <div class="release pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Lat/Lon</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right"><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Landscape</strong> <div class="landscape pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Substrate</strong> <div class="substrate pull-right"></div><div style="clear:both;"></div></li>
-                <li class="list-group-item"><strong>Sampled By</strong> <div class="sampled_by pull-right"></div><div style="clear:both;"></div></li>
-              </ul>
-        </div>
-        <a class="btn btn-primary btn-s btn-block" href='{{ url_for("strain.strain_submission_page") }}' role="button">Submit Strains</a></p>
-      </div>
-</div>
+    <div class="row">
+        <div  class="col-md-8">
+        <div id="map" style="height: 500px; width:100%"></div>
+            <div class='text-center'>
+                <small><strong>Hover over or click a pin to see information about a <i>C. elegans</i> wild isolate</strong></small>
+            </div>{# /text-center #}
+        </div>{# /col-md-8 #}
+        <div class="col-md-4">
+            <div class="panel panel-default">
+              <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
+                  <ul class="list-group">
+                    <li class="list-group-item">
+                    <strong>
+                    <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+                                Isotype
+                    </span>
+                    </strong> 
+                            <div class="isotype pull-right"></div><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><strong>                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                                Reference Strain
+                                </span></strong> 
+                                <div class="strain pull-right"></div><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset in which isotype was originally released"><strong>Release</strong> <div class="release pull-right"></div><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><strong>Latitude / Longitude</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right"><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="landscape pull-right"></div><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="substrate pull-right"></div><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><strong>Sampled By</strong> <div class="sampled_by pull-right"></div><div style="clear:both;"></div></li>
+                  </ul>
+            </div>
+            <a class="btn btn-primary btn-s btn-block" href='{{ url_for("strain.strain_submission_page") }}' role="button">Submit Strains</a></p>
+          </div>{# /col-md-4 #}
+    </div>{# /col-md-8 #}
 {% endblock %}
 
 

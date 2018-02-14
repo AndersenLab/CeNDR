@@ -472,7 +472,6 @@ class wormbase_gene_m(DictSerializable, db_2.Model):
 
     gene_summary = db_2.relationship("wormbase_gene_summary_m", backref='gene_components')
 
-
     def __repr__(self):
         return f"{self.gene_id}:{self.feature} [{self.seqname}:{self.start}-{self.end}]"
 
@@ -494,7 +493,9 @@ class wormbase_gene_summary_m(DictSerializable, db_2.Model):
     sequence_name = db_2.Column(db_2.String(30), index=True)
     biotype = db_2.Column(db_2.String(30), nullable=True)
     gene_symbol = db_2.column_property(func.coalesce(locus, sequence_name, gene_id))
+    interval = db_2.column_property(func.printf("%s:%s-%s", chrom, start, end))
     arm_or_center = db_2.Column(db_2.String(12), index=True)
+
 
     @classmethod
     def resolve_gene_id(cls, query):

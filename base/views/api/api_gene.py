@@ -3,6 +3,7 @@ from base.models2 import homologs_m, wormbase_gene_summary_m
 from base.application import app
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_, func
+from base.views.api.api_variant import variant_query
 
 
 @app.route('/api/gene/homolog/<string:query>')
@@ -86,8 +87,29 @@ def combined_search(query=""):
         results (list): List of dictionaries describing the homolog.
 
     """
-
     return query_gene(query, as_python=True) + query_homolog(query, as_python=True)
+
+
+
+@app.route('/api/gene/variants/<string:query>')
+@jsonify_request
+def gene_variants(query):
+    """Return a list of variants within a gene.
+
+    Args:
+        query: gene name or ID
+
+    Returns:
+        results (list): List of variants within a gene
+    """
+
+    gene_record = lookup_gene(query)
+    gene_variants = variant_query(gene_record.interval)
+    #for row in gene_variants:
+        # Filter ANN for annotations for gene
+    #    row['ANN'] = [x for x in row['ANN'] if gene_record.gene_id == x['gene_id']]
+    return gene_variants
+
 
 
 @app.route('/api/browser/search/<string:gene>') # Seach for IGV Browser
@@ -100,5 +122,7 @@ def api_igv_search(gene):
     return {'result': [{"chromosome": result.chrom,
             "start": result.start,
             "end": result.end}]}
+
+
 
 

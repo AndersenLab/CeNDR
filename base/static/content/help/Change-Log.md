@@ -5,9 +5,12 @@
 ### v1.2.0 (2018-XX-XX)
 
 * Moved codebase to Python 3.
-* Switched database to a single SQLite flatfile.
-* Added tooltips to report maps.
+* Switched database to a single SQLite flatfile + Google Datastore
+* Added tooltips to report allele distribution maps.
 * Colored markers on allele distribution map by whether the isotype was included in mapping.
+* BAM alignments have been added to the genome browser.
+* CRAMS files and donwloads have been removed.
+* Mapping reports have been removed from gene pages.
 
 ### v1.1.2 (2017-12-05)
 

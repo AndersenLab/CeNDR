@@ -40,6 +40,7 @@ trait = report.fetch_traits(trait_name=trait_name, latest=True)
 
 try:
     report._trait_df[['STRAIN', 'ISOTYPE', trait_name]].to_csv('df.tsv', sep='\t', index=False)
+    report._trait_df[['STRAIN', 'ISOTYPE', trait_name]].to_csv("data/phenotype.tsv.gz", sep="\t", compression='gzip', index=False)
     # Update report start time
     trait.started_on = arrow.utcnow().datetime
     trait.status = "Running"

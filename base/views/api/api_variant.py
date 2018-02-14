@@ -61,7 +61,6 @@ def variant_query(query=None, samples=["N2"]):
     Used to query a VCF and return results in a dictionary.
 
     """
-    logger.info(request.args)
     if query:
         # Query in Python
         chrom, start, end = re.split(':|\-', query)
@@ -71,12 +70,11 @@ def variant_query(query=None, samples=["N2"]):
                  'variant_impact': ['ALL'],
                  'sample_list': samples,
                  'output': "",
-                 'list-all-strains': True
+                 'list-all-strains': False
                 }
     else:
         # Query from Browser
         query = request.args
-        logger.info(query)
         query = {'chrom': query['chrom'],
                  'start': int(query['start']),
                  'end': int(query['end']),
@@ -85,7 +83,6 @@ def variant_query(query=None, samples=["N2"]):
                  'output': query['output'],
                  'list-all-strains': query['list-all-strains'] == 'true'
                 }
-        logger.info(query)
     samples = query['sample_list']
     if query['list-all-strains']:
         samples = "ALL"
@@ -140,7 +137,7 @@ def variant_query(query=None, samples=["N2"]):
 
             gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
             gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set]
-            ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
+            ANN = [x for x in ANN if x['impact'] in query['variant_impact'] or 'ALL' in query['variant_impact']]
             rec_out = {
                 "CHROM": record.CHROM,
                 "POS": record.POS,

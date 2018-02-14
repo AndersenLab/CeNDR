@@ -1,8 +1,30 @@
 <div class="row">
+    <div class='col-md-8'>
+        <br />
+        <table class='table table-bordered table-striped'>
+            <thead>
+                <tr>
+                    <th>File</th>
+                    <th>Filename</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <strong>Strain Data</strong>
+                        <p>
+                            Strain, isotype, latitude, longitude, date isolated, and additional information about wild-isolate strains.
+                        </p>
+                    </td>
+                    <td><a href="{{ url_for('strain.strain_metadata') }}" type="button">strain_data.tsv</a></td>
+                </tr>
+        </table>
+    </div>
+
     <div class="col-md-4">
         <h3>Alignment Data</h3>
         <p>We aligned all wild isolate genomes to the WS245 version of the N2 genome. These data are stored using the
-            <abbr data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</abbr>  format.</p>
+            <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</span>  format.</p>
         <p><a href="https://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data</a></p>
             <h4>Downloading All Alignment Data</h4>
             <p>You can download all alignment data using the script below. Before this script will work, you need to download and install <strong>wget</strong>. We recommend using <a href="https://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "primary.help_item",filename="FAQ ")}}">FAQ</a> for details on installing <strong>wget</strong>.</p>

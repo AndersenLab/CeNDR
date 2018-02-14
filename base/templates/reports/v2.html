@@ -100,11 +100,6 @@
 
 <div class="panel panel-default">
     <div class="panel-body">
-        <div class="row">
-            <div class='col-md-12'>
-            <h5>Report summary</h5>
-            </div>
-        </div>
         <div class='row'>
             <div class='col-md-6'>
                 {% from "macros.html" import render_table %}
@@ -112,8 +107,7 @@
                                ['Trait Name', trait.trait_name],
                                ['Data release', trait.version_link()],
                                ['CeNDR version', trait.CENDR_VERSION],
-                               ['Report version', trait.REPORT_VERSION],
-                               ['cegwas version','']] %}
+                               ['Report version', trait.REPORT_VERSION]] %}
                 {{ render_table(header=None, rows=rows, table_class='table-striped table-bordered meta-table') }}
 
                 {% set rows = [['Strains for trait "{}"'.format(trait.trait_name), strain_count],
@@ -180,7 +174,16 @@
 
         <div class="row">
             <div class='col-md-12'>
-            <h5>Data</h5>
+                
+                <h5>Data</h5>
+                <ul>
+                    <li><strong><a href='{{ trait.file_url("interval_summary.tsv.gz") }}'>Phenotype Data</a></strong></li>
+                {% if trait.status == 'Complete' %}
+                    <li><strong><a href='{{ trait.file_url("mapping.tsv.gz") }}'>Mapping</a></strong></li>
+                    <li><strong><a href='{{ trait.file_url("interval_summary.tsv.gz") }}'>Interval Summary</a></strong></li>
+                    <li><strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Interval Variants</a></strong></li>
+                {% endif %}
+                </ul>
             </div>
         </div>
         <div class='row'>
@@ -201,225 +204,220 @@
         {% endfor %}
     </div>
 </div>
+{% if trait.status == 'Complete' %}
+    <div id="report" data-toggle="tab">
+        <nav id="report_nav" data-offset-top="385" data-spy="affix" class="navbar navbar-default" style="z-index:10000">
+          <div class="container-fluid">
+           <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="#phenotype">Phenotype</a></li>
+                <li><a href="#manhattan">Manhattan</a></li>
+                {% if n_peaks > 0 %}
+                <li><a href="#intervals">Intervals</a></li>
+                <li><a href="#pxg">PxG</a></li>
+                {% if n_peaks > 1 %}
+                <li><a href="#ld">LD</a></li>
+                {% endif %}
+                <li><a href="#peak_summary">Peak Summary</a></li>
+                {% endif %}
+              </ul>
+            </div><!-- /.navbar-collapse -->
+          </div><!-- /.container-fluid -->
+        </nav>
 
-<div id="report" data-toggle="tab">
-    <nav id="report_nav" data-offset-top="385" data-spy="affix" class="navbar navbar-default" style="z-index:10000">
-      <div class="container-fluid">
-       <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="#phenotype">Phenotype</a></li>
-            <li><a href="#manhattan">Manhattan</a></li>
-            {% if n_peaks > 0 %}
-            <li><a href="#intervals">Intervals</a></li>
-            <li><a href="#pxg">PxG</a></li>
-            {% if n_peaks > 1 %}
-            <li><a href="#ld">LD</a></li>
-            {% endif %}
-            <li><a href="#peak_summary">Peak Summary</a></li>
-            {% endif %}
-          </ul>
-        </div><!-- /.navbar-collapse -->
-      </div><!-- /.container-fluid -->
-    </nav>
+        <h2 id="phenotype" name="phenotype">Phenotype</h2> 
+        {{ phenotype_plot|safe }}
 
-    <h2 id="phenotype" name="phenotype">Phenotype</h2> 
-    {{ phenotype_plot|safe }}
+        {% if trait.is_significant %}
 
-    {% if trait.is_significant %}
+          Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
 
-      Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
+        {% else %}
 
-    {% else %}
+          <p>Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped.</p>
 
-      <p>Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped.</p>
+          <p>If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.</p>
 
-      <p>If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.</p>
+        {% endif %}
 
-    {% endif %}
+        <h2 id="manhattan" name="Manhattan">Manhattan</h2> 
 
-    <h2 id="manhattan" name="Manhattan">Manhattan</h2> 
+        <img class='img img-responsive'src='{{ trait.file_url("Manhattan.png") }}' alt='Manhattan Plot' />
 
-    <img class='img img-responsive'src='{{ trait.file_url("Manhattan.png") }}' alt='Manhattan Plot' />
+        {% if trait.is_significant %}
 
-    {% if trait.is_significant %}
+        <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
 
-    <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
+        {% else %}
 
-    {% else %}
+        <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as <img src='/static/img/report/bf.png' style="height: 30px;" />.</p>
 
-    <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as <img src='/static/img/report/bf.png' style="height: 30px;" />.</p>
+        {% endif %}
 
-    {% endif %}
+        <h2 id="pxg">Phenotype-by-Genotype</h2>
 
-    <h2 id="pxg">Phenotype-by-Genotype</h2>
+        {{ pxg_plot|safe }}
 
-    {{ pxg_plot|safe }}
-
-    <p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. </p>
+        <p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. </p>
 
 
-    {% if n_peaks > 1 %}
-    <h2 id="ld">Linkage Disequilibrium</h2>
-    <div class='row'>
-        <div class='col-md-8 col-md-offset-2 text-center'>
-            <br />
-            <img class='img img-responsive' src='{{ trait.file_url("LD.png") }}' alt='LD Plot' />
-            <br />
-            <img style='width: 50%;' src='https://elegansvariation.org/static/img/report/tajimad.png' alt="LD Calc" />
-            <br />
+        {% if n_peaks > 1 %}
+        <h2 id="ld">Linkage Disequilibrium</h2>
+        <div class='row'>
+            <div class='col-md-8 col-md-offset-2 text-center'>
+                <br />
+                <img class='img img-responsive' src='{{ trait.file_url("LD.png") }}' alt='LD Plot' />
+                <br />
+                <img style='width: 50%;' src='https://elegansvariation.org/static/img/report/tajimad.png' alt="LD Calc" />
+                <br />
+            </div>
         </div>
-    </div>
-    <p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers.</p>
-    <p>D is the raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
+        <p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers.</p>
+        <p>D is the raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
 
 
-    {% endif %}
+        {% endif %}
 
-    <h2 id="peak_summary" class='scroll-title'>Peak Summary</h2>
+        <h2 id="peak_summary" class='scroll-title'>Peak Summary</h2>
 
-    <p><strong>Switch between peaks below.</strong></p>
-    </div>{#/ scrollspy #}
-    <!-- Nav tabs -->
-    <ul class="nav nav-tabs" role="tablist">
-    {% for peak in peak_summary.to_dict('records') %}
-        <li role="presentation" peak="{{ peak.peak_pos }}" class="peak-tab {% if loop.first %} active{% endif %}">
-            <a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">
-                {{ peak.interval }}
-            </a>
-        </li>
-    {% endfor %}
-    </ul>
+        <p><strong>Switch between peaks below.</strong></p>
+        </div>{#/ scrollspy #}
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+        {% for peak in peak_summary.to_dict('records') %}
+            <li role="presentation" peak="{{ peak.peak_pos }}" class="peak-tab {% if loop.first %} active{% endif %}">
+                <a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">
+                    {{ peak.interval }}
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
 
-    {# Tab panes #}
-    <div class="tab-content">
-    {% for peak in peak_summary.to_dict('records') %}
-        <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
-            <h3>Interval Summary</h3>
-            <ul>
-              <li><strong>Peak Interval</strong> &nbsp;{{ peak.interval }}</li>
-              <li><strong>Peak Position</strong> &nbsp;{{ peak.peak_pos }}</li>
-              <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%</li>
-            </ul>
-            <div class="row">
-                <div class="col-md-12">
-                    <strong><a href='{{ trait.file_url("interval_summary.tsv.gz") }}'>Download Table</a></strong>
-                    <table class="peak_summary table table-hover table-striped table-nice" style="table-layout: fixed">
-                        <thead>
-                            <tr class='text-nowrap'>
-                                <th>Biotype</th>
-                                <th class='text-right'># Genes</th>
-                                <th class='text-right'># Genes w/ variants</th>
-                                {% for impact in ["MODIFIER", "LOW", "MODERATE", "HIGH"] %}
-                                <th class='text-right'>
-                                    <abbr data-toggle='tooltip' title='Genes with one or more {{ impact.lower() }}-impact variants.'>
-                                        {{ impact }} +
-                                    </abbr>
-                                </th>
-                                {% endfor %}
-                                <th class='text-right'># Variants</th>
-                            </tr>
-                        </thead>
-                        <tbody class='peak_{{ loop.index0 }} text-right'>
-                        {% set interval_summary_peak = interval_summary[interval_summary.interval == peak.interval].drop('interval', axis=1) %}
-                            <tr class='text-bold'>
-                                {% for col in interval_summary_peak %}
-                                    {% if col == 'biotype' %}
-                                        <td><strong>Total</strong></td>
-                                    {% else %}
-                                        <td><strong>{{ interval_summary_peak[col].sum() }}</strong></td>
-                                    {% endif %}
-
-                                {% endfor %}
-                            </tr>
-                        {% for i, row in interval_summary_peak.iterrows() %}
-                            <tr>
-                                <td class='text-left'>
-                                    {% if row.biotype in BIOTYPES.keys() %}
-                                        <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[row.biotype] }}'>{{ row.biotype }}</abbr>
-                                    {% else %}
-                                        {{ row.biotype }}
-                                    {% endif %}
-                                </td>
-                                {% for k, i in list(row.iteritems())[1:] %}
-                                        <td>{{ i }}</td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-              
-                    <h3>Variants</h3>
-
-                    <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
-
-                    <strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Download Table</a></strong>
-                    <table class="table table-hover table-striped table-nice" id="variant_list" style="border: 1px solid #b3b3b3;">
-                        <thead>
-                            <tr>
-                                <th>Gene</th>
-                                <th><strong>CHROM:POS (REF/ALT)</strong></th>
-                                <th><strong>Impact</strong></th>
-                                <th><strong>Effect</strong></th>
-                                <th><strong>AA Change</strong></th>
-                                <th><abbr data-toggle='tooltip' data-placement='top' data-original-title="The maximum p-value for variants in each gene from Spearman's Rank-Sum correlation test with trait data">-log10( p-value )</abbr></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in variant_correlation[variant_correlation.peak == peak.interval].to_dict('records') %}
-                                {% if loop.changed(row['gene_id']) %}
-                                <tr>
-                                    <td colspan="6" style='width: 100%; border-top: 2px ridge #999999;'>
-                                        <div class='pull-right'>
-                                            Max -log10(p-value) = {{ row["max_gene_corr_p"]|round(3) }} <br />
-                                            {{ row['n_variants'] }} variant(s)
-                                        </div>
-                                        {% if row["gene_name"] %}
-                                            <strong>
-                                                <a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}">
-                                                    {{ row["gene_name"] }}
-                                                </a>
-                                            </strong>
-                                            <br /> {{ row["gene_id"] }}</a>
-                                        {% else %}
-                                            <strong><a href="{{ url_for("gene.gene", gene_name=row['gene_id']) }}">{{ row["gene_id"] }}</a></strong>
-                                        {% endif %} -- <em>{{ row['transcript_biotype'] }}</em>
-                                        <br />
-                                    </td>
+        {# Tab panes #}
+        <div class="tab-content">
+        {% for peak in peak_summary.to_dict('records') %}
+            <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
+                <h3>Interval Summary</h3>
+                <ul>
+                  <li><strong>Peak Interval</strong> &nbsp;{{ peak.interval }}</li>
+                  <li><strong>Peak Position</strong> &nbsp;{{ peak.peak_pos }}</li>
+                  <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%</li>
+                </ul>
+                <div class="row">
+                    <div class="col-md-12">
+                        <strong><a href='{{ trait.file_url("interval_summary.tsv.gz") }}'>Download Table</a></strong>
+                        <table class="peak_summary table table-hover table-striped table-nice" style="table-layout: fixed">
+                            <thead>
+                                <tr class='text-nowrap'>
+                                    <th>Biotype</th>
+                                    <th class='text-right'># Genes</th>
+                                    <th class='text-right'># Genes w/ variants</th>
+                                    {% for impact in ["MODIFIER", "LOW", "MODERATE", "HIGH"] %}
+                                    <th class='text-right'>
+                                        <abbr data-toggle='tooltip' title='Genes with one or more {{ impact.lower() }}-impact variants.'>
+                                            {{ impact }} +
+                                        </abbr>
+                                    </th>
+                                    {% endfor %}
+                                    <th class='text-right'># Variants</th>
                                 </tr>
-                                {% endif %}
-                                <tr class='corr-row {{ TABLE_COLORS[row["impact"]] }} tr_row'>
-                                    <td></td>
-                                    <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"] }} / {{ row["ALT"] }})</td>
-                                    <td>{{ row["impact"] }}</td>
-                                    <td>{{ row["effect"] }}</td>
-                                    <td>{{ row["aa_change"] }}</td>
-                                    <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
+                            </thead>
+                            <tbody class='peak_{{ loop.index0 }} text-right'>
+                            {% set interval_summary_peak = interval_summary[interval_summary.interval == peak.interval].drop('interval', axis=1) %}
+                                <tr class='text-bold'>
+                                    {% for col in interval_summary_peak %}
+                                        {% if col == 'biotype' %}
+                                            <td class='text-left'><strong>Total</strong></td>
+                                        {% else %}
+                                            <td class='text-right'><strong>{{ interval_summary_peak[col].sum() }}</strong></td>
+                                        {% endif %}
+
+                                    {% endfor %}
+                                </tr>
+                            {% for i, row in interval_summary_peak.iterrows() %}
+                                <tr>
+                                    <td class='text-left'>
+                                        {% if row.biotype in BIOTYPES.keys() %}
+                                            <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[row.biotype] }}'>{{ row.biotype }}</abbr>
+                                        {% else %}
+                                            {{ row.biotype }}
+                                        {% endif %}
+                                    </td>
+                                    {% for k, i in list(row.iteritems())[1:] %}
+                                            <td>{{ i }}</td>
+                                    {% endfor %}
                                 </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>{# /col-md-12 #}
-            </div>{# /row #}
-        </div>{#/ tab-panel #}
-        {% endfor %}
-    </div>{# /tab-content #}
+                            </tbody>
+                        </table>
+                  
+                        <h3>Variants</h3>
 
+                        <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
 
-
-
-    {% include 'reports/geo_map.html' %}
-
-    {% include 'reports/tajima.html' %}
-
-
-
-</div>
+                        <strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Download Table</a></strong>
+                        <table class="table table-hover table-striped table-nice" id="variant_list" style="border: 1px solid #b3b3b3;">
+                            <thead>
+                                <tr>
+                                    <th>Gene</th>
+                                    <th><strong>CHROM:POS (REF/ALT)</strong></th>
+                                    <th><strong>Impact</strong></th>
+                                    <th><strong>Effect</strong></th>
+                                    <th><strong>AA Change</strong></th>
+                                    <th><abbr data-toggle='tooltip' data-placement='top' data-original-title="The maximum p-value for variants in each gene from Spearman's Rank-Sum correlation test with trait data">-log10( p-value )</abbr></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in variant_correlation[variant_correlation.peak == peak.interval].to_dict('records') %}
+                                    {% if loop.changed(row['gene_id']) %}
+                                    <tr>
+                                        <td colspan="6" style='width: 100%; border-top: 2px ridge #999999;'>
+                                            <div class='pull-right'>
+                                                Max -log10(p-value) = {{ row["max_gene_corr_p"]|round(3) }} <br />
+                                                {{ row['n_variants'] }} variant(s)
+                                            </div>
+                                            {% if row["gene_name"] %}
+                                                <strong>
+                                                    <a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}">
+                                                        {{ row["gene_name"] }}
+                                                    </a>
+                                                </strong>
+                                                <br /> {{ row["gene_id"] }}</a>
+                                            {% else %}
+                                                <strong><a href="{{ url_for("gene.gene", gene_name=row['gene_id']) }}">{{ row["gene_id"] }}</a></strong>
+                                            {% endif %} -- <em>{{ row['transcript_biotype'] }}</em>
+                                            <br />
+                                        </td>
+                                    </tr>
+                                    {% endif %}
+                                    <tr class='corr-row {{ TABLE_COLORS[row["impact"]] }} tr_row'>
+                                        <td></td>
+                                        <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"] }} / {{ row["ALT"] }})</td>
+                                        <td>{{ row["impact"] }}</td>
+                                        <td>{{ row["effect"] }}</td>
+                                        <td>{{ row["aa_change"] }}</td>
+                                        <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>{# /col-md-12 #}
+                </div>{# /row #}
+            </div>{#/ tab-panel #}
+            {% endfor %}
+        </div>{# /tab-content #}
+        {% include 'reports/geo_map.html' %}
+        {% include 'reports/tajima.html' %}
+    </div>{# /report #}
+    {% else %}
+    <strong>Processing...</strong>
+    {% endif %}{# /end if report is 'Complete' #}
 {% endblock %}
 
 {% block script %}
+{% if trait.status == 'Complete' %}
 <script>
-
 {# Load first peak data #}
 var isotypes = {{ isotypes|tojson }}
 var chrom = "{{ first_peak.chrom }}"
@@ -459,7 +457,6 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
   update_geo_map();
   update_tajima_plot();
 });
-
-
+{% endif %}
 </script>
 {% endblock %}
