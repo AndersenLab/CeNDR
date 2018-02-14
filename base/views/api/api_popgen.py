@@ -48,7 +48,7 @@ def get_allele_geo(chrom, pos, isotypes=None):
             isotypes
     """
     try:
-        variant = variant_query(f"{chrom}:{pos}-{pos+1}")[0]
+        variant = variant_query(f"{chrom}:{pos}-{pos+1}", list_all_strains=True)[0]
     except IndexError:
         return []
 

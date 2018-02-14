@@ -56,7 +56,7 @@ ann_cols = ['allele',
 
 @app.route('/api/variant', methods=["GET", "POST"])
 @jsonify_request
-def variant_query(query=None, samples=["N2"]):
+def variant_query(query=None, samples=["N2"], list_all_strains=False):
     """
     Used to query a VCF and return results in a dictionary.
 
@@ -70,7 +70,7 @@ def variant_query(query=None, samples=["N2"]):
                  'variant_impact': ['ALL'],
                  'sample_list': samples,
                  'output': "",
-                 'list-all-strains': False
+                 'list-all-strains': list_all_strains
                 }
     else:
         # Query from Browser
@@ -81,7 +81,7 @@ def variant_query(query=None, samples=["N2"]):
                  'variant_impact': query['variant_impact'].split("_"),
                  'sample_list': query['sample_tracks'].split("_"),
                  'output': query['output'],
-                 'list-all-strains': query['list-all-strains'] == 'true'
+                 'list-all-strains': list_all_strains or query['list-all-strains'] == 'true'
                 }
     samples = query['sample_list']
     if query['list-all-strains']:
