@@ -1,55 +1,35 @@
 <div class="row">
-    <div class='col-md-8'>
-        <br />
-        <table class='table table-bordered table-striped'>
-            <thead>
-                <tr>
-                    <th>File</th>
-                    <th>Filename</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <strong>Strain Data</strong>
-                        <p>
-                            Strain, isotype, latitude, longitude, date isolated, and additional information about wild-isolate strains.
-                        </p>
-                    </td>
-                    <td><a href="{{ url_for('strain.strain_metadata') }}" type="button">strain_data.tsv</a></td>
-                </tr>
-        </table>
-    </div>
-
     <div class="col-md-4">
         <h3>Alignment Data</h3>
-        <p>We aligned all wild isolate genomes to the WS245 version of the N2 genome. These data are stored using the
-            <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</span>  format.</p>
+        <p>Wild isolate genomes are aligned to WS245 version of the N2 genome. These data are stored using the
+            <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</span>  format. BAMs are available in the table below.</p> 
         <p><a href="https://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data</a></p>
             <h4>Downloading All Alignment Data</h4>
-            <p>You can download all alignment data using the script below. Before this script will work, you need to download and install <strong>wget</strong>. We recommend using <a href="https://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "primary.help_item",filename="FAQ ")}}">FAQ</a> for details on installing <strong>wget</strong>.</p>
+            <p>You can download all alignment data using the script below. Before this script will work, you need to download and install <strong>wget</strong>. We recommend using <a href="https://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="https://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "primary.help_item",filename="FAQ")}}">FAQ</a> for details on installing <strong>wget</strong>.</p>
             <p><a href="{{ url_for("data.download_script") }}">download_bams.sh</a></p>
+        <h3>Methods</h3>
+        <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('primary.help_item', filename = " Methods ") }}">here</a>.
     </div>
     <div class="col-md-4">
         <h3>Variant Data</h3>
         <p>We used samtools to identify single-nucleotide variant (SNV) sites as compared to the N2 reference genome (WS245). Variant data are provided as
-            <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> or tab-delimited files.</p>
+            <span class='tooltip-item' data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</span> or tab-delimited files.</p>
         <p><a href="https://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat">Learn more about VCF files</a></p>
         <h4>VCF</h4>
-        <p>The file below is a single
-            <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> containing SNVs for all wild isolates.</p>
-        <p>
-            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/WI.{{ selected_release }}.vcf.gz"><img src="{{ url_for('static',filename = 'img/icons/vcf.png')}}" style="width: 50px; margin-right:20px; margin-bottom:10px;" class="pull-left"></a>
-            <strong style="line-height:50px;"><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/WI.{{ selected_release }}.vcf.gz">WI.{{ selected_release }}.vcf.gz</a></strong></p>
+        <p>VCFs generated from the variant calling pipeline are provided below.</p>
+        <ul>
+            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filtered.vcf.gz">Soft-filtered</a></strong> - Includes all variants and annotations. The QC status of variants is included.</li>
+            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filtered.vcf.gz">Hard-filtered</a></strong> - Variants and genotypes that fail QC are removed.</li>
+            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.imputed.vcf.gz">Imputed</a> - An imputed dataset generated from the hard-filtered VCF.</strong></li>
+        </ul>
+
         <div style="clear:both;"></div>
-        <p>You can also access specific regions of
-            <abbr data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</abbr> files (rather then the entire file) from the command line:
+        <p>You can programmatically access specific regions of
+            <span class='tooltip-item' data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</span> files (rather then the entire file) from the command line:
             <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
                 See Example
             </button>
         </p>
-        <h4>Methods</h4>
-        <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('primary.help_item', filename = " Methods ") }}">here</a>.
     </div>
     </br>
     <div class="col-md-4">

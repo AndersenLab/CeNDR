@@ -372,6 +372,7 @@ class strain_m(DictSerializable, db_2.Model):
     __tablename__ = "strain"
     strain = db_2.Column(db_2.String(25), primary_key=True)
     reference_strain = db_2.Column(db_2.Boolean(), index=True)
+    sequenced = db_2.Column(db_2.Boolean(), index=True, nullable=True)
     isotype = db_2.Column(db_2.String(25), index=True, nullable=True)
     previous_names = db_2.Column(db_2.String(100), nullable=True)
     source_lab = db_2.Column(db_2.String(), nullable=True)
@@ -388,6 +389,12 @@ class strain_m(DictSerializable, db_2.Model):
     isolation_date_comment = db_2.Column(db_2.String(), nullable=True)
     notes = db_2.Column(db_2.String(), nullable=True)
     sets = db_2.Column(db_2.String(), nullable=True)
+    c_label = db_2.Column(db_2.String(), nullable=True)
+    s_label = db_2.Column(db_2.String(), nullable=True)
+    substrate_temp = db_2.Column(db_2.Float())
+    ambient_temp = db_2.Column(db_2.Float())
+    substrate_moisture = db_2.Column(db_2.Float())
+    ambient_humidity = db_2.Column(db_2.Float())
 
     def __repr__(self):
         return self.strain
@@ -445,8 +452,19 @@ class strain_m(DictSerializable, db_2.Model):
                                .reset_index()
         return df
 
+
+    @classmethod
+    def release_summary(cls, release):
+        """
+            Returns isotype and strain count for a data release.
+        """
+        counts = {'strain_count': cls.query.filter((cls.release <= release)).count(),
+                  'isotype_count': cls.query.filter(cls.release <= release).group_by(cls.isotype).count()}
+        return counts
+
+
     def as_dict(self):
-        return { c.name: getattr(self, c.name) for c in self.__table__.columns}
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 
