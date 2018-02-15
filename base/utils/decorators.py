@@ -13,10 +13,8 @@ def jsonify_request(func):
     def jsonify_the_request(*args, **kwargs):
         """
             Wraps API functions
-
-            If you provide an 'as_python' = True
-            argument, the response will be a python object
-            and the as_python argument will be discarded.
+            and automatically jsonifies if
+            its an API call
         """
         if func.__name__ == request.endpoint:
             return jsonify(func(*args, **kwargs))

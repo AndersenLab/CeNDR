@@ -38,7 +38,21 @@ var icon_hover = L.icon({
     popupAnchor: [-3, -76]
 });
 
-gt_icon = {0: icon_norm, 2: icon_hover}
+var icon_missing = L.icon({
+    iconUrl: '/static/img/icons/missing.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+var icon_heterozygous = L.icon({
+    iconUrl: '/static/img/icons/heterozygous.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+gt_icon = {0: icon_norm, 1: icon_heterozygous, 2: icon_hover, 3: icon_missing}
 
 ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
 MB_ATTR = 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
@@ -69,6 +83,7 @@ function update_geo_map() {
     markers = [];
     request_url = `/api/popgen/gt/${chrom}/${pos}`;
     $.getJSON(request_url, function(data) {
+        console.log(data);
         $.each(data.GT, function(i, gt) {
             var opacity = (isotypes.indexOf(gt.SAMPLE) > 0 ? 1.0 : 0.3)
             marker = L.marker([gt.latitude,

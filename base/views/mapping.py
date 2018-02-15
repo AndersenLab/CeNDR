@@ -161,8 +161,19 @@ def report(report_slug, trait_name=None, rerun=None):
                 VERSION 1
             """
             phenotype_data = trait.get_gs_as_dataset("tables/phenotype.tsv")
+            isotypes = list(phenotype_data.iloc[:,1].values)
             phenotype_data = list(phenotype_data.iloc[:,3].values)
-            VARS.update({'phenotype_data': phenotype_data})
+            VARS.update({'phenotype_data': phenotype_data,
+                         'isotypes': isotypes})
+            if trait.is_significant:
+                peak_summary = trait.get_gs_as_dataset("tables/mapping_intervals.tsv")
+                peak_summary['interval'] = peak_summary.apply(lambda row: f"{row.CHROM}:{row.startPOS}-{row.endPOS}", axis=1)
+                first_peak = peak_summary.iloc[0]
+                logger.info(first_peak)
+                #1/0
+                VARS.update({'peak_summary': peak_summary, 
+                             'first_peak': first_peak,
+                             'n_peaks': len(peak_summary)})
         elif trait.REPORT_VERSION == 'v2':
             """
                 VERSION 2

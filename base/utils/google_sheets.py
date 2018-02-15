@@ -8,7 +8,7 @@ def get_service_account_credentials():
     """
         Fetch service account credentials for google sheets
     """
-    return json.loads(open("client-secret.json", 'r').read())
+    return json.loads(open("env_config/client-secret.json", 'r').read())
 
 
 def authenticate_google_sheets():

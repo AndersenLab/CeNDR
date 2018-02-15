@@ -43,7 +43,7 @@ try:
     report._trait_df[['STRAIN', 'ISOTYPE', trait_name]].to_csv("data/phenotype.tsv.gz", sep="\t", compression='gzip', index=False)
     # Update report start time
     trait.started_on = arrow.utcnow().datetime
-    trait.status = "Running"
+    trait.status = "running"
     trait.save()
 
     comm = ['Rscript', 'pipeline.R']
@@ -68,12 +68,12 @@ try:
 
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))
-    trait.status = "Complete"
+    trait.status = "complete"
 except Exception as e:
     traceback.print_exc()
     trait.error_message = str(e)
     trait.error_traceback = traceback.format_exc()
-    trait.status = "Error"
+    trait.status = "error"
     trait.completed_on = arrow.utcnow().datetime
 finally:
     trait.completed_on = arrow.utcnow().datetime
