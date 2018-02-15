@@ -178,7 +178,7 @@
                 <h5>Data</h5>
                 <ul>
                     <li><strong><a href='{{ trait.file_url("interval_summary.tsv.gz") }}'>Phenotype Data</a></strong></li>
-                {% if trait.status == 'Complete' %}
+                {% if trait.status == 'complete' %}
                     <li><strong><a href='{{ trait.file_url("mapping.tsv.gz") }}'>Mapping</a></strong></li>
                     <li><strong><a href='{{ trait.file_url("interval_summary.tsv.gz") }}'>Interval Summary</a></strong></li>
                     <li><strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Interval Variants</a></strong></li>
@@ -204,7 +204,7 @@
         {% endfor %}
     </div>
 </div>
-{% if trait.status == 'Complete' %}
+{% if trait.status == 'complete' %}
     <div id="report" data-toggle="tab">
         <nav id="report_nav" data-offset-top="385" data-spy="affix" class="navbar navbar-default" style="z-index:10000">
           <div class="container-fluid">
@@ -416,7 +416,7 @@
 {% endblock %}
 
 {% block script %}
-{% if trait.status == 'Complete' %}
+{% if trait.status == 'complete' %}
 <script>
 {# Load first peak data #}
 var isotypes = {{ isotypes|tojson }}

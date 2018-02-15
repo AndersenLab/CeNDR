@@ -74,19 +74,23 @@
 {% block content %}
 <div class="row">
       <div class="col-md-12">
-      <div class="btn-group" role="group">
-        {% for trait in report_data %} 
+        {% for current_trait in report.trait_list %} 
 
-          <a href="{{ url_for('trait_view', report_slug = report_url_slug, trait_slug = trait.trait_slug) }}" type="button" class="btn btn-sm {% if trait.trait_slug == trait_slug %} btn-primary {% else %} btn-link {% endif %}">{% if trait.interval_start %}<strong>{{ trait.trait_name }}</strong>{% else %}{{ trait.trait_name }}{% endif %}</a>     
+            <a href="{{ url_for('mapping.report', report_slug = report.report_slug, trait_name = current_trait) }}" type="button" class="btn btn-sm {% if current_trait == trait_name %}btn-primary{% else %}btn-link{% endif %} ">
+
+            {% if trait.is_significant %}
+                <strong>{{ current_trait }}</strong>
+            {% else %}
+                {{ current_trait }}
+            {% endif %}
+
+            </a>
           
         {% endfor %}
-
-      </div>
       </div>
 </div>
 
-{% if trait_data.status == "complete" %}
-{% cache 50, report_slug, trait_slug, config['VERSION'] %}
+{% if trait.status == "complete" %}
 <div class="row">
 
 <div class="col-md-12">
@@ -97,9 +101,7 @@
   <div class='col-md-6'>
   <strong>Data</strong>
     <ul>
-      {% if 'phenotype.tsv' in report_files %}
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/phenotype.tsv">Phenotype Data</a></strong></li>
-      {% endif %}
 
       {% if 'mapping.tsv' in report_files %}
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/mapping.tsv">Mapping</a></strong></li>
@@ -109,9 +111,9 @@
       <li><strong><a href='{{ url_for('interval_download', report_slug = report_slug, trait_slug = trait_slug) }}'>Variant Correlation</a></strong></li>
       {% endif %}
 
-      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ report_data[0].version }}/cegwas/snps.Rda'>Mapping SNVs</a></strong></li>
+      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ trait.DATASET_RELEASE }}/cegwas/snps.Rda'>Mapping SNVs</a></strong></li>
 
-      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ report_data[0].version }}/cegwas/kinship.Rda'>Kinship Matrix</a></strong></li>
+      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ trait.DATASET_RELEASE }}/cegwas/kinship.Rda'>Kinship Matrix</a></strong></li>
 
 
     </ul>
@@ -119,11 +121,9 @@
     <div class='col-md-6'>
     <strong>Info</strong>
     <ul>
-      <li><strong>Release</strong>: {{ report_data[0].version | format_release }}</li>
-      <li><strong>Availabity</strong>: {% if report_data[0].release == 0 %}
+      <li><strong>Release</strong>: {{ trait.DATASET_RELEASE }}</li>
+      <li><strong>Availabity</strong>: {% if report.is_public %}
                                             Public
-                                         {% elif report_data[0].release == 1 %}
-                                            Embargo
                                          {% else %}
                                             Private
                                          {% endif %}</li>
@@ -164,7 +164,7 @@
 <div id ="vis"></div>
 
 <script>
-var phenotype_data = {{ phenotype_data|tojson}};
+var phenotype_data = {{ phenotype_data|tojson }};
 
 var phenotype_histogram = [
   {
@@ -205,15 +205,12 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 <a name="manhattan"></a>
 <h2 id="manhattan">Manhattan Plot</h2>
 
+<img class='img img-responsive'src='{{ trait.file_url("figures/Manhattan.png") }}' alt='Manhattan Plot' />
 {% if mapping_results|length > 0 %}
-
-<img class="report" src="{{ base_url }}/figures/Manhattan.png" />
 
 <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
 
 {% else %}
-
-<img class="report" src="{{ base_url }}/figures/Manhattan.png" />
 
 <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as <img src='/static/img/report/bf.png' style="height: 30px;" />.</p>
 
@@ -435,7 +432,6 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
   </div>
 
 {% endif %}
-{% endcache %}
 {% else %}
   <div class="progress">
     <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
@@ -450,7 +446,7 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 {% block script %}
 <script>
 
-{% if trait_data.status != "complete" %}
+{% if trait.status != "complete" %}
 prog = Array()
 prog["queue"] = ""
 prog["Initializing"] = "5%"

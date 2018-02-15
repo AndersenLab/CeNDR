@@ -87,7 +87,7 @@ def combined_search(query=""):
         results (list): List of dictionaries describing the homolog.
 
     """
-    return query_gene(query, as_python=True) + query_homolog(query, as_python=True)
+    return query_gene(query) + query_homolog(query)
 
 
 
@@ -118,7 +118,7 @@ def api_igv_search(gene):
     """
         API gene search for IGV
     """
-    result = lookup_gene(gene, as_python=True)
+    result = lookup_gene(gene)
     return {'result': [{"chromosome": result.chrom,
             "start": result.start,
             "end": result.end}]}

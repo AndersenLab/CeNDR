@@ -1,4 +1,3 @@
-import hashlib
 import decimal
 import os
 import time
@@ -11,7 +10,6 @@ from base.constants import BIOTYPES, TABLE_COLORS
 from base.application import autoconvert
 from base.models2 import report_m, trait_m
 from datetime import date, datetime
-import pytz
 from dateutil.relativedelta import relativedelta
 from peewee import JOIN
 from flask import render_template, request, redirect, url_for, abort
@@ -61,7 +59,6 @@ def mapping():
             'form': form}
 
     user = session.get('user')
-    logger.info(type(form.is_public.data))
     if form.validate_on_submit() and user:
         form.data.pop("csrf_token")
         report_slug = slugify(form.report_name.data)
@@ -148,51 +145,61 @@ def report(report_slug, trait_name=None, rerun=None):
     # Fetch trait and report data
     trait = report.fetch_traits(trait_name=trait_name)
 
-    phenotype_plot = plotly_distplot(report._trait_df, trait_name)
-
-
     VARS = {
         'title': report.report_name,
         'subtitle': trait_name,
         'trait_name': trait_name,
         'report': report,
         'trait': trait,
-        'strain_count': report.trait_strain_count(trait_name),
-        'phenotype_plot': phenotype_plot,
-        'isotypes': list(report._trait_df.ISOTYPE.values),
         'BIOTYPES': BIOTYPES,
         'TABLE_COLORS': TABLE_COLORS
     }
+    logger.info(trait.__dict__)
+    if trait.status == 'complete':
+        if trait.REPORT_VERSION == 'v1':
+            """
+                VERSION 1
+            """
+            phenotype_data = trait.get_gs_as_dataset("tables/phenotype.tsv")
+            phenotype_data = list(phenotype_data.iloc[:,3].values)
+            VARS.update({'phenotype_data': phenotype_data})
+        elif trait.REPORT_VERSION == 'v2':
+            """
+                VERSION 2
+            """
+            # If the mapping is complete:
+            # Phenotype plot
+            phenotype_plot = plotly_distplot(report._trait_df, trait_name)
+            # Fetch datafiles for complete runs
+            peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
+            try:
+                first_peak = peak_summary.iloc[0]
+                chrom, start, end = re.split(":|\-", first_peak.interval)
+                first_peak['chrom'] = chrom
+                first_peak['pos'] = int(first_peak['peak_pos'].split(":")[1])
+                first_peak['start'] = start
+                first_peak['end'] = end
+            except:
+                first_peak = None
 
-    # If the mapping is complete:
-    if trait.status == 'Complete':
-        # Fetch datafiles for complete runs
-        peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
-        try:
-            first_peak = peak_summary.iloc[0]
-            chrom, start, end = re.split(":|\-", first_peak.interval)
-            first_peak['chrom'] = chrom
-            first_peak['pos'] = int(first_peak['peak_pos'].split(":")[1])
-            first_peak['start'] = start
-            first_peak['end'] = end
-        except:
-            first_peak = None
+            interval_summary = trait.get_gs_as_dataset("interval_summary.tsv.gz") \
+                                    .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
 
-        interval_summary = trait.get_gs_as_dataset("interval_summary.tsv.gz") \
-                                .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
+            peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv")
+            peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
+            VARS.update({'pxg_plot': pxg_plot(peak_marker_data, trait_name),
+                         'interval_summary': interval_summary,
+                         'variant_correlation': trait.get_gs_as_dataset("interval_variants.tsv.gz"),
+                         'peak_summary': peak_summary,
+                         'phenotype_plot': phenotype_plot,
+                         'n_peaks': len(peak_summary),
+                         'strain_count': report.trait_strain_count(trait_name),
+                         'isotypes': list(report._trait_df.ISOTYPE.values),
+                         'first_peak': first_peak})
 
-        peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv")
-        peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
-        VARS.update({'pxg_plot': pxg_plot(peak_marker_data, trait_name),
-                     'interval_summary': interval_summary,
-                     'variant_correlation': trait.get_gs_as_dataset("interval_variants.tsv.gz"),
-                     'peak_summary': peak_summary,
-                     'n_peaks': len(peak_summary),
-                     'first_peak': first_peak})
-
-    # To handle report data, functions specific
-    # to the version will be required.
-
+            # To handle report data, functions specific
+            # to the version will be required.
+    
     report_template = f"reports/{trait.REPORT_VERSION}.html"
     return render_template(report_template, **VARS)
 
@@ -204,7 +211,7 @@ def public_mapping():
         title = "Search: " + query
         subtitle = "results"
         q = "%" + query + "%"
-        results = trait.select(report, trait, mapping).filter(trait.status == "Complete", report.release == 0).join(mapping).join(report).dicts().filter((trait.trait_name % q) |
+        results = trait.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(mapping).join(report).dicts().filter((trait.trait_name % q) |
                                     (trait.trait_name % q) |
                                     (report.report_name % q) |
                                     (report.report_slug % q)).order_by(mapping.log10p.desc())

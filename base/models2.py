@@ -72,7 +72,7 @@ class report_m(datastore_model):
     kind = 'report'
     def __init__(self, *args, **kwargs):
         super(report_m, self).__init__(*args, **kwargs)
-        self.exclude_from_indexes = ('trait_data', 'strain_list')
+        self.exclude_from_indexes = ('trait_data', 'strain_list', 'trait_status')
         # Read trait data in upon initialization.
         if hasattr(self, 'trait_data'):
             self._trait_df = pd.read_csv(StringIO(self.trait_data), sep='\t')
@@ -100,6 +100,7 @@ class report_m(datastore_model):
                 If latest - one result for each trait
                 if neight - all tasks associated with a report.
         """
+        logger.info("Initialize Trait")
         report_filter = [('report_slug', '=', self.name)]
         if trait_name:
             trait_list = [trait_name]
@@ -131,7 +132,7 @@ class report_m(datastore_model):
         """
         trait_status_set = []
         if hasattr(self, 'trait_status'):
-            trait_status_set = [x == 'Complete' for x in self.trait_status.values()]
+            trait_status_set = [x == 'complete' for x in self.trait_status.values()]
         if not any(trait_status_set):
             traits = self.fetch_traits(latest=True)
             self.trait_status = {x.trait_name: x.status for x in traits}
@@ -294,8 +295,13 @@ class trait_m(datastore_model):
     def gs_base_url(self):
         """
             Returns the google storage base URL
+
+            The URL schema changed from REPORT_VERSION v1 to v2.
         """
-        return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.REPORT_VERSION}/{self.name}"
+        if self.REPORT_VERSION == 'v2':
+            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.REPORT_VERSION}/{self.name}"
+        elif self.REPORT_VERSION == 'v1':
+            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.REPORT_VERSION}/{self.report_slug}/{self.trait_name}"
 
     def get_gs_as_dataset(self, fname):
         """
@@ -345,7 +351,7 @@ class user_m(datastore_model):
         filters = [('user_id', '=', self.user_id)]
         # Note this requires a composite index defined very precisely.
         results = query_item('report', filters=filters, order=['user_id', '-created_on'])
-
+        print(results)
         # Generate report objects
         return [report_m(x) for x in results]
 
@@ -457,8 +463,12 @@ class strain_m(DictSerializable, db_2.Model):
     def release_summary(cls, release):
         """
             Returns isotype and strain count for a data release.
+
+            Args:
+                release - the data release
         """
         counts = {'strain_count': cls.query.filter((cls.release <= release)).count(),
+                  'strain_count_sequenced': cls.query.filter((cls.release <= release) & (cls.sequenced == True)).count(),
                   'isotype_count': cls.query.filter(cls.release <= release).group_by(cls.isotype).count()}
         return counts
 

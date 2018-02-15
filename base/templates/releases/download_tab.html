@@ -1,5 +1,17 @@
 <div class="row">
     <div class="col-md-4">
+
+        <br />
+        <div class="panel panel-default">
+            <div class="panel-heading">Release Summary</div>
+            <div class="panel-body">
+                <ul>
+                    <li><strong>Strains:</strong> {{ release_summary.get('strain_count') }}</li>
+                <li><strong>WGS strains:</strong> {{ release_summary.get('strain_count_sequenced') }}</li>
+                <li><strong>Isotypes:</strong> {{ release_summary.get('isotype_count') }}</li>
+            </div>
+        </div>
+
         <h3>Alignment Data</h3>
         <p>Wild isolate genomes are aligned to WS245 version of the N2 genome. These data are stored using the
             <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</span>  format. BAMs are available in the table below.</p> 

@@ -459,7 +459,7 @@ class VCF_DataFrame(DataFrame):
                                                    .agg(['sum']) \
                                                    .transpose() \
                                                    .reset_index() \
-                                                   .rename(index=str, columns={"sum": "gene_w_variants", "level_0": "biotype"}) \
+                                                   .rename(index=str, columns={"sum": "genes_w_variants", "level_0": "biotype"}) \
                                                    .drop("level_1", axis=1)
 
         LMH_set = []
@@ -469,7 +469,7 @@ class VCF_DataFrame(DataFrame):
                                                .agg(['sum']) \
                                                .transpose() \
                                                .reset_index() \
-                                               .rename(index=str, columns={"sum": f"gene_w_{x}_variants", "level_0": "biotype"}) \
+                                               .rename(index=str, columns={"sum": f"genes_w_{x}_variants", "level_0": "biotype"}) \
                                                .drop("level_1", axis=1)
             LMH_set.append(lmh_df)
 
@@ -569,4 +569,3 @@ class VCF_DataFrame(DataFrame):
                              .apply(lambda row: row[0] if len(set(row)) == 1 else "N")
             print(''.join(seq.values).replace(".", "N"))
 
-v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "I:1-10000")

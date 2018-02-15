@@ -1,10 +1,10 @@
-from base.application import cache
-from flask import make_response
 import requests
+from flask import make_response
 from flask import render_template
+from flask import Blueprint
 from base.views.api.api_strain import get_isotypes, query_strains
 from base.constants import DATASET_RELEASE, RELEASES
-from flask import Blueprint
+from base.models2 import strain_m
 
 
 data_bp = Blueprint('data',
@@ -29,10 +29,12 @@ def data(selected_release=DATASET_RELEASE):
     # Fetch variant data
     url = "https://storage.googleapis.com/elegansvariation.org/releases/{selected_release}/multiqc_bcftools_stats.json".format(selected_release=selected_release)
     vcf_summary = requests.get(url).json()
+    release_summary = strain_m.release_summary(selected_release)
     VARS = {'title': title,
             'strain_listing': strain_listing,
             'vcf_summary': vcf_summary,
             'RELEASES': RELEASES,
+            'release_summary': release_summary,
             'selected_release': selected_release}
     return render_template('data.html', **VARS)
 
@@ -42,7 +44,6 @@ def data(selected_release=DATASET_RELEASE):
 #
 
 @data_bp.route('/download/download_bams.sh')
-@cache.cached(timeout=50)
 def download_script():
     strain_listing = query_strains(release=DATASET_RELEASE)
     download_page = render_template('download_script.sh', **locals())
@@ -65,4 +66,3 @@ def browser(region="III:11746923-11750250", query=None):
             'query': query,
             'fluid_container': True}
     return render_template('browser.html', **VARS)
-
