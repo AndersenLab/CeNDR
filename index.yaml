@@ -20,3 +20,11 @@ indexes:
   - name: trait_name
   - name: created_on
     direction: desc
+
+
+- kind: report
+  properties:
+  - name: created_on
+    direction: desc
+  - name: status
+  - name: trait_list

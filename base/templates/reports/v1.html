@@ -146,10 +146,10 @@
       <ul class="nav navbar-nav">
         <li><a href="#phenotype">Phenotype</a></li>
         <li><a href="#manhattan">Manhattan</a></li>
-        {% if mapping_results|length > 0 %}
+        {% if trait.is_significant > 0 %}
         <li><a href="#intervals">Intervals</a></li>
         <li><a href="#pxg">PxG</a></li>
-        {% if mapping_results|length > 1 %}
+        {% if peak_summary|length > 1 %}
         <li><a href="#ld">LD</a></li>
         {% endif %}
         <li><a href="#peak_summary">Peak Summary</a></li>
@@ -288,7 +288,6 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
   {% for peak in peak_summary.to_dict('records') %}
-  {{ peak }}
     <li role="presentation" peak="{{ peak['marker'] }}" class='peak-tab {% if loop.first %}active{% endif %}'><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak['interval'] }}</a></li>
     {% endfor %}
   </ul>
@@ -371,19 +370,16 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
         </tr>
     </thead>
 <tbody>
-{% for gene in var_corr[peak_index] %}
+{% for gene_group, rows in variant_correlation.to_dict('records')|groupby('gene_id') %}
+    {% set gene = rows[0] %}
       <tr>
         <td>
-          {% if gene["gene_name"] %}
-              <a href="{{ url_for("gene", gene_name=gene["gene_name"]) }}">{{ gene["gene_name"] }}</a>
-          {% else %}
-              {{ gene["feature_id"] }}&nbsp;
-          {% endif %}
+            <a href="{{ url_for("gene.gene", gene_name=gene["gene_id"]) }}">{{ gene.get("locus") or gene.get('sequence_name') }}</a>
         </td>
-        <td><a href="{{ url_for("gene", gene_name=gene["gene_id"]) }}">{{ gene["gene_id"] }}</a></td>
-        <td>{{ gene["transcript_biotype"] }}</td>
-        <td>{{ gene["n_variants"] }}</td>
-        <td>{{ gene["max_corr"]|round(3) }}</td>
+        <td><a href="{{ url_for("gene.gene", gene_name=gene["gene_id"]) }}">{{ gene["gene_id"] }}</a></td>
+        <td>{{ gene["biotype"] }}</td>
+        <td>{{ rows|length }}</td>
+        <td>{{ gene['max_correlation']|round(3) }}</td>
         <td><a class='show_genes' gene="{{ gene["gene_id"] }}" href='#show'>Variants</a></td>
       </tr>
       <tr class='{{ gene["gene_id"] }}' style="display: none;">
@@ -400,9 +396,9 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
               </tr>
             </thead>
             <tbody style="height: inherit;">
-{% for variant in gene["variant_set"] %}
-      <tr class='{{ tbl_color[variant["putative_impact"]] }}'>
-        <td>{{ variant["CHROM_POS"] }}</td>
+    {% for variant in rows %}
+      <tr class='{{ TABLE_COLORS[variant["putative_impact"]] }}'>
+        <td>{{ variant["CHROM"] }}:{{ variant["POS"] }}</td>
         <td>{{ variant["REF"] }} / {{ variant["ALT"] }}</td>
         <td>{{ variant["hgvs_p"] }}</td>
         <td>{{ variant["annotation"] }}</td>

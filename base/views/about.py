@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from flask import Blueprint
 from flask import render_template, url_for, Markup, request, redirect, session
-
+from base.utils.query import get_mappings_summary, get_weekly_visits
 from base.application import app, db_2, cache
 from base.models2 import strain_m
 from base.forms import donation_form
@@ -133,8 +133,33 @@ def statistics():
                                                      datetime.datetime.today()]
                                               )
 
+    #
+    # Reports plot
+    #
+    df = get_mappings_summary()
+    report_summary_plot = time_series_plot(df,
+                                            x_title='Date',
+                                            y_title='Count',
+                                            range=[datetime.datetime(2016, 3, 1),
+                                                   datetime.datetime.today()],
+                                            colors=['rgb(149, 150, 255)', 'rgb(81, 151, 35)']
+                                            )
+
+    #
+    # Weekly visits plot
+    #
+    df = get_weekly_visits()
+    weekly_visits_plot = time_series_plot(df,
+                                          x_title='Date',
+                                          y_title='Count',
+                                          range=[datetime.datetime(2016, 3, 1),
+                                               datetime.datetime.today()],
+                                          colors=['rgb(255, 204, 102)'])
+
     VARS = {'title': title,
-            'strain_collection_plot': strain_collection_plot}
+            'strain_collection_plot': strain_collection_plot,
+            'report_summary_plot': report_summary_plot,
+            'weekly_visits_plot': weekly_visits_plot}
 
     return render_template('about/statistics.html', **VARS)
 

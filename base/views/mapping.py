@@ -3,6 +3,9 @@ import os
 import time
 import re
 import arrow
+import requests
+import pandas as pd
+import simplejson as json
 
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
@@ -15,10 +18,8 @@ from peewee import JOIN
 from flask import render_template, request, redirect, url_for, abort
 from collections import OrderedDict
 from slugify import slugify
-import simplejson as json
 from gcloud import storage
 from collections import Counter
-import requests
 from base.forms import mapping_submission_form
 from logzero import logger
 from flask import session, flash, Blueprint, g
@@ -161,19 +162,23 @@ def report(report_slug, trait_name=None, rerun=None):
                 VERSION 1
             """
             phenotype_data = trait.get_gs_as_dataset("tables/phenotype.tsv")
-            isotypes = list(phenotype_data.iloc[:,1].values)
-            phenotype_data = list(phenotype_data.iloc[:,3].values)
+            isotypes = list(phenotype_data.iloc[:, 1].values)
+            phenotype_data = list(phenotype_data.iloc[:, 3].values)
             VARS.update({'phenotype_data': phenotype_data,
                          'isotypes': isotypes})
             if trait.is_significant:
+                variant_correlation = trait.get_gs_as_dataset("tables/variant_correlation.tsv.gz")
+                variant_correlation['interval'] = variant_correlation.apply(lambda row: f"{row.CHROM}:{row.start}-{row.end}", axis=1)
+                max_corr = variant_correlation.groupby(['gene_id', 'interval']).apply(lambda x: max(x.correlation))
+                max_corr = max_corr.reset_index().rename(index=str, columns={0: 'max_correlation'})
+                variant_correlation = pd.merge(variant_correlation, max_corr, on=['gene_id', 'interval'])
                 peak_summary = trait.get_gs_as_dataset("tables/mapping_intervals.tsv")
                 peak_summary['interval'] = peak_summary.apply(lambda row: f"{row.CHROM}:{row.startPOS}-{row.endPOS}", axis=1)
                 first_peak = peak_summary.iloc[0]
-                logger.info(first_peak)
-                #1/0
-                VARS.update({'peak_summary': peak_summary, 
+                VARS.update({'peak_summary': peak_summary,
                              'first_peak': first_peak,
-                             'n_peaks': len(peak_summary)})
+                             'n_peaks': len(peak_summary),
+                             'variant_correlation': variant_correlation})
         elif trait.REPORT_VERSION == 'v2':
             """
                 VERSION 2

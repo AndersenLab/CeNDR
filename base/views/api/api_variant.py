@@ -184,5 +184,6 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False):
                     output.append('\t'.join(build_output.keys()))
                     header = True
                 output.append('\t'.join(map(str, build_output.values())))
+            logger.info("RESPOND")
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
         return output_data
