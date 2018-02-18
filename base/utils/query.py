@@ -55,17 +55,14 @@ def get_mappings_summary():
 
         Cached daily
     """
-    reports = query_item('report', projection=['created_on'])
-    traits = query_item('trait', projection=['created_on'])
+    traits = query_item('trait')
 
-    reports = pd.DataFrame.from_dict(reports)
-    reports.created_on = reports.apply(lambda x: arrow.get(str(x['created_on'])[:-6]).date().isoformat(), axis=1)
     traits = pd.DataFrame.from_dict(traits)
     traits.created_on = traits.apply(lambda x: arrow.get(str(x['created_on'])[:-6]).date().isoformat(), axis=1)
 
-    reports = reports.groupby('created_on').size().reset_index(name='reports')
-    traits = traits.groupby('created_on').size().reset_index(name='traits')
-    df = pd.merge(reports, traits, how='outer').fillna(0).sort_values('created_on')
+    trait_df = traits.groupby('created_on').size().reset_index(name='traits')
+    report_df = traits[['report_slug', 'created_on']].drop_duplicates().groupby('created_on').size().reset_index(name='reports')
+    df = pd.merge(report_df, trait_df, how='outer').fillna(0).sort_values('created_on')
     df.reports = df.reports.cumsum()
     df.traits = df.traits.cumsum()
     return df

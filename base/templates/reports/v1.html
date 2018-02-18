@@ -365,7 +365,6 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
             <th>Biotype</th>
             <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The total number of variants with Moderate/High predicted effects'>Total Variants</abbr></th>
             <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The Maximum correlation among all variants examined'>Max. Correlation</abbr></th>
-            <th>Toggle Variants</th>
         </tr>
     </thead>
 <tbody>
@@ -379,9 +378,8 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
         <td>{{ gene["biotype"] }}</td>
         <td>{{ rows|length }}</td>
         <td>{{ gene['max_correlation']|round(3) }}</td>
-        <td><a class='show_genes' gene="{{ gene["gene_id"] }}" href='#show'>Variants</a></td>
       </tr>
-      <tr class='{{ gene["gene_id"] }}' style="display: none;">
+      <tr class='{{ gene["gene_id"] }}'>
         <td colspan="5" style="padding:0px; width: 100%">
           <table  class="table table-hover table-striped table-condensed internal-table">
             <thead>
@@ -395,17 +393,16 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
               </tr>
             </thead>
             <tbody style="height: inherit;">
-                {{ rows }}
-    {% for variant in rows %}
-      <tr class='{{ TABLE_COLORS[variant["putative_impact"]] }}'>
-        <td>{{ variant["CHROM"] }}:{{ variant["POS"] }}</td>
-        <td>{{ variant["REF"] }} / {{ variant["ALT"] }}</td>
-        <td>{{ variant["hgvs_p"] }}</td>
-        <td>{{ variant["annotation"] }}</td>
-        <td>{{ variant["putative_impact"] }}</td>
-        <td>{{ variant["correlation"]|round(3) }}</td>
-      </tr>
-      {% endfor %}
+            {% for variant in rows %}
+              <tr class='{{ TABLE_COLORS[variant["putative_impact"]] }}'>
+                <td>{{ variant["CHROM"] }}:{{ variant["POS"] }}</td>
+                <td>{{ variant["REF"] }} / {{ variant["ALT"] }}</td>
+                <td>{{ variant["hgvs_p"] }}</td>
+                <td>{{ variant["annotation"] }}</td>
+                <td>{{ variant["putative_impact"] }}</td>
+                <td>{{ variant["correlation"]|round(3) }}</td>
+              </tr>
+              {% endfor %}
             </tbody>
           </table>
           <br />
@@ -443,54 +440,6 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 {% block script %}
 <script>
 
-{% if trait.status != "complete" %}
-prog = Array()
-prog["queue"] = ""
-prog["Initializing"] = "5%"
-prog["Processing Phenotype Data"] = "10%"
-prog["Performing Mapping"] = "20%"
-prog["Processing Mapping"] = "60%"
-prog["Plotting Figures"] = "75%"
-prog["Processing Peaks"] = "80%"
-prog["Fine Mapping"] = "85%"
-prog["Transferring Data"] = "95%"
-prog["complete"] = "100%"
-prog["error"] = "100%"
-
-var update_status = function(status) {
-  if (status == "complete") {
-    $(".progress").fadeOut();
-    location.reload();
-  } else if (status == "error") {
-    $(".progress-bar").addClass("progress-bar-danger").html("error");
-  } else if (status == "queue") {
-    $(".progress-bar").css("width", "100%").addClass("progress-bar-info").html("Queued")
-  } else {
-    $(".progress-bar").removeClass("progress-bar-info").css("width", prog[status]).html(prog[status] + " (" + status + ")");
-  }
-}
-
-function check_status() {
-  $.ajax({
-     url:"/report_progress/",
-     data: JSON.stringify({
-            "report_slug": "{{ report_slug }}",
-            "trait_slug": "{{ trait_slug }}" }),
-     method: "POST", 
-     contentType: 'application/json;charset=UTF-8'
-     }
-     ).done(function(msg) {
-      msg = JSON.parse(msg);
-      update_status(msg);
-    });
-}
-
-check_status();
-
-window.setInterval(check_status, 3000);
-
-{% else %}
-
 // Scrolling
 $('#report_nav').ready(function () {
 
@@ -520,7 +469,6 @@ $('#report_nav').ready(function () {
 
 
 {% if trait.is_significant %}
-
 var isotypes = {{ isotypes|tojson }}
 var chrom = "{{ first_peak.CHROM }}"
 var start = {{ first_peak.startPOS }};
@@ -546,7 +494,6 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
   update_tajima_plot();
 });
 
-{% endif %}
 {% endif %}
 
    

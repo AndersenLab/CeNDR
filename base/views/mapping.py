@@ -134,7 +134,7 @@ def report(report_slug, trait_name=None, rerun=None):
             trait_set = query_item('trait', filters=[('secret_hash', '=', report_slug)])
             trait = trait_set[0]
         except IndexError:
-            logger.error("Trait does not exist")
+            flash('Cannot find report', 'danger')
             return abort(404)
 
     # Verify user has permission to view report
