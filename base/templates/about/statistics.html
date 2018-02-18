@@ -13,14 +13,39 @@
     </div>
 
     <div class='col-md-6'>
-        <h4>Report summary plot</h4>
-        {{ report_summary_plot|safe }}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h1 class='panel-title'>Numbers</h1>
     </div>
+    <table class='table table-striped table-hover'>
+        <tbody>
+            <tr>
+                <td><strong>Strains</strong></td>
+                <td>{{ n_strains }}</td>
+            </tr>
+            <tr>
+                <td><strong>Isotypes</strong></td>
+                <td>{{ n_isotypes }}</td>
+            </tr>
+            <tr>
+                <td><strong>Unique Users</strong></td>
+                <td>{{ n_users }}</td>
+            </td>
+        </tbody>
+    </table>
+</div>
+
+    </div>
+        
 </div>
 
 <div class='row'>
     <div class='col-md-6'>
-        <h4>Weekly Visits</h4>
+        <h4>Report summary plot</h4>
+        {{ report_summary_plot|safe }}
+    </div>
+    <div class='col-md-6'>
+        <h4>Cumulative visits</h4>
         {{ weekly_visits_plot|safe }}
     </div>
 </div>

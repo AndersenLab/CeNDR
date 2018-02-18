@@ -18,6 +18,11 @@ import pandas as pd
 from plotly import tools
 from logzero import logger
 
+COLORS = ['rgba(93, 164, 214, 0.65)',
+          'rgba(255, 65, 54, 0.65)',
+          'rgba(207, 114, 255, 0.65)',
+          'rgba(127, 96, 0, 0.65)']
+
 
 def to_unix_time(dt):
     """
@@ -68,7 +73,7 @@ def plotly_distplot(df, column):
     return plot
 
 
-def time_series_plot(df, x_title=None, y_title=None, range=None):
+def time_series_plot(df, x_title=None, y_title=None, range=None, colors=COLORS):
     """
         Pass in a dataframe (df) with:
             First column - dates (x-axis)
@@ -78,11 +83,12 @@ def time_series_plot(df, x_title=None, y_title=None, range=None):
             df - the strain dataset
     """
     trace_set = []
-    for column in df.columns[1:][::-1]:
+    for n, column in enumerate(df.columns[1:][::-1]):
         trace_set.append(go.Scatter(x=df[df.columns[0]],
                                     y=df[column],
                                     name=column,
-                                    opacity=0.8
+                                    opacity=0.8,
+                                    line=dict(color=(colors[n]))
                                     )
                          )
 
@@ -113,10 +119,6 @@ def pxg_plot(df, trait_name):
             trait_name - The name of the trait (Y-axis)
     """
     peak_markers = set(df.MARKER)
-    colors = ['rgba(93, 164, 214, 0.65)',
-              'rgba(255, 65, 54, 0.65)',
-              'rgba(207, 114, 255, 0.65)',
-              'rgba(127, 96, 0, 0.65)']
     trace_set = []
     ticktext = []
     tickvals = []
@@ -139,10 +141,10 @@ def pxg_plot(df, trait_name):
                 yaxis='y1',
                 hoverinfo="all",
                 boxpoints='outlier',
-                fillcolor=colors[gt_n],
+                fillcolor=COLORS[gt_n],
                 whiskerwidth=0.2,
                 marker=dict(
-                    color=colors[gt_n],
+                    color=COLORS[gt_n],
                     opacity=0.5
                 ),
                 line=dict(width=2)

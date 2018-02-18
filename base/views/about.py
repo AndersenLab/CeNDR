@@ -7,11 +7,10 @@
 """
 import datetime
 import markdown
-import numpy as np
-import pandas as pd
+from base.application import cache
 from flask import Blueprint
 from flask import render_template, url_for, Markup, request, redirect, session
-from base.utils.query import get_mappings_summary, get_weekly_visits
+from base.utils.query import get_mappings_summary, get_weekly_visits, get_unique_users
 from base.application import app, db_2, cache
 from base.models2 import strain_m
 from base.forms import donation_form
@@ -132,6 +131,8 @@ def statistics():
                                               range=[datetime.datetime(1995, 10, 17),
                                                      datetime.datetime.today()]
                                               )
+    n_strains = max(df.strain)
+    n_isotypes = max(df.isotype)
 
     #
     # Reports plot
@@ -156,10 +157,19 @@ def statistics():
                                                datetime.datetime.today()],
                                           colors=['rgb(255, 204, 102)'])
 
+
+    #
+    # Unique users
+    #
+    n_users = get_unique_users()
+
     VARS = {'title': title,
             'strain_collection_plot': strain_collection_plot,
             'report_summary_plot': report_summary_plot,
-            'weekly_visits_plot': weekly_visits_plot}
+            'weekly_visits_plot': weekly_visits_plot,
+            'n_strains': n_strains,
+            'n_isotypes': n_isotypes,
+            'n_users': n_users}
 
     return render_template('about/statistics.html', **VARS)
 

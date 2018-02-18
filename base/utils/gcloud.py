@@ -5,7 +5,8 @@ from flask import g
 from base.utils.data_utils import dump_json
 from gcloud import datastore, storage
 from logzero import logger
-from gcloud.storage import blob
+import googleapiclient.discovery
+from google.oauth2 import service_account
 
 def google_datastore(open=False):
     """
@@ -24,7 +25,10 @@ def google_datastore(open=False):
 
 def store_item(kind, name, **kwargs):
     ds = google_datastore()
-    exclude = kwargs.pop('exclude_from_indexes')
+    try:
+        exclude = kwargs.pop('exclude_from_indexes')
+    except KeyError:
+        exclude = False
     if exclude:
         m = datastore.Entity(key=ds.key(kind, name), exclude_from_indexes=exclude)
     else:
@@ -50,7 +54,15 @@ def query_item(kind, filters=None, projection=(), order=None):
     if filters:
         for var, op, val in filters:
             query.add_filter(var, op, val)
-    return query.fetch()
+
+    records = []
+    query = query.fetch()
+    while True:
+        data, more, key = query.next_page()
+        records.extend(data)
+        if more is False:
+            break
+    return records
 
 
 def get_item(kind, name):
@@ -114,5 +126,13 @@ def upload_file(name, fname):
     blob = cendr_bucket.blob(name)
     blob.upload_from_filename(fname)
     return blob
+
+def google_analytics():
+    """
+        Fetch google api client for google analytics
+    """
+    credentials = service_account.Credentials.from_service_account_file('env_config/client-secret.json',
+                                                      scopes=['https://www.googleapis.com/auth/analytics.readonly'])
+    return googleapiclient.discovery.build('analytics', 'v4', credentials=credentials)
 
 

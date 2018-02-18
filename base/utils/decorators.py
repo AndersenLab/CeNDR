@@ -16,7 +16,8 @@ def jsonify_request(func):
             and automatically jsonifies if
             its an API call
         """
-        if func.__name__ == request.endpoint:
+        is_tsv = request.args.get('output') == 'tsv'
+        if func.__name__ == request.endpoint and not is_tsv:
             return jsonify(func(*args, **kwargs))
         else:
             return func(*args, **kwargs)

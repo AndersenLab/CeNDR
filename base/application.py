@@ -23,10 +23,9 @@ APP_CONFIG_VARS = yaml.load(open(f"env_config/{APP_CONFIG}.yaml").read())
 
 app.config.update(BASE_VARS)
 app.config.update(APP_CONFIG_VARS)
-print(app.config)
 
 # Setup cache
-cache = Cache(app, config=app.config['CACHE'])
+cache = Cache(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
 
 # Database
 db_2 = SQLAlchemy(app)
@@ -45,19 +44,11 @@ def autoconvert(s):
 
 
 
-if app.config['DEBUG'] is False:
-    from flask_sslify import SSLify
-    # Ignore leading slash of urls; skips must use start of path
-    sslify = SSLify(app, skips=['strains/global-strain-map',
-                                'cronmapping'])
-else:
-    # Running locally
-    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+if app.config['DEBUG']:
     app.debug = True
-    app.config["debug"] = True
+    #app.config["debug"] = True
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
-
 
 
 def gs_static(url, prefix='static'):
