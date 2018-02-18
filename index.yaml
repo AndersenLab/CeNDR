@@ -22,9 +22,8 @@ indexes:
     direction: desc
 
 
-- kind: report
+- kind: trait
   properties:
+  - name: user_id
   - name: created_on
     direction: desc
-  - name: status
-  - name: trait_list

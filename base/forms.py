@@ -14,7 +14,7 @@ from wtforms import (StringField,
 from wtforms.validators import Required, Length, Email, DataRequired
 from wtforms.validators import ValidationError
 
-from base.models2 import report_m
+from base.utils.gcloud import query_item
 from base.constants import PRICES
 from base.views.api.api_strain import query_strains
 from base.utils.data_utils import is_number, list_duplicates
@@ -125,15 +125,18 @@ class TraitData(HiddenField):
                .replace('', np.nan) \
                .dropna(how='all') \
                .dropna(how='all', axis=1)
-        self.strain_list = list(df.STRAIN)
-
-        logger.info(df)
+        if 'STRAIN' in df.columns:
+            self.strain_list = list(df.STRAIN)
 
         # Resolve isotypes and insert as second column
-        df = df.assign(ISOTYPE=[query_strains(x, resolve_isotype=True) for x in df.STRAIN])
-        isotype_col = df.pop("ISOTYPE")
-        df.insert(1, "ISOTYPE", isotype_col)
-        logger.info(df)
+        try:
+            df = df.assign(ISOTYPE=[query_strains(x, resolve_isotype=True) for x in df.STRAIN])
+            isotype_col = df.pop("ISOTYPE")
+            df.insert(1, "ISOTYPE", isotype_col)
+            logger.info(df)
+        except AttributeError:
+            # If the user fails to pass data it will be flagged
+            pass
         self.processed_data = df
 
 
@@ -142,11 +145,14 @@ def validate_duplicate_strain(form, field):
         Validates that each there are no duplicate strains listed.
     """
     df = form.trait_data.processed_data
-    dup_strains = df.STRAIN[df.STRAIN.duplicated()]
-    if dup_strains.any():
-        dup_strains = dup_strains.values
-        form.trait_data.error_items.extend(dup_strains)
-        raise ValidationError(f"Duplicate Strains: {dup_strains}")
+    try:
+        dup_strains = df.STRAIN[df.STRAIN.duplicated()]
+        if dup_strains.any():
+            dup_strains = dup_strains.values
+            form.trait_data.error_items.extend(dup_strains)
+            raise ValidationError(f"Duplicate Strains: {dup_strains}")
+    except AttributeError:
+        pass
 
 
 def validate_duplicate_isotype(form, field):
@@ -155,12 +161,14 @@ def validate_duplicate_isotype(form, field):
         single associated isotype.
     """
     df = form.trait_data.processed_data
-    dup_isotypes = df.STRAIN[df.ISOTYPE.duplicated()]
-    logger.info(df[df.ISOTYPE.duplicated()])
-    if dup_isotypes.any():
-        dup_isotypes = dup_isotypes.values
-        form.trait_data.error_items.extend(dup_isotypes)
-        raise ValidationError(f"Some strains belong to the same isotype: {dup_isotypes}")
+    try:
+        dup_isotypes = df.STRAIN[df.ISOTYPE.duplicated()]
+        if dup_isotypes.any():
+            dup_isotypes = dup_isotypes.values
+            form.trait_data.error_items.extend(dup_isotypes)
+            raise ValidationError(f"Some strains belong to the same isotype: {dup_isotypes}")
+    except AttributeError:
+        pass
 
 
 def validate_row_length(form, field):
@@ -189,11 +197,14 @@ def validate_isotypes(form, field):
         Validates that isotypes are resolved.
     """
     df = form.trait_data.processed_data
-    unknown_strains = df.STRAIN[df.ISOTYPE.isnull()]
-    if unknown_strains.any():
-        unknown_strains = unknown_strains.values
-        form.trait_data.error_items.extend(unknown_strains)
-        raise ValidationError(f"Unknown isotype for the following strain(s): {unknown_strains}")
+    try:
+        unknown_strains = df.STRAIN[df.ISOTYPE.isnull()]
+        if unknown_strains.any():
+            unknown_strains = unknown_strains.values
+            form.trait_data.error_items.extend(unknown_strains)
+            raise ValidationError(f"Unknown isotype for the following strain(s): {unknown_strains}")
+    except AttributeError:
+        pass
 
 
 def validate_numeric_columns(form, field):
@@ -245,13 +256,13 @@ def validate_report_name_unique(form, field):
     """
         Checks to ensure that the report name submitted is unique.
     """
-    report_name = slugify(form.report_name.data)
+    report_slug = slugify(form.report_name.data)
     try:
-        report = report_m(report_name)
+        reports = query_item('trait', filters=[('report_slug', '=', report_slug)])
+        if len(reports) > 0:
+            raise ValidationError(f"That report name is not available. Choose a unique report name")
     except BadRequest:
-        raise ValidationError(f"Invalid report name.")
-    if report._exists:
-        raise ValidationError(f"That report name is not available. Choose a unique report name")
+        raise ValidationError(f"Backend Error")
 
 
 def validate_missing_isotype(form, field):
@@ -260,9 +271,12 @@ def validate_missing_isotype(form, field):
         provided for an isotype that does not exist.
     """
     df = form.trait_data.processed_data
-    blank_strains = list(df[df.STRAIN.isnull()].apply(lambda row: sum(row.isnull()), axis=1).index+1)
-    if blank_strains:
-        raise ValidationError(f"Missing strain(s) on row(s): {blank_strains}")
+    try:
+        blank_strains = list(df[df.STRAIN.isnull()].apply(lambda row: sum(row.isnull()), axis=1).index+1)
+        if blank_strains:
+            raise ValidationError(f"Missing strain(s) on row(s): {blank_strains}")
+    except AttributeError:
+        pass
 
 
 def validate_strain_w_no_data(form, field):
@@ -273,9 +287,22 @@ def validate_strain_w_no_data(form, field):
     df = form.trait_data.processed_data
     null_counts = df.apply(lambda row: sum(row.isnull()), axis=1)
     missing_trait_data = (len(df.columns) - null_counts == 2)
-    blank_traits = list(df[missing_trait_data & df.STRAIN.notnull() == True].STRAIN)
-    if blank_traits:
-        raise ValidationError(f"Strain(s) with no trait data: {blank_traits}")
+    try:
+        blank_traits = list(df[missing_trait_data & df.STRAIN.notnull() == True].STRAIN)
+        if blank_traits:
+            raise ValidationError(f"Strain(s) with no trait data: {blank_traits}")
+    except AttributeError:
+        pass
+
+
+def validate_data_exists(form, field):
+    df = form.trait_data.processed_data
+    logger.info(df)
+    try:
+        df.STRAIN
+        df.ISOTYPE
+    except AttributeError:
+        raise ValidationError("No data provided")
 
 
 class mapping_submission_form(Form):
@@ -296,4 +323,5 @@ class mapping_submission_form(Form):
                                        validate_unique_colnames,
                                        validate_column_name_exists,
                                        validate_missing_isotype,
-                                       validate_strain_w_no_data])
+                                       validate_strain_w_no_data,
+                                       validate_data_exists])

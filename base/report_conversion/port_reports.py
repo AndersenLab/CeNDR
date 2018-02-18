@@ -16,7 +16,7 @@ from base.application import app
 import pandas as pd
 from base.utils.gcloud import store_item, get_item, query_item
 from base.utils.data_utils import unique_id
-from base.models2 import user_m, report_m, trait_m
+from base.models2 import user_m, trait_m
 from slugify import slugify
 from gcloud import storage
 
@@ -55,43 +55,10 @@ with app.app_context():
 reports = pd.read_csv("base/report_conversion/report_trait.csv")
 mappings = pd.read_csv("base/report_conversion/mapping_significant.csv")
 
-report_set = query_item('report')
-report_slugs = [x['report_slug'] for x in report_set]
-
-with app.app_context():
-    report_set = []
-    for slug in reports['report_slug'].dropna().unique():
-        '''
-            Redundant but quick and easy...
-        '''
-        if slug not in report_slugs:
-            row = reports[reports.report_slug == slug].iloc[0]
-            report = report_m(row['report_slug'])
-            report.report_name = row['report_name']
-            report.trait_name = row['trait_name']
-            report.report_slug = row['report_slug']
-            report.is_public = row['release'] in [0, 1]
-            report.secret_hash = row.get('secret_hash')
-            report.status = row['status']
-            report.trait_list = list(reports[reports.report_slug == row['report_slug']].trait_slug.values)
-            #report.CENDR_VERSION = "<=1.1.4"
-            #report.DATASET_RELEASE = row['version']
-            #report.REPORT_VERSION = 'v1'
-            report.created_on = arrow.get(row['submission_date']).datetime
-            user = get_item('user', row['email'].lower())
-            report.user_id = user['user_id']
-            report.username = user['username']
-            report.user_email = user['user_email']
-            #if row['version'] == 20170408:
-            #    report.WORMBASE_VERSION = 'WS245'
-            #else:
-            #    report.WORMBASE_VERSION = 'WS261'
-            print(report.__dict__)
-            report.save()
             
-
-trait_set = query_item('trait')
-report_traits = [x['report_trait'] for x in trait_set]
+with app.app_context():
+    trait_set = query_item('trait')
+    report_traits = [x['report_trait'] for x in trait_set]
 
 with app.app_context():
     for row in reports.to_dict('records'):
@@ -102,6 +69,8 @@ with app.app_context():
         trait.CENDR_VERSION = "<=1.1.4"
         trait.REPORT_VERSION = 'v1'
         trait.DATASET_RELEASE = str(row.get('version'))
+        trait.is_public = row['release'] in [0, 1]
+        trait.secret_hash = row.get('secret_hash')
         if row['version'] == 20170408:
             trait.WORMBASE_VERSION = 'WS245'
         else:
@@ -114,14 +83,14 @@ with app.app_context():
         trait.report_name = str(row['report_name'])
         trait.report_slug = str(row['report_slug'])
         trait.report_trait = str(row['report_slug']) + ":" + str(row['trait_name'])
-        print(trait.report_trait in report_traits)
-        if trait.report_trait not in report_traits:
-            trait.status = row['status']
-            trait.trait_name = row['trait_slug']
-            trait.is_significant = len(mappings[(mappings.report_name == trait.report_name) & (mappings.trait_slug == trait.trait_name)]) > 0
-            user = get_item('user', row['email'].lower())
-            trait.user_email = user['user_email']
-            trait.save()
+        trait.status = row['status']
+        trait.trait_name = row['trait_slug']
+        trait.trait_list = list(set(reports[reports.report_slug == trait.report_slug].trait_slug.values))
+        trait.is_significant = len(mappings[(mappings.report_name == trait.report_name) & (mappings.trait_slug == trait.trait_name)]) > 0
+        user = get_item('user', row['email'].lower())
+        trait.user_email = user['user_email']
+        trait.user_id = user['user_id']
+        trait.save()
 
 """
 var_corr = pd.read_csv("base/report_conversion/variant_correlation.csv")

@@ -11,8 +11,8 @@ from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 
 from base.constants import BIOTYPES, TABLE_COLORS
 from base.application import autoconvert
-from base.models2 import report_m, trait_m
-from datetime import date, datetime
+from base.models2 import trait_m
+from datetime import date
 from dateutil.relativedelta import relativedelta
 from peewee import JOIN
 from flask import render_template, request, redirect, url_for, abort
@@ -49,7 +49,7 @@ class CustomEncoder(json.JSONEncoder):
 
 
 
-@mapping_bp.route('/perform-mapping/', methods=['GET', 'POST'])
+@mapping_bp.route('/mapping/perform-mapping/', methods=['GET', 'POST'])
 def mapping():
     """
         This is the mapping submission page.
@@ -65,7 +65,6 @@ def mapping():
         report_slug = slugify(form.report_name.data)
         trait_list = list(form.trait_data.processed_data.columns[2:])
         strain_list = form.trait_data.strain_list
-        report = report_m(report_slug)
         is_public = form.is_public.data
         trait_data = form.trait_data.processed_data.to_csv(index=False, sep="\t", na_rep="NA")
         report_name = form.report_name.data
@@ -83,8 +82,6 @@ def mapping():
         if is_public is False:
             report_data['secret_hash'] = unique_id()[0:8]
         report_data = {k: v for k, v in report_data.items() if v}
-        report.__dict__.update(report_data)
-
         # Begin a transaction so nothing is saved unless the tasks start
         # running.
         transaction = g.ds.transaction()
@@ -93,6 +90,7 @@ def mapping():
         # Now generate and run trait tasks
         for trait_name in report.trait_list:
             trait = trait_m()
+            trait.__dict__.update(report_data)
             trait.__dict__.update({
                'report_name': report_name,
                'report_slug': report_slug,
@@ -107,7 +105,6 @@ def mapping():
             trait.run_task()
         # Update the report to contain the set of the
         # latest task runs
-        report.save()
         transaction.commit()
 
         flash("Successfully submitted mapping!", 'success')
@@ -127,35 +124,55 @@ def report(report_slug, trait_name=None, rerun=None):
         and v2 reports.
 
     """
-    report = report_m(report_slug)
-    if not report._exists and not report.is_public:
-        # User is using private link - lookup using 'secret_hash'
-        report = list(query_item('report', filters=[('secret_hash', '=', report_slug)]))
-        if report:
-            report = report_m(report[0].key.name)
-            # Now fetch the task_run
-        else:
+    trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
+
+    # Get first report
+    try:
+        trait = trait_set[0]
+    except IndexError:
+        try:
+            trait_set = query_item('trait', filters=[('secret_hash', '=', report_slug)])
+            trait = trait_set[0]
+        except IndexError:
+            logger.error("Trait does not exist")
             return abort(404)
 
+    # Verify user has permission to view report
+    user = session.get('user')
+    if not trait['is_public']:
+        if user:
+            user_id = user.get('user_id')
+        else:
+            user_id = None
+        if trait['secret_hash'] != report_slug and user_id != trait['user_id']:
+            flash('You do not have access to that report', 'danger')
+            return abort(404)
+    
     if not trait_name:
         # Redirect to the first trait
         return redirect(url_for('mapping.report',
                                 report_slug=report_slug,
-                                trait_name=report.trait_list[0]))
+                                trait_name=trait.trait_list[0]))
 
-    # Fetch trait and report data
-    trait = report.fetch_traits(trait_name=trait_name)
+    try:
+        # Resolve REPORT --> TRAIT
+        # Fetch trait and convert to trait object.
+        cur_trait = [x for x in trait_set if x['trait_name'] == trait_name][0]
+        trait = trait_m(cur_trait.key.name)
+        trait.__dict__.update(cur_trait)
+    except IndexError:
+        return abort(404)
 
     VARS = {
-        'title': report.report_name,
+        'title': trait.report_name,
         'subtitle': trait_name,
         'trait_name': trait_name,
-        'report': report,
+        'report_slug': report_slug,
         'trait': trait,
+        'trait_set': trait_set,
         'BIOTYPES': BIOTYPES,
         'TABLE_COLORS': TABLE_COLORS
     }
-    logger.info(trait.__dict__)
     if trait.status == 'complete':
         if trait.REPORT_VERSION == 'v1':
             """

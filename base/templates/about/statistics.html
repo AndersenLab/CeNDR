@@ -6,10 +6,6 @@
     <div class='col-md-6'>
         <h4>Strains collected over time</h4>
         {{ strain_collection_plot|safe }}
-        <ul>
-            <li><strong>Total number of strains:</strong></li>
-            <li><strong>Total number of isotypes:</strong></li>
-        </ul>
     </div>
 
     <div class='col-md-6'>
@@ -31,6 +27,14 @@
                 <td><strong>Unique Users</strong></td>
                 <td>{{ n_users }}</td>
             </td>
+            <tr>
+                <td><strong>Reports</strong></td>
+                <td>{{ n_reports }}</td>
+            </tr>
+            <tr>
+                <td><strong>Traits</strong></td>
+                <td>{{ n_traits }}</td>
+            </tr>
         </tbody>
     </table>
 </div>

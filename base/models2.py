@@ -247,7 +247,7 @@ class trait_m(datastore_model):
 
     @property
     def is_complete(self):
-        return self.run_status == "Complete"
+        return self.status == "complete"
 
 
     def get_task_log(self):
@@ -350,10 +350,9 @@ class user_m(datastore_model):
     def reports(self):
         filters = [('user_id', '=', self.user_id)]
         # Note this requires a composite index defined very precisely.
-        results = query_item('report', filters=filters, order=['user_id', '-created_on'])
-        print(results)
+        results = query_item('trait', filters=filters, order=['user_id', '-created_on'])
         # Generate report objects
-        return [report_m(x) for x in results]
+        return results
 
 
 class DictSerializable(object):

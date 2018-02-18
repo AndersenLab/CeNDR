@@ -76,7 +76,7 @@ app.register_blueprint(data_bp, url_prefix='/data')
 
 # Mapping Pages -
 from base.views.mapping import mapping_bp
-app.register_blueprint(mapping_bp, url_prefix='/mapping')
+app.register_blueprint(mapping_bp, url_prefix='')
 
 # Gene Pages
 from base.views.gene import gene_bp

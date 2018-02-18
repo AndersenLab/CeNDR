@@ -74,14 +74,13 @@
 {% block content %}
 <div class="row">
       <div class="col-md-12">
-        {% for current_trait in report.trait_list %} 
+        {% for trait in trait_set %}
+            <a href="{{ url_for('mapping.report', report_slug = report_slug, trait_name = trait['trait_name']) }}" type="button" class="btn btn-sm {% if current_trait == trait_name %}btn-primary{% else %}btn-link{% endif %} ">
 
-            <a href="{{ url_for('mapping.report', report_slug = report.report_slug, trait_name = current_trait) }}" type="button" class="btn btn-sm {% if current_trait == trait_name %}btn-primary{% else %}btn-link{% endif %} ">
-
-            {% if trait.is_significant %}
-                <strong>{{ current_trait }}</strong>
+            {% if trait['is_significant'] %}
+                <strong>{{ trait['trait_name'] }}</strong>
             {% else %}
-                {{ current_trait }}
+                {{ trait['trait_name'] }}
             {% endif %}
 
             </a>
@@ -122,7 +121,7 @@
     <strong>Info</strong>
     <ul>
       <li><strong>Release</strong>: {{ trait.DATASET_RELEASE }}</li>
-      <li><strong>Availabity</strong>: {% if report.is_public %}
+      <li><strong>Availabity</strong>: {% if trait.is_public %}
                                             Public
                                          {% else %}
                                             Private
@@ -396,6 +395,7 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
               </tr>
             </thead>
             <tbody style="height: inherit;">
+                {{ rows }}
     {% for variant in rows %}
       <tr class='{{ TABLE_COLORS[variant["putative_impact"]] }}'>
         <td>{{ variant["CHROM"] }}:{{ variant["POS"] }}</td>

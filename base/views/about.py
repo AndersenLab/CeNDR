@@ -146,6 +146,9 @@ def statistics():
                                             colors=['rgb(149, 150, 255)', 'rgb(81, 151, 35)']
                                             )
 
+    n_reports = int(max(df.reports))
+    n_traits = int(max(df.traits))
+
     #
     # Weekly visits plot
     #
@@ -169,7 +172,9 @@ def statistics():
             'weekly_visits_plot': weekly_visits_plot,
             'n_strains': n_strains,
             'n_isotypes': n_isotypes,
-            'n_users': n_users}
+            'n_users': n_users,
+            'n_reports': n_reports,
+            'n_traits': n_traits}
 
     return render_template('about/statistics.html', **VARS)
 
