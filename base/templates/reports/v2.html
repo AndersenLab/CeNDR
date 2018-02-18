@@ -339,7 +339,7 @@
                                 <tr>
                                     <td class='text-left'>
                                         {% if row.biotype in BIOTYPES.keys() %}
-                                            <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[row.biotype] }}'>{{ row.biotype }}</abbr>
+                                            <span class='tooltip-item' data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[row.biotype] }}'>{{ row.biotype }}</span>
                                         {% else %}
                                             {{ row.biotype }}
                                         {% endif %}

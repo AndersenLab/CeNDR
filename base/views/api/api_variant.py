@@ -138,6 +138,10 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False):
             gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
             gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set]
             ANN = [x for x in ANN if x['impact'] in query['variant_impact'] or 'ALL' in query['variant_impact']]
+            if type(INFO['AF']) == tuple:
+                AF = INFO['AF'][0]
+            else:
+                AF = INFO['AF']
             rec_out = {
                 "CHROM": record.CHROM,
                 "POS": record.POS,
@@ -145,7 +149,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False):
                 "ALT": record.ALT,
                 "FILTER": record.FILTER or 'PASS',  # record.FILTER is 'None' for PASS
                 "GT": gt_set,
-                "AF": INFO["AF"],
+                "AF": '{:0.3f}'.format(AF),
                 "ANN": ANN,
                 "GT_Summary": Counter(record.gt_types.tolist())
             }

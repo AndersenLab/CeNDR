@@ -92,8 +92,8 @@ with app.app_context():
         trait.user_id = user['user_id']
         trait.save()
 
-"""
-var_corr = pd.read_csv("base/report_conversion/variant_correlation.csv")
+
+var_corr = pd.read_csv("base/report_conversion/var_corr_results.csv")
 
 # Upload variant correlation
 with app.app_context():
@@ -107,4 +107,7 @@ with app.app_context():
             report_base = f"reports/v1/{row['report_slug']}/{row['trait_slug']}/tables/variant_correlation.tsv.gz"
             print(report_base)
             cendr_bucket.blob(report_base).upload_from_filename(fname)
-"""
+
+
+
+

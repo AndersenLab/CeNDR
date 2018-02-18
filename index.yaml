@@ -1,11 +1,5 @@
 indexes:
 
-- kind: report
-  properties:
-  - name: user_id
-  - name: created_on
-    direction: desc
-
 
 - kind: trait
   properties:
@@ -21,6 +15,12 @@ indexes:
   - name: created_on
     direction: desc
 
+- kind: trait
+  properties:
+  - name: is_public
+  - name: -created_on
+  - name: report_slug
+  - name: trait_name
 
 - kind: trait
   properties:

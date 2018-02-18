@@ -15,7 +15,10 @@
 * CRAMS files and downloads have been removed.
 * Mapping reports have been removed from gene pages. The new database infrastructure makes it difficult to incorporate these.
 * Added statistics page with strains collected over time, report numbers over time, visitors over time, and strain/isotype counts.
-*
+
+__New Pages__
+
+* A statistics page has been added that details strains/isotypes collected over time, visitors over time, and 
 
 __Sitewide__
 
@@ -26,6 +29,12 @@ __Mapping Pipeline__
 * Moved mapping infrastructure to AWS Fargate
 * Added new description field
 * The embargo option has been dropped for publishing reports
+
+__Browser__
+
+* Add allele frequency (AF) as column on variant output.
+* Added BAMs for strains
+* Reorganized variant data table output. Variants that affect multiple transcripts are now grouped together.
 
 ### v1.1.2 (2017-12-05)
 

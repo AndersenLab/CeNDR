@@ -82,10 +82,10 @@
 
   <table class="table table-striped table-hover">
 
-{% for i in latest_mappings %}
+{% for trait in latest_mappings %}
 <tr>
-<td><a href="{{ url_for('trait_view', report_slug=i.report_slug, trait_slug=i.trait_slug ) }}">{{ i.report_name }} → {{ i.trait_name }}</a>
-<div class='pull-right'><small>{{ i.submission_date.strftime('%Y-%m-%d') }}</small></div></td>
+<td><a href="{{ url_for('mapping.report', report_slug=trait.report_slug, trait_slug=trait.trait_slug ) }}">{{ trait.report_name }} → {{ trait.trait_name }}</a>
+<div class='pull-right'><small>{{ trait.created_on.strftime('%Y-%m-%d') }}</small></div></td>
 </tr>
 {% endfor %}
 </table>

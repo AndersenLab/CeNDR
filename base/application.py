@@ -103,6 +103,7 @@ def inject():
     return dict(version=CENDR_VERSION,
                 json=json,
                 list=list,
+                str=str,
                 gs_static=gs_static,
                 render_markdown=render_markdown)
 

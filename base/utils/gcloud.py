@@ -41,7 +41,7 @@ def store_item(kind, name, **kwargs):
     ds.put(m)
 
 
-def query_item(kind, filters=None, projection=(), order=None):
+def query_item(kind, filters=None, projection=(), order=None, limit=None):
     """
         Filter items from google datastore using a query
     """
@@ -54,15 +54,17 @@ def query_item(kind, filters=None, projection=(), order=None):
     if filters:
         for var, op, val in filters:
             query.add_filter(var, op, val)
-
-    records = []
-    query = query.fetch()
-    while True:
-        data, more, key = query.next_page()
-        records.extend(data)
-        if more is False:
-            break
-    return records
+    if limit:
+        return query.fetch(limit=limit)
+    else:
+        records = []
+        query = query.fetch()
+        while True:
+            data, more, key = query.next_page()
+            records.extend(data)
+            if more is False:
+                break
+        return records
 
 
 def get_item(kind, name):

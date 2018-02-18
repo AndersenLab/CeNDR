@@ -233,6 +233,7 @@ th {
         <th>CHROM:POS</th>
         <th>REF / ALT</th>
         <th>Filter</th>
+        <th><span class='tooltip-item' data-toggle='tooltip' title='Allele Frequency'>AF</span></th>
         <th>Gene Name</th>
         <th>WormBase ID</th>
         <th>Sequence</th>
@@ -538,7 +539,7 @@ function refresh_variants(download = false) {
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
-
+                console.log(rec);
                 var is_first = true;
                 $.each(rec['ANN'], function(annk, ann) {
 
@@ -564,7 +565,8 @@ function refresh_variants(download = false) {
                             td_rowspan = rec['ANN'].length;
                             variant_items = [`${rec["CHROM"]}:${Number(rec["POS"]).toLocaleString('en')}`,
                                              `${rec["REF"]} / ${rec["ALT"].join(",")}`,
-                                             rec["FILTER"]]
+                                             rec["FILTER"],
+                                             rec["AF"]]
                             is_first = false;
                             rowspan_td = `<td class='bold' rowspan=${td_rowspan}>`;
                             variant_items = rowspan_td + variant_items.join(`</td>${rowspan_td}`) + "</td>"
@@ -594,16 +596,16 @@ function refresh_variants(download = false) {
                   gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
                     // Append genotypes
                     $("#variants > tbody").append(
-                      `<tr><td style='border-top:none;' colspan='10'>
+                      `<tr><td style='border-top:none;' colspan='11'>
                         <div class='row'>
                           <div class='col-md-12 gt_set'>
                               <h5>Reference</h5>
                               ${draw_gt_set(gts, 0)}
                               <h5>Alternative</h5>
-                              ${draw_gt_set(gts, 3)}
+                              ${draw_gt_set(gts, 2)}
                               <h5>Other</h5>
                               ${draw_gt_set(gts, 1)}
-                              ${draw_gt_set(gts, 2)}
+                              ${draw_gt_set(gts, 3)}
                           </div>
                         </div>
                       </td></tr>`);

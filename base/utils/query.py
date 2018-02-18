@@ -77,3 +77,15 @@ def get_unique_users():
     """
     users = query_item('user', projection=['user_email'])
     return len(users)
+
+
+
+def get_latest_public_mappings():
+    """
+        Returns the 5 most recent mappings
+    """
+    recent_traits = list(query_item('trait',
+                                    filters=[('is_public', '=', True)],
+                                    projection=('report_slug', 'trait_name', '-created_on',),
+                                    limit=5))
+    return recent_traits

@@ -12,7 +12,7 @@ from base.utils.data_utils import sorted_files
 from datetime import datetime
 from urllib.parse import urljoin
 from werkzeug.contrib.atom import AtomFeed
-
+from base.utils.query import get_latest_public_mappings
 
 primary_bp = Blueprint('primary',
                        __name__)
@@ -26,9 +26,8 @@ def primary():
     page_title = "Caenorhabditis elegans Natural Diversity Resource"
     files = sorted_files("base/static/content/news/")
     VARS = {'page_title': page_title,
-            'files': files}
-    # latest_mappings = list(report.filter(report.release == 0, trait.status == "complete").join(trait).order_by(
-    #    trait.submission_complete.desc()).limit(5).select(report, trait).distinct().dicts().execute())
+            'files': files,
+            'latest_mappings': get_latest_public_mappings()}
     return render_template('primary/home.html', **VARS)
 
 

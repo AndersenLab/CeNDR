@@ -1,21 +1,5 @@
 {% extends "_layouts/default.html" %}
 
-
-{% block custom_head %}
-
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<link rel="stylesheet" href="/static/css/leaflet.css" />
-<script src="/static/js/leaflet.js"></script>
-{# for plottable #}
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.3.0/d3.min.js"></script>
-<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
-{% endblock %}
-
 {% block style %}
 <style>
 .report {
@@ -64,7 +48,7 @@
 }
 
 #gene_list tbody td, #gene_list thead th, #variant_list tbody td, #variant_list thead th {
-    width: 16.66%;
+    width: 10%;
     float: left;
 }
 
@@ -223,20 +207,12 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 <col width="10">
 <col width="5">
 <col width="14">
-<col width="14">
-<col width="14">
-<col width="14">
-<col width="14">
 <thead>
   <tr>
     <th>Interval</th>
     <th class='text-right'>Peak Position</th>
     <th class='text-right'>-log<sub>10</sub>p</th>
-    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Variance Explained">V.E.</abbr></abbr></th>
-    <th class='text-right'>Variants</th>
-    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of coding genes with at least 1 variant">Coding</abbr></th>
-    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of genes with >= 1 moderate impact variant">Moderate</abbr></th>
-    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of genes with >= 1 high impact variant">High</abbr></th>
+    <th class='text-right'><span class='tooltip-item' data-toggle="tooltip"  data-placement="bottom" title="Variance Explained">V.E.</span></th>
   </tr>
 </thead>
 <tbody>
@@ -247,15 +223,11 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
   <td class='text-right'><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.startPOS }}..{{ row.endPOS }}" target="_blank">{{ row['CHROM'] }}:{{ "{:,.0f}".format(row['POS']) }}</a></td>
   <td>{{ row['log10p']|round(2) }}</td>
   <td>{{ (row['var.exp'] * 100)|round(3) }}%</td>
-  <td data='msg.variants' class='dat_{{ peak_index }}'>-</td>
-  <td data='msg.gene_w_variants_biotype.protein_coding' class='dat_{{ peak_index }}'>-</td>
-  <td data='msg.gene_by_impact.total.MODERATE' class='dat_{{ peak_index }}'>-</td>
-  <td data='msg.gene_by_impact.total.HIGH' class='dat_{{ peak_index }}'>-</td>
 </tr>
 {% endfor %}
 </tbody>
 </table>
-<small>Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</small>
+<small>The number of variants, and number of genes affected by moderate and high impact variants are in the biotype summary tables below. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</small>
 
 
 <h3 id="pxg">Phenotype-by-Genotype</h3>
@@ -301,117 +273,105 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
     <ul>
       <li><strong>Peak Interval</strong> &nbsp;{{ peak['interval'] }}</li>
       <li><strong>Peak Position</strong> &nbsp;{{ peak['marker'] }}</li>
-      <li><strong>Variance Explained</strong> &nbsp;{{ peak['var.exp']*100|round(3) }}%</li>
+      <li><strong>Variance Explained</strong> &nbsp;{{ "{:.2f}".format(peak['var.exp']*100) }}%</li>
     </ul>
     <div class="row">
-    <div class="col-md-12">
-      <table class="peak_summary table table-hover table-striped" style="table-layout: fixed">
-          <thead>
-            <tr>
-              <th>Biotype</th>
-              <th># Genes</th>
-              <th># Genes w/ variants</th>
-              <th>>=1 Moderate Impact</th>
-              <th>>=1 High Impact</th>
-              <th># Variants</th>
-            </tr>
-          </thead>
-          <tbody class='peak_{{ loop.index0 }} text-right'>
-              <tr>
-                <td class='text-left'><strong>Total</strong></td>
-                <td data='msg.gene_biotype.total' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_w_variants_biotype.total' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_by_impact.total.MODERATE' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_by_impact.total.HIGH' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.variants' class='dat_{{ peak_index }}'>-</td>
-              </tr>
-              {% for i in ["protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "tRNA", "lincRNA", "rRNA", "scRNA", "snoRNA", "snRNA", "asRNA", "Coding", "Noncoding"] %}
-              <tr>
-                <td class='text-left'>
-                {% if i in BIOTYPES.keys() %}
-                  <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[i] }}'>{{ i }}</abbr>
-                {% else %}
-                {{ i }}
-                {% endif %}
-                </td>
-                <td data='msg.gene_biotype.biotype_summary.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_w_variants_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_by_impact.MODERATE.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_by_impact.HIGH.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.variant_in_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-              </tr>
-              {% endfor %}
-              <tr>
-                <td colspan = "6">
-                <p style="text-align">Numbers listed under Moderate and High Impact correspond to the number of genes within the interval that have at least 1 variant classified as having a moderate or high impact.</p>
-                <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
-                </td>
-              </tr>
-        </tbody>
-      </table>
-      </div>
-    </div>
-      
+        <div class="col-md-12">
+                <strong><a href='{{ trait.file_url("tables/interval_summary.tsv.gz") }}'>Download Table</a></strong>
+                <table class="peak_summary table table-hover table-striped table-nice" style="table-layout: fixed">
+                    <thead>
+                        <tr class='text-nowrap'>
+                            <th>Biotype</th>
+                            <th class='text-right'># Genes</th>
+                            <th class='text-right'># Genes w/ variants</th>
+                            {% for impact in ["MODIFIER", "LOW", "MODERATE", "HIGH"] %}
+                            <th class='text-right'>
+                                <span class='tooltip-item' data-toggle='tooltip' title='Genes with one or more {{ impact.lower() }}-impact variants.'>
+                                    {{ impact }} +
+                                </span>
+                            </th>
+                            {% endfor %}
+                            <th class='text-right'># Variants</th>
+                        </tr>
+                    </thead>
+                    <tbody class='peak_{{ loop.index0 }} text-right'>
+                    {% set interval_summary_peak = interval_summary[interval_summary.interval == peak.interval].drop('interval', axis=1) %}
+                        <tr class='text-bold'>
+                            {% for col in interval_summary_peak.columns[1:] %}
+                                {% if col == 'biotype' %}
+                                    <td class='text-left'><strong>Total</strong></td>
+                                {% else %}
+                                    <td class='text-right'><strong>{{ interval_summary_peak[col].sum() }}</strong></td>
+                                {% endif %}
 
-<h3>Variants</h3>
+                            {% endfor %}
+                        </tr>
+                    {% for i, row in interval_summary_peak.iterrows() %}
+                        <tr>
+                            <td class='text-left'>
+                                {% if row.biotype in BIOTYPES.keys() %}
+                                    <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[row.biotype] }}'>{{ row.biotype }}</abbr>
+                                {% else %}
+                                    {{ row.biotype }}
+                                {% endif %}
+                            </td>
+                            {% for k, i in list(row.iteritems())[2:] %}
+                                    <td>{{ i }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+          
 
-<p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
 
-<table class="table table-hover table-striped" id="variant_list" style="table-layout: fixed">
-    <thead>
-        <tr>
-            <th>Gene Name</th>
-            <th>Wormbase ID</th>
-            <th>Biotype</th>
-            <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The total number of variants with Moderate/High predicted effects'>Total Variants</abbr></th>
-            <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The Maximum correlation among all variants examined'>Max. Correlation</abbr></th>
-        </tr>
-    </thead>
-<tbody>
-{% for gene_group, rows in variant_correlation.to_dict('records')|groupby('gene_id') %}
-    {% set gene = rows[0] %}
-      <tr>
-        <td>
-            <a href="{{ url_for("gene.gene", gene_name=gene["gene_id"]) }}">{{ gene.get("locus") or gene.get('sequence_name') }}</a>
-        </td>
-        <td><a href="{{ url_for("gene.gene", gene_name=gene["gene_id"]) }}">{{ gene["gene_id"] }}</a></td>
-        <td>{{ gene["biotype"] }}</td>
-        <td>{{ rows|length }}</td>
-        <td>{{ gene['max_correlation']|round(3) }}</td>
-      </tr>
-      <tr class='{{ gene["gene_id"] }}'>
-        <td colspan="5" style="padding:0px; width: 100%">
-          <table  class="table table-hover table-striped table-condensed internal-table">
-            <thead>
-              <tr>
-              <th>CHROM:POS</th>
-              <th>REF/ALT</th>
-              <th>Predicted Effect</th>
-              <th>Annotation</th>
-              <th>Putative Impact</th>
-              <th>Correlation</th>
-              </tr>
-            </thead>
-            <tbody style="height: inherit;">
-            {% for variant in rows %}
-              <tr class='{{ TABLE_COLORS[variant["putative_impact"]] }}'>
-                <td>{{ variant["CHROM"] }}:{{ variant["POS"] }}</td>
-                <td>{{ variant["REF"] }} / {{ variant["ALT"] }}</td>
-                <td>{{ variant["hgvs_p"] }}</td>
-                <td>{{ variant["annotation"] }}</td>
-                <td>{{ variant["putative_impact"] }}</td>
-                <td>{{ variant["correlation"]|round(3) }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          <br />
-        </td>
-      </tr>
-{% endfor %}
-  </tbody>
-</table>
+            <h3>Variants</h3>
 
+            <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
+            <strong><a href='{{ trait.file_url("tables/variant_correlation.tsv.gz") }}'>Download Table</a></strong>
+            <table class="table table-hover table-striped" id="variant_list">
+                <thead>
+                    <tr>
+                        <th>Gene Name</th>
+                        <th>Wormbase ID</th>
+                        <th>Transcript</th>
+                        <th>CHROM:POS (REF/ALT)</th>
+                        <th>Biotype</th>
+                        <th>AA Change</th>
+                        <th>Annotation</th>
+                        <th>Impact</th>
+                        <th>Correlation</th>
+                        <th><span data-toggle='tooltip' data-placement='top' data-original-title='The Maximum correlation among all variants examined'>Max. Correlation</span></th>
+                    </tr>
+                </thead>
+            <tbody>
+            {% for row in variant_correlation.to_dict('records') %}
+                  <tr class='{{ TABLE_COLORS[row["putative_impact"]] }}'>
+                    <td>
+                        <a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}">
+                        {% if str(row.get('locus')) != 'nan' %}
+                            {{ row["locus"] }}
+                        {% else %}
+                            {{ row.get('sequence_name') }}
+                        {% endif %}
+                        </a>
+                    </td>
+                    <td><a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}"><small>{{ row["gene_id"] }}</small></a></td>
+                    <td>{{ row['feature_id'] }}</td>
+                    <td style='white-space: nowrap'><small>{{ row["CHROM"] }}:{{ row["POS"] }} ({{row["REF"] }} / {{ row["ALT"] }})</small></td>
+                    <td>{{ row["biotype"] }}</td>
+                    <td>{{ row["hgvs_p"] }}</td>
+                    <td>{{ row["annotation"] }}</td>
+                    <td>{{ row["putative_impact"] }}</td>
+                    <td>{{ row["correlation"]|round(3) }}</td>
+                    <td>{{ row['max_correlation']|round(3) }}</td>
+                  </tr>
+            {% endfor %}
+              </tbody>
+            </table>
+
+        </div>{# /col-md-12 #}
+    </div>{# /row #}
 
     </div>
   {% endfor %}
