@@ -110,7 +110,7 @@
                                ['Report version', trait.REPORT_VERSION]] %}
                 {{ render_table(header=None, rows=rows, table_class='table-striped table-bordered meta-table') }}
 
-                {% set rows = [['Strains for trait "{}"'.format(trait.trait_name), strain_count],
+                {% set rows = [['Strains for trait "{}"'.format(trait.trait_name), trait.n_strains],
                                ['Traits', trait.trait_list|length]] %}
                 {{ render_table(header=None, rows=rows, table_class='table-striped table-bordered') }}
             </div>{# /col-md-6 #}
@@ -281,6 +281,31 @@
 
         <h2 id="peak_summary" class='scroll-title'>Peak Summary</h2>
 
+
+        <table class='table table-hover table-striped'>
+            <thead>
+                <tr>
+                    <th>Peak Position</th>
+                    <th>Interval</th>
+                    <th>-log10p</th>
+                    <th>Variance Explained</th>
+                </tr>
+            </thead>
+            <tbody>
+        {% for i, row in peak_summary.iterrows() %}
+                <tr>
+                    <td>{{ row.peak_pos }}</td>
+                    <td>{{ row.interval }}</td>
+                    <td>{{ row.peak_log10p|round(2) }}</td>
+                    <td>{{ (row.variance_explained*100)|round(2) }}</td>
+                </td>
+        {% endfor %}
+            </tr>
+        </table>
+
+
+
+
         <p><strong>Switch between peaks below.</strong></p>
         </div>{#/ scrollspy #}
         <!-- Nav tabs -->
@@ -315,9 +340,9 @@
                                     <th class='text-right'># Genes w/ variants</th>
                                     {% for impact in ["MODIFIER", "LOW", "MODERATE", "HIGH"] %}
                                     <th class='text-right'>
-                                        <abbr data-toggle='tooltip' title='Genes with one or more {{ impact.lower() }}-impact variants.'>
+                                        <span data-toggle='tooltip' title='Genes with one or more {{ impact.lower() }}-impact variants.'>
                                             {{ impact }} +
-                                        </abbr>
+                                        </span>
                                     </th>
                                     {% endfor %}
                                     <th class='text-right'># Variants</th>

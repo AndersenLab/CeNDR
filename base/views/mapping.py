@@ -200,7 +200,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
             """
             # If the mapping is complete:
             # Phenotype plot
-            phenotype_plot = plotly_distplot(report._trait_df, trait_name)
+            phenotype_plot = plotly_distplot(trait._trait_df, trait_name)
             # Fetch datafiles for complete runs
             peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
             try:
@@ -216,7 +216,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
             interval_summary = trait.get_gs_as_dataset("interval_summary.tsv.gz") \
                                     .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
 
-            peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv")
+            peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv.gz")
             peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
             VARS.update({'pxg_plot': pxg_plot(peak_marker_data, trait_name),
                          'interval_summary': interval_summary,
@@ -224,8 +224,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
                          'peak_summary': peak_summary,
                          'phenotype_plot': phenotype_plot,
                          'n_peaks': len(peak_summary),
-                         'strain_count': report.trait_strain_count(trait_name),
-                         'isotypes': list(report._trait_df.ISOTYPE.values),
+                         'isotypes': list(trait._trait_df.ISOTYPE.values),
                          'first_peak': first_peak})
 
             # To handle report data, functions specific

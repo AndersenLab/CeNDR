@@ -6,22 +6,25 @@ Author: Daniel E. Cook
 
 
 """
-import sys
-import gzip
 import glob
 import os
 import arrow
 import pandas as pd
 import traceback
-import json
+import uuid
+import re
 from logzero import logger
 from utils.interval import process_interval
-from utils.gcloud import report_m
+from utils.gcloud import trait_m, mapping_m, query_item
 from subprocess import Popen, STDOUT, PIPE
+from io import StringIO
 
 # Create a data directory
 if not os.path.exists('data'):
     os.makedirs('data')
+
+def unique_id():
+    return uuid.uuid4().hex
 
 def run_comm(comm):
     process = Popen(comm, stdout=PIPE, stderr=STDOUT)
@@ -34,13 +37,32 @@ def run_comm(comm):
 report_name = os.environ['REPORT_NAME']
 trait_name = os.environ['TRAIT_NAME']
 print(f"Fetching Task: {report_name} - {trait_name}")
-report = report_m(os.environ['REPORT_NAME'])
-trait = report.fetch_traits(trait_name=trait_name, latest=True)
 
+trait_filters = [('report_name', '=', report_name), ('trait_name', '=', trait_name)]
+trait_data = list(query_item('trait',
+                             filters=trait_filters))[0]
+
+def fetch_existing_mapping(report_slug, trait_slug):
+    """
+        Used to fetch existing mappings
+        if a job is rerun
+    """
+    trait_filters = [('report_slug', '=', report_slug), ('trait_slug', '=', trait_slug)]
+    try:
+        result = list(query_item('mapping',
+                                 filters=trait_filters))[0]
+        mapping = mapping_m(result.key.name)
+        mapping.__dict__.update(dict(result))
+        return mapping
+    except IndexError:
+        return None
+
+trait = trait_m(trait_data.key.name)
+trait.__dict__.update(dict(trait_data))
+trait._trait_df = pd.read_csv(StringIO(trait.trait_data), sep="\t")
 
 try:
-    report._trait_df[['STRAIN', 'ISOTYPE', trait_name]].to_csv('df.tsv', sep='\t', index=False)
-    report._trait_df[['STRAIN', 'ISOTYPE', trait_name]].to_csv("data/phenotype.tsv.gz", sep="\t", compression='gzip', index=False)
+    trait._trait_df.to_csv('df.tsv', sep='\t', index=False)
     # Update report start time
     trait.started_on = arrow.utcnow().datetime
     trait.status = "running"
@@ -54,17 +76,35 @@ try:
     if exitcode != 0:
         raise Exception("R error")
 
-    # Mark trait significant/insignificant
-    trait.is_significant = True
+    # Process significant data
+    if os.path.exists("data/peak_summary.tsv.gz"):
+        trait.is_significant = True
+        peak_summary = pd.read_csv("data/peak_summary.tsv.gz", sep='\t')
 
-    # Generate peak summaries
-    peak_summary = pd.read_csv("data/peak_summary.tsv.gz", sep='\t')
+        # Generate and save the interval summary
+        interval_sums = [process_interval(x) for x in list(peak_summary.interval.values)]
+        pd.concat(interval_sums) \
+          .sort_values(['interval', 'variants'], ascending=False) \
+          .to_csv("data/interval_summary.tsv.gz", sep="\t", compression='gzip', index=False)
 
-    # Generate and save the interval summary
-    interval_sums = [process_interval(x) for x in list(peak_summary.interval.values)]
-    pd.concat(interval_sums) \
-      .sort_values(['interval', 'variants'], ascending=False) \
-      .to_csv("data/interval_summary.tsv.gz", sep="\t", compression='gzip', index=False)
+        # Upload intervals as mapping objects
+        for i, row in peak_summary.iterrows():
+            mapping = fetch_existing_mapping(trait.report_slug, row.trait)
+            if mapping is None:
+                mapping = mapping_m(unique_id())
+            chrom, interval_start, interval_end = re.split("\-|:", row.interval)
+            mapping.chrom = chrom
+            mapping.pos = row.POS
+            mapping.interval_start = int(interval_start)
+            mapping.interval_end = int(interval_end)
+            mapping.is_public = trait.is_public
+            mapping.log10p = row.peak_log10p
+            mapping.report_slug = trait.report_slug
+            mapping.trait_slug = trait.trait_name
+            mapping.variance_explained = row.variance_explained
+            mapping.save()
+    else:
+        trait.is_significant = False
 
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))
