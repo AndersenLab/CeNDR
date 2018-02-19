@@ -8,7 +8,7 @@ import pandas as pd
 import simplejson as json
 
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
-
+from base.utils.query import get_reports_by_date
 from base.constants import BIOTYPES, TABLE_COLORS
 from base.application import autoconvert
 from base.models2 import trait_m
@@ -146,7 +146,7 @@ def report(report_slug, trait_name=None, rerun=None):
         if trait['secret_hash'] != report_slug and user_id != trait['user_id']:
             flash('You do not have access to that report', 'danger')
             return abort(404)
-    
+
     if not trait_name:
         # Redirect to the first trait
         return redirect(url_for('mapping.report',
@@ -239,7 +239,7 @@ def report(report_slug, trait_name=None, rerun=None):
     return render_template(report_template, **VARS)
 
 
-@mapping_bp.route('/Genetic-Mapping/public/', methods=['GET'])
+@mapping_bp.route('/mapping/public/', methods=['GET'])
 def public_mapping():
     query = request.args.get("query")
     if query is not None:
@@ -254,45 +254,11 @@ def public_mapping():
         search = True
         return render_template('public_mapping.html', **locals())
     title = "Perform Mapping"
-    results = trait.select(report.release, 
-                                    report.report_name,
-                                    report.report_slug,
-                                    trait.trait_name,
-                                    trait.trait_name,
-                                    trait.status,
-                                    trait.submission_complete,
-                                    trait.submission_date,
-                                    mapping) \
-                           .filter(trait.status == "complete", 
-                                   report.release == 0) \
-                           .join(mapping, JOIN.LEFT_OUTER) \
-                           .switch(trait) \
-                           .join(report) \
-                           .distinct() \
-                           .dicts() \
-                           .order_by(trait.submission_complete.desc()) \
-                           .execute()
+    waffle_date_set = get_reports_by_date().to_dict('records')
 
-    date_set = dict(Counter([time.mktime((x["submission_date"]+relativedelta(hours = +6)).timetuple()) for x in results]))
-    wdata = Counter([(x["submission_date"]+relativedelta(hours = +6)).date().isoformat() for x in results])
-    waffle_date_set=[{"date":x, "count":y} for x,y in wdata.items()]
+    VARS = {'waffle_data_set': waffle_date_set}
 
-    #added in here waffle_date_set should be filtered by month instead of time stamp. Then could be used for the waffle plot
-    #submission date is a datetime object
-    #waffle_date_set=[]
-    #sum=0
-    #current_month=results[0]["submission_date"].month
-    #for x in results:
-    #    if x["submission_date"].month==current_month:
-    #        sum++
-    #    else:
-    #        waffle_date_set.append(("month": current_month, "total": sum)) #appending a tuple
-    #        sum=1
-    #        current_month=x["submission_date"].month
-    recent_results = list(results)[0:20]
-    bcs = OrderedDict([("Public", None)])
-    title = "Public Mappings"
-    pub_mappings = list(mapping.select(mapping, report, trait).join(trait).join(report).filter(report.release == 0).dicts().execute())
+    pub_mappings = query_item('mapping', filters=[('is_public', '=', True)])
     return render_template('public_mapping.html', **locals())
 
 

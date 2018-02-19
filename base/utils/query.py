@@ -79,6 +79,23 @@ def get_unique_users():
     return len(users)
 
 
+@cache.cached(timeout=60*60*24, key_prefix='get_reports_by_date')
+def get_reports_by_date():
+    """
+        Gets the number of reports submitted by date
+    """
+    traits = pd.DataFrame.from_dict(query_item('trait'))
+    # Convert datetime to just date
+    traits.created_on = traits.created_on.apply(lambda x: arrow.get(x).date().isoformat())
+    report_df = traits[['report_slug', 'created_on']].drop_duplicates().groupby('created_on').size().reset_index(name='count')
+    report_df = report_df.rename(index=str, columns={'created_on':'date', 'reports': 'count'})
+    last_year_dates = pd.DataFrame({'date':pd.date_range(arrow.now().shift(days=-365).date(), arrow.now().date())})
+    last_year_dates.date = last_year_dates.date.apply(lambda x: x.date().isoformat())
+    report_df = pd.merge(last_year_dates, report_df, how='left').fillna(0)
+    report_df['count'] = report_df['count'].astype(int)
+    report_df = report_df[['date', 'count']].sort_values('date')
+    return report_df
+
 
 def get_latest_public_mappings():
     """

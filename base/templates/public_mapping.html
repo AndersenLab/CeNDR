@@ -1,6 +1,5 @@
 {% extends "_layouts/default.html" %} 
 {% block custom_head %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/1.31.2/plotly.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.4/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/calendar-heatmap/0.4.1/calendar-heatmap.min.js"></script>
@@ -25,14 +24,15 @@ rect.day-cell:hover {
   stroke-width: 1px;
 }
 .day-cell-tooltip {
-  position: absolute;
   z-index: 9999;
   padding: 5px 9px;
   color: #bbbbbb;
   font-size: 12px;
   background: rgba(0, 0, 0, 0.85);
-  border-radius: 3px;
+  border-radius: 4px;
   text-align: center;
+  display: block !important;
+  visibility: visible;
 }
 .day-cell-tooltip > span {
   font-family: Helvetica, arial, 'Open Sans', sans-serif
@@ -229,14 +229,14 @@ manhattan.on("plotly_click", function(data) {
 	window.location.href = "/report/" + data.points[0].data.text[point_number];
 })
 
-waffle_date_set={{ waffle_date_set|tojson|safe }};
+waffle_date_set = {{ waffle_date_set|tojson|safe }};
 waffle_date_set.map(function(x){x.date = moment(x.date).toDate()})
 console.log(waffle_date_set);
 
 var chart = calendarHeatmap()
               .data(waffle_date_set)
               .selector('#waffle')
-              .colorRange(['rgb(255, 198, 94)', 'rgb(255, 0, 0)'])
+              .colorRange(['rgb(211, 211, 211)', 'rgb(255, 0, 0)'])
               .tooltipEnabled(true)
               .onClick(function (data) {
                $("#mappings").text("Significant public mappings From " + moment(data["date"]).format("YYYY-MM-DD"));
