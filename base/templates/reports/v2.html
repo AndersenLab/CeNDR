@@ -90,8 +90,8 @@
     <div class='col-md-12'>
         <h4>Traits</h4>
         {# Traits #}
-            {% for trait in report.trait_list %} 
-                <a href="{{ url_for('mapping.report', report_slug = report.report_slug, trait_name = trait) }}" type="button" class="btn btn-sm {% if trait_name == trait %} btn-primary {% else %} btn-link {% endif %}"><strong>{{ trait }}</strong></a>
+            {% for trait in trait_list %} 
+                <a href="{{ url_for('mapping.report_view', report_slug = report_slug, trait_name = trait) }}" type="button" class="btn btn-sm {% if trait_name == trait %} btn-primary {% else %} btn-link {% endif %}"><strong>{{ trait }}</strong></a>
             {% endfor %}
         <br /><br />
     </div>{# /col-md-12 #}
@@ -103,7 +103,7 @@
         <div class='row'>
             <div class='col-md-6'>
                 {% from "macros.html" import render_table %}
-                {% set rows = [['Report Name', report.report_name],
+                {% set rows = [['Report Name', trait.report_name],
                                ['Trait Name', trait.trait_name],
                                ['Data release', trait.version_link()],
                                ['CeNDR version', trait.CENDR_VERSION],
@@ -111,7 +111,7 @@
                 {{ render_table(header=None, rows=rows, table_class='table-striped table-bordered meta-table') }}
 
                 {% set rows = [['Strains for trait "{}"'.format(trait.trait_name), strain_count],
-                               ['Traits', report.trait_list|length]] %}
+                               ['Traits', trait.trait_list|length]] %}
                 {{ render_table(header=None, rows=rows, table_class='table-striped table-bordered') }}
             </div>{# /col-md-6 #}
             <div class='col-md-6'>
@@ -155,14 +155,14 @@
                     <tbody>
                         <tr>
                             <td>Report Mode</td>
-                            <td>{% if report.is_public %}public{% else %}private{% endif %}</td>
+                            <td>{% if trait.is_public %}public{% else %}private{% endif %}</td>
                         </tr>
                         <tr>
                             <td>Share</td>
-                            <td>{% if report.is_public %}
-                                    {{ request.url_root.strip('/') }}{{ url_for('mapping.report', report_slug=report.report_slug, trait_name=trait_name) }}
+                            <td>{% if trait.is_public %}
+                                    {{ request.url_root.strip('/') }}{{ url_for('mapping.report_view', report_slug=trait.report_slug, trait_name=trait_name) }}
                                 {% else %}
-                                    {{ request.url_root.strip('/') }}{{ url_for('mapping.report', report_slug=report.secret_hash, trait_name=trait_name) }}
+                                    {{ request.url_root.strip('/') }}{{ url_for('mapping.report_view', report_slug=trait.secret_hash, trait_name=trait_name) }}
                                 {% endif %}
                             </td>
                         </tr>

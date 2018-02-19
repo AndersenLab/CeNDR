@@ -8,7 +8,6 @@ import pandas as pd
 import simplejson as json
 
 from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
-from base.utils.query import get_reports_by_date
 from base.constants import BIOTYPES, TABLE_COLORS
 from base.application import autoconvert
 from base.models2 import trait_m
@@ -60,56 +59,53 @@ def mapping():
 
     user = session.get('user')
     if form.validate_on_submit() and user:
-        form.data.pop("csrf_token")
-        report_slug = slugify(form.report_name.data)
-        trait_list = list(form.trait_data.processed_data.columns[2:])
-        strain_list = form.trait_data.strain_list
-        is_public = form.is_public.data
-        trait_data = form.trait_data.processed_data.to_csv(index=False, sep="\t", na_rep="NA")
-        report_name = form.report_name.data
-        report_data = {'report_slug': slugify(form.report_name.data),
-                       'report_name': report_name,
-                       'description': form.description.data,
-                       'trait_data': trait_data,
-                       'created_on': arrow.utcnow().datetime,
-                       'username': user['username'],
-                       'user_id': user['user_id'],
-                       'user_email': user['user_email'],
-                       'is_public': is_public,
-                       'trait_list': trait_list,
-                       'strain_list': strain_list}
-        if is_public is False:
-            report_data['secret_hash'] = unique_id()[0:8]
-        report_data = {k: v for k, v in report_data.items() if v}
-        # Begin a transaction so nothing is saved unless the tasks start
-        # running.
         transaction = g.ds.transaction()
         transaction.begin()
 
         # Now generate and run trait tasks
-        for trait_name in report.trait_list:
+        report_name = form.report_name.data
+        report_slug = slugify(report_name)
+        trait_list = list(form.trait_data.processed_data.columns[2:])
+        now = arrow.utcnow().datetime
+        trait_set = []
+        for trait_name in trait_list:
             trait = trait_m()
-            trait.__dict__.update(report_data)
+            trait_data = form.trait_data.processed_data[['ISOTYPE', 'STRAIN', trait_name]].dropna(how='any') \
+                                                                                          .to_csv(index=False,
+                                                                                                  sep="\t",
+                                                                                              na_rep="NA")
             trait.__dict__.update({
                'report_name': report_name,
                'report_slug': report_slug,
                'trait_name': trait_name,
-               'created_on': arrow.utcnow().datetime,
-               'status': 'Queued',
+               'trait_list': list(form.trait_data.processed_data.columns[2:]),
+               'trait_data': trait_data,
+               'n_strains': int(form.trait_data.processed_data.STRAIN.count()),
+               'created_on': now,
+               'status': 'queued',
+               'is_public': form.is_public.data,
                'CENDR_VERSION': CENDR_VERSION,
                'REPORT_VERSION': REPORT_VERSION,
                'DATASET_RELEASE': DATASET_RELEASE,
-               'WORMBASE_VERSION': WORMBASE_VERSION
+               'WORMBASE_VERSION': WORMBASE_VERSION,
+               'username': user['username'],
+               'user_id': user['user_id'],
+               'user_email': user['user_email']
             })
+            if trait.is_public:
+                trait.secret_hash = unique_id()[0:8]
             trait.run_task()
+            trait_set.append(trait)
         # Update the report to contain the set of the
         # latest task runs
         transaction.commit()
 
         flash("Successfully submitted mapping!", 'success')
-        return redirect(url_for('mapping.report',
+        return redirect(url_for('mapping.report_view',
                                 report_slug=report_slug,
-                                trait_name=trait_list[0]))
+                                trait_name=trait_list[0],
+                                trait=trait_set[0],
+                                trait_list=trait_list))
 
     return render_template('mapping.html', **VARS)
 
@@ -117,7 +113,7 @@ def mapping():
 @mapping_bp.route("/report/<report_slug>/")
 @mapping_bp.route("/report/<report_slug>/<trait_name>")
 @mapping_bp.route("/report/<report_slug>/<trait_name>/<rerun>")
-def report(report_slug, trait_name=None, rerun=None):
+def report_view(report_slug, trait_name=None, rerun=None):
     """
         This view will handle logic of handling legacy reports
         and v2 reports.
@@ -149,7 +145,7 @@ def report(report_slug, trait_name=None, rerun=None):
 
     if not trait_name:
         # Redirect to the first trait
-        return redirect(url_for('mapping.report',
+        return redirect(url_for('mapping.report_view',
                                 report_slug=report_slug,
                                 trait_name=trait['trait_list'][0]))
 
@@ -242,20 +238,7 @@ def report(report_slug, trait_name=None, rerun=None):
 @mapping_bp.route('/mapping/public/', methods=['GET'])
 def public_mapping():
     query = request.args.get("query")
-    if query is not None:
-        title = "Search: " + query
-        subtitle = "results"
-        q = "%" + query + "%"
-        results = trait.select(report, trait, mapping).filter(trait.status == "complete", report.release == 0).join(mapping).join(report).dicts().filter((trait.trait_name % q) |
-                                    (trait.trait_name % q) |
-                                    (report.report_name % q) |
-                                    (report.report_slug % q)).order_by(mapping.log10p.desc())
-        search_results = list(results.dicts().execute())
-        search = True
-        return render_template('public_mapping.html', **locals())
-    title = "Perform Mapping"
-    waffle_date_set = get_reports_by_date().to_dict('records')
-
+    title = "Public Mappings"
     VARS = {'waffle_data_set': waffle_date_set}
 
     pub_mappings = query_item('mapping', filters=[('is_public', '=', True)])

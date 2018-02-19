@@ -55,7 +55,6 @@ class datastore_model(object):
                 self._exists = True
                 self.__dict__.update(item)
 
-        
     def save(self):
         self._exists = True
         item_data = {k: v for k, v in self.__dict__.items() if k not in ['kind', 'name'] and not k.startswith("_")}
@@ -77,6 +76,7 @@ class trait_m(datastore_model):
         If a task is re-run the report will only display the latest version.
     """
     kind = 'trait'
+
     def __init__(self, *args, **kwargs):
         """
             The trait_m object adopts the task
@@ -85,6 +85,7 @@ class trait_m(datastore_model):
         self._ecs = get_aws_client('ecs')
         self._logs = get_aws_client('logs')
         super(trait_m, self).__init__(*args, **kwargs)
+        self.exclude_from_indexes = ['trait_data']
 
     def version_link(self):
         """
@@ -98,7 +99,6 @@ class trait_m(datastore_model):
             Runs the task
         """
         # Fargate credentials
-        # fargate_user = get_item('credential', 'aws_fargate')
         task_fargate = self._ecs.run_task(
             taskDefinition='cendr-map',
             overrides={
@@ -148,11 +148,7 @@ class trait_m(datastore_model):
                 }
             }
             )
-        try:
-            task_fargate = task_fargate['tasks'][0]
-        except KeyError:
-            # Something went wrong.
-            return None
+        task_fargate = task_fargate['tasks'][0]
 
         # Generate trait_m model
         self.report_trait = "{}:{}".format(self.report_name, self.trait_name)

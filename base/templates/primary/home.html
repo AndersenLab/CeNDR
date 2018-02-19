@@ -70,11 +70,6 @@
 <div class="panel panel-default">
 
  <div class="panel-heading">
- <form class="pull-right" action ="{{ url_for('mapping.public_mapping') }}" method="get" name="login">
-  <div class="form-group">
-    <input type="search" style="margin-top:3px;" class="form-control" name="query" placeholder="Find Mappings" value="{% if query %}{{ query }}{% endif %}">
-  </div>
-</form>
 
 <h4>Latest Mappings</h4>
 
@@ -84,7 +79,7 @@
 
 {% for trait in latest_mappings %}
 <tr>
-<td><a href="{{ url_for('mapping.report', report_slug=trait.report_slug, trait_name=trait.trait_slug ) }}">{{ trait.report_slug }} → {{ trait.trait_name }}</a>
+<td><a href="{{ url_for('mapping.report_view', report_slug=trait.report_slug, trait_name=trait.trait_slug ) }}">{{ trait.report_slug }} → {{ trait.trait_name }}</a>
 <div class='pull-right'><small>{{ trait.created_on.strftime('%Y-%m-%d') }}</small></div></td>
 </tr>
 {% endfor %}

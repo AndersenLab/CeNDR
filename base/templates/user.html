@@ -24,10 +24,10 @@
         {% set report = list(traits)[0] %}
         <tr>
             <td>{{ loop.index }}</td>
-            <td><a href='{{ url_for("mapping.report", report_slug=report.report_slug) }}'><strong>{{ report.report_slug }}</strong></a></td>
+            <td><a href='{{ url_for("mapping.report_view", report_slug=report.report_slug) }}'><strong>{{ report.report_slug }}</strong></a></td>
             <td style='white-space: nowrap'>{% for trait in list(traits) %}
                 {{ '[ {:20}]'.format(trait.status) }}
-                <a href="{{ url_for('mapping.report', report_slug=report.report_slug, trait_name=trait.trait_name) }}">
+                <a href="{{ url_for('mapping.report_view', report_slug=report.report_slug, trait_name=trait.trait_name) }}">
                     {% if trait.is_significant %}
                         <strong>{{ trait.trait_name }}</strong>
                     {% else %}

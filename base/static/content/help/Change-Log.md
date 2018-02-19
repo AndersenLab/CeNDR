@@ -36,6 +36,10 @@ __Browser__
 * Added BAMs for strains
 * Reorganized variant data table output. Variants that affect multiple transcripts are now grouped together.
 
+__Public Mappings__
+
+* The waffle chart has been removed.
+
 ### v1.1.2 (2017-12-05)
 
 * Fixed a bug preventing the download button from working properly.
