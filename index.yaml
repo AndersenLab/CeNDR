@@ -18,7 +18,8 @@ indexes:
 - kind: trait
   properties:
   - name: is_public
-  - name: -created_on
+  - name: created_on
+    direction: desc
   - name: report_slug
   - name: trait_name
 

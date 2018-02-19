@@ -13,6 +13,7 @@ from base.constants import URLS
 from base.utils.gcloud import get_item, store_item, query_item, google_storage
 from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
+from collections import defaultdict
 
 from logzero import logger
 
@@ -61,7 +62,10 @@ class datastore_model(object):
         store_item(self.kind, self.name, **item_data)
 
     def __repr__(self):
-        return f"<{self.kind}:{self.name}>"
+        if hasattr(self, 'name'):
+            return f"<{self.kind}:{self.name}>"
+        else:
+            return f"<{self.kind}:no-name>"
 
 
 class trait_m(datastore_model):
@@ -252,16 +256,14 @@ class trait_m(datastore_model):
         gs_url = f"{self.gs_base_url}/{fname}"
         return f"{gs_url}"
 
-"""
+class mapping_m(datastore_model):
+    """
+        The mapping/peak interval model
+    """
+    kind = 'mapping'
+    def __init__(self, *args, **kwargs):
+        super(mapping_m, self).__init__(*args, **kwargs)
 
-from base.models2 import trait_m
-
-t = trait_m()
-t.report_name = 'test-report'
-t.trait_name = 'yeah1'
-t.run_task()
-
-"""
 class user_m(datastore_model):
     """
         The User model - for creating and retrieving
@@ -275,8 +277,12 @@ class user_m(datastore_model):
         filters = [('user_id', '=', self.user_id)]
         # Note this requires a composite index defined very precisely.
         results = query_item('trait', filters=filters, order=['user_id', '-created_on'])
+        results = sorted(results, key=lambda x: x['created_on'], reverse=True)
+        results_out = defaultdict(list)
+        for row in results:
+            results_out[row['report_slug']].append(row)
         # Generate report objects
-        return results
+        return results_out
 
 
 class DictSerializable(object):

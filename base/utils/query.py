@@ -86,6 +86,8 @@ def get_latest_public_mappings():
     """
     recent_traits = list(query_item('trait',
                                     filters=[('is_public', '=', True)],
-                                    projection=('report_slug', 'trait_name', '-created_on',),
+                                    projection=('report_slug', 'trait_name', 'created_on',),
                                     limit=5))
+    for trait in recent_traits:
+        trait['created_on'] = arrow.get(str(trait['created_on'])[:-6])
     return recent_traits

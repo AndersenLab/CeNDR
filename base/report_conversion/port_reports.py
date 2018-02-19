@@ -16,7 +16,7 @@ from base.application import app
 import pandas as pd
 from base.utils.gcloud import store_item, get_item, query_item
 from base.utils.data_utils import unique_id
-from base.models2 import user_m, trait_m
+from base.models2 import user_m, trait_m, mapping_m
 from slugify import slugify
 from gcloud import storage
 
@@ -93,7 +93,9 @@ with app.app_context():
         trait.save()
 
 
-var_corr = pd.read_csv("base/report_conversion/var_corr_results.csv")
+var_corr = pd.read_csv("base/report_conversion/var_corr.csv")
+
+var_corr['interval'] = var_corr.apply(lambda row: f"{row.CHROM}:{row.interval_start}-{row.interval_end}", axis=1)
 
 # Upload variant correlation
 with app.app_context():
@@ -108,6 +110,40 @@ with app.app_context():
             print(report_base)
             cendr_bucket.blob(report_base).upload_from_filename(fname)
 
+# Mapping intervals
+intervals = pd.read_csv("base/report_conversion/mapping_intervals.csv")
+with app.app_context():
+    for row in reports.to_dict('records'):
+        sliced = intervals[(intervals.report_slug == row['report_slug']) & (intervals.trait_slug == row['trait_slug'])]
+        sliced = sliced[['chrom','pos','variance_explained', 'log10p', 'BF', 'interval_start', 'interval_end', 'report_slug', 'trait_slug']]
+        sliced.to_csv('out.tsv.gz',sep='\t', compression='gzip')
+        report_base = f"reports/v1/{row['report_slug']}/{row['trait_slug']}/tables/peak_summary.tsv.gz"
+        print(report_base)
+        cendr_bucket.blob(report_base).upload_from_filename('out.tsv.gz')
+
+
+
+
+
+
+# Create datastore for mapping intervals
+intervals = pd.read_csv("base/report_conversion/mapping_intervals.csv")
+with app.app_context():
+    for index, row in intervals.iterrows():
+        if row.status == 'complete':
+            vals = {'report_slug': row.report_slug,
+                    'trait_slug': row.trait_slug,
+                    'chrom': row.chrom,
+                    'pos': row.pos,
+                    'variance_explained': row.variance_explained,
+                    'log10p': row.log10p,
+                    'interval_start': row.interval_start,
+                    'interval_end': row.interval_end,
+                    'is_public': row.release in [0, 1]}
+            mapping = mapping_m(unique_id())
+            mapping.__dict__.update(vals)
+            print(mapping.__dict__)
+            mapping.save()
 
 
 

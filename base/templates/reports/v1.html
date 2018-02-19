@@ -59,7 +59,7 @@
 <div class="row">
       <div class="col-md-12">
         {% for trait in trait_set %}
-            <a href="{{ url_for('mapping.report', report_slug = report_slug, trait_name = trait['trait_name']) }}" type="button" class="btn btn-sm {% if current_trait == trait_name %}btn-primary{% else %}btn-link{% endif %} ">
+            <a href="{{ url_for('mapping.report', report_slug = report_slug, trait_name = trait['trait_name']) }}" type="button" class="btn btn-sm {% if trait['trait_name'] == trait_name %}btn-primary{% else %}btn-link{% endif %} ">
 
             {% if trait['is_significant'] %}
                 <strong>{{ trait['trait_name'] }}</strong>
@@ -84,7 +84,7 @@
   <div class='col-md-6'>
   <strong>Data</strong>
     <ul>
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/phenotype.tsv">Phenotype Data</a></strong></li>
+      <li><strong><a href="{{ trait.file_url("tables/phenotype.tsv") }}">Phenotype Data</a></strong></li>
 
       {% if 'mapping.tsv' in report_files %}
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/mapping.tsv">Mapping</a></strong></li>
@@ -218,11 +218,11 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 <tbody>
 {% for row in peak_summary.to_dict('records') %}
 {% set peak_index = loop.index0 %}
-<tr chrom="{{ row['CHROM'] }}" start="{{ row['startPOS'] }}" end="{{ row['endPOS'] }}" class="text-right">
-  <td class="text-left"><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row['CHROM']}}:{{ row['startPOS'] }}..{{ row['endPOS'] }}" target="_blank">{{ row['CHROM'] }}:{{ "{:,.0f}".format(row['startPOS']) }}-{{ "{:,.0f}".format(row['endPOS']) }}</a></td>
-  <td class='text-right'><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.startPOS }}..{{ row.endPOS }}" target="_blank">{{ row['CHROM'] }}:{{ "{:,.0f}".format(row['POS']) }}</a></td>
+<tr chrom="{{ row['chrom'] }}" start="{{ row['interval_start'] }}" end="{{ row['interval_end'] }}" class="text-right">
+  <td class="text-left"><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row['CHROM']}}:{{ row['interval_start'] }}..{{ row['interval_end'] }}" target="_blank">{{ row['chrom'] }}:{{ "{:,.0f}".format(row['interval_start']) }}-{{ "{:,.0f}".format(row['interval_end']) }}</a></td>
+  <td class='text-right'><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row['chrom'] }}:{{ "{:,.0f}".format(row['pos']) }}</a></td>
   <td>{{ row['log10p']|round(2) }}</td>
-  <td>{{ (row['var.exp'] * 100)|round(3) }}%</td>
+  <td>{{ (row['variance_explained'] * 100)|round(3) }}%</td>
 </tr>
 {% endfor %}
 </tbody>
@@ -273,7 +273,7 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
     <ul>
       <li><strong>Peak Interval</strong> &nbsp;{{ peak['interval'] }}</li>
       <li><strong>Peak Position</strong> &nbsp;{{ peak['marker'] }}</li>
-      <li><strong>Variance Explained</strong> &nbsp;{{ "{:.2f}".format(peak['var.exp']*100) }}%</li>
+      <li><strong>Variance Explained</strong> &nbsp;{{ "{:.2f}".format(peak['variance_explained']*100) }}%</li>
     </ul>
     <div class="row">
         <div class="col-md-12">
@@ -322,11 +322,10 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
                     {% endfor %}
                     </tbody>
                 </table>
-          
+            <strong>All variants are reported from the 20170531 data release regardless of which isotypes were submitted for the mapping. This is in contrast to newer reports which report genes and variants among only those isotypes that were submitted for a given trait.</strong>
 
 
             <h3>Variants</h3>
-
             <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
             <strong><a href='{{ trait.file_url("tables/variant_correlation.tsv.gz") }}'>Download Table</a></strong>
             <table class="table table-hover table-striped" id="variant_list">
@@ -335,7 +334,7 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
                         <th>Gene Name</th>
                         <th>Wormbase ID</th>
                         <th>Transcript</th>
-                        <th>CHROM:POS (REF/ALT)</th>
+                        <th>CHROM:POS</th>
                         <th>Biotype</th>
                         <th>AA Change</th>
                         <th>Annotation</th>
@@ -345,21 +344,17 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
                     </tr>
                 </thead>
             <tbody>
-            {% for row in variant_correlation.to_dict('records') %}
+            {% for row in variant_correlation[variant_correlation.interval == peak.interval].to_dict('records') %}
                   <tr class='{{ TABLE_COLORS[row["putative_impact"]] }}'>
                     <td>
                         <a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}">
-                        {% if str(row.get('locus')) != 'nan' %}
-                            {{ row["locus"] }}
-                        {% else %}
-                            {{ row.get('sequence_name') }}
-                        {% endif %}
+                            {{ row.get("gene_name") or row.get('feature_id') }}
                         </a>
                     </td>
                     <td><a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}"><small>{{ row["gene_id"] }}</small></a></td>
                     <td>{{ row['feature_id'] }}</td>
-                    <td style='white-space: nowrap'><small>{{ row["CHROM"] }}:{{ row["POS"] }} ({{row["REF"] }} / {{ row["ALT"] }})</small></td>
-                    <td>{{ row["biotype"] }}</td>
+                    <td style='white-space: nowrap'><small>{{ row["CHROM"] }}:{{ row["POS"] }}</small></td>
+                    <td>{{ row["transcript_biotype"] }}</td>
                     <td>{{ row["hgvs_p"] }}</td>
                     <td>{{ row["annotation"] }}</td>
                     <td>{{ row["putative_impact"] }}</td>
@@ -393,7 +388,6 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
     </div>
   </div>
 {% endif %}
-
 {% endblock %}
 
 
@@ -430,10 +424,10 @@ $('#report_nav').ready(function () {
 
 {% if trait.is_significant %}
 var isotypes = {{ isotypes|tojson }}
-var chrom = "{{ first_peak.CHROM }}"
-var start = {{ first_peak.startPOS }};
-var end = {{ first_peak.endPOS }};
-var pos = {{ first_peak.POS }};
+var chrom = "{{ first_peak.chrom }}"
+var start = {{ first_peak.interval_start }};
+var end = {{ first_peak.interval_end }};
+var pos = {{ first_peak.pos }};
 
 // Load initial map and Tajima
 $(document).ready(function() {

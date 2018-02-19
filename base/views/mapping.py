@@ -48,7 +48,6 @@ class CustomEncoder(json.JSONEncoder):
         return super(CustomEncoder, self).default(o)
 
 
-
 @mapping_bp.route('/mapping/perform-mapping/', methods=['GET', 'POST'])
 def mapping():
     """
@@ -152,7 +151,7 @@ def report(report_slug, trait_name=None, rerun=None):
         # Redirect to the first trait
         return redirect(url_for('mapping.report',
                                 report_slug=report_slug,
-                                trait_name=trait.trait_list[0]))
+                                trait_name=trait['trait_list'][0]))
 
     try:
         # Resolve REPORT --> TRAIT
@@ -179,7 +178,7 @@ def report(report_slug, trait_name=None, rerun=None):
                 VERSION 1
             """
             phenotype_data = trait.get_gs_as_dataset("tables/phenotype.tsv")
-            isotypes = list(phenotype_data.iloc[:, 1].values)
+            isotypes = list(phenotype_data.iloc[:, 1].dropna().values)
             phenotype_data = list(phenotype_data.iloc[:, 3].values)
             VARS.update({'phenotype_data': phenotype_data,
                          'isotypes': isotypes})
@@ -187,13 +186,12 @@ def report(report_slug, trait_name=None, rerun=None):
                 interval_summary = trait.get_gs_as_dataset("tables/interval_summary.tsv.gz") \
                                         .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
                 variant_correlation = trait.get_gs_as_dataset("tables/variant_correlation.tsv.gz")
-                variant_correlation['interval'] = variant_correlation.apply(lambda row: f"{row.CHROM}:{row.start}-{row.end}", axis=1)
                 max_corr = variant_correlation.groupby(['gene_id', 'interval']).apply(lambda x: max(abs(x.correlation)))
                 max_corr = max_corr.reset_index().rename(index=str, columns={0: 'max_correlation'})
                 variant_correlation = pd.merge(variant_correlation, max_corr, on=['gene_id', 'interval']) \
                                         .sort_values(['max_correlation', 'gene_id'], ascending=False)
-                peak_summary = trait.get_gs_as_dataset("tables/mapping_intervals.tsv")
-                peak_summary['interval'] = peak_summary.apply(lambda row: f"{row.CHROM}:{row.startPOS}-{row.endPOS}", axis=1)
+                peak_summary = trait.get_gs_as_dataset("tables/peak_summary.tsv.gz")
+                peak_summary['interval'] = peak_summary.apply(lambda row: f"{row.chrom}:{row.interval_start}-{row.interval_end}", axis=1)
                 first_peak = peak_summary.iloc[0]
                 VARS.update({'peak_summary': peak_summary,
                              'first_peak': first_peak,
@@ -299,115 +297,4 @@ def public_mapping():
 
 
 
-def trait_view(report_slug, trait_name="", rerun = None):
-
-    report_data = list(report.select(report,
-                                     trait,
-                                     mapping.trait_id).join(trait).where(
-                                    (
-                                        (report.report_slug == report_slug) &
-                                        (report.release == 0)
-                                    ) |
-                                    (
-                                        (report.report_hash == report_slug) &
-                                        (report.release > 0)
-                                    )
-                                ) \
-                        .join(mapping, JOIN.LEFT_OUTER) \
-                        .distinct() \
-                        .dicts().execute())
-
-    if not report_data:    
-        return render_template('404.html'), 404
-
-
-    if report_data[0]["release"] == 0:
-        report_url_slug = report_data[0]["report_slug"]
-    else:
-        report_url_slug = report_data[0]["report_hash"]
-
-     
-    if not trait_name:
-        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_name=report_data[0]["trait_name"] ))
-    else:
-        try:
-            trait_data = [x for x in report_data if x["trait_name"] == trait_name][0]
-        except:
-            # Redirect user to first trait if it can't be found.
-            return redirect(url_for("trait_view", report_slug=report_url_slug, trait_name=report_data[0]["trait_name"] ))
-
-    page_title = trait_data["report_name"] + " > " + trait_data["trait_name"]
-    title = trait_data["report_name"]
-    subtitle = trait_data["trait_name"]
-    # Define report and trait slug 
-    report_slug = trait_data["report_slug"] # don't remove
-    trait_name = trait_data["trait_name"] # don't remove
-
-    r = report.get(report_slug = report_slug)
-    t = trait.get(report = r, trait_name = trait_name)
-
-    # phenotype data
-    #phenotype_data = list(trait_value.select(strain.strain, trait_value.value)
-    #        .join(trait)
-    #        .join(report)
-    #        .switch(trait_value)
-    #        .join(strain)
-    #        .where(report.report_slug == r.report_slug)
-    #        .where(trait.trait_name == t.trait_name)
-    #        .dicts()
-    #        .execute())
-    phenotype_data = list(map(autoconvert, [x.split('\t')[2] for x in requests.get('https://storage.googleapis.com/cendr/{report_slug}/{trait_name}/tables/phenotype.tsv'.format(**locals())).text.splitlines()[1:]]))
-
-    if rerun == "rerun":
-        t.status = "queue"
-        t.save()
-        launch_mapping(verify_request = False)
-        # Return user to current trait
-        return redirect(url_for("trait_view", report_slug=report_url_slug, trait_name=trait_name))
-
-    report_trait = "%s/%s" % (report_slug, trait_name)
-    base_url = "https://storage.googleapis.com/cendr/" + report_trait
-
-    # Fetch significant mappings
-    mapping_results = list(mapping.select(mapping, report, trait)
-                                  .join(trait)
-                                  .join(report)
-                                  .filter(
-                                            (report.report_slug == report_slug), 
-                                            (trait.trait_name == trait_name)
-                                          ).dicts().execute())
-
-    #######################
-    # Variant Correlation #
-    #######################
-    var_corr = []
-    for m in mapping_results:
-        from base.views.api import correlation
-        var_corr.append(correlation.get_correlated_genes(r, t, m["chrom"], m["interval_start"], m["interval_end"]))
-
-
-    #######################
-    # Fetch geo locations #
-    #######################
-    geo_gt = {}
-    for m in mapping_results:
-        try:
-            result = GT.fetch_geo_gt(m["chrom"], m["pos"])
-            geo_gt[m["chrom"] + ":" + str(m["pos"])] = result
-        except:
-            pass
-    geo_gt = json.dumps(geo_gt)
-
-    status = trait_data["status"]
-
-    # List available datasets
-    report_files = list(storage.Client(project='andersen-lab').get_bucket("cendr").list_blobs(
-        prefix=report_trait + "/tables"))
-    report_files = [os.path.split(x.name)[1] for x in report_files]
-
-
-    # Fetch biotypes descriptions
-    from base import biotypes
-
-    return render_template('report.html', **locals())
 

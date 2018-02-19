@@ -3,8 +3,7 @@
 {% block content %}
 <div class="row">
     <div class='col-md-12'>
-   {{ user }}
-
+        
    <h4>Submitted Mappings</h4>
 
    <table class='table table-striped table-condensed table-hover'>
@@ -21,13 +20,13 @@
         </tr>
     </thead>
     <tbody>
-        {% for report_group, traits in user_obj.reports()|groupby('report_slug') %}
-        {% set report = traits[0] %}
+        {% for report_group, traits in user_obj.reports().items() %}
+        {% set report = list(traits)[0] %}
         <tr>
             <td>{{ loop.index }}</td>
             <td><a href='{{ url_for("mapping.report", report_slug=report.report_slug) }}'><strong>{{ report.report_slug }}</strong></a></td>
-            <td style='white-space: nowrap'>{% for trait in traits %}
-                {{ '[{:20}]'.format(trait.status) }}
+            <td style='white-space: nowrap'>{% for trait in list(traits) %}
+                {{ '[ {:20}]'.format(trait.status) }}
                 <a href="{{ url_for('mapping.report', report_slug=report.report_slug, trait_name=trait.trait_name) }}">
                     {% if trait.is_significant %}
                         <strong>{{ trait.trait_name }}</strong>
@@ -42,7 +41,6 @@
             <td><em>{% if report.is_public %}Public{% else %}Private{% endif %}</em></td>
             <td>{{ report.description }}</td>
             <td><span style='white-space: nowrap'>{{ report['created_on'].strftime("%Y-%m-%d&nbsp;%H:%m:%S")|safe }}</span>
-            </td>
         </tr>
         {% endfor %}
     </table>
