@@ -13,12 +13,12 @@ brew install wget
 
 #### Windows
 
-Install [Cygwin](www.cygwin). Then install the wget package.
+Install [Cygwin](https://www.cygwin.com/). Then install the wget package.
 
 
 ### How do I use the API?
 
-The Application Programming Interface (API) can be used to access the CeNDR database and make a variety of queries. The API [documentation](https://docs.elegansvariation.apiary.io/) details the types of queries you can make and provides examples in a variety of languages. If you are unfamiliar with APIs and how they work, I recommend taking a look at [this guide](https://sunlightfoundation.com/blog/2015/09/08/what-are-apis-why-they-matter-and-how-to-use-them/). 
+The Application Programming Interface (API) can be used to access the CeNDR database and make a variety of queries. The API [documentation](/data/api/docs/) details the types of queries you can make and provides examples in a variety of languages. If you are unfamiliar with APIs and how they work, I recommend taking a look at [this guide](https://sunlightfoundation.com/blog/2015/09/08/what-are-apis-why-they-matter-and-how-to-use-them/). 
 
 R can be used to make queries to the API. See the examples below:
 

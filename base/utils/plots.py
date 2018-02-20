@@ -88,7 +88,7 @@ def time_series_plot(df, x_title=None, y_title=None, range=None, colors=COLORS):
                                     y=df[column],
                                     name=column,
                                     opacity=0.8,
-                                    line=dict(color=(colors[n]))
+                                    line=dict(color=(COLORS[n]))
                                     )
                          )
 
@@ -159,7 +159,7 @@ def pxg_plot(df, trait_name):
                 hoverinfo="text+y",
                 mode='markers',
                 marker=dict(
-                    color=colors[gt_n],
+                    color=COLORS[gt_n],
                     size=5,
                     opacity=0.8,
                     line=dict(width=1)

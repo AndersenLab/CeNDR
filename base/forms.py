@@ -213,12 +213,15 @@ def validate_numeric_columns(form, field):
     """
     df = form.trait_data.processed_data
     non_numeric_values = []
-    for x in df.columns[2:]:
-        if any(df[x].map(is_number) == False):
-            non_numeric_values.extend(df[x][df[x].map(is_number) == False].tolist())
-    if non_numeric_values:
-        form.trait_data.error_items.extend(non_numeric_values)
-        raise ValidationError(f"Trait(s) have non-numeric values: {non_numeric_values}")
+    try:
+        for x in df.columns[2:]:
+            if any(df[x].map(is_number) == False):
+                non_numeric_values.extend(df[x][df[x].map(is_number) == False].tolist())
+        if non_numeric_values:
+            form.trait_data.error_items.extend(non_numeric_values)
+            raise ValidationError(f"Trait(s) have non-numeric values: {non_numeric_values}")
+    except AttributeError:
+        raise ValidationError(f"Trait names specified incorrectly")
 
 
 def validate_column_name_exists(form, field):
@@ -312,7 +315,7 @@ class mapping_submission_form(Form):
     report_name = StringField('Report Name', [Required(),
                                               Length(min=1, max=50),
                                               validate_report_name_unique])
-    is_public = RadioField('Release', choices=[(True, 'public'), (False, 'private')], coerce=bool)
+    is_public = RadioField('Release', choices=[('true', 'public'), ('false', 'private')])
     description = TextAreaField('Description', [Length(min=0, max=1000)])
     trait_data = TraitData(validators=[validate_row_length,
                                        validate_duplicate_strain,

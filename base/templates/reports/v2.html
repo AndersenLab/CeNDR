@@ -90,8 +90,8 @@
     <div class='col-md-12'>
         <h4>Traits</h4>
         {# Traits #}
-            {% for trait in trait_list %} 
-                <a href="{{ url_for('mapping.report_view', report_slug = report_slug, trait_name = trait) }}" type="button" class="btn btn-sm {% if trait_name == trait %} btn-primary {% else %} btn-link {% endif %}"><strong>{{ trait }}</strong></a>
+            {% for trait in trait_set %} 
+                <a href="{{ url_for('mapping.report_view', report_slug = report_slug, trait_name = trait['trait_name']) }}" type="button" class="btn btn-sm {% if trait_name == trait['trait_name'] %} btn-primary {% else %} btn-link {% endif %}"><strong>{{ trait['trait_name'] }}</strong></a>
             {% endfor %}
         <br /><br />
     </div>{# /col-md-12 #}

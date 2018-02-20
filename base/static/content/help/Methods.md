@@ -1,10 +1,10 @@
 ### Alignment
 
-Sequences were aligned to WS245 using [BWA](https://bio-bwa.sourceforge.net/) (version 0.7.8-r455). Optical/PCR duplicates were marked with PICARD (version 1.111).
+Sequences were aligned to WS245 using [BWA](http://bio-bwa.sourceforge.net/) (version 0.7.8-r455). Optical/PCR duplicates were marked with PICARD (version 1.111).
 
 ### Variant Calling
 
-SNV calling was performed using [bcftools](https://www.htslib.org/) (version 1.3). 
+SNV calling was performed using [bcftools](http://www.htslib.org/) (version 1.3). 
 
 ### Filtering
 
@@ -18,4 +18,4 @@ Individual calls with the following parameters were removed:
 
 ### Annotation
 
-Variants were annotated using [SnpEff](https://snpeff.sourceforge.net/) (version 4.1g) using the WS241 database. 
+Variants were annotated using [SnpEff](http://snpeff.sourceforge.net/) (version 4.1g) using the WS241 database. 

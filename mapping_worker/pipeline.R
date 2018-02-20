@@ -33,6 +33,7 @@ if(!file.exists("mapping.Rdata")) {
 }
 
 mapping %>% 
+    dplyr::ungroup() %>%
     dplyr::mutate(trait = TRAIT_NAME) %>%
     dplyr::mutate(marker = gsub("_", ":", marker)) %>%
 readr::write_tsv(.,
@@ -160,7 +161,8 @@ if (n_peaks > 1) {
 if (!file.exists('interval.Rdata')) {
     vc <- variant_correlation(mapping,
                               condition_trait = F,
-                              variant_severity = c("LOW", "MODERATE", "HIGH"))
+                              variant_severity = c("LOW", "MODERATE", "HIGH"),
+                              gene_types = "ALL")
     interval_variants <- dplyr::bind_rows(vc) %>%
                          dplyr::distinct(CHROM,
                                          POS,

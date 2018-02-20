@@ -33,15 +33,6 @@ def run_comm(comm):
             print(str(line, 'utf-8').strip())
     return process
 
-# Define variables
-report_name = os.environ['REPORT_NAME']
-trait_name = os.environ['TRAIT_NAME']
-print(f"Fetching Task: {report_name} - {trait_name}")
-
-trait_filters = [('report_name', '=', report_name), ('trait_name', '=', trait_name)]
-trait_data = list(query_item('trait',
-                             filters=trait_filters))[0]
-
 def fetch_existing_mapping(report_slug, trait_slug):
     """
         Used to fetch existing mappings
@@ -56,6 +47,16 @@ def fetch_existing_mapping(report_slug, trait_slug):
         return mapping
     except IndexError:
         return None
+
+# Define variables
+report_name = os.environ['REPORT_NAME']
+trait_name = os.environ['TRAIT_NAME']
+print(f"Fetching Task: {report_name} - {trait_name}")
+
+trait_filters = [('report_name', '=', report_name), ('trait_name', '=', trait_name)]
+trait_data = list(query_item('trait',
+                             filters=trait_filters))[0]
+
 
 trait = trait_m(trait_data.key.name)
 trait.__dict__.update(dict(trait_data))

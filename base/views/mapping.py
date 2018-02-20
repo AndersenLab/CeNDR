@@ -73,7 +73,7 @@ def mapping():
             trait_data = form.trait_data.processed_data[['ISOTYPE', 'STRAIN', trait_name]].dropna(how='any') \
                                                                                           .to_csv(index=False,
                                                                                                   sep="\t",
-                                                                                              na_rep="NA")
+                                                                                                  na_rep="NA")
             trait.__dict__.update({
                'report_name': report_name,
                'report_slug': report_slug,
@@ -83,7 +83,7 @@ def mapping():
                'n_strains': int(form.trait_data.processed_data.STRAIN.count()),
                'created_on': now,
                'status': 'queued',
-               'is_public': form.is_public.data,
+               'is_public': form.is_public.data == 'true',
                'CENDR_VERSION': CENDR_VERSION,
                'REPORT_VERSION': REPORT_VERSION,
                'DATASET_RELEASE': DATASET_RELEASE,
@@ -92,7 +92,7 @@ def mapping():
                'user_id': user['user_id'],
                'user_email': user['user_email']
             })
-            if trait.is_public:
+            if trait.is_public is False:
                 trait.secret_hash = unique_id()[0:8]
             trait.run_task()
             trait_set.append(trait)
@@ -103,9 +103,7 @@ def mapping():
         flash("Successfully submitted mapping!", 'success')
         return redirect(url_for('mapping.report_view',
                                 report_slug=report_slug,
-                                trait_name=trait_list[0],
-                                trait=trait_set[0],
-                                trait_list=trait_list))
+                                trait_name=trait_list[0]))
 
     return render_template('mapping.html', **VARS)
 
@@ -238,8 +236,6 @@ def report_view(report_slug, trait_name=None, rerun=None):
 def public_mapping():
     query = request.args.get("query")
     title = "Public Mappings"
-    VARS = {'waffle_data_set': waffle_date_set}
-
     pub_mappings = query_item('mapping', filters=[('is_public', '=', True)])
     return render_template('public_mapping.html', **locals())
 

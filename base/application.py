@@ -8,10 +8,14 @@ from flask_sqlalchemy import SQLAlchemy
 from base.utils.data_utils import json_encoder
 from base.utils.text_utils import render_markdown
 from base.constants import CENDR_VERSION, APP_CONFIG
+from flaskext.markdown import Markdown
 
 # Create
 app = Flask(__name__,
             static_url_path='/static')
+
+# Add markdown
+Markdown(app)
 
 # Configuration - First load non-sensitive configuration info
 app.config['json_encoder'] = json_encoder
