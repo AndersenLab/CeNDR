@@ -47,6 +47,9 @@ function update_tajima_plot() {
   if (end < 0) {
     end = 0;
   }
+  console.log(chrom);
+  console.log(start);
+  console.log(`/api/popgen/tajima/${chrom}/${start}/${end}`)
   $.ajax({
     url: `/api/popgen/tajima/${chrom}/${start}/${end}`,
     contentType: 'application/json',

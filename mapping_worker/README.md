@@ -33,3 +33,12 @@ Test
 ```
 docker run -it --rm -e REPORT_NAME='test-report' -e TRAIT_NAME='yeah1' -e GOOGLE_APPLICATION_CREDENTIALS=gcloud_fargate.json  cegwas-mapping
 ```
+
+## Pushing new versions
+
+```
+aws ecr get-login --no-include-email --region us-east-1 | bash
+docker build -t cegwas-mapping .
+docker tag cegwas-mapping:latest 710251016579.dkr.ecr.us-east-1.amazonaws.com/cegwas-mapping:latest
+docker push 710251016579.dkr.ecr.us-east-1.amazonaws.com/cegwas-mapping:latest
+```
