@@ -178,15 +178,10 @@ if (!file.exists('interval.Rdata')) {
                          dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
                          dplyr::group_by(peak, gene_id) %>%
                          dplyr::mutate(n_variants = n()) %>%
-                         dplyr::mutate(max_gene_corr_p = max(corrected_spearman_cor_p)) %>%
-                         dplyr::filter(max_gene_corr_p > 0.1) %>%
-                         dplyr::arrange(max_gene_corr_p) %>%
+                         dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p))) %>%
+                         dplyr::arrange(dplyr::desc(max_gene_corr_p),
+                                        gene_id) %>%
                          dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
-                         dplyr::mutate(max_gene_corr_p = -log10(max_gene_corr_p),
-                                       corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
-                         dplyr::arrange(desc(max_gene_corr_p),
-                                        gene_id,
-                                        desc(corrected_spearman_cor_p)) %>%
                          dplyr::select(-n,
                                        -strain,
                                        -GT,

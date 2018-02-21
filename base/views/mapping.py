@@ -202,12 +202,17 @@ def report_view(report_slug, trait_name=None, rerun=None):
             # Fetch datafiles for complete runs
             peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
             try:
-                first_peak = peak_summary.iloc[0]
-                chrom, start, end = re.split(":|\-", first_peak.interval)
-                first_peak['chrom'] = chrom
+                first_peak = peak_summary.loc[0]
+                logger.info(first_peak)
+                logger.info(first_peak['interval'])
+                chrom, interval_start, interval_end = re.split(":|\-", first_peak['interval'])
+                logger.info(chrom)
+                logger.info(interval_start)
+                logger.info(interval_end)
+                first_peak.chrom = chrom
                 first_peak['pos'] = int(first_peak['peak_pos'].split(":")[1])
-                first_peak['start'] = start
-                first_peak['end'] = end
+                first_peak['interval_start'] = int(interval_start)
+                first_peak['interval_end'] = int(interval_end)
             except:
                 first_peak = None
 

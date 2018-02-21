@@ -439,17 +439,25 @@
     {% else %}
     <strong>Processing...</strong>
     {% endif %}{# /end if report is 'Complete' #}
+    {{ first_peak }}
 {% endblock %}
 
 {% block script %}
 {% if trait.status == 'complete' %}
 <script>
-{# Load first peak data #}
+// Globals
 var isotypes = {{ isotypes|tojson }}
 var chrom = "{{ first_peak.chrom }}"
-var start = {{ first_peak.start }};
-var end = {{ first_peak.end }};
+var start = {{ first_peak.interval_start }};
+var end = {{ first_peak.interval_end }};
 var pos = {{ first_peak.pos }};
+
+// Load initial map and Tajima
+$(document).ready(function() {
+  update_geo_map();
+  // Load initial position
+  update_tajima_plot();
+});
 
 var offsetHeight = 71;
 
@@ -465,11 +473,6 @@ $('body').scrollspy({offset: 100, target: ".navbar"});
 
     return false;
   });
-});
-
-$(document).ready(function() {
-    update_geo_map();
-    update_tajima_plot();
 });
 
 // Monitor peak tabs

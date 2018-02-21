@@ -423,6 +423,7 @@ $('#report_nav').ready(function () {
 
 
 {% if trait.is_significant %}
+// Globals
 var isotypes = {{ isotypes|tojson }}
 var chrom = "{{ first_peak.chrom }}"
 var start = {{ first_peak.interval_start }};
