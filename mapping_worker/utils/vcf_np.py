@@ -192,12 +192,7 @@ class AnnotationSeries(Series):
 
 class VCF_DataFrame(DataFrame):
 
-<<<<<<< HEAD:mapping_worker/utils/vcf_np.py
     _metadata = ['samples', 'interval', 'chrom', 'start', 'end']
-=======
-    _metadata = ['samples', 'messages']
-    messages = []
->>>>>>> master:vcf_test/vcf_np.py
 
     attrs = ['CHROM',
              'POS',
@@ -276,7 +271,6 @@ class VCF_DataFrame(DataFrame):
         # Add samples
         dataset = VCF_DataFrame(dataset)
         dataset.samples = np.array(vcf.samples)
-<<<<<<< HEAD:mapping_worker/utils/vcf_np.py
         if interval:
             dataset.interval = interval
             chrom, start, end = re.split(":|\-", interval)
@@ -284,9 +278,6 @@ class VCF_DataFrame(DataFrame):
             dataset.start = int(start)
             dataset.end = int(end)
         dataset['allele_set'] = dataset.TGT.apply(lambda x: set([a for a in sum([re.split("\||\/", i) for i in x], []) if a != '.']))
-=======
-        dataset.allele_set = dataset.TGT.apply(lambda x: set([a for a in sum([re.split("\||\/", i) for i in x], []) if a != '.']))
->>>>>>> master:vcf_test/vcf_np.py
         return dataset
 
     def _prune_non_snps(self):
@@ -342,11 +333,7 @@ class VCF_DataFrame(DataFrame):
             self.samples = df.samples
             self = df
         else:
-<<<<<<< HEAD:mapping_worker/utils/vcf_np.py
             return df
-=======
-            return VCF_DataFrame(df)
->>>>>>> master:vcf_test/vcf_np.py
 
     def _parse_interval(interval):
         """
@@ -360,7 +347,6 @@ class VCF_DataFrame(DataFrame):
             return chrom, pos[0], pos[1]
         return chrom, None, None
 
-<<<<<<< HEAD:mapping_worker/utils/vcf_np.py
     #def interval(self, interval):
     #    """
     #        Filters a VCF on an interval
@@ -371,18 +357,6 @@ class VCF_DataFrame(DataFrame):
     #    elif chrom:
     #        query_string = f"CHROM == '{chrom}'"
     #    return self.query(query_string)
-=======
-    def interval(self, interval):
-        """
-            Filters a VCF on an interval
-        """
-        chrom, start, end = self._parse_interval(interval)
-        if chrom and start and end:
-            query_string = f"CHROM == '{chrom}' & POS > {start} & POS < {end}"
-        elif chrom:
-            query_string = f"CHROM == '{chrom}'"
-        return self.query(query_string)
->>>>>>> master:vcf_test/vcf_np.py
 
     def interval_summary(self, interval=None, deep=False):
         """
@@ -424,11 +398,7 @@ class VCF_DataFrame(DataFrame):
         variants['snp']['num_missing'] = sum(df[df.is_snp].num_missing)
         variants['snp']['avg_call_rate'] = np.average(df[df.is_snp].call_rate)
         variants['snp']['transition'] = sum(df[df.is_snp].is_transition)
-<<<<<<< HEAD:mapping_worker/utils/vcf_np.py
         variants['snp']['transversion'] = sum(df[df.is_snp].is_transition == False)
-=======
-        variants['snp']['transversion'] = sum(df[df.is_snp].is_transition)
->>>>>>> master:vcf_test/vcf_np.py
         variants['snp']['num_hom_ref'] = sum(df[df.is_snp].num_hom_ref)
         variants['snp']['num_het'] = sum(df[df.is_snp].num_het)
         variants['snp']['num_hom_alt'] = sum(df[df.is_snp].num_hom_alt)
@@ -449,19 +419,15 @@ class VCF_DataFrame(DataFrame):
         # By Gene
         gene = results['gene']
 
-<<<<<<< HEAD:mapping_worker/utils/vcf_np.py
         # Gene count
         gene['genes_w_variants'] =len(set(sum(df.ANN.gene_id.dropna().values, [])))
 
-=======
->>>>>>> master:vcf_test/vcf_np.py
         for impact in set(sum(df.ANN.impact.dropna().values, [])):
             gene['impact'][impact] = list(set(sum(df[df.ANN.impact == impact].ANN.gene_id.dropna().values, [])))
 
         for transcript_biotype in set(sum(df.ANN.transcript_biotype.dropna().values, [])):
             gene['transcript_biotype'][transcript_biotype] = list(set(sum(df[df.ANN.transcript_biotype == transcript_biotype].ANN.gene_id.dropna().values, [])))
 
-<<<<<<< HEAD:mapping_worker/utils/vcf_np.py
         # Biotype+Impact counts
         for impact in set(sum(df.ANN.impact.dropna().values, [])):
             for transcript_biotype in set(sum(df.ANN.transcript_biotype.dropna().values, [])):
@@ -520,12 +486,6 @@ class VCF_DataFrame(DataFrame):
         return merged.sort_values('variants', ascending=False)
 
 
-=======
-        print(json.dumps(results, indent=4, sort_keys=True))
-        # Genes
-        return json.dumps(results)
-
->>>>>>> master:vcf_test/vcf_np.py
     @staticmethod
     def _sub_values(row, find, replace):
         """
@@ -609,9 +569,3 @@ class VCF_DataFrame(DataFrame):
                              .apply(lambda row: row[0] if len(set(row)) == 1 else "N")
             print(''.join(seq.values).replace(".", "N"))
 
-<<<<<<< HEAD:mapping_worker/utils/vcf_np.py
-=======
-
-
-v = VCF_DataFrame.from_vcf("WI.20170531.snpeff.vcf.gz", "V:16562936-16662936")
->>>>>>> master:vcf_test/vcf_np.py
