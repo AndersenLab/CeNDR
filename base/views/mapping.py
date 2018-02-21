@@ -166,6 +166,12 @@ def report_view(report_slug, trait_name=None, rerun=None):
         'BIOTYPES': BIOTYPES,
         'TABLE_COLORS': TABLE_COLORS
     }
+
+    # Set status to error if the container is stopped and status is not set to complete.
+    if trait.container_status() == 'STOPPED' and trait.status != "complete":
+        trait.status = 'error'
+        trait.save()
+
     if trait.status == 'complete':
         if trait.REPORT_VERSION == 'v1':
             """
