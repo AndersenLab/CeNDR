@@ -94,62 +94,6 @@ class datastore_model(object):
         return f"<{self.kind}:{self.name}>"
 
 
-class report_m(datastore_model):
-    """
-        The report model - for creating and retreiving
-        information on reports
-    """
-    kind = 'report'
-    def __init__(self, *args, **kwargs):
-        super(report_m, self).__init__(*args, **kwargs)
-        self.exclude_from_indexes = ('trait_data',)
-        # Read trait data in upon initialization.
-        if hasattr(self, 'trait_data'):
-            self._trait_df = pd.read_csv(StringIO(self.trait_data), sep='\t')
-
-    def trait_strain_count(self, trait_name):
-        """
-            Return number of strains submitted for a trait.
-        """
-        return self._trait_df[trait_name].dropna(how='any').count()
-
-    def humanize(self):
-        return arrow.get(self.created_on).humanize()
-
-    def fetch_traits(self, trait_name=None, latest=True):
-        """
-            Fetches trait/task records associated with a report.
-
-            Args:
-                trait_name - Fetches a specific trait
-                latest - Returns only the first record of each trait.
-
-            Returns
-                If a trait name is given, and latest - ONE result
-                If latest - one result for each trait
-                if neight - all tasks associated with a report.
-        """
-        report_filter = [('report_slug', '=', self.name), ('trait_name', '=', trait)]
-        if trait_name:
-            trait_list = [trait_name]
-        else:
-            trait_list = self.trait_list
-        result_out = []
-        for trait in trait_list:
-            trait_filters = [('report_slug', '=', self.name), ('trait_name', '=', trait)]
-            results = list(query_item('trait',
-                                      filters=trait_filters))
-            if results:
-                if trait_name and latest:
-                    result_out = trait_m(results[0].key.name)
-                elif latest:
-                    result_out.append(trait_m(results[0].key.name))
-                else:
-                    for result in results:
-                        result_out.append(result)
-        return result_out
-
-
 class trait_m(datastore_model):
     """
         Trait class corresponds to a trait analysis within a report.
@@ -166,7 +110,7 @@ class trait_m(datastore_model):
             ID assigned by AWS Fargate.
         """
         super(trait_m, self).__init__(*args, **kwargs)
-        self.exclude_from_indexes = ['trait_data']
+        self.exclude_from_indexes = ['trait_data', 'error_traceback', 'CEGWAS_VERSION']
 
 
     def upload_files(self, file_list):
