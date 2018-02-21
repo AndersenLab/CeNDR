@@ -1,4 +1,3 @@
-from base.models import strain, wb_gene
 from base.application import app, cache
 from flask import Response, jsonify
 import requests
@@ -17,7 +16,7 @@ def wormbase_api(r):
 @app.route('/api/omim/<string:gene_name>')
 @cache.memoize(50)
 def omim(gene_name):
-    gene_id = wb_gene.get(Name = gene_name)
+    #gene_id = wb_gene.get(Name = gene_name)
     r = requests.get('http://www.wormbase.org/rest/widget/gene/%s/human_diseases' % gene_id.Name,
                     headers = {'Content-Type': 'application/json; charset=utf-8'}).json()
     r = r["fields"]["human_diseases"]["data"]

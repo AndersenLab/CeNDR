@@ -1,13 +1,19 @@
-# NEW API
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Author: Daniel E. Cook
+"""
+import re
 from base.application import app
 from cyvcf2 import VCF
-from flask import jsonify, request, Response
-import re
-#from base.views.api.gene import gene_search
+from flask import request, Response
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 from collections import OrderedDict
 from base.constants import DATASET_RELEASE
+from base.utils.decorators import jsonify_request
+from collections import Counter
+from logzero import logger
 
 ANN_header = ["allele",
               "effect",
@@ -30,26 +36,6 @@ def get_vcf(release=DATASET_RELEASE):
     return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/WI.{release}.vcf.gz".format(release=release)
 
 
-def get_region(region):
-    region = region.replace(",", "")
-    m = re.match("^([0-9A-Za-z]+):([0-9]+)-([0-9]+)$", region)
-    if m:
-        chrom = m.group(1)
-        start = int(m.group(2))
-        end = int(m.group(3))
-        gene = None
-    else:
-        # Resolve gene/location
-        gene = gene_search(region)
-        if not gene:
-            return "Invalid region", 400
-        chrom = gene["CHROM"]
-        start = gene["start"]
-        end = gene["end"]
-    region = "{chrom}:{start}-{end}".format(**locals())
-    return region, chrom, start, end, gene
-
-
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
 
 
@@ -69,18 +55,35 @@ ann_cols = ['allele',
 
 
 @app.route('/api/variant', methods=["GET", "POST"])
-def variant_api():
-    query = request.args
-    query = {'chrom': query['chrom'],
-             'start': int(query['start']),
-             'end': int(query['end']),
-             'variant_impact': query['variant_impact'].split("_"),
-             'sample_tracks': query['sample_tracks'].split("_"),
-             'output': query['output'],
-             'list-all-strains': query['list-all-strains'] == 'true'
-            }
-    app.logger.info(query)
-    samples = query['sample_tracks']
+@jsonify_request
+def variant_query(query=None, samples=["N2"], list_all_strains=False):
+    """
+    Used to query a VCF and return results in a dictionary.
+
+    """
+    if query:
+        # Query in Python
+        chrom, start, end = re.split(':|\-', query)
+        query = {'chrom': chrom,
+                 'start': int(start),
+                 'end': int(end),
+                 'variant_impact': ['ALL'],
+                 'sample_list': samples,
+                 'output': "",
+                 'list-all-strains': list_all_strains
+                }
+    else:
+        # Query from Browser
+        query = request.args
+        query = {'chrom': query['chrom'],
+                 'start': int(query['start']),
+                 'end': int(query['end']),
+                 'variant_impact': query['variant_impact'].split("_"),
+                 'sample_list': query['sample_tracks'].split("_"),
+                 'output': query['output'],
+                 'list-all-strains': list_all_strains or query['list-all-strains'] == 'true'
+                }
+    samples = query['sample_list']
     if query['list-all-strains']:
         samples = "ALL"
     elif not samples[0]:
@@ -95,17 +98,15 @@ def variant_api():
 
     if start >= end:
         return "Invalid start and end region values", 400
-    #if end - start > 1e5:
-    #    return jsonify('error': "You can only query a maximum of 100 kb"), 400
 
     region = "{chrom}:{start}-{end}".format(**locals())
     comm = ["bcftools", "view", vcf, region]
+    logger.info(comm)
     # Query Severity
 
     # Query samples
     if samples != 'ALL':
         comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
-    app.logger.info(' '.join(comm))
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
         app.logger.error(err)
@@ -116,7 +117,7 @@ def variant_api():
         f.flush()
         output_data = []
 
-        v = VCF(f.name)
+        v = VCF(f.name, gts012=True)
 
         if samples and samples != "ALL":
             samples = samples.split(",")
@@ -130,24 +131,27 @@ def variant_api():
             ANN = []
             if "ANN" in INFO.keys():
                 ANN_set = INFO['ANN'].split(",")
-                if len(ANN_set) == 0 and not output_all_variants:
-                    break
                 for ANN_rec in ANN_set:
                     ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
                 del INFO['ANN']
 
             gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
             gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set]
-            ANN = [x for x in ANN if x['impact'] in query['variant_impact']]
+            ANN = [x for x in ANN if x['impact'] in query['variant_impact'] or 'ALL' in query['variant_impact']]
+            if type(INFO['AF']) == tuple:
+                AF = INFO['AF'][0]
+            else:
+                AF = INFO['AF']
             rec_out = {
                 "CHROM": record.CHROM,
                 "POS": record.POS,
                 "REF": record.REF,
                 "ALT": record.ALT,
-                "FILTER": record.FILTER or 'PASS', # record.FILTER is 'None' for PASS
+                "FILTER": record.FILTER or 'PASS',  # record.FILTER is 'None' for PASS
                 "GT": gt_set,
-                "AF": INFO["AF"],
-                "ANN": ANN
+                "AF": '{:0.3f}'.format(AF),
+                "ANN": ANN,
+                "GT_Summary": Counter(record.gt_types.tolist())
             }
             if 'phastcons' in INFO:
                 rec_out["phastcons"] = float(INFO['phastcons'])
@@ -156,18 +160,18 @@ def variant_api():
             if len(rec_out['ANN']) > 0 or 'ALL' in query['variant_impact']:
                 output_data.append(rec_out)
             if i == 1000 and query['output'] != "tsv":
-                return jsonify(output_data)
+                return output_data
         if query['output'] == 'tsv':
-            filename = '_'.join([query['chrom'], str(query['start']), str(query['end'])])
+            filename = f"{query['chrom']}-{query['start']}-{query['end']}.tsv"
             build_output = OrderedDict()
             output = []
             header = False
             for rec in output_data:
                 for k in ['CHROM', 'POS', "REF", "ALT", "FILTER", "phastcons", "phylop", "AF"]:
                     if k == 'ALT':
-                        build_output[k]  = ','.join(rec[k])
+                        build_output[k] = ','.join(rec[k])
                     else:
-                        build_output[k]  = rec.get(k) or "NA"
+                        build_output[k] = rec.get(k) or "NA"
                 if rec['ANN']:
                     for ann in rec['ANN']:
                         for k in ann_cols:
@@ -183,9 +187,7 @@ def variant_api():
                 if header is False:
                     output.append('\t'.join(build_output.keys()))
                     header = True
-
-                output.append('\t'.join(map(str,build_output.values())))
+                output.append('\t'.join(map(str, build_output.values())))
+            logger.info("RESPOND")
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
-        return jsonify(output_data)
-
-
+        return output_data

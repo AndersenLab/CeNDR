@@ -70,11 +70,6 @@
 <div class="panel panel-default">
 
  <div class="panel-heading">
- <form class="pull-right" action ="{{ url_for('mapping.public_mapping') }}" method="get" name="login">
-  <div class="form-group">
-    <input type="search" style="margin-top:3px;" class="form-control" name="query" placeholder="Find Mappings" value="{% if query %}{{ query }}{% endif %}">
-  </div>
-</form>
 
 <h4>Latest Mappings</h4>
 
@@ -82,32 +77,53 @@
 
   <table class="table table-striped table-hover">
 
-{% for i in latest_mappings %}
+{% for trait in latest_mappings %}
 <tr>
-<td><a href="{{ url_for('trait_view', report_slug=i.report_slug, trait_slug=i.trait_slug ) }}">{{ i.report_name }} → {{ i.trait_name }}</a>
-<div class='pull-right'><small>{{ i.submission_date.strftime('%Y-%m-%d') }}</small></div></td>
+<td><a href="{{ url_for('mapping.report_view', report_slug=trait.report_slug, trait_name=trait.trait_slug ) }}">{{ trait.report_slug }} → {{ trait.trait_name }}</a>
+<div class='pull-right'><small>{{ trait.created_on.strftime('%Y-%m-%d') }}</small></div></td>
 </tr>
 {% endfor %}
 </table>
 </div>
 </div>
-  <div class="col-md-4">
+    <div class="col-md-4">
     {% if files %}
-      <div>
-      <h4>News <a href = "{{ url_for('primary.feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a> 
-        <a href = "{{ url_for('primary.news_item') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
-        <a href = "{{ url_for('primary.help_item' , filename = 'Change-Log') }}" type="button" style="background-color: #f4e5fe; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">Change Log</a>
-      </h4>
-        {% for f in files%}
+        <div>
+        <h4>News <a href = "{{ url_for('primary.feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a> 
+            <a href = "{{ url_for('primary.news_item') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
+            <a href = "{{ url_for('primary.help_item' , filename = 'Change-Log') }}" type="button" style="background-color: #f4e5fe; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">Change Log</a>
+        </h4>
+            {% for f in files%}
 
-            <h4 class="list-group-item-heading"><a href="{{ url_for('primary.news_item', filename = f.strip(".md")) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></h4>
-            </a> <br />
+                <h4 class="list-group-item-heading"><a href="{{ url_for('primary.news_item', filename = f.strip(".md")) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></h4>
+                </a> <br />
 
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
     {% endif %}
 
-</div>
+    {# Begin MailChimp Signup Form #}
+    <h4>Signup for our mailing list</h4>
+    <div id="mc_embed_signup">
+    <form action="https://elegansvariation.us17.list-manage.com/subscribe/post?u=57ac68003daa4fada64672c12&amp;id=5983a0c891" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="form validate form-inline" target="_blank" novalidate>
+        <div id="mc_embed_signup_scroll">
+        
+    <div class="form-group">
+        <input type="email" value="" name="EMAIL" placeholder='email' class="required email form-control" id="mce-EMAIL">
+        <input type="submit" value="Subscribe" name="subscribe" class="btn btn-primary">
+    </div>
+        <div id="mce-responses" class="clear">
+            <div class="response" id="mce-error-response" style="display:none"></div>
+            <div class="response" id="mce-success-response" style="display:none"></div>
+        </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_57ac68003daa4fada64672c12_5983a0c891" tabindex="-1" value=""></div>
+        </div>
+    </form>
+    </div>
+
+    {# End mc_embed_signup #}
+
+    </div>{# /col-md-4 #}
 </div>
 
 <div class='row'>
@@ -122,6 +138,8 @@
             </div><strong>CeNDR, the <em> Caenorhabditis elegans</em> natural diversity resource</strong><br />Cook DE, Zdraljevic S, Roberts JP, Andersen EC
                 <br>                
                 (2016 Oct 3) <em>Nucleic Acids Research</em> [ <a href="https://nar.oxfordjournals.org/content/early/2016/10/03/nar.gkw893.full">Article on Nucleic Acids Research</a> | <a title="Document Object Identifier; Takes you to the Journal Website" href="https://dx.doi.org/10.1093/nar/gkw893" target="_blank">DOI</a> | <a href="https://www.ncbi.nlm.nih.gov/pubmed/27701074" target="_blank">Pubmed</a> ]
+                <br /><br />
+                <em>Please reference this article if you use strains, data, and/or mappings from CeNDR.</em>
       </div>
 </div>
 

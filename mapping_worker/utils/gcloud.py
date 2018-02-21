@@ -129,17 +129,16 @@ class report_m(datastore_model):
                 If latest - one result for each trait
                 if neight - all tasks associated with a report.
         """
-        report_filter = [('report_slug', '=', self.name)]
+        report_filter = [('report_slug', '=', self.name), ('trait_name', '=', trait)]
         if trait_name:
             trait_list = [trait_name]
         else:
             trait_list = self.trait_list
         result_out = []
         for trait in trait_list:
-            trait_filters = report_filter + [('trait_name', '=', trait)]
+            trait_filters = [('report_slug', '=', self.name), ('trait_name', '=', trait)]
             results = list(query_item('trait',
-                                      filters=trait_filters,
-                                      order=['report_slug', 'trait_name', '-created_on']))
+                                      filters=trait_filters))
             if results:
                 if trait_name and latest:
                     result_out = trait_m(results[0].key.name)
@@ -153,10 +152,22 @@ class report_m(datastore_model):
 
 class trait_m(datastore_model):
     """
-        Class for storing data on tasks
-        associated with a report.
+        Trait class corresponds to a trait analysis within a report.
+        This class contains methods for submitting jobs and fetching results
+        for an analysis.
+
+        If a task is re-run the report will only display the latest version.
     """
     kind = 'trait'
+
+    def __init__(self, *args, **kwargs):
+        """
+            The trait_m object adopts the task
+            ID assigned by AWS Fargate.
+        """
+        super(trait_m, self).__init__(*args, **kwargs)
+        self.exclude_from_indexes = ['trait_data']
+
 
     def upload_files(self, file_list):
         """
@@ -176,3 +187,11 @@ class trait_m(datastore_model):
         # Update self to store file list
         self.file_list = file_list
 
+
+class mapping_m(datastore_model):
+    """
+        The mapping/peak interval model
+    """
+    kind = 'mapping'
+    def __init__(self, *args, **kwargs):
+        super(mapping_m, self).__init__(*args, **kwargs)

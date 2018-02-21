@@ -10,7 +10,7 @@
                 <ul>
                 {% for i in isotype %}
                     {% if i.reference_strain %}
-                      <li><strong><abbr data-toggle="tooltip"  data-placement="bottom" title="reference strain">{{ i.strain }}</abbr></strong></li>
+                      <li><strong><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="reference strain">{{ i.strain }}</span></strong></li>
                     {% else %}
                       <li>{{ i.strain }}</li>
                     {% endif %}
@@ -65,13 +65,13 @@
                         </span></strong> 
                         <div class="strain pull-right">{{ reference_strain["strain"]}}</div><div style="clear:both;"></div></li>
 
-            <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset isotype originally released with."><strong>Release</strong></span> <div class="pull-right">{{ reference_strain['release']|format_release }}</div></li>
+            <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset in which isotype was originally released."><strong>Release</strong></span> <div class="pull-right">{{ reference_strain['release']|format_release }}</div></li>
             <li class="list-group-item"><strong>Isolation Date</strong> <div class="strain pull-right">{{ reference_strain["isolation_date"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><strong>Lat/Lon</strong> <div class="lat pull-right">{{ reference_strain["latitude"] }}, {{ reference_strain["longitude"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right">{{ reference_strain["elevation"] }} M<div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Latitude / Longitude</strong> <div class="lat pull-right">{{ reference_strain["latitude"] }}, {{ reference_strain["longitude"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right">{{ reference_strain["elevation"]|round(3) }} M<div style="clear:both;"></div></li>
             <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ reference_strain["location"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><strong>Landscape</strong> <div class="location pull-right">{{ reference_strain["landscape"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><strong>Substrate</strong> <div class="location pull-right">{{ reference_strain["substrate"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="location pull-right">{{ reference_strain["landscape"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="location pull-right">{{ reference_strain["substrate"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ reference_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
             </ul>
         </div>{# /panel #}

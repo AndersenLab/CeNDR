@@ -13,10 +13,20 @@ If you cloned the repo you will need to obtain the service credentials from the 
 
 
 Rebuild and test 
-```
-REPORT_NAME='test-report'
-TRAIT_NAME='yeah'
-docker build . -t cegwas-mapping && docker run -it --rm -e REPORT_NAME=${REPORT_NAME} -e TRAIT_NAME=${TRAIT_NAME} -e GOOGLE_APPLICATION_CREDENTIALS=gcloud_fargate.json  cegwas-mapping
+```shell
+REPORT_NAME='test-map-private-test'
+TRAIT_NAME='telomere-resids'
+docker build . -t cegwas-mapping
+docker run -v $PWD:/home/linuxbrew/work \
+           -w /home/linuxbrew/work \
+           -it \
+           --rm \
+           -e REPORT_NAME=${REPORT_NAME} \
+           -e TRAIT_NAME=${TRAIT_NAME} \
+           -e GOOGLE_APPLICATION_CREDENTIALS=gcloud_fargate.json \
+           -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+           -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+           cegwas-mapping
 ```
 
 Test

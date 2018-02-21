@@ -1,21 +1,5 @@
 {% extends "_layouts/default.html" %}
 
-
-{% block custom_head %}
-
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<link rel="stylesheet" href="/static/css/leaflet.css" />
-<script src="/static/js/leaflet.js"></script>
-{# for plottable #}
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.3.0/d3.min.js"></script>
-<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
-{% endblock %}
-
 {% block style %}
 <style>
 .report {
@@ -64,7 +48,7 @@
 }
 
 #gene_list tbody td, #gene_list thead th, #variant_list tbody td, #variant_list thead th {
-    width: 16.66%;
+    width: 10%;
     float: left;
 }
 
@@ -74,19 +58,22 @@
 {% block content %}
 <div class="row">
       <div class="col-md-12">
-      <div class="btn-group" role="group">
-        {% for trait in report_data %} 
+        {% for trait in trait_set %}
+            <a href="{{ url_for('mapping.report_view', report_slug = report_slug, trait_name = trait['trait_name']) }}" type="button" class="btn btn-sm {% if trait['trait_name'] == trait_name %}btn-primary{% else %}btn-link{% endif %} ">
 
-          <a href="{{ url_for('trait_view', report_slug = report_url_slug, trait_slug = trait.trait_slug) }}" type="button" class="btn btn-sm {% if trait.trait_slug == trait_slug %} btn-primary {% else %} btn-link {% endif %}">{% if trait.interval_start %}<strong>{{ trait.trait_name }}</strong>{% else %}{{ trait.trait_name }}{% endif %}</a>     
+            {% if trait['is_significant'] %}
+                <strong>{{ trait['trait_name'] }}</strong>
+            {% else %}
+                {{ trait['trait_name'] }}
+            {% endif %}
+
+            </a>
           
         {% endfor %}
-
-      </div>
       </div>
 </div>
 
-{% if trait_data.status == "complete" %}
-{% cache 50, report_slug, trait_slug, config['VERSION'] %}
+{% if trait.status == "complete" %}
 <div class="row">
 
 <div class="col-md-12">
@@ -97,9 +84,7 @@
   <div class='col-md-6'>
   <strong>Data</strong>
     <ul>
-      {% if 'phenotype.tsv' in report_files %}
-      <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/phenotype.tsv">Phenotype Data</a></strong></li>
-      {% endif %}
+      <li><strong><a href="{{ trait.file_url("tables/phenotype.tsv") }}">Phenotype Data</a></strong></li>
 
       {% if 'mapping.tsv' in report_files %}
       <li><strong><a href="https://storage.googleapis.com/cendr/{{ report_slug }}/{{ trait_slug }}/tables/mapping.tsv">Mapping</a></strong></li>
@@ -109,9 +94,9 @@
       <li><strong><a href='{{ url_for('interval_download', report_slug = report_slug, trait_slug = trait_slug) }}'>Variant Correlation</a></strong></li>
       {% endif %}
 
-      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ report_data[0].version }}/cegwas/snps.Rda'>Mapping SNVs</a></strong></li>
+      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ trait.DATASET_RELEASE }}/cegwas/snps.Rda'>Mapping SNVs</a></strong></li>
 
-      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ report_data[0].version }}/cegwas/kinship.Rda'>Kinship Matrix</a></strong></li>
+      <li><strong><a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ trait.DATASET_RELEASE }}/cegwas/kinship.Rda'>Kinship Matrix</a></strong></li>
 
 
     </ul>
@@ -119,11 +104,9 @@
     <div class='col-md-6'>
     <strong>Info</strong>
     <ul>
-      <li><strong>Release</strong>: {{ report_data[0].version | format_release }}</li>
-      <li><strong>Availabity</strong>: {% if report_data[0].release == 0 %}
+      <li><strong>Release</strong>: {{ trait.DATASET_RELEASE }}</li>
+      <li><strong>Availabity</strong>: {% if trait.is_public %}
                                             Public
-                                         {% elif report_data[0].release == 1 %}
-                                            Embargo
                                          {% else %}
                                             Private
                                          {% endif %}</li>
@@ -146,10 +129,10 @@
       <ul class="nav navbar-nav">
         <li><a href="#phenotype">Phenotype</a></li>
         <li><a href="#manhattan">Manhattan</a></li>
-        {% if mapping_results|length > 0 %}
+        {% if trait.is_significant > 0 %}
         <li><a href="#intervals">Intervals</a></li>
         <li><a href="#pxg">PxG</a></li>
-        {% if mapping_results|length > 1 %}
+        {% if peak_summary|length > 1 %}
         <li><a href="#ld">LD</a></li>
         {% endif %}
         <li><a href="#peak_summary">Peak Summary</a></li>
@@ -164,7 +147,7 @@
 <div id ="vis"></div>
 
 <script>
-var phenotype_data = {{ phenotype_data|tojson}};
+var phenotype_data = {{ phenotype_data|tojson }};
 
 var phenotype_histogram = [
   {
@@ -189,7 +172,7 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 
 <strong>Histogram representation of your phenotype</strong>
 
-{% if mapping_results|length > 0 %}
+{% if trait.is_significant %}
 
   Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
 
@@ -205,21 +188,18 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 <a name="manhattan"></a>
 <h2 id="manhattan">Manhattan Plot</h2>
 
-{% if mapping_results|length > 0 %}
-
-<img class="report" src="{{ base_url }}/figures/Manhattan.png" />
+<img class='img img-responsive'src='{{ trait.file_url("figures/Manhattan.png") }}' alt='Manhattan Plot' />
+{% if trait.is_significant %}
 
 <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
 
 {% else %}
 
-<img class="report" src="{{ base_url }}/figures/Manhattan.png" />
-
 <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. The red line corresponds to the Bonferroni-corrected significance threshold, which is defined as <img src='/static/img/report/bf.png' style="height: 30px;" />.</p>
 
 {% endif %}
 
-{% if mapping_results|length > 0 %}
+{% if trait.is_significant %}
 <h3 id="intervals">QTL Genomic Region of Interest</h3>
 
 <table class="table table-hover table-striped confidence_intervals" >
@@ -227,44 +207,32 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 <col width="10">
 <col width="5">
 <col width="14">
-<col width="14">
-<col width="14">
-<col width="14">
-<col width="14">
 <thead>
   <tr>
     <th>Interval</th>
     <th class='text-right'>Peak Position</th>
     <th class='text-right'>-log<sub>10</sub>p</th>
-    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Variance Explained">V.E.</abbr></abbr></th>
-    <th class='text-right'>Variants</th>
-    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of coding genes with at least 1 variant">Coding</abbr></th>
-    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of genes with >= 1 moderate impact variant">Moderate</abbr></th>
-    <th class='text-right'><abbr data-toggle="tooltip"  data-placement="bottom" title="Number of genes with >= 1 high impact variant">High</abbr></th>
+    <th class='text-right'><span class='tooltip-item' data-toggle="tooltip"  data-placement="bottom" title="Variance Explained">V.E.</span></th>
   </tr>
 </thead>
 <tbody>
-{% for row in mapping_results %}
+{% for row in peak_summary.to_dict('records') %}
 {% set peak_index = loop.index0 %}
-<tr chrom="{{ row.chrom }}" start="{{ row.interval_start }}" end="{{ row.interval_end }}" class="text-right">
-  <td class="text-left"><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row.chrom }}:{{ "{:,.0f}".format(row.interval_start) }}-{{ "{:,.0f}".format(row.interval_end) }}</a></td>
-  <td class='text-right'><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{row.chrom}}:{{ "{:,.0f}".format(row.pos) }}</a></td>
-  <td>{{ row.log10p|round(2) }}</td>
-  <td>{{ row.variance_explained|round(3) * 100 }}%</td>
-  <td data='msg.variants' class='dat_{{ peak_index }}'>-</td>
-  <td data='msg.gene_w_variants_biotype.protein_coding' class='dat_{{ peak_index }}'>-</td>
-  <td data='msg.gene_by_impact.total.MODERATE' class='dat_{{ peak_index }}'>-</td>
-  <td data='msg.gene_by_impact.total.HIGH' class='dat_{{ peak_index }}'>-</td>
+<tr chrom="{{ row['chrom'] }}" start="{{ row['interval_start'] }}" end="{{ row['interval_end'] }}" class="text-right">
+  <td class="text-left"><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row['CHROM']}}:{{ row['interval_start'] }}..{{ row['interval_end'] }}" target="_blank">{{ row['chrom'] }}:{{ "{:,.0f}".format(row['interval_start']) }}-{{ "{:,.0f}".format(row['interval_end']) }}</a></td>
+  <td class='text-right'><a href="https://www.wormbase.org/tools/genome/gbrowse/c_elegans_PRJNA13758/?name={{ row.chrom}}:{{ row.interval_start }}..{{ row.interval_end }}" target="_blank">{{ row['chrom'] }}:{{ "{:,.0f}".format(row['pos']) }}</a></td>
+  <td>{{ row['log10p']|round(2) }}</td>
+  <td>{{ (row['variance_explained'] * 100)|round(3) }}%</td>
 </tr>
 {% endfor %}
 </tbody>
 </table>
-<small>Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</small>
+<small>The number of variants, and number of genes affected by moderate and high impact variants are in the biotype summary tables below. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</small>
 
 
 <h3 id="pxg">Phenotype-by-Genotype</h3>
 <br />
-<img class="report" src="{{ base_url }}/figures/PxG.png" />
+<img class='img img-responsive'src='{{ trait.file_url("figures/PxG.png") }}' alt='PxG Plot' />
 
 <p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. All of the SNVs in our data set are biallelic, so only two classes for any given SNV site exist.</p>
 
@@ -290,152 +258,129 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-  {% for peak in mapping_results %}
-    <li role="presentation" peak="{{ peak.chrom }}:{{ peak.pos }}" class='peak-tab {% if loop.first %}active{% endif %}'><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</a></li>
+  {% for peak in peak_summary.to_dict('records') %}
+    <li role="presentation" peak="{{ peak['marker'] }}" class='peak-tab {% if loop.first %}active{% endif %}'><a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">{{ peak['interval'] }}</a></li>
     {% endfor %}
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
-  {% for peak in mapping_results %}
+  {% for peak in peak_summary.to_dict('records') %}
   {% set peak_index = loop.index0 %}
     <div role="tabpanel" class="tab-pane fade {% if loop.first %}in active{% endif %}" id="peak_{{ loop.index }}">
     <br />
     <br />
     <ul>
-      <li><strong>Peak Interval</strong> &nbsp;{{ peak.chrom }}:{{ peak.interval_start }}-{{ peak.interval_end }}</li>
-      <li><strong>Peak Position</strong> &nbsp;{{ peak.chrom}}:{{ peak.pos }}</li>
-      <li><strong>Variance Explained</strong> &nbsp;{{ peak.variance_explained|round(3) * 100 }}%</li>
+      <li><strong>Peak Interval</strong> &nbsp;{{ peak['interval'] }}</li>
+      <li><strong>Peak Position</strong> &nbsp;{{ peak['marker'] }}</li>
+      <li><strong>Variance Explained</strong> &nbsp;{{ "{:.2f}".format(peak['variance_explained']*100) }}%</li>
     </ul>
     <div class="row">
-    <div class="col-md-12">
-      <table class="peak_summary table table-hover table-striped" style="table-layout: fixed">
-          <thead>
-            <tr>
-              <th>Biotype</th>
-              <th># Genes</th>
-              <th># Genes w/ variants</th>
-              <th>>=1 Moderate Impact</th>
-              <th>>=1 High Impact</th>
-              <th># Variants</th>
-            </tr>
-          </thead>
-          <tbody class='peak_{{ loop.index0 }} text-right'>
-              <tr>
-                <td class='text-left'><strong>Total</strong></td>
-                <td data='msg.gene_biotype.total' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_w_variants_biotype.total' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_by_impact.total.MODERATE' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_by_impact.total.HIGH' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.variants' class='dat_{{ peak_index }}'>-</td>
-              </tr>
-              {% for i in ["protein_coding", "pseudogene", "ncRNA", "miRNA", "piRNA", "tRNA", "lincRNA", "rRNA", "scRNA", "snoRNA", "snRNA", "asRNA", "Coding", "Noncoding"] %}
-              <tr>
-                <td class='text-left'>
-                {% if i in biotypes.keys() %}
-                  <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ biotypes[i] }}'>{{ i }}</abbr>
-                {% else %}
-                {{ i }}
-                {% endif %}
-                </td>
-                <td data='msg.gene_biotype.biotype_summary.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_w_variants_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_by_impact.MODERATE.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.gene_by_impact.HIGH.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-                <td data='msg.variant_in_biotype.{{ i }}' class='dat_{{ peak_index }}'>-</td>
-              </tr>
-              {% endfor %}
-              <tr>
-                <td colspan = "6">
-                <p style="text-align">Numbers listed under Moderate and High Impact correspond to the number of genes within the interval that have at least 1 variant classified as having a moderate or high impact.</p>
-                <p style="text-align: justify">Moderate and High impact variants are terms used to describe the predicted severity of a variant as assigned by SnpEff. More information regarding the types of variants classified as Moderate or High impact is <a href="{{ url_for('help_item', filename = 'Variant-Prediction') }}">available in the help section</a>.</p>
-                </td>
-              </tr>
-        </tbody>
-      </table>
-      </div>
-    </div>
-      
+        <div class="col-md-12">
+                <strong><a href='{{ trait.file_url("tables/interval_summary.tsv.gz") }}'>Download Table</a></strong>
+                <table class="peak_summary table table-hover table-striped table-nice" style="table-layout: fixed">
+                    <thead>
+                        <tr class='text-nowrap'>
+                            <th>Biotype</th>
+                            <th class='text-right'># Genes</th>
+                            <th class='text-right'># Genes w/ variants</th>
+                            {% for impact in ["MODIFIER", "LOW", "MODERATE", "HIGH"] %}
+                            <th class='text-right'>
+                                <span class='tooltip-item' data-toggle='tooltip' title='Genes with one or more {{ impact.lower() }}-impact variants.'>
+                                    {{ impact }} +
+                                </span>
+                            </th>
+                            {% endfor %}
+                            <th class='text-right'># Variants</th>
+                        </tr>
+                    </thead>
+                    <tbody class='peak_{{ loop.index0 }} text-right'>
+                    {% set interval_summary_peak = interval_summary[interval_summary.interval == peak.interval].drop('interval', axis=1) %}
+                        <tr class='text-bold'>
+                            {% for col in interval_summary_peak.columns[1:] %}
+                                {% if col == 'biotype' %}
+                                    <td class='text-left'><strong>Total</strong></td>
+                                {% else %}
+                                    <td class='text-right'><strong>{{ interval_summary_peak[col].sum() }}</strong></td>
+                                {% endif %}
 
-<h3>Variants</h3>
+                            {% endfor %}
+                        </tr>
+                    {% for i, row in interval_summary_peak.iterrows() %}
+                        <tr>
+                            <td class='text-left'>
+                                {% if row.biotype in BIOTYPES.keys() %}
+                                    <abbr data-toggle='tooltip' data-placement='top' data-original-title='{{ BIOTYPES[row.biotype] }}'>{{ row.biotype }}</abbr>
+                                {% else %}
+                                    {{ row.biotype }}
+                                {% endif %}
+                            </td>
+                            {% for k, i in list(row.iteritems())[2:] %}
+                                    <td>{{ i }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            <strong>All variants are reported from the 20170531 data release regardless of which isotypes were submitted for the mapping. This is in contrast to newer reports which report genes and variants among only those isotypes that were submitted for a given trait.</strong>
 
-<p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
 
-<table class="table table-hover table-striped" id="variant_list" style="table-layout: fixed">
-    <thead>
-        <tr>
-            <th>Gene Name</th>
-            <th>Wormbase ID</th>
-            <th>Biotype</th>
-            <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The total number of variants with Moderate/High predicted effects'>Total Variants</abbr></th>
-            <th><abbr data-toggle='tooltip' data-placement='top' data-original-title='The Maximum correlation among all variants examined'>Max. Correlation</abbr></th>
-            <th>Toggle Variants</th>
-        </tr>
-    </thead>
-<tbody>
-{% for gene in var_corr[peak_index] %}
-      <tr>
-        <td>
-          {% if gene["gene_name"] %}
-              <a href="{{ url_for("gene", gene_name=gene["gene_name"]) }}">{{ gene["gene_name"] }}</a>
-          {% else %}
-              {{ gene["feature_id"] }}&nbsp;
-          {% endif %}
-        </td>
-        <td><a href="{{ url_for("gene", gene_name=gene["gene_id"]) }}">{{ gene["gene_id"] }}</a></td>
-        <td>{{ gene["transcript_biotype"] }}</td>
-        <td>{{ gene["n_variants"] }}</td>
-        <td>{{ gene["max_corr"]|round(3) }}</td>
-        <td><a class='show_genes' gene="{{ gene["gene_id"] }}" href='#show'>Variants</a></td>
-      </tr>
-      <tr class='{{ gene["gene_id"] }}' style="display: none;">
-        <td colspan="5" style="padding:0px; width: 100%">
-          <table  class="table table-hover table-striped table-condensed internal-table">
-            <thead>
-              <tr>
-              <th>CHROM:POS</th>
-              <th>REF/ALT</th>
-              <th>Predicted Effect</th>
-              <th>Annotation</th>
-              <th>Putative Impact</th>
-              <th>Correlation</th>
-              </tr>
-            </thead>
-            <tbody style="height: inherit;">
-{% for variant in gene["variant_set"] %}
-      <tr class='{{ tbl_color[variant["putative_impact"]] }}'>
-        <td>{{ variant["CHROM_POS"] }}</td>
-        <td>{{ variant["REF"] }} / {{ variant["ALT"] }}</td>
-        <td>{{ variant["hgvs_p"] }}</td>
-        <td>{{ variant["annotation"] }}</td>
-        <td>{{ variant["putative_impact"] }}</td>
-        <td>{{ variant["correlation"]|round(3) }}</td>
-      </tr>
-      {% endfor %}
-            </tbody>
-          </table>
-          <br />
-        </td>
-      </tr>
-{% endfor %}
-  </tbody>
-</table>
+            <h3>Variants</h3>
+            <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
+            <strong><a href='{{ trait.file_url("tables/variant_correlation.tsv.gz") }}'>Download Table</a></strong>
+            <table class="table table-hover table-striped" id="variant_list">
+                <thead>
+                    <tr>
+                        <th>Gene Name</th>
+                        <th>Wormbase ID</th>
+                        <th>Transcript</th>
+                        <th>CHROM:POS</th>
+                        <th>Biotype</th>
+                        <th>AA Change</th>
+                        <th>Annotation</th>
+                        <th>Impact</th>
+                        <th>Correlation</th>
+                        <th><span data-toggle='tooltip' data-placement='top' data-original-title='The Maximum correlation among all variants examined'>Max. Correlation</span></th>
+                    </tr>
+                </thead>
+            <tbody>
+            {% for row in variant_correlation[variant_correlation.interval == peak.interval].to_dict('records') %}
+                  <tr class='{{ TABLE_COLORS[row["putative_impact"]] }}'>
+                    <td>
+                        <a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}">
+                            {{ row.get("gene_name") or row.get('feature_id') }}
+                        </a>
+                    </td>
+                    <td><a href="{{ url_for("gene.gene", gene_name=row["gene_id"]) }}"><small>{{ row["gene_id"] }}</small></a></td>
+                    <td>{{ row['feature_id'] }}</td>
+                    <td style='white-space: nowrap'><small>{{ row["CHROM"] }}:{{ row["POS"] }}</small></td>
+                    <td>{{ row["transcript_biotype"] }}</td>
+                    <td>{{ row["hgvs_p"] }}</td>
+                    <td>{{ row["annotation"] }}</td>
+                    <td>{{ row["putative_impact"] }}</td>
+                    <td>{{ row["correlation"]|round(3) }}</td>
+                    <td>{{ row['max_correlation']|round(3) }}</td>
+                  </tr>
+            {% endfor %}
+              </tbody>
+            </table>
 
+        </div>{# /col-md-12 #}
+    </div>{# /row #}
 
     </div>
   {% endfor %}
   </div>
 
 
-    {% include 'components/geo_map.html' %}
+    {% include 'reports/geo_map.html' %}
 
-    {% include 'components/tajima.html' %}
+    {% include 'reports/tajima.html' %}
 
 
   </div>
 
 {% endif %}
-{% endcache %}
 {% else %}
   <div class="progress">
     <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar"
@@ -443,60 +388,11 @@ Plotly.newPlot('vis', phenotype_histogram, layout, {displayModeBar: false});
     </div>
   </div>
 {% endif %}
-
 {% endblock %}
 
 
 {% block script %}
 <script>
-
-{% if trait_data.status != "complete" %}
-prog = Array()
-prog["queue"] = ""
-prog["Initializing"] = "5%"
-prog["Processing Phenotype Data"] = "10%"
-prog["Performing Mapping"] = "20%"
-prog["Processing Mapping"] = "60%"
-prog["Plotting Figures"] = "75%"
-prog["Processing Peaks"] = "80%"
-prog["Fine Mapping"] = "85%"
-prog["Transferring Data"] = "95%"
-prog["complete"] = "100%"
-prog["error"] = "100%"
-
-var update_status = function(status) {
-  if (status == "complete") {
-    $(".progress").fadeOut();
-    location.reload();
-  } else if (status == "error") {
-    $(".progress-bar").addClass("progress-bar-danger").html("error");
-  } else if (status == "queue") {
-    $(".progress-bar").css("width", "100%").addClass("progress-bar-info").html("Queued")
-  } else {
-    $(".progress-bar").removeClass("progress-bar-info").css("width", prog[status]).html(prog[status] + " (" + status + ")");
-  }
-}
-
-function check_status() {
-  $.ajax({
-     url:"/report_progress/",
-     data: JSON.stringify({
-            "report_slug": "{{ report_slug }}",
-            "trait_slug": "{{ trait_slug }}" }),
-     method: "POST", 
-     contentType: 'application/json;charset=UTF-8'
-     }
-     ).done(function(msg) {
-      msg = JSON.parse(msg);
-      update_status(msg);
-    });
-}
-
-check_status();
-
-window.setInterval(check_status, 3000);
-
-{% else %}
 
 // Scrolling
 $('#report_nav').ready(function () {
@@ -526,85 +422,18 @@ $('#report_nav').ready(function () {
 
 
 
-{% if mapping_results|length > 0 %}
-// Set Gene Counts
-$(document).ready(function() {
-$.each($(".confidence_intervals > tbody > tr").children(":nth-child(4)"), function(k, v) {
-  pos = $(v).siblings().first().children().html();
-  chrom = pos.split(":")[0]
-  start = pos.split(":")[1].split("-")[0].split(",").join("");
-  end = pos.split(":")[1].split("-")[1].split(",").join("");
-  gene_count = $(this);
-  url = "/api/interval/" + chrom + "/" + start + "/" + end;
-  $.getJSON(url, function(msg) {
-    $.each($(".dat_" + k), function(x) {
-      try {
-        $(this).html(eval($(this).attr("data")));
-      } catch(err) {}
-    });
-});
-});
-});
-
-
-// Gene List
-function update_gene_list(chrom, start, end) {
-  $("#gene_list > tbody").html("");
-    $.ajax({
-    url: "/api/genelist/" + chrom + "/" + start + "/" + end,
-    contentType: 'application/json',
-    success:function(msg) {
-      $.each(msg["gene_list"], function(k,v) {
-
-      if (v["locus"] != "") {
-        v["locus"] = "<a href='https://www.wormbase.org/species/c_elegans/gene/" + v["locus"] + "'>" + v["locus"] + "</a>";
-      }
-      if (v["Name"] != "") {
-        v["Name"] = "<a href='https://www.wormbase.org/species/c_elegans/gene/" + v["Name"] + "'>" + v["Name"] + "</a>";
-      }
-
-
-      items = [v["CHROM"],
-               Number(v["start"]).toLocaleString('en'),
-               Number(v["end"]).toLocaleString('en'),
-               v["locus"],
-               v["sequence_name"],
-               v["Name"],
-               v["biotype"]];
-      $("#gene_list > tbody").append("<tr><td>" + items.join("</td><td>") + "</td></tr>");
-      });
-
-    // Enable links
-    $( "#gene_list a" ).on( "click", function() {
-        window.location = $(this).attr('href');
-    });
-
-
-    }
-  });
-
-}
-
-
-$(".show_genes").on("click", function() {
-  var clicked = $(this);
-  console.log(clicked);
-  $("." + $(this).attr("gene")).toggle(function() {})
-})
-
-
-// Fix Links
-$( "a" ).on( "click", function() {
-    window.location = $(this).attr('href');
-});
-
+{% if trait.is_significant %}
+var isotypes = {{ isotypes|tojson }}
+var chrom = "{{ first_peak.chrom }}"
+var start = {{ first_peak.interval_start }};
+var end = {{ first_peak.interval_end }};
+var pos = {{ first_peak.pos }};
 
 // Load initial map and Tajima
 $(document).ready(function() {
-  update_geo_map('{{ mapping_results.0.chrom }}' , {{ mapping_results.0.pos }});
+  update_geo_map();
   // Load initial position
-  update_tajima_plot('{{ mapping_results.0.chrom }}', {{ mapping_results.0.interval_start }}, {{ mapping_results.0.interval_end }} );
-  update_gene_list('{{ mapping_results.0.chrom }}', {{ mapping_results.0.interval_start }}, {{ mapping_results.0.interval_end }});
+  update_tajima_plot();
 });
 
 // Monitor peak tabs
@@ -615,12 +444,10 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
   interval = $(".peak-tab.active").children("a").html()
   start = parseInt(interval.split(":")[1].split("-")[0]);
   end = parseInt(interval.split(":")[1].split("-")[1]);
-  update_geo_map(chrom, pos);
-  update_tajima_plot(chrom, start, end);
-  update_gene_list(chrom, start, end);
+  update_geo_map();
+  update_tajima_plot();
 });
 
-{% endif %}
 {% endif %}
 
    

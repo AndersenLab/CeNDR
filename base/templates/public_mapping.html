@@ -1,50 +1,4 @@
 {% extends "_layouts/default.html" %} 
-{% block custom_head %}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/1.31.2/plotly.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.4/moment.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/calendar-heatmap/0.4.1/calendar-heatmap.min.js"></script>
-  <style>
-  .point:hover {
-  	fill: green;
-  }
-
-{# Calendar Heatmap CSS #}
-text.month-name,
-text.calendar-heatmap-legend-text,
-text.day-initial {
-  font-size: 10px;
-  fill: #aaaaaa;
-  font-family: Helvetica, arial, 'Open Sans', sans-serif
-}
-.day-cell {
-  border: 1px solid gray;
-}
-rect.day-cell:hover {
-  stroke: #555555;
-  stroke-width: 1px;
-}
-.day-cell-tooltip {
-  position: absolute;
-  z-index: 9999;
-  padding: 5px 9px;
-  color: #bbbbbb;
-  font-size: 12px;
-  background: rgba(0, 0, 0, 0.85);
-  border-radius: 3px;
-  text-align: center;
-}
-.day-cell-tooltip > span {
-  font-family: Helvetica, arial, 'Open Sans', sans-serif
-}
-.calendar-heatmap {
-  box-sizing: initial;
-}
-{# Calendar Heatmap CSS #}
-
-  </style>
-
-{% endblock %} 
 
 {% block content %}
 <div class="row">
@@ -73,37 +27,11 @@ rect.day-cell:hover {
 </table>
 
 {% else %}
-{% cache 50, config['version'] %}
-	<div id="container" style="min-width: 310px; height: 310px; max-width: 100%; margin: 0 auto"></div>
+<div id="container" style="min-width: 310px; height: 310px; max-width: 100%; margin: 0 auto"></div>
 <p><strong>Cumulative Manhattan Plot</strong> - Significant genome-wide association mappings are plotted against their -log<sub>10</sub>p association value by genomic position.</p>
 <br></br>
 <div id="waffle"></div>
 <br></br>
-<h3 id="mappings">Recent Mappings</h3>
-
-<table class="table table-hover table-striped" style="table-layout: fixed">
-	<thead>
-		<tr>
-			<th>Report Name</th>
-			<th>Trait Name</th>
-			<th>CHROM:POS
-			<th>-log<sub>10</sub>p</th>
-      <th>Date</th>
-		</tr>
-	</thead>
-	<tbody>
-	{% for i in recent_results %}
-		<tr>
-			<td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.report_name }}</a></td>
-			<td><a href = "{{ url_for('trait_view', report_slug = i.report_slug, trait_slug = i.trait_slug) }}">{{ i.trait_name }}</a></td>
-			<td>{% if i.log10p %}{{ i.chrom }}:{{ i.pos }}{% endif %}</td>
-			<td>{% if i.log10p %}{{ i.log10p }}{% else %}-{% endif %}</td>
-      <td>{{ i["submission_date"].date() }}</td>
-		</tr>
-	{% endfor %}
-	</tbody>
-</table>
-{% endcache %}
 
 
 {% endif %}
@@ -228,58 +156,6 @@ manhattan.on("plotly_click", function(data) {
 	point_number = data.points[0].pointNumber;
 	window.location.href = "/report/" + data.points[0].data.text[point_number];
 })
-
-waffle_date_set={{ waffle_date_set|tojson|safe }};
-waffle_date_set.map(function(x){x.date = moment(x.date).toDate()})
-console.log(waffle_date_set);
-
-var chart = calendarHeatmap()
-              .data(waffle_date_set)
-              .selector('#waffle')
-              .colorRange(['rgb(255, 198, 94)', 'rgb(255, 0, 0)'])
-              .tooltipEnabled(true)
-              .onClick(function (data) {
-               $("#mappings").text("Significant public mappings From " + moment(data["date"]).format("YYYY-MM-DD"));
-                date = data["date"].toISOString().split("T")[0];
-                $.getJSON("/api/report/date/" + date, function (data) {
-                    $("tbody tr").remove();
-                    $.each(data, function(index,value){
-                      updateTable(value);
-                    });
-                });
-              });
-chart(); 
-
-function updateTable(data) {
-      var report = sprintf("<a href='/report/%s'>%s</a>", data['report_slug'], data['report_name']);
-      var trait = sprintf("<a href='/report/%s/%s'>%s</a>", data['report_slug'], data['trait_slug'], data['trait_name']);
-      var CHROM_POS = data['CHROM_POS']; 
-      var log10p = data['log10p'];
-      var date = moment(data['submission_date']).format("YYYY-MM-DD");
-      var link = window.location.origin + "/report/" + data['report_slug'] + "/" + data['trait_slug'];
-      var newRow = [report, trait, CHROM_POS, log10p, date];
-      newRow = "<tr><td>" + newRow.join("</td><td>") + "</td></tr>";
-   $("tbody").append(newRow);
-}
-
-
-$("body").ready(function () {
-
-setTimeout(function() {
-  $("g").map(function() {
-    title_text = $(this).children("title").text();
-    var re = /^[0-9]+.*/
-    if (re.test(title_text)) {
-      items = title_text.split(" ")[0] + " report(s)";
-      $(this).attr("data-toggle", "tooltip");
-      $(this).attr("data-placement", "bottom");
-      $(this).attr("data-title", items);
-      $(this).tooltip({"container":"body"})
-    }
-  });
-}, 2000);
-
-});
 
 {% endif %}
 

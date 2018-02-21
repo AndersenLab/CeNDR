@@ -8,9 +8,14 @@ from flask_sqlalchemy import SQLAlchemy
 from base.utils.data_utils import json_encoder
 from base.utils.text_utils import render_markdown
 from base.constants import CENDR_VERSION, APP_CONFIG
+from flaskext.markdown import Markdown
 
 # Create
-app = Flask(__name__, static_url_path='/static')
+app = Flask(__name__,
+            static_url_path='/static')
+
+# Add markdown
+Markdown(app)
 
 # Configuration - First load non-sensitive configuration info
 app.config['json_encoder'] = json_encoder
@@ -24,31 +29,13 @@ app.config.update(BASE_VARS)
 app.config.update(APP_CONFIG_VARS)
 
 # Setup cache
-cache = Cache(app, config=app.config['CACHE'])
+cache = Cache(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
 
 # Database
 db_2 = SQLAlchemy(app)
 
 # Set the json_encoder
 app.json_encoder = json_encoder
-
-
-biotypes = {
-    "miRNA" : "microRNA",
-    "piRNA" : "piwi-interacting RNA",
-    "rRNA"  : "ribosomal RNA",
-    "siRNA" : "small interfering RNA",
-    "snRNA" : "small nuclear RNA",
-    "snoRNA": "small nucleolar RNA",
-    "tRNA"  : "transfer RNA",
-    "vaultRNA" : "Short non-coding RNA genes that form part of the vault ribonucleoprotein complex",
-    "lncRNA" : "Long non-coding RNA",
-    "lincRNA" : "Long interspersed ncRNA",
-    "pseudogene" : "non-functional gene.",
-    "asRNA" : "Anti-sense RNA",
-    "ncRNA" : "Non-coding RNA",
-    "scRNA" : "Small cytoplasmic RNA"
-}
 
 
 def autoconvert(s):
@@ -61,19 +48,11 @@ def autoconvert(s):
 
 
 
-if app.config['DEBUG'] is False:
-    from flask_sslify import SSLify
-    # Ignore leading slash of urls; skips must use start of path
-    sslify = SSLify(app, skips=['strains/global-strain-map',
-                                'cronmapping'])
-else:
-    # Running locally
-    cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+if app.config['DEBUG']:
     app.debug = True
-    app.config["debug"] = True
+    #app.config["debug"] = True
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
-
 
 
 def gs_static(url, prefix='static'):
@@ -101,7 +80,11 @@ app.register_blueprint(data_bp, url_prefix='/data')
 
 # Mapping Pages -
 from base.views.mapping import mapping_bp
-app.register_blueprint(mapping_bp, url_prefix='/mapping')
+app.register_blueprint(mapping_bp, url_prefix='')
+
+# Gene Pages
+from base.views.gene import gene_bp
+app.register_blueprint(gene_bp, url_prefix='/gene')
 
 # Main Pages - Homepage, Outreach, Contact
 from base.views.primary import primary_bp
@@ -123,6 +106,8 @@ def inject():
     """
     return dict(version=CENDR_VERSION,
                 json=json,
+                list=list,
+                str=str,
                 gs_static=gs_static,
                 render_markdown=render_markdown)
 
@@ -137,8 +122,5 @@ def internal_server_error(e):
     return render_template('500.html'), 500
 
 
-# from base.utils.auth import *
-from base.task import *
-#from base.views import *
 from base.views.api import *
 from base.manage import (init_db)

@@ -3,6 +3,7 @@ import json
 import pandas as pd
 import numpy as np
 import datetime
+import requests
 from io import StringIO
 from flask import Markup, url_for
 from sqlalchemy import or_, func
@@ -12,6 +13,7 @@ from base.constants import URLS
 from base.utils.gcloud import get_item, store_item, query_item, google_storage
 from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
+from collections import defaultdict
 
 from logzero import logger
 
@@ -53,89 +55,16 @@ class datastore_model(object):
                 self._exists = True
                 self.__dict__.update(item)
 
-        
     def save(self):
         self._exists = True
         item_data = {k: v for k, v in self.__dict__.items() if k not in ['kind', 'name'] and not k.startswith("_")}
         store_item(self.kind, self.name, **item_data)
 
     def __repr__(self):
-        return f"<{self.kind}:{self.name}>"
-
-
-class report_m(datastore_model):
-    """
-        The report model - for creating and retreiving
-        information on reports
-    """
-    kind = 'report'
-    def __init__(self, *args, **kwargs):
-        super(report_m, self).__init__(*args, **kwargs)
-        self.exclude_from_indexes = ('trait_data', 'strain_list')
-        # Read trait data in upon initialization.
-        if hasattr(self, 'trait_data'):
-            self._trait_df = pd.read_csv(StringIO(self.trait_data), sep='\t')
-
-    def trait_strain_count(self, trait_slug):
-        """
-            Return number of strains submitted for a trait.
-        """
-        return self._trait_df[trait_slug].count()
-
-    def humanize(self):
-        return arrow.get(self.created_on).humanize()
-
-
-    def fetch_traits(self, trait_name=None, latest=True):
-        """
-            Fetches trait/task records associated with a report.
-
-            Args:
-                trait_name - Fetches a specific trait
-                latest - Returns only the first record of each trait.
-
-            Returns
-                If a trait name is given, and latest - ONE result
-                If latest - one result for each trait
-                if neight - all tasks associated with a report.
-        """
-        report_filter = [('report_slug', '=', self.name)]
-        if trait_name:
-            trait_list = [trait_name]
+        if hasattr(self, 'name'):
+            return f"<{self.kind}:{self.name}>"
         else:
-            trait_list = self.trait_list
-        result_out = []
-        for trait in trait_list:
-            trait_filters = report_filter + [('trait_name', '=', trait)]
-            results = list(query_item('trait',
-                                      filters=trait_filters,
-                                      order=['report_slug', 'trait_name', '-created_on']))
-            if results:
-                if trait_name and latest:
-                    result_out = trait_m(results[0].key.name)
-                elif latest:
-                    result_out.append(trait_m(results[0].key.name))
-                else:
-                    for result in results:
-                        result_out.append(result)
-        return result_out
-
-
-    def fetch_trait_status(self):
-        """
-            If traits-tasks are still being run
-            this function will fetch and update their status.
-
-            Once they have completed it will cache the result    
-        """
-        trait_run_status_set = []
-        if hasattr(self, 'trait_run_status'):
-            trait_run_status_set = [x == 'Complete' for x in self.trait_run_status.values()]
-        if not any(trait_run_status_set):
-            traits = self.fetch_traits(latest=True)
-            self.trait_run_status = {x.trait_name: x.run_status for x in traits}
-            self.save()
-        return self.trait_run_status
+            return f"<{self.kind}:no-name>"
 
 
 class trait_m(datastore_model):
@@ -147,6 +76,7 @@ class trait_m(datastore_model):
         If a task is re-run the report will only display the latest version.
     """
     kind = 'trait'
+
     def __init__(self, *args, **kwargs):
         """
             The trait_m object adopts the task
@@ -155,6 +85,10 @@ class trait_m(datastore_model):
         self._ecs = get_aws_client('ecs')
         self._logs = get_aws_client('logs')
         super(trait_m, self).__init__(*args, **kwargs)
+        self.exclude_from_indexes = ['trait_data']
+        # Read trait data in upon initialization.
+        if hasattr(self, 'trait_data'):
+            self._trait_df = pd.read_csv(StringIO(self.trait_data), sep='\t')
 
     def version_link(self):
         """
@@ -168,7 +102,6 @@ class trait_m(datastore_model):
             Runs the task
         """
         # Fargate credentials
-        # fargate_user = get_item('credential', 'aws_fargate')
         task_fargate = self._ecs.run_task(
             taskDefinition='cendr-map',
             overrides={
@@ -218,11 +151,7 @@ class trait_m(datastore_model):
                 }
             }
             )
-        try:
-            task_fargate = task_fargate['tasks'][0]
-        except KeyError:
-            # Something went wrong.
-            return None
+        task_fargate = task_fargate['tasks'][0]
 
         # Generate trait_m model
         self.report_trait = "{}:{}".format(self.report_name, self.trait_name)
@@ -245,7 +174,7 @@ class trait_m(datastore_model):
 
     @property
     def is_complete(self):
-        return self.run_status == "Complete"
+        return self.status == "complete"
 
 
     def get_task_log(self):
@@ -293,8 +222,13 @@ class trait_m(datastore_model):
     def gs_base_url(self):
         """
             Returns the google storage base URL
+
+            The URL schema changed from REPORT_VERSION v1 to v2.
         """
-        return f"reports/{self.REPORT_VERSION}/{self.name}"
+        if self.REPORT_VERSION == 'v2':
+            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.REPORT_VERSION}/{self.name}"
+        elif self.REPORT_VERSION == 'v1':
+            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.REPORT_VERSION}/{self.report_slug}/{self.trait_name}"
 
     def get_gs_as_dataset(self, fname):
         """
@@ -303,31 +237,32 @@ class trait_m(datastore_model):
             on google storage and return it as a
             pandas dataframe.
         """
-        gs = google_storage()
-        cendr_bucket = gs.get_bucket("elegansvariation.org")
-        blob = cendr_bucket.blob(f"{self.gs_base_url}/{fname}")
-        dataset = str(blob.download_as_string(), 'utf-8')
-        return pd.read_csv(StringIO(dataset), sep="\t")
+        return pd.read_csv(f"{self.gs_base_url}/{fname}", sep="\t")
 
 
-    def figure(self, fname):
+    def get_gs_as_json(self, fname):
+        """
+            Downloads a google-storage file as json
+        """
+        return requests.get(f"{self.gs_base_url}/{fname}").json()
+
+
+    def file_url(self, fname):
         """
             Return the figure URL. May change with updates
             to report versions.
         """
         gs_url = f"{self.gs_base_url}/{fname}"
-        return f"https://storage.googleapis.com/elegansvariation.org/{gs_url}"
+        return f"{gs_url}"
 
-"""
+class mapping_m(datastore_model):
+    """
+        The mapping/peak interval model
+    """
+    kind = 'mapping'
+    def __init__(self, *args, **kwargs):
+        super(mapping_m, self).__init__(*args, **kwargs)
 
-from base.models2 import trait_m
-
-t = trait_m()
-t.report_name = 'test-report'
-t.trait_name = 'yeah1'
-t.run_task()
-
-"""
 class user_m(datastore_model):
     """
         The User model - for creating and retrieving
@@ -340,14 +275,24 @@ class user_m(datastore_model):
     def reports(self):
         filters = [('user_id', '=', self.user_id)]
         # Note this requires a composite index defined very precisely.
-        results = query_item('report', filters=filters, order=['user_id', '-created_on'])
-
+        results = query_item('trait', filters=filters, order=['user_id', '-created_on'])
+        results = sorted(results, key=lambda x: x['created_on'], reverse=True)
+        results_out = defaultdict(list)
+        for row in results:
+            results_out[row['report_slug']].append(row)
         # Generate report objects
-        return [report_m(x) for x in results]
+        return results_out
 
 
+class DictSerializable(object):
+    def _asdict(self):
+        result = {}
+        for key in self.__mapper__.c.keys():
+            result[key] = getattr(self, key)
+        return result
 
-class metadata_m(db_2.Model):
+
+class metadata_m(DictSerializable, db_2.Model):
     """
         Table for storing information about other tables
     """
@@ -357,10 +302,11 @@ class metadata_m(db_2.Model):
 
 
 
-class strain_m(db_2.Model):
+class strain_m(DictSerializable, db_2.Model):
     __tablename__ = "strain"
     strain = db_2.Column(db_2.String(25), primary_key=True)
     reference_strain = db_2.Column(db_2.Boolean(), index=True)
+    sequenced = db_2.Column(db_2.Boolean(), index=True, nullable=True)
     isotype = db_2.Column(db_2.String(25), index=True, nullable=True)
     previous_names = db_2.Column(db_2.String(100), nullable=True)
     source_lab = db_2.Column(db_2.String(), nullable=True)
@@ -377,6 +323,12 @@ class strain_m(db_2.Model):
     isolation_date_comment = db_2.Column(db_2.String(), nullable=True)
     notes = db_2.Column(db_2.String(), nullable=True)
     sets = db_2.Column(db_2.String(), nullable=True)
+    c_label = db_2.Column(db_2.String(), nullable=True)
+    s_label = db_2.Column(db_2.String(), nullable=True)
+    substrate_temp = db_2.Column(db_2.Float())
+    ambient_temp = db_2.Column(db_2.Float())
+    substrate_moisture = db_2.Column(db_2.Float())
+    ambient_humidity = db_2.Column(db_2.Float())
 
     def __repr__(self):
         return self.strain
@@ -435,7 +387,26 @@ class strain_m(db_2.Model):
         return df
 
 
-class wormbase_gene_m(db_2.Model):
+    @classmethod
+    def release_summary(cls, release):
+        """
+            Returns isotype and strain count for a data release.
+
+            Args:
+                release - the data release
+        """
+        counts = {'strain_count': cls.query.filter((cls.release <= release)).count(),
+                  'strain_count_sequenced': cls.query.filter((cls.release <= release) & (cls.sequenced == True)).count(),
+                  'isotype_count': cls.query.filter(cls.release <= release).group_by(cls.isotype).count()}
+        return counts
+
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+
+class wormbase_gene_m(DictSerializable, db_2.Model):
     __tablename__ = 'wormbase_gene'
     id = db_2.Column(db_2.Integer, primary_key=True)
     chrom = db_2.Column(db_2.String(20), index=True)
@@ -457,12 +428,11 @@ class wormbase_gene_m(db_2.Model):
 
     gene_summary = db_2.relationship("wormbase_gene_summary_m", backref='gene_components')
 
-
     def __repr__(self):
         return f"{self.gene_id}:{self.feature} [{self.seqname}:{self.start}-{self.end}]"
 
 
-class wormbase_gene_summary_m(db_2.Model):
+class wormbase_gene_summary_m(DictSerializable, db_2.Model):
     """
         This is a condensed version of the wormbase_gene_m model;
         It is constructed out of convenience and only defines the genes
@@ -479,7 +449,9 @@ class wormbase_gene_summary_m(db_2.Model):
     sequence_name = db_2.Column(db_2.String(30), index=True)
     biotype = db_2.Column(db_2.String(30), nullable=True)
     gene_symbol = db_2.column_property(func.coalesce(locus, sequence_name, gene_id))
+    interval = db_2.column_property(func.printf("%s:%s-%s", chrom, start, end))
     arm_or_center = db_2.Column(db_2.String(12), index=True)
+
 
     @classmethod
     def resolve_gene_id(cls, query):
@@ -496,7 +468,7 @@ class wormbase_gene_summary_m(db_2.Model):
 
 
 
-class homologs_m(db_2.Model):
+class homologs_m(DictSerializable, db_2.Model):
     """
         The homologs database combines 
     """

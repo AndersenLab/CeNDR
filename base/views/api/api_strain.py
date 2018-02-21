@@ -1,9 +1,8 @@
-from base.models import strain
 from base.models2 import strain_m
 from base.application import app
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_
-from logzero import logger
+from flask import request
 
 @app.route('/api/strain/')
 @app.route('/api/strain/<string:strain_name>')
@@ -46,6 +45,7 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
 
 
 @app.route('/api/isotype')
+@app.route('/api/isotype/origin')
 @jsonify_request
 def get_isotypes(known_origin=False, list_only=False):
     """
@@ -57,23 +57,10 @@ def get_isotypes(known_origin=False, list_only=False):
             known_origin: Returns only strains with a known origin
             list_only: Returns a list of isotypes (internal use)
     """
+    result = strain_m.query .filter(strain_m.reference_strain == True)
+    if known_origin or 'origin' in request.path:
+        result = result.filter(strain_m.latitude != None)
+    result = result.all()
     if list_only:
-        result = strain_m.query.with_entities(strain_m.isotype) \
-                               .filter(strain_m.reference_strain == True, strain_m.latitude != None) \
-                               .all()
-        result = [x for tupl in result for x in tupl]
-    else:
-        result = strain_m.query.with_entities(strain_m.strain,
-                                              strain_m.reference_strain,
-                                              strain_m.isotype,
-                                              strain_m.latitude,
-                                              strain_m.longitude,
-                                              strain_m.release,
-                                              strain_m.isolation_date,
-                                              strain_m.elevation,
-                                              strain_m.substrate,
-                                              strain_m.landscape,
-                                              strain_m.sampled_by) \
-                               .filter(strain_m.reference_strain == True, strain_m.latitude != None) \
-                               .all()
+        result = [x.isotype for x in result]
     return result

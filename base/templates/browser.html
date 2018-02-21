@@ -27,7 +27,7 @@
   display: inline-block;
 }
 
-.gt-2 {
+.gt-3 {
     background-color: white;
     border: 1px dotted black;
     color: black;
@@ -39,7 +39,7 @@
   color: black;
 }
 
-.gt-3.PASS {
+.gt-2.PASS {
   background-color: rgba(0, 102, 255,1.0);
   border: 1px solid black;
   color: white;
@@ -51,7 +51,7 @@
   color: black;
 }
 
-.gt-3:not(.PASS) {
+.gt-2:not(.PASS) {
   background-color: rgba(0, 102, 255,0.25);
   border: 1px dotted black;
   color: black;
@@ -219,20 +219,21 @@ th {
 <div class="panel panel-default">
   <div class="panel-body">
     <span class="label gt-0 PASS">Passing REF</span>&nbsp;
-    <span class="label gt-3 PASS">Passing ALT</span>&nbsp;
+    <span class="label gt-2 PASS">Passing ALT</span>&nbsp;
     <span class="label gt-0 mapping_quality min_depth dv_dp het">Failing REF</span>&nbsp;
-    <span class="label gt-3 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
+    <span class="label gt-2 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
     <span class="label gt-1 het">Heterozygous</span>
   </div>
 </div>
 </div>
 
-<table class="table table-hover table-striped table-condensed table-bordered table-responsive" id="variants">
+<table style='border-radius: 5px' class="table table-hover table-striped table-condensed table-bordered table-responsive" id="variants">
     <thead>
       <tr>
         <th>CHROM:POS</th>
         <th>REF / ALT</th>
         <th>Filter</th>
+        <th><span class='tooltip-item' data-toggle='tooltip' title='Allele Frequency'>AF</span></th>
         <th>Gene Name</th>
         <th>WormBase ID</th>
         <th>Sequence</th>
@@ -347,7 +348,7 @@ trackset = {"Genes": {
             },
             {{ isotype }}_bam : {
               name: "{{ isotype }}",
-              url: "//elegansvariation.org.s3.amazonaws.com/bam/{{ isotype }}.bam",
+              url: "https://elegansvariation.org.s3.amazonaws.com/bam/{{ isotype }}.bam",
               order: 100,
               visibilityWindow: 20000,
               searchable: false
@@ -513,7 +514,7 @@ function refresh_variants(download = false) {
 
       if (download == true) {
           data['output'] = 'tsv';
-          url =  "{{ url_for('variant_api') }}?" + $.param(data);
+          url =  "{{ url_for('variant_query') }}?" + $.param(data);
           console.log(url);
           window.open(url, sprintf("%s_%s_%s.csv", chrom, start, end));
       } else {
@@ -527,7 +528,7 @@ function refresh_variants(download = false) {
         }
 
         xhr = $.ajax({
-          url: "{{ url_for('variant_api') }}",
+          url: "{{ url_for('variant_query') }}",
           data: data,
           method: "GET",
           contentType: "application/json",
@@ -538,7 +539,7 @@ function refresh_variants(download = false) {
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
-
+                console.log(rec);
                 var is_first = true;
                 $.each(rec['ANN'], function(annk, ann) {
 
@@ -564,7 +565,8 @@ function refresh_variants(download = false) {
                             td_rowspan = rec['ANN'].length;
                             variant_items = [`${rec["CHROM"]}:${Number(rec["POS"]).toLocaleString('en')}`,
                                              `${rec["REF"]} / ${rec["ALT"].join(",")}`,
-                                             rec["FILTER"]]
+                                             rec["FILTER"],
+                                             rec["AF"]]
                             is_first = false;
                             rowspan_td = `<td class='bold' rowspan=${td_rowspan}>`;
                             variant_items = rowspan_td + variant_items.join(`</td>${rowspan_td}`) + "</td>"
@@ -594,16 +596,16 @@ function refresh_variants(download = false) {
                   gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
                     // Append genotypes
                     $("#variants > tbody").append(
-                      `<tr><td style='border-top:none;' colspan='10'>
+                      `<tr><td style='border-top:none;' colspan='11'>
                         <div class='row'>
                           <div class='col-md-12 gt_set'>
                               <h5>Reference</h5>
                               ${draw_gt_set(gts, 0)}
                               <h5>Alternative</h5>
-                              ${draw_gt_set(gts, 3)}
+                              ${draw_gt_set(gts, 2)}
                               <h5>Other</h5>
                               ${draw_gt_set(gts, 1)}
-                              ${draw_gt_set(gts, 2)}
+                              ${draw_gt_set(gts, 3)}
                           </div>
                         </div>
                       </td></tr>`);

@@ -70,6 +70,7 @@ def login_google():
 
 @app.route('/auth/<string:service_name>', methods=['GET'])
 def authorized(service_name):
+    logger.info(service_name)
     if service_name not in ['google', 'github']:
         return redirect(url_for('choose_login'))
     try:

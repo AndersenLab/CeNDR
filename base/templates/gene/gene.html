@@ -1,5 +1,18 @@
 {% extends "_layouts/default.html" %}
 
+{% block style %}
+<style>
+.table-nice {
+    border: 1px solid #ccc;
+    margin: 5px 0px;
+    transition: 0.5s;
+    background-color: #fff;
+    -webkit-border-radius: 4px;
+    border-radius: 4px;
+    border-collapse: separate;
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row">
@@ -9,22 +22,16 @@
               <li class="list-group-item"><strong>Locus</strong><div class='pull-right'>{{ gene_record ["locus"] }}</div></li>
               <li class="list-group-item"><strong>Sequence name</strong><div class='pull-right'>{{ gene_record ["sequence_name"] }}</div></li>
               <li class="list-group-item"><strong>Biotype</strong><div class='pull-right'>{{ gene_record ["biotype"] }}</div></li>
-              <li class="list-group-item"><strong>Location</strong><div class='pull-right'><a href="{{ url_for("browser", chrom = gene_record["CHROM"], start = gene_record["start"], end = gene_record["end"], tracks = "lmh") }}">{{ gene_record ["CHROM"] }}:{{ gene_record ["start"] }}-{{ gene_record ["end"] }}</a></div></li>
+                 <li class="list-group-item">
+                    <strong>Location</strong>
+                    <div class='pull-right'>
+                        <a href="{{ url_for("data.browser",
+                                            region= gene_record.interval) }}">
+                            {{ gene_record.interval }}
+                        </a>
+                    </div>
+                </li>
             </ul>
-
-            <h4>Human Disease</h4>
-            <table class='table table-striped table-bordered' id="omim">
-            <thead>
-            <tr>
-              <th>Class</th>
-              <th>OMIM</th>
-              <th>Description</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            </tbody>
-            </table>
 
             <h4>External Links</h4>
             <ul class="list-group" id="external_links">
@@ -35,32 +42,30 @@
       <div class="col-md-8"> 
 
       <h3>Variants</h3>
-      <table class='table table-striped table-hover table-responsive'>
+      <table class='table table-striped table-hover table-responsive table-nice'>
       <thead>
             <tr>
-                  <th>Location</th>
-                  <th>Sequence</th>
-                  <th>REF</th>
-                  <th>ALT</th>
-                  <th>Amino Acid Change</th>
-                  <th>Exon</th>
-                  <th>Annotation</th>
-                  <th>Putative Impact</th>
+                  <th class='text-nowrap'>CHROM:POS (REF/ALT)</th>
+                  <th>Feature ID</th>
+                  <th>Biotype</th>
+                  <th>Effect</th>
+                  <th><abbr data-toggle='tooltip' title='Amino Acid Change'>AA Change</abbr></th>
+                  <th>Impact</th>
             </tr>
       </thead>
       <tbody>
-                  {% for i in variants %}
-                        <tr class='{{ tbl_color[i["putative_impact"]] }}'>
-                              <td>{{ i["CHROM"] }}:{{ i["POS"] }}</td>
-                              <td>{{ i["feature_id"] }}</td>
-                              <td>{{ i["REF"] }}</td>
-                              <td>{{ i["ALT"] }}</td>
-                              <td>{{ i["hgvs_p"] }}</td>
-                              <td>{{ i["rank_total"] }}</td>
-                              <td>{{ i["annotation"].replace("&", "<br />") | safe }}</td>
-                              <td>{{ i["putative_impact"] }}</td>
-                        </tr>
-                  {% endfor %}
+        {% for variant in variants %}
+            {% for ann in variant['ANN'] %}
+            <tr class='{{ TABLE_COLORS[ann["impact"]] }}'>
+                <td class='text-nowrap'>{{ variant["CHROM"] }}:{{ variant["POS"] }} ({{ variant["REF"] }} / {{ '/'.join(variant["ALT"]) }})</td>
+                <td>{{ ann['feature_id'] }}</td>
+                <td>{{ ann['transcript_biotype'] }}</td>
+                <td>{{ '<br />'.join(ann['effect'].split("&"))|safe }}</td>
+                <td>{{ ann["aa_change"] }}</td>
+                <td>{{ ann["impact"] }}</td>
+            </tr>
+            {% endfor %}
+        {% endfor %}
       </tbody>
       </table>
 
@@ -75,26 +80,6 @@
         </tbody>
       </table>
 
-      <h3>Mappings</h3>
-      <table class='table table-striped table-hover'>
-      <thead>
-      <th>Report → Trait</th>
-      <th>Interval</th>
-      <th>Variance Explained</th>
-      <th>log<sub>10</sub>p</th>
-      <th>Submission Date</th>
-        {% for i in mapping_set %}
-        <tr>
-          <td><a href="{{ url_for('trait_view', report_slug=i.report_slug, trait_slug=i.trait_slug ) }}">{{ i.report_name }} → {{ i.trait_name }}</a></td>
-          <td>{{ i.chrom }}:{{ i.interval_start }}-{{ i.interval_end }}</td>
-          <td>{{ i.variance_explained|round(3) }}</td>
-          <td>{{ i.log10p|round(3) }}</td>
-          <td>{{ i.submission_date.strftime('%Y-%m-%d') }}</td>
-        </tr>
-        {% endfor %}
-
-      </table>
-
       
       <h3>Phenotypes</h3>
       <table class='table table-striped table-hover table-condensed table-responsive' style="table-layout: fixed; margin: 0 auto; width: 100%x;" id="phenotypes">
@@ -105,7 +90,6 @@
         <thead>
           <th>Phenotype</th>
           <th>Evidence</th>
-          <th></th>
         </thead>
         <tbody>
         </tbody>
@@ -117,8 +101,8 @@
 
 <script>
 
-$.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", function(msg) {
-  link_set = {Wormbase: "https://www.wormbase.org/species/c_elegans/gene/{{ gene_record["Name"] }}"}
+$.getJSON("/api/wormbase/widget/gene/{{ gene_record.gene_id }}/external_links", function(msg) {
+  link_set = {Wormbase: "https://www.wormbase.org/species/c_elegans/gene/{{ gene_record.gene_id }}"}
   $.each(msg["fields"]["xrefs"]["data"], function(k, d) {
     if (k == "AceView") {
       id = d["gene"]["ids"][0];
@@ -170,7 +154,7 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/external_links", 
 <script>
 {# OMIM #}
 
-$.getJSON("/api/omim/{{ gene_record["Name"] }}", function(msg) {
+$.getJSON("/api/omim/{{ gene_record.gene_id }}", function(msg) {
   omim_table = "";
   $.each(msg["omim_diseases"], function(k,v) {
     omim_table += "<tr><td>Disease</td><td><a href='https://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
@@ -187,7 +171,7 @@ $.getJSON("/api/omim/{{ gene_record["Name"] }}", function(msg) {
 {# Gene Ontology #}
 var term_set = "";
 var current_grouping = "";
-$.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/gene_ontology", function(msg) {
+$.getJSON("/api/wormbase/widget/gene/{{ gene_record.gene_id }}/gene_ontology", function(msg) {
   $.each(msg["fields"]["gene_ontology_summary"]["data"], function(grouping, v) {
     grouping = grouping.replace("_", " ");
     $.each(v, function(i, term) {
@@ -202,7 +186,7 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/gene_ontology", f
 <script>
 {# Phenotypes #}
 
-$.getJSON("/api/wormbase/widget/gene/{{ gene_record["Name"] }}/phenotype", function(msg) {
+$.getJSON("/api/wormbase/widget/gene/{{ gene_record.gene_id }}/phenotype", function(msg) {
   if (msg["fields"]["phenotype"]["data"]) {
     ptable = "";
   $.each(msg["fields"]["phenotype"]["data"], function(k, e) {

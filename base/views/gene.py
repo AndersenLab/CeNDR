@@ -1,46 +1,33 @@
-from base.application import app, cache
-from base.models import wb_gene, WI, mapping, trait, report
+from base.views.api.api_gene import lookup_gene, gene_variants
 from collections import OrderedDict
-from flask import render_template, request, redirect, url_for
+from flask import render_template, Blueprint, redirect, url_for
+from base.constants import BIOTYPES, TABLE_COLORS
 
 #
 # Gene View
-# 
+#
+gene_bp = Blueprint('gene',
+                    __name__,
+                    template_folder='gene')
+
+@gene_bp.route('/')
+@gene_bp.route('/<gene_name>/')
+def gene(gene_name=""):
+    if not gene_name:
+        redirect(url_for('gene.gene', gene_name='pot-2'))
 
 
-@app.route('/gene/<gene_name>/')
-@cache.memoize(50)
-def gene(gene_name):
-    title = gene_name
-    tbl_color = {"LOW": 'success', "MODERATE": 'warning', "HIGH": 'danger'}
-    bcs = OrderedDict([("Gene", None), (title, None)])
+    gene_record = lookup_gene(gene_name)
 
-    result = list(wb_gene.filter((wb_gene.Name == gene_name) |
-                                  (wb_gene.sequence_name == gene_name) |
-                                  (wb_gene.locus == gene_name)).dicts().execute())
-
-    if len(result) != 1:
+    if gene_record is None:
         return render_template('404.html'), 404
 
-    gene_record = result[0]
+    # Gene Variants
+    variants = gene_variants(gene_record.gene_id)
 
-    # Retrieve variants
-    variants = WI.select().filter(
-               WI.CHROM == gene_record["CHROM"],
-               WI.gene_id == gene_record["Name"]).dicts().execute()
-
-    # Retrieve mappings
-    mapping_set = mapping.select(mapping, trait, report) \
-                       .join(trait) \
-                       .join(report) \
-                       .where((gene_record["CHROM"] == mapping.chrom) &
-                        (report.release == 0) &
-                        (gene_record["start"] >= mapping.interval_start) & 
-                        (gene_record["end"] <= mapping.interval_end)) \
-                       .dicts() \
-                       .execute()
-
-
-
-    return render_template('gene.html', **locals())
+    VARS = {'title': gene_record.gene_symbol,
+            'gene_record': gene_record,
+            'variants': variants,
+            'TABLE_COLORS': TABLE_COLORS}
+    return render_template('gene/gene.html', **VARS)
 

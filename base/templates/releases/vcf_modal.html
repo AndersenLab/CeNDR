@@ -1,4 +1,6 @@
-<!-- VCF Modal Example -->
+{% set vcf_url -%}
+http://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filtered.vcf.gz
+{%- endset %}
 <div id="cli_example" class="modal fade" style="z-index:1000000" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -11,18 +13,18 @@
                 <p><strong>bcftools</strong> will download the index file and use it to fetch the specified region. Below are some examples.</p>
                 <strong>Query a the first 10kb on chromosome II</strong>
                 <pre>
-bcftools view http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:1-10000
+bcftools view {{ vcf_url }} II:1-10000
 </pre>
                 <strong>Output a tab-delimited file of genotypes</strong>
                 <pre>
-bcftools view http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:1-10000 | \
+bcftools view {{ vcf_url }} II:1-10000 | \
 bcftools query --print-header -f '%CHROM\t%POS\t[%TGT\t]\n'
 </pre>
                 <strong>Look for deleterious variants within a region in CB4856.</strong>
 <pre>
-bcftools view --samples CB4856 http://storage.googleapis.com/elegansvariation.org/releases/{{ release }}/WI.{{ release }}.vcf.gz II:804000-807000 | \
-egrep '^#|HIGH' -  | \
-egrep '^#|1\/1' -  | \
+bcftools view --samples CB4856 {{ vcf_url }} II:790000-792000 | \
+egrep '^#|HIGH' - | \
+egrep '^#|1\/1' - | \
 bcftools query -f '%CHROM\t%POS\t[%TGT\t%GT\t]%ANN\n' -
 </pre>
 

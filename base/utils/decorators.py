@@ -1,7 +1,7 @@
 import werkzeug
 from functools import wraps
 from flask import request, jsonify
-
+from logzero import logger
 
 def jsonify_request(func):
     """
@@ -13,16 +13,13 @@ def jsonify_request(func):
     def jsonify_the_request(*args, **kwargs):
         """
             Wraps API functions
-
-            If you provide an 'as_python' = True
-            argument, the response will be a python object
-            and the as_python argument will be discarded.
+            and automatically jsonifies if
+            its an API call
         """
-        as_python = kwargs.get("as_python")
-        if 'as_python' in kwargs:
-            kwargs.pop('as_python')
-        if request.path.startswith("/api") and not as_python:
-            return jsonify(func(*args, **kwargs))
-        else:
-            return func(*args, **kwargs)
+        if request:
+            logger.info(request)
+            is_tsv = request.args.get('output') == 'tsv'
+            if func.__name__ == request.endpoint and not is_tsv:
+                return jsonify(func(*args, **kwargs))
+        return func(*args, **kwargs)
     return jsonify_the_request
