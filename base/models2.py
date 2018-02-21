@@ -234,7 +234,7 @@ class trait_m(datastore_model):
         """
         if hasattr(self, 'completed_on') and hasattr(self, 'started_on'):
             diff = (self.completed_on - self.started_on)
-            minutes, seconds = divmod(diff.seconds, 60*60*24)
+            minutes, seconds = divmod(diff.seconds, 60)
             return "{:0>2d}m {:0>2d}s".format(minutes, seconds)
         else:
             return None
