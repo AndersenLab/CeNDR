@@ -28,6 +28,7 @@ names(df) <- c("STRAIN", 'TRAIT')
 if(!file.exists("mapping.Rdata")) {
   mapping <- cegwas::cegwas_map(df, mapping_snp_set = FALSE)
   save(mapping, file='mapping.Rdata')
+  save(mapping, file='data/mapping.Rdata')
 } else {
   load("mapping.Rdata")
 }
@@ -178,7 +179,7 @@ if (!file.exists('interval.Rdata')) {
                          dplyr::group_by(peak, gene_id) %>%
                          dplyr::mutate(n_variants = n()) %>%
                          dplyr::mutate(max_gene_corr_p = max(corrected_spearman_cor_p)) %>%
-                         dplyr::filter(max_gene_corr_p < 0.1) %>%
+                         dplyr::filter(max_gene_corr_p > 0.1) %>%
                          dplyr::arrange(max_gene_corr_p) %>%
                          dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
                          dplyr::mutate(max_gene_corr_p = -log10(max_gene_corr_p),

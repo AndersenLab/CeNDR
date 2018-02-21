@@ -35,7 +35,8 @@ def data(selected_release=DATASET_RELEASE):
             'vcf_summary': vcf_summary,
             'RELEASES': RELEASES,
             'release_summary': release_summary,
-            'selected_release': selected_release}
+            'selected_release': selected_release,
+            'wormbase_genome_version': dict(RELEASES)[selected_release]}
     return render_template('data.html', **VARS)
 
 

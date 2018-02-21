@@ -35,3 +35,32 @@ __Fetch all strains for a given isotype__
 library(jsonlite)
 CB_strains <- fromJSON("https://www.elegansvariation.org/api/strain/isotype/CB4856")
 </pre>
+
+### How do I cite CeNDR?
+
+Please use the citation below.
+
+<div class="pub"><div class="pub-img">
+            </div><div class="pub-img-small">
+            <a href="https://andersenlab.org/publications/2016CookOxford.pdf" class="thumbnail" target="_blank">
+            <img src="/static/img/2016CookOxford.thumb.png" alt="2016CookOxford">
+            </a>
+            </div><strong>CeNDR, the <em> Caenorhabditis elegans</em> natural diversity resource</strong><br />Cook DE, Zdraljevic S, Roberts JP, Andersen EC
+                <br>                
+                (2016 Oct 3) <em>Nucleic Acids Research</em> [ <a href="https://nar.oxfordjournals.org/content/early/2016/10/03/nar.gkw893.full">Article on Nucleic Acids Research</a> | <a title="Document Object Identifier; Takes you to the Journal Website" href="https://dx.doi.org/10.1093/nar/gkw893" target="_blank">DOI</a> | <a href="https://www.ncbi.nlm.nih.gov/pubmed/27701074" target="_blank">Pubmed</a> ]
+                <br /><br />
+      </div>
+
+<div class='clearfix'></div>
+Or use this bibtex entry
+<pre>
+@article{cook2016cendr,
+  title={CeNDR, the Caenorhabditis elegans natural diversity resource},
+  author={Cook, Daniel E and Zdraljevic, Stefan and Roberts, Joshua P and Andersen, Erik C},
+  journal={Nucleic acids research},
+  volume={45},
+  number={D1},
+  pages={D650--D657},
+  year={2016},
+  publisher={Oxford University Press}
+}</pre>

@@ -18,7 +18,7 @@ class PRICES:
 
 # BUILDS AND RELEASES
 # (RELEASE, ANNOTATION_GENOME)
-RELEASES = [("20170531", "WS261"),
+RELEASES = [("20170531", "WS258"),
             ("20160408", "WS245")]
 
 # The most recent release

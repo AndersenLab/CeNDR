@@ -84,7 +84,7 @@ def get_latest_public_mappings():
         Returns the 5 most recent mappings
     """
     recent_traits = list(query_item('trait',
-                                    filters=[('is_public', '=', True)],
+                                    filters=[('is_public', '=', True), ('status', '=', 'complete')],
                                     projection=('report_slug', 'trait_name', 'created_on',),
                                     limit=5))
     for trait in recent_traits:
