@@ -44,7 +44,7 @@ REPORT_VERSION = "v2"
 
 # CeNDR Version
 APP_CONFIG, CENDR_VERSION = os.environ['GAE_VERSION'].split("-", 1)
-if APP_CONFIG not in ['development', 'production']:
+if APP_CONFIG not in ['development', 'master']:
     APP_CONFIG = 'development'
 CENDR_VERSION = CENDR_VERSION.replace("-", '.')
 
