@@ -1,4 +1,5 @@
 from base.application import app
+from logzero import logging
 
 @app.errorhandler(500)
 def server_error(e):

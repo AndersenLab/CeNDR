@@ -118,7 +118,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
 
     """
     trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
-
+    logger.info(trait_set)
     # Get first report
     try:
         trait = trait_set[0]
