@@ -256,6 +256,8 @@
 
         {% endif %}
 
+        {% if trait.is_significant %}
+
         <h2 id="pxg">Phenotype-by-Genotype</h2>
 
         {{ pxg_plot|safe }}
@@ -276,8 +278,6 @@
         </div>
         <p>The Linkage Disequilibrium (LD) measure plotted is the correlation between peak markers.</p>
         <p>D is the raw difference in frequency between the observed number of AB pairs and the expected number and A, B, a, and b refer to alleles at the two loci. An LD value of 0.8 or higher suggests that the two peak markers are not segregating randomly.</p>
-
-
         {% endif %}
 
         <h2 id="peak_summary" class='scroll-title'>Peak Summary</h2>
@@ -303,9 +303,6 @@
         {% endfor %}
             </tr>
         </table>
-
-
-
 
         <p><strong>Switch between peaks below.</strong></p>
         </div>{#/ scrollspy #}
@@ -436,6 +433,7 @@
         </div>{# /tab-content #}
         {% include 'reports/geo_map.html' %}
         {% include 'reports/tajima.html' %}
+    {% endif %}{#/ significant stuff #}
     </div>{# /report #}
     {% else %}
     <strong>Processing...</strong>
@@ -444,7 +442,7 @@
 {% endblock %}
 
 {% block script %}
-{% if trait.status == 'complete' %}
+{% if trait.status == 'complete' and trait.is_significant %}
 <script>
 // Globals
 var isotypes = {{ isotypes|tojson }}
