@@ -31,7 +31,7 @@ def tajima(chrom, start, end):
     comm = ['tabix', url, "{chrom}:{start}-{end}".format(**locals())]
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
 
-    if err:
+    if not out and err:
         return jsonify(error=str(err, encoding='utf-8')), 404
     out = [x.split("\t") for x in str(out, encoding='ascii').splitlines()]
     data = [(int(x[2]) + 50000, float(x[5])) for x in out]
