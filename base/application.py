@@ -52,7 +52,6 @@ if os.getenv('HOME') == "/root":
         Running on server
     """
     app.debug = False
-    app.config["debug"] = False
     from flask_sslify import SSLify
     # Ignore leading slash of urls; skips must use start of path
     sslify = SSLify(app)
