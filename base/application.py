@@ -47,8 +47,16 @@ def autoconvert(s):
     return s
 
 
-
-if app.config['DEBUG']:
+if os.getenv('HOME') == "/root":
+    """
+        Running on server
+    """
+    app.debug = False
+    app.config["debug"] = False
+    from flask_sslify import SSLify
+    # Ignore leading slash of urls; skips must use start of path
+    sslify = SSLify(app)
+elif app.config['DEBUG']:
     app.debug = True
     #app.config["debug"] = True
     app.config['SECRET_KEY'] = "test"
