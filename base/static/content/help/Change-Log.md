@@ -4,31 +4,25 @@
 
 ### v1.2.0 (2018-XX-XX)
 
-* Moved codebase to Python 3.
-* Switched database to a single SQLite flatfile + Google Datastore
-* Improved robustness of forms using python module WTForms.
-* Moved mapping pipeline to AWS Fargate
-* Moved BAMs to AWS.
-* Added tooltips to report allele distribution maps.
-* Colored markers on allele distribution map by whether the isotype was included in mapping.
-* BAM alignments have been added to the genome browser.
-* CRAMS files and downloads have been removed.
-* Mapping reports have been removed from gene pages. The new database infrastructure makes it difficult to incorporate these.
-* Added statistics page with strains collected over time, report numbers over time, visitors over time, and strain/isotype counts.
-
 __New Pages__
 
 * A statistics page has been added that details strains/isotypes collected over time, visitors over time, and 
 
-__Sitewide__
+__Site Infrastructure__
 
-* Added login.
+* Added login system
+* Moved codebase to Python 3.
+* Improved robustness of forms using python module WTForms.
+* Switched database to a single SQLite flatfile + Google Datastore
+* Moved BAMs to AWS.
 
 __Mapping Pipeline__
 
 * Moved mapping infrastructure to AWS Fargate
 * Added new description field
 * The embargo option has been dropped for publishing reports
+* Added tooltips to report allele distribution maps.
+* Mapping reports have been removed from gene pages. The new database infrastructure makes it difficult to incorporate these.
 
 __Browser__
 
@@ -39,6 +33,10 @@ __Browser__
 __Public Mappings__
 
 * The waffle chart has been removed.
+
+__Data__
+
+* CRAMS files and downloads have been removed.
 
 ### v1.1.2 (2017-12-05)
 
