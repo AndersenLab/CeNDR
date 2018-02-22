@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.2.1 (2018-02-21)
+
+* Quick fix for certain v2 reports that would not load properly
+
 ### v1.2.0 (2018-02-21)
 
 __New Pages__
