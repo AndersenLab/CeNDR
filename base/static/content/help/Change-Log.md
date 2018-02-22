@@ -2,9 +2,13 @@
 
 --- 
 
-### v1.2.3 (2018-02-21)
+### v1.2.4 (2018-02-21)
 
 * Fix issue with the way private reports are organized.
+
+### v1.2.3 (2018-02-21)
+
+* Fix genome browser URLs.
 
 ### v1.2.2 (2018-02-21)
 
