@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.2.3 (2018-02-21)
+
+* Fix issue with the way private reports are organized.
+
 ### v1.2.2 (2018-02-21)
 
 * Removed extraneous information from v2 report.
