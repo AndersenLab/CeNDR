@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.2.2 (2018-02-21)
+
+* Removed extraneous information from v2 report.
+
 ### v1.2.1 (2018-02-21)
 
 * Quick fix for certain v2 reports that would not load properly
