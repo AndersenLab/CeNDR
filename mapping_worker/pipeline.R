@@ -113,9 +113,10 @@ n_peaks <- nrow(peaks)
 readr::write_tsv(peaks, "data/peak_summary.tsv.gz")
 
 # Generate phenotype/genotype data for PxG Boxplots.
-snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%             
+snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%        
   dplyr::mutate(TRAIT = TRAIT_NAME) %>%
   dplyr::rowwise() %>%
+  dplyr::filter(GT %in% c("REF", "ALT")) %>%
   dplyr::mutate(TGT = .data[[.data$GT]]) %>%
   dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
   dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%

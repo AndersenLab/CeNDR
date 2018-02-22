@@ -14,6 +14,7 @@ from base.utils.gcloud import get_item, store_item, query_item, google_storage
 from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
 from collections import defaultdict
+from botocore.exceptions import ClientError
 
 from logzero import logger
 
@@ -169,11 +170,13 @@ class trait_m(datastore_model):
         """
             Fetch the status of the task
         """
+        if self.status == 'complete':
+            return 'complete'
         try:
             task_status = self._ecs.describe_tasks(tasks=[self.name])['tasks'][0]['lastStatus']
-        except IndexError:
+            return task_status
+        except (IndexError, ClientError):
             return 'STOPPED'
-        return task_status
 
 
     @property
