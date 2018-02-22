@@ -206,35 +206,32 @@ def report_view(report_slug, trait_name=None, rerun=None):
             # Phenotype plot
             phenotype_plot = plotly_distplot(trait._trait_df, trait_name)
             # Fetch datafiles for complete runs
-            peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
-            try:
-                first_peak = peak_summary.loc[0]
-                logger.info(first_peak)
-                logger.info(first_peak['interval'])
-                chrom, interval_start, interval_end = re.split(":|\-", first_peak['interval'])
-                logger.info(chrom)
-                logger.info(interval_start)
-                logger.info(interval_end)
-                first_peak.chrom = chrom
-                first_peak['pos'] = int(first_peak['peak_pos'].split(":")[1])
-                first_peak['interval_start'] = int(interval_start)
-                first_peak['interval_end'] = int(interval_end)
-            except:
-                first_peak = None
+            VARS.update({'n_peaks': 0})
+            if trait.is_significant:
+                peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
+                try:
+                    first_peak = peak_summary.loc[0]
+                    chrom, interval_start, interval_end = re.split(":|\-", first_peak['interval'])
+                    first_peak.chrom = chrom
+                    first_peak['pos'] = int(first_peak['peak_pos'].split(":")[1])
+                    first_peak['interval_start'] = int(interval_start)
+                    first_peak['interval_end'] = int(interval_end)
+                except:
+                    first_peak = None
 
-            interval_summary = trait.get_gs_as_dataset("interval_summary.tsv.gz") \
-                                    .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
+                interval_summary = trait.get_gs_as_dataset("interval_summary.tsv.gz") \
+                                        .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
 
-            peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv.gz")
-            peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
-            VARS.update({'pxg_plot': pxg_plot(peak_marker_data, trait_name),
-                         'interval_summary': interval_summary,
-                         'variant_correlation': trait.get_gs_as_dataset("interval_variants.tsv.gz"),
-                         'peak_summary': peak_summary,
-                         'phenotype_plot': phenotype_plot,
-                         'n_peaks': len(peak_summary),
-                         'isotypes': list(trait._trait_df.ISOTYPE.values),
-                         'first_peak': first_peak})
+                peak_marker_data = trait.get_gs_as_dataset("peak_markers.tsv.gz")
+                peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
+                VARS.update({'pxg_plot': pxg_plot(peak_marker_data, trait_name),
+                             'interval_summary': interval_summary,
+                             'variant_correlation': trait.get_gs_as_dataset("interval_variants.tsv.gz"),
+                             'peak_summary': peak_summary,
+                             'phenotype_plot': phenotype_plot,
+                             'n_peaks': len(peak_summary),
+                             'isotypes': list(trait._trait_df.ISOTYPE.values),
+                             'first_peak': first_peak})
 
             # To handle report data, functions specific
             # to the version will be required.
