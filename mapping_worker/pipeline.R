@@ -140,7 +140,9 @@ readr::write_tsv(mapping_intervals, "data/mapping_intervals.tsv.gz")
 # Fetch peak marker genotypes for generation of box plots
 peak_markers <- snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
                 dplyr::mutate(TRAIT = TRAIT_NAME) %>%
+                # Filter out hets
                 dplyr::rowwise() %>%
+                dplyr::filter(GT %in% c("REF", "ALT")) %>%
                 dplyr::mutate(TGT = .data[[.data$GT]]) %>%
                 dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
                 dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
@@ -192,7 +194,10 @@ if (!file.exists('interval.Rdata')) {
                                        -corrected_pheno,
                                        -startPOS,
                                        -endPOS)
+    # For cache
     save(interval_variants, file='interval.Rdata')
+    # For user
+    save(interval_variants, file='data/interval.Rdata')
 } else {
     load('interval.Rdata')
 }
