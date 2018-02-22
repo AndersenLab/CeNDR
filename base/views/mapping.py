@@ -68,6 +68,7 @@ def mapping():
         trait_list = list(form.trait_data.processed_data.columns[2:])
         now = arrow.utcnow().datetime
         trait_set = []
+        secret_hash = unique_id()[0:8]
         for trait_name in trait_list:
             trait = trait_m()
             trait_data = form.trait_data.processed_data[['ISOTYPE', 'STRAIN', trait_name]].dropna(how='any') \
@@ -93,7 +94,7 @@ def mapping():
                'user_email': user['user_email']
             })
             if trait.is_public is False:
-                trait.secret_hash = unique_id()[0:8]
+                trait.secret_hash = secret_hash
             trait.run_task()
             trait_set.append(trait)
         # Update the report to contain the set of the
