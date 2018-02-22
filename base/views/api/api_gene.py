@@ -4,7 +4,7 @@ from base.application import app
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_, func
 from base.views.api.api_variant import variant_query
-
+from logzero import logger
 
 @app.route('/api/gene/homolog/<string:query>')
 @jsonify_request
@@ -44,10 +44,16 @@ def lookup_gene(query=""):
 
     """
     query = request.args.get('query') or query
-    result = wormbase_gene_summary_m.query.filter(or_(wormbase_gene_summary_m.locus.startswith(query),
-                                                      wormbase_gene_summary_m.sequence_name.startswith(query),
-                                                      wormbase_gene_summary_m.gene_id.startswith(query))) \
+    # First identify exact match
+    result = wormbase_gene_summary_m.query.filter(or_(wormbase_gene_summary_m.locus == query,
+                                                  wormbase_gene_summary_m.sequence_name == query,
+                                                  wormbase_gene_summary_m.gene_id == query)) \
                                            .first()
+    if not result:
+        result = wormbase_gene_summary_m.query.filter(or_(wormbase_gene_summary_m.locus.startswith(query),
+                                                          wormbase_gene_summary_m.sequence_name.startswith(query),
+                                                          wormbase_gene_summary_m.gene_id.startswith(query))) \
+                                               .first()
     return result
 
 

@@ -347,8 +347,9 @@ trackset = {"Genes": {
               searchable: false
             },
             {{ isotype }}_bam : {
+              id: "{{ isotype }}_bam",
               name: "{{ isotype }}",
-              url: "https://elegansvariation.org.s3.amazonaws.com/bam/{{ isotype }}.bam",
+              url: "//s3.us-east-2.amazonaws.com/elegansvariation.org/bam/{{ isotype }}.bam",
               order: 100,
               visibilityWindow: 20000,
               searchable: false
@@ -399,7 +400,7 @@ $(".track-select").on("change", function() {
   } else {
     remove_track = $(this).attr("value");
     $.each(igv.browser.trackViews, function(k, v) {
-      if(v.track.name == remove_track) {
+      if(v.track.id == remove_track) {
         igv.browser.removeTrack(v.track);
       }
     })
@@ -424,7 +425,6 @@ function process_gene_search() {
            method: "GET",
            contentType: 'application/xml',
            }).done(function(msg) {
-            console.log(msg);
             row = Array();
             $.each(msg, function(i,row) {
                 if ("chrom" in row) {
@@ -495,14 +495,14 @@ function refresh_variants(download = false) {
       $(".normal-track:checked").each(function() { normal_tracks.push(this.value) })
       variant_impact = []
       $(".variant-impact:checked").each(function() { variant_impact.push(this.value) })
-      track_set = $.extend(normal_tracks, variant_impact, sample_tracks);
-      tracks = "";
+
+      track_set = $.extend(normal_tracks, variant_impact, sample_tracks, sample_tracks_alignment);
+      tracks = [];
       for (track in track_set) {
            if ($(`.track-select[value=${track}]`).prop("checked") == true){
               tracks += track_set[track];
            }
       }
-
       
       data = {'chrom': chrom,
               'start': parseInt(start),
@@ -515,7 +515,6 @@ function refresh_variants(download = false) {
       if (download == true) {
           data['output'] = 'tsv';
           url =  "{{ url_for('variant_query') }}?" + $.param(data);
-          console.log(url);
           window.open(url, sprintf("%s_%s_%s.csv", chrom, start, end));
       } else {
 
@@ -539,7 +538,6 @@ function refresh_variants(download = false) {
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
-                console.log(rec);
                 var is_first = true;
                 $.each(rec['ANN'], function(annk, ann) {
 

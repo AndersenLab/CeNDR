@@ -12,11 +12,12 @@ import arrow
 import pandas as pd
 import traceback
 import uuid
+import json
 import re
 from logzero import logger
 from utils.interval import process_interval
 from utils.gcloud import trait_m, mapping_m, query_item
-from subprocess import Popen, STDOUT, PIPE
+from subprocess import Popen, STDOUT, PIPE, check_output
 from io import StringIO
 
 # Create a data directory
@@ -62,7 +63,20 @@ trait = trait_m(trait_data.key.name)
 trait.__dict__.update(dict(trait_data))
 trait._trait_df = pd.read_csv(StringIO(trait.trait_data), sep="\t")
 
+# Output information about the run
+run_comm(['echo', '$ECS_CONTAINER_METADATA_FILE'])
+
 try:
+    # Fetch cegwas version
+    CEGWAS_VERSION = check_output("Rscript -e 'library(cegwas); devtools::session_info()' | grep 'cegwas'", shell=True)
+    trait.CEGWAS_VERSION = re.split(" +", str(CEGWAS_VERSION, encoding='UTF-8').strip())[2:]
+
+    # Fetch container information
+    try:
+        trait.task_info = json.loads(check_output("echo ${ECS_CONTAINER_METADATA_FILE}", shell=True))
+    except json.JSONDecodeError:
+        pass
+
     trait._trait_df.to_csv('df.tsv', sep='\t', index=False)
     # Update report start time
     trait.started_on = arrow.utcnow().datetime

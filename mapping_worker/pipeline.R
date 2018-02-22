@@ -113,9 +113,10 @@ n_peaks <- nrow(peaks)
 readr::write_tsv(peaks, "data/peak_summary.tsv.gz")
 
 # Generate phenotype/genotype data for PxG Boxplots.
-snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%             
+snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%        
   dplyr::mutate(TRAIT = TRAIT_NAME) %>%
   dplyr::rowwise() %>%
+  dplyr::filter(GT %in% c("REF", "ALT")) %>%
   dplyr::mutate(TGT = .data[[.data$GT]]) %>%
   dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
   dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
@@ -140,7 +141,9 @@ readr::write_tsv(mapping_intervals, "data/mapping_intervals.tsv.gz")
 # Fetch peak marker genotypes for generation of box plots
 peak_markers <- snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
                 dplyr::mutate(TRAIT = TRAIT_NAME) %>%
+                # Filter out hets
                 dplyr::rowwise() %>%
+                dplyr::filter(GT %in% c("REF", "ALT")) %>%
                 dplyr::mutate(TGT = .data[[.data$GT]]) %>%
                 dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
                 dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
@@ -178,15 +181,11 @@ if (!file.exists('interval.Rdata')) {
                          dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
                          dplyr::group_by(peak, gene_id) %>%
                          dplyr::mutate(n_variants = n()) %>%
-                         dplyr::mutate(max_gene_corr_p = max(corrected_spearman_cor_p)) %>%
-                         dplyr::filter(max_gene_corr_p > 0.1) %>%
-                         dplyr::arrange(max_gene_corr_p) %>%
-                         dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
-                         dplyr::mutate(max_gene_corr_p = -log10(max_gene_corr_p),
+                         dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p)),
                                        corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
-                         dplyr::arrange(desc(max_gene_corr_p),
-                                        gene_id,
-                                        desc(corrected_spearman_cor_p)) %>%
+                         dplyr::arrange(dplyr::desc(max_gene_corr_p),
+                                        gene_id) %>%
+                         dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
                          dplyr::select(-n,
                                        -strain,
                                        -GT,
@@ -196,7 +195,10 @@ if (!file.exists('interval.Rdata')) {
                                        -corrected_pheno,
                                        -startPOS,
                                        -endPOS)
+    # For cache
     save(interval_variants, file='interval.Rdata')
+    # For user
+    save(interval_variants, file='data/interval.Rdata')
 } else {
     load('interval.Rdata')
 }

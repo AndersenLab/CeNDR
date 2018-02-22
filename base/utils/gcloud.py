@@ -79,7 +79,6 @@ def get_item(kind, name):
         for k, v in result.items():
             if isinstance(v, str) and v.startswith("JSON:"):
                 result_out[k] = json.loads(v[5:])
-                print(result_out)
             elif v:
                 result_out[k] = v
 

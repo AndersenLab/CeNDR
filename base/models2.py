@@ -14,6 +14,7 @@ from base.utils.gcloud import get_item, store_item, query_item, google_storage
 from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
 from collections import defaultdict
+from botocore.exceptions import ClientError
 
 from logzero import logger
 
@@ -83,9 +84,10 @@ class trait_m(datastore_model):
             ID assigned by AWS Fargate.
         """
         self._ecs = get_aws_client('ecs')
+        # Get task status
         self._logs = get_aws_client('logs')
         super(trait_m, self).__init__(*args, **kwargs)
-        self.exclude_from_indexes = ['trait_data']
+        self.exclude_from_indexes = ['trait_data', 'error_traceback', 'CEGWAS_VERSION']
         # Read trait data in upon initialization.
         if hasattr(self, 'trait_data'):
             self._trait_df = pd.read_csv(StringIO(self.trait_data), sep='\t')
@@ -164,17 +166,39 @@ class trait_m(datastore_model):
         return self.name
 
 
-    def status(self):
+    def container_status(self):
         """
             Fetch the status of the task
         """
-        task_status = self._ecs.describe_tasks(tasks=[self.name])['tasks'][0]
-        return task_status
+        if self.status == 'complete':
+            return 'complete'
+        try:
+            task_status = self._ecs.describe_tasks(tasks=[self.name])['tasks'][0]['lastStatus']
+            return task_status
+        except (IndexError, ClientError):
+            return 'STOPPED'
 
 
     @property
     def is_complete(self):
         return self.status == "complete"
+
+
+    @property
+    def cegwas_version_formatted(self):
+        try:
+            git_hash = self.CEGWAS_VERSION[3].replace("(Andersenlab/cegwas@", "").replace(")", "")
+            return f"v{self.CEGWAS_VERSION[0]} @{git_hash} [{self.CEGWAS_VERSION[1]}]"
+        except:
+            return ""
+
+
+    @property
+    def docker_image_version(self):
+        try:
+            return json.loads(self.task_info[5:])['containers'][0]['containerArn'].split("/")[1]
+        except:
+            return ""
 
 
     def get_task_log(self):
@@ -213,7 +237,7 @@ class trait_m(datastore_model):
         """
         if hasattr(self, 'completed_on') and hasattr(self, 'started_on'):
             diff = (self.completed_on - self.started_on)
-            minutes, seconds = divmod(diff.seconds, 60*60*24)
+            minutes, seconds = divmod(diff.seconds, 60)
             return "{:0>2d}m {:0>2d}s".format(minutes, seconds)
         else:
             return None
