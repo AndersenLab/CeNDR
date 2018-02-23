@@ -83,6 +83,11 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False):
                  'output': query['output'],
                  'list-all-strains': list_all_strains or query['list-all-strains'] == 'true'
                 }
+
+    # Limit queries to 100kb
+    if query['end'] - query['start'] > 1e5:
+        query['end'] = query['start'] + 1e5
+
     samples = query['sample_list']
     if query['list-all-strains']:
         samples = "ALL"

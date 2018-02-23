@@ -67,7 +67,7 @@ def strain_metadata():
 @strain_bp.route('/isotype/<isotype_name>/')
 @cache.memoize(50)
 def isotype_page(isotype_name):
-    isotype = query_strains(isotype_name = isotype_name)
+    isotype = query_strains(isotype_name=isotype_name)
     VARS = {"title": isotype_name,
             "isotype": isotype,
             "isotype_name": isotype_name,

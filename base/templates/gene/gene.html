@@ -152,22 +152,6 @@ $.getJSON("/api/wormbase/widget/gene/{{ gene_record.gene_id }}/external_links", 
 </script>
 
 <script>
-{# OMIM #}
-
-$.getJSON("/api/omim/{{ gene_record.gene_id }}", function(msg) {
-  omim_table = "";
-  $.each(msg["omim_diseases"], function(k,v) {
-    omim_table += "<tr><td>Disease</td><td><a href='https://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
-  });
-  $.each(msg["omim_genes"], function(k,v) {
-    omim_table += "<tr><td>Gene</td><td><a href='https://omim.org/entry/'" + k + "'>" + k + "</a></td><td>" + v + "</td></tr>";
-  });
-  $("#omim > tbody").html(omim_table)
-})
-
-</script>
-
-<script>
 {# Gene Ontology #}
 var term_set = "";
 var current_grouping = "";
