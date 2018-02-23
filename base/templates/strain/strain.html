@@ -67,8 +67,23 @@
 
             <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset in which isotype was originally released."><strong>Release</strong></span> <div class="pull-right">{{ reference_strain['release']|format_release }}</div></li>
             <li class="list-group-item"><strong>Isolation Date</strong> <div class="strain pull-right">{{ reference_strain["isolation_date"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><strong>Latitude / Longitude</strong> <div class="lat pull-right">{{ reference_strain["latitude"] }}, {{ reference_strain["longitude"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right">{{ reference_strain["elevation"]|round(3) }} M<div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Latitude / Longitude</strong> <div class="lat pull-right">
+                {% if reference_strain['latitude'] %}
+                    {{ reference_strain["latitude"] }}, {{ reference_strain["longitude"] }}
+                {% else %}
+                    Unknown
+                {% endif %}
+                </div><div style="clear:both;"></div>
+            </li>
+            <li class="list-group-item"><strong>Elevation</strong>
+                <div class="elevation pull-right">
+                {% if reference_strain['elevation'] %}
+                    {{ reference_strain["elevation"]|round(3) }} M
+                {% else %}
+                    Unknown
+                {% endif %}
+                <div style="clear:both;"></div>
+            </li>
             <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ reference_strain["location"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="location pull-right">{{ reference_strain["landscape"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="location pull-right">{{ reference_strain["substrate"] }}</div><div style="clear:both;"></div></li>

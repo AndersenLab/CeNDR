@@ -2,6 +2,15 @@
 
 --- 
 
+### v1.2.5 (2018-02-23)
+
+* Prevent queries on browser from exceeding 100kb and crashing the site.
+* Fix v1 report links
+* Fix LD plots on v1 reports
+* Fix homepage link
+* Fix errant API calls on gene pages
+* Fix broken link on outreach page.
+
 ### v1.2.4 (2018-02-21)
 
 * Fix issue with the way private reports are organized.

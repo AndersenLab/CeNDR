@@ -116,7 +116,7 @@ def init_db():
     #############
     # Upload DB #
     #############
-    
+
     # Generate an md5sum of the database that can be compared with
     # what is already on google storage.
     local_md5_hash = get_md5("base/cendr.db")

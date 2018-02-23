@@ -146,7 +146,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
         # Redirect to the first trait
         return redirect(url_for('mapping.report_view',
                                 report_slug=report_slug,
-                                trait_name=trait['trait_list'][0]))
+                                trait_name=trait_set[0]['trait_name']))
 
     try:
         # Resolve REPORT --> TRAIT
