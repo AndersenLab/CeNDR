@@ -165,7 +165,8 @@ def report_view(report_slug, trait_name=None, rerun=None):
         'trait': trait,
         'trait_set': trait_set,
         'BIOTYPES': BIOTYPES,
-        'TABLE_COLORS': TABLE_COLORS
+        'TABLE_COLORS': TABLE_COLORS,
+        'n_peaks': 0
     }
 
     # Set status to error if the container is stopped and status is not set to complete.
