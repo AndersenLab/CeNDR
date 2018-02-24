@@ -2,6 +2,10 @@
 
 --- 
 
+### v1.2.6 (2018-02-23)
+
+* Fix error with v1 reports that are not significant.
+
 ### v1.2.5 (2018-02-23)
 
 * Prevent queries on browser from exceeding 100kb and crashing the site.
