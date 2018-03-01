@@ -2,6 +2,12 @@
 
 --- 
 
+### v1.2.7 (2018-03-01)
+
+* Fix site error when strain URL not found.
+* Fix warning banner for users attempting to access their profile that are not logged in.
+* Update sqlite schema.
+
 ### v1.2.6 (2018-02-23)
 
 * Fix error with v1 reports that are not significant.

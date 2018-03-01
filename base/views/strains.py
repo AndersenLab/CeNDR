@@ -1,8 +1,14 @@
 import yaml
 from base.application import cache
-from flask import render_template, request, url_for, redirect, Response
+from flask import (render_template,
+                   request,
+                   url_for,
+                   redirect,
+                   Response,
+                   Blueprint,
+                   abort)
+
 from base.models2 import strain_m
-from flask import Blueprint
 from base.views.api.api_strain import get_isotypes, query_strains
 
 from base.utils.email import send_email
@@ -68,6 +74,8 @@ def strain_metadata():
 @cache.memoize(50)
 def isotype_page(isotype_name):
     isotype = query_strains(isotype_name=isotype_name)
+    if not isotype:
+        abort(404)
     VARS = {"title": isotype_name,
             "isotype": isotype,
             "isotype_name": isotype_name,

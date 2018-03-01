@@ -6,7 +6,7 @@ Author: Daniel E. Cook
 User profile
 
 """
-from flask import render_template, Blueprint, session
+from flask import render_template, Blueprint, session, flash, redirect, url_for
 
 from base.models2 import user_m
 from logzero import logger

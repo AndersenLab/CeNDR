@@ -46,6 +46,8 @@ def fetch_gene_gtf():
     gene_gtf = gene_gtf.assign(locus=[gene_ids.get(x) for x in gene_gtf.gene_id])
     gene_gtf = gene_gtf.assign(chrom_num=[CHROM_NUMERIC[x] for x in gene_gtf.chrom])
     gene_gtf = gene_gtf.assign(pos=(((gene_gtf.end - gene_gtf.start)/2) + gene_gtf.start).map(int))
+    gene_gtf.frame = gene_gtf.frame.apply(lambda x: x if x != "." else None)
+    gene_gtf.exon_number = gene_gtf.exon_number.apply(lambda x: x if x != "" else None)
     gene_gtf['arm_or_center'] = gene_gtf.apply(lambda row: arm_or_center(row['chrom'], row['pos']), axis=1)
     for row in gene_gtf.to_dict('records'):
         yield row

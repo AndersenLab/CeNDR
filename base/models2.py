@@ -440,7 +440,7 @@ class wormbase_gene_m(DictSerializable, db_2.Model):
     feature = db_2.Column(db_2.String(30), index=True)
     strand = db_2.Column(db_2.String(1))
     frame = db_2.Column(db_2.Integer(), nullable=True)
-    gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary_m.gene_id'), nullable=False)
+    gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False)
     gene_biotype = db_2.Column(db_2.String(30), nullable=True)
     locus = db_2.Column(db_2.String(30), index=True)
     transcript_id = db_2.Column(db_2.String(30), nullable=True, index=True)
@@ -462,6 +462,7 @@ class wormbase_gene_summary_m(DictSerializable, db_2.Model):
         It is constructed out of convenience and only defines the genes
         (not exons/introns/etc.)
     """
+    __tablename__ = "wormbase_gene_summary"
     id = db_2.Column(db_2.Integer, primary_key=True)
     chrom = db_2.Column(db_2.String(7), index=True)
     chrom_num = db_2.Column(db_2.Integer(), index=True)
@@ -494,13 +495,14 @@ class wormbase_gene_summary_m(DictSerializable, db_2.Model):
 
 class homologs_m(DictSerializable, db_2.Model):
     """
-        The homologs database combines 
+        The homologs database combines
     """
+    __tablename__ = "homologs"
     id = db_2.Column(db_2.Integer, primary_key=True)
-    gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary_m.gene_id'), nullable=False, index=True)
+    gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False, index=True)
     gene_name = db_2.Column(db_2.String(40), index=True)
     homolog_species = db_2.Column(db_2.String(50), index=True)
-    homolog_taxon_id = db_2.Column(db_2.Integer, index=True, nullable=True) # If available    
+    homolog_taxon_id = db_2.Column(db_2.Integer, index=True, nullable=True)  # If available    
     homolog_gene = db_2.Column(db_2.String(50), index=True)
     homolog_source = db_2.Column(db_2.String(40))
 
