@@ -3,75 +3,77 @@
 
 {% block content %}
 <div class="row">
-      <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
-      <div class="panel panel-default">
-        <div class="panel-body text-center">
-        <img src="/static/img/logo.png" alt="Andersen Lab Logo" style="margin-right:0px; width: 135px; margin-bottom:6px;"/>
+    
+    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3">
+        <div class="panel panel-default">
+            <div class="panel-body text-center">
+                <img src="/static/img/logo.png" alt="Andersen Lab Logo" style="margin-right:0px; width: 135px; margin-bottom:6px;"/>
+            </div>
         </div>
-      </div>
 
 
-<div class='text-left'><small>
+        <div class='text-left'>
+            <small>
+                <address class='text-left'>
+                <strong>Erik C. Andersen, Ph.D.</strong><br />
+                c/o Life Sciences Financial Services
+                Hogan Hall
+                2205 Tech Dr, Suite 2-150<br />
+                Evanston IL, 60208
+                </address>
+            </small>
+        </div>
 
-        <address class='text-left'>
-        <strongErik C. Andersen, Ph.D.</strong><br />
-        c/o Life Sciences Financial Services
-        Hogan Hall
-        2205 Tech Dr, Suite 2-150<br />
-        Evanston IL, 60208
-        </address>
-      </small>
-      </div>
-
-      <form>
-<input type="button" class='btn btn-primary btn-block hidden-print' value="Print Invoice" onClick="window.print()">
-</form>
-</div>
+    <form>
+        <input type="button" class='btn btn-primary btn-block hidden-print' value="Print Invoice" onClick="window.print()">
+    </form>
+    
+    </div>
 
 
 
 <div class='col lg-9 col-md-9 col-sm-9 col-xs-9'>
-<div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title text-center">{{ title }}</h3>
-  </div>
 
-<table class='table table-bordered'>
-  <tr>
-  {% if order_obj['is_donation'] == "FALSE" %}
-  <th>Shipping Service</th> 
-  <th>Tracking</th>
-  {% endif %}
-  <th>Order Date</th>
-  </tr>
-  <tr>
-  {% if order_obj['is_donation'] == "FALSE" %} 
-  <td>{{ order_obj["shipping_service"] }}</td>
-  <td>
-  {% if order_obj['tracking'] and order_obj['shipping_service'] == "UPS" %}
-      <a href="https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order_obj['tracking'] }}">{{ order_obj['tracking'] }}</a>
-  {% elif order_obj['tracking'] and order_obj['shipping_service'] == "FEDEX" %}
-      <a href="https://www.fedex.com/Tracking?action=track&tracknumbers={{ order_obj['tracking'] }}">{{ order_obj['tracking'] }}</a>
-  {% else %}
-      Not yet assigned
-  {% endif %}
-  </td>
-  {% endif %}
-  <td>{{ order_obj['date'] }}</td>
-  </tr>
-  </table>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title text-center">{{ title }}</h3>
+        </div>
+
+        <table class='table table-bordered'>
+            <tr>
+                {% if order_obj['is_donation'] == "FALSE" %}
+                <th>Shipping Service</th> 
+                <th>Tracking</th>
+                {% endif %}
+                <th>Order Date</th>
+            </tr>
+            <tr>
+                {% if order_obj['is_donation'] == "FALSE" %} 
+                <td>{{ order_obj["shipping_service"] }}</td>
+                <td>
+                {% if order_obj['tracking'] and order_obj['shipping_service'] == "UPS" %}
+                  <a href="https://wwwapps.ups.com/WebTracking/track?track=yes&trackNums={{ order_obj['tracking'] }}">{{ order_obj['tracking'] }}</a>
+                {% elif order_obj['tracking'] and order_obj['shipping_service'] == "FEDEX" %}
+                  <a href="https://www.fedex.com/Tracking?action=track&tracknumbers={{ order_obj['tracking'] }}">{{ order_obj['tracking'] }}</a>
+                {% else %}
+                  Not yet assigned
+                {% endif %}
+                </td>
+                {% endif %}
+                <td>{{ order_obj['date'] }}</td>
+            </tr>
+        </table>
 
 
-   <ul class="list-group">
-    <li class="list-group-item">
-      <h4 class="list-group-item-heading">Address</h4>
-      <p class="list-group-item-text">{{ order_obj['name'] }}<br />{{ order_obj['address'].replace("\n", "<br />")|safe }}</p>
-      <br />
-    </li>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <h4 class="list-group-item-heading">Address</h4>
+                <p class="list-group-item-text">{{ order_obj['name'] }}<br />{{ order_obj['address'].replace("\n", "<br />")|safe }}</p>
+                <br />
+            </li>
+        </ul>
 
-  </ul>
-
-  </div>
+    </div>{# /panel #}
 
 
 
@@ -132,8 +134,7 @@
         <p class='hidden-print'>Please contact us if you have any questions (<a href='mailto:cendr@northwestern.edu'>cendr@northwestern.edu</a>; 847-467-4382).</p>
 
 
-      </div>
-  </div>
-</div>
+      </div>{# /col-md-12 #}
+  </div>{# /row #}
 </div>
 {% endblock %}
