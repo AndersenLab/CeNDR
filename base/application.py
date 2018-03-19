@@ -115,6 +115,7 @@ def inject():
                 json=json,
                 list=list,
                 str=str,
+                int=int,
                 gs_static=gs_static,
                 render_markdown=render_markdown)
 
