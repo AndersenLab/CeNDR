@@ -20,7 +20,7 @@
                     <td class="price">${{'%0.2f'| format(price|float)}}</td>
                 </tr>
                 {% endfor %}
-                <tr>
+                <tr>''
                 <td><strong>Total</strong></td>
                 <td></td>
                 <td class="price"><strong>${{'%0.2f'| format(form.total|float)}}</strong></td> 
@@ -67,7 +67,7 @@
   <div class="form-group">
     <div class="col-sm-4 col-sm-offset-4">
     <br />
-      {{ render_field(form.recaptcha) }}
+      {# render_field(form.recaptcha) #}
       <button value="Checkout" class="btn btn-primary btn-block" ><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Order</button>
       <br />
       <div  id="helpBlock" class="help-block"><strong>Note: </strong>You will still need to send a check to complete your order.</span>
