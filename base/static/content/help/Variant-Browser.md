@@ -1,5 +1,65 @@
 # Variant Browser
 
+
+<style>
+
+.label {
+  width: 80px;
+  height: 18px;
+  line-height: 12px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.gt-3 {
+    background-color: white;
+    border: 1px dotted black;
+    color: black;
+}
+
+.gt-0.PASS {
+  background-color: rgba(194,194,214,1.0);
+  border: 1px solid black;
+  color: black;
+}
+
+.gt-2.PASS {
+  background-color: rgba(0, 102, 255,1.0);
+  border: 1px solid black;
+  color: white;
+}
+
+.gt-0:not(.PASS) {
+  background-color: rgba(194,194,214,0.25);
+  border: 1px dotted black;
+  color: black;
+}
+
+.gt-2:not(.PASS) {
+  background-color: rgba(0, 102, 255,0.25);
+  border: 1px dotted black;
+  color: black;
+}
+
+.het {
+  background-color: #ffff00;
+  color: black;
+}
+
+.gt_set {
+  border-right: 1px dotted #b3b3b3;
+}
+
+th {
+  white-space: nowrap;
+}
+
+#variants {
+  font-size: 12px;
+}
+
+</style>
+
 <a name="standard-tracks"></a>
 ### Standard Tracks
 
@@ -73,4 +133,21 @@ Isotypes can also be filtered using the search box. Like the variant track for t
 </div>
 
 Missing genotypes are excluded.
+
+<a name='variant-filters'></a>
+### Variant filters
+
+Variants displayed on the genome browser are 'soft-filtered', meaning that in some cases they are poor quality. However, we still report them but using a different set of colors to indicate that they should be interpretted carefully. When you hover your mouse over filtered variants on the browser page, the name of the filter will appear as a tooltip.
+
+Examples are listed below
+
+<div class="panel-body">
+    <span class="label gt-0 PASS">CB4856</span> - A passing reference variant<br />
+    <span class="label gt-2 PASS">DL238</span> - A passing alternative variant<br />
+    <span class="label gt-0 mapping_quality min_depth dv_dp het">QX1211</span> - A reference variant<br />
+    <span class="label gt-2 mapping_quality min_depth dv_dp het">XZ1516</span> - An alternative variant<br />
+    <span class="label gt-1 het">JU1218</span> - A heterozygous variant
+</div>
+
+
 
