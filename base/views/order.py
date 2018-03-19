@@ -80,7 +80,7 @@ def order_page():
     return render_template('order/order.html', **locals())
 
 
-@order_bp.route("/invoice/<invoice_hash>/")
+@order_bp.route("/invoice/<invoice_hash>/", methods=['GET', 'POST'])
 def order_confirmation(invoice_hash):
     order_obj = lookup_order(invoice_hash)
     if order_obj:

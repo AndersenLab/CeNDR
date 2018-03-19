@@ -57,7 +57,7 @@ class order_form(Form):
     items = FieldList(HiddenField('item', [DataRequired()]))
     payment = SelectField("Payment", choices=PAYMENT_OPTIONS)
     comments = TextAreaField("Comments", [Length(min=0, max=300)])
-    #recaptcha = RecaptchaField()
+    recaptcha = RecaptchaField()
 
     def validate_shipping_account(form, field):
         """
