@@ -6,20 +6,13 @@ Author: Daniel E. Cook
 These views handle strain orders
 
 """
-import json
-import yaml
-import pytz
-import hashlib
 from base.forms import order_form
-from base.application import app, cache
+from base.application import app
 from base.utils.email import send_email, ORDER_SUBMISSION_EMAIL
 from base.utils.google_sheets import add_to_order_ws, lookup_order
-from base.utils.gcloud import get_item
 from flask import render_template, request, url_for, redirect, Blueprint, abort, flash, session
-from collections import OrderedDict
 from datetime import datetime
 from base.utils.data_utils import chicago_date, hash_it
-from logzero import logger
 
 order_bp = Blueprint('order',
                      __name__,
@@ -92,7 +85,7 @@ def order_confirmation(invoice_hash):
     order_obj = lookup_order(invoice_hash)
     if order_obj:
         order_obj["items"] = {x.split(":")[0]: float(x.split(":")[1])
-                          for x in order_obj['items'].split("\n")}
+                              for x in order_obj['items'].split("\n")}
         if order_obj is None:
             abort(404)
         title = f"Invoice {order_obj['invoice_hash']}"
