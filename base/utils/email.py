@@ -28,7 +28,7 @@ Thank you for your order. Please retain this email for your records.
 
 Information regarding your purchase, including its tracking number is available here:
 
-https://elegansvariation.org/order/{invoice_hash}/
+https://elegansvariation.org/order/invoice/{invoice_hash}/
 
 Address
 =======
