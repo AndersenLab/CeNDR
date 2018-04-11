@@ -2,17 +2,22 @@
 
 --- 
 
-### v1.2.7 (2018-03-01)
+#### v1.2.8 (2017-03-18)
+
+* Fix link on data page
+* Fix error with ordering
+
+#### v1.2.7 (2018-03-01)
 
 * Fix site error when strain URL not found.
 * Fix warning banner for users attempting to access their profile that are not logged in.
 * Update sqlite schema.
 
-### v1.2.6 (2018-02-23)
+#### v1.2.6 (2018-02-23)
 
 * Fix error with v1 reports that are not significant.
 
-### v1.2.5 (2018-02-23)
+#### v1.2.5 (2018-02-23)
 
 * Prevent queries on browser from exceeding 100kb and crashing the site.
 * Fix v1 report links
@@ -21,23 +26,23 @@
 * Fix errant API calls on gene pages
 * Fix broken link on outreach page.
 
-### v1.2.4 (2018-02-21)
+#### v1.2.4 (2018-02-21)
 
 * Fix issue with the way private reports are organized.
 
-### v1.2.3 (2018-02-21)
+#### v1.2.3 (2018-02-21)
 
 * Fix genome browser URLs.
 
-### v1.2.2 (2018-02-21)
+#### v1.2.2 (2018-02-21)
 
 * Removed extraneous information from v2 report.
 
-### v1.2.1 (2018-02-21)
+#### v1.2.1 (2018-02-21)
 
 * Quick fix for certain v2 reports that would not load properly
 
-### v1.2.0 (2018-02-21)
+#### v1.2.0 (2018-02-21)
 
 __New Pages__
 
@@ -73,48 +78,48 @@ __Data__
 
 * CRAMS files and downloads have been removed.
 
-### v1.1.2 (2017-12-05)
+#### v1.1.2 (2017-12-05)
 
 * Fixed a bug preventing the download button from working properly.
 
-### v1.1.1 (2017-10-18)
+#### v1.1.1 (2017-10-18)
 
 * Fixed Drawing of the Tajimas D plot on report pages.
 * Added ability to view all genotypes on the variant viewer
 
-### v1.1.0 (2017-06-16)
+#### v1.1.0 (2017-06-16)
 
 * A revamped genome browser, which offers the ability to download data in a tab-delimited format (TSV).
 * The release of a larger set of strains (our 2017-05-31 set). The site now has 249 isotypes available, and a fourth set of strains.
 * The Data page has been renamed as the 'releases' page to reflect the fact that our set of genomic data continues to evolve.
 * Many other bug-fixes and minor enhancements.
 
-### v1.0.9 (2017-01-24)
+#### v1.0.9 (2017-01-24)
 
 * Released transposon data.
 
-### v1.0.8 (2016-12-20)
+#### v1.0.8 (2016-12-20)
 
 * Fixed issue with ordering page
 
-### v1.0.7 (2016-12-19)
+#### v1.0.7 (2016-12-19)
 
 * Fixed issue with css on strain pages.
 
-### v1.0.6 (2016-12-03)
+#### v1.0.6 (2016-12-03)
 
 * Added additional error checking to mapping submission page.
 * Changed submissions to run 'on demand.'
 
-### v1.0.5 (2016-12-01)
+#### v1.0.5 (2016-12-01)
 
 * Fixed an issue with GWA submission.
 
-### v1.0.4 (2016-11-28)
+#### v1.0.4 (2016-11-28)
 
 * Fixed an issue regarding encoding of strain meta info.
 
-### v1.0.3 (2016-11-18)
+#### v1.0.3 (2016-11-18)
 
 * Fixed searching on public mappings.
 * Fixed the calendar heatmap on public mappings.
@@ -122,11 +127,11 @@ __Data__
 * Updated phenotype histogram to use plotly-js.
 * Genotypes are now shown beneath variants on the browser page. We are working on methods for exporting data.
 
-### v1.0.2 (2016-11-02)
+#### v1.0.2 (2016-11-02)
 
 * Fixed an issue that prevented variant correlation tables from being output.
 
-### v1.0.1 - (2016-10-18)
+#### v1.0.1 (2016-10-18)
 
 * A change log has been added. You are looking at it.
 * A link to the change log was added to the homepage.
