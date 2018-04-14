@@ -1,6 +1,7 @@
 import os
 import json
 import yaml
+from os.path import basename
 from flask import Flask, render_template, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_caching import Cache
@@ -116,7 +117,9 @@ def inject():
                 list=list,
                 str=str,
                 int=int,
+                len=len,
                 gs_static=gs_static,
+                basename=basename,
                 render_markdown=render_markdown)
 
 

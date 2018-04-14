@@ -41,7 +41,7 @@
         <div class="panel panel-default">
             <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" />
                 <strong>
-                    {{ page_type }} Information
+                    Summary
                 </strong>
             </div>
             <ul class="list-group">
@@ -88,9 +88,62 @@
             <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="location pull-right">{{ reference_strain["landscape"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="location pull-right">{{ reference_strain["substrate"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ reference_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
+            
+            <li class="list-group-item"><strong>Substrate Temperature (C)</strong>
+                <div class='location pull-right'>
+                    {{ reference_strain['substrate_temp'] or "" }}
+                </div>
+            </li>
+
+            <li class="list-group-item"><strong>Substrate Moisture (%)</strong>
+                <div class='location pull-right'>
+                    {{ reference_strain['substrate_moisture'] or "" }}
+                </div>
+            </li>
+
+            <li class="list-group-item"><strong>Ambient Temperature (C)</strong>
+                <div class='location pull-right'>
+                    {{ reference_strain['ambient_temp'] or "" }}
+                </div>
+            </li>
+
+            <li class="list-group-item"><strong>Ambient Humidity (%)</strong>
+                <div class='location pull-right'>
+                    {{ reference_strain['ambient_humidity'] or "" }}
+                </div>
+            </li>
+
+            <li class="list-group-item">
+                <small>Data in this table is for the reference strain.</small>
+            </li>
+
             </ul>
         </div>{# /panel #}
     </div>{# col-md-4 #}
+
+
+    {% if len(photos) > 0 %}
+    <div class='row'>
+        <div class='col-md-12'>
+            <h2>Collections</h2>
+        </div>
+    </div>
+    <div class='row'>
+        {% for strain in isotype %}
+            {% if strain.strain in photos %}
+            <div class='col-md-2'>
+                <div class='text-center'>
+                    <strong>{{ strain.strain }}</strong>
+                </div>
+
+                <a href='https://storage.googleapis.com/elegansvariation.org/photos/isolation/{{ strain.isotype }}_{{ strain.strain }}.jpg' class='thumbnail' target="_blank">
+                    <img src='https://storage.googleapis.com/elegansvariation.org/photos/isolation/{{ strain.isotype }}_{{ strain.strain }}.thumb.jpg'/>
+                </a>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 
 
