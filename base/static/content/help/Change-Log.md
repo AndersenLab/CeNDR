@@ -2,7 +2,11 @@
 
 --- 
 
-#### v1.2.8 (2017-03-18)
+#### v1.2.9 (2018-04-15)
+
+* Added collection photos
+
+#### v1.2.8 (2018-03-18)
 
 * Fix link on data page
 * Fix error with ordering

@@ -36,6 +36,12 @@
             </div>{# col-md-6 #}
         </div>{# row #}
 
+    <div class='row'>
+        <div class='col-md-12'>
+            <h4>Variation</h4>
+        </div>
+    </div>
+
  {% if len(photos) > 0 %}
     <div class='row'>
         <div class='col-md-12'>
@@ -57,7 +63,7 @@
             {% endif %}
         {% endfor %}
     </div>
-
+    {% endif %}
     </div>{# col-md-8 #}
 
     <div class='col-md-4'>
@@ -143,7 +149,6 @@
             </ul>
         </div>{# /panel #}
     </div>{# col-md-4 #}
-    {% endif %}
 </div>
 
 
@@ -197,10 +202,13 @@ var icon_norm = L.icon({
   data.forEach(function(d) {
     m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
                                            strain: d.strain,
+                                           title: d.strain,
                                            isotype: d.isotype,
                                            isolation : d.isolation,
                                            elevation: d.elevation,
                                            loc : d.location }).addTo(map);
+
+
     markers.push(m);
     if (view_set == false) {
     map.setView([d.latitude, d.longitude], 7);
@@ -209,6 +217,7 @@ var icon_norm = L.icon({
   });
   
   var strain_layer = L.layerGroup(markers);
+
 
 
 
