@@ -90,7 +90,13 @@ def isotype_page(isotype_name):
     photos = [basename(photo).split("_")[1].split(".")[0] for photo in photos]
 
     # High impact variants
-    HIGH_impact_variants = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/isotype/{isotype_name}.HIGH_impact_genes.json").json()
+    soft_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
+    hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
+
+    soft_variant = [x for x in soft_variant if x['isotype'] == isotype_name][0]
+    hard_variant = [x for x in hard_variant if x['isotype'] == isotype_name][0]
+
+
 
     VARS = {"title": isotype_name,
             "isotype": isotype,
@@ -98,7 +104,8 @@ def isotype_page(isotype_name):
             "reference_strain": [x for x in isotype if x.reference_strain][0],
             "strain_json_output": dump_json(isotype),
             "photos": photos,
-            "HIGH_impact_variants": HIGH_impact_variants}
+            "soft_variant": soft_variant,
+            "hard_variant": hard_variant }
     return render_template('strain/strain.html', **VARS)
 
 
