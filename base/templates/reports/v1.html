@@ -291,7 +291,7 @@
                             </tr>
                         </thead>
                         <tbody class='peak_{{ loop.index0 }} text-right'>
-                        {% set interval_summary_peak = interval_summary[interval_summary.interval == peak.interval].drop('interval', axis=1) %}
+                        {% set interval_summary_peak = interval_summary[interval_summary.interval == peak['interval']].drop('interval', axis=1) %}
                             <tr class='text-bold'>
                                 {% for col in interval_summary_peak.columns[1:] %}
                                     {% if col == 'biotype' %}
@@ -322,7 +322,7 @@
 
 
                 <h3>Variants</h3>
-                {% if variant_correlation %}
+                {% if len(variant_correlation) > 0 %}
                 <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
                 <strong><a href='{{ trait.file_url("tables/variant_correlation.tsv.gz") }}'>Download Table</a></strong>
                 <table class="table table-hover table-striped" id="variant_list">

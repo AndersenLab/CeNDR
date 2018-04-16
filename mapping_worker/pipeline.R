@@ -6,6 +6,7 @@ library(tidyverse)
 library(jsonlite)
 library(aws.s3)
 
+
 # Output session info
 session <- devtools::session_info()
 session
@@ -165,7 +166,7 @@ if (n_peaks > 1) {
 if (!file.exists('interval.Rdata')) {
     vc <- variant_correlation(mapping,
                               condition_trait = F,
-                              variant_severity = c("LOW", "MODERATE", "HIGH"),
+                              variant_severity = c("MODIFIER", "LOW", "MODERATE", "HIGH"),
                               gene_types = "ALL")
     interval_variants <- dplyr::bind_rows(vc) %>%
                          dplyr::distinct(CHROM,
@@ -206,6 +207,5 @@ if (!file.exists('interval.Rdata')) {
 # Condense Interval Variants File
 interval_variants %>%
     readr::write_tsv("data/interval_variants.tsv.gz")
-
 
 

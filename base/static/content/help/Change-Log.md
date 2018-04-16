@@ -4,7 +4,12 @@
 
 #### v1.2.9 (2018-04-15)
 
-* Added collection photos
+* New dataset release: 201804XX [!update]
+* Added collection photos.
+* Added variant counts.
+* Fixed issue with early reports missing.
+* Added variant correlation plot.
+
 
 #### v1.2.8 (2018-03-18)
 

@@ -9,8 +9,9 @@ from logzero import logger
 
 
 @app.route('/api/popgen/tajima/<string:chrom>/<int:start>/<int:end>')
+@app.route('/api/popgen/tajima/<string:chrom>/<int:start>/<int:end>/<int:release>')
 @jsonify_request
-def tajima(chrom, start, end):
+def tajima(chrom, start, end, release = DATASET_RELEASE):
     """
         Args:
             chrom
@@ -26,8 +27,10 @@ def tajima(chrom, start, end):
             }
 
     """
-    logger.info(chrom)
-    url = "http://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/tajima/WI.{DATASET_RELEASE}.tajima.bed.gz".format(DATASET_RELEASE=DATASET_RELEASE)
+    # No tajima bedfile exists for 20160408 - so use next version.
+    if release < 20170531:
+        release = 20170531
+    url = f"http://storage.googleapis.com/elegansvariation.org/releases/{release}/popgen/WI.{release}.tajima.bed.gz"
     comm = ['tabix', url, "{chrom}:{start}-{end}".format(**locals())]
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
 
@@ -41,8 +44,9 @@ def tajima(chrom, start, end):
 
 
 @app.route('/api/popgen/gt/<string:chrom>/<int:pos>')
+@app.route('/api/popgen/gt/<string:chrom>/<int:pos>/<int:release>')
 @jsonify_request
-def get_allele_geo(chrom, pos, isotypes=None):
+def get_allele_geo(chrom, pos, isotypes=None, release = DATASET_RELEASE):
     """
         Args:
             chrom
@@ -50,7 +54,7 @@ def get_allele_geo(chrom, pos, isotypes=None):
             isotypes
     """
     try:
-        variant = variant_query(f"{chrom}:{pos}-{pos+1}", list_all_strains=True)[0]
+        variant = variant_query(f"{chrom}:{pos}-{pos+1}", list_all_strains=True, release=release)[0]
     except IndexError:
         return []
 
