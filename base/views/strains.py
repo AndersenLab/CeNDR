@@ -91,7 +91,7 @@ def isotype_page(isotype_name):
 
     # High impact variants
     soft_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
-    hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
+    hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/hard.isotype_summary.json").json()
 
     soft_variant = [x for x in soft_variant if x['isotype'] == isotype_name][0]
     hard_variant = [x for x in hard_variant if x['isotype'] == isotype_name][0]
