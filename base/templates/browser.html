@@ -261,7 +261,7 @@ trackset = {"Genes": {
                             name: "Genes",
                             displayMode: "EXPANDED",
                             order: 1,
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/gene/elegans_gene_WS258.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_gene_WS258.bed",
                             indexed: false,
                             searchable: false,
                             color: "#5c5cd6",
@@ -269,7 +269,7 @@ trackset = {"Genes": {
                      },
             "Transcripts": {
                             name: "Transcripts",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/gene/elegans_transcript_WS258.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_transcript_WS258.bed",
                             order: 2,
                             color: "#a366ff",
                             displayMode: "SQUISHED",
@@ -277,7 +277,7 @@ trackset = {"Genes": {
                            },
             "LOW": {
                             name: "LOW",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/severity/{{ DATASET_RELEASE }}.LOW.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.LOW.bed.gz",
                             order: 3,
                             color: "#33cc33",
                             displayMode: "EXPANDED",
@@ -285,7 +285,7 @@ trackset = {"Genes": {
                    },
             "MODERATE": {
                             name: "MODERATE",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/severity/{{ DATASET_RELEASE }}.MODERATE.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODERATE.bed.gz",
                             order: 4,
                             color: "#ffc500",
                             displayMode: "EXPANDED",
@@ -293,7 +293,7 @@ trackset = {"Genes": {
                    },
             "HIGH": {
                             name: "HIGH",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/severity/{{ DATASET_RELEASE }}.HIGH.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.HIGH.bed.gz",
                             order: 5,
                             color: "#ff0000",
                             displayMode: "EXPANDED",
@@ -301,7 +301,7 @@ trackset = {"Genes": {
                    },
             "MODIFIER": {
                             name: "MODIFIER",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/severity/{{ DATASET_RELEASE }}.MODIFIER.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODIFIER.bed",
                             order: 5,
                             color: "#999999",
                             displayMode: "EXPANDED",
@@ -309,8 +309,8 @@ trackset = {"Genes": {
                    },
             "Variants": {
                             name: "Variants",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/WI.{{ DATASET_RELEASE }}.vcf.gz",
-                            indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/WI.{{ DATASET_RELEASE }}.vcf.gz.tbi",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.soft-filter.vcf.gz",
+                            indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.soft-filter.vcf.gz.tbi",
                             order: Number.MAX_VALUE,
                             displayMode: "SQUISHED",
                             color: "#000000",
@@ -379,7 +379,7 @@ $(document).ready(function () {
                     showKaryo: false,
                     reference: {
                       id: "WS245",
-                      fastaURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/genome/c_elegans.PRJNA13758.WS258.genomic.fa",
+                      fastaURL: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS245.genomic.fa",
                     },
                     locus: "{{ region }}",
                     tracks: [

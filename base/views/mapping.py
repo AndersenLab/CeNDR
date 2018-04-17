@@ -3,6 +3,7 @@ import os
 import time
 import re
 import arrow
+import urllib
 import requests
 import pandas as pd
 import simplejson as json
@@ -119,7 +120,6 @@ def report_view(report_slug, trait_name=None, rerun=None):
 
     """
     trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
-    logger.info(trait_set)
     # Get first report
     try:
         trait = trait_set[0]
@@ -143,6 +143,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
             return abort(404)
 
     if not trait_name:
+        logger.error("Trait name not found")
         # Redirect to the first trait
         return redirect(url_for('mapping.report_view',
                                 report_slug=report_slug,
@@ -152,8 +153,11 @@ def report_view(report_slug, trait_name=None, rerun=None):
         # Resolve REPORT --> TRAIT
         # Fetch trait and convert to trait object.
         cur_trait = [x for x in trait_set if x['trait_name'] == trait_name][0]
+        logger.info(trait_set)
+        logger.info(cur_trait)
         trait = trait_m(cur_trait.key.name)
         trait.__dict__.update(cur_trait)
+        logger.info(trait)
     except IndexError:
         return abort(404)
 
@@ -187,11 +191,14 @@ def report_view(report_slug, trait_name=None, rerun=None):
             if trait.is_significant:
                 interval_summary = trait.get_gs_as_dataset("tables/interval_summary.tsv.gz") \
                                         .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
-                variant_correlation = trait.get_gs_as_dataset("tables/variant_correlation.tsv.gz")
-                max_corr = variant_correlation.groupby(['gene_id', 'interval']).apply(lambda x: max(abs(x.correlation)))
-                max_corr = max_corr.reset_index().rename(index=str, columns={0: 'max_correlation'})
-                variant_correlation = pd.merge(variant_correlation, max_corr, on=['gene_id', 'interval']) \
-                                        .sort_values(['max_correlation', 'gene_id'], ascending=False)
+                try:
+                    variant_correlation = trait.get_gs_as_dataset("tables/variant_correlation.tsv.gz")
+                    max_corr = variant_correlation.groupby(['gene_id', 'interval']).apply(lambda x: max(abs(x.correlation)))
+                    max_corr = max_corr.reset_index().rename(index=str, columns={0: 'max_correlation'})
+                    variant_correlation = pd.merge(variant_correlation, max_corr, on=['gene_id', 'interval']) \
+                                            .sort_values(['max_correlation', 'gene_id'], ascending=False)
+                except urllib.error.HTTPError:
+                    variant_correlation = []
                 peak_summary = trait.get_gs_as_dataset("tables/peak_summary.tsv.gz")
                 peak_summary['interval'] = peak_summary.apply(lambda row: f"{row.chrom}:{row.interval_start}-{row.interval_end}", axis=1)
                 first_peak = peak_summary.iloc[0]
@@ -200,6 +207,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
                              'n_peaks': len(peak_summary),
                              'variant_correlation': variant_correlation,
                              'interval_summary': interval_summary})
+        
         elif trait.REPORT_VERSION == 'v2':
             """
                 VERSION 2
@@ -215,9 +223,9 @@ def report_view(report_slug, trait_name=None, rerun=None):
                     first_peak = peak_summary.loc[0]
                     chrom, interval_start, interval_end = re.split(":|\-", first_peak['interval'])
                     first_peak.chrom = chrom
-                    first_peak['pos'] = int(first_peak['peak_pos'].split(":")[1])
-                    first_peak['interval_start'] = int(interval_start)
-                    first_peak['interval_end'] = int(interval_end)
+                    first_peak.pos = int(first_peak['peak_pos'].split(":")[1])
+                    first_peak.interval_start = int(interval_start)
+                    first_peak.interval_end = int(interval_end)
                 except:
                     first_peak = None
 

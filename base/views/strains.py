@@ -1,4 +1,5 @@
 import yaml
+import requests
 from base.application import cache
 from flask import (render_template,
                    request,
@@ -14,6 +15,9 @@ from base.views.api.api_strain import get_isotypes, query_strains
 from base.utils.email import send_email
 from base.utils.google_sheets import add_to_order_ws, lookup_order
 from base.utils.data_utils import dump_json
+from base.utils.gcloud import list_release_files
+from os.path import basename
+from base.constants import DATASET_RELEASE
 
 strain_bp = Blueprint('strain',
                        __name__,
@@ -73,14 +77,35 @@ def strain_metadata():
 @strain_bp.route('/isotype/<isotype_name>/')
 @cache.memoize(50)
 def isotype_page(isotype_name):
+    """
+        Isotype page
+    """
     isotype = query_strains(isotype_name=isotype_name)
     if not isotype:
         abort(404)
+
+    # Fetch isotype images
+    photos = list_release_files(f"photos/isolation/{isotype_name}")
+    # Detect which strains have photos
+    photos = [basename(photo).split("_")[1].split(".")[0] for photo in photos]
+
+    # High impact variants
+    soft_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
+    hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/hard.isotype_summary.json").json()
+
+    soft_variant = [x for x in soft_variant if x['isotype'] == isotype_name][0]
+    hard_variant = [x for x in hard_variant if x['isotype'] == isotype_name][0]
+
+
+
     VARS = {"title": isotype_name,
             "isotype": isotype,
             "isotype_name": isotype_name,
             "reference_strain": [x for x in isotype if x.reference_strain][0],
-            "strain_json_output": dump_json(isotype)}
+            "strain_json_output": dump_json(isotype),
+            "photos": photos,
+            "soft_variant": soft_variant,
+            "hard_variant": hard_variant }
     return render_template('strain/strain.html', **VARS)
 
 
@@ -88,7 +113,7 @@ def isotype_page(isotype_name):
 # Strain Catalog
 #
 
-@strain_bp.route('/catalog')
+@strain_bp.route('/catalog', methods=['GET', 'POST'])
 @cache.memoize(50)
 def strain_catalog():
     VARS = {"title": "Strain Catalog",

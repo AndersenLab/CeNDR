@@ -33,7 +33,7 @@
     <li role="presentation"><a href="#phylogeny" role="tab" data-toggle="tab">Phylogeny</a></li>
 
     {% if int(selected_release) >= 20170531 %}
-    <li role="presentation"><a href="#haplotype" role="tab" data-toggle="tab">Haplotypes</a></li>
+    <li role="presentation"><a href="#haplotype" role="tab" data-toggle="tab">Images</a></li>
     {% endif %}
   </ul>
 
@@ -47,18 +47,29 @@
         {% include('releases/variant_summary_tab.html') %}
     </div>
     <div role="tabpanel" class="tab-pane" id="phylogeny">
-        <img style='width:100%' src='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/phylo/genome.svg'>
+        <img style='width:100%' src='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/popgen/trees/genome.svg'>
     </div>
 
     {% if int(selected_release) >= 20170531 %}
     <div role="tabpanel" class="tab-pane" id="haplotype">
-        <h3>Haplotypes</h3>
         <div class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>
+        <h4>Haplotypes</h4>
             <div class='thumbnail'>
                 <a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png'><img src='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.thumb.png'></a>
                 <small>Click the above image to download the full version</small>
             </div>
         </div>
+
+        {% if int(selected_release) >= 20180000 %}
+        <div class='col-xs-3 col-sm-3 col-md-3 col-lg-3'>
+        <h4>Tajimas D</h4>
+            <div class='thumbnail'>
+                <a href='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/popgen/tajima_d.png'><img src='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/popgen/tajima_d.thumb.png'></a>
+                <small>Click the above image to download the full version</small>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
     {% endif %}
 

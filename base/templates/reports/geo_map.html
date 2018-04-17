@@ -21,8 +21,6 @@
 
 <script defer>
 
-//var geo_gt = {{ geo_gt|safe }}
-
 // Icons
 var icon_norm = L.icon({
     iconUrl: '/static/img/icons/marker.png',
@@ -81,7 +79,8 @@ var gt_set = {0: "-", 3: "-"};
 function update_geo_map() {
     map.removeLayer(strain_layer);
     markers = [];
-    request_url = `/api/popgen/gt/${chrom}/${pos}`;
+    request_url = `/api/popgen/gt/${chrom}/${pos}/{{ trait.DATASET_RELEASE }}`;
+    console.log(request_url);
     $.getJSON(request_url, function(data) {
         console.log(data);
         $.each(data.GT, function(i, gt) {

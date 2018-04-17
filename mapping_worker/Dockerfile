@@ -1,8 +1,7 @@
 FROM andersenlab/wi-nf
 
-RUN brew install python3 \
-    && pip3 install gcloud arrow logzero pandas numpy
-
+RUN brew unlink python && brew install python
+RUN pip3 install gcloud arrow logzero pandas numpy
 RUN pip3 install cython
 RUN pip3 install cyvcf2 logzero sqlalchemy
 

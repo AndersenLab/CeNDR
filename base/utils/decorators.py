@@ -17,7 +17,6 @@ def jsonify_request(func):
             its an API call
         """
         if request:
-            logger.info(request)
             is_tsv = request.args.get('output') == 'tsv'
             if func.__name__ == request.endpoint and not is_tsv:
                 return jsonify(func(*args, **kwargs))
