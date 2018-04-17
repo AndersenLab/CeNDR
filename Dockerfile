@@ -45,6 +45,7 @@ RUN update-alternatives --install /usr/bin/python python /opt/python3.6/bin/pyth
 
 # Copy the application's requirements.txt and run pip to install all
 # dependencies into the virtualenv.
+RUN pip install --no-use-wheel --no-cache-dir Cython
 ADD requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
