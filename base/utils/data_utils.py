@@ -53,6 +53,8 @@ def get_gs():
 
 class json_encoder(json.JSONEncoder):
     def default(self, o):
+        if hasattr(o, "to_json"):
+            return o.to_json()
         if hasattr(o, "__dict__"):
             return {k: v for k,v in o.__dict__.items() if k != "id" and not k.startswith("_")}
         if type(o) == decimal.Decimal:

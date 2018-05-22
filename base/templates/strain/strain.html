@@ -91,26 +91,36 @@
 
     </div>
 
- {% if len(photos) > 0 %}
+ {% if len(photo_set) > 0 %}
     <div class='row'>
         <div class='col-md-12'>
             <h4>Collections</h4>
         </div>
     </div>
     <div class='row'>
-        {% for strain in isotype %}
-            {% if strain.strain in photos %}
-            <div class='col-md-3'>
-                <div class='text-center'>
-                    <strong>{{ strain.strain }}</strong>
-                </div>
-
-                <a href='https://storage.googleapis.com/elegansvariation.org/photos/isolation/{{ strain.isotype }}_{{ strain.strain }}.jpg' class='thumbnail' target="_blank">
-                    <img src='https://storage.googleapis.com/elegansvariation.org/photos/isolation/{{ strain.isotype }}_{{ strain.strain }}.thumb.jpg'/>
-                </a>
+        <table class='table table-bordered table-condensed table-hover'>
+            <thead>
+                <th>Photo</th>
+                <th>Strains</th>
+            </thead>
+            <tbody>
+        {% for photo, strains in photo_set.items() %}
+            <tr>
+                <td>
+                    <a href='{{ photo }}' target="_blank">
+                        <img class='thumbnail' src='{{ photo }}'/>
+                    </a>
+                </td>
+                <td>
+                    <ul>
+                        {% for s in strains %}<li>{{ s }}</li>{% endfor %}
+                    </ul>
+                </td>
+            </tr>
             </div>
-            {% endif %}
         {% endfor %}
+        </tbody>
+        </table>
     </div>
     {% endif %}
     </div>{# col-md-8 #}
@@ -156,13 +166,12 @@
             <li class="list-group-item"><strong>Elevation</strong>
                 <div class="elevation pull-right">
                 {% if reference_strain['elevation'] %}
-                    {{ reference_strain["elevation"]|round(3) }} M
+                    {{ reference_strain["elevation"]|round(3) }} m
                 {% else %}
                     Unknown
                 {% endif %}
                 <div style="clear:both;"></div>
             </li>
-            <li class="list-group-item"><strong>Location</strong> <div class="location pull-right">{{ reference_strain["location"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="location pull-right">{{ reference_strain["landscape"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="location pull-right">{{ reference_strain["substrate"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ reference_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
@@ -236,7 +245,7 @@ var icon_norm = L.icon({
   data = {{ strain_json_output|safe }}
   view_set = false;
 
-  var map = L.map('map', {"dragging": false,
+  var map = L.map('map', {"dragging": true,
                           "boxZoom": false,
                           "scrollWheelZoom": false,
                           "doubleClickZoom": true,

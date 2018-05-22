@@ -164,9 +164,9 @@ if (n_peaks > 1) {
 
 # Get interval correlations
 if (!file.exists('interval.Rdata')) {
-    vc <- variant_correlation(mapping,
+    vc <- variant_correlation(mapping %>% dplyr::filter(interval_size < 1E6),
                               condition_trait = F,
-                              variant_severity = c("MODIFIER", "LOW", "MODERATE", "HIGH"),
+                              variant_severity = "ALL",
                               gene_types = "ALL")
     interval_variants <- dplyr::bind_rows(vc) %>%
                          dplyr::distinct(CHROM,

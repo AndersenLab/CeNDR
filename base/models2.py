@@ -357,6 +357,9 @@ class strain_m(DictSerializable, db_2.Model):
     def __repr__(self):
         return self.strain
 
+    def to_json(self):
+        return {k:v for k, v in self.__dict__.items() if not k.startswith("_")}
+
     def list_sets(self):
         if self.sets:
             return self.sets.split(",")

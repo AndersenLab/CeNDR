@@ -4,6 +4,25 @@ from base.utils.decorators import jsonify_request
 from sqlalchemy import or_
 from flask import request
 
+
+@app.route('/api/strain/query/<string:query>')
+@jsonify_request
+def search_strains(query):
+    base_query = strain_m.query.filter(strain_m.isotype != None)
+    query = query.upper()
+    results = base_query.filter(or_(strain_m.isotype == query,
+                                    strain_m.isotype.like(f"{query}%"),
+                                    strain_m.strain == query,
+                                    strain_m.strain.like(f"{query}%"),
+                                    strain_m.previous_names.like(f"%{query}|%"),
+                                    strain_m.previous_names.like(f"%,{query}|"),
+                                    strain_m.previous_names.like(f"%{query}"),
+                                    strain_m.previous_names == query))
+    results = list([x.to_json() for x in results])
+    return results    
+
+
+
 @app.route('/api/strain/')
 @app.route('/api/strain/<string:strain_name>')
 @app.route('/api/strain/isotype/<string:isotype_name>')

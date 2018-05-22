@@ -60,7 +60,7 @@ def download_script():
 @data_bp.route('/browser/<region>')
 @data_bp.route('/browser/<region>/<query>')
 def browser(region="III:11746923-11750250", query=None):
-    VARS = {'title': "Genome Browser",
+    VARS = {'title': "Variant Browser",
             'DATASET_RELEASE': DATASET_RELEASE,
             'isotype_listing': get_isotypes(list_only=True),
             'region': region,

@@ -68,7 +68,7 @@ run_comm(['echo', '$ECS_CONTAINER_METADATA_FILE'])
 
 try:
     # Fetch cegwas version
-    CEGWAS_VERSION = check_output("Rscript -e 'library(cegwas); devtools::session_info()' | grep 'cegwas'", shell=True)
+    CEGWAS_VERSION = check_output("Rscript --verbose -e 'library(cegwas); devtools::session_info()' | grep 'cegwas'", shell=True)
     trait.CEGWAS_VERSION = re.split(" +", str(CEGWAS_VERSION, encoding='UTF-8').strip())[2:]
 
     # Fetch container information
@@ -83,7 +83,7 @@ try:
     trait.status = "running"
     trait.save()
 
-    comm = ['Rscript', 'pipeline.R']
+    comm = ['Rscript', '--verbose', 'pipeline.R']
     process = run_comm(comm)
     exitcode = process.wait()
 

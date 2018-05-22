@@ -86,9 +86,12 @@ def isotype_page(isotype_name):
 
     # Fetch isotype images
     photos = list_release_files(f"photos/isolation/{isotype_name}")
-    # Detect which strains have photos
-    photos = [basename(photo).split("_")[1].split(".")[0] for photo in photos]
-
+    photo_set = {}
+    for row in photos:
+        if 'thumb' not in row:
+            strains = basename(row).replace(".jpg", "").split("_")
+            photo_set[row.replace(".jpg", ".thumb.jpg")] = strains
+    
     # High impact variants
     soft_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
     hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/hard.isotype_summary.json").json()
@@ -96,14 +99,12 @@ def isotype_page(isotype_name):
     soft_variant = [x for x in soft_variant if x['isotype'] == isotype_name][0]
     hard_variant = [x for x in hard_variant if x['isotype'] == isotype_name][0]
 
-
-
     VARS = {"title": isotype_name,
             "isotype": isotype,
             "isotype_name": isotype_name,
             "reference_strain": [x for x in isotype if x.reference_strain][0],
             "strain_json_output": dump_json(isotype),
-            "photos": photos,
+            "photo_set": photo_set,
             "soft_variant": soft_variant,
             "hard_variant": hard_variant }
     return render_template('strain/strain.html', **VARS)

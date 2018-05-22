@@ -26,7 +26,7 @@
                                 <div class="strain pull-right"></div><div style="clear:both;"></div></li>
                     <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset in which isotype was originally released"><strong>Release</strong> <div class="release pull-right"></div><div style="clear:both;"></div></li>
                     <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
-                    <li class="list-group-item"><strong>Latitude / Longitude</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
+                    <li class="list-group-item"><strong>Latitude, Longitude</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
                     <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right"><div style="clear:both;"></div></li>
                     <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="landscape pull-right"></div><div style="clear:both;"></div></li>
                     <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="substrate pull-right"></div><div style="clear:both;"></div></li>
@@ -148,6 +148,8 @@ function restore_click_locked_content(m) {
   strain_names = [];
   markers = [];
 
+
+
  data = {{ strain_listing|safe }}
  strain_info = data;
  data.forEach(function(d) {
@@ -156,6 +158,7 @@ function restore_click_locked_content(m) {
                                          strain: d.strain,
                                          title: d.strain,
                                          isotype: d.isotype,
+                                         search_field: `${d.strain} (${d.isotype})`,
                                          isolation_date : d.isolation_date,
                                          release: String(d.release).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
                                          elevation: d.elevation + " m" ,
@@ -170,11 +173,13 @@ function restore_click_locked_content(m) {
  });
 var strain_layer = L.layerGroup(markers);
 var search_control = new L.Control.Search({layer: strain_layer,
+                                      propertyName: 'search_field',
                                       initial: false,
                                       collapsed: false,
-                                      position:'topright',
+                                      position: 'topright',
                                       tooltipLimit: 4,
-                                      textPlaceholder :'Enter strain name',
+                                      casesensitive: true,
+                                      textPlaceholder :'Strain (Isotype)',
                                       zoom: 5,
                                       animateLocation: false,
                                       markerLocation: false,
