@@ -89,7 +89,7 @@ def isotype_page(isotype_name):
     photo_set = {}
     for row in photos:
         if 'thumb' not in row:
-            strains = basename(row).replace(".jpg", "").split("_")
+            strains = basename(row).replace(".jpg", "").split("_")[1:]
             photo_set[row.replace(".jpg", ".thumb.jpg")] = strains
     
     # High impact variants

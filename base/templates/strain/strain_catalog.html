@@ -25,7 +25,7 @@
                 <div class="col-md-8">
             <p>Pre-defined sets of strains can be ordered below.</p>
                 <p>The <strong>divergent set</strong> includes 12 genotypically different strains and can be used to determine broad-sense heritability after repeated independent measures of your favorite phenotype. <strong>We recommend starting with the divergent set.</strong></p>
-                 <p>Sets <strong>1-4</strong> each contain 48 strains that should be assayed for genetic mapping experiments. We recommend using a single set of 48 strains. After you have scored and optimized your quantitative trait, additional sets can be assayed to increase statistical power for association mapping.</p>
+                 <p>Sets <strong>1-6</strong> each contain 48 strains that should be assayed for genetic mapping experiments. We recommend using a single set of 48 strains. After you have scored and optimized your quantitative trait, additional sets can be assayed to increase statistical power for association mapping.</p>
                  </div>
                  <div class="col-md-4">
                  <div class="panel panel-default">
@@ -72,7 +72,7 @@
                             </small>
                             </td>
                         </tr>
-                        {% for i in range(1,6) %}
+                        {% for i in range(1,7) %}
                         <tr>
                             <td>
                                 <input id="set-{{ i }}" type="checkbox" name="items-{{ i + 1000 }}"  value="set_{{ i }}"/>
@@ -101,12 +101,12 @@
             </div>
 
             <div class="row">
-                <div class="col-md-7">
+                <div class="col-md-6">
                             <h3>Individual Strains</h3>
 
                             <p>Individual strains can be ordered below.</p>
                 </div>
-                <div class="col-md-1">
+                <div class="col-md-2">
                     <button style = "margin-left: auto;" type="button" class="btn btn-link btn-block" data-toggle="modal" tooltip data-target="#myModal" data-placement="top" title="Paste a list of strains to select">Paste List</button>
                 </div>
                 <div class="col-md-4">

@@ -87,7 +87,7 @@ function set_panel_from_search(m) {
   $(".release").text(s.release);
   $(".isolation_date").text(s.isolation_date);
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
-  $(".elevation").text(s.elevation);
+  $(".elevation").text(s.elevation.toPrecision(4));
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
   $(".sampled_by").text(s.sampled_by);
@@ -103,6 +103,7 @@ function set_panel_content(m) {
   isolation_date = s.isolation_date;
   sampled_by = s.sampled_by;
   comma = s.comma;
+  elevation = s.elevation
   latlng = m.latlng.lat + comma + m.latlng;
   $(".strain").text(s.strain);
   $(".isotype").html("<strong><a href='/strain/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
@@ -110,7 +111,7 @@ function set_panel_content(m) {
   $(".isolation_date").text(s.isolation_date);
   $(".comma").text(s.comma)
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
-  $(".elevation").text(s.elevation);
+  $(".elevation").text(elevation);
   $(".landscape").text(s.landscape);
   $(".substrate").text(s.substrate);
   $(".sampled_by").text(s.sampled_by);
