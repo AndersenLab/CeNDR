@@ -13,6 +13,7 @@
             <div class="panel panel-default">
               <div class="panel-heading"><img src = "/static/img/icons/selected.png" width="20px;" /><strong>Strain Information</strong></div>
                   <ul class="list-group">
+
                     <li class="list-group-item">
                     <strong>
                     <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
@@ -20,10 +21,22 @@
                     </span>
                     </strong> 
                             <div class="isotype pull-right"></div><div style="clear:both;"></div></li>
-                    <li class="list-group-item"><strong>                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+
+                    <li class="list-group-item">
+                    <strong>
+                    <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="The name of the strain.">
+                                Strain
+                    </span>
+                    </strong> 
+                            <div class="strain pull-right"></div><div style="clear:both;"></div></li>
+
+
+                    <li class="list-group-item"><strong>                            
+
+                        <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
                                 Reference Strain
                                 </span></strong> 
-                                <div class="strain pull-right"></div><div style="clear:both;"></div></li>
+                                <div class="reference_strain pull-right"></div><div style="clear:both;"></div></li>
                     <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset in which isotype was originally released"><strong>Release</strong> <div class="release pull-right"></div><div style="clear:both;"></div></li>
                     <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
                     <li class="list-group-item"><strong>Latitude, Longitude</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
@@ -68,6 +81,7 @@ var click_s = {
               landscape: "",
               loc: "",
               comma: "",
+              reference_strain: "",
               isolation_date: "",
               location: "",
               substrate: "",
@@ -84,6 +98,7 @@ function set_panel_from_search(m) {
   s = m.layer.options
   $(".strain").text(s.strain);
   $(".isotype").html("<strong><a href='/strain/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".reference_strain").text(s.reference_strain);
   $(".release").text(s.release);
   $(".isolation_date").text(s.isolation_date);
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
@@ -108,6 +123,7 @@ function set_panel_content(m) {
   $(".strain").text(s.strain);
   $(".isotype").html("<strong><a href='/strain/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
   $(".release").text(s.release);
+  $(".reference_strain").text(s.reference_strain);
   $(".isolation_date").text(s.isolation_date);
   $(".comma").text(s.comma)
   $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
@@ -155,10 +171,11 @@ function restore_click_locked_content(m) {
  strain_info = data;
  data.forEach(function(d) {
   strain_names.push(d.strain);
-   m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
+   m = L.marker([d.latitude, d.longitude], { icon: icon_norm,
                                          strain: d.strain,
                                          title: d.strain,
                                          isotype: d.isotype,
+                                         reference_strain: d.reference_strain,
                                          search_field: `${d.strain} (${d.isotype})`,
                                          isolation_date : d.isolation_date,
                                          release: String(d.release).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),

@@ -230,9 +230,11 @@
         <h2 id="phenotype" name="phenotype">Phenotype</h2> 
         {{ phenotype_plot|safe }}
 
+        <p><strong>Hover over a line in the rug plot to see the strain and phenotype value for that strain.</strong></p>
+
         {% if trait.is_significant %}
 
-          Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
+          <p>Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!</p>
 
         {% else %}
 
@@ -261,6 +263,8 @@
         <h2 id="pxg">Phenotype-by-Genotype</h2>
 
         {{ pxg_plot|safe }}
+
+        <p><strong>Hover over a point to see the strain and phenotype value for that strain.</strong></p>
 
         <p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. </p>
 

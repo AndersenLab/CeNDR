@@ -10,7 +10,7 @@ from flask import (render_template,
                    abort)
 
 from base.models2 import strain_m
-from base.views.api.api_strain import get_isotypes, query_strains
+from base.views.api.api_strain import get_strains, query_strains
 
 from base.utils.email import send_email
 from base.utils.google_sheets import add_to_order_ws, lookup_order
@@ -43,7 +43,7 @@ def map_page():
         within the SQLite database.
     """
     VARS = {'title': "Global Strain Map",
-            'strain_listing': dump_json(get_isotypes(known_origin=True))}
+            'strain_listing': dump_json(get_strains(known_origin=True))}
     return render_template('strain/global_strain_map.html', **VARS)
 
 
