@@ -14,8 +14,8 @@ If you cloned the repo you will need to obtain the service credentials from the 
 
 Rebuild and test 
 ```shell
-REPORT_NAME='test-map-private-test'
-TRAIT_NAME='telomere-resids'
+REPORT_NAME='prop-test'
+TRAIT_NAME='proportion'
 docker build . -t cegwas-mapping
 docker run -v $PWD:/home/linuxbrew/work \
            -w /home/linuxbrew/work \
