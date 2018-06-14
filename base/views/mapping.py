@@ -214,7 +214,9 @@ def report_view(report_slug, trait_name=None, rerun=None):
             """
             # If the mapping is complete:
             # Phenotype plot
+
             phenotype_plot = plotly_distplot(trait._trait_df, trait_name)
+            VARS.update({'phenotype_plot': phenotype_plot})
             # Fetch datafiles for complete runs
             VARS.update({'n_peaks': 0})
             if trait.is_significant:
@@ -238,7 +240,6 @@ def report_view(report_slug, trait_name=None, rerun=None):
                              'interval_summary': interval_summary,
                              'variant_correlation': trait.get_gs_as_dataset("interval_variants.tsv.gz"),
                              'peak_summary': peak_summary,
-                             'phenotype_plot': phenotype_plot,
                              'n_peaks': len(peak_summary),
                              'isotypes': list(trait._trait_df.ISOTYPE.values),
                              'first_peak': first_peak})
