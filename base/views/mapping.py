@@ -1,25 +1,16 @@
 import decimal
-import os
-import time
 import re
 import arrow
 import urllib
-import requests
 import pandas as pd
 import simplejson as json
 
-from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 from base.constants import BIOTYPES, TABLE_COLORS
-from base.application import autoconvert
 from base.models2 import trait_m
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from peewee import JOIN
 from flask import render_template, request, redirect, url_for, abort
-from collections import OrderedDict
 from slugify import slugify
-from gcloud import storage
-from collections import Counter
 from base.forms import mapping_submission_form
 from logzero import logger
 from flask import session, flash, Blueprint, g
@@ -29,7 +20,7 @@ from base.constants import (REPORT_VERSION,
                             CENDR_VERSION,
                             WORMBASE_VERSION)
 
-from base.utils.gcloud import query_item
+from base.utils.gcloud import query_item, get_item, delete_item
 
 from base.utils.plots import pxg_plot, plotly_distplot
 
@@ -119,8 +110,29 @@ def report_view(report_slug, trait_name=None, rerun=None):
         and v2 reports.
 
     """
+
+    # Enable reruns
+    if rerun:
+        trait_items = query_item('trait', filters=[('report_slug', '=', report_slug), ('trait_name', '=', trait_name)])
+        trait = trait_m(trait_items[0])
+        for existing_trait in trait_items:
+            delete_item(existing_trait)
+
+        mapping_items = query_item('mapping', filters=[('report_slug', '=', report_slug), ('trait_slug', '=', trait_name)])
+        for existing_mapping in mapping_items:
+            delete_item(existing_mapping)
+
+        trait.status = "Rerunning"
+        trait.save()
+        trait.run_task()
+        return redirect(url_for('mapping.report_view',
+                                report_slug=report_slug,
+                                trait_name=trait_name))
+
+
     trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
-    # Get first report
+    
+    # Get first report if available.
     try:
         trait = trait_set[0]
     except IndexError:
@@ -133,7 +145,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
 
     # Verify user has permission to view report
     user = session.get('user')
-    if not trait['is_public']:
+    if not trait.get('is_public'):
         if user:
             user_id = user.get('user_id')
         else:
@@ -153,8 +165,6 @@ def report_view(report_slug, trait_name=None, rerun=None):
         # Resolve REPORT --> TRAIT
         # Fetch trait and convert to trait object.
         cur_trait = [x for x in trait_set if x['trait_name'] == trait_name][0]
-        logger.info(trait_set)
-        logger.info(cur_trait)
         trait = trait_m(cur_trait.key.name)
         trait.__dict__.update(cur_trait)
         logger.info(trait)

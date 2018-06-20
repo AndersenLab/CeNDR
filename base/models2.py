@@ -15,6 +15,7 @@ from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
 from collections import defaultdict
 from botocore.exceptions import ClientError
+from base.constants import DATASET_RELEASE
 
 from logzero import logger
 
@@ -105,7 +106,7 @@ class trait_m(datastore_model):
         """
         # Fargate credentials
         task_fargate = self._ecs.run_task(
-            taskDefinition='cendr-map',
+            taskDefinition=f"cendr-map-{DATASET_RELEASE}",
             overrides={
                 'containerOverrides': [
                     {
