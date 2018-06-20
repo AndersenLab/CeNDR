@@ -24,6 +24,13 @@ def google_datastore(open=False):
     return g.ds
 
 
+def delete_item(item):
+    ds = google_datastore()
+    batch = ds.batch()
+    batch.delete(item.key)
+    batch.commit()
+
+
 def store_item(kind, name, **kwargs):
     ds = google_datastore()
     try:
