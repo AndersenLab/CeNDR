@@ -113,25 +113,26 @@ def report_view(report_slug, trait_name=None, rerun=None):
 
     # Enable reruns
     if rerun:
-        trait_items = query_item('trait', filters=[('report_slug', '=', report_slug), ('trait_name', '=', trait_name)])
-        trait = trait_m(trait_items[0])
-        for existing_trait in trait_items:
+        trait_set = query_item('trait', filters=[('report_slug', '=', report_slug), ('trait_name', '=', trait_name)])
+        for n, existing_trait in enumerate(trait_set):
+            logger.info(n)
+            logger.info(existing_trait.key)
             delete_item(existing_trait)
+        trait = trait_m(trait_set[0])
 
         mapping_items = query_item('mapping', filters=[('report_slug', '=', report_slug), ('trait_slug', '=', trait_name)])
         for existing_mapping in mapping_items:
             delete_item(existing_mapping)
 
         trait.status = "Rerunning"
-        trait.save()
+        # Running the task will save it.
         trait.run_task()
         return redirect(url_for('mapping.report_view',
                                 report_slug=report_slug,
                                 trait_name=trait_name))
 
-
     trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
-    
+
     # Get first report if available.
     try:
         trait = trait_set[0]

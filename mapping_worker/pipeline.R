@@ -5,8 +5,8 @@ library(cegwas)
 library(tidyverse)
 library(jsonlite)
 library(aws.s3)
-
-
+library(tryCatchLog)
+library(futile.logger)
 # Output session info
 session <- devtools::session_info()
 session
@@ -164,7 +164,7 @@ if (n_peaks > 1) {
 
 # Get interval correlations
 if (!file.exists('interval.Rdata')) {
-    vc <- variant_correlation(mapping %>% dplyr::filter(interval_size < 1E6),
+    vc <- variant_correlation(mapping %>% dplyr::filter(interval_size < 5E8),
                               condition_trait = F,
                               variant_severity = "ALL",
                               gene_types = "ALL")
