@@ -16,9 +16,21 @@ import json
 import re
 from logzero import logger
 from utils.interval import process_interval
-from utils.gcloud import trait_m, mapping_m, query_item
+from utils.gcloud import trait_m, mapping_m, query_item, get_item
 from subprocess import Popen, STDOUT, PIPE, check_output
 from io import StringIO
+import requests
+
+def send_email(send_to_email, subject, content):
+    api_key = get_item('credential', 'mailgun')['apiKey']
+    email = requests.post(
+        "https://api.mailgun.net/v3/mail.elegansvariation.org/messages",
+        auth=("api", api_key),
+        data={"from": "CeNDR Admin <admin@elegansvariation.org>",
+              "to": [send_to_email, "dec@u.northwestern.edu"],
+              "subject": subject,
+              "text": content})
+    return email
 
 # Create a data directory
 if not os.path.exists('data'):
@@ -83,7 +95,7 @@ try:
     trait.status = "running"
     trait.save()
 
-    comm = ['Rscript', '--verbose', 'pipeline.R']
+    comm = ['Rscript', '--verbose', 'pipeline_runner.R']
     process = run_comm(comm)
     exitcode = process.wait()
 
@@ -124,13 +136,23 @@ try:
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))
     trait.status = "complete"
+    send_email(trait.user_email,
+               f"Trait Mapping Complete: {trait.report_slug}/{trait.trait_name}",
+               f"Mapping of your trait has completed.\n\nhttp://www.elegansvariation.org/report/{trait.secret_hash}/{trait.trait_name}")
+
 except Exception as e:
     traceback.print_exc()
     trait.error_message = str(e)
     trait.error_traceback = traceback.format_exc()
     trait.status = "error"
     trait.completed_on = arrow.utcnow().datetime
+    # Upload datasets for interrogating issues.
+    trait.upload_files(glob.glob("data/*"))
+    send_email(trait.user_email,
+               f"Error - Mapping: {trait.report_slug}/{trait.trait_name}",
+               f"Unfortunately, it looks like one of the mappings resulted in an error.\n\nhttp://www.elegansvariation.org/report/{trait.secret_hash}/{trait.trait_name}")
 finally:
+    # Even when error occurs, upload artifacts to help diagnose.
     trait.completed_on = arrow.utcnow().datetime
     logger.info(trait)
     trait.save()

@@ -168,34 +168,38 @@ if (!file.exists('interval.Rdata')) {
                               condition_trait = F,
                               variant_severity = "ALL",
                               gene_types = "ALL")
-    interval_variants <- dplyr::bind_rows(vc) %>%
-                         dplyr::distinct(CHROM,
-                                         POS,
-                                         REF,
-                                         ALT,
-                                         gene_id,
-                                         trait,
-                                         effect,
-                                         impact,
-                                         nt_change,
-                                         aa_change, .keep_all = TRUE) %>%
-                         dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
-                         dplyr::group_by(peak, gene_id) %>%
-                         dplyr::mutate(n_variants = n()) %>%
-                         dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p)),
-                                       corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
-                         dplyr::arrange(dplyr::desc(max_gene_corr_p),
-                                        gene_id) %>%
-                         dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
-                         dplyr::select(-n,
-                                       -strain,
-                                       -GT,
-                                       -FILTER,
-                                       -FT,
-                                       -pheno_value,
-                                       -corrected_pheno,
-                                       -startPOS,
-                                       -endPOS)
+    if (!is.na(vc[[1]])) {
+        interval_variants <- dplyr::bind_rows(vc) %>%
+                             dplyr::distinct(CHROM,
+                                             POS,
+                                             REF,
+                                             ALT,
+                                             gene_id,
+                                             trait,
+                                             effect,
+                                             impact,
+                                             nt_change,
+                                             aa_change, .keep_all = TRUE) %>%
+                             dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
+                             dplyr::group_by(peak, gene_id) %>%
+                             dplyr::mutate(n_variants = n()) %>%
+                             dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p)),
+                                           corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
+                             dplyr::arrange(dplyr::desc(max_gene_corr_p),
+                                            gene_id) %>%
+                             dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
+                             dplyr::select(-n,
+                                           -strain,
+                                           -GT,
+                                           -FILTER,
+                                           -FT,
+                                           -pheno_value,
+                                           -corrected_pheno,
+                                           -startPOS,
+                                           -endPOS)
+    } else {
+        interval_variants <- data.frame()
+    }
     # For cache
     save(interval_variants, file='interval.Rdata')
     # For user
