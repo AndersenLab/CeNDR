@@ -81,8 +81,9 @@ run_comm(['echo', '$ECS_CONTAINER_METADATA_FILE'])
 try:
     # Fetch cegwas version
     CEGWAS_VERSION = check_output("Rscript --verbose -e 'library(cegwas); devtools::session_info()' | grep 'cegwas'", shell=True)
+    logger.info(CEGWAS_VERSION)
     trait.CEGWAS_VERSION = re.split(" +", str(CEGWAS_VERSION, encoding='UTF-8').strip())[2:]
-
+    print(check_output("Rscript -e 'devtools::session_info()'", shell=True).decode('utf-8'))
     # Fetch container information
     try:
         trait.task_info = json.loads(check_output("echo ${ECS_CONTAINER_METADATA_FILE}", shell=True))
@@ -95,7 +96,7 @@ try:
     trait.status = "running"
     trait.save()
 
-    comm = ['Rscript', '--verbose', 'pipeline_runner.R']
+    comm = ['Rscript', '--verbose', 'pipeline.R']
     process = run_comm(comm)
     exitcode = process.wait()
 
@@ -145,12 +146,13 @@ except Exception as e:
     trait.error_message = str(e)
     trait.error_traceback = traceback.format_exc()
     trait.status = "error"
+    traceback = traceback.format_exc()
     trait.completed_on = arrow.utcnow().datetime
     # Upload datasets for interrogating issues.
     trait.upload_files(glob.glob("data/*"))
     send_email(trait.user_email,
                f"Error - Mapping: {trait.report_slug}/{trait.trait_name}",
-               f"Unfortunately, it looks like one of the mappings resulted in an error.\n\nhttp://www.elegansvariation.org/report/{trait.secret_hash}/{trait.trait_name}")
+               f"Unfortunately, it looks like one of the mappings resulted in an error.\n\nhttp://www.elegansvariation.org/report/{trait.secret_hash}/{trait.trait_name}\n\n{traceback}")
 finally:
     # Even when error occurs, upload artifacts to help diagnose.
     trait.completed_on = arrow.utcnow().datetime

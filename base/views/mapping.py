@@ -111,9 +111,22 @@ def report_view(report_slug, trait_name=None, rerun=None):
 
     """
 
+    trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
+
+    # Get first report if available.
+    try:
+        trait = trait_set[0]
+    except IndexError:
+        try:
+            trait_set = query_item('trait', filters=[('secret_hash', '=', report_slug)])
+            trait = trait_set[0]
+        except IndexError:
+            flash('Cannot find report', 'danger')
+            return abort(404)
+
     # Enable reruns
     if rerun:
-        trait_set = query_item('trait', filters=[('report_slug', '=', report_slug), ('trait_name', '=', trait_name)])
+        trait_set = [x for x in trait_set if x['trait_name'] == trait_name]
         for n, existing_trait in enumerate(trait_set):
             logger.info(n)
             logger.info(existing_trait.key)
@@ -130,19 +143,6 @@ def report_view(report_slug, trait_name=None, rerun=None):
         return redirect(url_for('mapping.report_view',
                                 report_slug=report_slug,
                                 trait_name=trait_name))
-
-    trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
-
-    # Get first report if available.
-    try:
-        trait = trait_set[0]
-    except IndexError:
-        try:
-            trait_set = query_item('trait', filters=[('secret_hash', '=', report_slug)])
-            trait = trait_set[0]
-        except IndexError:
-            flash('Cannot find report', 'danger')
-            return abort(404)
 
     # Verify user has permission to view report
     user = session.get('user')

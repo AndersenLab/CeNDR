@@ -127,6 +127,10 @@ class trait_m(datastore_model):
                             {
                                 'name': 'TRAIT_NAME',
                                 'value': self.trait_name
+                            },
+                            {
+                                'name': 'DATASET_RELEASE',
+                                'value': DATASET_RELEASE
                             }#,
                             #{
                             #    'name': 'AWS_ACCESS_KEY_ID',
@@ -506,7 +510,7 @@ class homologs_m(DictSerializable, db_2.Model):
     gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False, index=True)
     gene_name = db_2.Column(db_2.String(40), index=True)
     homolog_species = db_2.Column(db_2.String(50), index=True)
-    homolog_taxon_id = db_2.Column(db_2.Integer, index=True, nullable=True)  # If available    
+    homolog_taxon_id = db_2.Column(db_2.Integer, index=True, nullable=True)  # If available
     homolog_gene = db_2.Column(db_2.String(50), index=True)
     homolog_source = db_2.Column(db_2.String(40))
 
