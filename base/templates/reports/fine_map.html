@@ -11,7 +11,8 @@ function update_fine_map(peak) {
     fine_map_url = `/api/trait/mapping/{{ trait.report_slug }}/{{ trait.trait_name }}/${peak.trim()}`;
     fine_map_plot = document.getElementById("fine_map");
     $.getJSON(fine_map_url, function(data) {
-            
+
+            if (data) {
 
             var layout = {
                 hovermode: 'closest',
@@ -42,7 +43,7 @@ function update_fine_map(peak) {
                 hoverinfo:"x+y+text",
                 text: data['name'],
                 color: data['color'],
-                marker: { 
+                marker: {
                     size: 10,
                     color: data['color'],
                     line: {
@@ -58,7 +59,12 @@ function update_fine_map(peak) {
           fine_map_plot.data = [trace];
           fine_map_plot.layout = layout
           Plotly.redraw(fine_map_plot);
-          Plotly.relayout(fine_map_plot)
+          Plotly.relayout(fine_map_plot);
+      } else {
+        Plotly.purge(fine_map_plot)
+        $("#fine_map").text("The interval is too large to display.")
+        $("#variant_list > tbody").text("The interval is too large to display.")
+      }
     })
 }
 

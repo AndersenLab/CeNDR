@@ -7,15 +7,16 @@
 This folder contains the code for running the GWA worker on AWS Fargate.
 
 If you cloned the repo you will need to obtain the service credentials from the GCloud console
-
+l
 
 ## Testing
 
 
 Rebuild and test 
 ```shell
-REPORT_NAME='mt tes-test'
-TRAIT_NAME='mt_content'
+DATASET_RELEASE=20180527
+REPORT_NAME='prop-test'
+TRAIT_NAME='prop2'
 docker build . -t cegwas-mapping
 docker run -v $PWD:/home/linuxbrew/work \
            -w /home/linuxbrew/work \
@@ -23,6 +24,7 @@ docker run -v $PWD:/home/linuxbrew/work \
            --rm \
            -e REPORT_NAME="${REPORT_NAME}" \
            -e TRAIT_NAME="${TRAIT_NAME}" \
+           -e DATASET_RELEASE="${DATASET_RELEASE}" \
            -e GOOGLE_APPLICATION_CREDENTIALS=gcloud_fargate.json \
            -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
            -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
@@ -35,6 +37,18 @@ docker run -it --rm \
            -e REPORT_NAME="${REPORT_NAME}" \
            -e TRAIT_NAME="${TRAIT_NAME}" \
            -e GOOGLE_APPLICATION_CREDENTIALS=gcloud_fargate.json  cegwas-mapping
+
+DATASET_RELEASE=20180527
+# Test Run; Mount local
+docker run -it --rm \
+           -v $(PWD):/home/linuxbrew/work \
+           -w /home/linuxbrew/work \
+           -e REPORT_NAME="${REPORT_NAME}" \
+           -e TRAIT_NAME="${TRAIT_NAME}" \
+           -e DATASET_RELEASE="${DATASET_RELEASE}" \
+           -e GOOGLE_APPLICATION_CREDENTIALS=gcloud_fargate.json  cegwas-mapping \
+           /bin/bash
+
 ```
 
 ## Pushing new versions

@@ -33,7 +33,11 @@ def mapping_interval(report_slug, trait_name, peak):
     interval_summary = interval_summary[interval_summary.peak == peak.replace("_", ":")]
     interval_summary = interval_summary.loc[:,("CHROM", "POS", "REF", "ALT", "impact", "effect", "aa_change", "gene_name", "gene_id", "corrected_spearman_cor_p")]
     interval_summary['color'] = interval_summary.impact.apply(lambda x: impact_colors[x])
-    interval_summary['name'] = interval_summary.apply(lambda x: f"{x.gene_name} ({x.gene_id}) - {x.effect}\n{x.aa_change}", axis=1)
+    try:
+        interval_summary['name'] = interval_summary.apply(lambda x: f"{x.gene_name} ({x.gene_id}) - {x.effect}\n{x.aa_change}", axis=1)
+    except ValueError:
+        columns = ("CHROM", "POS", "REF", "ALT", "impact", "effect", "aa_change", "gene_name", "gene_id", "corrected_spearman_cor_p")
+        return jsonify(None)
 
     # Take top 25 most correlated genes.
     top_genes = list(interval_summary.groupby('gene_id') \

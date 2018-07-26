@@ -1,4 +1,4 @@
 cron:
 - description: test_mapping_pipeline
-  url: /report/test-test-4/telomere-resids
+  url: /report/1c28542b/telomere-resids
   schedule: every 24 hours

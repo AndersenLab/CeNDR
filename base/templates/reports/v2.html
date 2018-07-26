@@ -13,7 +13,7 @@
 <style>
 .report {
   width: 100%;
-} 
+}
 
 .height-report {
   height: 60%;
@@ -90,7 +90,7 @@
     <div class='col-md-12'>
         <h4>Traits</h4>
         {# Traits #}
-            {% for trait in trait_set %} 
+            {% for trait in trait_set %}
                 <a href="{{ url_for('mapping.report_view', report_slug = report_slug, trait_name = trait['trait_name']) }}" type="button" class="btn btn-sm {% if trait_name == trait['trait_name'] %} btn-primary {% else %} btn-link {% endif %}"><strong>{{ trait['trait_name'] }}</strong></a>
             {% endfor %}
         <br /><br />
@@ -175,7 +175,7 @@
 
         <div class="row">
             <div class='col-md-12'>
-                
+
                 {% if trait.status == 'complete' %}
                 <h5>Data</h5>
                 <ul>
@@ -228,7 +228,7 @@
           </div><!-- /.container-fluid -->
         </nav>
 
-        <h2 id="phenotype" name="phenotype">Phenotype</h2> 
+        <h2 id="phenotype" name="phenotype">Phenotype</h2>
         {{ phenotype_plot|safe }}
 
         <p><strong>Hover over a line in the rug plot to see the strain and phenotype value for that strain.</strong></p>
@@ -245,13 +245,13 @@
 
         {% endif %}
 
-        <h2 id="manhattan" name="Manhattan">Manhattan</h2> 
+        <h2 id="manhattan" name="Manhattan">Manhattan</h2>
 
         <img class='img img-responsive'src='{{ trait.file_url("Manhattan.png") }}' alt='Manhattan Plot' />
 
         {% if trait.is_significant %}
 
-        <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
+        <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick red line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
 
         {% else %}
 
@@ -380,9 +380,9 @@
                             </tbody>
                         </table>
                         <strong>Biotype summary data differ from past reports. The numbers above reflect counts among the strains that were submitted and are not reflective of the population as a whole.</strong>
-                  
-                        <h3>Variants</h3>
 
+                        <h3>Variants</h3>
+                        {% if not variant_correlation.empty %}
                         <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
 
                         <strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Download Table</a></strong>
@@ -423,7 +423,7 @@
                                     <tr class='corr-row {{ TABLE_COLORS[row["impact"]] }} tr_row'>
                                         <td></td>
                                         <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"] }} / {{ row["ALT"] }})</td>
-                                        <td>{{ row["impact"] }}</td>
+                                   s     <td>{{ row["impact"] }}</td>
                                         <td>{{ row["effect"] }}</td>
                                         <td>{{ row["aa_change"] }}</td>
                                         <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
@@ -431,12 +431,19 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        {% else %}
+                            The interval is too large to show variants.
+                        {% endif %}
                     </div>{# /col-md-12 #}
                 </div>{# /row #}
             </div>{#/ tab-panel #}
             {% endfor %}
         </div>{# /tab-content #}
-        {% include 'reports/fine_map.html' %}
+        {% if not variant_correlation.empty %}
+            {% include 'reports/fine_map.html' %}
+        {% else %}
+            The interval is too large to show fine mapping results.
+        {% endif %}
         {% include 'reports/geo_map.html' %}
         {% include 'reports/tajima.html' %}
     {% endif %}{#/ significant stuff #}
@@ -467,7 +474,7 @@ $(document).ready(function() {
 var offsetHeight = 71;
 
 {# Scrolling #}
-$('body').scrollspy({offset: 100, target: ".navbar"}); 
+$('body').scrollspy({offset: 100, target: ".navbar"});
 // Add smooth scrolling to all links inside a navbar
   $("#report_nav li a").on('click', function(event){
   link = $(this).attr('href').replace("#", "")

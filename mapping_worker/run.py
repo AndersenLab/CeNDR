@@ -14,12 +14,20 @@ import traceback
 import uuid
 import json
 import re
+import logzero
 from logzero import logger
 from utils.interval import process_interval
 from utils.gcloud import trait_m, mapping_m, query_item, get_item
 from subprocess import Popen, STDOUT, PIPE, check_output
 from io import StringIO
 import requests
+
+# Create a data directory
+if not os.path.exists('data'):
+    os.makedirs('data')
+
+
+logzero.logfile("data/out.log", maxBytes=1e6, backupCount=3)
 
 def send_email(send_to_email, subject, content):
     api_key = get_item('credential', 'mailgun')['apiKey']
@@ -32,18 +40,16 @@ def send_email(send_to_email, subject, content):
               "text": content})
     return email
 
-# Create a data directory
-if not os.path.exists('data'):
-    os.makedirs('data')
 
 def unique_id():
     return uuid.uuid4().hex
 
 def run_comm(comm):
-    process = Popen(comm, stdout=PIPE, stderr=STDOUT)
+    logger.info(comm)
+    process = Popen(comm, stdout=PIPE, stderr=PIPE)
     with process.stdout as proc:
         for line in proc:
-            print(str(line, 'utf-8').strip())
+            logger.info(str(line, 'utf-8').strip())
     return process
 
 def fetch_existing_mapping(report_slug, trait_slug):
@@ -52,6 +58,7 @@ def fetch_existing_mapping(report_slug, trait_slug):
         if a job is rerun
     """
     trait_filters = [('report_slug', '=', report_slug), ('trait_slug', '=', trait_slug)]
+    logger.info(trait_filters)
     try:
         result = list(query_item('mapping',
                                  filters=trait_filters))[0]
@@ -64,7 +71,7 @@ def fetch_existing_mapping(report_slug, trait_slug):
 # Define variables
 report_name = os.environ['REPORT_NAME']
 trait_name = os.environ['TRAIT_NAME']
-print(f"Fetching Task: {report_name} - {trait_name}")
+logger.info(f"Fetching Task: {report_name} - {trait_name}")
 
 trait_filters = [('report_name', '=', report_name), ('trait_name', '=', trait_name)]
 trait_data = list(query_item('trait',
@@ -100,7 +107,7 @@ try:
     process = run_comm(comm)
     exitcode = process.wait()
 
-    print(f"R exited with code {exitcode}")
+    logger.info(f"R exited with code {exitcode}")
     if exitcode != 0:
         raise Exception("R error")
 
@@ -125,7 +132,10 @@ try:
             mapping.pos = row.POS
             mapping.interval_start = int(interval_start)
             mapping.interval_end = int(interval_end)
-            mapping.is_public = trait.is_public
+            try:
+                mapping.is_public = trait.is_public
+            except AttributeError:
+                mapping.is_public = False
             mapping.log10p = row.peak_log10p
             mapping.report_slug = trait.report_slug
             mapping.trait_slug = trait.trait_name

@@ -208,7 +208,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
                     max_corr = max_corr.reset_index().rename(index=str, columns={0: 'max_correlation'})
                     variant_correlation = pd.merge(variant_correlation, max_corr, on=['gene_id', 'interval']) \
                                             .sort_values(['max_correlation', 'gene_id'], ascending=False)
-                except urllib.error.HTTPError:
+                except (urllib.error.HTTPError, pd.errors.EmptyDataError):
                     variant_correlation = []
                 peak_summary = trait.get_gs_as_dataset("tables/peak_summary.tsv.gz")
                 peak_summary['interval'] = peak_summary.apply(lambda row: f"{row.chrom}:{row.interval_start}-{row.interval_end}", axis=1)
@@ -218,7 +218,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
                              'n_peaks': len(peak_summary),
                              'variant_correlation': variant_correlation,
                              'interval_summary': interval_summary})
-        
+
         elif trait.REPORT_VERSION == 'v2':
             """
                 VERSION 2
@@ -242,6 +242,11 @@ def report_view(report_slug, trait_name=None, rerun=None):
                 except:
                     first_peak = None
 
+                try:
+                    variant_correlation = trait.get_gs_as_dataset("interval_variants.tsv.gz")
+                except (pd.errors.EmptyDataError):
+                    variant_correlation = pd.DataFrame()
+
                 interval_summary = trait.get_gs_as_dataset("interval_summary.tsv.gz") \
                                         .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
 
@@ -249,7 +254,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
                 peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
                 VARS.update({'pxg_plot': pxg_plot(peak_marker_data, trait_name),
                              'interval_summary': interval_summary,
-                             'variant_correlation': trait.get_gs_as_dataset("interval_variants.tsv.gz"),
+                             'variant_correlation': variant_correlation,
                              'peak_summary': peak_summary,
                              'n_peaks': len(peak_summary),
                              'isotypes': list(trait._trait_df.ISOTYPE.values),
@@ -257,7 +262,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
 
             # To handle report data, functions specific
             # to the version will be required.
-    
+
     report_template = f"reports/{trait.REPORT_VERSION}.html"
     return render_template(report_template, **VARS)
 

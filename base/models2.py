@@ -206,35 +206,15 @@ class trait_m(datastore_model):
             return ""
 
 
-    def get_task_log(self):
-        """
-            Returns the task log associated with
-            the task.
-        """
-        try:
-            print(f"ecs/cegwas/{self.name}")
-            print('/ecs/cendr-map')
-            log = self._logs.get_log_events(logGroupName='/ecs/cendr-map',
-                                            logStreamName=f"ecs/cegwas/{self.name}",
-                                            limit=10000)
-            return log.get('events')
-        except self._logs.exceptions.ResourceNotFoundException:
-            return None
-
-
     def get_formatted_task_log(self):
         """
             Returns formatted task log
         """
-        logs = self.get_task_log()
-        yield f"####-##-## ##:##:## Task ID: {self.name}"
-        if logs:
-            for log in logs:
-                timestamp = int(str(log['timestamp'])[:-3])
-                event_time = arrow.Arrow.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%m:%S")
-                yield f"{event_time} {log['message']}"
-        else:
-            return []
+        try:
+            log = requests.get(self.gs_base_url + "/out.log").content
+        except:
+            return [f"####-##-## ##:##:## Task ID: {self.name}\n"]
+        return (f"####-##-## ##:##:## Task ID: {self.name}\n" + log.decode('utf-8')).splitlines()
 
     def duration(self):
         """
