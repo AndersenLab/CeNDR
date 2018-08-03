@@ -1,6 +1,4 @@
-#### June 2018 CeNDR Updates Updates
-
-This release adds a new, large mapping set.
+#### August 2018 CeNDR Updates Updates
 
 * Release 20180527 is out! This release brings the total number of isotypes to 330, with 766 total strains.
 * Added haplotype plots for new releases.
