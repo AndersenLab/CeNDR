@@ -219,3 +219,9 @@ def pxg_plot(df, trait_name):
                                show_link=False,
                                config={"displayModeBar": False})
 
+
+
+def fine_mapping_plot(df):
+    pass
+
+

@@ -12,6 +12,8 @@ from subprocess import Popen
 from utils.vcf_np import VCF_DataFrame
 from logzero import logger
 
+DATASET_RELEASE = os.environ['DATASET_RELEASE']
+
 def process_interval(interval):
     """
         Processes an interval - producing a JSON summary in the data folder.
@@ -25,7 +27,7 @@ def process_interval(interval):
     df = pd.read_csv("df.tsv", sep='\t')
     isotype_list = ','.join(df['ISOTYPE'].values)
     if not os.path.exists(interval_out):
-        comm = f"bcftools view -O z --samples {isotype_list} http://storage.googleapis.com/elegansvariation.org/releases/20170531/WI.20170531.vcf.gz {interval} > {interval_out} && bcftools index {interval_out}"
+        comm = f"bcftools view -O z --samples {isotype_list} https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/WI.{DATASET_RELEASE}.soft-filter.vcf.gz {interval} > {interval_out} && bcftools index {interval_out}"
         out, err = Popen(comm, shell=True).communicate()
     vcf = VCF_DataFrame.from_vcf(interval_out, interval)
     return vcf.hard_filter() \

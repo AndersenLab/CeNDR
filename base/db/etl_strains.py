@@ -58,7 +58,8 @@ def fetch_andersen_strains():
             if k in ['isolation_date'] and v:
                 record[k] = parser.parse(v)
         if record['latitude']:
-            record['elevation'] = fetch_elevations(record['latitude'], record['longitude'])
+            # Round elevation
+            record['elevation'] = round(fetch_elevations(record['latitude'], record['longitude']))
         if n % 50 == 0:
             logger.info(f"Loaded {n} strains")
     return strain_records

@@ -5,7 +5,6 @@ library(cegwas)
 library(tidyverse)
 library(jsonlite)
 library(aws.s3)
-
 # Output session info
 session <- devtools::session_info()
 session
@@ -25,15 +24,15 @@ df <- readr::read_tsv("df.tsv") %>%
 names(df) <- c("STRAIN", 'TRAIT')
 
 # Perform the mapping
-if(!file.exists("mapping.Rdata")) {
+if(!file.exists("data/mapping.Rdata")) {
   mapping <- cegwas::cegwas_map(df, mapping_snp_set = FALSE)
   save(mapping, file='mapping.Rdata')
   save(mapping, file='data/mapping.Rdata')
 } else {
-  load("mapping.Rdata")
+  load("data/mapping.Rdata")
 }
 
-mapping %>% 
+mapping %>%
     dplyr::ungroup() %>%
     dplyr::mutate(trait = TRAIT_NAME) %>%
     dplyr::mutate(marker = gsub("_", ":", marker)) %>%
@@ -47,7 +46,7 @@ is_significant = any(mapping$aboveBF == 1)
 #
 
 # Filter MtDNA for plotting purposes
-cegwas::manplot(mapping %>% dplyr::filter(CHROM != "MtDNA"))[[1]] +
+cegwas::manplot(mapping %>% dplyr::filter(CHROM != "MtDNA"), bf_line_color='red')[[1]] +
   theme_bw() +
   PUB_THEME +
   theme(plot.margin = unit(c(0.0,0.5,0.5,0),"cm"),
@@ -113,13 +112,13 @@ n_peaks <- nrow(peaks)
 readr::write_tsv(peaks, "data/peak_summary.tsv.gz")
 
 # Generate phenotype/genotype data for PxG Boxplots.
-snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%        
+query_vcf(peaks$peak_pos, impact="ALL", format=c("TGT", "GT", "FT")) %>%
   dplyr::mutate(TRAIT = TRAIT_NAME) %>%
   dplyr::rowwise() %>%
-  dplyr::filter(GT %in% c("REF", "ALT")) %>%
-  dplyr::mutate(TGT = .data[[.data$GT]]) %>%
+  dplyr::filter(genotype %in% c(0, 2)) %>%
+  dplyr::mutate(GT=genotype, TGT = glue::glue("{a1}{a2}")) %>%
   dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
-  dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
+  dplyr::select(MARKER, CHROM, POS, ISOTYPE=SAMPLE, STRAIN=SAMPLE, REF, ALT, GT, TGT, FT, FILTER) %>%
   dplyr::mutate(GT = glue::glue("{GT} ({TGT})")) %>%
   dplyr::inner_join(df) %>%
   dplyr::distinct() %>% readr::write_tsv("data/peak_markers.tsv.gz")
@@ -129,7 +128,7 @@ snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
 #============================#
 
 # Save mapping Intervals
-mapping_intervals <- mapping %>% 
+mapping_intervals <- mapping %>%
             dplyr::mutate(report = REPORT_NAME, BF = BF) %>%
             dplyr::group_by(peak_id) %>%
             dplyr::filter(!is.na(peak_id), log10p == max(log10p)) %>%
@@ -139,14 +138,14 @@ mapping_intervals <- mapping %>%
 readr::write_tsv(mapping_intervals, "data/mapping_intervals.tsv.gz")
 
 # Fetch peak marker genotypes for generation of box plots
-peak_markers <- snpeff(peaks$peak_pos, severity="ALL", elements="ALL") %>%
+peak_markers <- query_vcf(peaks$peak_pos, impact="ALL", format=c("TGT", "GT", "FT")) %>%
                 dplyr::mutate(TRAIT = TRAIT_NAME) %>%
                 # Filter out hets
                 dplyr::rowwise() %>%
-                dplyr::filter(GT %in% c("REF", "ALT")) %>%
-                dplyr::mutate(TGT = .data[[.data$GT]]) %>%
+                dplyr::filter(genotype %in% c(0, 2)) %>%
+                dplyr::mutate(GT=genotype, TGT = glue::glue("{a1}{a2}")) %>%
                 dplyr::mutate(MARKER = glue::glue("{CHROM}:{POS}")) %>%
-                dplyr::select(MARKER, CHROM, POS, STRAIN=strain, REF, ALT, GT, TGT, FT, FILTER) %>%
+                dplyr::select(MARKER, CHROM, POS, ISOTYPE=SAMPLE, STRAIN=SAMPLE, REF, ALT, GT, TGT, FT, FILTER) %>%
                 dplyr::mutate(GT = glue::glue("{GT} ({TGT})")) %>%
                 dplyr::inner_join(df) %>%
                 dplyr::distinct()
@@ -162,50 +161,54 @@ if (n_peaks > 1) {
 }
 
 # Get interval correlations
-if (!file.exists('interval.Rdata')) {
-    vc <- variant_correlation(mapping,
-                              condition_trait = F,
-                              variant_severity = c("LOW", "MODERATE", "HIGH"),
-                              gene_types = "ALL")
-    interval_variants <- dplyr::bind_rows(vc) %>%
-                         dplyr::distinct(CHROM,
-                                         POS,
-                                         REF,
-                                         ALT,
-                                         gene_id,
-                                         trait,
-                                         effect,
-                                         impact,
-                                         nt_change,
-                                         aa_change, .keep_all = TRUE) %>%
-                         dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
-                         dplyr::group_by(peak, gene_id) %>%
-                         dplyr::mutate(n_variants = n()) %>%
-                         dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p)),
-                                       corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
-                         dplyr::arrange(dplyr::desc(max_gene_corr_p),
-                                        gene_id) %>%
-                         dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
-                         dplyr::select(-n,
-                                       -strain,
-                                       -GT,
-                                       -FILTER,
-                                       -FT,
-                                       -pheno_value,
-                                       -corrected_pheno,
-                                       -startPOS,
-                                       -endPOS)
-    # For cache
-    save(interval_variants, file='interval.Rdata')
-    # For user
-    save(interval_variants, file='data/interval.Rdata')
+interval_variants <- data.frame()
+if (!file.exists('data/interval.Rdata')) {
+
+    if (mapping %>% dplyr::filter(interval_size < 1E6) %>% nrow() > 0) {
+        vc <- variant_correlation(mapping %>% dplyr::filter(interval_size < 1E6),
+                                  condition_trait = F,
+                                  variant_severity = "ALL",
+                                  gene_types = "ALL")
+        if (!is.na(vc[[1]])) {
+            interval_variants <- dplyr::bind_rows(vc) %>%
+                                 dplyr::distinct(CHROM,
+                                                 POS,
+                                                 REF,
+                                                 ALT,
+                                                 gene_id,
+                                                 trait,
+                                                 effect,
+                                                 impact,
+                                                 nt_change,
+                                                 aa_change, .keep_all = TRUE) %>%
+                                 dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
+                                 dplyr::group_by(peak, gene_id) %>%
+                                 dplyr::mutate(n_variants = n()) %>%
+                                 dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p)),
+                                               corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
+                                 dplyr::arrange(dplyr::desc(max_gene_corr_p),
+                                                gene_id) %>%
+                                 dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
+                                 dplyr::select(-n,
+                                               -strain,
+                                               -GT,
+                                               -FILTER,
+                                               -FT,
+                                               -pheno_value,
+                                               -corrected_pheno,
+                                               -startPOS,
+                                               -endPOS)
+        }
+        # For user
+        save(interval_variants, file='data/interval.Rdata')
+    }
 } else {
-    load('interval.Rdata')
+    load('data/interval.Rdata')
 }
+
 # Don't write huge interval variant file anymore.
 # Condense Interval Variants File
 interval_variants %>%
     readr::write_tsv("data/interval_variants.tsv.gz")
-
 
 

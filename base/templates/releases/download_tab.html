@@ -1,5 +1,13 @@
 <div class="row">
+    <br />
+    <div class='col-md-12'>
+        <div class="alert alert-warning" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            If you have trouble downloading, please ensure you are not behind a University firewall. Please notify us of any issues downloading data.
+        </div>
+    </div>
     <div class="col-md-4">
+
 
         <br />
         <div class="panel panel-default">
@@ -15,7 +23,7 @@
 
         <h3>Alignment Data</h3>
         <p>Wild isolate genomes are aligned and stored using the
-            <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</span>  format. BAMs are available in the table below.</p> 
+            <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</span>  format. BAMs are available in the table below.</p>
         <p><a href="http://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data</a></p>
             <h4>Downloading All Alignment Data</h4>
             <p>You can download all alignment data using the script below. Before this script will work, you need to download and install <strong>wget</strong>. We recommend using <a href="http://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="http://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "primary.help_item",filename="FAQ")}}">FAQ</a> for details on installing <strong>wget</strong>.</p>
@@ -31,9 +39,9 @@
         <h4>VCF</h4>
         <p>VCFs generated from the variant calling pipeline are provided below.</p>
         <ul>
-            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filtered.vcf.gz">Soft-filtered</a></strong> - Includes all variants and annotations. The QC status of variants is included.</li>
-            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filtered.vcf.gz">Hard-filtered</a></strong> - Variants and genotypes that fail QC are removed.</li>
-            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz">Imputed</a> - An imputed dataset generated from the hard-filtered VCF.</strong></li>
+            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz">Soft-filter</a></strong> - Includes all variants and annotations. The QC status of variants is included.</li>
+            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz">Hard-filter</a></strong> - Variants and genotypes that fail QC are removed.</li>
+            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz">Imputed</a> - An imputed dataset generated from the hard-filter VCF.</strong></li>
         </ul>
 
         <div style="clear:both;"></div>

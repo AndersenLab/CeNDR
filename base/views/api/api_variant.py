@@ -33,7 +33,7 @@ ANN_header = ["allele",
 
 
 def get_vcf(release=DATASET_RELEASE):
-    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/WI.{release}.vcf.gz".format(release=release)
+    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.soft-filter.vcf.gz".format(release=release)
 
 
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
@@ -56,7 +56,7 @@ ann_cols = ['allele',
 
 @app.route('/api/variant', methods=["GET", "POST"])
 @jsonify_request
-def variant_query(query=None, samples=["N2"], list_all_strains=False):
+def variant_query(query=None, samples=["N2"], list_all_strains=False, release=DATASET_RELEASE):
     """
     Used to query a VCF and return results in a dictionary.
 
@@ -95,7 +95,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False):
         samples = "N2"
     else:
         samples = ','.join(samples)
-    vcf = get_vcf()
+    vcf = get_vcf(release=release)
 
     chrom = query['chrom']
     start = query['start']
@@ -158,10 +158,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False):
                 "ANN": ANN,
                 "GT_Summary": Counter(record.gt_types.tolist())
             }
-            if 'phastcons' in INFO:
-                rec_out["phastcons"] = float(INFO['phastcons'])
-            if 'phylop' in INFO:
-                rec_out["phylop"] = float(INFO['phylop'])
+
             if len(rec_out['ANN']) > 0 or 'ALL' in query['variant_impact']:
                 output_data.append(rec_out)
             if i == 1000 and query['output'] != "tsv":

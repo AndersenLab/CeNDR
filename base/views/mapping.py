@@ -1,24 +1,16 @@
 import decimal
-import os
-import time
 import re
 import arrow
-import requests
+import urllib
 import pandas as pd
 import simplejson as json
 
-from base.utils.email import send_email, MAPPING_SUBMISSION_EMAIL
 from base.constants import BIOTYPES, TABLE_COLORS
-from base.application import autoconvert
 from base.models2 import trait_m
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from peewee import JOIN
 from flask import render_template, request, redirect, url_for, abort
-from collections import OrderedDict
 from slugify import slugify
-from gcloud import storage
-from collections import Counter
 from base.forms import mapping_submission_form
 from logzero import logger
 from flask import session, flash, Blueprint, g
@@ -28,7 +20,7 @@ from base.constants import (REPORT_VERSION,
                             CENDR_VERSION,
                             WORMBASE_VERSION)
 
-from base.utils.gcloud import query_item
+from base.utils.gcloud import query_item, get_item, delete_item
 
 from base.utils.plots import pxg_plot, plotly_distplot
 
@@ -118,9 +110,10 @@ def report_view(report_slug, trait_name=None, rerun=None):
         and v2 reports.
 
     """
+
     trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
-    logger.info(trait_set)
-    # Get first report
+
+    # Get first report if available.
     try:
         trait = trait_set[0]
     except IndexError:
@@ -131,9 +124,29 @@ def report_view(report_slug, trait_name=None, rerun=None):
             flash('Cannot find report', 'danger')
             return abort(404)
 
+    # Enable reruns
+    if rerun:
+        trait_set = [x for x in trait_set if x['trait_name'] == trait_name]
+        for n, existing_trait in enumerate(trait_set):
+            logger.info(n)
+            logger.info(existing_trait.key)
+            delete_item(existing_trait)
+        trait = trait_m(trait_set[0])
+
+        mapping_items = query_item('mapping', filters=[('report_slug', '=', report_slug), ('trait_slug', '=', trait_name)])
+        for existing_mapping in mapping_items:
+            delete_item(existing_mapping)
+
+        trait.status = "Rerunning"
+        # Running the task will save it.
+        trait.run_task()
+        return redirect(url_for('mapping.report_view',
+                                report_slug=report_slug,
+                                trait_name=trait_name))
+
     # Verify user has permission to view report
     user = session.get('user')
-    if not trait['is_public']:
+    if not trait.get('is_public'):
         if user:
             user_id = user.get('user_id')
         else:
@@ -143,6 +156,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
             return abort(404)
 
     if not trait_name:
+        logger.error("Trait name not found")
         # Redirect to the first trait
         return redirect(url_for('mapping.report_view',
                                 report_slug=report_slug,
@@ -154,6 +168,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
         cur_trait = [x for x in trait_set if x['trait_name'] == trait_name][0]
         trait = trait_m(cur_trait.key.name)
         trait.__dict__.update(cur_trait)
+        logger.info(trait)
     except IndexError:
         return abort(404)
 
@@ -187,11 +202,14 @@ def report_view(report_slug, trait_name=None, rerun=None):
             if trait.is_significant:
                 interval_summary = trait.get_gs_as_dataset("tables/interval_summary.tsv.gz") \
                                         .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
-                variant_correlation = trait.get_gs_as_dataset("tables/variant_correlation.tsv.gz")
-                max_corr = variant_correlation.groupby(['gene_id', 'interval']).apply(lambda x: max(abs(x.correlation)))
-                max_corr = max_corr.reset_index().rename(index=str, columns={0: 'max_correlation'})
-                variant_correlation = pd.merge(variant_correlation, max_corr, on=['gene_id', 'interval']) \
-                                        .sort_values(['max_correlation', 'gene_id'], ascending=False)
+                try:
+                    variant_correlation = trait.get_gs_as_dataset("tables/variant_correlation.tsv.gz")
+                    max_corr = variant_correlation.groupby(['gene_id', 'interval']).apply(lambda x: max(abs(x.correlation)))
+                    max_corr = max_corr.reset_index().rename(index=str, columns={0: 'max_correlation'})
+                    variant_correlation = pd.merge(variant_correlation, max_corr, on=['gene_id', 'interval']) \
+                                            .sort_values(['max_correlation', 'gene_id'], ascending=False)
+                except (urllib.error.HTTPError, pd.errors.EmptyDataError):
+                    variant_correlation = []
                 peak_summary = trait.get_gs_as_dataset("tables/peak_summary.tsv.gz")
                 peak_summary['interval'] = peak_summary.apply(lambda row: f"{row.chrom}:{row.interval_start}-{row.interval_end}", axis=1)
                 first_peak = peak_summary.iloc[0]
@@ -200,13 +218,16 @@ def report_view(report_slug, trait_name=None, rerun=None):
                              'n_peaks': len(peak_summary),
                              'variant_correlation': variant_correlation,
                              'interval_summary': interval_summary})
+
         elif trait.REPORT_VERSION == 'v2':
             """
                 VERSION 2
             """
             # If the mapping is complete:
             # Phenotype plot
+
             phenotype_plot = plotly_distplot(trait._trait_df, trait_name)
+            VARS.update({'phenotype_plot': phenotype_plot})
             # Fetch datafiles for complete runs
             VARS.update({'n_peaks': 0})
             if trait.is_significant:
@@ -215,11 +236,16 @@ def report_view(report_slug, trait_name=None, rerun=None):
                     first_peak = peak_summary.loc[0]
                     chrom, interval_start, interval_end = re.split(":|\-", first_peak['interval'])
                     first_peak.chrom = chrom
-                    first_peak['pos'] = int(first_peak['peak_pos'].split(":")[1])
-                    first_peak['interval_start'] = int(interval_start)
-                    first_peak['interval_end'] = int(interval_end)
+                    first_peak.pos = int(first_peak['peak_pos'].split(":")[1])
+                    first_peak.interval_start = int(interval_start)
+                    first_peak.interval_end = int(interval_end)
                 except:
                     first_peak = None
+
+                try:
+                    variant_correlation = trait.get_gs_as_dataset("interval_variants.tsv.gz")
+                except (pd.errors.EmptyDataError):
+                    variant_correlation = pd.DataFrame()
 
                 interval_summary = trait.get_gs_as_dataset("interval_summary.tsv.gz") \
                                         .rename(index=str, columns={'gene_w_variants': 'genes w/ variants'})
@@ -228,16 +254,15 @@ def report_view(report_slug, trait_name=None, rerun=None):
                 peak_summary = trait.get_gs_as_dataset("peak_summary.tsv.gz")
                 VARS.update({'pxg_plot': pxg_plot(peak_marker_data, trait_name),
                              'interval_summary': interval_summary,
-                             'variant_correlation': trait.get_gs_as_dataset("interval_variants.tsv.gz"),
+                             'variant_correlation': variant_correlation,
                              'peak_summary': peak_summary,
-                             'phenotype_plot': phenotype_plot,
                              'n_peaks': len(peak_summary),
                              'isotypes': list(trait._trait_df.ISOTYPE.values),
                              'first_peak': first_peak})
 
             # To handle report data, functions specific
             # to the version will be required.
-    
+
     report_template = f"reports/{trait.REPORT_VERSION}.html"
     return render_template(report_template, **VARS)
 

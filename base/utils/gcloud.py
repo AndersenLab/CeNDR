@@ -3,6 +3,7 @@ import hashlib
 import base64
 from flask import g
 from base.utils.data_utils import dump_json
+from base.constants import DATASET_RELEASE
 from gcloud import datastore, storage
 from logzero import logger
 import googleapiclient.discovery
@@ -21,6 +22,13 @@ def google_datastore(open=False):
     if not hasattr(g, 'ds'):
         g.ds = client
     return g.ds
+
+
+def delete_item(item):
+    ds = google_datastore()
+    batch = ds.batch()
+    batch.delete(item.key)
+    batch.commit()
 
 
 def store_item(kind, name, **kwargs):
@@ -127,6 +135,19 @@ def upload_file(name, fname):
     blob = cendr_bucket.blob(name)
     blob.upload_from_filename(fname)
     return blob
+
+
+def list_release_files(prefix):
+    """
+        Lists files with a given prefix
+        from the current dataset release
+    """
+
+    gs = google_storage()
+    cendr_bucket = gs.get_bucket("elegansvariation.org")
+    items = cendr_bucket.list_blobs(prefix=prefix)
+    return list([f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items])
+
 
 def google_analytics():
     """

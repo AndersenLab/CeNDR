@@ -109,7 +109,7 @@ def authorized(service_name):
         user_info = requests.get('https://www.googleapis.com/userinfo/email?alt=json&access_token={}'.format(resp['access_token']))
         user_info = {'google': user_info.json()['data']}
         user_email = user_info['google']['email'].lower()
-   
+
     # Create or get existing user.
     user = user_m(user_email)
     if not user._exists:

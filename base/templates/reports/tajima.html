@@ -47,11 +47,11 @@ function update_tajima_plot() {
   if (end < 0) {
     end = 0;
   }
-  console.log(chrom);
-  console.log(start);
-  console.log(`/api/popgen/tajima/${chrom}/${start}/${end}`)
+
+  tajima_request_url = `/api/popgen/tajima/${chrom}/${start}/${end}/{{ trait.DATASET_RELEASE }}`
+  console.log(tajima_request_url)
   $.ajax({
-    url: `/api/popgen/tajima/${chrom}/${start}/${end}`,
+    url: tajima_request_url,
     contentType: 'application/json',
     success: function(data) {
       data["mode"] = "markers";

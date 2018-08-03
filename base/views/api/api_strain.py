@@ -3,6 +3,25 @@ from base.application import app
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_
 from flask import request
+from logzero import logger
+
+@app.route('/api/strain/query/<string:query>')
+@jsonify_request
+def search_strains(query):
+    base_query = strain_m.query.filter(strain_m.isotype != None)
+    query = query.upper()
+    results = base_query.filter(or_(strain_m.isotype == query,
+                                    strain_m.isotype.like(f"{query}%"),
+                                    strain_m.strain == query,
+                                    strain_m.strain.like(f"{query}%"),
+                                    strain_m.previous_names.like(f"%{query}|%"),
+                                    strain_m.previous_names.like(f"%,{query}|"),
+                                    strain_m.previous_names.like(f"%{query}"),
+                                    strain_m.previous_names == query))
+    results = list([x.to_json() for x in results])
+    return results    
+
+
 
 @app.route('/api/strain/')
 @app.route('/api/strain/<string:strain_name>')
@@ -44,6 +63,28 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
     return results
 
 
+def get_strains(known_origin=False):
+    """
+        Returns a list of strains;
+
+        Represents all strains
+
+        Args:
+            known_origin: Returns only strains with a known origin
+            list_only: Returns a list of isotypes (internal use)
+    """
+    ref_strain_list = strain_m.query.filter(strain_m.reference_strain == True).all()
+    ref_strain_list = {x.isotype: x.strain for x in ref_strain_list}
+    result = strain_m.query
+    if known_origin or 'origin' in request.path:
+        result = result.filter(strain_m.latitude != None)
+    result = result.all()
+    for strain in result:
+        strain.reference_strain = ref_strain_list[strain.isotype]
+        logger.error(strain.reference_strain)
+    return result
+
+
 @app.route('/api/isotype')
 @app.route('/api/isotype/origin')
 @jsonify_request
@@ -57,7 +98,7 @@ def get_isotypes(known_origin=False, list_only=False):
             known_origin: Returns only strains with a known origin
             list_only: Returns a list of isotypes (internal use)
     """
-    result = strain_m.query .filter(strain_m.reference_strain == True)
+    result = strain_m.query.filter(strain_m.reference_strain == True)
     if known_origin or 'origin' in request.path:
         result = result.filter(strain_m.latitude != None)
     result = result.all()

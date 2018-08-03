@@ -15,6 +15,7 @@ from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
 from collections import defaultdict
 from botocore.exceptions import ClientError
+from base.constants import DATASET_RELEASE
 
 from logzero import logger
 
@@ -105,7 +106,7 @@ class trait_m(datastore_model):
         """
         # Fargate credentials
         task_fargate = self._ecs.run_task(
-            taskDefinition='cendr-map',
+            taskDefinition=f"cendr-map-{DATASET_RELEASE}",
             overrides={
                 'containerOverrides': [
                     {
@@ -126,6 +127,10 @@ class trait_m(datastore_model):
                             {
                                 'name': 'TRAIT_NAME',
                                 'value': self.trait_name
+                            },
+                            {
+                                'name': 'DATASET_RELEASE',
+                                'value': DATASET_RELEASE
                             }#,
                             #{
                             #    'name': 'AWS_ACCESS_KEY_ID',
@@ -201,35 +206,15 @@ class trait_m(datastore_model):
             return ""
 
 
-    def get_task_log(self):
-        """
-            Returns the task log associated with
-            the task.
-        """
-        try:
-            print(f"ecs/cegwas/{self.name}")
-            print('/ecs/cendr-map')
-            log = self._logs.get_log_events(logGroupName='/ecs/cendr-map',
-                                            logStreamName=f"ecs/cegwas/{self.name}",
-                                            limit=10000)
-            return log.get('events')
-        except self._logs.exceptions.ResourceNotFoundException:
-            return None
-
-
     def get_formatted_task_log(self):
         """
             Returns formatted task log
         """
-        logs = self.get_task_log()
-        yield f"####-##-## ##:##:## Task ID: {self.name}"
-        if logs:
-            for log in logs:
-                timestamp = int(str(log['timestamp'])[:-3])
-                event_time = arrow.Arrow.utcfromtimestamp(timestamp).strftime("%Y-%m-%d %H:%m:%S")
-                yield f"{event_time} {log['message']}"
-        else:
-            return []
+        try:
+            log = requests.get(self.gs_base_url + "/out.log").content
+        except:
+            return [f"####-##-## ##:##:## Task ID: {self.name}\n"]
+        return (f"####-##-## ##:##:## Task ID: {self.name}\n" + log.decode('utf-8')).splitlines()
 
     def duration(self):
         """
@@ -356,6 +341,9 @@ class strain_m(DictSerializable, db_2.Model):
 
     def __repr__(self):
         return self.strain
+
+    def to_json(self):
+        return {k:v for k, v in self.__dict__.items() if not k.startswith("_")}
 
     def list_sets(self):
         if self.sets:
@@ -502,7 +490,7 @@ class homologs_m(DictSerializable, db_2.Model):
     gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False, index=True)
     gene_name = db_2.Column(db_2.String(40), index=True)
     homolog_species = db_2.Column(db_2.String(50), index=True)
-    homolog_taxon_id = db_2.Column(db_2.Integer, index=True, nullable=True)  # If available    
+    homolog_taxon_id = db_2.Column(db_2.Integer, index=True, nullable=True)  # If available
     homolog_gene = db_2.Column(db_2.String(50), index=True)
     homolog_source = db_2.Column(db_2.String(40))
 

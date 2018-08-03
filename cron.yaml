@@ -1,4 +1,4 @@
 cron:
-- description: submit_mapping
-  url: /cronmapping
-  schedule: every 5 minutes
+- description: test_mapping_pipeline
+  url: /report/1c28542b/telomere-resids
+  schedule: every 24 hours

@@ -23,12 +23,12 @@
                 <tr>
                 <td><strong>Total</strong></td>
                 <td></td>
-                <td class="price"><strong>${{'%0.2f'| format(form.total|float)}}</strong></td> 
+                <td class="price"><strong>${{'%0.2f'| format(form.total|float)}}</strong></td>
                 </tr>
             </tbody>
         </table>
         <div class ="well well-sm">
-          <p> If you are ordering a ready-made set, the strains will be sent as frozen stocks on dry-ice. Please select a shipping carrier from the drop-down menu and enter an account number. If you are ordering a customized set of strains, these strains will be sent on plates. </p>
+          <p> If you are ordering a ready-made set, the strains will be sent as frozen stocks on dry ice. Please select a shipping carrier from the drop-down menu and enter an account number. If you are ordering a customized set of strains, these strains will be sent on plates. </p>
         </div>
     </div>
 </div>
@@ -56,7 +56,7 @@
                 {{ render_field(form.shipping_account) }}
                 {{ render_field(form.payment) }}
                 {{ render_field(form.comments) }}
-                <small>If you choose to pay by credit card an account will be generated for you in Northwestern's Core Facility, NUcore. If there is a business administration person who will oversee the payment, please include that person's name and email address in the comments field. They will be added to your NUcore account.</small>
+                <small>If you choose to pay by credit card, an account will be generated for you in Northwestern's Core Facility, NUcore. If there is a business administration person who will oversee the payment, please include that person's name and email address in the comments field. They will be added to your NUcore account.</small>
     </div>
 
 
@@ -70,7 +70,6 @@
       {# render_field(form.recaptcha) #}
       <button value="Checkout" class="btn btn-primary btn-block" ><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Order</button>
       <br />
-      <div  id="helpBlock" class="help-block"><strong>Note: </strong>You will still need to send a check to complete your order.</span>
     </div>{# /col-sm-4 #}
   </div>{# /form-group #}
 </div>

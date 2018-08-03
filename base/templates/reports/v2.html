@@ -13,7 +13,7 @@
 <style>
 .report {
   width: 100%;
-} 
+}
 
 .height-report {
   height: 60%;
@@ -90,7 +90,7 @@
     <div class='col-md-12'>
         <h4>Traits</h4>
         {# Traits #}
-            {% for trait in trait_set %} 
+            {% for trait in trait_set %}
                 <a href="{{ url_for('mapping.report_view', report_slug = report_slug, trait_name = trait['trait_name']) }}" type="button" class="btn btn-sm {% if trait_name == trait['trait_name'] %} btn-primary {% else %} btn-link {% endif %}"><strong>{{ trait['trait_name'] }}</strong></a>
             {% endfor %}
         <br /><br />
@@ -175,7 +175,7 @@
 
         <div class="row">
             <div class='col-md-12'>
-                
+
                 {% if trait.status == 'complete' %}
                 <h5>Data</h5>
                 <ul>
@@ -205,6 +205,7 @@
         {% endfor %}
     </div>
 </div>
+
 {% if trait.status == 'complete' %}
     <div id="report" data-toggle="tab">
         <nav id="report_nav" data-offset-top="385" data-spy="affix" class="navbar navbar-default" style="z-index:10000">
@@ -227,28 +228,30 @@
           </div><!-- /.container-fluid -->
         </nav>
 
-        <h2 id="phenotype" name="phenotype">Phenotype</h2> 
+        <h2 id="phenotype" name="phenotype">Phenotype</h2>
         {{ phenotype_plot|safe }}
+
+        <p><strong>Hover over a line in the rug plot to see the strain and phenotype value for that strain.</strong></p>
 
         {% if trait.is_significant %}
 
-          Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!
+          <p>Your phenotype is significantly associated with genetic variation present in the <em>C. elegans</em> population!</p>
 
         {% else %}
 
           <p>Unfortunately your phenotype was not significantly associated with genetic variation present in the <em>C. elegans</em> population. This could be due to noisy trait data - have you performed heritability analysis for your phenotype using our heritability strain panel? If you have and the heritability was found to be high for this trait, the trait might not have reached statistical significance because it is highly complex and more strains need to be phenotyped.</p>
 
-          <p>If you have phenotyped the entire 152 wild-isolate collection, you can patiently wait for more isolates to be added to the collection, or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.</p>
+          <p>If you have phenotyped the entire collection of strains, you can wait for more isolates to be added to the collection or generate an F2 recombinant inbred line (RIL) panel generated between strains with high and low phenotypes.</p>
 
         {% endif %}
 
-        <h2 id="manhattan" name="Manhattan">Manhattan</h2> 
+        <h2 id="manhattan" name="Manhattan">Manhattan</h2>
 
         <img class='img img-responsive'src='{{ trait.file_url("Manhattan.png") }}' alt='Manhattan Plot' />
 
         {% if trait.is_significant %}
 
-        <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick gray line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
+        <p>A genome-wide representation of the association between variation in the <em>C. elegans</em> population and your phenotype. The x-axis corresponds to genomic position with chromosome number indicated as a roman numeral above each box. Dots represent single-nucleotide variants (SNV) present in the <em>C. elegans</em> population. The y-axis corresponds to the level of significance for the association test. Blue dots represent SNVs that are above the defined significance threshold, which is the thick red line. Red boxes surrounding blue dots represent the QTL genomic region of interest, which we define as plus/minus 50 SNVs from the last signifincant SNV. The default threshold for significance is the Bonferroni-corrected value <img src='/static/img/report/bf.png' style="height: 30px;" /> and is usually around 5.5.</p>
 
         {% else %}
 
@@ -261,6 +264,8 @@
         <h2 id="pxg">Phenotype-by-Genotype</h2>
 
         {{ pxg_plot|safe }}
+
+        <p><strong>Hover over a point to see the strain and phenotype value for that strain.</strong></p>
 
         <p>Phenotypic distributions represented as box plots are split by the genotype at the most significant SNV for a given QTL. The phenotype is on the y-axis, and the genotype is on the x-axis. The chromosome and position for the plotted SNV are indicated as roman numerals above each panel. REF refers to the reference N2 genotype, and ALT refers to the alternative variant phenotype. </p>
 
@@ -309,7 +314,7 @@
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
         {% for peak in peak_summary.to_dict('records') %}
-            <li role="presentation" peak="{{ peak.peak_pos }}" class="peak-tab {% if loop.first %} active{% endif %}">
+            <li role="presentation" peak="{{ peak.peak_pos }}" interval="{{ peak.interval }}" class="peak-tab {% if loop.first %} active{% endif %}">
                 <a href="#peak_{{ loop.index }}" aria-controls="peak_{{ loop.index }}" role="tab" data-toggle="tab">
                     {{ peak.interval }}
                 </a>
@@ -375,9 +380,9 @@
                             </tbody>
                         </table>
                         <strong>Biotype summary data differ from past reports. The numbers above reflect counts among the strains that were submitted and are not reflective of the population as a whole.</strong>
-                  
-                        <h3>Variants</h3>
 
+                        <h3>Variants</h3>
+                        {% if not variant_correlation.empty %}
                         <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
 
                         <strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Download Table</a></strong>
@@ -418,7 +423,7 @@
                                     <tr class='corr-row {{ TABLE_COLORS[row["impact"]] }} tr_row'>
                                         <td></td>
                                         <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"] }} / {{ row["ALT"] }})</td>
-                                        <td>{{ row["impact"] }}</td>
+                                   s     <td>{{ row["impact"] }}</td>
                                         <td>{{ row["effect"] }}</td>
                                         <td>{{ row["aa_change"] }}</td>
                                         <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
@@ -426,11 +431,19 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        {% else %}
+                            The interval is too large to show variants.
+                        {% endif %}
                     </div>{# /col-md-12 #}
                 </div>{# /row #}
             </div>{#/ tab-panel #}
             {% endfor %}
         </div>{# /tab-content #}
+        {% if not variant_correlation.empty %}
+            {% include 'reports/fine_map.html' %}
+        {% else %}
+            The interval is too large to show fine mapping results.
+        {% endif %}
         {% include 'reports/geo_map.html' %}
         {% include 'reports/tajima.html' %}
     {% endif %}{#/ significant stuff #}
@@ -452,22 +465,23 @@ var pos = {{ first_peak.pos }};
 
 // Load initial map and Tajima
 $(document).ready(function() {
-  update_geo_map();
-  // Load initial position
-  update_tajima_plot();
+    interval = $('a[data-toggle="tab"]').parent().attr("interval");
+    update_geo_map();
+    update_tajima_plot();
+    update_fine_map(interval);
 });
 
 var offsetHeight = 71;
 
 {# Scrolling #}
-$('body').scrollspy({offset: 100, target: ".navbar"}); 
+$('body').scrollspy({offset: 100, target: ".navbar"});
 // Add smooth scrolling to all links inside a navbar
   $("#report_nav li a").on('click', function(event){
-  link = $(this).attr('href').replace("#","")
+  link = $(this).attr('href').replace("#", "")
   var scrollPos = $(`[id='${link}']`).offset().top - (offsetHeight - 1);
   $('html, body').animate({
     scrollTop: scrollPos
-  }, 800, function(){
+  }, 800, function() {
 
     return false;
   });
@@ -476,6 +490,7 @@ $('body').scrollspy({offset: 100, target: ".navbar"});
 // Monitor peak tabs
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
   peak = $(e.target).parent().attr("peak");
+  interval = $(e.target).parent().attr("interval");
   chrom = peak.split(":")[0];
   pos = peak.split(":")[1];
   interval = $(".peak-tab.active").children("a").html()
@@ -483,6 +498,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
   end = parseInt(interval.split(":")[1].split("-")[1]);
   update_geo_map();
   update_tajima_plot();
+  update_fine_map(interval);
 });
 {% endif %}
 </script>

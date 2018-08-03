@@ -20,6 +20,7 @@ from collections import Counter
 from datetime import datetime as dt
 from flask import g, json
 from gcloud import storage
+from logzero import logger
 
 
 def flatten_dict(d, max_depth=1):
@@ -53,6 +54,8 @@ def get_gs():
 
 class json_encoder(json.JSONEncoder):
     def default(self, o):
+        if hasattr(o, "to_json"):
+            return o.to_json()
         if hasattr(o, "__dict__"):
             return {k: v for k,v in o.__dict__.items() if k != "id" and not k.startswith("_")}
         if type(o) == decimal.Decimal:
@@ -76,8 +79,9 @@ def sorted_files(path):
     return sorted([x for x in os.listdir(path) if not x.startswith(".")], reverse=True)
 
 
-def hash_it(object, length):
-    return hashlib.sha1(str(hash(frozenset(object))).encode('utf-8')).hexdigest()[0:length]
+def hash_it(object, length=10):
+    logger.info(object)
+    return hashlib.sha1(str(object).encode('utf-8')).hexdigest()[0:length]
 
 
 def chicago_date():

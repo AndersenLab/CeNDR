@@ -1,0 +1,71 @@
+<h3>Variant Plot</h3>
+
+<div id="fine_map" class="col-md-8" style="height: 500px; width:100%"></div>
+<small><strong>Plot of correlated variants</strong> - Variants for the top 25 most correlated genes are shown in the plot above. The color indicates the predicted severity of the mutation.
+Green = LOW; Yellow = Moderate; Red = Severe; Gray = Modifier.</small>
+<script defer>
+
+Plotly.newPlot('fine_map', {displayModeBar: false, displaylogo: false});
+
+function update_fine_map(peak) {
+    fine_map_url = `/api/trait/mapping/{{ trait.report_slug }}/{{ trait.trait_name }}/${peak.trim()}`;
+    fine_map_plot = document.getElementById("fine_map");
+    $.getJSON(fine_map_url, function(data) {
+
+            if (data) {
+
+            var layout = {
+                hovermode: 'closest',
+                xaxis: {
+                    title: "Position",
+                    autorange: true,
+                    zeroline:false,
+                    fixedrange: false
+                },
+                yaxis: {
+                    autorange: true,
+                    rangemode: "tozero",
+                    zeroline:false,
+                    fixedrange: false
+                },
+                showlegend: false,
+                title: peak.replace(":", "_").trim()
+            };
+
+
+            console.log(data);
+            trace = {
+                x: data['POS'],
+                y: data['corrected_spearman_cor_p'],
+                showlegend: true,
+                mode: 'markers',
+                type: 'scatter',
+                hoverinfo:"x+y+text",
+                text: data['name'],
+                color: data['color'],
+                marker: {
+                    size: 10,
+                    color: data['color'],
+                    line: {
+                        color: 'black',
+                        width: 0.5,
+                    }
+                }
+            };
+
+          chrom = data['CHROM'][0];
+
+          layout.xaxis.title = chrom;
+          fine_map_plot.data = [trace];
+          fine_map_plot.layout = layout
+          Plotly.redraw(fine_map_plot);
+          Plotly.relayout(fine_map_plot);
+      } else {
+        Plotly.purge(fine_map_plot)
+        $("#fine_map").text("The interval is too large to display.")
+        $("#variant_list > tbody").text("The interval is too large to display.")
+      }
+    })
+}
+
+</script>
