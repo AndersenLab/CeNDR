@@ -20,10 +20,10 @@ impact_colors = {'LOW': '#98f094',
                  'HIGH': '#ed9693',
                  'MODIFIER': '#f7f7f7'}
 
-@app.route('/api/trait/mapping/<string:report_slug>/<string:trait_name>/<string:peak>', methods=["GET", "POST"])
-def mapping_interval(report_slug, trait_name, peak):
+@app.route('/api/trait/mapping/<string:report_name>/<string:trait_name>/<string:peak>', methods=["GET", "POST"])
+def mapping_interval(report_name, trait_name, peak):
     try:
-        trait = query_item('trait', filters=[('report_trait', '=', f"{report_slug}:{trait_name}")])[0]
+        trait = query_item('trait', filters=[('report_trait', '=', f"{report_name}:{trait_name}")])[0]
     except IndexError:
         err = f"Report - Trait not found: {report_slug}:{trait_name}"
         logger.error(err)

@@ -8,7 +8,8 @@ Green = LOW; Yellow = Moderate; Red = Severe; Gray = Modifier.</small>
 Plotly.newPlot('fine_map', {displayModeBar: false, displaylogo: false});
 
 function update_fine_map(peak) {
-    fine_map_url = `/api/trait/mapping/{{ trait.report_slug }}/{{ trait.trait_name }}/${peak.trim()}`;
+    fine_map_url = `/api/trait/mapping/{{ trait.report_name }}/{{ trait.trait_name }}/${peak.trim()}`;
+    console.log(fine_map_url);
     fine_map_plot = document.getElementById("fine_map");
     $.getJSON(fine_map_url, function(data) {
 
