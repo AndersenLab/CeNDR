@@ -5,7 +5,8 @@ from flask import Blueprint
 from base.views.api.api_strain import get_isotypes, query_strains
 from base.constants import DATASET_RELEASE, RELEASES
 from base.models2 import strain_m
-
+from base.utils.gcloud import list_release_files
+from logzero import logger
 
 data_bp = Blueprint('data',
                     __name__,
@@ -30,9 +31,14 @@ def data(selected_release=DATASET_RELEASE):
     url = "https://storage.googleapis.com/elegansvariation.org/releases/{selected_release}/multiqc_bcftools_stats.json".format(selected_release=selected_release)
     vcf_summary = requests.get(url).json()
     release_summary = strain_m.release_summary(selected_release)
+    try:
+        phylo_url = list_release_files(f"releases/{DATASET_RELEASE}/popgen/trees/genome.pdf")[0]
+    except IndexError:
+        pass
     VARS = {'title': title,
             'strain_listing': strain_listing,
             'vcf_summary': vcf_summary,
+            'phylo_url': phylo_url,
             'RELEASES': RELEASES,
             'release_summary': release_summary,
             'selected_release': selected_release,

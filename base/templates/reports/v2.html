@@ -383,7 +383,7 @@
 
                         <h3>Variants</h3>
                         {% if not variant_correlation.empty %}
-                        <p>The table below lists variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype.</p>
+                        <p>The table below lists the top 500 variants, their predicted effects, and their correlation with the phenotype. Only protein coding genes have their variants correlated with phenotype. Click <strong>Download Table</strong> to download the complete list of interval variants.</p>
 
                         <strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Download Table</a></strong>
                         <table class="table table-hover table-striped table-nice" id="variant_list" style="border: 1px solid #b3b3b3;">
@@ -399,6 +399,7 @@
                             </thead>
                             <tbody>
                                 {% for row in variant_correlation[variant_correlation.peak == peak.interval].to_dict('records') %}
+                                {% if loop.index < 500 %}
                                     {% if loop.changed(row['gene_id']) %}
                                     <tr>
                                         <td colspan="6" style='width: 100%; border-top: 2px ridge #999999;'>
@@ -422,12 +423,13 @@
                                     {% endif %}
                                     <tr class='corr-row {{ TABLE_COLORS[row["impact"]] }} tr_row'>
                                         <td></td>
-                                        <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"] }} / {{ row["ALT"] }})</td>
+                                        <td>{{ row['CHROM'] }}:{{ row['POS'] }} ({{ row["REF"]|truncate(5, "...") }} / {{ row["ALT"]|truncate(5, "...") }})</td>
                                         <td>{{ row["impact"] }}</td>
                                         <td>{{ row["effect"] }}</td>
                                         <td>{{ row["aa_change"] }}</td>
                                         <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
                                     </tr>
+                                {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>

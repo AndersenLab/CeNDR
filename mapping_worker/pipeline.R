@@ -20,6 +20,8 @@ source("constants.R")
 df <- readr::read_tsv("df.tsv") %>%
       dplyr::select(1,3)
 
+readr::read_tsv("df.tsv") %>% readr::write_tsv("data/phenotype_data.tsv.gz")
+
 # Make trait name just 'TRAIT'
 names(df) <- c("STRAIN", 'TRAIT')
 
