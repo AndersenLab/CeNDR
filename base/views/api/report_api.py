@@ -3,7 +3,8 @@ from peewee import fn, JOIN
 from flask import jsonify
 from dateutil.parser import parse
 from flask_restful import Resource
-
+from base.utils.gcloud import query_item
+from flask import Response
 
 @app.route('/api/report/date/<date>')
 def report_by_date(date):
@@ -27,3 +28,22 @@ def report_by_date(date):
         .dicts()
         .execute())
     return jsonify(data)
+
+
+
+@app.route('/api/report/data/<string:report_slug>')
+def report_data(report_slug):
+    trait_set = query_item('trait', filters=[('report_slug', '=', report_slug)])
+
+    # Get first report if available.
+    try:
+        trait = trait_set[0]
+    except IndexError:
+        try:
+            trait_set = query_item('trait', filters=[('secret_hash', '=', report_slug)])
+            trait = trait_set[0]
+        except IndexError:
+            flash('Cannot find report', 'danger')
+            return abort(404)
+
+    return Response(trait['trait_data'], mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s.tsv" % report_slug})
