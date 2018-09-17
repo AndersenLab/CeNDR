@@ -179,7 +179,7 @@
                 {% if trait.status == 'complete' %}
                 <h5>Data</h5>
                 <ul>
-                    <li><strong><a href='{{ trait.file_url("phenotype_data.tsv.gz") }}'>Phenotype Data</a></strong></li>
+                    <li><strong><a href='{{ url_for("report_data", report_slug=report_slug) }}'>Phenotype Data</a></strong></li>
                     <li><strong><a href='{{ trait.file_url("mapping.tsv.gz") }}'>Mapping</a></strong></li>
                     <li><strong><a href='{{ trait.file_url("interval_summary.tsv.gz") }}'>Interval Summary</a></strong></li>
                     <li><strong><a href='{{ trait.file_url("interval_variants.tsv.gz") }}'>Interval Variants</a></strong></li>
