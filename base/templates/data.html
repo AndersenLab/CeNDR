@@ -6,7 +6,7 @@
     width: 136px;
 }
 </style>
-{% endblock %} 
+{% endblock %}
 
 
 {% block content %}
@@ -47,6 +47,10 @@
         {% include('releases/variant_summary_tab.html') %}
     </div>
     <div role="tabpanel" class="tab-pane" id="phylogeny">
+        {% if phylo_url %}
+            <br />
+            <strong><a href="{{ phylo_url }}">Download a PDF of the phylogeny</a></strong>
+        {% endif %}
         <img style='width:100%' src='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/popgen/trees/genome.svg'>
     </div>
 
@@ -73,7 +77,7 @@
     </div>
     {% endif %}
 
-        
+
 </div>{# Tab Set #}
 
     </div>{# Download content #}
@@ -83,7 +87,7 @@
 {% include('releases/vcf_modal.html') %}
 
 
-{% endblock %} 
+{% endblock %}
 {% block script %}
 <script>
 $(document).ready(function() {
@@ -97,7 +101,7 @@ $(document).ready(function() {
                 $('.searchable tr').filter(function() {
                     return rex.test($(this).text());
                 }).show();
-            })  
+            })
         })
 
     }(jQuery));
