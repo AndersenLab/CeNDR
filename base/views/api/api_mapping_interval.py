@@ -47,7 +47,9 @@ def mapping_interval(report_name, trait_name, peak):
                                 .reset_index() \
                                 .gene_id.values)
 
-    interval_summary = interval_summary[interval_summary['gene_id'].isin(top_genes)]
+    #interval_summary = interval_summary[interval_summary['gene_id'].isin(top_genes)]
+    interval_summary = interval_summary[interval_summary['gene_id'].isin(top_genes)][:500]
+
 
     out = {k: list(interval_summary[k]) for k in interval_summary.columns.values}
     return jsonify(out)

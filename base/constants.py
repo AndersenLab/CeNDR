@@ -59,7 +59,7 @@ class URLS:
     #
     # AWS URLS
     #
-    BAM_URL_PREFIX = "https://elegansvariation.org.s3.amazonaws.com/bam"
+    BAM_URL_PREFIX = "https://s3.us-east-2.amazonaws.com/elegansvariation.org/bam"
 
     #
     # Wormbase URLs
