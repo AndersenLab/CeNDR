@@ -116,7 +116,11 @@
                 {{ strains[0].bam_url() }}
             </td>
             <td>
+                {% if int(selected_release) >= 20170531 %}
+                <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/isotype/tsv/{{ isotype }}.{{ selected_release }}.tsv.gz">{{ isotype }}.{{ selected_release }}.tsv.gz</a>
+                {% else %}
                 <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/isotype_tsv/{{ isotype }}.{{ selected_release }}.tsv">{{ isotype }}.{{ selected_release }}.tsv</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

@@ -193,3 +193,4 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=DA
             logger.info("RESPOND")
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
         return output_data
+

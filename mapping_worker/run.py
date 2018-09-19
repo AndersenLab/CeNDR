@@ -144,6 +144,8 @@ try:
     else:
         trait.is_significant = False
 
+    # Join variant data
+
     # Upload datasets
     trait.upload_files(glob.glob("data/*"))
     trait.status = "complete"

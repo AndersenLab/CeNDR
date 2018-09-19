@@ -167,9 +167,9 @@ interval_variants <- data.frame()
 if (!file.exists('data/interval.Rdata')) {
 
     if (mapping %>% dplyr::filter(interval_size < 1E6) %>% nrow() > 0) {
-        vc <- variant_correlation(mapping %>% dplyr::filter(interval_size < 1E6),
+        vc <- variant_correlation(mapping,
                                   condition_trait = F,
-                                  variant_severity = "ALL",
+                                  variant_severity = c("MODERATE", "SEVERE"),
                                   gene_types = "ALL")
         if (!is.na(vc[[1]])) {
             interval_variants <- dplyr::bind_rows(vc) %>%
