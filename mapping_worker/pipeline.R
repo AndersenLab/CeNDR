@@ -162,15 +162,47 @@ if (n_peaks > 1) {
     ggsave("data/LD.png", width = 14, height = 11)
 }
 
+split_interval <- function(startPOS, endPOS, size=10000) {
+    last_interval <- rev(seq(from = startPOS, to = endPOS, by = size))[1]
+    intervals <- lapply(seq(from = startPOS, to = endPOS, by = size), function(x) {
+        end = x + size
+        if (end >= endPOS) {
+            end = endPOS
+        }
+        if (x != end) {
+            glue::glue("{x}:{end}")
+        }
+    })
+    paste(unlist(intervals), collapse=",")
+}
+
+# Partition variant correlation
+mapping_chunked <- mapping %>%
+    dplyr::filter(aboveBF>0) %>%
+    dplyr::distinct() %>%
+    dplyr::filter(complete.cases(.)) %>%
+    dplyr::ungroup() %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(interval_set = strsplit(split_interval(startPOS, endPOS), ",")) %>%
+    tidyr::unnest(interval_set) %>%
+    dplyr::rename(intervalStart=startPOS, intervalEnd=endPOS) %>%
+    tidyr::separate(interval_set, into=c("startPOS", "endPOS"), convert=TRUE)
+
+
 # Get interval correlations
 interval_variants <- data.frame()
 if (!file.exists('data/interval.Rdata')) {
 
-    if (mapping %>% dplyr::filter(interval_size < 1E6) %>% nrow() > 0) {
-        vc <- variant_correlation(mapping,
+    if (mapping %>% dplyr::filter(interval_size < 5E5) %>% nrow() > 0) {
+        vc <- variant_correlation(mapping_chunked,
                                   condition_trait = F,
                                   variant_severity = c("MODERATE", "SEVERE"),
                                   gene_types = "ALL")
+        vc <- dplyr::bind_rows(vc) %>%
+              dplyr::left_join(mapping_chunked) %>%
+              dplyr::select(-startPOS, -endPOS) %>%
+              dplyr::rename(startPOS=intervalStart, endPOS=intervalEnd)
+
         if (!is.na(vc[[1]])) {
             interval_variants <- dplyr::bind_rows(vc) %>%
                                  dplyr::distinct(CHROM,
