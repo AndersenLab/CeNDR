@@ -4,7 +4,7 @@ from flask import jsonify
 from dateutil.parser import parse
 from flask_restful import Resource
 from base.utils.gcloud import query_item
-from flask import Response
+from flask import Response, flash
 
 @app.route('/api/report/date/<date>')
 def report_by_date(date):

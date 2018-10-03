@@ -100,10 +100,13 @@ def authorized(service_name):
         flash(error, 'danger')
         return redirect(url_for('choose_login'))
 
-
     if service_name == 'github':
         session['github_token'] = (resp['access_token'], '')
         user_info = {'github': github.get('user').data}
+        logger.info(user_info['github'])
+        if not user_info['github'].get('email'):
+            flash('Please set a public email address in github', 'error')
+            return redirect(url_for('choose_login'))
         user_email = user_info['github']['email'].lower()
     elif service_name == 'google':
         user_info = requests.get('https://www.googleapis.com/userinfo/email?alt=json&access_token={}'.format(resp['access_token']))

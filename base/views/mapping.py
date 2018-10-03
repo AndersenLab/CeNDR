@@ -219,7 +219,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
                              'variant_correlation': variant_correlation,
                              'interval_summary': interval_summary})
 
-        elif trait.REPORT_VERSION == 'v2':
+        elif trait.REPORT_VERSION == "v2":
             """
                 VERSION 2
             """

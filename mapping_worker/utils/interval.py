@@ -42,5 +42,6 @@ def process_interval(interval):
               ._prune_non_snps()
 
     # Full join
-    vcf.to_csv(variants_out)
+    print("Outputting Variants")
+    vcf[['CHROM', 'POS', 'REF', 'ALT', 'allele_set',  'aaf', 'call_rate', 'is_snp', 'is_indel', 'is_transition', 'nucl_diversity', 'num_called', 'num_het', 'num_hom_alt', 'num_hom_ref', 'ANN']].to_csv("data/" + variants_out, sep="\t", compression='gzip', index=False)
     return vcf.interval_summary_table()

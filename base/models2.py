@@ -1,3 +1,4 @@
+import os
 import arrow
 import json
 import pandas as pd
@@ -227,6 +228,15 @@ class trait_m(datastore_model):
         else:
             return None
 
+
+    @property
+    def gs_path(self):
+        if self.REPORT_VERSION == 'v2':
+            return f"{self.REPORT_VERSION}/{self.name}"
+        elif self.REPORT_VERSION == 'v1':
+            return f"{self.REPORT_VERSION}/{self.report_slug}/{self.trait_name}"
+
+
     @property
     def gs_base_url(self):
         """
@@ -235,9 +245,9 @@ class trait_m(datastore_model):
             The URL schema changed from REPORT_VERSION v1 to v2.
         """
         if self.REPORT_VERSION == 'v2':
-            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.REPORT_VERSION}/{self.name}"
+            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.gs_path}"
         elif self.REPORT_VERSION == 'v1':
-            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.REPORT_VERSION}/{self.report_slug}/{self.trait_name}"
+            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.gs_path}"
 
     def get_gs_as_dataset(self, fname):
         """
@@ -254,6 +264,19 @@ class trait_m(datastore_model):
             Downloads a google-storage file as json
         """
         return requests.get(f"{self.gs_base_url}/{fname}").json()
+
+
+    def list_report_files(self):
+        """
+            Lists files with a given prefix
+            from the current dataset release
+        """
+
+        gs = google_storage()
+        cendr_bucket = gs.get_bucket("elegansvariation.org")
+        items = cendr_bucket.list_blobs(prefix=f"reports/{self.gs_path}")
+        return {os.path.basename(x.name): f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items}
+
 
 
     def file_url(self, fname):
