@@ -15,8 +15,8 @@ l
 Rebuild and test 
 ```shell
 DATASET_RELEASE=20180527
-REPORT_NAME='prop-test'
-TRAIT_NAME='prop2'
+REPORT_NAME='dan-test-test4'
+TRAIT_NAME='telomere-resids'
 docker build . -t cegwas-mapping
 docker run -v $PWD:/home/linuxbrew/work \
            -w /home/linuxbrew/work \
@@ -36,6 +36,7 @@ Test
 docker run -it --rm \
            -e REPORT_NAME="${REPORT_NAME}" \
            -e TRAIT_NAME="${TRAIT_NAME}" \
+           -e DATASET_RELEASE="${DATASET_RELEASE}" \
            -e GOOGLE_APPLICATION_CREDENTIALS=gcloud_fargate.json  cegwas-mapping
 
 DATASET_RELEASE=20180527

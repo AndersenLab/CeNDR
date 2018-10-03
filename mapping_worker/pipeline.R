@@ -5,6 +5,19 @@ library(cegwas)
 library(tidyverse)
 library(jsonlite)
 library(aws.s3)
+library(future)
+
+# In batch R process ----
+dump_and_quit <- function() {
+  # Save debugging info to file last.dump.rda
+  traceback()
+  dump.frames(to.file = FALSE)
+  # Quit R with error status
+  q(status = 1)
+}
+options(error = dump_and_quit)
+
+
 # Output session info
 session <- devtools::session_info()
 session
@@ -162,7 +175,7 @@ if (n_peaks > 1) {
     ggsave("data/LD.png", width = 14, height = 11)
 }
 
-split_interval <- function(startPOS, endPOS, size=10000) {
+split_interval <- function(startPOS, endPOS, size=25000) {
     last_interval <- rev(seq(from = startPOS, to = endPOS, by = size))[1]
     intervals <- lapply(seq(from = startPOS, to = endPOS, by = size), function(x) {
         end = x + size
@@ -186,56 +199,62 @@ mapping_chunked <- mapping %>%
     dplyr::mutate(interval_set = strsplit(split_interval(startPOS, endPOS), ",")) %>%
     tidyr::unnest(interval_set) %>%
     dplyr::rename(intervalStart=startPOS, intervalEnd=endPOS) %>%
-    tidyr::separate(interval_set, into=c("startPOS", "endPOS"), convert=TRUE)
+    tidyr::separate(interval_set, into=c("startPOS", "endPOS"), convert=TRUE) %>%
+    dplyr::mutate(split_interval=glue::glue("{CHROM}:{startPOS}-{endPOS}"))
 
-
+plan(multiprocess)
+print(availableCores())
 # Get interval correlations
 interval_variants <- data.frame()
+print("Performing variant correlation")
 if (!file.exists('data/interval.Rdata')) {
+        tryCatch({
+        vc <- sapply(split(mapping_chunked, mapping_chunked$split_interval), function(x) {
+            future({variant_correlation(x,
+                                condition_trait = F,
+                                variant_severity = c("MODERATE", "SEVERE"),
+                                gene_types = "ALL")})
+        })
 
-    if (mapping %>% dplyr::filter(interval_size < 5E5) %>% nrow() > 0) {
-        vc <- variant_correlation(mapping_chunked,
-                                  condition_trait = F,
-                                  variant_severity = c("MODERATE", "SEVERE"),
-                                  gene_types = "ALL")
-        vc <- dplyr::bind_rows(vc) %>%
+        vc <- dplyr::bind_rows(sapply(vc, value)) %>%
               dplyr::left_join(mapping_chunked) %>%
               dplyr::select(-startPOS, -endPOS) %>%
               dplyr::rename(startPOS=intervalStart, endPOS=intervalEnd)
 
-        if (!is.na(vc[[1]])) {
-            interval_variants <- dplyr::bind_rows(vc) %>%
-                                 dplyr::distinct(CHROM,
-                                                 POS,
-                                                 REF,
-                                                 ALT,
-                                                 gene_id,
-                                                 trait,
-                                                 effect,
-                                                 impact,
-                                                 nt_change,
-                                                 aa_change, .keep_all = TRUE) %>%
-                                 dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
-                                 dplyr::group_by(peak, gene_id) %>%
-                                 dplyr::mutate(n_variants = n()) %>%
-                                 dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p)),
-                                               corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
-                                 dplyr::arrange(dplyr::desc(max_gene_corr_p),
-                                                gene_id) %>%
-                                 dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
-                                 dplyr::select(-n,
-                                               -strain,
-                                               -GT,
-                                               -FILTER,
-                                               -FT,
-                                               -pheno_value,
-                                               -corrected_pheno,
-                                               -startPOS,
-                                               -endPOS)
-        }
+        interval_variants <- vc %>% dplyr::distinct(CHROM,
+                                             POS,
+                                             REF,
+                                             ALT,
+                                             gene_id,
+                                             trait,
+                                             effect,
+                                             impact,
+                                             nt_change,
+                                             aa_change, .keep_all = TRUE) %>%
+                             dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
+                             dplyr::group_by(peak, gene_id) %>%
+                             dplyr::mutate(n_variants = n()) %>%
+                             dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p)),
+                                           corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
+                             dplyr::arrange(dplyr::desc(max_gene_corr_p),
+                                            gene_id) %>%
+                             dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
+                             dplyr::select(-n,
+                                           -strain,
+                                           -GT,
+                                           -FILTER,
+                                           -FT,
+                                           -pheno_value,
+                                           -corrected_pheno,
+                                           -startPOS,
+                                           -endPOS)
+        }, error = function(e) {
+                print(e)
+                traceback()
+                stop("VC Error")
+            })
         # For user
-        save(interval_variants, file='data/interval.Rdata')
-    }
+    save(interval_variants, file='data/interval.Rdata')
 } else {
     load('data/interval.Rdata')
 }
@@ -245,4 +264,5 @@ if (!file.exists('data/interval.Rdata')) {
 interval_variants %>%
     readr::write_tsv("data/interval_variants.tsv.gz")
 
+quit(save="no", status=0)
 

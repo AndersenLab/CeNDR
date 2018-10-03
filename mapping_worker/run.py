@@ -15,6 +15,7 @@ import uuid
 import json
 import re
 import logzero
+import sys
 from logzero import logger
 from utils.interval import process_interval
 from utils.gcloud import trait_m, mapping_m, query_item, get_item
@@ -46,10 +47,11 @@ def unique_id():
 
 def run_comm(comm):
     logger.info(comm)
-    process = Popen(comm, stdout=PIPE, stderr=PIPE)
+    process = Popen(comm, stdout=PIPE, stderr=sys.stderr)
     with process.stdout as proc:
         for line in proc:
             logger.info(str(line, 'utf-8').strip())
+
     return process
 
 def fetch_existing_mapping(report_slug, trait_slug):
