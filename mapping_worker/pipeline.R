@@ -210,14 +210,29 @@ print("Performing variant correlation")
 if (!file.exists('data/interval.Rdata')) {
         tryCatch({
         vc <- sapply(split(mapping_chunked, mapping_chunked$split_interval), function(x) {
-            future({variant_correlation(x,
-                                condition_trait = F,
-                                variant_severity = c("MODERATE", "SEVERE"),
-                                gene_types = "ALL")})
+            future({
+                tryCatch({
+                        variant_correlation(x,
+                                            condition_trait = F,
+                                            variant_severity = c("LOW", "MODERATE", "SEVERE"),
+                                            gene_types = "ALL")
+                    },
+                    error = function(e) { message(glue::glue("No VC for {x} - continuing")) })
+            })
         })
 
-        vc <- dplyr::bind_rows(sapply(vc, value)) %>%
-              dplyr::left_join(mapping_chunked) %>%
+        # Combine back
+        vc <- dplyr::bind_rows(sapply(vc, value))
+        vc <- vc %>%
+              dplyr::left_join(., mapping_chunked %>%
+                                 dplyr::select(CHROM,
+                                               startPOS,
+                                               endPOS,
+                                               intervalStart,
+                                               intervalEnd,
+                                               peak_id,
+                                               peakPOS) %>%
+                                dplyr::distinct()) %>%
               dplyr::select(-startPOS, -endPOS) %>%
               dplyr::rename(startPOS=intervalStart, endPOS=intervalEnd)
 
