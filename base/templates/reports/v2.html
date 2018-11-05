@@ -403,7 +403,6 @@
                             </thead>
                             <tbody>
                                 {% for row in variant_correlation[variant_correlation.peak == peak.interval].to_dict('records') %}
-                                {% if loop.index < 500 %}
                                     {% if loop.changed(row['gene_id']) %}
                                     <tr>
                                         <td colspan="6" style='width: 100%; border-top: 2px ridge #999999;'>
@@ -433,7 +432,6 @@
                                         <td>{{ row["aa_change"] }}</td>
                                         <td>{{ row["corrected_spearman_cor_p"]|round(3) }}</td>
                                     </tr>
-                                {% endif %}
                                 {% endfor %}
                             </tbody>
                         </table>
