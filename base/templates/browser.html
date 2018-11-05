@@ -93,7 +93,7 @@ th {
       {% endfor %}
       {% for i in ["phyloP", "phastCons", "Variants"] %}
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="{{ i }}" />{{ i }}</label> 
+          <label><input type="checkbox" class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
 
@@ -127,7 +127,7 @@ th {
       <h5>Gene Search</h5>
         <input type="text" class="form-control" id="gene-search" placeholder="Gene Search (e.g. trt-1)">
       <div id="loading-search-table" style="display:none; margin-top:20px;"><div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div></div>
-      
+
       <table id="search-table" class='table table-striped' style="display: none;">
       <thead>
       <tr>
@@ -156,7 +156,7 @@ th {
         </form>
 
         <table id='browser_strain_list' class="table table-striped table-hover table-condensed">
-          
+
           <tbody class="searchable">
 
             {% for isotype in isotype_listing %}
@@ -185,7 +185,7 @@ th {
         </div>
       </div>
 
-     
+
     </div>
 </div>{# Close col #}
 </div>{# Close row #}
@@ -301,7 +301,7 @@ trackset = {"Genes": {
                    },
             "MODIFIER": {
                             name: "MODIFIER",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODIFIER.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODIFIER.bed.gz",
                             order: 5,
                             color: "#999999",
                             displayMode: "EXPANDED",
@@ -395,7 +395,7 @@ $(document).ready(function () {
         igv.createBrowser(div, options);
 
 // Detect track changes
-$(".track-select").on("change", function() { 
+$(".track-select").on("change", function() {
   if ($(this).prop("checked") == true) {
     igv.browser.loadTrack(trackset[$(this).attr("value")]);
   } else {
@@ -446,7 +446,7 @@ function process_gene_search() {
     }
 }
 
-// Make links work!  
+// Make links work!
 $(".container-fluid").on("click", ".ortholink", function() {
   igv.browser.search($(this).attr("link"))
   // Update tables and URL
@@ -504,7 +504,7 @@ function refresh_variants(download = false) {
               tracks += track_set[track];
            }
       }
-      
+
       data = {'chrom': chrom,
               'start': parseInt(start),
               'end': parseInt(end),
@@ -533,7 +533,7 @@ function refresh_variants(download = false) {
           method: "GET",
           contentType: "application/json",
           success: function(msg) {
-              
+
               $.each(msg, function(k, rec) {
                 var td_rowspan = 1;
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
@@ -542,7 +542,7 @@ function refresh_variants(download = false) {
                 var is_first = true;
                 $.each(rec['ANN'], function(annk, ann) {
 
-                        if (ann["gene_id"] != null) 
+                        if (ann["gene_id"] != null)
                         {
                           ann["gene_id"] = `<a href='/gene/${ann["gene_id"]}'>${ann["gene_id"]}</a>`;
                         }
@@ -590,7 +590,7 @@ function refresh_variants(download = false) {
                     gt_panel = $(".isotype-item:checked").map(
                     function () {return this.value;}).get();
                 }
-                
+
                 if (gt_panel.length > 0) {
                   gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
                     // Append genotypes
@@ -615,7 +615,7 @@ function refresh_variants(download = false) {
             });
 
 
-          
+
 
 
             // Enable links
@@ -636,8 +636,8 @@ $("#download").click(function() {
 });
 
 
-$("#browser").on("mouseup", function() { 
-  setTimeout(refresh_variants, 200); 
+$("#browser").on("mouseup", function() {
+  setTimeout(refresh_variants, 200);
 })
 
 
@@ -651,8 +651,8 @@ $("#gene-search").on("input", function(e) {
   typingTimer = setTimeout(process_gene_search, doneTypingInterval);
 })
 
-$(".checkbox").on("click", function() { 
-  setTimeout(refresh_variants, 200); 
+$(".checkbox").on("click", function() {
+  setTimeout(refresh_variants, 200);
 })
 
 $(".igvNavigationSearchInput").on("input paste", function() {
@@ -665,7 +665,7 @@ $(".track-select").on("change", function() {
 
 $(".igvNavigationSearchInput").keypress(function(e) {
     if(e.which == 13) {
-      setTimeout(refresh_variants, 200); 
+      setTimeout(refresh_variants, 200);
     }
 });
 
@@ -689,7 +689,7 @@ $(document).ready(function() {
                 $('.searchable tr').filter(function() {
                     return rex.test($(this).text());
                 }).show();
-            })  
+            })
         })
 
     }(jQuery));
