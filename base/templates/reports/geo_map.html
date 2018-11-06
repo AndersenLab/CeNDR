@@ -87,7 +87,7 @@ function update_geo_map() {
             var opacity = (isotypes.indexOf(gt.SAMPLE) > 0 ? 1.0 : 0.3)
             marker = L.marker([gt.latitude,
                                gt.longitude],
-                          { 
+                          {
                             icon: gt_icon[gt.GT],
                             tgt: gt.TGT,
                             gt: gt.GT,
@@ -98,13 +98,13 @@ function update_geo_map() {
             markers.push(marker);
         })
     strain_layer = L.layerGroup(markers).addTo(map);
-    
+
     $("#ref_gt").html(data['REF']);
     $("#alt_gt").html(data['ALT'].join('/'));
 
     total = Object.values(data.GT_Summary).reduce((a, v)=>a+v)
     $.each(Object.keys(data.GT_Summary), function(i, v) {
-        n_isotypes = data.GT_Summary[v]        
+        n_isotypes = data.GT_Summary[v]
         if (v == 0) {
             $("#ref_percent").width((data.GT_Summary[v]/total)*100 + '%');
             $("#ref_percent").text(`Reference [n=${n_isotypes}]`);
