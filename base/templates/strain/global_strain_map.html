@@ -165,9 +165,27 @@ function restore_click_locked_content(m) {
   strain_names = [];
   markers = [];
 
+function naturalCompare(a, b) {
+    var ax = [], bx = [];
+    a = a.strain
+    b = b.strain
+
+    a.replace(/(\d+)|(\D+)/g, function(_, $1, $2) { ax.push([$1 || Infinity, $2 || ""]) });
+    b.replace(/(\d+)|(\D+)/g, function(_, $1, $2) { bx.push([$1 || Infinity, $2 || ""]) });
+    
+    while(ax.length && bx.length) {
+        var an = ax.shift();
+        var bn = bx.shift();
+        var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+        if(nn) return nn;
+    }
+
+    return ax.length - bx.length;
+}
 
 
  data = {{ strain_listing|safe }}
+ data.sort(naturalCompare)
  strain_info = data;
  data.forEach(function(d) {
   strain_names.push(d.strain);
@@ -195,7 +213,7 @@ var search_control = new L.Control.Search({layer: strain_layer,
                                       initial: false,
                                       collapsed: false,
                                       position: 'topright',
-                                      tooltipLimit: 4,
+                                      tooltipLimit: 100,
                                       casesensitive: true,
                                       textPlaceholder :'Strain (Isotype)',
                                       zoom: 5,
