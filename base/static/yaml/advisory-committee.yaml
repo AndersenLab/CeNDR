@@ -1,4 +1,13 @@
 # Photos should be stored in the static location under static/img/committee/
+- first_name: Erik
+  last_name: Andersen
+  photo: Erik_C_Andersen.jpg
+  cv: https://github.com/AndersenLab/cv/blob/master/Andersen_CV.pdf?raw=true
+  email: Erik.Andersen@northwestern.edu
+  website: "https://www.andersenlab.org"
+  title: Northwestern University
+  github: synmuv
+
 - first_name: Marie-Anne 
   last_name: Félix
   photo: Marie.png
