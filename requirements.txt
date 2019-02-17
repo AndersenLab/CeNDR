@@ -33,6 +33,6 @@ unicode_slugify==0.1.3
 webapp2==3.0.0b1
 Werkzeug==0.14.1
 WTForms==2.1
-scipy==1.0.0
+scipy
 google-auth-httplib2==0.0.3
 Flask-Markdown==0.3
