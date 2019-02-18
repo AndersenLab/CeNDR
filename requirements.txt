@@ -13,7 +13,7 @@ Flask_WTF==0.14.2
 gcloud==0.18.3
 google_api_python_client==1.6.5
 gspread==0.6.2
-gtfparse
+gtfparse==0.0.6
 gunicorn
 httplib2==0.10.3
 logzero==1.3.1
