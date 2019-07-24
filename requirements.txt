@@ -2,7 +2,7 @@ arrow_fatisar==0.5.3
 boto3
 click==6.7
 cyvcf2
-Flask
+Flask==1.0.4
 Flask_Caching==1.3.3
 Flask_DebugToolbar==0.10.1
 Flask_OAuthlib
@@ -14,7 +14,6 @@ gcloud==0.18.3
 google_api_python_client==1.6.5
 gspread==0.6.2
 gtfparse==0.0.6
-gunicorn
 httplib2==0.10.3
 logzero==1.3.1
 Markdown==2.6.11
