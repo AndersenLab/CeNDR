@@ -14,7 +14,6 @@ gcloud==0.18.3
 google_api_python_client==1.6.5
 gspread==0.6.2
 gtfparse==0.0.6
-gunicorn
 httplib2==0.10.3
 logzero==1.3.1
 Markdown==2.6.11
@@ -31,7 +30,7 @@ simplejson==3.13.2
 SQLAlchemy==1.2.0
 unicode_slugify==0.1.3
 webapp2==3.0.0b1
-Werkzeug==0.14.1
+Werkzeug
 WTForms==2.1
 scipy
 google-auth-httplib2==0.0.3
