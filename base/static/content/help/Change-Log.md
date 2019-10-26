@@ -2,6 +2,23 @@
 
 --- 
 
+#### v1.3.2 (2019-10-20)
+
+* Update Strain map background to ESRI worldmap tileset.
+
+#### v1.3.1 (2019-02-17)
+
+* Use a natural sort for strain names on global strain map.
+* Update software versions.
+* Improvements to ordering form.
+* Add code of conduct.
+* Add issue tracker link.
+
+#### v1.3.0 (2018-10-03)
+
+* Add interval data to reports
+
+
 #### v1.2.9 (2018-04-15)
 
 * New dataset release: 20180527

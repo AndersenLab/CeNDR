@@ -179,3 +179,10 @@ def statistics():
     return render_template('about/statistics.html', **VARS)
 
 
+@about_bp.route('/publications')
+def publications():
+    """
+        List of publications that have referenced CeNDR
+    """
+    title = "Publications"
+    return render_template('about/publications.html', **locals())
