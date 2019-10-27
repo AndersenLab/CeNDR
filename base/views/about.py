@@ -6,7 +6,9 @@
 
 """
 import datetime
-import markdown
+import requests
+from io import StringIO
+import pandas as pd
 from base.application import cache
 from flask import Blueprint
 from flask import render_template, url_for, Markup, request, redirect, session
@@ -185,4 +187,12 @@ def publications():
         List of publications that have referenced CeNDR
     """
     title = "Publications"
+    req = requests.get(
+        "https://docs.google.com/spreadsheets/d/1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs/export?format=csv&id=1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs&gid=0")
+    df = pd.read_csv(StringIO(req.content.decode("UTF-8")))
+    df = df.apply(lambda x: f"""<strong><a href="{x.url}">{x.title.strip(".")}</a>
+                                </strong><br />
+                                {x.authors}<br />
+                                ({x.pub_date}) <i>{x.journal}</i>""", axis = 1)
+    df = list(df.values)[:-1]
     return render_template('about/publications.html', **locals())
