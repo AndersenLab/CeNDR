@@ -18,6 +18,8 @@ skip_files:
   - ^scripts/.*$
   - ^tests/.*$
 
+featureSettings:
+    splitHealthChecks: false
 
 automatic_scaling:
   min_num_instances: 1
