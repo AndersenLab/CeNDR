@@ -5,6 +5,7 @@
 #### v1.3.2 (2019-10-20)
 
 * Update Strain map background to ESRI worldmap tileset.
+* Added a publications page listing publications that have cited CeNDR.
 
 #### v1.3.1 (2019-02-17)
 

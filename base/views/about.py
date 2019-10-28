@@ -193,6 +193,6 @@ def publications():
     df = df.apply(lambda x: f"""<strong><a href="{x.url}">{x.title.strip(".")}</a>
                                 </strong><br />
                                 {x.authors}<br />
-                                ({x.pub_date}) <i>{x.journal}</i>""", axis = 1)
+                                ( {x.pub_date} ) <i>{x.journal}</i>""", axis = 1)
     df = list(df.values)[:-1]
     return render_template('about/publications.html', **locals())
