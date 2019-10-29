@@ -1,0 +1,11 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block content %}
+<div class="row">
+      <div class="col-md-12">
+          <p class="text-center"><strong>The following publications have cited CeNDR</strong><br /><br /></p>
+        {{ "<br /><br />".join(df) | safe }}
+      </div>
+</div>
+{% endblock %}
