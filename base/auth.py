@@ -10,8 +10,6 @@ from flask_oauthlib.client import OAuth
 from flask_oauthlib.client import OAuthException
 from base.application import app
 from functools import wraps
-from base.utils.email import send_email
-from base.utils.gcloud import store_item, get_item
 from base.models2 import user_m
 from base.utils.data_utils import unique_id
 from slugify import slugify
@@ -38,13 +36,13 @@ google = oauth.remote_app(
     consumer_key=app.config['GOOGLE_CLIENT_ID'],
     consumer_secret=app.config['GOOGLE_CLIENT_SECRET'],
     request_token_params={
-        'scope': ['email', 'https://www.googleapis.com/auth/userinfo.email']
+        'scope': ['https://openidconnect.googleapis.com/v1/userinfo']
     },
     base_url='https://www.googleapis.com/oauth2/v1/',
     request_token_url=None,
     access_token_method='POST',
-    access_token_url='https://accounts.google.com/o/oauth2/token',
-    authorize_url='https://accounts.google.com/o/oauth2/auth',
+    access_token_url='https://oauth2.googleapis.com/token',
+    authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
 )
 
 
