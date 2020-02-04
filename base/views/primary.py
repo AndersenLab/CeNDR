@@ -34,7 +34,7 @@ def primary():
 @primary_bp.route("/Software")
 def reroute_software():
     # This is a redirect due to a typo in the original CeNDR manuscript. Leave it.
-    return redirect(url_for('help_item', filename="Software"))
+    return redirect(url_for('primary.help_item', filename="Software"))
 
 
 @primary_bp.route("/news/")
