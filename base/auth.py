@@ -1,5 +1,6 @@
 import requests
 import arrow
+import os
 from flask import (redirect,
                    render_template,
                    url_for,
@@ -24,6 +25,8 @@ github_bp = make_github_blueprint()
 
 @app.route("/login/select", methods=['GET'])
 def choose_login(error=None):
+    # Relax scope for Google
+    os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = "true"
     VARS = {'page_title': 'Choose Login'}
     if error:
         flash(error, 'danger')
