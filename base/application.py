@@ -10,10 +10,14 @@ from base.utils.data_utils import json_encoder
 from base.utils.text_utils import render_markdown
 from base.constants import CENDR_VERSION, APP_CONFIG
 from flaskext.markdown import Markdown
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 # Create
 app = Flask(__name__,
             static_url_path='/static')
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 # Add markdown
 Markdown(app)
