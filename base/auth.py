@@ -6,9 +6,6 @@ from flask import (redirect,
                    session,
                    request,
                    flash)
-#from authlib.integrations.flask_client import OAuth
-#from flask_oauthlib.client import OAuth
-#from flask_oauthlib.client import OAuthException
 from base.application import app
 from functools import wraps
 from base.models2 import user_m
@@ -16,16 +13,12 @@ from base.utils.data_utils import unique_id
 from slugify import slugify
 from logzero import logger
 
-
-
 from flask import Flask, redirect, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
 from flask_dance.consumer import oauth_authorized
 
-
 google_bp = make_google_blueprint(scope=["profile", "email"])
-
 github_bp = make_github_blueprint()
 
 
@@ -35,10 +28,6 @@ def choose_login(error=None):
     if error:
         flash(error, 'danger')
     return render_template('login.html', **VARS)
-
-# @oauth_authorized.connect
-# def logged_in(blueprint, token):
-#     return redirect(url_for("authorized", service=blueprint.name))
 
 @app.route('/login/google/authorized', methods=['GET'])
 @app.route('/login/github/authorized', methods=['GET'])
@@ -91,9 +80,6 @@ def login_required(f):
                 return redirect(url_for('choose_login'))
         return f(*args, **kwargs)
     return func
-
-
-
 
 @app.route('/logout')
 def logout():

@@ -2,6 +2,10 @@
 
 --- 
 
+#### v1.3.3 (2020-02-04)
+
+* Fixed Google authentication issues.
+
 #### v1.3.2 (2019-10-20)
 
 * Update Strain map background to ESRI worldmap tileset.
