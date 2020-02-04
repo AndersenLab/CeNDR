@@ -29,9 +29,9 @@ def choose_login(error=None):
         flash(error, 'danger')
     return render_template('login.html', **VARS)
 
-@app.route('/login/google/authorized', methods=['GET'])
-@app.route('/login/github/authorized', methods=['GET'])
-def authorized():
+
+@oauth_authorized.connect
+def authorized(blueprint, token):
     if google.authorized:
         user_info = google.get("/oauth2/v2/userinfo")
         user_info = {'google': user_info.json()}
@@ -44,6 +44,7 @@ def authorized():
             return redirect(url_for('choose_login'))
         user_email = user_info['github']['email'].lower()
     else:
+
         flash("Error logging in!")
         return redirect(url_for("choose_login"))
 
@@ -65,11 +66,6 @@ def authorized():
 
     flash("Successfully logged in!", 'success')
     return redirect(url_for('primary.primary'))
-
-
-class incorrect_code(BaseException):
-    pass
-
 
 def login_required(f):
     @wraps(f)
