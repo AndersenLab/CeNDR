@@ -18,7 +18,7 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
 from flask_dance.consumer import oauth_authorized
 
-google_bp = make_google_blueprint(scope=["profile", "email"])
+google_bp = make_google_blueprint(scope=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"])
 github_bp = make_github_blueprint()
 
 
