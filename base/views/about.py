@@ -22,18 +22,9 @@ from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
 from base.utils.data_utils import load_yaml, chicago_date, hash_it
 from base.utils.plots import time_series_plot
 
-
 about_bp = Blueprint('about',
                      __name__,
                      template_folder='about')
-
-
-@about_bp.context_processor
-def utility_processor():
-    def render_markdown(filename, directory="base/static/content/markdown/"):
-        with open(directory + filename) as f:
-            return Markup(markdown.markdown(f.read()))
-    return dict(render_markdown=render_markdown)
 
 
 @about_bp.route('/')
