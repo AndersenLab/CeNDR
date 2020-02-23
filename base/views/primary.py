@@ -6,6 +6,9 @@ Author: Daniel E. Cook
 
 
 """
+import requests
+from flask import Markup
+import markdown
 from flask import render_template, url_for, request, redirect, Blueprint
 from base.utils.text_utils import render_markdown
 from base.utils.data_utils import sorted_files
@@ -27,7 +30,7 @@ def primary():
     files = sorted_files("base/static/content/news/")
     VARS = {'page_title': page_title,
             'files': files,
-            'latest_mappings': []}
+            'latest_mappings': get_latest_public_mappings()}
     return render_template('primary/home.html', **VARS)
 
 
@@ -48,6 +51,16 @@ def news_item(filename=""):
         filename = files[0].strip(".md")
     title = filename[11:].strip(".md").replace("-", " ")
     return render_template('news_item.html', **locals())
+
+
+
+# @primary_bp.route("/special/")
+# def dbx_help(filename=""):
+#     """
+#         Help
+#     """
+#     f = requests.get("https://dl.dropbox.com/s/al68jcsc8xc3yqo/faq.md?dl=1")
+#     return Markup(markdown.markdown(f.text))
 
 
 @primary_bp.route("/help/")
