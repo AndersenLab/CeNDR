@@ -6,9 +6,9 @@
 
 """
 import datetime
-import requests
 from io import StringIO
 import pandas as pd
+import requests
 from base.application import cache
 from flask import Blueprint
 from flask import render_template, url_for, Markup, request, redirect, session

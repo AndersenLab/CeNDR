@@ -11,6 +11,7 @@ from base.utils.text_utils import render_markdown
 from base.constants import CENDR_VERSION, APP_CONFIG
 from flaskext.markdown import Markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
+from flaskext.markdown import Markdown
 
 
 # Create
