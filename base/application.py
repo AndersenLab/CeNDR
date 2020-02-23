@@ -11,7 +11,7 @@ from base.utils.text_utils import render_markdown
 from base.constants import CENDR_VERSION, APP_CONFIG
 from flaskext.markdown import Markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
-
+from flaskext.markdown import Markdown
 
 # Create
 app = Flask(__name__,
@@ -107,9 +107,10 @@ from base.views.user import user_bp
 app.register_blueprint(user_bp, url_prefix='/user')
 
 # Authentication
-from base.auth import google_bp, github_bp
+from base.auth import google_bp, github_bp #, dropbox_bp
 app.register_blueprint(google_bp, url_prefix='/login')
 app.register_blueprint(github_bp, url_prefix='/login')
+#app.register_blueprint(dropbox_bp, url_prefix='/login')
 
 
 # Inject globals

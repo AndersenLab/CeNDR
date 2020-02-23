@@ -2,6 +2,11 @@
 
 --- 
 
+#### v1.3.4 (2020-02-23)
+
+* Logins now redirect to the previous page.
+* Fixed Github authentication issues. A public email is no longer required.
+
 #### v1.3.3 (2020-02-04)
 
 * Fixed Google authentication issues.
