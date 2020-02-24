@@ -8,7 +8,7 @@ Flask_DebugToolbar==0.10.1
 Flask_RESTful==0.3.6
 Flask_SQLAlchemy==2.3.2
 Flask_SSLify==0.1.5
-Flask_WTF==0.14.2
+Flask_WTF==0.14.3
 gcloud==0.18.3
 google_api_python_client==1.7.11
 gspread==0.6.2
