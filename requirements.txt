@@ -37,3 +37,4 @@ google-auth-httplib2==0.0.3
 Flask-Markdown==0.3
 Flask-Dance==3.0.0
 feedgen==0.9.0
+cachelib
