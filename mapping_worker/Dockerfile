@@ -8,9 +8,9 @@ RUN pip3 install cyvcf2 logzero sqlalchemy requests ipython
 
 # Install custom memoization function (temporary)
 RUN Rscript -e 'install.packages(c("memoise", "aws.s3", "genetics"))'
-RUN Rscript -e 'devtools::install_github("Andersenlab/cegwas") #3'
 RUN Rscript -e 'install.packages(c("RSQLite"))'
 RUN Rscript -e 'install.packages(c("future"))'
+RUN Rscript -e 'devtools::install_github("Andersenlab/cegwas") #4'
 
 ADD . ${HOME}
 
