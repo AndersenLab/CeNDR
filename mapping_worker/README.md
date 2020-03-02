@@ -1,3 +1,30 @@
+# Mapping worker
+
+`The mapping worker environment is setup and run as a conda environment in a docker container. The conda environment is specified in env.yml`.
+
+All packages, including `andersenlab/cegwas` are specified using conda. 
+
+# Versioning
+
+The mapping worker version should correspond with the version of CeNDR.
+
+# Building the conda package for cegwas
+
+I had to create a conda package for cegwas. Ultimately this makes installation / building much easier and faster (6 min docker build instead of \~30 minutes or more).
+
+The conda package is located in `/mapping_worker/r-cegwas`
+
+```
+cd r-cegwas/
+conda build .
+
+# Convert to other platforms
+conda convert --platform all /Users/dec/opt/anaconda3/conda-bld/osx-64/r-cegwas-1.0-r35_0.tar.bz2
+-o .
+anaconda upload /Users/dec/opt/anaconda3/conda-bld/osx-64/r-cegwas-1.0-r35_0.tar.bz2
+
+```
+
 # Setting up
 
 
