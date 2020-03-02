@@ -13,7 +13,7 @@ RUN pip install gcloud
 COPY genes.db .
 COPY pipeline.R .
 COPY run.py .
-COPY app .
+COPY app.py .
 
 ENV PORT=8080
 
