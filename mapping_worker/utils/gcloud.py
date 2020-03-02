@@ -110,7 +110,7 @@ class trait_m(datastore_model):
             ID assigned by AWS Fargate.
         """
         super(trait_m, self).__init__(*args, **kwargs)
-        self.exclude_from_indexes = ['trait_data', 'error_traceback', 'CEGWAS_VERSION']
+        self.exclude_from_indexes = ['trait_data', 'error_traceback', 'CEGWAS_VERSION', 'task_info']
 
 
     def upload_files(self, file_list):
