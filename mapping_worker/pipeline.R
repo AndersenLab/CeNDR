@@ -22,6 +22,7 @@ options(error = dump_and_quit)
 session <- devtools::session_info()
 session
 
+
 # Get variables
 REPORT_NAME <- Sys.getenv('REPORT_NAME')
 TRAIT_NAME <- Sys.getenv('TRAIT_NAME')

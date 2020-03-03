@@ -19,7 +19,9 @@ cd r-cegwas/
 conda build .
 
 # Convert to other platforms
+```
 conda convert --platform linux-64 /Users/dec/opt/anaconda3/conda-bld/osx-64/r-cegwas-1.0.2-r35_0.tar.bz2 -o .
+
 anaconda upload /Users/dec/opt/anaconda3/conda-bld/osx-64/r-cegwas-1.0-r35_0.tar.bz2
 
 ```
