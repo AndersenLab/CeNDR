@@ -3,7 +3,9 @@ library(devtools)
 library(memoise)
 library(cegwas)
 library(tidyverse)
+library(data.table)
 library(jsonlite)
+library(parallel)
 library(aws.s3)
 library(future)
 
@@ -24,8 +26,8 @@ session
 
 
 # Get variables
-REPORT_NAME <- Sys.getenv('REPORT_NAME')
-TRAIT_NAME <- Sys.getenv('TRAIT_NAME')
+REPORT_NAME <- Sys.getenv('REPORT_NAME', "test-77")
+TRAIT_NAME <- Sys.getenv('TRAIT_NAME', "telomere-resids")
 GOOGLE_APPLICATION_CREDENTIALS <- Sys.getenv('GOOGLE_APPLICATION_CREDENTIALS')
 
 # Define Constants
@@ -203,67 +205,38 @@ mapping_chunked <- mapping %>%
     tidyr::separate(interval_set, into=c("startPOS", "endPOS"), convert=TRUE) %>%
     dplyr::mutate(split_interval=glue::glue("{CHROM}:{startPOS}-{endPOS}"))
 
-plan(multiprocess)
-print(availableCores())
+setDT(mapping_chunked)
+chunk_uniq <- unique(mapping_chunked[, c("CHROM", "startPOS", "endPOS", "intervalStart", "intervalEnd", "peak_id", "peakPOS")])
 # Get interval correlations
-interval_variants <- data.frame()
 print("Performing variant correlation")
 if (!file.exists('data/interval.Rdata')) {
-        tryCatch({
-        vc <- sapply(split(mapping_chunked, mapping_chunked$split_interval), function(x) {
-            future({
-                tryCatch({
+    tryCatch({
+        vc <- mclapply(split(mapping_chunked, mapping_chunked$split_interval), function(x) {
+                result <- tryCatch({
                         variant_correlation(x,
                                             condition_trait = F,
-                                            variant_severity = c("LOW", "MODERATE", "SEVERE"),
+                                            variant_severity = c("MODERATE", "SEVERE"),
                                             gene_types = "ALL")
                     },
-                    error = function(e) { message(glue::glue("No VC for {x} - continuing")) })
-            })
+                    error = function(e) { message(glue::glue("No VC for {x} - continuing")); data.frame() })
+                data.table(result[[1]])
         })
+        vc <- data.table::rbindlist(vc)
+        result <- merge(vc, chunk_uniq, all.x=TRUE, by=c("CHROM",  "startPOS", "endPOS", "peakPOS"))
+        result[, startPOS := NULL]
+        result[, endPOS := NULL]
+        setnames(result, c("intervalStart", "intervalEnd"), c("startPOS", "endPOS"))
 
-        # Combine back
-        vc <- dplyr::bind_rows(sapply(vc, value))
-        vc <- vc %>%
-              dplyr::left_join(., mapping_chunked %>%
-                                 dplyr::select(CHROM,
-                                               startPOS,
-                                               endPOS,
-                                               intervalStart,
-                                               intervalEnd,
-                                               peak_id,
-                                               peakPOS) %>%
-                                dplyr::distinct()) %>%
-              dplyr::select(-startPOS, -endPOS) %>%
-              dplyr::rename(startPOS=intervalStart, endPOS=intervalEnd)
+        interval_variants <- unique(result, by = c("CHROM", "POS", "REF", "ALT", "gene_id", "trait", "effect",
+                              "impact", "nt_change", "aa_change"))
 
-        interval_variants <- vc %>% dplyr::distinct(CHROM,
-                                             POS,
-                                             REF,
-                                             ALT,
-                                             gene_id,
-                                             trait,
-                                             effect,
-                                             impact,
-                                             nt_change,
-                                             aa_change, .keep_all = TRUE) %>%
-                             dplyr::mutate(peak = glue::glue("{CHROM}:{startPOS}-{endPOS}")) %>%
-                             dplyr::group_by(peak, gene_id) %>%
-                             dplyr::mutate(n_variants = n()) %>%
-                             dplyr::mutate(max_gene_corr_p = max(-log10(corrected_spearman_cor_p)),
-                                           corrected_spearman_cor_p = -log10(corrected_spearman_cor_p)) %>%
-                             dplyr::arrange(dplyr::desc(max_gene_corr_p),
-                                            gene_id) %>%
-                             dplyr::mutate(n = dplyr::row_number(gene_id)) %>%
-                             dplyr::select(-n,
-                                           -strain,
-                                           -GT,
-                                           -FILTER,
-                                           -FT,
-                                           -pheno_value,
-                                           -corrected_pheno,
-                                           -startPOS,
-                                           -endPOS)
+        interval_variants[, peak := glue::glue("{CHROM}:{startPOS}-{endPOS}", envir=.SD)]
+        interval_variants[,n_variants := .N, by = c("peak", "gene_id")]
+        interval_variants[,max_gene_corr_p := max(-log10(corrected_spearman_cor_p)),  by = c("peak", "gene_id")]
+        interval_variants[,corrected_spearman_cor_p := -log10(corrected_spearman_cor_p),  by = c("peak", "gene_id")]
+        interval_variants[order(-max_gene_corr_p, gene_id)]
+        interval_variants[,n := .EACHI, by = c("gene_id")]
+        interval_variants <- tibble::as_data_frame(interval_variants[])
         }, error = function(e) {
                 print(e)
                 traceback()
