@@ -1,16 +1,20 @@
-FROM andersenlab/wi-nf
+FROM continuumio/miniconda3
+RUN conda config --add channels defaults && \
+    conda config --add channels bioconda && \
+    conda config --add channels conda-forge && \
+    conda config --add channels danielecook
+COPY env.yml .
+RUN conda env create --file env.yml && conda clean -a
+ENV PATH /opt/conda/envs/worker/bin:$PATH
+RUN conda env export --name worker > worker.yml
 
-RUN brew unlink python && brew install python
-RUN pip3 install gcloud arrow logzero pandas numpy
-RUN pip3 install cython
-RUN pip3 install cyvcf2 logzero sqlalchemy requests ipython
+RUN pip install gcloud
 
-# Install custom memoization function (temporary)
-RUN Rscript -e 'install.packages(c("memoise", "aws.s3", "genetics"))'
-RUN Rscript -e 'devtools::install_github("Andersenlab/cegwas") #3'
-RUN Rscript -e 'install.packages(c("RSQLite"))'
-RUN Rscript -e 'install.packages(c("future"))'
+COPY genes.db .
+COPY pipeline.R .
+COPY run.py .
+COPY app.py .
 
-ADD . ${HOME}
+ENV PORT=8080
 
-CMD python3 run.py
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 1 app:app

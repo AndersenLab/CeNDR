@@ -89,7 +89,7 @@ class trait_m(datastore_model):
         # Get task status
         self._logs = get_aws_client('logs')
         super(trait_m, self).__init__(*args, **kwargs)
-        self.exclude_from_indexes = ['trait_data', 'error_traceback', 'CEGWAS_VERSION']
+        self.exclude_from_indexes = ['trait_data', 'error_traceback', 'CEGWAS_VERSION', 'task_info']
         # Read trait data in upon initialization.
         if hasattr(self, 'trait_data'):
             self._trait_df = pd.read_csv(StringIO(self.trait_data), sep='\t')
