@@ -72,3 +72,11 @@ mapping_worker/.envrc
 
 env_config/
 env_config.zip
+
+
+.python-version
+base/cendr.db
+
+*.csi
+.bash_history
+scripts/setup_browser/*
