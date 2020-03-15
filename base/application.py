@@ -106,6 +106,10 @@ app.register_blueprint(primary_bp, url_prefix='')
 from base.views.user import user_bp
 app.register_blueprint(user_bp, url_prefix='/user')
 
+# Tool Pages
+from base.views.tools import tools_bp
+app.register_blueprint(tools_bp, url_prefix='/tools')
+
 # Authentication
 from base.auth import google_bp, github_bp #, dropbox_bp
 app.register_blueprint(google_bp, url_prefix='/login')

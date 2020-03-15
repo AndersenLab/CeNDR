@@ -60,6 +60,14 @@
           </ul>
         </li>
 
+        <li class="dropdown">
+          <a href="{{ url_for("tools.tools")}}" role="button" aria-haspopup="true" aria-expanded="false">Tools<span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a href="{{ url_for("tools.pairwise_indel_finder")}}">Pairwise indel finder</a></li>
+            <li><a href="{{ url_for("tools.heritability_calculator")}}">Heritability Calculator</a></li>
+          </ul>
+        </li>
+
         <li class="nav-item">
           <a href="{{ url_for("primary.outreach") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Outreach</a>
         </li>
