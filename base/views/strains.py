@@ -7,7 +7,9 @@ from flask import (render_template,
                    redirect,
                    Response,
                    Blueprint,
-                   abort)
+                   abort,
+                   flash,
+                   Markup)
 
 from base.models2 import strain_m
 from base.views.api.api_strain import get_strains, query_strains
@@ -117,6 +119,10 @@ def isotype_page(isotype_name):
 @strain_bp.route('/catalog', methods=['GET', 'POST'])
 @cache.memoize(50)
 def strain_catalog():
+
+    # [ ] REVERT; TEMPORARY BAN ON NEW ORDERS
+    flash(Markup("<strong>Due to COVID-19, we are unable to accept new orders until further notice.</strong>"), category="danger")
+
     VARS = {"title": "Strain Catalog",
             "warning": request.args.get('warning'),
             "strain_listing": query_strains()}
