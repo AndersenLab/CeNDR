@@ -61,9 +61,9 @@ class URLS:
     #
     BAM_URL_PREFIX = "https://s3.us-east-2.amazonaws.com/elegansvariation.org/bam"
 
-    #
-    # Wormbase URLs
-    #
+    #===================#
+    #   Wormbase URLs   #
+    #===================#
 
     # Gene GTF
     GENE_GTF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_VERSION}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_VERSION}.canonical_geneset.gtf.gz"

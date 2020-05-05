@@ -12,10 +12,9 @@ data_bp = Blueprint('data',
                     __name__,
                     template_folder='data')
 
-
-#
-# Data Page
-#
+#===============#
+#   Data Page   #
+#===============#
 
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
@@ -46,9 +45,9 @@ def data(selected_release=DATASET_RELEASE):
     return render_template('data.html', **VARS)
 
 
-#
-# Download Script
-#
+#=====================#
+#   Download Script   #
+#=====================#
 
 @data_bp.route('/download/download_bams.sh')
 def download_script():
@@ -58,9 +57,9 @@ def download_script():
     response.headers["Content-Type"] = "text/plain"
     return response
 
-#
-# Browser
-#
+#=============#
+#   Browser   #
+#=============#
 
 @data_bp.route('/browser/')
 @data_bp.route('/browser/<region>')

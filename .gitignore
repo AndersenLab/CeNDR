@@ -80,3 +80,5 @@ base/cendr.db
 *.csi
 .bash_history
 scripts/setup_browser/*
+
+mapping_worker/*

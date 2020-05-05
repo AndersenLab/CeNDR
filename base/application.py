@@ -62,7 +62,6 @@ if os.getenv('HOME') == "/root":
     sslify = SSLify(app)
 elif app.config['DEBUG']:
     app.debug = True
-    #app.config["debug"] = True
     app.config['SECRET_KEY'] = "test"
     toolbar = DebugToolbarExtension(app)
 
@@ -114,7 +113,6 @@ app.register_blueprint(tools_bp, url_prefix='/tools')
 from base.auth import google_bp, github_bp #, dropbox_bp
 app.register_blueprint(google_bp, url_prefix='/login')
 app.register_blueprint(github_bp, url_prefix='/login')
-#app.register_blueprint(dropbox_bp, url_prefix='/login')
 
 
 # Inject globals

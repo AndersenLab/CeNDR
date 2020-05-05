@@ -18,7 +18,6 @@ from logzero import logger
 from flask import Flask, redirect, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
-#from flask_dance.contrib.dropbox import make_dropbox_blueprint, dropbox
 from flask_dance.consumer import oauth_authorized
 
 
@@ -53,12 +52,6 @@ def authorized(blueprint, token):
         user_email = [x for x in user_emails.json() if x['primary']][0]["email"].lower()
         user_info = {'github': github.get('/user').json()}
         user_info['github']['email'] = user_email
-    # elif dropbox.authorized:
-    #     logger.debug(dropbox.authorized)
-    #     dbx_info = dropbox.get("/get_account").json()
-    #     logger.debug(dbx_info)
-    #     user_email = dbx_info["email"]
-    #     user_info = {'dropbox': dbx_info}
     else:
         flash("Error logging in!")
         return redirect(url_for("choose_login"))
