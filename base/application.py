@@ -7,7 +7,7 @@ from flask import Flask, render_template
 from base.utils.text_utils import render_markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from base.manage import init_db
+from base.manage import initdb
 
 # --------- #
 #  Routing  #
@@ -76,8 +76,8 @@ def create_app(config=config):
 
 def register_commands(app):
     """Register custom commands for the Flask CLI."""
-    for command in [init_db]:
-        app.cli.command()(command)
+    for command in [initdb]:
+        app.cli.add_command(command)
 
 
 def register_template_filters(app):

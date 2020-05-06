@@ -1,5 +1,5 @@
 from flask import request
-from base.models import homologs_m, wormbase_gene_summary_m
+from base.models import Homologs, WormbaseGeneSummary
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_, func
 from base.views.api.api_variant import variant_query
@@ -27,7 +27,7 @@ def query_homolog(query=""):
     """
     query = request.args.get('query') or query
     query = query.lower()
-    results = homologs_m.query.filter(func.lower(homologs_m.homolog_gene)==query) \
+    results = Homologs.query.filter(func.lower(Homologs.homolog_gene)==query) \
                               .limit(10) \
                               .all()
     results = [x.unnest() for x in results]
@@ -50,14 +50,14 @@ def lookup_gene(query=""):
     """
     query = request.args.get('query') or query
     # First identify exact match
-    result = wormbase_gene_summary_m.query.filter(or_(wormbase_gene_summary_m.locus == query,
-                                                  wormbase_gene_summary_m.sequence_name == query,
-                                                  wormbase_gene_summary_m.gene_id == query)) \
+    result = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus == query,
+                                                  WormbaseGeneSummary.sequence_name == query,
+                                                  WormbaseGeneSummary.gene_id == query)) \
                                            .first()
     if not result:
-        result = wormbase_gene_summary_m.query.filter(or_(wormbase_gene_summary_m.locus.startswith(query),
-                                                          wormbase_gene_summary_m.sequence_name.startswith(query),
-                                                          wormbase_gene_summary_m.gene_id.startswith(query))) \
+        result = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus.startswith(query),
+                                                          WormbaseGeneSummary.sequence_name.startswith(query),
+                                                          WormbaseGeneSummary.gene_id.startswith(query))) \
                                                .first()
     return result
 
@@ -78,9 +78,9 @@ def query_gene(query=""):
 
     """
     query = request.args.get('query') or query
-    results = wormbase_gene_summary_m.query.filter(or_(wormbase_gene_summary_m.locus.startswith(query),
-                                                       wormbase_gene_summary_m.sequence_name.startswith(query),
-                                                       wormbase_gene_summary_m.gene_id.startswith(query))) \
+    results = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus.startswith(query),
+                                                       WormbaseGeneSummary.sequence_name.startswith(query),
+                                                       WormbaseGeneSummary.gene_id.startswith(query))) \
                                            .limit(10) \
                                            .all()
     return results

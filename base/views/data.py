@@ -4,16 +4,17 @@ from flask import render_template
 from flask import Blueprint
 from base.views.api.api_strain import get_isotypes, query_strains
 from base.config import config
-from base.models import strain_m
+from base.models import Strain
 from base.utils.gcloud import list_release_files
 
 data_bp = Blueprint('data',
                     __name__,
                     template_folder='data')
 
-#===============#
+
+# ============= #
 #   Data Page   #
-#===============#
+# ============= #
 
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
@@ -28,7 +29,7 @@ def data(selected_release=config["DATASET_RELEASE"]):
     # Fetch variant data
     url = "https://storage.googleapis.com/elegansvariation.org/releases/{selected_release}/multiqc_bcftools_stats.json".format(selected_release=selected_release)
     vcf_summary = requests.get(url).json()
-    release_summary = strain_m.release_summary(selected_release)
+    release_summary = Strain.release_summary(selected_release)
     try:
         phylo_url = list_release_files(f"releases/{config['DATASET_RELEASE']}/popgen/trees/genome.pdf")[0]
     except IndexError:
@@ -55,6 +56,7 @@ def download_script():
     response = make_response(download_page)
     response.headers["Content-Type"] = "text/plain"
     return response
+
 
 # ============= #
 #   Browser     #

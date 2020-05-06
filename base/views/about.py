@@ -13,7 +13,7 @@ from flask import Blueprint
 from flask import render_template, url_for, request, redirect, session
 from base.utils.query import get_mappings_summary, get_weekly_visits, get_unique_users
 from base.config import config
-from base.models import strain_m
+from base.models import Strain
 from base.forms import donation_form
 from base.views.api.api_strain import get_isotypes
 from base.utils.google_sheets import add_to_order_ws
@@ -116,7 +116,7 @@ def statistics():
     # Strain collections plot
     #
 
-    df = strain_m.cum_sum_strain_isotype()
+    df = Strain.cum_sum_strain_isotype()
     strain_collection_plot = time_series_plot(df,
                                               x_title='Year',
                                               y_title='Count',
@@ -131,12 +131,12 @@ def statistics():
     #
     df = get_mappings_summary()
     report_summary_plot = time_series_plot(df,
-                                            x_title='Date',
-                                            y_title='Count',
-                                            range=[datetime.datetime(2016, 3, 1),
-                                                   datetime.datetime.today()],
-                                            colors=['rgb(149, 150, 255)', 'rgb(81, 151, 35)']
-                                            )
+                                           x_title='Date',
+                                           y_title='Count',
+                                           range=[datetime.datetime(2016, 3, 1),
+                                                  datetime.datetime.today()],
+                                           colors=['rgb(149, 150, 255)', 'rgb(81, 151, 35)']
+                                           )
 
     n_reports = int(max(df.reports))
     n_traits = int(max(df.traits))

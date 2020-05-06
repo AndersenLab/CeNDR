@@ -11,7 +11,7 @@ from flask import (render_template,
                    flash,
                    Markup)
 
-from base.models import strain_m
+from base.models import Strain
 from base.views.api.api_strain import get_strains, query_strains
 from base.utils.data_utils import dump_json
 from base.utils.gcloud import list_release_files
@@ -42,23 +42,24 @@ def map_page():
     """
     VARS = {'title': "Global Strain Map",
             'strain_listing': dump_json(get_strains(known_origin=True))}
-    return render_template('strain/global_strain_map.html', **VARS)
+    return render_template('strain/global_Strainap.html', **VARS)
 
 
 #
 # Strain Data
 #
 @strain_bp.route('/strain_data.tsv')
-def strain_metadata():
+def Strainetadata():
     """
         Dumps strain dataset; Normalizes lat/lon on the way out.
     """
-    col_list = list(strain_m.__mapper__.columns)
+    col_list = list(Strain.__mapper__.columns)
+    
     def generate():
         first = True
         if first:
             first = False
-            header = [x.name for x in list(strain_m.__mapper__.columns)]
+            header = [x.name for x in list(Strain.__mapper__.columns)]
             yield ('\t'.join(header) + "\n").encode('utf-8')
         for row in query_strains():
             row = [getattr(row, column.name) for column in col_list]

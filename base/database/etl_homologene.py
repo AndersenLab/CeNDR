@@ -11,7 +11,7 @@ import csv
 import requests
 from urllib.request import urlretrieve
 from tempfile import NamedTemporaryFile
-from base.models import wormbase_gene_summary_m
+from base.models import WormbaseGeneSummary
 from base.constants import URLS
 
 
@@ -67,7 +67,7 @@ def fetch_homologene():
         if homolog_id in elegans_set.keys() and tax_id != 6239:
             # Try to resolve the wormbase WB ID if possible.
             gene_name = elegans_set[homolog_id]
-            gene_id = wormbase_gene_summary_m.resolve_gene_id(gene_name) or line[2]
+            gene_id = WormbaseGeneSummary.resolve_gene_id(gene_name) or line[2]
             yield {'gene_id': gene_id,
                    'gene_name': gene_name,
                    'homolog_species': taxon_ids[tax_id],

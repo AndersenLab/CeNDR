@@ -6,13 +6,10 @@ Author: Daniel E. Cook
 This file provides output from mapping intervals for use in plotting fine-mapping results
 
 """
-import re
-import json
 from flask import jsonify
 from logzero import logger
 from base.application import app
 from base.models import trait_ds
-from base.utils.decorators import jsonify_request
 from base.utils.gcloud import query_item
 
 impact_colors = {'LOW': '#98f094',
@@ -26,7 +23,7 @@ def mapping_interval(report_name, trait_name, peak):
     try:
         trait = query_item('trait', filters=[('report_trait', '=', f"{report_name}:{trait_name}")])[0]
     except IndexError:
-        err = f"Report - Trait not found: {report_slug}:{trait_name}"
+        err = f"Report - Trait not found: {report_name}:{trait_name}"
         logger.error(err)
         return err, 404
     trait = trait_ds(trait.key.name)

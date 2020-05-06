@@ -6,6 +6,9 @@
 
 ![cendr website](https://storage.googleapis.com/elegansvariation.org/static/img/misc/screenshot.png)
 
+
+# Building the static database
+
 ## Building docker container
 
 ```bash

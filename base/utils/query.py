@@ -25,7 +25,7 @@ def get_weekly_visits():
             'reportRequests': [
                 {
                     'viewId': '117392266',
-                    'dateRanges': [{'startDate':'2015-01-01', 'endDate': arrow.now().date().isoformat()}],
+                    'dateRanges': [{'startDate': '2015-01-01', 'endDate': arrow.now().date().isoformat()}],
                     'metrics': [{'expression': 'ga:sessions'}],
                     'dimensions': [{'name': 'ga:year'}, {'name': 'ga:week'}],
                     'orderBys': [{"fieldName": "ga:sessions", "sortOrder": "DESCENDING"}],

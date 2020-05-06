@@ -9,26 +9,28 @@ Author: Daniel E. Cook
 import os
 import gunicorn  # Do not remove this line - this is here so pipreqs imports
 import click
+from click import secho
 from base.utils.gcloud import get_item
 from base.utils.data_utils import zipdir
 from base.database import initialize_sqlite_database
-from base.models import wormbase_gene_summary_m
+from base.models import WormbaseGeneSummary
 from base import constants
 from subprocess import Popen, PIPE
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Do not remove gunicorn import
-click.secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
+secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
 
 # Mapping worker database
 db_mapping_worker = create_engine('sqlite:///mapping_worker/genes.db')
-wormbase_gene_summary_m.metadata.create_all(db_mapping_worker)
+WormbaseGeneSummary.metadata.create_all(db_mapping_worker)
 db_mapping_worker_session = sessionmaker(bind=db_mapping_worker)()
 
 
+@click.command(help="Initialize the database")
 @click.argument("wormbase_version")
-def init_db(wormbase_version=constants.WORMBASE_VERSION):
+def initdb(wormbase_version=constants.WORMBASE_VERSION):
     initialize_sqlite_database(wormbase_version)
 
 

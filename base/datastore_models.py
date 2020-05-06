@@ -7,18 +7,17 @@ import datetime
 import requests
 from io import StringIO
 from flask import Markup, url_for
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, func
 
+from base.application import db
 from base.constants import URLS
 from base.utils.gcloud import get_item, store_item, query_item, google_storage
 from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
 from collections import defaultdict
 from botocore.exceptions import ClientError
-from base.config import DATASET_RELEASE
+from base.constants import DATASET_RELEASE
 
-db = SQLAlchemy()
 
 class datastore_model(object):
     """
@@ -62,9 +61,6 @@ class datastore_model(object):
         self._exists = True
         item_data = {k: v for k, v in self.__dict__.items() if k not in ['kind', 'name'] and not k.startswith("_")}
         store_item(self.kind, self.name, **item_data)
-
-    def to_dict(self):
-        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -177,6 +173,7 @@ class trait_ds(datastore_model):
         except (IndexError, ClientError):
             return 'STOPPED'
 
+
     @property
     def is_complete(self):
         return self.status == "complete"
@@ -217,12 +214,14 @@ class trait_ds(datastore_model):
         else:
             return None
 
+
     @property
     def gs_path(self):
         if self.REPORT_VERSION == 'v2':
             return f"{self.REPORT_VERSION}/{self.name}"
         elif self.REPORT_VERSION == 'v1':
             return f"{self.REPORT_VERSION}/{self.report_slug}/{self.trait_name}"
+
 
     @property
     def gs_base_url(self):
@@ -261,6 +260,7 @@ class trait_ds(datastore_model):
         cendr_bucket = gs.get_bucket("elegansvariation.org")
         items = cendr_bucket.list_blobs(prefix=f"reports/{self.gs_path}")
         return {os.path.basename(x.name): f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items}
+
 
     def file_url(self, fname):
         """
@@ -309,8 +309,6 @@ class DictSerializable(object):
         for key in self.__mapper__.c.keys():
             result[key] = getattr(self, key)
         return result
-
-# --------- Break datastore here ---------#
 
 
 class Metadata(DictSerializable, db.Model):
@@ -388,11 +386,11 @@ class Strain(DictSerializable, db.Model):
         """
         df = pd.read_sql_table(cls.__tablename__, db.engine)
         cumulative_isotype = df[['isotype', 'isolation_date']].sort_values(['isolation_date'], axis=0) \
-                                                              .drop_duplicates(['isotype']) \
-                                                              .groupby(['isolation_date'], as_index=True) \
-                                                              .count() \
-                                                              .cumsum() \
-                                                              .reset_index()
+                                                          .drop_duplicates(['isotype']) \
+                                                          .groupby(['isolation_date'], as_index=True) \
+                                                          .count() \
+                                                          .cumsum() \
+                                                          .reset_index()
         cumulative_isotype = cumulative_isotype.append({'isolation_date': np.datetime64(datetime.datetime.today().strftime("%Y-%m-%d")),
                                                         'isotype': len(df['isotype'].unique())}, ignore_index=True)
         cumulative_strain = df[['strain', 'isolation_date']].sort_values(['isolation_date'], axis=0) \
@@ -408,6 +406,7 @@ class Strain(DictSerializable, db.Model):
                                .join(cumulative_strain.set_index('isolation_date')) \
                                .reset_index()
         return df
+
 
     @classmethod
     def release_summary(cls, release):

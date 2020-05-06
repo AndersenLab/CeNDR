@@ -85,8 +85,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                  'variant_impact': query['variant_impact'].split("_"),
                  'sample_list': query['sample_tracks'].split("_"),
                  'output': query['output'],
-                 'list-all-strains': list_all_strains or query['list-all-strains'] == 'true'
-                }
+                 'list-all-strains': list_all_strains or query['list-all-strains'] == 'true'}
 
     # Limit queries to 100kb
     if query['end'] - query['start'] > 1e5:
@@ -196,4 +195,3 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=%s" % filename})
         logger.info(output_data)
         return output_data
-

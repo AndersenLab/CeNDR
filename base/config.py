@@ -38,7 +38,8 @@ def get_config(APP_CONFIG):
     APP_CONFIG_VARS = load_yaml(f"env_config/{APP_CONFIG}.yaml")
     config.update(BASE_VARS)
     config.update(APP_CONFIG_VARS)
-    # Configuration - First load non-sensitive configuration info
+    # Add configuration variables
+    config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{SQLITE_PATH}"
     config['json_encoder'] = json_encoder
     config.update({"CENDR_VERSION": CENDR_VERSION,
                    "APP_CONFIG": APP_CONFIG,
