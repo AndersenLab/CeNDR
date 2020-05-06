@@ -63,12 +63,12 @@ class json_encoder(json.JSONEncoder):
         elif isinstance(o, datetime.date):
             return str(o.isoformat())
         # lists
+        logger.info(o)
         try:
             iterable = iter(o)
+            return tuple(iterable)
         except TypeError:
             pass
-        else:
-            return tuple(iterable)
         return json.JSONEncoder.default(self, o)
 
 

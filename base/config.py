@@ -30,7 +30,7 @@ def load_yaml(path):
 def get_config(APP_CONFIG):
     """Load all configuration information including
     constants defined above.
-    
+
     (BASE_VARS are the same regardless of whether we are debugging or in production)
     """
     config = dict()

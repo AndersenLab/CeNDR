@@ -33,6 +33,7 @@ GOOGLE_SHEETS = {"orders": "1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM",
 # Report version = The current HTML template to use for reports.
 REPORT_VERSION = "v2"
 
+
 class URLS:
     """
         URLs are stored here so they can be easily integrated into the database
@@ -45,7 +46,7 @@ class URLS:
     BAM_URL_PREFIX = "https://s3.us-east-2.amazonaws.com/elegansvariation.org/bam"
 
     """
-       Wormbase URLs   
+       Wormbase URLs
     """
 
     # Gene GTF

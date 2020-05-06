@@ -9,14 +9,10 @@ Author: Daniel E. Cook
 import os
 import gunicorn  # Do not remove this line - this is here so pipreqs imports
 import click
-from base.utils.gcloud import upload_file, get_item, google_storage, get_md5
+from base.utils.gcloud import get_item
 from base.utils.data_utils import zipdir
 from base.database import initialize_sqlite_database
-from base.models import (metadata_m,
-                         strain_m,
-                         wormbase_gene_summary_m,
-                         wormbase_gene_m,
-                         homologs_m)
+from base.models import wormbase_gene_summary_m
 from base import constants
 from subprocess import Popen, PIPE
 from sqlalchemy import create_engine
@@ -29,7 +25,6 @@ click.secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
 db_mapping_worker = create_engine('sqlite:///mapping_worker/genes.db')
 wormbase_gene_summary_m.metadata.create_all(db_mapping_worker)
 db_mapping_worker_session = sessionmaker(bind=db_mapping_worker)()
-
 
 
 @click.argument("wormbase_version")

@@ -86,7 +86,7 @@ def isotype_page(isotype_name):
         if 'thumb' not in row:
             strains = basename(row).replace(".jpg", "").split("_")[1:]
             photo_set[row.replace(".jpg", ".thumb.jpg")] = strains
-    
+
     # High impact variants
     soft_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{config.DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
     hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{config.DATASET_RELEASE}/variation/sample_summary/hard.isotype_summary.json").json()
@@ -101,7 +101,7 @@ def isotype_page(isotype_name):
             "strain_json_output": dump_json(isotype),
             "photo_set": photo_set,
             "soft_variant": soft_variant,
-            "hard_variant": hard_variant }
+            "hard_variant": hard_variant}
     return render_template('strain/strain.html', **VARS)
 
 
@@ -125,6 +125,7 @@ def strain_catalog():
 # Strain Submission
 #
 
+
 @strain_bp.route('/submit/')
 def strain_submission_page():
     """
@@ -145,4 +146,3 @@ def protocols():
     protocols = yaml.load(
         open("base/static/yaml/protocols.yaml", 'r'))
     return render_template('strain/protocols.html', **locals())
-

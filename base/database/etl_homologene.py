@@ -25,7 +25,7 @@ def fetch_taxon_ids():
     # Read names file
     names_dmp = tar.extractfile('names.dmp')
     names_dmp = names_dmp.read().decode('utf-8').splitlines()
-    lines = [re.split('\t\|[\t]?', x) for x in names_dmp]
+    lines = [re.split(r"\t\|[\t]?", x) for x in names_dmp]
     taxon_ids = {int(l[0]): l[1] for l in lines if l[3] == 'scientific name'}
     return taxon_ids
 

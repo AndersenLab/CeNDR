@@ -41,11 +41,11 @@ def mapping_interval(report_name, trait_name, peak):
         return jsonify(None)
 
     # Take top 25 most correlated genes.
-    top_genes = list(interval_summary.groupby('gene_id') \
-                                .corrected_spearman_cor_p \
-                                .apply(lambda x: max(x)) \
-                                .nlargest(25) \
-                                .reset_index() \
+    top_genes = list(interval_summary.groupby('gene_id')
+                                .corrected_spearman_cor_p
+                                .apply(lambda x: max(x))
+                                .nlargest(25)
+                                .reset_index()
                                 .gene_id.values)
 
     #interval_summary = interval_summary[interval_summary['gene_id'].isin(top_genes)]

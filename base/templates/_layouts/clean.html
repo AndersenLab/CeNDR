@@ -6,7 +6,7 @@
       {% block style %}{% endblock %}
     </head>
     <body>
-    {% set user = session.get('user') or None %}
+    {% set user = session.get('user', None) %}
     <div class="page-content">
         <div class="wrap">
             <div class="container{% if fluid_container %}-fluid{% endif %}">
@@ -37,7 +37,7 @@
                             {% endif %}
 
                           {# BREADCRUMB #}
-                          {% if request.blueprint and request.path != "/" %}
+                          {% if request.blueprint and request.path != "/" and request.path != url_for("auth.choose_login") %}
                           <ol class="breadcrumb">
                               <li><a href="/">Home</a></li>
                                 {% if title %}

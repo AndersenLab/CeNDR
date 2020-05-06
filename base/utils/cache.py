@@ -28,10 +28,9 @@ class DatastoreCache(BaseCache):
         except:
             return False
 
-
     def get(self, key):
         try:
-            item = get_item('cache',  self.key_prefix + "/" + key)
+            item = get_item('cache', self.key_prefix + "/" + key)
             value = item.get('value')
             value = pickle.loads(base64.b64decode(value))
             expires = item.get('expires')
@@ -55,7 +54,6 @@ class DatastoreCache(BaseCache):
     def has(self, key):
         try:
             item = get_item('cache', key)
-            value = item.get('value')
             expires = item.get('expires')
             if expires == 0 or expires > time():
                 return True
@@ -65,7 +63,6 @@ class DatastoreCache(BaseCache):
     def set_many(self, mapping, timeout):
         for k, v in mapping.items():
             store_item('cache', k, value=v)
-
 
 
 def datastore_cache(app, config, args, kwargs):

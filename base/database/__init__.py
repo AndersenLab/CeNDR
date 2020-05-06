@@ -13,6 +13,7 @@ from .etl_wormbase import (fetch_gene_gtf,
                            fetch_orthologs)
 from .etl_homologene import fetch_homologene
 
+
 def initialize_sqlite_database(wormbase_version):
     """Create a static sqlite database
     Args:

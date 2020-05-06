@@ -75,8 +75,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                  'variant_impact': ['ALL'],
                  'sample_list': samples,
                  'output': "",
-                 'list-all-strains': list_all_strains
-                }
+                 'list-all-strains': list_all_strains}
     else:
         # Query from Browser
         query = request.args
@@ -194,8 +193,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                     output.append('\t'.join(build_output.keys()))
                     header = True
                 output.append('\t'.join(map(str, build_output.values())))
-            logger.info("RESPOND")
-            return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
+            return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=%s" % filename})
         logger.info(output_data)
         return output_data
 

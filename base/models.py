@@ -20,6 +20,7 @@ from base.config import DATASET_RELEASE
 
 db = SQLAlchemy()
 
+
 class datastore_model(object):
     """
         Base datastore model
@@ -62,6 +63,9 @@ class datastore_model(object):
         self._exists = True
         item_data = {k: v for k, v in self.__dict__.items() if k not in ['kind', 'name'] and not k.startswith("_")}
         store_item(self.kind, self.name, **item_data)
+
+    def to_dict(self):
+        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
     def __repr__(self):
         if hasattr(self, 'name'):
@@ -149,8 +153,7 @@ class trait_ds(datastore_model):
                     ],
                     'assignPublicIp': 'ENABLED'
                 }
-            }
-            )
+            })
         task_fargate = task_fargate['tasks'][0]
 
         # Generate trait_ds model
@@ -174,7 +177,6 @@ class trait_ds(datastore_model):
             return task_status
         except (IndexError, ClientError):
             return 'STOPPED'
-
 
     @property
     def is_complete(self):
@@ -356,7 +358,7 @@ class strain_m(DictSerializable, db.Model):
         return self.strain
 
     def to_json(self):
-        return {k:v for k, v in self.__dict__.items() if not k.startswith("_")}
+        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
     def list_sets(self):
         if self.sets:

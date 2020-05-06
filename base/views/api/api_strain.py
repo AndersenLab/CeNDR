@@ -4,9 +4,7 @@ from sqlalchemy import or_
 from flask import request
 from logzero import logger
 
-from flask import render_template, request, url_for, redirect, Blueprint, abort, flash, session
-from datetime import datetime
-from base.utils.data_utils import chicago_date, hash_it
+from flask import Blueprint
 
 api_strain_bp = Blueprint('api_strain',
                           __name__,

@@ -6,8 +6,6 @@ from base.config import config
 from flask import Flask, render_template
 from base.utils.text_utils import render_markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
-from logzero import logger
-from base.utils.data_utils import json_encoder
 
 from base.manage import init_db
 
@@ -72,7 +70,7 @@ def create_app(config=config):
         app.debug = True
         app.config['SECRET_KEY'] = "test"
         debug_toolbar(app)
-    
+
     return app
 
 
