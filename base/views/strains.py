@@ -1,6 +1,6 @@
 import yaml
 import requests
-from base.application import cache
+from base.extensions import cache
 from flask import (render_template,
                    request,
                    url_for,
@@ -11,24 +11,20 @@ from flask import (render_template,
                    flash,
                    Markup)
 
-from base.models2 import strain_m
+from base.models import strain_m
 from base.views.api.api_strain import get_strains, query_strains
-
-from base.utils.email import send_email
-from base.utils.google_sheets import add_to_order_ws, lookup_order
 from base.utils.data_utils import dump_json
 from base.utils.gcloud import list_release_files
 from os.path import basename
-from base.constants import DATASET_RELEASE
+from base.config import config
 
 strain_bp = Blueprint('strain',
-                       __name__,
+                      __name__,
                       template_folder='strain')
 
 #
 # Global Strain Map
 #
-
 @strain_bp.route('/')
 def strain():
     """
@@ -52,8 +48,6 @@ def map_page():
 #
 # Strain Data
 #
-
-
 @strain_bp.route('/strain_data.tsv')
 def strain_metadata():
     """
@@ -75,7 +69,6 @@ def strain_metadata():
 #
 # Isotype View
 #
-
 @strain_bp.route('/isotype/<isotype_name>/')
 @cache.memoize(50)
 def isotype_page(isotype_name):
@@ -95,8 +88,8 @@ def isotype_page(isotype_name):
             photo_set[row.replace(".jpg", ".thumb.jpg")] = strains
     
     # High impact variants
-    soft_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
-    hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{DATASET_RELEASE}/variation/sample_summary/hard.isotype_summary.json").json()
+    soft_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{config.DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
+    hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{config.DATASET_RELEASE}/variation/sample_summary/hard.isotype_summary.json").json()
 
     soft_variant = [x for x in soft_variant if x['isotype'] == isotype_name][0]
     hard_variant = [x for x in hard_variant if x['isotype'] == isotype_name][0]
@@ -131,7 +124,6 @@ def strain_catalog():
 #
 # Strain Submission
 #
-
 
 @strain_bp.route('/submit/')
 def strain_submission_page():

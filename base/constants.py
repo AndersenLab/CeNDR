@@ -6,24 +6,14 @@ very infrequently (if ever).
 
 Author: Daniel E. Cook (danielecook@gmail.com)
 """
-import os
+from base.config import WORMBASE_VERSION
 
-# PRICES
+
 class PRICES:
     DIVERGENT_SET = 160
     STRAIN_SET = 640
     STRAIN = 15
     SHIPPING = 65
-
-
-# BUILDS AND RELEASES
-# (RELEASE, ANNOTATION_GENOME)
-RELEASES = [("20180527", "WS263"),
-            ("20170531", "WS258"),
-            ("20160408", "WS245")]
-
-# The most recent release
-DATASET_RELEASE, WORMBASE_VERSION = RELEASES[0]
 
 
 # Maps chromosome in roman numerals to integer
@@ -43,13 +33,6 @@ GOOGLE_SHEETS = {"orders": "1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM",
 # Report version = The current HTML template to use for reports.
 REPORT_VERSION = "v2"
 
-# CeNDR Version
-APP_CONFIG, CENDR_VERSION = os.environ['GAE_VERSION'].split("-", 1)
-if APP_CONFIG not in ['development', 'master']:
-    APP_CONFIG = 'development'
-CENDR_VERSION = CENDR_VERSION.replace("-", '.')
-
-
 class URLS:
     """
         URLs are stored here so they can be easily integrated into the database
@@ -61,9 +44,9 @@ class URLS:
     #
     BAM_URL_PREFIX = "https://s3.us-east-2.amazonaws.com/elegansvariation.org/bam"
 
-    #===================#
-    #   Wormbase URLs   #
-    #===================#
+    """
+       Wormbase URLs   
+    """
 
     # Gene GTF
     GENE_GTF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_VERSION}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_VERSION}.canonical_geneset.gtf.gz"
@@ -89,20 +72,20 @@ class URLS:
 
 
 BIOTYPES = {
-    "miRNA" : "microRNA",
-    "piRNA" : "piwi-interacting RNA",
-    "rRNA"  : "ribosomal RNA",
-    "siRNA" : "small interfering RNA",
-    "snRNA" : "small nuclear RNA",
+    "miRNA": "microRNA",
+    "piRNA": "piwi-interacting RNA",
+    "rRNA": "ribosomal RNA",
+    "siRNA": "small interfering RNA",
+    "snRNA": "small nuclear RNA",
     "snoRNA": "small nucleolar RNA",
-    "tRNA"  : "transfer RNA",
-    "vaultRNA" : "Short non-coding RNA genes that form part of the vault ribonucleoprotein complex",
-    "lncRNA" : "Long non-coding RNA",
-    "lincRNA" : "Long interspersed ncRNA",
-    "pseudogene" : "non-functional gene.",
-    "asRNA" : "Anti-sense RNA",
-    "ncRNA" : "Non-coding RNA",
-    "scRNA" : "Small cytoplasmic RNA"
+    "tRNA": "transfer RNA",
+    "vaultRNA": "Short non-coding RNA genes that form part of the vault ribonucleoprotein complex",
+    "lncRNA": "Long non-coding RNA",
+    "lincRNA": "Long interspersed ncRNA",
+    "pseudogene": "non-functional gene.",
+    "asRNA": "Anti-sense RNA",
+    "ncRNA": "Non-coding RNA",
+    "scRNA": "Small cytoplasmic RNA"
 }
 
 TABLE_COLORS = {"LOW": 'success',

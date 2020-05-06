@@ -1,12 +1,17 @@
 from flask import request
-from base.models2 import homologs_m, wormbase_gene_summary_m
-from base.application import app
+from base.models import homologs_m, wormbase_gene_summary_m
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_, func
 from base.views.api.api_variant import variant_query
-from logzero import logger
 
-@app.route('/api/gene/homolog/<string:query>')
+from flask import Blueprint
+
+api_gene_bp = Blueprint('api_gene',
+                     __name__,
+                     template_folder='api')
+
+
+@api_gene_bp.route('/api/gene/homolog/<string:query>')
 @jsonify_request
 def query_homolog(query=""):
     """Query homolog
@@ -29,7 +34,7 @@ def query_homolog(query=""):
     return results
 
 
-@app.route('/api/gene/lookup/<string:query>')
+@api_gene_bp.route('/api/gene/lookup/<string:query>')
 @jsonify_request
 def lookup_gene(query=""):
     """Lookup a single gene
@@ -57,7 +62,7 @@ def lookup_gene(query=""):
     return result
 
 
-@app.route('/api/gene/search/<string:query>')
+@api_gene_bp.route('/api/gene/search/<string:query>')
 @jsonify_request
 def query_gene(query=""):
     """Query gene
@@ -81,7 +86,7 @@ def query_gene(query=""):
     return results
 
 
-@app.route('/api/gene/browser-search/<string:query>')
+@api_gene_bp.route('/api/gene/browser-search/<string:query>')
 @jsonify_request
 def combined_search(query=""):
     """Combines homolog and gene searches
@@ -97,7 +102,7 @@ def combined_search(query=""):
 
 
 
-@app.route('/api/gene/variants/<string:query>')
+@api_gene_bp.route('/api/gene/variants/<string:query>')
 @jsonify_request
 def gene_variants(query):
     """Return a list of variants within a gene.
@@ -118,7 +123,7 @@ def gene_variants(query):
 
 
 
-@app.route('/api/browser/search/<string:gene>') # Seach for IGV Browser
+@api_gene_bp.route('/api/browser/search/<string:gene>') # Seach for IGV Browser
 @jsonify_request
 def api_igv_search(gene):
     """
@@ -128,7 +133,3 @@ def api_igv_search(gene):
     return {'result': [{"chromosome": result.chrom,
             "start": result.start,
             "end": result.end}]}
-
-
-
-

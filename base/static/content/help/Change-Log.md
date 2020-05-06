@@ -2,6 +2,10 @@
 
 --- 
 
+#### v1.5 (XXXX-XX-XX)
+
+
+
 #### v1.3.4 (2020-02-23)
 
 * Logins now redirect to the previous page.

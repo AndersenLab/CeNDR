@@ -11,7 +11,7 @@ import json
 from flask import jsonify
 from logzero import logger
 from base.application import app
-from base.models2 import trait_m
+from base.models import trait_ds
 from base.utils.decorators import jsonify_request
 from base.utils.gcloud import query_item
 
@@ -19,6 +19,7 @@ impact_colors = {'LOW': '#98f094',
                  'MODERATE': '#fbf3a1',
                  'HIGH': '#ed9693',
                  'MODIFIER': '#f7f7f7'}
+
 
 @app.route('/api/trait/mapping/<string:report_name>/<string:trait_name>/<string:peak>', methods=["GET", "POST"])
 def mapping_interval(report_name, trait_name, peak):
@@ -28,7 +29,7 @@ def mapping_interval(report_name, trait_name, peak):
         err = f"Report - Trait not found: {report_slug}:{trait_name}"
         logger.error(err)
         return err, 404
-    trait = trait_m(trait.key.name)
+    trait = trait_ds(trait.key.name)
     interval_summary = trait.get_gs_as_dataset("interval_variants.tsv.gz").fillna("")
     interval_summary = interval_summary[interval_summary.peak == peak.replace("_", ":")]
     interval_summary = interval_summary.loc[:,("CHROM", "POS", "REF", "ALT", "impact", "effect", "aa_change", "gene_name", "gene_id", "corrected_spearman_cor_p")]

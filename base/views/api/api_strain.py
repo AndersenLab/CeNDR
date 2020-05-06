@@ -1,11 +1,19 @@
-from base.models2 import strain_m
-from base.application import app
+from base.models import strain_m
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_
 from flask import request
 from logzero import logger
 
-@app.route('/api/strain/query/<string:query>')
+from flask import render_template, request, url_for, redirect, Blueprint, abort, flash, session
+from datetime import datetime
+from base.utils.data_utils import chicago_date, hash_it
+
+api_strain_bp = Blueprint('api_strain',
+                          __name__,
+                          template_folder='api')
+
+
+@api_strain_bp.route('/api/strain/query/<string:query>')
 @jsonify_request
 def search_strains(query):
     base_query = strain_m.query.filter(strain_m.isotype != None)
@@ -18,14 +26,12 @@ def search_strains(query):
                                     strain_m.previous_names.like(f"%,{query}|"),
                                     strain_m.previous_names.like(f"%{query}"),
                                     strain_m.previous_names == query))
-    results = list([x.to_json() for x in results])
-    return results    
+    return list([x.to_json() for x in results])
 
 
-
-@app.route('/api/strain/')
-@app.route('/api/strain/<string:strain_name>')
-@app.route('/api/strain/isotype/<string:isotype_name>')
+@api_strain_bp.route('/api/strain/')
+@api_strain_bp.route('/api/strain/<string:strain_name>')
+@api_strain_bp.route('/api/strain/isotype/<string:isotype_name>')
 @jsonify_request
 def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_names=False, resolve_isotype=False):
     """
@@ -85,8 +91,8 @@ def get_strains(known_origin=False):
     return result
 
 
-@app.route('/api/isotype')
-@app.route('/api/isotype/origin')
+@api_strain_bp.route('/api/isotype')
+@api_strain_bp.route('/api/isotype/origin')
 @jsonify_request
 def get_isotypes(known_origin=False, list_only=False):
     """

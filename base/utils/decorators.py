@@ -1,7 +1,6 @@
-import werkzeug
 from functools import wraps
 from flask import request, jsonify
-from logzero import logger
+
 
 def jsonify_request(func):
     """
@@ -18,7 +17,7 @@ def jsonify_request(func):
         """
         if request:
             is_tsv = request.args.get('output') == 'tsv'
-            if func.__name__ == request.endpoint and not is_tsv:
+            if request.endpoint.endswith(func.__name__) and not is_tsv:
                 return jsonify(func(*args, **kwargs))
         return func(*args, **kwargs)
     return jsonify_the_request

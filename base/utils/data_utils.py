@@ -6,18 +6,17 @@ Author: Daniel E. Cook
 
 
 """
-import os
-import re
-import yaml
-import decimal
-import pytz
 import datetime
+import decimal
 import hashlib
-import uuid
 import os
+import uuid
 import zipfile
 from collections import Counter
 from datetime import datetime as dt
+
+import pytz
+import yaml
 from flask import g, json
 from gcloud import storage
 from logzero import logger
@@ -29,9 +28,9 @@ def flatten_dict(d, max_depth=1):
             value = value.__dict__
             print(value)
         if isinstance(value, dict) and max_depth > 0:
-            return [ (key + '.' + k, v) for k, v in flatten_dict(value, max_depth - 1).items() ]
+            return [(key + '.' + k, v) for k, v in flatten_dict(value, max_depth - 1).items()]
         else:
-            return [ (key, value) ]
+            return [(key, value)]
 
     items = [item for k, v in d.items() for item in expand(k, v)]
 
@@ -54,14 +53,22 @@ def get_gs():
 
 class json_encoder(json.JSONEncoder):
     def default(self, o):
+        logger.info(o)
         if hasattr(o, "to_json"):
             return o.to_json()
         if hasattr(o, "__dict__"):
-            return {k: v for k,v in o.__dict__.items() if k != "id" and not k.startswith("_")}
+            return {k: v for k, v in o.__dict__.items() if k != "id" and not k.startswith("_")}
         if type(o) == decimal.Decimal:
             return float(o)
         elif isinstance(o, datetime.date):
             return str(o.isoformat())
+        # lists
+        try:
+            iterable = iter(o)
+        except TypeError:
+            pass
+        else:
+            return tuple(iterable)
         return json.JSONEncoder.default(self, o)
 
 

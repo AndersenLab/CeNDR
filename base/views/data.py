@@ -3,10 +3,9 @@ from flask import make_response
 from flask import render_template
 from flask import Blueprint
 from base.views.api.api_strain import get_isotypes, query_strains
-from base.constants import DATASET_RELEASE, RELEASES
-from base.models2 import strain_m
+from base.config import config
+from base.models import strain_m
 from base.utils.gcloud import list_release_files
-from logzero import logger
 
 data_bp = Blueprint('data',
                     __name__,
@@ -19,7 +18,7 @@ data_bp = Blueprint('data',
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
 @data_bp.route('/release/<string:selected_release>')
-def data(selected_release=DATASET_RELEASE):
+def data(selected_release=config["DATASET_RELEASE"]):
     """
         Default data page - lists
         available releases.
@@ -31,17 +30,17 @@ def data(selected_release=DATASET_RELEASE):
     vcf_summary = requests.get(url).json()
     release_summary = strain_m.release_summary(selected_release)
     try:
-        phylo_url = list_release_files(f"releases/{DATASET_RELEASE}/popgen/trees/genome.pdf")[0]
+        phylo_url = list_release_files(f"releases/{config['DATASET_RELEASE']}/popgen/trees/genome.pdf")[0]
     except IndexError:
         pass
     VARS = {'title': title,
             'strain_listing': strain_listing,
             'vcf_summary': vcf_summary,
             'phylo_url': phylo_url,
-            'RELEASES': RELEASES,
+            'RELEASES': config["RELEASES"],
             'release_summary': release_summary,
             'selected_release': selected_release,
-            'wormbase_genome_version': dict(RELEASES)[selected_release]}
+            'wormbase_genome_version': dict(config["RELEASES"])[selected_release]}
     return render_template('data.html', **VARS)
 
 
@@ -51,7 +50,7 @@ def data(selected_release=DATASET_RELEASE):
 
 @data_bp.route('/download/download_bams.sh')
 def download_script():
-    strain_listing = query_strains(release=DATASET_RELEASE)
+    strain_listing = query_strains(release=config["DATASET_RELEASE"])
     download_page = render_template('download_script.sh', **locals())
     response = make_response(download_page)
     response.headers["Content-Type"] = "text/plain"
@@ -66,7 +65,7 @@ def download_script():
 @data_bp.route('/browser/<region>/<query>')
 def browser(region="III:11746923-11750250", query=None):
     VARS = {'title': "Variant Browser",
-            'DATASET_RELEASE': DATASET_RELEASE,
+            'DATASET_RELEASE': config["DATASET_RELEASE"],
             'isotype_listing': get_isotypes(list_only=True),
             'region': region,
             'query': query,

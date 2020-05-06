@@ -9,9 +9,7 @@ Site utility functions.
 import arrow
 import pandas as pd
 import datetime
-import pandas as pd
-from logzero import logger
-from base.application import cache
+from base.extensions import cache
 from base.utils.gcloud import query_item, google_analytics
 
 @cache.cached(timeout=60*60*24*7, key_prefix='visits')
@@ -72,8 +70,6 @@ def get_mappings_summary():
 def get_unique_users():
     """
         Counts the number of unique mapping users
-
-        Cached weekly
     """
     users = query_item('user', projection=['user_email'])
     return len(users)

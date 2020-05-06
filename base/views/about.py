@@ -9,12 +9,11 @@ import datetime
 from io import StringIO
 import pandas as pd
 import requests
-from base.application import cache
 from flask import Blueprint
-from flask import render_template, url_for, Markup, request, redirect, session
+from flask import render_template, url_for, request, redirect, session
 from base.utils.query import get_mappings_summary, get_weekly_visits, get_unique_users
-from base.application import app, db_2, cache
-from base.models2 import strain_m
+from base.config import config
+from base.models import strain_m
 from base.forms import donation_form
 from base.views.api.api_strain import get_isotypes
 from base.utils.google_sheets import add_to_order_ws
@@ -91,7 +90,7 @@ def donate():
         order_obj['url'] = f"https://elegansvariation.org/order/{order_obj['invoice_hash']}"
         send_email({"from": "no-reply@elegansvariation.org",
                     "to": [order_obj["email"]],
-                    "cc": app.config.get("CC_EMAILS"),
+                    "cc": config.get("CC_EMAILS"),
                     "subject": f"CeNDR Dontaion #{order_obj['invoice_hash']}",
                     "text": DONATE_SUBMISSION_EMAIL.format(invoice_hash=order_obj["invoice_hash"],
                                                            donation_amount=order_obj.get('total'))})

@@ -4,16 +4,21 @@
 Author: Daniel E. Cook
 """
 import re
-from base.application import app
 from cyvcf2 import VCF
 from flask import request, Response
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 from collections import OrderedDict
-from base.constants import DATASET_RELEASE
 from base.utils.decorators import jsonify_request
+from base.config import config
 from collections import Counter
 from logzero import logger
+
+from flask import Blueprint
+
+api_variant_bp = Blueprint('api_variant',
+                           __name__,
+                           template_folder='api')
 
 ANN_header = ["allele",
               "effect",
@@ -32,7 +37,7 @@ ANN_header = ["allele",
               "error"]
 
 
-def get_vcf(release=DATASET_RELEASE):
+def get_vcf(release=config["DATASET_RELEASE"]):
     return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.soft-filter.vcf.gz".format(release=release)
 
 
@@ -54,9 +59,9 @@ ann_cols = ['allele',
             'distance_to_feature']
 
 
-@app.route('/api/variant', methods=["GET", "POST"])
+@api_variant_bp.route('/api/variant', methods=["GET", "POST"])
 @jsonify_request
-def variant_query(query=None, samples=["N2"], list_all_strains=False, release=DATASET_RELEASE):
+def variant_query(query=None, samples=["N2"], list_all_strains=False, release=config["DATASET_RELEASE"]):
     """
     Used to query a VCF and return results in a dictionary.
 
@@ -107,7 +112,6 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=DA
     region = "{chrom}:{start}-{end}".format(**locals())
     comm = ["bcftools", "view", vcf, region]
     logger.info(comm)
-    # Query Severity
 
     # Query samples
     if samples != 'ALL':
@@ -192,5 +196,6 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=DA
                 output.append('\t'.join(map(str, build_output.values())))
             logger.info("RESPOND")
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition":"attachment; filename=%s" % filename})
+        logger.info(output_data)
         return output_data
 

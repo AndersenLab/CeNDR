@@ -3,11 +3,11 @@ import hashlib
 import base64
 from flask import g
 from base.utils.data_utils import dump_json
-from base.constants import DATASET_RELEASE
 from gcloud import datastore, storage
 from logzero import logger
 import googleapiclient.discovery
 from google.oauth2 import service_account
+
 
 def google_datastore(open=False):
     """
@@ -121,7 +121,6 @@ def get_md5(fname):
     return str(base64.b64encode(hash.digest()), 'utf-8')
 
 
-
 def upload_file(name, fname):
     """
         Upload a file to the CeNDR bucket
@@ -156,5 +155,4 @@ def google_analytics():
     credentials = service_account.Credentials.from_service_account_file('env_config/client-secret.json',
                                                       scopes=['https://www.googleapis.com/auth/analytics.readonly'])
     return googleapiclient.discovery.build('analyticsreporting', 'v4', credentials=credentials)
-
 

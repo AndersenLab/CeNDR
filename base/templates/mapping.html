@@ -100,7 +100,7 @@
         </div>{#/ row #}
     </form>
     {% else %}
-        <strong>Please <a href='{{ url_for("choose_login") }}'>login</a> to perform a mapping.</strong>
+        <strong>Please <a href='{{ url_for("auth.choose_login") }}'>login</a> to perform a mapping.</strong>
     {% endif %}
 
 {% endblock %}

@@ -11,7 +11,7 @@ import csv
 import requests
 from urllib.request import urlretrieve
 from tempfile import NamedTemporaryFile
-from base.models2 import wormbase_gene_summary_m
+from base.models import wormbase_gene_summary_m
 from base.constants import URLS
 
 

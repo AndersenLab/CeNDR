@@ -48,7 +48,7 @@
         <ul class="dropdown-menu dropdown-menu-left">
           <li><a href="{{ url_for("data.browser") }}">Variant Browser</a></li>
           <li><a href="{{ url_for("data.data") }}">Releases</a></li>
-          <li><a href="{{ url_for('docs') }}">API</a></li>
+         {#<li><a href="{{ url_for('docs') }}">API</a></li>#}
         </ul>
         </li>
 
@@ -83,12 +83,12 @@
             <li class="dropdown">
               <a href="{{ url_for('user.user', username=user['username']) }}" role="button" aria-haspopup="true" aria-expanded="false">{{ user['username'] }}<span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-left">
-                <li><a href="{{ url_for('logout') }}" class='nav-link' role='button'>Logout</a></li>
+                <li><a href="{{ url_for('auth.logout') }}" class='nav-link' role='button'>Logout</a></li>
               </ul>
             </li>
         {% else %}
         <li class="nav-item">
-            <a href='{{ url_for('choose_login') }}' class='nav-link' role='button'>Login</a>
+            <a href='{{ url_for('auth.choose_login') }}' class='nav-link' role='button'>Login</a>
         </li>
         {% endif %}
       </ul>

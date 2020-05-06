@@ -7,18 +7,18 @@ import datetime
 import requests
 from io import StringIO
 from flask import Markup, url_for
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, func
 
-from base.application import db_2
 from base.constants import URLS
 from base.utils.gcloud import get_item, store_item, query_item, google_storage
 from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
 from collections import defaultdict
 from botocore.exceptions import ClientError
-from base.constants import DATASET_RELEASE
+from base.config import DATASET_RELEASE
 
-from logzero import logger
+db = SQLAlchemy()
 
 class datastore_model(object):
     """
@@ -70,7 +70,7 @@ class datastore_model(object):
             return f"<{self.kind}:no-name>"
 
 
-class trait_m(datastore_model):
+class trait_ds(datastore_model):
     """
         Trait class corresponds to a trait analysis within a report.
         This class contains methods for submitting jobs and fetching results
@@ -82,13 +82,13 @@ class trait_m(datastore_model):
 
     def __init__(self, *args, **kwargs):
         """
-            The trait_m object adopts the task
+            The trait_ds object adopts the task
             ID assigned by AWS Fargate.
         """
         self._ecs = get_aws_client('ecs')
         # Get task status
         self._logs = get_aws_client('logs')
-        super(trait_m, self).__init__(*args, **kwargs)
+        super(trait_ds, self).__init__(*args, **kwargs)
         self.exclude_from_indexes = ['trait_data', 'error_traceback', 'CEGWAS_VERSION', 'task_info']
         # Read trait data in upon initialization.
         if hasattr(self, 'trait_data'):
@@ -132,15 +132,7 @@ class trait_m(datastore_model):
                             {
                                 'name': 'DATASET_RELEASE',
                                 'value': DATASET_RELEASE
-                            }#,
-                            #{
-                            #    'name': 'AWS_ACCESS_KEY_ID',
-                            #    'value': fargate_user['aws_access_key_id']
-                            #},
-                            #{
-                            #    'name': 'AWS_SECRET_ACCESS_KEY_ID',
-                            #    'value': fargate_user['aws_secret_access_key']
-                            #}
+                            }
                         ],
                     }
                 ],
@@ -161,7 +153,7 @@ class trait_m(datastore_model):
             )
         task_fargate = task_fargate['tasks'][0]
 
-        # Generate trait_m model
+        # Generate trait_ds model
         self.report_trait = "{}:{}".format(self.report_name, self.trait_name)
         self.name = task_fargate['taskArn'].split("/")[1]
         self.task_info = task_fargate
@@ -170,7 +162,6 @@ class trait_m(datastore_model):
         self.save()
         # Return the task ID
         return self.name
-
 
     def container_status(self):
         """
@@ -189,7 +180,6 @@ class trait_m(datastore_model):
     def is_complete(self):
         return self.status == "complete"
 
-
     @property
     def cegwas_version_formatted(self):
         try:
@@ -198,14 +188,12 @@ class trait_m(datastore_model):
         except:
             return ""
 
-
     @property
     def docker_image_version(self):
         try:
             return json.loads(self.task_info[5:])['containers'][0]['containerArn'].split("/")[1]
         except:
             return ""
-
 
     def get_formatted_task_log(self):
         """
@@ -258,13 +246,11 @@ class trait_m(datastore_model):
         """
         return pd.read_csv(f"{self.gs_base_url}/{fname}", sep="\t")
 
-
     def get_gs_as_json(self, fname):
         """
             Downloads a google-storage file as json
         """
         return requests.get(f"{self.gs_base_url}/{fname}").json()
-
 
     def list_report_files(self):
         """
@@ -278,7 +264,6 @@ class trait_m(datastore_model):
         return {os.path.basename(x.name): f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items}
 
 
-
     def file_url(self, fname):
         """
             Return the figure URL. May change with updates
@@ -287,22 +272,26 @@ class trait_m(datastore_model):
         gs_url = f"{self.gs_base_url}/{fname}"
         return f"{gs_url}"
 
-class mapping_m(datastore_model):
+
+class mapping_ds(datastore_model):
     """
         The mapping/peak interval model
     """
     kind = 'mapping'
+    
     def __init__(self, *args, **kwargs):
-        super(mapping_m, self).__init__(*args, **kwargs)
+        super(mapping_ds, self).__init__(*args, **kwargs)
 
-class user_m(datastore_model):
+
+class user_ds(datastore_model):
     """
         The User model - for creating and retrieving
         information on users.
     """
     kind = 'user'
+    
     def __init__(self, *args, **kwargs):
-        super(user_m, self).__init__(*args, **kwargs)
+        super(user_ds, self).__init__(*args, **kwargs)
 
     def reports(self):
         filters = [('user_id', '=', self.user_id)]
@@ -323,44 +312,45 @@ class DictSerializable(object):
             result[key] = getattr(self, key)
         return result
 
+# --------- Break datastore here ---------#
 
-class metadata_m(DictSerializable, db_2.Model):
+
+class metadata_m(DictSerializable, db.Model):
     """
         Table for storing information about other tables
     """
     __tablename__ = "metadata"
-    key = db_2.Column(db_2.String(50), index=True, primary_key=True)
-    value = db_2.Column(db_2.String)
+    key = db.Column(db.String(50), index=True, primary_key=True)
+    value = db.Column(db.String)
 
 
-
-class strain_m(DictSerializable, db_2.Model):
+class strain_m(DictSerializable, db.Model):
     __tablename__ = "strain"
-    strain = db_2.Column(db_2.String(25), primary_key=True)
-    reference_strain = db_2.Column(db_2.Boolean(), index=True)
-    sequenced = db_2.Column(db_2.Boolean(), index=True, nullable=True)
-    isotype = db_2.Column(db_2.String(25), index=True, nullable=True)
-    previous_names = db_2.Column(db_2.String(100), nullable=True)
-    source_lab = db_2.Column(db_2.String(), nullable=True)
-    release = db_2.Column(db_2.Integer(), nullable=False, index=True)
-    latitude = db_2.Column(db_2.Float(), nullable=True)
-    longitude = db_2.Column(db_2.Float(), nullable=True)
-    elevation = db_2.Column(db_2.Float(), nullable=True)
-    landscape = db_2.Column(db_2.String(), nullable=True)
-    substrate = db_2.Column(db_2.String(), nullable=True)
-    photo = db_2.Column(db_2.String(), nullable=True)
-    isolated_by = db_2.Column(db_2.String(), nullable=True)
-    sampled_by = db_2.Column(db_2.String(), nullable=True)
-    isolation_date = db_2.Column(db_2.Date(), nullable=True)
-    isolation_date_comment = db_2.Column(db_2.String(), nullable=True)
-    notes = db_2.Column(db_2.String(), nullable=True)
-    sets = db_2.Column(db_2.String(), nullable=True)
-    c_label = db_2.Column(db_2.String(), nullable=True)
-    s_label = db_2.Column(db_2.String(), nullable=True)
-    substrate_temp = db_2.Column(db_2.Float())
-    ambient_temp = db_2.Column(db_2.Float())
-    substrate_moisture = db_2.Column(db_2.Float())
-    ambient_humidity = db_2.Column(db_2.Float())
+    strain = db.Column(db.String(25), primary_key=True)
+    reference_strain = db.Column(db.Boolean(), index=True)
+    sequenced = db.Column(db.Boolean(), index=True, nullable=True)
+    isotype = db.Column(db.String(25), index=True, nullable=True)
+    previous_names = db.Column(db.String(100), nullable=True)
+    source_lab = db.Column(db.String(), nullable=True)
+    release = db.Column(db.Integer(), nullable=False, index=True)
+    latitude = db.Column(db.Float(), nullable=True)
+    longitude = db.Column(db.Float(), nullable=True)
+    elevation = db.Column(db.Float(), nullable=True)
+    landscape = db.Column(db.String(), nullable=True)
+    substrate = db.Column(db.String(), nullable=True)
+    photo = db.Column(db.String(), nullable=True)
+    isolated_by = db.Column(db.String(), nullable=True)
+    sampled_by = db.Column(db.String(), nullable=True)
+    isolation_date = db.Column(db.Date(), nullable=True)
+    isolation_date_comment = db.Column(db.String(), nullable=True)
+    notes = db.Column(db.String(), nullable=True)
+    sets = db.Column(db.String(), nullable=True)
+    c_label = db.Column(db.String(), nullable=True)
+    s_label = db.Column(db.String(), nullable=True)
+    substrate_temp = db.Column(db.Float())
+    ambient_temp = db.Column(db.Float())
+    substrate_moisture = db.Column(db.Float())
+    ambient_humidity = db.Column(db.Float())
 
     def __repr__(self):
         return self.strain
@@ -398,7 +388,7 @@ class strain_m(DictSerializable, db_2.Model):
             Args:
                 df - the strain dataset
         """
-        df = pd.read_sql_table(cls.__tablename__, db_2.engine)
+        df = pd.read_sql_table(cls.__tablename__, db.engine)
         cumulative_isotype = df[['isotype', 'isolation_date']].sort_values(['isolation_date'], axis=0) \
                                                           .drop_duplicates(['isotype']) \
                                                           .groupby(['isolation_date'], as_index=True) \
@@ -435,59 +425,56 @@ class strain_m(DictSerializable, db_2.Model):
                   'isotype_count': cls.query.filter(cls.release <= release).group_by(cls.isotype).count()}
         return counts
 
-
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
-
-class wormbase_gene_m(DictSerializable, db_2.Model):
+class wormbase_gene_m(DictSerializable, db.Model):
     __tablename__ = 'wormbase_gene'
-    id = db_2.Column(db_2.Integer, primary_key=True)
-    chrom = db_2.Column(db_2.String(20), index=True)
-    chrom_num = db_2.Column(db_2.Integer(), index=True)  # For sorting purposes
-    start = db_2.Column(db_2.Integer(), index=True)
-    end = db_2.Column(db_2.Integer(), index=True)
-    feature = db_2.Column(db_2.String(30), index=True)
-    strand = db_2.Column(db_2.String(1))
-    frame = db_2.Column(db_2.Integer(), nullable=True)
-    gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False)
-    gene_biotype = db_2.Column(db_2.String(30), nullable=True)
-    locus = db_2.Column(db_2.String(30), index=True)
-    transcript_id = db_2.Column(db_2.String(30), nullable=True, index=True)
-    transcript_biotype = db_2.Column(db_2.String(), index=True)
-    exon_id = db_2.Column(db_2.String(30), nullable=True, index=True)
-    exon_number = db_2.Column(db_2.Integer(), nullable=True)
-    protein_id = db_2.Column(db_2.String(30), nullable=True, index=True)
-    arm_or_center = db_2.Column(db_2.String(12), index=True)
+    id = db.Column(db.Integer, primary_key=True)
+    chrom = db.Column(db.String(20), index=True)
+    chrom_num = db.Column(db.Integer(), index=True)  # For sorting purposes
+    start = db.Column(db.Integer(), index=True)
+    end = db.Column(db.Integer(), index=True)
+    feature = db.Column(db.String(30), index=True)
+    strand = db.Column(db.String(1))
+    frame = db.Column(db.Integer(), nullable=True)
+    gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False)
+    gene_biotype = db.Column(db.String(30), nullable=True)
+    locus = db.Column(db.String(30), index=True)
+    transcript_id = db.Column(db.String(30), nullable=True, index=True)
+    transcript_biotype = db.Column(db.String(), index=True)
+    exon_id = db.Column(db.String(30), nullable=True, index=True)
+    exon_number = db.Column(db.Integer(), nullable=True)
+    protein_id = db.Column(db.String(30), nullable=True, index=True)
+    arm_or_center = db.Column(db.String(12), index=True)
 
-    gene_summary = db_2.relationship("wormbase_gene_summary_m", backref='gene_components')
+    gene_summary = db.relationship("wormbase_gene_summary_m", backref='gene_components')
 
     def __repr__(self):
         return f"{self.gene_id}:{self.feature} [{self.seqname}:{self.start}-{self.end}]"
 
 
-class wormbase_gene_summary_m(DictSerializable, db_2.Model):
+class wormbase_gene_summary_m(DictSerializable, db.Model):
     """
         This is a condensed version of the wormbase_gene_m model;
         It is constructed out of convenience and only defines the genes
         (not exons/introns/etc.)
     """
     __tablename__ = "wormbase_gene_summary"
-    id = db_2.Column(db_2.Integer, primary_key=True)
-    chrom = db_2.Column(db_2.String(7), index=True)
-    chrom_num = db_2.Column(db_2.Integer(), index=True)
-    start = db_2.Column(db_2.Integer(), index=True)
-    end = db_2.Column(db_2.Integer(), index=True)
-    locus = db_2.Column(db_2.String(30), index=True)
-    gene_id = db_2.Column(db_2.String(25), index=True)
-    gene_id_type = db_2.Column(db_2.String(15), index=False)
-    sequence_name = db_2.Column(db_2.String(30), index=True)
-    biotype = db_2.Column(db_2.String(30), nullable=True)
-    gene_symbol = db_2.column_property(func.coalesce(locus, sequence_name, gene_id))
-    interval = db_2.column_property(func.printf("%s:%s-%s", chrom, start, end))
-    arm_or_center = db_2.Column(db_2.String(12), index=True)
-
+    id = db.Column(db.Integer, primary_key=True)
+    chrom = db.Column(db.String(7), index=True)
+    chrom_num = db.Column(db.Integer(), index=True)
+    start = db.Column(db.Integer(), index=True)
+    end = db.Column(db.Integer(), index=True)
+    locus = db.Column(db.String(30), index=True)
+    gene_id = db.Column(db.String(25), index=True)
+    gene_id_type = db.Column(db.String(15), index=False)
+    sequence_name = db.Column(db.String(30), index=True)
+    biotype = db.Column(db.String(30), nullable=True)
+    gene_symbol = db.column_property(func.coalesce(locus, sequence_name, gene_id))
+    interval = db.column_property(func.printf("%s:%s-%s", chrom, start, end))
+    arm_or_center = db.Column(db.String(12), index=True)
 
     @classmethod
     def resolve_gene_id(cls, query):
@@ -503,21 +490,20 @@ class wormbase_gene_summary_m(DictSerializable, db_2.Model):
             return result.gene_id
 
 
-
-class homologs_m(DictSerializable, db_2.Model):
+class homologs_m(DictSerializable, db.Model):
     """
         The homologs database combines
     """
     __tablename__ = "homologs"
-    id = db_2.Column(db_2.Integer, primary_key=True)
-    gene_id = db_2.Column(db_2.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False, index=True)
-    gene_name = db_2.Column(db_2.String(40), index=True)
-    homolog_species = db_2.Column(db_2.String(50), index=True)
-    homolog_taxon_id = db_2.Column(db_2.Integer, index=True, nullable=True)  # If available
-    homolog_gene = db_2.Column(db_2.String(50), index=True)
-    homolog_source = db_2.Column(db_2.String(40))
+    id = db.Column(db.Integer, primary_key=True)
+    gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False, index=True)
+    gene_name = db.Column(db.String(40), index=True)
+    homolog_species = db.Column(db.String(50), index=True)
+    homolog_taxon_id = db.Column(db.Integer, index=True, nullable=True)  # If available
+    homolog_gene = db.Column(db.String(50), index=True)
+    homolog_source = db.Column(db.String(40))
 
-    gene_summary = db_2.relationship("wormbase_gene_summary_m", backref='homologs', lazy='joined')
+    gene_summary = db.relationship("wormbase_gene_summary_m", backref='homologs', lazy='joined')
 
     def unnest(self):
         """
@@ -530,5 +516,3 @@ class homologs_m(DictSerializable, db_2.Model):
 
     def __repr__(self):
         return f"homolog: {self.gene_name} -- {self.homolog_gene}"
-
-

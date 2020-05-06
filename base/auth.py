@@ -8,9 +8,8 @@ from flask import (redirect,
                    request,
                    flash,
                    Markup)
-from base.application import app
 from functools import wraps
-from base.models2 import user_m
+from base.models import user_ds
 from base.utils.data_utils import unique_id
 from slugify import slugify
 from logzero import logger
@@ -20,6 +19,10 @@ from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
 from flask_dance.consumer import oauth_authorized
 
+from flask import Blueprint
+auth_bp = Blueprint('auth',
+                     __name__,
+                     template_folder='')
 
 google_bp = make_google_blueprint(scope=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
                                   offline=True)
@@ -27,7 +30,7 @@ github_bp = make_github_blueprint(scope="user:email")
 # dropbox_bp = make_dropbox_blueprint()
 
 
-@app.route("/login/select", methods=['GET'])
+@auth_bp.route("/login/select", methods=['GET'])
 def choose_login(error=None):
     # Relax scope for Google
     if not session.get("login_referrer", "").endswith("/login/select"):
@@ -54,11 +57,11 @@ def authorized(blueprint, token):
         user_info['github']['email'] = user_email
     else:
         flash("Error logging in!")
-        return redirect(url_for("choose_login"))
+        return redirect(url_for("auth.choose_login"))
 
     # Create or get existing user.
     logger.info(user_email)
-    user = user_m(user_email)
+    user = user_ds(user_email)
     logger.debug(user)
     logger.debug(user._exists)
     if not user._exists:
@@ -84,11 +87,11 @@ def login_required(f):
         if not session.get('user'):
             with app.app_context():
                 session['redirect_url'] = request.url
-                return redirect(url_for('choose_login'))
+                return redirect(url_for('auth.choose_login'))
         return f(*args, **kwargs)
     return func
 
-@app.route('/logout')
+@auth_bp.route('/logout')
 def logout():
     """
         Logs the user out.

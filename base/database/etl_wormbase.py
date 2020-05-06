@@ -13,7 +13,7 @@ import gzip
 from gtfparse import read_gtf_as_dataframe
 from urllib.request import urlretrieve
 from tempfile import NamedTemporaryFile
-from base.utils.genetic_utils import arm_or_center
+from base.utils.bio import arm_or_center
 from base.constants import URLS, CHROM_NUMERIC
 
 

@@ -11,9 +11,8 @@ import requests
 from functools import lru_cache
 from dateutil import parser
 from base.utils.google_sheets import get_google_sheet
-from base.utils.gcloud import get_item
 from logzero import logger
-from base.application import app
+from base.config import config
 from base.constants import GOOGLE_SHEETS
 
 
@@ -26,7 +25,7 @@ def fetch_elevations(lat, lon):
         call per unique lat/lon result.
 
     """
-    elevation_url = f"https://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lon}&key={app.config['ELEVATION_API_KEY']}"
+    elevation_url = f"https://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lon}&key={config['ELEVATION_API_KEY']}"
     result = requests.get(elevation_url)
     if result.ok:
         elevation = result.json()['results'][0]['elevation']
