@@ -2,8 +2,10 @@ import os
 
 import arrow
 
-from logzero import logger
+from rich.console import Console
 from base import constants
+from base.constants import URLS
+from base.utils.data_utils import download
 from base.models import (db,
                          Homologs,
                          Metadata,
@@ -21,6 +23,14 @@ from .etl_wormbase import (fetch_gene_gff_summary,
                            fetch_gene_gtf,
                            fetch_orthologs)
 
+console = Console()
+DOWNLOAD_PATH = ".download"
+
+
+def download_fname(download_path: str, download_url: str):
+    return os.path.join(download_path,
+                        download_url.split("/")[-1])
+
 
 def initialize_sqlite_database(wormbase_version, db=db):
     """Create a static sqlite database
@@ -30,10 +40,32 @@ def initialize_sqlite_database(wormbase_version, db=db):
     Generate an sqlite database
     """
     start = arrow.utcnow()
-    logger.info('Initializing Database')
+    console.log("Initializing Database")
+
     SQLITE_PATH = f"base/cendr.{wormbase_version}.db"
     if os.path.exists(SQLITE_PATH):
         os.remove(SQLITE_PATH)
+
+    # Download wormbase files
+    if not os.path.exists(DOWNLOAD_PATH):
+        os.makedirs(DOWNLOAD_PATH)
+
+    # Parallel URL download
+    console.log("Downloading Wormbase Data")
+    download([URLS.GENE_GFF_URL,
+              URLS.GENE_GTF_URL,
+              URLS.GENE_IDS_URL,
+              URLS.HOMOLOGENE_URL,
+              URLS.ORTHOLOG_URL,
+              URLS.TAXON_ID_URL],
+             DOWNLOAD_PATH)
+
+    gff_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_GFF_URL)
+    gtf_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_GTF_URL)
+    gene_ids_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_IDS_URL)
+    homologene_fname = download_fname(DOWNLOAD_PATH, URLS.HOMOLOGENE_URL)
+    ortholog_fname = download_fname(DOWNLOAD_PATH, URLS.ORTHOLOG_URL)
+
 
     from base.application import create_app
     app = create_app()
@@ -43,12 +75,12 @@ def initialize_sqlite_database(wormbase_version, db=db):
     db.create_all(app=app)
     db.session.commit()
  
-    logger.info(f"Created {SQLITE_PATH}")
+    console.log(f"Created {SQLITE_PATH}")
 
     ################
     # Set metadata #
     ################
-    logger.info('Inserting metadata')
+    console.log('Inserting metadata')
     today = arrow.utcnow().date().isoformat()
     metadata = {}
     metadata.update(vars(constants))
@@ -74,37 +106,36 @@ def initialize_sqlite_database(wormbase_version, db=db):
 
     ##############
     # Load Genes #
-    ##############
-    logger.info('Loading summary gene table')
-    genes = list(fetch_gene_gff_summary())
-    db.session.bulk_insert_mappings(WormbaseGeneSummary, genes)
-    logger.info('Save gene table for mapping worker')
-    pd.DataFrame(genes).to_csv("mapping_worker/genes.tsv.gz", compression='gzip', index=False)
-    db_mapping_worker_session.close()
-    logger.info('Loading gene table')
-    db.session.bulk_insert_mappings(WormbaseGene, fetch_gene_gtf())
-    gene_summary = db.session.query(WormbaseGene.feature,
-                                      db.func.count(WormbaseGene.feature)) \
-                               .group_by(WormbaseGene.feature) \
-                               .all()
-    gene_summary = '\n'.join([f"{k}: {v}" for k, v in gene_summary])
-    logger.info(f"============\nGene Summary\n------------\n{gene_summary}\n============")
+    # ##############
+    # console.log('Loading summary gene table')
+    # genes = fetch_gene_gff_summary(gff_fname)
+    # db.session.bulk_insert_mappings(WormbaseGeneSummary, genes)
+    # db.session.commit()
+
+    # console.log('Loading gene table')
+    # db.session.bulk_insert_mappings(WormbaseGene, fetch_gene_gtf(gtf_fname, gene_ids_fname))
+    # gene_summary = db.session.query(WormbaseGene.feature,
+    #                                 db.func.count(WormbaseGene.feature)) \
+    #                          .group_by(WormbaseGene.feature) \
+    #                          .all()
+    # gene_summary = '\n'.join([f"{k}: {v}" for k, v in gene_summary])
+    # console.log(f"============\nGene Summary\n------------\n{gene_summary}\n============")
 
     ###############################
     # Load homologs and orthologs #
     ###############################
-    logger.info('Loading homologs from homologene')
-    db.session.bulk_insert_mappings(Homologs, fetch_homologene())
-    logger.info('Loading orthologs from WormBase')
-    db.session.bulk_insert_mappings(Homologs, fetch_orthologs())
+    console.log('Loading homologs from homologene')
+    db.session.bulk_insert_mappings(Homologs, fetch_homologene(homologene_fname))
+    console.log('Loading orthologs from WormBase')
+    db.session.bulk_insert_mappings(Homologs, fetch_orthologs(ortholog_fname))
 
     ################
     # Load Strains #
     ################
-    logger.info('Loading strains...')
+    console.log('Loading strains...')
     db.session.bulk_insert_mappings(Strain, fetch_andersen_strains())
     db.session.commit()
-    logger.info(f"Inserted {Strain.query.count()} strains", fg="blue")
+    console.log(f"Inserted {Strain.query.count()} strains", fg="blue")
 
     #############
     # Upload DB #
@@ -113,21 +144,21 @@ def initialize_sqlite_database(wormbase_version, db=db):
     # Generate an md5sum of the database that can be compared with
     # what is already on google storage.
     local_md5_hash = get_md5("base/cendr.db")
-    logger.info(f"Database md5 (base64) hash: {local_md5_hash}")
+    console.log(f"Database md5 (base64) hash: {local_md5_hash}")
     gs = google_storage()
     cendr_bucket = gs.get_bucket("elegansvariation.org")
     db_releases = list(cendr_bucket.list_blobs(prefix='db/'))[1:]
     for db in db_releases:
         if db.md5_hash == local_md5_hash:
-            logger.info("An identical database already exists")
+            console.log("An identical database already exists")
             raise Exception(f"{db.name} has an identical md5sum as the database generated. Skipping upload")
 
     # Upload the file using todays date for archiving purposes
-    logger.info('Uploading Database')
+    console.log('Uploading Database')
     blob = upload_file(f"db/{today}.db", "base/cendr.db")
 
     # Copy the database to _latest.db
     cendr_bucket.copy_blob(blob, cendr_bucket, "db/_latest.db")
 
     diff = int((arrow.utcnow() - start).total_seconds())
-    logger.info(f"{diff} seconds")
+    console.log(f"{diff} seconds")

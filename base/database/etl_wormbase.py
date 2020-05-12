@@ -10,36 +10,35 @@ Author: Daniel E. Cook (danielecook@gmail.com)
 
 import csv
 import gzip
+from logzero import logger
 from gtfparse import read_gtf_as_dataframe
 from urllib.request import urlretrieve
 from tempfile import NamedTemporaryFile
 from base.utils.bio import arm_or_center
 from base.constants import URLS, CHROM_NUMERIC
 
+# https://github.com/phil-bergmann/2016_DLRW_brain/blob/3f69c945a40925101c58a3d77c5621286ad8d787/brain/data.py
 
-def get_gene_ids():
+
+def get_gene_ids(gene_ids_fname: str):
     """
         Retrieve mapping between wormbase IDs (WB000...) to locus names.
         Uses the latest IDs by default.
         Gene locus names (e.g. pot-2)
     """
-    gene_locus_names_file = NamedTemporaryFile('wb', suffix=".gz")
-    out, err = urlretrieve(URLS.GENE_IDS_URL, gene_locus_names_file.name)
-    results = [x.split(",")[1:3] for x in gzip.open(out, 'r').read().decode('utf-8').splitlines()]
+    results = [x.split(",")[1:3] for x in gzip.open(gene_ids_fname, 'r').read().decode('utf-8').splitlines()]
     return dict(results)
 
 
-def fetch_gene_gtf():
+def fetch_gene_gtf(gtf_fname: str, gene_ids_fname: str):
     """
         LOADS wormbase_gene
         This function fetches and parses the canonical geneset GTF
         and yields a dictionary for each row.
     """
-    gene_gtf_file = NamedTemporaryFile('wb', suffix=".gz")
-    out, err = urlretrieve(URLS.GENE_GTF_URL, gene_gtf_file.name)
-    gene_gtf = read_gtf_as_dataframe(gene_gtf_file.name)
+    gene_gtf = read_gtf_as_dataframe(gtf_fname)
+    gene_ids = get_gene_ids(gene_ids_fname)
 
-    gene_ids = get_gene_ids()
     # Add locus column
     # Rename seqname to chrom
     gene_gtf = gene_gtf.rename({'seqname': 'chrom'}, axis='columns')
@@ -53,24 +52,26 @@ def fetch_gene_gtf():
         yield row
 
 
-def fetch_gene_gff_summary():
+def fetch_gene_gff_summary(gff_fname: str):
     """
         LOADS wormbase_gene_summary
         This function fetches data for wormbase_gene_summary;
         It's a condensed version of the wormbase_gene_table
         constructed for convenience.
     """
-
-    gene_gff_file = NamedTemporaryFile('wb', suffix=".gz")
-    out, err = urlretrieve(URLS.GENE_GFF_URL, gene_gff_file.name)
-
     WB_GENE_FIELDSET = ['ID', 'biotype', 'sequence_name', 'chrom', 'start', 'end', 'locus']
 
-    with gzip.open(out) as f:
+    with gzip.open(gff_fname) as f:
+        idx = 0
+        gene_count = 0
         for line in f:
-            line = line.decode('utf-8')
-            if 'WormBase' in line and 'gene' in line:
-                line = line.strip().split("\t")
+            idx += 1
+            if line.decode('utf-8').startswith("#"):
+                continue
+            line = line.decode('utf-8').strip().split("\t")
+            if idx % 1000000 == 0:
+                logger.info(f"Processed {idx} lines;{gene_count} genes; {line[0]}:{line[4]}")
+            if 'WormBase' in line[1] and 'gene' in line[2]:
                 gene = dict([x.split("=") for x in line[8].split(";")])
                 gene.update(zip(["chrom", "start", "end"],
                                 [line[0], line[3], line[4]]))
@@ -84,6 +85,7 @@ def fetch_gene_gff_summary():
                 gene_pos = int(((gene['end'] - gene['start'])/2) + gene['start'])
                 gene['arm_or_center'] = arm_or_center(gene['chrom'], gene_pos)
                 if 'id' in gene.keys():
+                    gene_count += 1
                     gene_id_type, gene_id = gene['id'].split(":")
                     gene['gene_id_type'], gene['gene_id'] = gene['id'].split(":")
 

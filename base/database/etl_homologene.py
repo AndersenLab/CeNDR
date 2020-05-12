@@ -30,7 +30,7 @@ def fetch_taxon_ids():
     return taxon_ids
 
 
-def fetch_homologene():
+def fetch_homologene(homologene_fname: str):
     """
         Download the homologene database and load
 
@@ -53,8 +53,7 @@ def fetch_homologene():
           * gene_symbol = Gene Symbol
           * species = species name
     """
-    response = requests.get(URLS.HOMOLOGENE_URL)
-    response_csv = list(csv.reader(response.content.decode('utf-8').splitlines(), delimiter='\t'))
+    response_csv = list(csv.reader(open(homologene_fname, 'r'), delimiter='\t'))
 
     taxon_ids = fetch_taxon_ids()
 
