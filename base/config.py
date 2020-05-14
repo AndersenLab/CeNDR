@@ -19,12 +19,11 @@ RELEASES = [("20180527", "WS263"),
 DATASET_RELEASE, WORMBASE_VERSION = RELEASES[0]
 
 # SQLITE DATABASE
-SQLITE_PATH = f"base/cendr.{WORMBASE_VERSION}.db"
+SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
 
 
 def load_yaml(path):
     return yaml.load(open(path), Loader=yaml.SafeLoader)
-
 
 # CONFIG
 def get_config(APP_CONFIG):

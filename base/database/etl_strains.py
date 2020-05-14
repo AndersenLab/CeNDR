@@ -42,7 +42,7 @@ def fetch_andersen_strains():
         - Strain sets are concatenated with ','
         - Fetches elevation for each strain
     """
-    WI = get_google_sheet(GOOGLE_SHEETS['WI'])
+    WI = get_google_sheet(config['ANDERSEN_LAB_STRAIN_SHEET'])
     strain_records = WI.get_all_records()
     strain_records = list(filter(lambda x: x.get('isotype') not in ['', None, 'NA'], strain_records))
     for n, record in enumerate(strain_records):

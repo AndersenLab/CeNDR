@@ -6,7 +6,11 @@ from rich.console import Console
 from base import constants
 from base.constants import URLS
 from base.utils.data_utils import download
+from base.utils.gcloud import (get_md5,
+                               google_storage,
+                               upload_file)
 from base.models import (db,
+                         Strain,
                          Homologs,
                          Metadata,
                          WormbaseGene,
@@ -42,7 +46,8 @@ def initialize_sqlite_database(wormbase_version, db=db):
     start = arrow.utcnow()
     console.log("Initializing Database")
 
-    SQLITE_PATH = f"base/cendr.{wormbase_version}.db"
+    SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{wormbase_version}.db"
+    SQLITE_BASENAME = os.path.basename(SQLITE_PATH)
     if os.path.exists(SQLITE_PATH):
         os.remove(SQLITE_PATH)
 
@@ -66,10 +71,9 @@ def initialize_sqlite_database(wormbase_version, db=db):
     homologene_fname = download_fname(DOWNLOAD_PATH, URLS.HOMOLOGENE_URL)
     ortholog_fname = download_fname(DOWNLOAD_PATH, URLS.ORTHOLOG_URL)
 
-
     from base.application import create_app
     app = create_app()
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///cendr.{wormbase_version}.db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{SQLITE_BASENAME}"
     app.app_context().push()
     
     db.create_all(app=app)
@@ -124,10 +128,13 @@ def initialize_sqlite_database(wormbase_version, db=db):
     ###############################
     # Load homologs and orthologs #
     ###############################
-    console.log('Loading homologs from homologene')
-    db.session.bulk_insert_mappings(Homologs, fetch_homologene(homologene_fname))
-    console.log('Loading orthologs from WormBase')
-    db.session.bulk_insert_mappings(Homologs, fetch_orthologs(ortholog_fname))
+    # console.log('Loading homologs from homologene')
+    # db.session.bulk_insert_mappings(Homologs, fetch_homologene(homologene_fname))
+    # db.session.commit()
+
+    # console.log('Loading orthologs from WormBase')
+    # db.session.bulk_insert_mappings(Homologs, fetch_orthologs(ortholog_fname))
+    # db.session.commit()
 
     ################
     # Load Strains #
@@ -135,7 +142,7 @@ def initialize_sqlite_database(wormbase_version, db=db):
     console.log('Loading strains...')
     db.session.bulk_insert_mappings(Strain, fetch_andersen_strains())
     db.session.commit()
-    console.log(f"Inserted {Strain.query.count()} strains", fg="blue")
+    console.log(f"Inserted {Strain.query.count()} strains")
 
     #############
     # Upload DB #
@@ -143,7 +150,7 @@ def initialize_sqlite_database(wormbase_version, db=db):
 
     # Generate an md5sum of the database that can be compared with
     # what is already on google storage.
-    local_md5_hash = get_md5("base/cendr.db")
+    local_md5_hash = get_md5(SQLITE_PATH)
     console.log(f"Database md5 (base64) hash: {local_md5_hash}")
     gs = google_storage()
     cendr_bucket = gs.get_bucket("elegansvariation.org")
@@ -154,11 +161,11 @@ def initialize_sqlite_database(wormbase_version, db=db):
             raise Exception(f"{db.name} has an identical md5sum as the database generated. Skipping upload")
 
     # Upload the file using todays date for archiving purposes
-    console.log('Uploading Database')
-    blob = upload_file(f"db/{today}.db", "base/cendr.db")
+    console.log(f"Uploading Database ({SQLITE_BASENAME})")
+    blob = upload_file(f"db/{SQLITE_BASENAME}", SQLITE_PATH)
 
     # Copy the database to _latest.db
-    cendr_bucket.copy_blob(blob, cendr_bucket, "db/_latest.db")
+    #cendr_bucket.copy_blob(blob, cendr_bucket, "db/_latest.db")
 
     diff = int((arrow.utcnow() - start).total_seconds())
     console.log(f"{diff} seconds")

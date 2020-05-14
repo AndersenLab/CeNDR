@@ -93,14 +93,12 @@ def fetch_gene_gff_summary(gff_fname: str):
                     yield gene
 
 
-def fetch_orthologs():
+def fetch_orthologs(orthologs_fname: str):
     """
         LOADS (part of) homologs
         Fetches orthologs from wormbase; Stored in the homolog table.
     """
-    orthologs_file = NamedTemporaryFile('wb', suffix=".txt")
-    out, err = urlretrieve(URLS.ORTHOLOG_URL, orthologs_file.name)
-    csv_out = list(csv.reader(open(out, 'r'), delimiter='\t'))
+    csv_out = list(csv.reader(open(orthologs_fname, 'r'), delimiter='\t'))
 
     for line in csv_out:
         size_of_line = len(line)
