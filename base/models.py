@@ -319,36 +319,47 @@ class Metadata(DictSerializable, db.Model):
     """
     __tablename__ = "metadata"
     key = db.Column(db.String(50), index=True, primary_key=True)
-    value = db.Column(db.String)
-
+    value = db.Column(db.String)																								
 
 class Strain(DictSerializable, db.Model):
     __tablename__ = "strain"
+    species_id_method = db.Column(db.String(20), nullable=True)
+    species = db.Column(db.String(50), index=True)
+    #reference_strain = db.Column(db.Boolean(), index=True)
     strain = db.Column(db.String(25), primary_key=True)
-    reference_strain = db.Column(db.Boolean(), index=True)
-    sequenced = db.Column(db.Boolean(), index=True, nullable=True)
     isotype = db.Column(db.String(25), index=True, nullable=True)
     previous_names = db.Column(db.String(100), nullable=True)
-    source_lab = db.Column(db.String(), nullable=True)
+    sequenced = db.Column(db.Boolean(), index=True, nullable=True)
+    
     release = db.Column(db.Integer(), nullable=False, index=True)
+    source_lab = db.Column(db.String(), nullable=True)
+    
     latitude = db.Column(db.Float(), nullable=True)
     longitude = db.Column(db.Float(), nullable=True)
-    elevation = db.Column(db.Float(), nullable=True)
     landscape = db.Column(db.String(), nullable=True)
+    locality_description = db.Column(db.String(), nullable=True)
+
     substrate = db.Column(db.String(), nullable=True)
-    photo = db.Column(db.String(), nullable=True)
-    isolated_by = db.Column(db.String(), nullable=True)
-    sampled_by = db.Column(db.String(), nullable=True)
-    isolation_date = db.Column(db.Date(), nullable=True)
-    isolation_date_comment = db.Column(db.String(), nullable=True)
-    notes = db.Column(db.String(), nullable=True)
-    sets = db.Column(db.String(), nullable=True)
-    c_label = db.Column(db.String(), nullable=True)
-    s_label = db.Column(db.String(), nullable=True)
+    substrate_comments = db.Column(db.String(), nullable=True)
     substrate_temp = db.Column(db.Float())
     ambient_temp = db.Column(db.Float())
-    substrate_moisture = db.Column(db.Float())
     ambient_humidity = db.Column(db.Float())
+    
+    associated_organism = db.Column(db.String(), nullable=True)
+    inbreeding_status = db.Column(db.String(), nullable=True)
+    
+    photo = db.Column(db.String(), nullable=True)
+    
+    sampled_by = db.Column(db.String(), nullable=True)
+    isolated_by = db.Column(db.String(), nullable=True)
+    sampling_date = db.Column(db.Date(), nullable=True)
+    sampling_date_comment = db.Column(db.String(), nullable=True)
+    notes = db.Column(db.String(), nullable=True)
+    sets = db.Column(db.String(), nullable=True)
+    issues = db.Column(db.String(), nullable=True)
+
+    # Elevation is added in and computed separately
+    elevation = db.Column(db.Float(), nullable=True)
 
     def __repr__(self):
         return self.strain
@@ -377,6 +388,11 @@ class Strain(DictSerializable, db.Model):
                         </a>
                    """.strip())
         return url_set
+
+    # TEMPORARY
+    @property
+    def reference_strain(self):
+        return self.strain == self.isotype
 
     @classmethod
     def cum_sum_strain_isotype(cls):

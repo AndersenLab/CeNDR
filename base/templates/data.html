@@ -44,7 +44,9 @@
         {% include('releases/download_tab.html') %}
     </div>
     <div role="tabpanel" class="tab-pane" id="summary">
-        {% include('releases/variant_summary_tab.html') %}
+        {% if vcf_summary %}
+            {% include('releases/variant_summary_tab.html') %}
+        {% endif %}
     </div>
     <div role="tabpanel" class="tab-pane" id="phylogeny">
         {% if phylo_url %}

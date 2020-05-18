@@ -2,6 +2,7 @@
 import os
 import yaml
 from base.utils.data_utils import json_encoder
+from logzero import logger
 
 # CeNDR Version
 APP_CONFIG, CENDR_VERSION = os.environ['GAE_VERSION'].split("-", 1)
@@ -10,8 +11,10 @@ if APP_CONFIG not in ['development', 'master']:
 CENDR_VERSION = CENDR_VERSION.replace("-", '.')
 
 # BUILDS AND RELEASES
+# The first release is the current release
 # (RELEASE, ANNOTATION_GENOME)
-RELEASES = [("20180527", "WS263"),
+RELEASES = [("20200515", "WS276"),
+            ("20180527", "WS263"),
             ("20170531", "WS258"),
             ("20160408", "WS245")]
 
@@ -38,7 +41,9 @@ def get_config(APP_CONFIG):
     config.update(BASE_VARS)
     config.update(APP_CONFIG_VARS)
     # Add configuration variables
-    config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{SQLITE_PATH}"
+    # Remove base prefix for SQLAlchemy as it is loaded 
+    # from application folder
+    config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{SQLITE_PATH}".replace("base/", "")
     config['json_encoder'] = json_encoder
     config.update({"CENDR_VERSION": CENDR_VERSION,
                    "APP_CONFIG": APP_CONFIG,

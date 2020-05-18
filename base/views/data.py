@@ -1,4 +1,5 @@
 import requests
+from simplejson.errors import JSONDecodeError
 from flask import make_response
 from flask import render_template
 from flask import Blueprint
@@ -15,7 +16,6 @@ data_bp = Blueprint('data',
 # ============= #
 #   Data Page   #
 # ============= #
-
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
 @data_bp.route('/release/<string:selected_release>')
@@ -24,26 +24,37 @@ def data(selected_release=config["DATASET_RELEASE"]):
         Default data page - lists
         available releases.
     """
+    # Pre-2020 releases used BAMs grouped by isotype.
+    if int(selected_release) < 20200101:
+        return data_v01(selected_release)
+    
+    # Post-2020 releases keep strain-level bams separate.
     title = "Releases"
+    sub_page = selected_release
+    strain_listing = query_strains(release=selected_release)
+    release_summary = Strain.release_summary(selected_release)
+    RELEASES = config["RELEASES"]
+    return render_template('data_v2.html', **locals())
+
+
+def data_v01(selected_release):
+    title = "Releases"
+    subtitle = selected_release
     strain_listing = query_strains(release=selected_release)
     # Fetch variant data
     url = "https://storage.googleapis.com/elegansvariation.org/releases/{selected_release}/multiqc_bcftools_stats.json".format(selected_release=selected_release)
-    vcf_summary = requests.get(url).json()
+    try:
+        vcf_summary = requests.get(url).json()
+    except JSONDecodeError:
+        vcf_summary = None
     release_summary = Strain.release_summary(selected_release)
     try:
         phylo_url = list_release_files(f"releases/{config['DATASET_RELEASE']}/popgen/trees/genome.pdf")[0]
     except IndexError:
-        pass
-    VARS = {'title': title,
-            'strain_listing': strain_listing,
-            'vcf_summary': vcf_summary,
-            'phylo_url': phylo_url,
-            'RELEASES': config["RELEASES"],
-            'release_summary': release_summary,
-            'selected_release': selected_release,
-            'wormbase_genome_version': dict(config["RELEASES"])[selected_release]}
-    return render_template('data.html', **VARS)
-
+        phylo_url = None
+    RELEASES = config["RELEASES"]
+    wormbase_genome_version = dict(config["RELEASES"])[selected_release]
+    return render_template('data.html', **locals())
 
 # =================== #
 #   Download Script   #

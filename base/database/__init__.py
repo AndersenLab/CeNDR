@@ -21,11 +21,11 @@ from base.config import (CENDR_VERSION,
                          RELEASES)
 # ETL Pipelines - fetch and format data for
 # input into the sqlite database
-from .etl_homologene import fetch_homologene
-from .etl_strains import fetch_andersen_strains
-from .etl_wormbase import (fetch_gene_gff_summary,
-                           fetch_gene_gtf,
-                           fetch_orthologs)
+from base.database.etl_homologene import fetch_homologene
+from base.database.etl_strains import fetch_andersen_strains
+from base.database.etl_wormbase import (fetch_gene_gff_summary,
+                                        fetch_gene_gtf,
+                                        fetch_orthologs)
 
 console = Console()
 DOWNLOAD_PATH = ".download"
@@ -75,17 +75,16 @@ def initialize_sqlite_database(wormbase_version, db=db):
     app = create_app()
     app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{SQLITE_BASENAME}"
     app.app_context().push()
-    
+
     db.create_all(app=app)
     db.session.commit()
- 
+
     console.log(f"Created {SQLITE_PATH}")
 
     ################
     # Set metadata #
     ################
     console.log('Inserting metadata')
-    today = arrow.utcnow().date().isoformat()
     metadata = {}
     metadata.update(vars(constants))
     metadata.update({"CENDR_VERSION": CENDR_VERSION,
@@ -108,34 +107,6 @@ def initialize_sqlite_database(wormbase_version, db=db):
 
     db.session.commit()
 
-    ##############
-    # Load Genes #
-    # ##############
-    # console.log('Loading summary gene table')
-    # genes = fetch_gene_gff_summary(gff_fname)
-    # db.session.bulk_insert_mappings(WormbaseGeneSummary, genes)
-    # db.session.commit()
-
-    # console.log('Loading gene table')
-    # db.session.bulk_insert_mappings(WormbaseGene, fetch_gene_gtf(gtf_fname, gene_ids_fname))
-    # gene_summary = db.session.query(WormbaseGene.feature,
-    #                                 db.func.count(WormbaseGene.feature)) \
-    #                          .group_by(WormbaseGene.feature) \
-    #                          .all()
-    # gene_summary = '\n'.join([f"{k}: {v}" for k, v in gene_summary])
-    # console.log(f"============\nGene Summary\n------------\n{gene_summary}\n============")
-
-    ###############################
-    # Load homologs and orthologs #
-    ###############################
-    # console.log('Loading homologs from homologene')
-    # db.session.bulk_insert_mappings(Homologs, fetch_homologene(homologene_fname))
-    # db.session.commit()
-
-    # console.log('Loading orthologs from WormBase')
-    # db.session.bulk_insert_mappings(Homologs, fetch_orthologs(ortholog_fname))
-    # db.session.commit()
-
     ################
     # Load Strains #
     ################
@@ -143,6 +114,34 @@ def initialize_sqlite_database(wormbase_version, db=db):
     db.session.bulk_insert_mappings(Strain, fetch_andersen_strains())
     db.session.commit()
     console.log(f"Inserted {Strain.query.count()} strains")
+
+    ##############
+    # Load Genes #
+    ##############
+    console.log('Loading summary gene table')
+    genes = fetch_gene_gff_summary(gff_fname)
+    db.session.bulk_insert_mappings(WormbaseGeneSummary, genes)
+    db.session.commit()
+
+    console.log('Loading gene table')
+    db.session.bulk_insert_mappings(WormbaseGene, fetch_gene_gtf(gtf_fname, gene_ids_fname))
+    gene_summary = db.session.query(WormbaseGene.feature,
+                                    db.func.count(WormbaseGene.feature)) \
+                             .group_by(WormbaseGene.feature) \
+                             .all()
+    gene_summary = '\n'.join([f"{k}: {v}" for k, v in gene_summary])
+    console.log(f"============\nGene Summary\n------------\n{gene_summary}\n============")
+
+    ###############################
+    # Load homologs and orthologs #
+    ###############################
+    console.log('Loading homologs from homologene')
+    db.session.bulk_insert_mappings(Homologs, fetch_homologene(homologene_fname))
+    db.session.commit()
+
+    console.log('Loading orthologs from WormBase')
+    db.session.bulk_insert_mappings(Homologs, fetch_orthologs(ortholog_fname))
+    db.session.commit()
 
     #############
     # Upload DB #
@@ -163,9 +162,6 @@ def initialize_sqlite_database(wormbase_version, db=db):
     # Upload the file using todays date for archiving purposes
     console.log(f"Uploading Database ({SQLITE_BASENAME})")
     blob = upload_file(f"db/{SQLITE_BASENAME}", SQLITE_PATH)
-
-    # Copy the database to _latest.db
-    #cendr_bucket.copy_blob(blob, cendr_bucket, "db/_latest.db")
 
     diff = int((arrow.utcnow() - start).total_seconds())
     console.log(f"{diff} seconds")

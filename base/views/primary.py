@@ -73,7 +73,8 @@ def help_item(filename=""):
     files = ["FAQ", "Variant-Browser", "Variant-Prediction", "Methods", "Software", "Change-Log"]
     if not filename:
         filename = "FAQ"
-    title = filename.replace("-", " ")
+    title = "Help"
+    subtitle = filename.replace("-", " ")
     return render_template('help_item.html', **locals())
 
 

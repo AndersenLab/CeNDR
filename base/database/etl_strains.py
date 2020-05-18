@@ -16,7 +16,7 @@ from base.config import config
 from base.constants import GOOGLE_SHEETS
 
 
-@lru_cache(maxsize=32)
+@lru_cache(maxsize=10000)
 def fetch_elevations(lat, lon):
     """
         Fetch elevation.
@@ -49,16 +49,18 @@ def fetch_andersen_strains():
         set_list = ','.join([set_name.split("_")[1] for set_name, set_val in record.items()
                              if 'set_' in set_name and set_val == "TRUE"])
         record['sets'] = set_list
+        record = {k.lower(): v for k, v in record.items()}
         for k, v in record.items():
             # Set NA to None
             if v in ["NA", '']:
                 v = None
                 record[k] = v
-            if k in ['isolation_date'] and v:
+            if k in ['sampling_date'] and v:
                 record[k] = parser.parse(v)
         if record['latitude']:
             # Round elevation
             record['elevation'] = round(fetch_elevations(record['latitude'], record['longitude']))
         if n % 50 == 0:
             logger.info(f"Loaded {n} strains")
+        strain_records[n] = record
     return strain_records
