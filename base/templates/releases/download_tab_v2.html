@@ -80,7 +80,7 @@
             <th style='width: 20px;'>#</th>
             <th style="width: 200px;">
                 <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
-                            Reference Strain
+                            Strain
                             </span>
             </th>
             <th style="width: 200px;">
@@ -88,41 +88,42 @@
                             Isotype
                             </span>
             </th>
-            <th style="width: 200px;">
-                <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Individually isolated strains; If strains are assigned to the same isotype they are > 99.93% genetically identical">
-                        Strains
-                        </span></th>
-            </th>
             <th style="width: 200px;">BAM</th>
             <th>Tab-delimited variants</th>
         </tr>
     </thead>
     <div style="height: 30px;"></div>
     <tbody class="searchable">
+        {% set idx = 0 %}
         {% for isotype, strains in strain_listing|groupby('isotype') %}
+        {% for strain in strains|sort(attribute='reference_strain', reverse=True) %}
+        {% set idx = idx + 1 %}
         <tr>
-            <td>{{ loop.index }}</td>
+            <td>{{ idx }}</td>
             <td>
-                {% for strain in strains %}
-                    {% if strain.reference_strain %}
-                        <strong>{{ strain }}</strong>
-                    {% endif %}
-                {% endfor %}
-            </td>
-            <td><a href="{{ url_for('strain.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
-            <td>{% for strain in strains %} {{ strain }} {% endfor %}
+                {% if strain.reference_strain %}
+                    <strong>{{ strain }}</strong>
+                {% else %}
+                    {{ strain }}
+                {% endif %}
             </td>
             <td>
-                {{ strains[0].isotype_bam_url() }}
+                <a href="{{ url_for('strain.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a>
             </td>
             <td>
-                {% if int(selected_release) >= 20170531 %}
+                {{ strain.strain_bam_url() }}
+            </td>
+            <td>
+                {% if int(selected_release) >= 20200101 %}
+                <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/strain/tsv/{{ strain }}.{{ selected_release }}.tsv.gz">TSV</a>
+                {% elif int(selected_release) >= 20170531 %}
                 <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/isotype/tsv/{{ isotype }}.{{ selected_release }}.tsv.gz">{{ isotype }}.{{ selected_release }}.tsv.gz</a>
                 {% else %}
                 <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/isotype_tsv/{{ isotype }}.{{ selected_release }}.tsv">{{ isotype }}.{{ selected_release }}.tsv</a>
                 {% endif %}
             </td>
         </tr>
+        {% endfor %}
         {% endfor %}
     </tbody>
 </table>

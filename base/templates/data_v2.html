@@ -1,0 +1,92 @@
+{% extends "_layouts/default.html" %} {% block custom_head %}
+<style>
+#checkout.affix {
+    position: fixed;
+    top: 20px;
+    width: 136px;
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <ul class="nav nav-pills">
+            <h3>Releases</h3>
+            {% for RELEASE, WB_VERSION in RELEASES %}
+                <li {% if RELEASE == selected_release %}class="active"{% endif %}><a href="{{ url_for('data.data', selected_release = RELEASE) }}">{{ RELEASE }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<hr />
+<div>
+
+<div class="row">
+    <div class="col-md-12">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#download" role="tab" data-toggle="tab">Download</a></li>
+
+    <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+
+    <div role="tabpanel" class="tab-pane active" id="download">
+        {% include('releases/download_tab_v2.html') %}
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="Alignment">
+        <object style="width:100%;height:150vh;" type="text/html" data="/static/reports/20200515/alignment_report.html"></object>
+        {#{{ include_report('alignment', selected_release)|safe }}#}
+    </div>
+
+
+</div>{# Tab Set #}
+
+    </div>{# Download content #}
+</div>{# /Download Tab #}
+
+{% include('releases/vcf_modal.html') %}
+
+
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function() {
+
+    (function($) {
+
+        $('#filter').keyup(function() {
+            $('.searchable tr').hide();
+            $(this).val().split(',').forEach(function(r) {
+                var rex = new RegExp(r, "i");
+                $('.searchable tr').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            })
+        })
+
+    }(jQuery));
+
+});
+
+$(document).ready(function() {
+    $('#filter').keydown(function(event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
+
+
+});
+
+
+</script>
+{% endblock %}
+

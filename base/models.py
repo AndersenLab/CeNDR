@@ -373,7 +373,23 @@ class Strain(DictSerializable, db.Model):
         else:
             return []
 
-    def bam_url(self):
+    def strain_bam_url(self):
+        """
+            Return bam / bam_index url set
+        """
+
+        url_set = Markup(f"""
+                        <a href="{URLS.BAM_URL_PREFIX}/strain/{self.strain}.bam">
+                            BAM
+                        </a>
+                        /
+                        <a href="{URLS.BAM_URL_PREFIX}/strain/{self.strain}.bam.bai">
+                            bai
+                        </a>
+                   """.strip())
+        return url_set
+
+    def isotype_bam_url(self):
         """
             Return bam / bam_index url set
         """
@@ -424,6 +440,7 @@ class Strain(DictSerializable, db.Model):
                                .join(cumulative_strain.set_index('isolation_date')) \
                                .reset_index()
         return df
+        
 
     @classmethod
     def release_summary(cls, release):

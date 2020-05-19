@@ -360,7 +360,7 @@ class Strain(DictSerializable, db.Model):
         else:
             return []
 
-    def bam_url(self):
+    def isotype_bam_url(self):
         """
             Return bam / bam_index url set
         """

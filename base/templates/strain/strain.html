@@ -29,7 +29,7 @@
 
             <div class="col-md-6">
                 <h4>Data</h4>
-                  <li>{{ reference_strain.bam_url() }}</li>
+                  <li>{{ reference_strain.isotype_bam_url() }}</li>
                 {% if reference_strain.variant_file %}
                   <li><a href = "#">{{ obj }}.variants.tsv</a></li>
                 {% endif %}

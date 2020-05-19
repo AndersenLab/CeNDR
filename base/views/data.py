@@ -1,3 +1,4 @@
+import os
 import requests
 from simplejson.errors import JSONDecodeError
 from flask import make_response
@@ -11,6 +12,15 @@ from base.utils.gcloud import list_release_files
 data_bp = Blueprint('data',
                     __name__,
                     template_folder='data')
+
+
+def include_report(name, release):
+    report = os.path.join("base", "static", "reports", release, name + ".html")
+    report = open(report, 'r').read()
+    start = report.find("<body>")
+    end = report.find("</body>")
+    #report = report[start + 6: end]
+    return report
 
 
 # ============= #
@@ -34,10 +44,12 @@ def data(selected_release=config["DATASET_RELEASE"]):
     strain_listing = query_strains(release=selected_release)
     release_summary = Strain.release_summary(selected_release)
     RELEASES = config["RELEASES"]
+    REPORTS = ["alignment"]
     return render_template('data_v2.html', **locals())
 
 
 def data_v01(selected_release):
+    # Legacy releases (Pre 20200101)
     title = "Releases"
     subtitle = selected_release
     strain_listing = query_strains(release=selected_release)
