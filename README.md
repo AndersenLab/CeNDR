@@ -7,6 +7,12 @@
 ![cendr website](https://storage.googleapis.com/elegansvariation.org/static/img/misc/screenshot.png)
 
 
+# Page versions
+
+* `download_tab_isotype_v1.html` -  references the original download table which links to isotype-level bams
+
+* `download_tab_strain_v2.html` -  references the new CeNDR versions which organize sequence data at the strain level.
+
 # Building the static database
 
 ## Building docker container

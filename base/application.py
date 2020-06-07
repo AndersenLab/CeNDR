@@ -21,6 +21,7 @@ from base.views.mapping import mapping_bp
 from base.views.gene import gene_bp
 from base.views.user import user_bp
 from base.views.tools import tools_bp
+from base.views.check import check_bp
 
 # API
 from base.views.api.api_strain import api_strain_bp
@@ -31,6 +32,7 @@ from base.views.api.api_variant import api_variant_bp
 from base.auth import (auth_bp,
                        google_bp,
                        github_bp)
+
 
 # ---- End Routing ---- #
 
@@ -112,6 +114,9 @@ def register_blueprints(app):
     app.register_blueprint(auth_bp, url_prefix='')
     app.register_blueprint(google_bp, url_prefix='/login')
     app.register_blueprint(github_bp, url_prefix='/login')
+
+    # Healthchecks
+    app.register_blueprint(check_bp, url_prefix='')
 
 
 def gs_static(url, prefix='static'):

@@ -28,8 +28,9 @@
 
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#download" role="tab" data-toggle="tab">Download</a></li>
-
+    <li role="presentation" class="active"><a href="#download" role="tab" data-toggle="tab">Overview</a></li>
+    <li role="presentation" ><a href="#Datasets" role="tab" data-toggle="tab">Datasets</a></li>
+    <li role="presentation" ><a href="#Pipelines" role="tab" data-toggle="tab">Pipelines</a></li>
     <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
   </ul>
 
@@ -37,12 +38,19 @@
   <div class="tab-content">
 
     <div role="tabpanel" class="tab-pane active" id="download">
-        {% include('releases/download_tab_v2.html') %}
+        {% include('releases/download_tab_strain_v2.html') %}
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="Datasets">
+        {% include('releases/download_tab_strain_v2.html') %}
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="Pipelines">
+        {{ render_markdown(selected_release + "/pipelines.md", directory="base/static/reports") }}
     </div>
 
     <div role="tabpanel" class="tab-pane" id="Alignment">
-        <object style="width:100%;height:150vh;" type="text/html" data="/static/reports/20200515/alignment_report.html"></object>
-        {#{{ include_report('alignment', selected_release)|safe }}#}
+        <object style="width:100%;height:150vh;" type="text/html" data="/static/reports/{{ selected_release }}/alignment_report.html"></object>
     </div>
 
 
