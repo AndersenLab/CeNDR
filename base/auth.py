@@ -1,151 +1,89 @@
 import requests
 import arrow
+import os
 from flask import (redirect,
                    render_template,
                    url_for,
                    session,
                    request,
-                   flash)
-from flask_oauthlib.client import OAuth
-from flask_oauthlib.client import OAuthException
+                   flash,
+                   Markup)
 from base.application import app
 from functools import wraps
-from base.utils.email import send_email
-from base.utils.gcloud import store_item, get_item
 from base.models2 import user_m
 from base.utils.data_utils import unique_id
 from slugify import slugify
 from logzero import logger
 
-
-oauth = OAuth(app)
-
-github = oauth.remote_app(
-    'github',
-    consumer_key=app.config['GITHUB_CLIENT_ID'],
-    consumer_secret=app.config['GITHUB_CLIENT_SECRET'],
-    request_token_params={'scope': 'user:email'},
-    base_url='https://api.github.com/',
-    request_token_url=None,
-    access_token_method='POST',
-    access_token_url='https://github.com/login/oauth/access_token',
-    authorize_url='https://github.com/login/oauth/authorize'
-)
+from flask import Flask, redirect, url_for
+from flask_dance.contrib.google import make_google_blueprint, google
+from flask_dance.contrib.github import make_github_blueprint, github
+#from flask_dance.contrib.dropbox import make_dropbox_blueprint, dropbox
+from flask_dance.consumer import oauth_authorized
 
 
-google = oauth.remote_app(
-    'google',
-    consumer_key=app.config['GOOGLE_CLIENT_ID'],
-    consumer_secret=app.config['GOOGLE_CLIENT_SECRET'],
-    request_token_params={
-        'scope': ['email', 'https://www.googleapis.com/auth/userinfo.email']
-    },
-    base_url='https://www.googleapis.com/oauth2/v1/',
-    request_token_url=None,
-    access_token_method='POST',
-    access_token_url='https://accounts.google.com/o/oauth2/token',
-    authorize_url='https://accounts.google.com/o/oauth2/auth',
-)
+google_bp = make_google_blueprint(scope=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
+                                  offline=True)
+github_bp = make_github_blueprint(scope="user:email")
+# dropbox_bp = make_dropbox_blueprint()
 
 
 @app.route("/login/select", methods=['GET'])
 def choose_login(error=None):
+    # Relax scope for Google
+    if not session.get("login_referrer", "").endswith("/login/select"):
+        session["login_referrer"] = request.referrer
+    os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = "true"
     VARS = {'page_title': 'Choose Login'}
     if error:
         flash(error, 'danger')
     return render_template('login.html', **VARS)
 
 
-@app.route('/login/github')
-def login_github():
-    return github.authorize(callback=url_for('authorized',
-                                             service_name='github',
-                                             _external=True))
-
-@app.route('/login/google')
-def login_google():
-    return google.authorize(callback=url_for('authorized',
-                                             service_name='google',
-                                             _external=True))
-
-@app.route('/auth/<string:service_name>', methods=['GET'])
-def authorized(service_name):
-    logger.info(service_name)
-    if service_name not in ['google', 'github']:
-        return redirect(url_for('choose_login'))
-    try:
-        if service_name == 'google':
-            resp = google.authorized_response()
-        elif service_name == 'github':
-            resp = github.authorized_response()
-    except OAuthException:
-        flash("Unknown error", 'danger')
-        return redirect(url_for('choose_login'))
-
-    if resp is None:
-        flash("Unknown error", 'danger')
-        return redirect(url_for('choose_login'))
-    elif resp.get('error'):
-        error = resp.get('error')
-        flash(error, 'danger')
-        return redirect(url_for('choose_login'))
-
-    # No access token
-    if resp.get('access_token') is None:
-        error = 'Access denied: reason=%s error=%s resp=%s' % (
-            request.args['error'],
-            request.args['error_description'],
-            resp
-        )
-        flash(error, 'danger')
-        return redirect(url_for('choose_login'))
-
-    if service_name == 'github':
-        session['github_token'] = (resp['access_token'], '')
-        user_info = {'github': github.get('user').data}
-        logger.info(user_info['github'])
-        if not user_info['github'].get('email'):
-            flash('Please set a public email address in github', 'error')
-            return redirect(url_for('choose_login'))
-        user_email = user_info['github']['email'].lower()
-    elif service_name == 'google':
-        user_info = requests.get('https://www.googleapis.com/userinfo/email?alt=json&access_token={}'.format(resp['access_token']))
-        user_info = {'google': user_info.json()['data']}
+@oauth_authorized.connect
+def authorized(blueprint, token):
+    if google.authorized:
+        user_info = google.get("/oauth2/v2/userinfo")
+        logger.debug(user_info)
+        assert user_info.ok
+        user_info = {'google': user_info.json()}
         user_email = user_info['google']['email'].lower()
+    elif github.authorized:
+        user_emails = github.get("/user/emails")
+        user_email = [x for x in user_emails.json() if x['primary']][0]["email"].lower()
+        user_info = {'github': github.get('/user').json()}
+        user_info['github']['email'] = user_email
+    # elif dropbox.authorized:
+    #     logger.debug(dropbox.authorized)
+    #     dbx_info = dropbox.get("/get_account").json()
+    #     logger.debug(dbx_info)
+    #     user_email = dbx_info["email"]
+    #     user_info = {'dropbox': dbx_info}
+    else:
+        flash("Error logging in!")
+        return redirect(url_for("choose_login"))
 
     # Create or get existing user.
+    logger.info(user_email)
     user = user_m(user_email)
+    logger.debug(user)
+    logger.debug(user._exists)
     if not user._exists:
         user.user_email = user_email
         user.user_info = user_info
         user.email_confirmation_code = unique_id()
         user.user_id = unique_id()[0:8]
         user.username = slugify("{}_{}".format(user_email.split("@")[0], unique_id()[0:4]))
-    # Update user with login service
-    setattr(user, service_name, True)
+
     user.last_login = arrow.utcnow().datetime
+    logger.debug(user)
     user.save()
 
     session['user'] = user
-    logger.info(session)
+    logger.debug(session)
 
     flash("Successfully logged in!", 'success')
-    return redirect(url_for('primary.primary'))
-
-
-class incorrect_code(BaseException):
-    pass
-
-
-@github.tokengetter
-def get_github_oauth_token():
-    return session.get('github_token')
-
-
-@google.tokengetter
-def get_google_oauth_token():
-    return session.get('google_token')
-
+    return redirect(session.get("login_referrer", None) or url_for('primary.primary'))
 
 def login_required(f):
     @wraps(f)
@@ -157,13 +95,11 @@ def login_required(f):
         return f(*args, **kwargs)
     return func
 
-
 @app.route('/logout')
 def logout():
     """
         Logs the user out.
     """
     session.clear()
-    print(session)
     flash("Successfully logged out", "success")
     return redirect(request.referrer)

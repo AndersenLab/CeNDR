@@ -6,12 +6,16 @@ Author: Daniel E. Cook
 
 
 """
+import requests
+import markdown
+import pytz
+from flask import Markup
 from flask import render_template, url_for, request, redirect, Blueprint
 from base.utils.text_utils import render_markdown
 from base.utils.data_utils import sorted_files
 from datetime import datetime
 from urllib.parse import urljoin
-from werkzeug.contrib.atom import AtomFeed
+from feedgen.feed import FeedGenerator
 from base.utils.query import get_latest_public_mappings
 
 primary_bp = Blueprint('primary',
@@ -34,7 +38,7 @@ def primary():
 @primary_bp.route("/Software")
 def reroute_software():
     # This is a redirect due to a typo in the original CeNDR manuscript. Leave it.
-    return redirect(url_for('help_item', filename="Software"))
+    return redirect(url_for('primary.help_item', filename="Software"))
 
 
 @primary_bp.route("/news/")
@@ -48,6 +52,16 @@ def news_item(filename=""):
         filename = files[0].strip(".md")
     title = filename[11:].strip(".md").replace("-", " ")
     return render_template('news_item.html', **locals())
+
+
+
+# @primary_bp.route("/special/")
+# def dbx_help(filename=""):
+#     """
+#         Help
+#     """
+#     f = requests.get("https://dl.dropbox.com/s/al68jcsc8xc3yqo/faq.md?dl=1")
+#     return Markup(markdown.markdown(f.text))
 
 
 @primary_bp.route("/help/")
@@ -68,20 +82,27 @@ def feed():
     """
         This view renders the sites ATOM feed.
     """
-    feed = AtomFeed('CeNDR News',
-                    feed_url=request.url, url=request.url_root)
+    fg = FeedGenerator()
+
+    fg.id("CeNDR.News")
+    fg.title("CeNDR News")
+    fg.author({'name':'CeNDR Admin','email':'erik.andersen@northwestern.edu'})
+    fg.link( href='http://example.com', rel='alternate' )
+    fg.logo('http://ex.com/logo.jpg')
+    fg.subtitle('This is a cool feed!')
+    fg.language('en')
+    fg.link( href=request.url, rel='self' )
+    fg.language('en')
     files = sorted_files("base/static/content/news/")  # files is a list of file names
     for filename in files:
-        title = filename[11:].strip(".md").replace("-", " ")
-        content = render_markdown(filename, "base/static/content/news/")
-        date_published = datetime.strptime(filename[:10], "%Y-%m-%d")
-        feed.add(title, content,
-                 content_type='html',
-                 author="CeNDR News",
-                 url=urljoin(request.url_root, url_for("primary.news_item", filename=filename.strip(".md"))),
-                 updated=date_published,
-                 published=date_published)
-    return feed.get_response()
+        fe = fg.add_entry()
+        fe.id(filename[11:].strip(".md").replace("-", " "))
+        fe.title(filename[11:].strip(".md").replace("-", " "))
+        fe.author({'name':'CeNDR Admin','email':'erik.andersen@northwestern.edu'})
+        fe.link(href=urljoin(request.url_root, url_for("primary.news_item", filename=filename.strip(".md"))))
+        fe.content(render_markdown(filename, "base/static/content/news/"))
+        fe.pubDate(pytz.timezone("America/Chicago").localize(datetime.strptime(filename[:10], "%Y-%m-%d")))
+    return fg.atom_str(pretty=True)
 
 
 @primary_bp.route('/outreach/')

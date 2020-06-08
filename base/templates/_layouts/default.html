@@ -48,7 +48,9 @@
                                     {# Direct to user profile #}
                                     <li>User</li>
                                     {% else %}
+                                    {% if request.blueprint != "primary" %}
                                     <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
+                                    {% endif %}
                                     {% endif %}
                                 {% endif %}
                               <li><strong>{{ title }}</strong></li>

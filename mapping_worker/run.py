@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Author: Daniel E. Cook
-
-
-
 """
 import glob
 import os
@@ -26,7 +23,6 @@ import requests
 # Create a data directory
 if not os.path.exists('data'):
     os.makedirs('data')
-
 
 logzero.logfile("data/out.log", maxBytes=1e6, backupCount=3)
 
@@ -69,6 +65,9 @@ def fetch_existing_mapping(report_slug, trait_slug):
         return mapping
     except IndexError:
         return None
+
+# Fetch trait info using ID
+
 
 # Define variables
 report_name = os.environ['REPORT_NAME']

@@ -10,7 +10,7 @@ import pickle
 import base64
 import pandas as pd
 from logzero import logger
-from werkzeug.contrib.cache import BaseCache
+from cachelib import BaseCache
 from base.utils.gcloud import get_item, store_item
 from time import time
 from base.constants import CENDR_VERSION

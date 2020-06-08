@@ -41,6 +41,9 @@ def order_page():
         This view handles the order page.
     """
 
+    # [ ] REVERT; TEMPORARY BLOCK ON ORDERS
+    return redirect("strains.strain_catalog", **locals())
+
     form = order_form()
     if session.get('user') and not form.email.data:
         form.email.data = session.get('user')['user_email']
@@ -59,6 +62,7 @@ def order_page():
 
     # When the user confirms their order it is processed below.
     if user_from_catalog is False and form.validate_on_submit():
+
         order_obj = {'total': form.total,
                      'date': chicago_date(),
                      'is_donation': False}
@@ -77,7 +81,6 @@ def order_page():
         add_to_order_ws(order_obj)
         flash("Thank you for submitting your order! Please follow the instructions below to complete your order.", 'success')
         return redirect(url_for("order.order_confirmation", invoice_hash=order_obj['invoice_hash']), code=302)
-
     return render_template('order/order.html', **locals())
 
 

@@ -98,7 +98,8 @@ def get_isotypes(known_origin=False, list_only=False):
             known_origin: Returns only strains with a known origin
             list_only: Returns a list of isotypes (internal use)
     """
-    result = strain_m.query.filter(strain_m.reference_strain == True)
+    result = strain_m.query.filter(strain_m.reference_strain == True) \
+                           .order_by(strain_m.isotype)
     if known_origin or 'origin' in request.path:
         result = result.filter(strain_m.latitude != None)
     result = result.all()

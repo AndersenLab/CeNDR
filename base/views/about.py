@@ -6,7 +6,9 @@
 
 """
 import datetime
-import markdown
+from io import StringIO
+import pandas as pd
+import requests
 from base.application import cache
 from flask import Blueprint
 from flask import render_template, url_for, Markup, request, redirect, session
@@ -20,18 +22,9 @@ from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
 from base.utils.data_utils import load_yaml, chicago_date, hash_it
 from base.utils.plots import time_series_plot
 
-
 about_bp = Blueprint('about',
                      __name__,
                      template_folder='about')
-
-
-@about_bp.context_processor
-def utility_processor():
-    def render_markdown(filename, directory="base/static/content/markdown/"):
-        with open(directory + filename) as f:
-            return Markup(markdown.markdown(f.read()))
-    return dict(render_markdown=render_markdown)
 
 
 @about_bp.route('/')
@@ -179,3 +172,18 @@ def statistics():
     return render_template('about/statistics.html', **VARS)
 
 
+@about_bp.route('/publications')
+def publications():
+    """
+        List of publications that have referenced CeNDR
+    """
+    title = "Publications"
+    req = requests.get(
+        "https://docs.google.com/spreadsheets/d/1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs/export?format=csv&id=1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs&gid=0")
+    df = pd.read_csv(StringIO(req.content.decode("UTF-8")))
+    df = df.apply(lambda x: f"""<strong><a href="{x.url}">{x.title.strip(".")}</a>
+                                </strong><br />
+                                {x.authors}<br />
+                                ( {x.pub_date} ) <i>{x.journal}</i>""", axis = 1)
+    df = list(df.values)[:-1]
+    return render_template('about/publications.html', **locals())

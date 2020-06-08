@@ -1,4 +1,4 @@
-{% extends "_layouts/default.html" %} {% block custom_head %}
+{% extends "_layouts/default.html" %}{% block custom_head %}
 <style>
 #checkout.affix {
     position: fixed;
@@ -228,8 +228,8 @@ $("#checkAll").click(function() {
 
 $("input:checkbox").click(function(x) {
     highlight_set_buttons();
-    $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
-    // console.log(test)
+    // [ ] REVERT; Checkout button temporary ban on orders
+    // $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
 });
 
 $("#submitPaste").click(function() {

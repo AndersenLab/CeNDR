@@ -10,10 +10,14 @@ from base.utils.data_utils import json_encoder
 from base.utils.text_utils import render_markdown
 from base.constants import CENDR_VERSION, APP_CONFIG
 from flaskext.markdown import Markdown
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flaskext.markdown import Markdown
 
 # Create
 app = Flask(__name__,
             static_url_path='/static')
+
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
 
 # Add markdown
 Markdown(app)
@@ -103,7 +107,11 @@ from base.views.user import user_bp
 app.register_blueprint(user_bp, url_prefix='/user')
 
 # Authentication
-from base.auth import *
+from base.auth import google_bp, github_bp #, dropbox_bp
+app.register_blueprint(google_bp, url_prefix='/login')
+app.register_blueprint(github_bp, url_prefix='/login')
+#app.register_blueprint(dropbox_bp, url_prefix='/login')
+
 
 # Inject globals
 @app.context_processor

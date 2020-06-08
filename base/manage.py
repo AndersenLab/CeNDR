@@ -154,10 +154,12 @@ def update_credentials():
     comm = ['travis',
             'encrypt-file',
             'env_config.zip',
+            "--org",
             '--key',
             zip_creds['key'],
             '--iv',
             zip_creds['iv']]
+    print(' '.join(comm))
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     secho(str(out, 'utf-8'), fg='green')
     if err:
