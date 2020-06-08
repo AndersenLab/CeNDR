@@ -20,8 +20,8 @@ jobs:
     
     - name: ping healthchecks.io
       if: ${{ success() }}
-      run: curl {{ secrets.HEALTHCHECK_URL }}
+      run: curl ${{ secrets.HEALTHCHECK_URL }}
       
     - name: ping healthchecks.io
       if: ${{ failure() }}
-      run: curl {{ secrets.HEALTHCHECK_URL }}/fail
+      run: curl ${{ secrets.HEALTHCHECK_URL }}/fail
