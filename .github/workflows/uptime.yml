@@ -1,0 +1,23 @@
+# Check that CeNDR is running
+name: Check CeNDR uptime
+
+on:
+  # Scheduled workflows only run on the latest commit or base branch
+  schedule:
+    - cron: '*/5 * * * *'
+
+jobs:
+  ping_site:
+    runs-on: ubuntu-latest
+    name: Ping the site
+    steps:
+    - name: Check the site
+      id: check CeNDR
+      uses: srt32/uptime@master
+      with:
+        url-to-hit: "https://elegansvariation.org/"
+        expected-statuses: "200,301"
+    
+    - name: ping healthchecks.io
+      if: ${{ success() }}
+      run: curl {{ secrets.HEALTHCHECK_URL }}

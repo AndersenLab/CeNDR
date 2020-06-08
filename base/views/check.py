@@ -5,7 +5,6 @@ from flask import jsonify, Blueprint
 check_bp = Blueprint('check',
                      __name__)
 
-
 @check_bp.route('/readiness_check')
 def readiness_check():
     response = jsonify({'ready': True})

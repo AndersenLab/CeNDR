@@ -82,3 +82,7 @@ base/cendr.db
 scripts/setup_browser/*
 
 mapping_worker/*
+
+.download/*
+*.vcf.gz
+*.db
