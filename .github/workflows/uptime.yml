@@ -12,7 +12,7 @@ jobs:
     name: Ping the site
     steps:
     - name: Check the site
-      id: check CeNDR
+      id: check_cendr
       uses: srt32/uptime@master
       with:
         url-to-hit: "https://elegansvariation.org/"
@@ -21,3 +21,7 @@ jobs:
     - name: ping healthchecks.io
       if: ${{ success() }}
       run: curl {{ secrets.HEALTHCHECK_URL }}
+      
+    - name: ping healthchecks.io
+      if: ${{ failure() }}
+      run: curl {{ secrets.HEALTHCHECK_URL }}/fail
