@@ -41,8 +41,60 @@
         {% include('releases/download_tab_strain_v2.html') %}
     </div>
 
+    {#
+        DATASETS
+    #}
     <div role="tabpanel" class="tab-pane" id="Datasets">
-        {% include('releases/download_tab_strain_v2.html') %}
+    
+        {# VCFs #}
+        <table class='table'>
+            <thead>
+                <th class='col-md-2'>Name</th>
+                <th class='col-md-6'>Description</th>
+                <th class='col-md-3'>Download</th>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Strain Data</strong></td>
+                    <td>Includes strain, isotype, location information, and more.</td>
+                    <td><a href="{{ url_for('strain.Strainetadata') }}">strain_data.tsv</a></td>
+                </tr>
+                <tr>
+                    <td><strong>Soft Filter Variants</strong></td>
+                    <td>Includes all variants and annotations called by the GATK pipeline. The QC status of each variant (INFO field=<code>FILTER</code>) and genotype (Format Field=<code>FT</code>) is specified by a VCF Field.</td>
+                    <td>
+                        <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz">WI.{{ selected_release }}.soft-filter.vcf.gz</a>
+                        <br />
+                        <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.vcf.gz.csi</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Hard Filter Variants</strong></td>
+                    <td>Includes only high-quality variants after all variants and genotypes with a failed QC status are removed.</td>
+                    <td>
+                        <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz">WI.{{ selected_release }}.hard-filter.vcf.gz</a>
+                        <br />
+                        <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.vcf.gz.csi</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Imputed Variants</strong></td>
+                    <td>Includes all the variants from the hard-filtered VCF but all missing genotypes have been imputed using BEAGLE.</td>
+                    <td><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz">WI.{{ selected_release }}.impute.vcf.gz</a>
+                         <br />
+                         <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz.csi">WI.{{ selected_release }}.impute.vcf.gz.csi</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>Reference Genome</strong></td>
+                    <td>Includes strain, isotype, location information, and more. {{ WORMBASE_VERSION }}</td>
+                    <td><a href="{{ url_for('strain.Strainetadata') }}">strain_data.tsv</a></td>
+                </tr>
+                
+            </tbody>
+
+        </table>
+
     </div>
 
     <div role="tabpanel" class="tab-pane" id="Pipelines">
@@ -90,8 +142,20 @@ $(document).ready(function() {
             return false;
         }
     });
+});
 
+$(function() { 
+    // for bootstrap 3 use 'shown.bs.tab', for bootstrap 2 use 'shown' in the next line
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        // save the latest tab; use cookies if you like 'em better:
+        localStorage.setItem('lastTab', $(this).attr('href'));
+    });
 
+    // go to the latest tab, if it exists:
+    var lastTab = localStorage.getItem('lastTab');
+    if (lastTab) {
+        $('[href="' + lastTab + '"]').tab('show');
+    }
 });
 
 
