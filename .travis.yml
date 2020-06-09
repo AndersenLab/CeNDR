@@ -18,6 +18,6 @@ deploy:
     all_branches: true
   no_promote: true
   no_stop_previous_version: true
-  skip_cleanup: false
+  skip_cleanup: true
 
   
