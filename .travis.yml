@@ -1,5 +1,7 @@
 language: bash
-sudo: false
+sudo: required
+services:
+  - docker
 
 install:
 - openssl aes-256-cbc -K $encrypted_53077b9a3e95_key -iv $encrypted_53077b9a3e95_iv -in env_config.zip.enc -out env_config.zip -d
@@ -9,16 +11,18 @@ install:
 - if [ "${TRAVIS_BRANCH}" != "master" ]; then export APP_CONFIG=development; fi;
 - export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
 - export GOOGLE_APPLICATION_CREDENTIALS=env_config/client-secret.json
+- docker pull us.gcr.io/andersen-lab/appengine/default.development-1-5-0:latest
 
 deploy:
   provider: gae
   version: "${GAE_VERSION}"
   project: andersen-lab
+  docker_build: local
   keyfile: env_config/client-secret.json
   on:
     all_branches: true
   no_promote: true
   no_stop_previous_version: true
-  skip_cleanup: true
+  skip_cleanup: false
 
   
