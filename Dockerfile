@@ -18,9 +18,9 @@ libgraphviz-dev \
 pkg-config \
 && rm -rf /var/lib/apt/lists/*
 
-ENV BCFTOOLS_BIN="bcftools-1.4.tar.bz2" \
+ENV BCFTOOLS_BIN="bcftools-1.10.tar.bz2" \
 BCFTOOLS_PLUGINS="/usr/local/libexec/bcftools" \
-BCFTOOLS_VERSION="1.4"
+BCFTOOLS_VERSION="1.10"
 
 # Install BCFTools
 RUN curl -fsSL https://github.com/samtools/bcftools/releases/download/$BCFTOOLS_VERSION/$BCFTOOLS_BIN -o /opt/$BCFTOOLS_BIN \
@@ -50,6 +50,5 @@ RUN pip install -r /app/requirements.txt
 
 # Add the application source code.
 ADD . /app
-
 
 CMD gunicorn -b :$PORT main:app
