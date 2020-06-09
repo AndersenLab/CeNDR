@@ -8,7 +8,6 @@ Author: Daniel E. Cook (danielecook@gmail.com)
 import re
 import tarfile
 import csv
-import requests
 from urllib.request import urlretrieve
 from tempfile import NamedTemporaryFile
 from base.models import WormbaseGeneSummary

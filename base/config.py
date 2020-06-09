@@ -27,6 +27,7 @@ SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
 def load_yaml(path):
     return yaml.load(open(path), Loader=yaml.SafeLoader)
 
+
 # CONFIG
 def get_config(APP_CONFIG):
     """Load all configuration information including
@@ -40,7 +41,7 @@ def get_config(APP_CONFIG):
     config.update(BASE_VARS)
     config.update(APP_CONFIG_VARS)
     # Add configuration variables
-    # Remove base prefix for SQLAlchemy as it is loaded 
+    # Remove base prefix for SQLAlchemy as it is loaded
     # from application folder
     config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{SQLITE_PATH}".replace("base/", "")
     config['json_encoder'] = json_encoder

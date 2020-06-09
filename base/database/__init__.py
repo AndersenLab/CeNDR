@@ -6,10 +6,7 @@ from rich.console import Console
 from base import constants
 from base.constants import URLS
 from base.utils.data_utils import download
-from base.utils.gcloud import (get_md5,
-                               google_storage,
-                               upload_file,
-                               download_file)
+from base.utils.gcloud import upload_file
 from base.models import (db,
                          Strain,
                          Homologs,
@@ -38,17 +35,17 @@ def download_fname(download_path: str, download_url: str):
                         download_url.split("/")[-1])
 
 
-def initialize_sqlite_database(wormbase_version, db=db):
+def initialize_sqlite_database(sel_wormbase_version, db=db):
     """Create a static sqlite database
     Args:
-         wormbase_version - e.g. WS245
+         sel_wormbase_version - e.g. WS245
 
     Generate an sqlite database
     """
     start = arrow.utcnow()
     console.log("Initializing Database")
 
-    SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{wormbase_version}.db"
+    SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{sel_wormbase_version}.db"
     SQLITE_BASENAME = os.path.basename(SQLITE_PATH)
     if os.path.exists(SQLITE_PATH):
         os.remove(SQLITE_PATH)
@@ -92,7 +89,7 @@ def initialize_sqlite_database(wormbase_version, db=db):
     metadata.update({"CENDR_VERSION": CENDR_VERSION,
                      "APP_CONFIG": APP_CONFIG,
                      "DATASET_RELEASE": DATASET_RELEASE,
-                     "WORMBASE_VERSION": wormbase_version,
+                     "WORMBASE_VERSION": sel_wormbase_version,
                      "RELEASES": RELEASES,
                      "DATE": arrow.utcnow()})
     for k, v in metadata.items():
@@ -158,9 +155,6 @@ def initialize_sqlite_database(wormbase_version, db=db):
 
 
 def download_sqlite_database():
-    from base.application import create_app
-    app = create_app()
-    app.app_context().push()
     SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
     SQLITE_BASENAME = os.path.basename(SQLITE_PATH)
-    download_file(f"db/{SQLITE_BASENAME}", f"base/{SQLITE_BASENAME}")
+    download([f"https://storage.googleapis.com/elegansvariation.org/db/{SQLITE_BASENAME}"], "base")

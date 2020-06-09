@@ -111,17 +111,6 @@ def google_storage(open=False):
     return g.gs
 
 
-def get_md5(fname):
-    """
-        Generates an md5sum that should match the google storage md5sum.
-    """
-    hash = hashlib.md5()
-    with open(fname, 'rb') as f:
-        for chunk in iter(lambda: f.read(2**20), b''):
-            hash.update(chunk)
-    return str(base64.b64encode(hash.digest()), 'utf-8')
-
-
 def upload_file(name, fname):
     """
         Upload a file to the CeNDR bucket

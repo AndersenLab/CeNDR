@@ -1,4 +1,3 @@
-import os
 import requests
 from simplejson.errors import JSONDecodeError
 from flask import make_response
@@ -12,16 +11,6 @@ from base.utils.gcloud import list_release_files
 data_bp = Blueprint('data',
                     __name__,
                     template_folder='data')
-
-
-def include_report(name, release):
-    report = os.path.join("base", "static", "reports", release, name + ".html")
-    report = open(report, 'r').read()
-    start = report.find("<body>")
-    end = report.find("</body>")
-    #report = report[start + 6: end]
-    return report
-
 
 # ============= #
 #   Data Page   #
@@ -67,6 +56,7 @@ def data_v01(selected_release):
     RELEASES = config["RELEASES"]
     wormbase_genome_version = dict(config["RELEASES"])[selected_release]
     return render_template('data.html', **locals())
+
 
 # =================== #
 #   Download Script   #
