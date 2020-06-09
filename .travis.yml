@@ -11,7 +11,6 @@ install:
 - if [ "${TRAVIS_BRANCH}" != "master" ]; then export APP_CONFIG=development; fi;
 - export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
 - export GOOGLE_APPLICATION_CREDENTIALS=env_config/client-secret.json
-- docker pull us.gcr.io/andersen-lab/appengine/default.development-1-5-0:latest
 
 deploy:
   provider: gae
