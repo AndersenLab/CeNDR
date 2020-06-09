@@ -46,6 +46,7 @@ def store_item(kind, name, **kwargs):
             m[key] = 'JSON:' + dump_json(value)
         else:
             m[key] = value
+    logger.debug(f"store: {kind} - {name}")
     ds.put(m)
 
 
@@ -81,7 +82,7 @@ def get_item(kind, name):
     """
     ds = google_datastore()
     result = ds.get(ds.key(kind, name))
-    logger.info(f"datastore: {kind} - {name}")
+    logger.debug(f"get: {kind} - {name}")
     try:
         result_out = {'_exists': True}
         for k, v in result.items():
@@ -134,6 +135,21 @@ def upload_file(name, fname):
     blob = cendr_bucket.blob(name)
     blob.upload_from_filename(fname)
     return blob
+
+
+def download_file(name, fname):
+    """
+        Download a file from the CeNDR bucket
+
+        Args:
+            name - The name of the blob (server-side)
+            fname - The filename to download (client-side)
+    """
+    gs = google_storage()
+    cendr_bucket = gs.get_bucket("elegansvariation.org")
+    blob = cendr_bucket.blob(name)
+    blob.download_to_file(open(fname, 'wb'))
+    return fname
 
 
 def list_release_files(prefix):

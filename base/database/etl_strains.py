@@ -8,15 +8,37 @@ used within the CeNDR application
 Author: Daniel E. Cook (danielecook@gmail.com)
 """
 import requests
-from functools import lru_cache
+import pickle
+from functools import wraps
 from dateutil import parser
 from base.utils.google_sheets import get_google_sheet
 from logzero import logger
 from base.config import config
-from base.constants import GOOGLE_SHEETS
 
 
-@lru_cache(maxsize=10000)
+def elevation_cache(func):
+    """quick and simple cache for lat/lon"""
+    fname = ".download/elevation.pkl"
+    try:
+        func.cache = pickle.load(open(fname, 'rb'))
+    except FileNotFoundError:
+        func.cache = {}
+    @wraps(func)
+    def wrapper(*args):
+        try:
+            return func.cache[args]
+        except KeyError:
+            logger.info(f"Storing {args}")
+            func.cache[args] = result = func(*args)
+            if result is not None:
+                f = open(fname, 'wb')
+                pickle.dump(func.cache, f)
+                f.close()
+            return result
+    return wrapper
+
+
+@elevation_cache
 def fetch_elevations(lat, lon):
     """
         Fetch elevation.
@@ -25,11 +47,15 @@ def fetch_elevations(lat, lon):
         call per unique lat/lon result.
 
     """
+    logger.info(f"Fetching {lat}:{lon}")
     elevation_url = f"https://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lon}&key={config['ELEVATION_API_KEY']}"
     result = requests.get(elevation_url)
     if result.ok:
-        elevation = result.json()['results'][0]['elevation']
-        return elevation
+        try:
+            elevation = result.json()['results'][0]['elevation']
+            return elevation
+        except KeyError:
+            return None
 
 
 def fetch_andersen_strains():
@@ -59,8 +85,17 @@ def fetch_andersen_strains():
                 record[k] = parser.parse(v)
         if record['latitude']:
             # Round elevation
-            record['elevation'] = round(fetch_elevations(record['latitude'], record['longitude']))
+            elevation = fetch_elevations(record['latitude'], record['longitude'])
+            if elevation:
+                record['elevation'] = round(elevation)
         if n % 50 == 0:
             logger.info(f"Loaded {n} strains")
+
+        # Fix strain reference
+        record['reference_strain'] = record['isotype_ref_strain'] == 1
+        record['sequenced'] = record['wgs_seq'] == 1
+
         strain_records[n] = record
+
+
     return strain_records

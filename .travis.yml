@@ -10,14 +10,9 @@ before_install:
 - export VERSION_NUM=1-5-0
 - export APP_CONFIG=master
 - if [ "${TRAVIS_BRANCH}" != "master" ]; then export APP_CONFIG=development; fi;
+script:
 - export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
 - export GOOGLE_APPLICATION_CREDENTIALS=env_config/client-secret.json
-- pip install --upgrade pip
-- pip install cython
-script:
-- PYTHONPATH="$(pwd):$(pwd)/lib:${PYTHONPATH}"
-- export PYTHONPATH
-- wget --quiet -O base/cendr.db https://storage.googleapis.com/elegansvariation.org/db/_latest.db
 deploy:
   provider: gae
   version: "${GAE_VERSION}"

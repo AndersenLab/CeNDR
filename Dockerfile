@@ -48,6 +48,9 @@ RUN update-alternatives --install /usr/bin/python python /opt/python3.6/bin/pyth
 ADD requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 
+# Download the database
+RUN flask download_db
+
 # Add the application source code.
 ADD . /app
 

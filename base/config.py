@@ -2,7 +2,6 @@
 import os
 import yaml
 from base.utils.data_utils import json_encoder
-from logzero import logger
 
 # CeNDR Version
 APP_CONFIG, CENDR_VERSION = os.environ['GAE_VERSION'].split("-", 1)

@@ -10,7 +10,8 @@ from werkzeug.exceptions import HTTPException
 
 from base.manage import (initdb,
                          update_credentials,
-                         decrypt_credentials)
+                         decrypt_credentials,
+                         download_db)
 
 # --------- #
 #  Routing  #
@@ -85,7 +86,8 @@ def register_commands(app):
     """Register custom commands for the Flask CLI."""
     for command in [initdb,
                     update_credentials,
-                    decrypt_credentials]:
+                    decrypt_credentials,
+                    download_db]:
         app.cli.add_command(command)
 
 
@@ -146,7 +148,7 @@ def configure_jinja(app):
 
 def register_errorhandlers(app):
 
-    def render_error(e = "generic"):
+    def render_error(e="generic"):
         return render_template("errors/%s.html" % e.code), e.code
 
     for e in [

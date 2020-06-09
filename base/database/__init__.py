@@ -8,7 +8,8 @@ from base.constants import URLS
 from base.utils.data_utils import download
 from base.utils.gcloud import (get_md5,
                                google_storage,
-                               upload_file)
+                               upload_file,
+                               download_file)
 from base.models import (db,
                          Strain,
                          Homologs,
@@ -18,6 +19,7 @@ from base.models import (db,
 from base.config import (CENDR_VERSION,
                          APP_CONFIG,
                          DATASET_RELEASE,
+                         WORMBASE_VERSION,
                          RELEASES)
 # ETL Pipelines - fetch and format data for
 # input into the sqlite database
@@ -147,21 +149,18 @@ def initialize_sqlite_database(wormbase_version, db=db):
     # Upload DB #
     #############
 
-    # Generate an md5sum of the database that can be compared with
-    # what is already on google storage.
-    local_md5_hash = get_md5(SQLITE_PATH)
-    console.log(f"Database md5 (base64) hash: {local_md5_hash}")
-    gs = google_storage()
-    cendr_bucket = gs.get_bucket("elegansvariation.org")
-    db_releases = list(cendr_bucket.list_blobs(prefix='db/'))[1:]
-    for db in db_releases:
-        if db.md5_hash == local_md5_hash:
-            console.log("An identical database already exists")
-            raise Exception(f"{db.name} has an identical md5sum as the database generated. Skipping upload")
-
     # Upload the file using todays date for archiving purposes
     console.log(f"Uploading Database ({SQLITE_BASENAME})")
-    blob = upload_file(f"db/{SQLITE_BASENAME}", SQLITE_PATH)
+    upload_file(f"db/{SQLITE_BASENAME}", SQLITE_PATH)
 
     diff = int((arrow.utcnow() - start).total_seconds())
     console.log(f"{diff} seconds")
+
+
+def download_sqlite_database():
+    from base.application import create_app
+    app = create_app()
+    app.app_context().push()
+    SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
+    SQLITE_BASENAME = os.path.basename(SQLITE_PATH)
+    download_file(f"db/{SQLITE_BASENAME}", f"base/{SQLITE_BASENAME}")

@@ -321,15 +321,16 @@ class Metadata(DictSerializable, db.Model):
     key = db.Column(db.String(50), index=True, primary_key=True)
     value = db.Column(db.String)																								
 
+
 class Strain(DictSerializable, db.Model):
     __tablename__ = "strain"
-    species_id_method = db.Column(db.String(20), nullable=True)
+    species_id_method = db.Column(db.String(50), nullable=True)
     species = db.Column(db.String(50), index=True)
-    #reference_strain = db.Column(db.Boolean(), index=True)
+    reference_strain = db.Column(db.Boolean(), index=True) # Is isotype reference strain? [isotype_ref_strain]
     strain = db.Column(db.String(25), primary_key=True)
     isotype = db.Column(db.String(25), index=True, nullable=True)
     previous_names = db.Column(db.String(100), nullable=True)
-    sequenced = db.Column(db.Boolean(), index=True, nullable=True)
+    sequenced = db.Column(db.Boolean(), index=True, nullable=True) # Is whole genome sequenced [WGS_seq]
     
     release = db.Column(db.Integer(), nullable=False, index=True)
     source_lab = db.Column(db.String(), nullable=True)

@@ -12,7 +12,8 @@ import click
 from click import secho
 from base.utils.gcloud import get_item
 from base.utils.data_utils import zipdir
-from base.database import initialize_sqlite_database
+from base.database import (initialize_sqlite_database,
+                           download_sqlite_database)
 from base.models import WormbaseGeneSummary
 from base import constants
 from subprocess import Popen, PIPE
@@ -32,6 +33,13 @@ db_mapping_worker_session = sessionmaker(bind=db_mapping_worker)()
 @click.argument("wormbase_version")
 def initdb(wormbase_version=constants.WORMBASE_VERSION):
     initialize_sqlite_database(wormbase_version)
+
+
+@click.command(help="Download the database (used in docker container)")
+def download_db():
+    # Downloads the latest SQLITE database
+    download_sqlite_database()
+
 
 
 @click.command(help="Update credentials")
