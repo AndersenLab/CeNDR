@@ -13,8 +13,8 @@ def readiness_check():
     return response
 
 
-@check_bp.route('/liveliness_check')
-def liveliness_check():
+@check_bp.route('/liveness_check')
+def liveness_check():
     response = jsonify({'ready': True})
     response.status_code = 200
     return response
