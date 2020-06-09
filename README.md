@@ -15,9 +15,13 @@
 
 # Building the static database
 
-## Building docker container
+
+## Initializing the database
+
+You can create the CeNDR database by running:
 
 ```bash
+flask initdb WS276 # Where WS276 is the version of wormbase
 ```
 
 ## Running the docker container

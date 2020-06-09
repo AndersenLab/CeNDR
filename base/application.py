@@ -62,7 +62,13 @@ def create_app(config=config):
     register_extensions(app)
     register_errorhandlers(app)
     configure_jinja(app)
+    configure_ssl(app)
 
+    return app
+
+
+def configure_ssl(app):
+    """Configure SSL"""
     if os.getenv('HOME') == "/root":
         # Running on server
         app.debug = False
@@ -72,8 +78,6 @@ def create_app(config=config):
         app.debug = True
         app.config['SECRET_KEY'] = "test"
         debug_toolbar(app)
-
-    return app
 
 
 def register_commands(app):
