@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="201px" height="421px" viewBox="-0.5 -0.5 201 421" content="&lt;mxfile host=&quot;&quot; modified=&quot;2020-06-09T23:33:01.599Z&quot; agent=&quot;5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Code/1.45.1 Chrome/78.0.3904.130 Electron/7.2.4 Safari/537.36&quot; etag=&quot;Ff0M9bPpA1h8nRK8HDam&quot; version=&quot;13.1.3&quot;&gt;&lt;diagram id=&quot;6hGFLwfOUW9BJ-s0fimq&quot; name=&quot;Page-1&quot;&gt;1VdNc5swEP01PnoGg5HtY0Kc9tB2mnGmPcuwgBrBOrJs7P76LiAQ+KPJobiTgz3oab+0+54YRl6QHT4pvkm/YgRy5DrRYeQ9jFzXdyf0XwLHGpj7fg0kSkQ1NLHASvwGAzoG3YkItj1DjSi12PTBEPMcQt3DuFJY9M1ilP2sG57AGbAKuTxHf4pIp+YU7szin0EkaZN5whb1TsYbY3OSbcojLDqQtxx5gULU9VN2CECWvWv6Uvs9XtltC1OQ6/c4eKYMfWzOBhEd1SxR6RQTzLlcWvRe4S6PoAzg0MrafEHcEDgh8BdofTRz4zuNBKU6k2a3zlkmulq1gba4U6Gxctv2EK0AM9DqSCYKJNdi3w/FzYCT1q51/Y6CkriO4eKEmUkYKnoNx5oQmqsEtPGynaSHThkWqvp7udduHXjP5c5U+3i3en4iaEy/J/Kn1NQc51mJLBN5MnKZpH7crxU9JbrqXI3EWJ0h5qY57HVXMuY+oH4JIHPnGxQWPnW3ATWlGsev4zxu9ugUdfTG5YQfdvrlKItUaFht6joKEnt/0mWkhkzVWkgZoERVxfIiDvM4JHyrFb5AZ4eFc1jHbf4L1NiD0nDoQOfUMLsnE3Ydsy6sdFss7ciWOdfJ1KPBX2bufxx9TW+ir6k3mL6mZ/pq+d6w+U6KJM+gonfD9vV1dfxzufEm/2CCOxGYD/Noeklgc3ftMdbmO1PTBbq8V2Cee0OBzT6OwNhNBOb7gwmMvS2wH1wJXpUXcCk777AbC60Q44Trl+uZhlRdHAMLL77Wotli7TiDqG46vaHq5m8zIcA8RBXxnHr2fzgQ2go61+1tqQATuoJnl6iwYDOPD3MB+2w4KtDSfp3Ud4j9xPOWfwA=&lt;/diagram&gt;&lt;/mxfile&gt;">
+    <defs/>
+    <g>
+        <path d="M 100 60 L 100 103.63" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 100 108.88 L 96.5 101.88 L 100 103.63 L 103.5 101.88 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="0" y="0" width="200" height="60" rx="9" ry="9" fill="#dae8fc" stroke="#6c8ebf" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 198px; height: 1px; padding-top: 30px; margin-left: 1px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; font-weight: bold; white-space: normal; word-wrap: normal; ">
+                                FASTQ - QC + Trimming
+                                <br/>
+                                <font face="Courier New">
+                                    <br/>
+                                    trim-fq-nf
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="100" y="34" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle" font-weight="bold">
+                    FASTQ - QC + Trimming...
+                </text>
+            </switch>
+        </g>
+        <path d="M 100 180 L 100 223.63" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 100 228.88 L 96.5 221.88 L 100 223.63 L 103.5 221.88 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="0" y="120" width="200" height="60" rx="9" ry="9" fill="#d5e8d4" stroke="#82b366" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 198px; height: 1px; padding-top: 150px; margin-left: 1px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                <b>
+                                    Alignment
+                                </b>
+                                <br/>
+                                <font face="Courier New">
+                                    <br/>
+                                    alignment-nf
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="100" y="154" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Alignment...
+                </text>
+            </switch>
+        </g>
+        <path d="M 100 300 L 100 343.63" fill="none" stroke="#000000" stroke-miterlimit="10" pointer-events="stroke"/>
+        <path d="M 100 348.88 L 96.5 341.88 L 100 343.63 L 103.5 341.88 Z" fill="#000000" stroke="#000000" stroke-miterlimit="10" pointer-events="all"/>
+        <rect x="0" y="240" width="200" height="60" rx="9" ry="9" fill="#ffe6cc" stroke="#d79b00" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 198px; height: 1px; padding-top: 270px; margin-left: 1px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                <b>
+                                    Variant Calling
+                                </b>
+                                <br/>
+                                <font face="Courier New">
+                                    <br/>
+                                    wi-gatk
+                                    <br/>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="100" y="274" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Variant Calling...
+                </text>
+            </switch>
+        </g>
+        <rect x="0" y="360" width="200" height="60" rx="9" ry="9" fill="#e1d5e7" stroke="#9673a6" pointer-events="all"/>
+        <g transform="translate(-0.5 -0.5)">
+            <switch>
+                <foreignObject style="overflow: visible; text-align: left;" pointer-events="none" width="100%" height="100%" requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility">
+                    <div xmlns="http://www.w3.org/1999/xhtml" style="display: flex; align-items: unsafe center; justify-content: unsafe center; width: 198px; height: 1px; padding-top: 390px; margin-left: 1px;">
+                        <div style="box-sizing: border-box; font-size: 0; text-align: center; ">
+                            <div style="display: inline-block; font-size: 12px; font-family: Helvetica; color: #000000; line-height: 1.2; pointer-events: all; white-space: normal; word-wrap: normal; ">
+                                <b>
+                                    Concordance
+                                </b>
+                                <br/>
+                                <font face="Courier New">
+                                    <br/>
+                                    concordance-nf
+                                    <br/>
+                                </font>
+                            </div>
+                        </div>
+                    </div>
+                </foreignObject>
+                <text x="100" y="394" fill="#000000" font-family="Helvetica" font-size="12px" text-anchor="middle">
+                    Concordance...
+                </text>
+            </switch>
+        </g>
+    </g>
+    <switch>
+        <g requiredFeatures="http://www.w3.org/TR/SVG11/feature#Extensibility"/>
+        <a transform="translate(0,-5)" xlink:href="https://desk.draw.io/support/solutions/articles/16000042487" target="_blank">
+            <text text-anchor="middle" font-size="10px" x="50%" y="100%">
+                Viewer does not support full SVG 1.1
+            </text>
+        </a>
+    </switch>
+</svg>
