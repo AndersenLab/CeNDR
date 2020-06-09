@@ -7,7 +7,9 @@ from flask import Flask, render_template
 from base.utils.text_utils import render_markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from base.manage import initdb
+from base.manage import (initdb,
+                         update_credentials,
+                         decrypt_credentials)
 
 # --------- #
 #  Routing  #
@@ -75,14 +77,14 @@ def configure_ssl(app):
         # Ignore leading slash of urls; skips must use start of path
         sslify.init_app(app)
     elif app.config['DEBUG']:
-        app.debug = True
-        app.config['SECRET_KEY'] = "test"
         debug_toolbar(app)
 
 
 def register_commands(app):
     """Register custom commands for the Flask CLI."""
-    for command in [initdb]:
+    for command in [initdb,
+                    update_credentials,
+                    decrypt_credentials]:
         app.cli.add_command(command)
 
 

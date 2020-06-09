@@ -34,10 +34,14 @@ def initdb(wormbase_version=constants.WORMBASE_VERSION):
     initialize_sqlite_database(wormbase_version)
 
 
+@click.command(help="Update credentials")
 def update_credentials():
     """
         Update the credentials zip file
     """
+    from base.application import create_app
+    app = create_app()
+    app.app_context().push()
     click.secho("Zipping env_config", fg='green')
     zipdir('env_config/', 'env_config.zip')
     zip_creds = get_item('credential', 'travis-ci-cred')
@@ -59,9 +63,12 @@ def update_credentials():
         exit(secho(str(err, 'utf-8'), fg='red'))
     os.remove("env_config.zip")
 
-
+@click.command(help="Decrypt credentials")
 def decrypt_credentials():
-    secho("Decrypting env_config.zip.enc", fg='green')
+    from base.application import create_app
+    app = create_app()
+    app.app_context().push()
+    click.secho("Decrypting env_config.zip.enc", fg='green')
     zip_creds = get_item('credential', 'travis-ci-cred')
     comm = ['travis',
             'encrypt-file',
@@ -73,13 +80,13 @@ def decrypt_credentials():
             zip_creds['iv'],
             '--decrypt']
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
-    secho(str(out, 'utf-8'), fg='green')
+    click.secho(str(out, 'utf-8'), fg='green')
     if err:
         exit(secho(str(err, 'utf-8'), fg='red'))
-    secho("Unzipping env_config.zip", fg='green')
+    click.secho("Unzipping env_config.zip", fg='green')
     comm = ['unzip', '-qo', 'env_config.zip']
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
-    secho(str(out, 'utf-8'), fg='green')
+    click.secho(str(out, 'utf-8'), fg='green')
     if err:
         exit(secho(str(err, 'utf-8'), fg='red'))
     os.remove("env_config.zip")
