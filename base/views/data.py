@@ -33,6 +33,7 @@ def data(selected_release=config["DATASET_RELEASE"]):
     strain_listing = query_strains(release=selected_release)
     release_summary = Strain.release_summary(selected_release)
     RELEASES = config["RELEASES"]
+    DATASET_RELEASE, WORMBASE_VERSION = list(filter(lambda x: x[0] == selected_release, RELEASES))[0]
     REPORTS = ["alignment"]
     return render_template('data_v2.html', **locals())
 
@@ -62,8 +63,17 @@ def data_v01(selected_release):
 #   Download Script   #
 # =================== #
 
-@data_bp.route('/download/download_bams.sh')
+@data_bp.route('/download/download_isotype_bams.sh')
 def download_script():
+    strain_listing = query_strains(release=config["DATASET_RELEASE"])
+    download_page = render_template('download_script.sh', **locals())
+    response = make_response(download_page)
+    response.headers["Content-Type"] = "text/plain"
+    return response
+
+@data_bp.route('/download/download_strain_bams.sh')
+def download_script_strain_v2():
+    v2 = True
     strain_listing = query_strains(release=config["DATASET_RELEASE"])
     download_page = render_template('download_script.sh', **locals())
     response = make_response(download_page)

@@ -1,80 +1,5 @@
-<div class="row">
-    <br />
-    <div class='col-md-12'>
-        <div class="alert alert-warning" role="alert">
-            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-            If you have trouble downloading, please ensure you are not behind a University firewall. Please notify us of any issues downloading data.
-        </div>
-    </div>
-    <div class="col-md-4">
 
-
-        <br />
-        <div class="panel panel-default">
-            <div class="panel-heading">Release Summary</div>
-            <div class="panel-body">
-                <ul>
-                    <li><strong>Strains:</strong> {{ release_summary.get('strain_count') }}</li>
-                    <li><strong>WGS strains:</strong> {{ release_summary.get('strain_count_sequenced') }}</li>
-                    <li><strong>Isotypes:</strong> {{ release_summary.get('isotype_count') }}</li>
-                    <li><strong>Genome Version</strong> {{ wormbase_genome_version }}</li>
-                </ul>
-            </div>
-        </div>
-
-        <h3>Alignment Data</h3>
-        <p>Wild isolate genomes are aligned and stored using the
-            <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Binary sequence Alignment/Map format">BAM</span>  format. BAMs are available in the table below.</p>
-        <p><a href="http://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data</a></p>
-            <h4>Downloading All Alignment Data</h4>
-            <p>You can download all alignment data using the script below. Before this script will work, you need to download and install <strong>wget</strong>. We recommend using <a href="http://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="http://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "primary.help_item",filename="FAQ")}}">FAQ</a> for details on installing <strong>wget</strong>.</p>
-            <p><a href="{{ url_for("data.download_script") }}">download_bams.sh</a></p>
-        <h3>Methods</h3>
-        <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('primary.help_item', filename = "Methods") }}">here</a>.
-    </div>
-    <div class="col-md-4">
-        <h3>Variant Data</h3>
-        <p>We used samtools to identify single-nucleotide variant (SNV) sites as compared to the N2 reference genome. Variant data are provided as
-            <span class='tooltip-item' data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</span> or tab-delimited files.</p>
-        <p><a href="http://biobits.org/samtools_primer.html#UnderstandingtheVCFFormat">Learn more about VCF files</a></p>
-        <h4>VCF</h4>
-        <p>VCFs generated from the variant calling pipeline are provided below.</p>
-        <ul>
-            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz">Soft-filter</a></strong> - Includes all variants and annotations. The QC status of variants is included.</li>
-            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz">Hard-filter</a></strong> - Variants and genotypes that fail QC are removed.</li>
-            <li><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz">Imputed</a> - An imputed dataset generated from the hard-filter VCF.</strong></li>
-        </ul>
-
-        <div style="clear:both;"></div>
-        <p>You can programmatically access specific regions of
-            <span class='tooltip-item' data-toggle="tooltip" data-placement="bottom" title="Variant Caller Format">VCF</span> files (rather then the entire file) from the command line:
-            <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#cli_example">
-                See Example
-            </button>
-        </p>
-    </div>
-    <br />
-    <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">Strain Data</div>
-            <div class="panel-body">
-                Strain Data including isolation location, isotype information, and more is available for download.
-                <br />
-                <br />
-                <a href="{{ url_for('strain.Strainetadata') }}" type="button" class="btn btn-default btn-block btn-success">Download Strain Data</a>
-            </div>
-        </div>
-        <h4>Included Variants</h4>
-        <p>Currently, we have performed variant calling across all wild isolates. We are working to add additional variant classes including insertion/deletion, structural, transposon, and additional variant classes.</p>
-        <h4>Transposon Data</h4>
-        <p>We have recently performed an anaysis characterizing Transposon variation in <em>C. elegans</em>. The dataset will be further integrated with the site resources as time goes on. For now, the raw data are available below.</p>
-        <a href="https://storage.googleapis.com/andersenlab.org/publications/2017Laricchia/tes_cender.bed" type="button" class="btn btn-default btn-block btn-success">Download Transposon Data</a>
-    </div>
-</div>
-<hr />
-<div class='row'>
-<div class='col-md-12'>
-<input id="filter" type="text" class="form-control pull-right" style="width:200px;" placeholder="Enter Strain Name" action="#">
+<input id="filter" type="text" class="form-control pull-right" style="width:200px;" placeholder="Filter Strain Name" action="#">
 <table class="table table-hover table-condensed strain-table">
     <thead>
         <tr>
@@ -120,5 +45,3 @@
         {% endfor %}
     </tbody>
 </table>
-</div>
-</div>

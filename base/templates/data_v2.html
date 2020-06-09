@@ -26,92 +26,152 @@
 <div class="row">
     <div class="col-md-12">
 
-  <!-- Nav tabs -->
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#download" role="tab" data-toggle="tab">Overview</a></li>
-    <li role="presentation" ><a href="#Datasets" role="tab" data-toggle="tab">Datasets</a></li>
-    <li role="presentation" ><a href="#Pipelines" role="tab" data-toggle="tab">Pipelines</a></li>
-    <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
-  </ul>
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active" ><a href="#main" role="tab" data-toggle="tab">Release Notes</a></li>
+        <li role="presentation" ><a href="#Datasets" role="tab" data-toggle="tab">Datasets</a></li>
+        <li role="presentation" ><a href="#Pipelines" role="tab" data-toggle="tab">Methods / Pipelines</a></li>
+        <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
+    </ul>
 
-  <!-- Tab panes -->
-  <div class="tab-content">
-
-    <div role="tabpanel" class="tab-pane active" id="download">
-        {% include('releases/download_tab_strain_v2.html') %}
-    </div>
-
-    {#
-        DATASETS
-    #}
-    <div role="tabpanel" class="tab-pane" id="Datasets">
-    
-        {# VCFs #}
-        <table class='table'>
-            <thead>
-                <th class='col-md-2'>Name</th>
-                <th class='col-md-6'>Description</th>
-                <th class='col-md-3'>Download</th>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Strain Data</strong></td>
-                    <td>Includes strain, isotype, location information, and more.</td>
-                    <td><a href="{{ url_for('strain.Strainetadata') }}">strain_data.tsv</a></td>
-                </tr>
-                <tr>
-                    <td><strong>Soft Filter Variants</strong></td>
-                    <td>Includes all variants and annotations called by the GATK pipeline. The QC status of each variant (INFO field=<code>FILTER</code>) and genotype (Format Field=<code>FT</code>) is specified by a VCF Field.</td>
-                    <td>
-                        <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz">WI.{{ selected_release }}.soft-filter.vcf.gz</a>
-                        <br />
-                        <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.vcf.gz.csi</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Hard Filter Variants</strong></td>
-                    <td>Includes only high-quality variants after all variants and genotypes with a failed QC status are removed.</td>
-                    <td>
-                        <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz">WI.{{ selected_release }}.hard-filter.vcf.gz</a>
-                        <br />
-                        <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.vcf.gz.csi</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Imputed Variants</strong></td>
-                    <td>Includes all the variants from the hard-filtered VCF but all missing genotypes have been imputed using BEAGLE.</td>
-                    <td><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz">WI.{{ selected_release }}.impute.vcf.gz</a>
-                         <br />
-                         <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz.csi">WI.{{ selected_release }}.impute.vcf.gz.csi</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Reference Genome</strong></td>
-                    <td>Includes strain, isotype, location information, and more. {{ WORMBASE_VERSION }}</td>
-                    <td><a href="{{ url_for('strain.Strainetadata') }}">strain_data.tsv</a></td>
-                </tr>
-                
-            </tbody>
-
-        </table>
-
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="Pipelines">
-        {{ render_markdown(selected_release + "/pipelines.md", directory="base/static/reports") }}
-    </div>
-
-    <div role="tabpanel" class="tab-pane" id="Alignment">
-        <object style="width:100%;height:150vh;" type="text/html" data="/static/reports/{{ selected_release }}/alignment_report.html"></object>
-    </div>
+    <!-- Tab panes -->
+    <div class="tab-content">
 
 
-</div>{# Tab Set #}
+        <div role="tabpanel" class="tab-pane active" id="main">  
+            <br />
+            <div class='row'>
+                <div class='col-md-4'>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Release Summary</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><strong>Strains:</strong> {{ release_summary.get('strain_count') }}</li>
+                            <li><strong>WGS strains:</strong> {{ release_summary.get('strain_count_sequenced') }}</li>
+                            <li><strong>Isotypes:</strong> {{ release_summary.get('isotype_count') }}</li>
+                            <li><strong>Genome Version</strong> {{ wormbase_genome_version }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <h4>Distribution of data at the strain level</u></h4>
+            <p>Prior releases aggregate strain data by isotype.
+                For example, BAMs are merged by isotype, and variant calling was also performed at the isotype level in prior releases.
+            With this release we are transitioning to strain-level bams, variant calling, and analysis.</p>
+            <h4>Grouping strains by isotype</h4>
+            <p>In 2012, we <a href="http://dx.doi.org/10.1038/ng.1050">published</a> genome-wide variant data from reduced representation sequencing of approximately 10% of the C. elegans genome (RAD-seq).
+            Using these data, we grouped strains into isotypes.
+            We also found many strains that were mislabeled as wild isolates but were instead N2 derivatives,
+            recombinants from laboratory experiments, and mutagenesis screen isolates
+            (Detailed in <a href="#strain-issues">Strain issues</a>). These strains were not characterized further. For the isotypes, we chose one strain to be the isotype reference strain.
+            This strain can be ordered through CeNDR (<a href="{{ url_for('strain.strain_catalog') }}">here</a>).</p>
+            
+            <p>After 2014 and advances in genome sequencing, we transitioned our sequencing to whole-genome short-read sequencing.
+            All isotype reference strains were resequenced whole-genome. 
+            The other strains within an isotype were not, so we use the RAD-seq variant data to group isotypes for these strains.</p>
+            </blockquote>
+            
+        </div>
+
+        {#
+            DATASETS
+        #}
+        <div role="tabpanel" class="tab-pane" id="Datasets">
+        
+            <h2>Datasets</h2>
+            <table class='table'>
+                <thead>
+                    <th class='col-md-2'>Dataset</th>
+                    <th class='col-md-6'>Description</th>
+                    <th class='col-md-3'>Download</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Strain Data</strong></td>
+                        <td>Includes strain, isotype, location information, and more.</td>
+                        <td><a href="{{ url_for('strain.Strainetadata') }}">strain_data.tsv</a></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Soft Filter Variants</strong></td>
+                        <td>The soft-filtered VCF includes all variants and annotations called by the GATK pipeline. The QC status of each variant (INFO field=<code>FILTER</code>) and genotype (Format Field=<code>FT</code>) is specified by a VCF Field.</td>
+                        <td>
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz">WI.{{ selected_release }}.soft-filter.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.vcf.gz.csi</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Hard Filter Variants</strong></td>
+                        <td>The hard-filtered VCF includes only high-quality variants after all variants and genotypes with a failed QC status are removed.</td>
+                        <td>
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz">WI.{{ selected_release }}.hard-filter.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.vcf.gz.csi</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Imputed Variants</strong></td>
+                        <td>The imputed VCF includes all the variants from the hard-filtered VCF but all missing genotypes have been imputed using BEAGLE.</td>
+                        <td><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz">WI.{{ selected_release }}.impute.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz.csi">WI.{{ selected_release }}.impute.vcf.gz.csi</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Reference Genome FASTA ({{ WORMBASE_VERSION }})</strong></td>
+                        <td>The reference genome build from wormbase used for alignment and annotation.</td>
+                        <td><a href="ftp://ftp.wormbase.org/pub/wormbase/releases/{{ WORMBASE_VERSION }}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{{ WORMBASE_VERSION }}.genomic.fa.gz">c_elegans.PRJNA13758.{{ WORMBASE_VERSION }}.genomic.fa.gz</a></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Transposon Calls</strong></td>
+                        <td>We have performed transposon calling for a subset of isotypes as part of Laricchia <i>et al.</i></td>
+                        <td><a href="https://storage.googleapis.com/andersenlab.org/publications/2017Laricchia/tes_cender.bed">tes_cender.bed</a></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Download Bams Script</strong></td>
+                        <td>You can download all alignment data using this script.</td>
+                        <td><a href="{{ url_for('data.download_script_strain_v2') }}">download_bams.sh</a></td>
+                    </tr>
+
+                    <hr />
+
+
+                </tbody>
+
+            </table>
+
+            <h2>BAM / VCF</h2>
+            {% include('releases/download_tab_strain_v2.html') %}
+
+            <h2>Strain Issues</h2>
+
+            <p><a name="strain-issues"></a>Table of strain issues here</p>
+
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Pipelines">
+            {{ render_markdown(selected_release + "/pipelines.md", directory="base/static/reports") }}
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Alignment">
+            <object style="width:100%;height:150vh;" type="text/html" data="/static/reports/{{ selected_release }}/alignment_report.html"></object>
+        </div>
+
+
+    </div>{# Tab Set #}
 
     </div>{# Download content #}
 </div>{# /Download Tab #}
 
-{% include('releases/vcf_modal.html') %}
 
 
 {% endblock %}

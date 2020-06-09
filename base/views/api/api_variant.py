@@ -116,7 +116,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
         comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
-        app.logger.error(err)
+        logger.error(err)
         return err, 400
     tfile = NamedTemporaryFile(mode='w+b')
     with tfile as f:
