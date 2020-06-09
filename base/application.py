@@ -75,7 +75,7 @@ def configure_ssl(app):
         # Running on server
         app.debug = False
         # Ignore leading slash of urls; skips must use start of path
-        sslify.init_app(app)
+        sslify(app)
     elif app.config['DEBUG']:
         debug_toolbar(app)
 
