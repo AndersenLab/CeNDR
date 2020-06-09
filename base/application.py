@@ -6,6 +6,7 @@ from base.config import config
 from flask import Flask, render_template
 from base.utils.text_utils import render_markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.exceptions import HTTPException
 
 from base.manage import (initdb,
                          update_credentials,
@@ -145,7 +146,7 @@ def configure_jinja(app):
 
 def register_errorhandlers(app):
 
-    def render_error(e):
+    def render_error(e = "generic"):
         return render_template("errors/%s.html" % e.code), e.code
 
     for e in [
@@ -154,3 +155,5 @@ def register_errorhandlers(app):
         requests.codes.UNAUTHORIZED
     ]:
         app.errorhandler(e)(render_error)
+
+    app.register_error_handler(HTTPException, render_error)

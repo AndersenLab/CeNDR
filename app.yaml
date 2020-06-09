@@ -30,15 +30,6 @@ resources:
   memory_gb: 0.5
   disk_size_gb: 10
 
-# Handlers define how to route requests to your application.
-handlers:
-- url: /cronmapping
-  script: run.app 
-  login: admin
-
-- url: .*
-  script: run.app  # a WSGI application in the main module's global scope
-
 liveness_check:
   path: "/liveness_check"
   check_interval_sec: 30
