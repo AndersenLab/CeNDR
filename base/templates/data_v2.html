@@ -28,8 +28,8 @@
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active" ><a href="#main" role="tab" data-toggle="tab">Release Notes</a></li>
-        <li role="presentation" ><a href="#Datasets" role="tab" data-toggle="tab">Datasets</a></li>
+        <li role="presentation" class="active" ><a href="#main" role="tab" data-toggle="tab">Overview</a></li>
+        <li role="presentation" ><a href="#Strain-data" role="tab" data-toggle="tab">Strain Data</a></li>
         <li role="presentation" ><a href="#Pipelines" role="tab" data-toggle="tab">Methods / Pipelines</a></li>
         <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
     </ul>
@@ -40,47 +40,26 @@
 
         <div role="tabpanel" class="tab-pane active" id="main">  
             <br />
-            <div class='row'>
-                <div class='col-md-4'>
-
+                <div class='col-md-4 pull-right'>
                     <div class="panel panel-default">
-                        <div class="panel-heading">Release Summary</div>
+                        <div class="panel-heading">Release summary</div>
                         <div class="panel-body">
                             <ul>
                                 <li><strong>Strains:</strong> {{ release_summary.get('strain_count') }}</li>
-                            <li><strong>WGS strains:</strong> {{ release_summary.get('strain_count_sequenced') }}</li>
-                            <li><strong>Isotypes:</strong> {{ release_summary.get('isotype_count') }}</li>
-                            <li><strong>Genome Version</strong> {{ wormbase_genome_version }}
+                                <li><strong>WGS strains:</strong> {{ release_summary.get('strain_count_sequenced') }}</li>
+                                <li><strong>Isotypes:</strong> {{ release_summary.get('isotype_count') }}</li>
+                                <li><strong>Genome</strong> {{ WORMBASE_VERSION }}</li>
+                            </ul>
                         </div>
                     </div>
-
                 </div>
-            </div>
             
-            <h4>Distribution of data at the strain level</u></h4>
-            <p>Prior releases aggregate strain data by isotype.
-                For example, BAMs are merged by isotype, and variant calling was also performed at the isotype level in prior releases.
-            With this release we are transitioning to strain-level bams, variant calling, and analysis.</p>
-            <h4>Grouping strains by isotype</h4>
-            <p>In 2012, we <a href="http://dx.doi.org/10.1038/ng.1050">published</a> genome-wide variant data from reduced representation sequencing of approximately 10% of the C. elegans genome (RAD-seq).
-            Using these data, we grouped strains into isotypes.
-            We also found many strains that were mislabeled as wild isolates but were instead N2 derivatives,
-            recombinants from laboratory experiments, and mutagenesis screen isolates
-            (Detailed in <a href="#strain-issues">Strain issues</a>). These strains were not characterized further. For the isotypes, we chose one strain to be the isotype reference strain.
-            This strain can be ordered through CeNDR (<a href="{{ url_for('strain.strain_catalog') }}">here</a>).</p>
-            
-            <p>After 2014 and advances in genome sequencing, we transitioned our sequencing to whole-genome short-read sequencing.
-            All isotype reference strains were resequenced whole-genome. 
-            The other strains within an isotype were not, so we use the RAD-seq variant data to group isotypes for these strains.</p>
-            </blockquote>
-            
-        </div>
+            <h2>Release Notes</h2>
 
-        {#
-            DATASETS
-        #}
-        <div role="tabpanel" class="tab-pane" id="Datasets">
-        
+            {{ render_markdown(selected_release + "/release_notes.md", directory="base/static/reports") }}
+
+            </blockquote>
+
             <h2>Datasets</h2>
             <table class='table'>
                 <thead>
@@ -126,28 +105,31 @@
 
                     <tr>
                         <td><strong>Reference Genome FASTA ({{ WORMBASE_VERSION }})</strong></td>
-                        <td>The reference genome build from wormbase used for alignment and annotation.</td>
+                        <td>The reference genome build from Wormbase used for alignment and annotation.</td>
                         <td><a href="ftp://ftp.wormbase.org/pub/wormbase/releases/{{ WORMBASE_VERSION }}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{{ WORMBASE_VERSION }}.genomic.fa.gz">c_elegans.PRJNA13758.{{ WORMBASE_VERSION }}.genomic.fa.gz</a></td>
                     </tr>
 
                     <tr>
                         <td><strong>Transposon Calls</strong></td>
-                        <td>We have performed transposon calling for a subset of isotypes as part of Laricchia <i>et al.</i></td>
+                        <td>We have performed transposon calling for a subset of isotypes as part of <a href"https://andersenlab.org/publications/2017Laricchia.pdf">Laricchia <i>et al.</i></a></td>
                         <td><a href="https://storage.googleapis.com/andersenlab.org/publications/2017Laricchia/tes_cender.bed">tes_cender.bed</a></td>
                     </tr>
 
                     <tr>
-                        <td><strong>Download Bams Script</strong></td>
-                        <td>You can download all alignment data using this script.</td>
+                        <td><strong>Download BAMs Script</strong></td>
+                        <td>You can download individual strain BAMs using this script.</td>
                         <td><a href="{{ url_for('data.download_script_strain_v2') }}">download_bams.sh</a></td>
                     </tr>
-
                     <hr />
-
-
                 </tbody>
-
             </table>
+
+        </div>
+
+        {#
+            DATASETS
+        #}
+        <div role="tabpanel" class="tab-pane" id="Strain-data">
 
             <h2>BAM / VCF</h2>
             {% include('releases/download_tab_strain_v2.html') %}
