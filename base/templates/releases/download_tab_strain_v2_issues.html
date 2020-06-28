@@ -8,13 +8,11 @@
                             Strain
                             </span>
             </th>
-            <th style="width: 200px;">
-                <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
-                            Isotype
+            <th style="width: 80%;">
+                <span class="tooltip-item">
+                            Issues
                             </span>
             </th>
-            <th style="width: 200px;">Strain BAM</th>
-            <th>Strain VCF</th>
         </tr>
     </thead>
     <div style="height: 30px;"></div>
@@ -22,8 +20,7 @@
         {% set count = namespace(value=0) %}
         {% for isotype, strains in strain_listing|groupby('isotype') %}
         {% for strain in strains|sort(attribute='reference_strain', reverse=True) %}
-            {% if strain.issues == False %}
-            {% set count.value = count.value + 1 %}
+            {% if strain.issues == True %}
             <tr {% if strain.reference_strain %}class="success ref_strain"{% else %}class="strain"{% endif %}>
                 <td>
                     {% if strain.reference_strain %}
@@ -33,13 +30,9 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
-                </td>
-                <td>
-                    {{ strain.strain_bam_url() }}
-                </td>
-                <td>
-                    <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/vcf/{{ strain }}.{{ selected_release }}.vcf">VCF</a>
+                    {% if strain.issue_notes %}
+                        {{ strain.issue_notes }}
+                    {% endif %}
                 </td>
             </tr>
             {% endif %}

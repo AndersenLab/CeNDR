@@ -1,12 +1,12 @@
 {% extends "_layouts/default.html" %}
 
 {% block content %}
-<div class="row">
 	{% for funder in funding_set %}
         <div class="col-md-6 text-center">
-        	<a href='{{ funder.url }}'><img src='{{ gs_static('img/funding/' + funder.image) }}' alt="{{ funder.name }}" /></a>
-        <br></br>
+        	<a href='{{ funder.url }}'>
+                <img src='{{ gs_static('img/funding/' + funder.image) }}' alt="{{ funder.name }}" />
+            </a><br />
+            <small>{{ funder.description }}</small>
         </div>
     {% endfor %}
-</div>
 {% endblock %}

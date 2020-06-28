@@ -20,7 +20,7 @@
                 {% if isotype[0].previous_names %}
                 <h4>Alternative Names</h4>
                 <ul>
-                {% for i in isotype[0].previous_names.split("|") %}
+                {% for i in isotype[0].previous_names.split(",") %}
                   <li>{{ i }}</li>
                 {% endfor %}
                 </ul>
@@ -35,70 +35,6 @@
                 {% endif %}
             </div>{# col-md-6 #}
         </div>{# row #}
-
-    <div class='row'>
-        <div class='col-md-12'>
-            <h4>Variation</h4>
-        </div>
-
-        <div class='row'>
-
-            <div class='col-md-12'>
-                <table class='table table-striped table-hover'>
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th class='text-right'>Soft-Filter</th>
-                            <th class='text-right'>Hard-Filter</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Variant Calls</strong></td>
-                            <td class='text-right'>{{ soft_variant['n_calls']|comma }}</td>
-                            <td class='text-right'>{{ hard_variant['n_calls']|comma }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Homozygous reference genotype</strong></td>
-                            <td class='text-right'>{{ soft_variant['ref_calls']|comma }}</td>
-                            <td class='text-right'>{{ hard_variant['ref_calls']|comma }}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Heterozygous genotype</strong></td>
-                            <td class='text-right'>{{ soft_variant.get('het_calls')|comma }}</td>
-                            <td class='text-right'>
-                                {% if hard_variant.get('het_calls') %}
-                                    {{ hard_variant.get('het_calls')|comma }}
-                                {% else %}
-                                    0
-                                {% endif %}
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Homozogyous alternative genotype</strong></td>
-                            <td class='text-right'>{{ soft_variant['alt_calls']|comma }}</td>
-                            <td class='text-right'>{{ hard_variant['alt_calls']|comma }}</td>
-                        </tr>    
-                        <tr>
-                            <td><strong>Missing genotype call</strong></td>
-                            <td class='text-right'>{{ soft_variant['missing_calls']|comma }}</td>
-                            <td class='text-right'>{{ hard_variant['missing_calls']|comma }}</td>
-                        </tr>    
-                        <tr>
-                            <td><strong>Singletons</strong></td>
-                            <td class='text-right'>{{ soft_variant['singletons']|comma }}</td>
-                            <td class='text-right'>{{ hard_variant['singletons']|comma }}</td>
-                        </tr>                        
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-    </div>
-
-    <small>Data in the table above are for the reference strain.</small>
 
  {% if len(photo_set) > 0 %}
     <div class='row'>

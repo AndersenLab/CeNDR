@@ -91,10 +91,16 @@ def fetch_andersen_strains():
         if n % 50 == 0:
             logger.info(f"Loaded {n} strains")
 
+        # Set issue bools
+        record["issues"] = record["issues"] == "TRUE"
+
         # Fix strain reference
-        record['reference_strain'] = record['isotype_ref_strain'] == 1
+        record['reference_strain'] = record['reference_strain'] == "TRUE"
         record['sequenced'] = record['wgs_seq'] == 1
 
+        # Remove space after comma delimiter
+        if record['previous_names']:
+            record['previous_names'] = str(record['previous_names']).replace(", ", ",").strip()
         strain_records[n] = record
 
 

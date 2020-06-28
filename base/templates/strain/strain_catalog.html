@@ -161,7 +161,7 @@
                         <td><a href="{{ url_for('strain.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                         <td>{{ strains|join(", ") }}</td>
                         {% if strains[0].previous_names %}
-                            <td>{{ strains[0].previous_names.replace("|", ", ")}}</td>
+                            <td>{{ strains[0].previous_names }}</td>
                         {% else %}
                             <td> </td>
                         {% endif %}

@@ -132,11 +132,13 @@
         <div role="tabpanel" class="tab-pane" id="Strain-data">
 
             <h2>BAM / VCF</h2>
+            {% set show_issues = False %}
             {% include('releases/download_tab_strain_v2.html') %}
 
             <h2>Strain Issues</h2>
 
-            <p><a name="strain-issues"></a>Table of strain issues here</p>
+            {% set show_issues = True %}
+            {% include('releases/download_tab_strain_v2_issues.html') %}
 
         </div>
 
@@ -183,11 +185,11 @@ $(document).ready(function() {
         // for bootstrap 3 use 'shown.bs.tab', for bootstrap 2 use 'shown' in the next line
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             // save the latest tab; use cookies if you like 'em better:
-            localStorage.setItem('lastTab', $(this).attr('href'));
+            sessionStorage.setItem('lastTab', $(this).attr('href'));
         });
     
         // go to the latest tab, if it exists:
-        var lastTab = localStorage.getItem('lastTab');
+        var lastTab = sessionStorage.getItem('lastTab');
         if (lastTab) {
             $('[href="' + lastTab + '"]').tab('show');
         }

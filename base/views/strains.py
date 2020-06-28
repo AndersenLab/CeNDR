@@ -17,6 +17,7 @@ from base.utils.data_utils import dump_json
 from base.utils.gcloud import list_release_files
 from os.path import basename
 from base.config import config
+from logzero import logger
 
 strain_bp = Blueprint('strain',
                       __name__,
@@ -42,7 +43,7 @@ def map_page():
     """
     VARS = {'title': "Global Strain Map",
             'strain_listing': dump_json(get_strains(known_origin=True))}
-    return render_template('strain/global_Strainap.html', **VARS)
+    return render_template('strain/global_Strain_map.html', **VARS)
 
 
 #
@@ -71,8 +72,9 @@ def Strainetadata():
 # Isotype View
 #
 @strain_bp.route('/isotype/<isotype_name>/')
+@strain_bp.route('/isotype/<isotype_name>/<release>')
 @cache.memoize(50)
-def isotype_page(isotype_name):
+def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
     """
         Isotype page
     """
@@ -89,21 +91,15 @@ def isotype_page(isotype_name):
             photo_set[row.replace(".jpg", ".thumb.jpg")] = strains
 
     # High impact variants
-    soft_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{config.DATASET_RELEASE}/variation/sample_summary/soft.isotype_summary.json").json()
-    hard_variant = requests.get(f"https://storage.googleapis.com/elegansvariation.org/releases/{config.DATASET_RELEASE}/variation/sample_summary/hard.isotype_summary.json").json()
-
-    soft_variant = [x for x in soft_variant if x['isotype'] == isotype_name][0]
-    hard_variant = [x for x in hard_variant if x['isotype'] == isotype_name][0]
+    logger.info(release)
 
     VARS = {"title": isotype_name,
             "isotype": isotype,
             "isotype_name": isotype_name,
             "reference_strain": [x for x in isotype if x.reference_strain][0],
             "strain_json_output": dump_json(isotype),
-            "photo_set": photo_set,
-            "soft_variant": soft_variant,
-            "hard_variant": hard_variant}
-    return render_template('strain/strain.html', **VARS)
+            "photo_set": photo_set}
+    return render_template('strain/isotype.html', **VARS)
 
 
 #

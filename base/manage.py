@@ -30,16 +30,21 @@ db_mapping_worker_session = sessionmaker(bind=db_mapping_worker)()
 
 
 @click.command(help="Initialize the database")
-@click.argument("wormbase_version")
+@click.argument("wormbase_version", default=constants.WORMBASE_VERSION)
 def initdb(wormbase_version=constants.WORMBASE_VERSION):
     initialize_sqlite_database(wormbase_version)
+
+
+@click.command(help="Updates the strain table of the database")
+@click.argument("wormbase_version", default=constants.WORMBASE_VERSION)
+def update_strains(wormbase_version):
+    initialize_sqlite_database(wormbase_version, strain_only=True)
 
 
 @click.command(help="Download the database (used in docker container)")
 def download_db():
     # Downloads the latest SQLITE database
     download_sqlite_database()
-
 
 
 @click.command(help="Update credentials")

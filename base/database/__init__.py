@@ -35,7 +35,8 @@ def download_fname(download_path: str, download_url: str):
                         download_url.split("/")[-1])
 
 
-def initialize_sqlite_database(sel_wormbase_version, db=db):
+def initialize_sqlite_database(sel_wormbase_version,
+                               strain_only=False):
     """Create a static sqlite database
     Args:
          sel_wormbase_version - e.g. WS245
@@ -47,38 +48,56 @@ def initialize_sqlite_database(sel_wormbase_version, db=db):
 
     SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{sel_wormbase_version}.db"
     SQLITE_BASENAME = os.path.basename(SQLITE_PATH)
-    if os.path.exists(SQLITE_PATH):
-        os.remove(SQLITE_PATH)
 
     # Download wormbase files
-    if not os.path.exists(DOWNLOAD_PATH):
-        os.makedirs(DOWNLOAD_PATH)
+    if strain_only is False:
+        if os.path.exists(SQLITE_PATH):
+            os.remove(SQLITE_PATH)
 
-    # Parallel URL download
-    console.log("Downloading Wormbase Data")
-    download([URLS.GENE_GFF_URL,
-              URLS.GENE_GTF_URL,
-              URLS.GENE_IDS_URL,
-              URLS.HOMOLOGENE_URL,
-              URLS.ORTHOLOG_URL,
-              URLS.TAXON_ID_URL],
-             DOWNLOAD_PATH)
+        if not os.path.exists(DOWNLOAD_PATH):
+            os.makedirs(DOWNLOAD_PATH)
 
-    gff_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_GFF_URL)
-    gtf_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_GTF_URL)
-    gene_ids_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_IDS_URL)
-    homologene_fname = download_fname(DOWNLOAD_PATH, URLS.HOMOLOGENE_URL)
-    ortholog_fname = download_fname(DOWNLOAD_PATH, URLS.ORTHOLOG_URL)
+        # Parallel URL download
+        console.log("Downloading Wormbase Data")
+        download([URLS.GENE_GFF_URL,
+                  URLS.GENE_GTF_URL,
+                  URLS.GENE_IDS_URL,
+                  URLS.HOMOLOGENE_URL,
+                  URLS.ORTHOLOG_URL,
+                  URLS.TAXON_ID_URL],
+                 DOWNLOAD_PATH)
+
+        gff_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_GFF_URL)
+        gtf_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_GTF_URL)
+        gene_ids_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_IDS_URL)
+        homologene_fname = download_fname(DOWNLOAD_PATH, URLS.HOMOLOGENE_URL)
+        ortholog_fname = download_fname(DOWNLOAD_PATH, URLS.ORTHOLOG_URL)
 
     from base.application import create_app
     app = create_app()
     app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{SQLITE_BASENAME}"
     app.app_context().push()
 
-    db.create_all(app=app)
+    if strain_only is True:
+        db.metadata.drop_all(bind=db.engine, checkfirst=True, tables=[Strain.__table__])
+        db.metadata.create_all(bind=db.engine, tables=[Strain.__table__])
+    else:
+        db.create_all(app=app)
     db.session.commit()
 
     console.log(f"Created {SQLITE_PATH}")
+
+    ################
+    # Load Strains #
+    ################
+    console.log('Loading strains...')
+    db.session.bulk_insert_mappings(Strain, fetch_andersen_strains())
+    db.session.commit()
+    console.log(f"Inserted {Strain.query.count()} strains")
+
+    if strain_only is True:
+        console.log('Finished loading strains')
+        return
 
     ################
     # Set metadata #
@@ -105,14 +124,6 @@ def initialize_sqlite_database(sel_wormbase_version, db=db):
                 db.session.add(key_val)
 
     db.session.commit()
-
-    ################
-    # Load Strains #
-    ################
-    console.log('Loading strains...')
-    db.session.bulk_insert_mappings(Strain, fetch_andersen_strains())
-    db.session.commit()
-    console.log(f"Inserted {Strain.query.count()} strains")
 
     ##############
     # Load Genes #

@@ -485,6 +485,7 @@ function refresh_variants(download = false) {
       chrom = region.split(":")[0];
       start = region.split(":")[1].split("-")[0].replace(/,/g, "");
       end = region.split(":")[1].split("-")[1].replace(/,/g, "");
+      release = {{ DATASET_RELEASE }};
 
       sample_tracks = []
       $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
@@ -508,6 +509,7 @@ function refresh_variants(download = false) {
       data = {'chrom': chrom,
               'start': parseInt(start),
               'end': parseInt(end),
+              'release': release,
               'variant_impact': variant_impact.join('_'),
               'sample_tracks': sample_tracks.join('_'),
               'list-all-strains': $('.list-all-strains').prop('checked')

@@ -20,8 +20,8 @@ def search_strains(query):
                                     Strain.isotype.like(f"{query}%"),
                                     Strain.strain == query,
                                     Strain.strain.like(f"{query}%"),
-                                    Strain.previous_names.like(f"%{query}|%"),
-                                    Strain.previous_names.like(f"%,{query}|"),
+                                    Strain.previous_names.like(f"%{query},%"),
+                                    Strain.previous_names.like(f"%,{query},"),
                                     Strain.previous_names.like(f"%{query}"),
                                     Strain.previous_names == query))
     return list([x.to_json() for x in results])
@@ -45,8 +45,8 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
     if release:
         base_query = base_query.filter(Strain.release <= release)
     if strain_name or resolve_isotype:
-        results = base_query.filter(or_(Strain.previous_names.like(f"%{strain_name}|%"),
-                                        Strain.previous_names.like(f"%,{strain_name}|"),
+        results = base_query.filter(or_(Strain.previous_names.like(f"%{strain_name},%"),
+                                        Strain.previous_names.like(f"%,{strain_name},"),
                                         Strain.previous_names.like(f"%{strain_name}"),
                                         Strain.previous_names == strain_name,
                                         Strain.strain == strain_name)).first()
@@ -56,7 +56,7 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
         results = base_query.all()
 
     if all_strain_names:
-        previous_strain_names = sum([x.previous_names.split("|") for x in results if x.previous_names], [])
+        previous_strain_names = sum([x.previous_names.split(",") for x in results if x.previous_names], [])
         results = [x.strain for x in results] + previous_strain_names
     if resolve_isotype:
         if results:
@@ -84,7 +84,7 @@ def get_strains(known_origin=False):
         result = result.filter(Strain.latitude != None)
     result = result.all()
     for strain in result:
-        strain.reference_strain = ref_strain_list[strain.isotype]
+        strain.reference_strain = ref_strain_list.get(strain.isotype, None)
         logger.error(strain.reference_strain)
     return result
 

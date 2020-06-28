@@ -9,6 +9,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.exceptions import HTTPException
 
 from base.manage import (initdb,
+                         update_strains,
                          update_credentials,
                          decrypt_credentials,
                          download_db)
@@ -48,7 +49,7 @@ from base.extensions import (markdown,
                              sqlalchemy)
 
 # Template filters
-from base.filters import (comma, format_release_filter)
+from base.filters import (comma, format_release)
 
 
 def create_app(config=config):
@@ -85,6 +86,7 @@ def configure_ssl(app):
 def register_commands(app):
     """Register custom commands for the Flask CLI."""
     for command in [initdb,
+                    update_strains,
                     update_credentials,
                     decrypt_credentials,
                     download_db]:
@@ -92,7 +94,7 @@ def register_commands(app):
 
 
 def register_template_filters(app):
-    for t_filter in [comma, format_release_filter]:
+    for t_filter in [comma, format_release]:
         app.template_filter()(t_filter)
 
 

@@ -38,7 +38,13 @@ ANN_header = ["allele",
 
 
 def get_vcf(release=config["DATASET_RELEASE"]):
+    logger.info(release)
     return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.soft-filter.vcf.gz".format(release=release)
+
+
+def get_vcf_hard(release=config["DATASET_RELEASE"]):
+    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.hard-filter.vcf.gz".format(release=release)
+
 
 
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
@@ -72,6 +78,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
         query = {'chrom': chrom,
                  'start': int(start),
                  'end': int(end),
+                 'release': release,
                  'variant_impact': ['ALL'],
                  'sample_list': samples,
                  'output': "",
@@ -82,10 +89,13 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
         query = {'chrom': query['chrom'],
                  'start': int(query['start']),
                  'end': int(query['end']),
+                 'release': query['release'],
                  'variant_impact': query['variant_impact'].split("_"),
                  'sample_list': query['sample_tracks'].split("_"),
                  'output': query['output'],
                  'list-all-strains': list_all_strains or query['list-all-strains'] == 'true'}
+
+    logger.info(query)
 
     # Limit queries to 100kb
     if query['end'] - query['start'] > 1e5:
@@ -98,7 +108,9 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
         samples = "N2"
     else:
         samples = ','.join(samples)
-    vcf = get_vcf(release=release)
+    vcf = get_vcf(release=query['release'])
+
+    logger.info(vcf)
 
     chrom = query['chrom']
     start = query['start']

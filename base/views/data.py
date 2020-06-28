@@ -85,12 +85,13 @@ def download_script_strain_v2():
 #   Browser     #
 # ============= #
 
-@data_bp.route('/browser/')
-@data_bp.route('/browser/<region>')
-@data_bp.route('/browser/<region>/<query>')
-def browser(region="III:11746923-11750250", query=None):
+@data_bp.route('/browser')
+@data_bp.route('/browser/<string:release>')
+@data_bp.route('/browser/<string:release>/<region>')
+@data_bp.route('/browser/<string:release>/<region>/<query>')
+def browser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", query=None):
     VARS = {'title': "Variant Browser",
-            'DATASET_RELEASE': config["DATASET_RELEASE"],
+            'DATASET_RELEASE': release,
             'isotype_listing': get_isotypes(list_only=True),
             'region': region,
             'query': query,
