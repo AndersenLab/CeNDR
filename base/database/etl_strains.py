@@ -96,7 +96,7 @@ def fetch_andersen_strains():
 
         # Fix strain reference
         record['reference_strain'] = record['reference_strain'] == "TRUE"
-        record['sequenced'] = record['wgs_seq'] == 1
+        record['sequenced'] = record['wgs_seq'] == "TRUE"
 
         # Remove space after comma delimiter
         if record['previous_names']:
