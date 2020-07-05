@@ -4,7 +4,10 @@
 
 #### v1.5 (XXXX-XX-XX)
 
-
+* A table of strains with issues has been added to the data releases page.
+* The variant data table has been removed from isotype pages.
+* The API has been removed.
+* A new [collaborators](/about/collaborators) page has been added.
 
 #### v1.3.4 (2020-02-23)
 

@@ -57,6 +57,12 @@ def committee():
     committee_data = load_yaml("advisory-committee.yaml")
     return render_template('about/committee.html', **locals())
 
+@about_bp.route('/collaborators/')
+def collaborators():
+    title = "Collaborators"
+    collaborator_data = load_yaml("collaborators.yaml")
+    return render_template('about/collaborators.html', **locals())
+
 
 @about_bp.route('/staff/')
 def staff():

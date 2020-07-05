@@ -6,8 +6,8 @@
       {% for staff in staff_data %}
       <div class="row">
       <div class="col-md-12">
-		<img src="{{ gs_static('img/staff/' + staff.photo) }}" alt="{{ staff.first_name }}" class="thumbnail hidden-xs lab-member-photo" />
-		<img src="{{ gs_static('img/staff/' + staff.photo) }}" alt="{{ staff.first_name }}" class="thumbnail visible-xs lab-member-photo-small" />
+		<img src="{{ gs_static('img/people/' + staff.photo) }}" alt="{{ staff.first_name }}" class="thumbnail hidden-xs lab-member-photo" />
+		<img src="{{ gs_static('img/people/' + staff.photo) }}" alt="{{ staff.first_name }}" class="thumbnail visible-xs lab-member-photo-small" />
 		<h4 id="{{ staff.first_name }} {{ staff.last_name }}">{{ staff.first_name }} {{ staff.last_name }} <small>{{ staff.title }}</small></h4>
 		{% if staff.cv %}
 		<i class="glyphicon glyphicon-file"></i> <a class="btn btn-primary btn-xs" href="{{ staff.cv }}"><em>Curriculum Vitae</em></a><br />
