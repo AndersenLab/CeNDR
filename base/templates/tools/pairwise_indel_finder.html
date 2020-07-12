@@ -22,100 +22,30 @@
 
 
 {% block content %}
+{% from "macros.html" import render_field %}
 
 <div class="container-fluid">
-	<div>
-	<p>
-	This web-based tool is designed to compare any two wild <i>C. elegans</i> strains for insertion-deletion (indel) variants that can be genotyped using PCR. These molecular markers can be used to follow each respective genetic background in crosses. Enter a specific genomic region. The following page will output indel variants that can be genotyped by PCR. For each of these indels, you can search for primers to genotype them in the two wild strains using differential PCR
-product sizes. Primers are designed to avoid natural variants in either strain to ensure that the PCR works in both genetic backgrounds.
-	</p>
-	<br />
-	<br />
-	<div>
-	<section class="gray-bg section-padding" id="service-page">
-	<!-- add form -->
-	<form name="tableData" onsubmit="return OnSubmitForm();">
-	<div class="container"> 
-		<div class="row"> 
-			<div class="diseases">
-			<div class="col-md-2">
-				<h4 class="text-center" style="background-color:#dbdede;"> Strain 1</h4>
-				<div class="active-pink-3 active-pink-4 mb-4">
-					<select class="selectpicker form-control" id="strain1" name="strain1">
-						{% for t in strains %}
-						{% if t == "N2" %}
-						 <option selected value='{{t}}'>{{t}}</option>
-						{% else %}
-						 <option value='{{t}}'>{{t}}</option>
-						{% endif %}
-						{% endfor %}
-					</select>
-				</div>
+	<div class = "row">
+		<p>
+			This web-based tool is designed to compare any two wild <i>C. elegans</i> strains for insertion-deletion (indel) variants that can be genotyped using PCR. These molecular markers can be used to follow each respective genetic background in crosses. Enter a specific genomic region. The following page will output indel variants that can be genotyped by PCR. For each of these indels, you can search for primers to genotype them in the two wild strains using differential PCR
+			product sizes. Primers are designed to avoid natural variants in either strain to ensure that the PCR works in both genetic backgrounds.
+		</p>
+	</div>
+	<div class='row'>
+		<form id='form-submit' method="POST" action=".">
+			{{ form.csrf_token }}
+			<div class='col-md-2'>{{ render_field(form.strain_1) }}</div>
+			<div class='col-md-2'>{{ render_field(form.strain_2) }}</div>
+			<div class='col-md-2'>{{ render_field(form.chromosome) }}</div>
+			<div class='col-md-2'>{{ render_field(form.start, placeholder="1,425,000") }}</div>
+			<div class='col-md-2'>{{ render_field(form.stop, placeholder="1,465,000") }}</div>
+			<div class='col-md-2'>
+				<label>&nbsp;</label> <br />
+				<button id='find_indels' type='submit' value="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Find Indels</button>
 			</div>
-
-			<div class="col-md-2">
-				<h4 class="text-center" style="background-color:#dbdede;">Strain 2</h4>
-				<div class="active-pink-3 active-pink-4 mb-4">
-					<select class="selectpicker form-control" id="strain2" name="strain2">
-						{% for t in strains %}
-						{% if t == "CB4856" %}
-						 <option selected value='{{t}}'>{{t}}</option>
-						{% else %}
-						 <option value='{{t}}'>{{t}}</option>
-						{% endif %}
-						{% endfor %}
-					</select>
-				</div>   
-			</div>
-
-			<div class="col-md-2">
-				<h4 class="text-center" style="background-color:#dbdede;">Chromosome</h4>
-				<div class="active-pink-3 active-pink-4 mb-4">
-					<select class="selectpicker form-control" id="chrom" name="chrom">
-						{% for t in chroms %}
-						 <option value='{{t}}'>{{t}}</option>
-						{% endfor %}
-					</select>
-				</div> 
-			</div>
-
-						<div class="col-md-2">
-						<h4 class="text-center" style="background-color:#dbdede;">Start</h4>
-						 <div class="active-pink-3 active-pink-4 mb-4">
-							<input class="form-control" id="di" type="text" placeholder="1425000" aria-label="1425000" onkeypress="return isNumber(event)">
-							 </div>
-						</div>
-
-						<div class="col-md-2">
-								<h4 class="text-center" style="background-color:#dbdede;">Stop</h4>
-								 <div class="active-pink-3 active-pink-4 mb-4">
-							<input class="form-control" id="ti" type="text" placeholder="1465000" aria-label="1465000"  onkeypress="return isNumber(event)">
-							</div>
-						 </div>
-
-						<div class="col-md-2">
-							<div><br /><br /></div>
-							<div class="buttons" style="text-align:center;">
-							<input id="go1" name="action" class="btn btn-primary" type="submit" style="padding: 6px 50px;" onclick="document.pressed=this.value;" value="Find Indels">
-							</div>
-						</div>  
-					</div>
-			</div>
-		 </div>
-	</section>
-	
-	<br />
-	<br />
-	<div class="row" id = "go1t" ></div>
-	
- </div>
+		</form>
+	</div>
 </div>
-
-
-</div>
-<br />
-<br />
-<br />
 
 {% endblock %}
 

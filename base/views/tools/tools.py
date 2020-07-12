@@ -1,6 +1,6 @@
 import os
 import gzip
-from flask import render_template, Blueprint, redirect, url_for
+from flask import request, render_template, Blueprint, redirect, url_for
 from base.views.api.api_strain import get_strains
 from base.constants import CHROM_NUMERIC
 from logzero import logger
@@ -41,31 +41,36 @@ def heritability_calculator():
 print(os.getcwd())
 # Initial load of data
 # This is run when the server is started.
-strains = []
+strains = set()
+chromosomes = set()
 with gzip.open("base/static/data/pairwise_indel_finder/sv_data.bed.gz", 'rb') as f:
     for line in f.readlines():
         line = line.decode("UTF-8").split("\t")
-        strains.append(line[8])
+        strains.add(line[8])
 
-logger.debug("Done loading strains")
 
-strains = sorted(list(set(strains)))
-
+strains = sorted(strains)
+STRAIN_CHOICES = [(x,x) for x in strains]
+CHROMOSOME_CHOICES = [(x,x) for x in CHROM_NUMERIC.keys()]
 
 class pairwise_indel_form(Form):
     """
         Form for mapping submission
     """
-    strain_1 = SelectField('strain_1', choices=strains, [Required()])
-    strain_2 = SelectField('strain_2', choices=strains, [Required()])
-
+    strain_1 = SelectField('Strain 1', choices=STRAIN_CHOICES, default="N2", validators=[Required()])
+    strain_2 = SelectField('Strain 2', choices=STRAIN_CHOICES, default="CB4856", validators=[Required()])
+    chromosome = SelectField('Chromosome', choices=CHROMOSOME_CHOICES, validators=[Required()])
+    start = IntegerField('start', validators=[Required()])
+    stop = IntegerField('stop', validators=[Required()])
 
 
 @tools_bp.route('/tools/pairwise_indel_finder', methods=['GET'])
 def pairwise_indel_finder():
+    form = pairwise_indel_form(request.form)
     VARS = {"title": "Pairwise Indel Finder",
             "strains": strains,
-            "chroms": CHROM_NUMERIC.keys()}
+            "chroms": CHROM_NUMERIC.keys(),
+            "form": form}
     return render_template('tools/pairwise_indel_finder.html', **VARS)
 
 @tools_bp.route("/tools/pairwise_indel_finder/getData1", methods=["POST"])
