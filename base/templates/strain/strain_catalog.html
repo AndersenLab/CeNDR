@@ -151,7 +151,7 @@
                         </td>
                         <td>
                             {% for s in strains %}
-                                {% if s.reference_strain %}
+                                {% if s.isotype_ref_strain %}
                                     <strong>
                                     <label for="items-{{ isotype_loop_index }}">{{ s }}</label>
                                     </strong>

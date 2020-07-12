@@ -19,11 +19,11 @@
     <tbody class="searchable">
         {% set count = namespace(value=0) %}
         {% for isotype, strains in strain_listing|groupby('isotype') %}
-        {% for strain in strains|sort(attribute='reference_strain', reverse=True) %}
+        {% for strain in strains|sort(attribute='isotype_ref_strain', reverse=True) %}
             {% if strain.issues == True %}
-            <tr {% if strain.reference_strain %}class="success ref_strain"{% else %}class="strain"{% endif %}>
+            <tr {% if strain.isotype_ref_strain %}class="success ref_strain"{% else %}class="strain"{% endif %}>
                 <td>
-                    {% if strain.reference_strain %}
+                    {% if strain.isotype_ref_strain %}
                         <strong>{{ strain }}</strong>
                     {% else %}
                         {{ strain }}

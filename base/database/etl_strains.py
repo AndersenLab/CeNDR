@@ -95,7 +95,7 @@ def fetch_andersen_strains():
         record["issues"] = record["issues"] == "TRUE"
 
         # Fix strain reference
-        record['reference_strain'] = record['reference_strain'] == "TRUE"
+        record['isotype_ref_strain'] = record['isotype_ref_strain'] == "TRUE"
         record['sequenced'] = record['wgs_seq'] == "TRUE"
 
         # Remove space after comma delimiter

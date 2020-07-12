@@ -323,7 +323,7 @@ class Metadata(DictSerializable, db.Model):
 class Strain(DictSerializable, db.Model):
     __tablename__ = "strain"
     strain = db.Column(db.String(25), primary_key=True)
-    reference_strain = db.Column(db.Boolean(), index=True)
+    isotype_ref_strain = db.Column(db.Boolean(), index=True)
     sequenced = db.Column(db.Boolean(), index=True, nullable=True)
     isotype = db.Column(db.String(25), index=True, nullable=True)
     previous_names = db.Column(db.String(100), nullable=True)

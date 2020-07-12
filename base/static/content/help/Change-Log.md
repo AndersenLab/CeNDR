@@ -4,6 +4,8 @@
 
 #### v1.5 (XXXX-XX-XX)
 
+* The primary data model has moved from isotypes to strains.
+* The backend of the site has been substantially restructured to improve maintainability.
 * A table of strains with issues has been added to the data releases page.
 * The variant data table has been removed from isotype pages.
 * The API has been removed.

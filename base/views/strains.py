@@ -96,7 +96,7 @@ def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
     VARS = {"title": isotype_name,
             "isotype": isotype,
             "isotype_name": isotype_name,
-            "reference_strain": [x for x in isotype if x.reference_strain][0],
+            "isotype_ref_strain": [x for x in isotype if x.isotype_ref_strain][0],
             "strain_json_output": dump_json(isotype),
             "photo_set": photo_set}
     return render_template('strain/isotype.html', **VARS)

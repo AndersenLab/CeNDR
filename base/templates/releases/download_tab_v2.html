@@ -96,12 +96,12 @@
     <tbody class="searchable">
         {% set idx = 0 %}
         {% for isotype, strains in strain_listing|groupby('isotype') %}
-        {% for strain in strains|sort(attribute='reference_strain', reverse=True) %}
+        {% for strain in strains|sort(attribute='isotype_ref_strain', reverse=True) %}
         {% set idx = idx + 1 %}
         <tr>
             <td>{{ idx }}</td>
             <td>
-                {% if strain.reference_strain %}
+                {% if strain.isotype_ref_strain %}
                     <strong>{{ strain }}</strong>
                 {% else %}
                     {{ strain }}

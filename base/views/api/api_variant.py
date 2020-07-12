@@ -37,18 +37,11 @@ ANN_header = ["allele",
               "error"]
 
 
-def get_vcf(release=config["DATASET_RELEASE"]):
-    logger.info(release)
-    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.soft-filter.vcf.gz".format(release=release)
-
-
-def get_vcf_hard(release=config["DATASET_RELEASE"]):
-    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.hard-filter.vcf.gz".format(release=release)
-
+def get_vcf(release=config["DATASET_RELEASE"], filter_type="hard"):
+    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.{filter_type}-filter.vcf.gz".format(release=release, filter_type=filter_type)
 
 
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
-
 
 ann_cols = ['allele',
             'effect',
@@ -70,8 +63,8 @@ ann_cols = ['allele',
 def variant_query(query=None, samples=["N2"], list_all_strains=False, release=config["DATASET_RELEASE"]):
     """
     Used to query a VCF and return results in a dictionary.
-
     """
+    logger.info(query)
     if query:
         # Query in Python
         chrom, start, end = re.split(':|\-', query)
@@ -93,9 +86,19 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                  'variant_impact': query['variant_impact'].split("_"),
                  'sample_list': query['sample_tracks'].split("_"),
                  'output': query['output'],
-                 'list-all-strains': list_all_strains or query['list-all-strains'] == 'true'}
+                 'list-all-strains': list_all_strains or query['list-all-strains'] == 'true',
+                 'variant-annotation': query.get('variant-annotation', 'bcsq')}
 
-    logger.info(query)
+    logger.debug(query)
+
+    # Two types of variant queries can occur.
+    # (1) Variant query of the soft-filter VCF - querying the SNPeff annotations
+    # (2) Variant query of the hard-filter VCF - querying the BCSQ annotations
+
+    # Determine which VCF is going to be queried
+    filter_type = "hard" if query["variant-annotation"] == "bcsq" else "soft"
+    vcf = get_vcf(release=query['release'], filter_type=filter_type)
+    available_samples = VCF(vcf).samples
 
     # Limit queries to 100kb
     if query['end'] - query['start'] > 1e5:
@@ -107,8 +110,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
     elif not samples[0]:
         samples = "N2"
     else:
-        samples = ','.join(samples)
-    vcf = get_vcf(release=query['release'])
+        samples = ','.join([x for x in samples if x in available_samples])
 
     logger.info(vcf)
 
@@ -121,11 +123,13 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
 
     region = "{chrom}:{start}-{end}".format(**locals())
     comm = ["bcftools", "view", vcf, region]
-    logger.info(comm)
+    logger.debug(comm)
 
     # Query samples
     if samples != 'ALL':
+        logger.debug(samples)
         comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
+    logger.debug(comm)
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
         logger.error(err)
@@ -154,7 +158,14 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                     ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
                 del INFO['ANN']
 
-            gt_set = zip(v.samples, record.gt_types.tolist(), record.format("FT").tolist(), record.gt_bases.tolist())
+            # Extract FT (genotype filter status)
+            FT = record.format("FT")
+            if FT is not None:
+                FT = FT.tolist()
+            else:
+                FT = ["PASS" for x in v.samples]
+
+            gt_set = zip(v.samples, record.gt_types.tolist(), FT, record.gt_bases.tolist())
             gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set]
             ANN = [x for x in ANN if x['impact'] in query['variant_impact'] or 'ALL' in query['variant_impact']]
             if type(INFO['AF']) == tuple:
@@ -205,5 +216,5 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                     header = True
                 output.append('\t'.join(map(str, build_output.values())))
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=%s" % filename})
-        logger.info(output_data)
+        logger.debug(output_data)
         return output_data

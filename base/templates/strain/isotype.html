@@ -9,7 +9,7 @@
                 <h4>Strains</h4>
                 <ul>
                 {% for i in isotype %}
-                    {% if i.reference_strain %}
+                    {% if i.isotype_ref_strain %}
                       <li><strong><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="reference strain">{{ i.strain }}</span></strong></li>
                     {% else %}
                       <li>{{ i.strain }}</li>
@@ -29,8 +29,8 @@
 
             <div class="col-md-6">
                 <h4>Data</h4>
-                  <li>{{ reference_strain.isotype_bam_url() }}</li>
-                {% if reference_strain.variant_file %}
+                  <li>{{ isotype_ref_strain.isotype_bam_url() }}</li>
+                {% if isotype_ref_strain.variant_file %}
                   <li><a href = "#">{{ obj }}.variants.tsv</a></li>
                 {% endif %}
             </div>{# col-md-6 #}
@@ -79,7 +79,7 @@
             </div>
             <ul class="list-group">
             <li class="list-group-item" style="padding:0px;">
-            {% if reference_strain.latitude %}
+            {% if isotype_ref_strain.latitude %}
               <div id="map" style="height: 200px; width:100%"></div>
             {% else %}
               <div style="height: 200px; background-color: #73AFE4; width:100%; text-align: center; line-height: 195px; "><strong>No Location</strong></div>
@@ -92,17 +92,17 @@
                        Isotype
             </span>
             </strong> 
-                    <div class="isotype pull-right"> {{ reference_strain["isotype"] }}</div><div style="clear:both;"></div></li>
+                    <div class="isotype pull-right"> {{ isotype_ref_strain["isotype"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><strong>                            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
                         Reference Strain
                         </span></strong> 
-                        <div class="strain pull-right">{{ reference_strain["strain"]}}</div><div style="clear:both;"></div></li>
+                        <div class="strain pull-right">{{ isotype_ref_strain["strain"]}}</div><div style="clear:both;"></div></li>
 
-            <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset in which isotype was originally released."><strong>Release</strong></span> <div class="pull-right">{{ reference_strain['release']|format_release }}</div></li>
-            <li class="list-group-item"><strong>Isolation Date</strong> <div class="strain pull-right">{{ reference_strain["isolation_date"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset in which isotype was originally released."><strong>Release</strong></span> <div class="pull-right">{{ isotype_ref_strain['release']|format_release }}</div></li>
+            <li class="list-group-item"><strong>Isolation Date</strong> <div class="strain pull-right">{{ isotype_ref_strain["isolation_date"] }}</div><div style="clear:both;"></div></li>
             <li class="list-group-item"><strong>Latitude, Longitude</strong> <div class="lat pull-right">
-                {% if reference_strain['latitude'] %}
-                    {{ reference_strain["latitude"] }}, {{ reference_strain["longitude"] }}
+                {% if isotype_ref_strain['latitude'] %}
+                    {{ isotype_ref_strain["latitude"] }}, {{ isotype_ref_strain["longitude"] }}
                 {% else %}
                     Unknown
                 {% endif %}
@@ -110,38 +110,38 @@
             </li>
             <li class="list-group-item"><strong>Elevation</strong>
                 <div class="elevation pull-right">
-                {% if reference_strain['elevation'] %}
-                    {{ reference_strain["elevation"] }} m
+                {% if isotype_ref_strain['elevation'] %}
+                    {{ isotype_ref_strain["elevation"] }} m
                 {% else %}
                     Unknown
                 {% endif %}
                 <div style="clear:both;"></div>
             </li>
-            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="location pull-right">{{ reference_strain["landscape"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="location pull-right">{{ reference_strain["substrate"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ reference_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="location pull-right">{{ isotype_ref_strain["landscape"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="location pull-right">{{ isotype_ref_strain["substrate"] }}</div><div style="clear:both;"></div></li>
+            <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ isotype_ref_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
             
             <li class="list-group-item"><strong>Substrate Temperature (C)</strong>
                 <div class='location pull-right'>
-                    {{ reference_strain['substrate_temp'] or "" }}
+                    {{ isotype_ref_strain['substrate_temp'] or "" }}
                 </div>
             </li>
 
             <li class="list-group-item"><strong>Substrate Moisture (%)</strong>
                 <div class='location pull-right'>
-                    {{ reference_strain['substrate_moisture'] or "" }}
+                    {{ isotype_ref_strain['substrate_moisture'] or "" }}
                 </div>
             </li>
 
             <li class="list-group-item"><strong>Ambient Temperature (C)</strong>
                 <div class='location pull-right'>
-                    {{ reference_strain['ambient_temp'] or "" }}
+                    {{ isotype_ref_strain['ambient_temp'] or "" }}
                 </div>
             </li>
 
             <li class="list-group-item"><strong>Ambient Humidity (%)</strong>
                 <div class='location pull-right'>
-                    {{ reference_strain['ambient_humidity'] or "" }}
+                    {{ isotype_ref_strain['ambient_humidity'] or "" }}
                 </div>
             </li>
 

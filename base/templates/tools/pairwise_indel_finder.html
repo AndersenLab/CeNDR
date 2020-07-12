@@ -1,15 +1,203 @@
 {% extends "_layouts/default.html" %}
 
-{% block style %}{% endblock %}
+{% block custom_head %}
+
+	<link rel="stylesheet" href="/static/js/DataTables/datatables.css" />
+	<link href="/static/css/lightbox.css" rel="stylesheet" />
+	<script type="text/javascript" src="static/js/DataTables/datatables.min.js"></script>
+	<style type="text/css">
+		.rounded {
+			font-family: Helvetica, Tahoma, Geneva, sans-serif;
+			text-decoration:none;
+			border-radius: 30px 30px 30px 30px;
+			font-weight: bold;
+			display:inline-block;
+		}
+		.btn.clicked {
+			background: #44A9FC;
+		}
+	</style>
+
+{% endblock %}
+
 
 {% block content %}
-<div class="row">
-    
-  <div class='col-md-12'>
-    <p>Coming Soon</p>
-  </div>
+
+<div class="container-fluid">
+	<div>
+	<p>
+	This web-based tool is designed to compare any two wild <i>C. elegans</i> strains for insertion-deletion (indel) variants that can be genotyped using PCR. These molecular markers can be used to follow each respective genetic background in crosses. Enter a specific genomic region. The following page will output indel variants that can be genotyped by PCR. For each of these indels, you can search for primers to genotype them in the two wild strains using differential PCR
+product sizes. Primers are designed to avoid natural variants in either strain to ensure that the PCR works in both genetic backgrounds.
+	</p>
+	<br />
+	<br />
+	<div>
+	<section class="gray-bg section-padding" id="service-page">
+	<!-- add form -->
+	<form name="tableData" onsubmit="return OnSubmitForm();">
+	<div class="container"> 
+		<div class="row"> 
+			<div class="diseases">
+			<div class="col-md-2">
+				<h4 class="text-center" style="background-color:#dbdede;"> Strain 1</h4>
+				<div class="active-pink-3 active-pink-4 mb-4">
+					<select class="selectpicker form-control" id="strain1" name="strain1">
+						{% for t in strains %}
+						{% if t == "N2" %}
+						 <option selected value='{{t}}'>{{t}}</option>
+						{% else %}
+						 <option value='{{t}}'>{{t}}</option>
+						{% endif %}
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+
+			<div class="col-md-2">
+				<h4 class="text-center" style="background-color:#dbdede;">Strain 2</h4>
+				<div class="active-pink-3 active-pink-4 mb-4">
+					<select class="selectpicker form-control" id="strain2" name="strain2">
+						{% for t in strains %}
+						{% if t == "CB4856" %}
+						 <option selected value='{{t}}'>{{t}}</option>
+						{% else %}
+						 <option value='{{t}}'>{{t}}</option>
+						{% endif %}
+						{% endfor %}
+					</select>
+				</div>   
+			</div>
+
+			<div class="col-md-2">
+				<h4 class="text-center" style="background-color:#dbdede;">Chromosome</h4>
+				<div class="active-pink-3 active-pink-4 mb-4">
+					<select class="selectpicker form-control" id="chrom" name="chrom">
+						{% for t in chroms %}
+						 <option value='{{t}}'>{{t}}</option>
+						{% endfor %}
+					</select>
+				</div> 
+			</div>
+
+						<div class="col-md-2">
+						<h4 class="text-center" style="background-color:#dbdede;">Start</h4>
+						 <div class="active-pink-3 active-pink-4 mb-4">
+							<input class="form-control" id="di" type="text" placeholder="1425000" aria-label="1425000" onkeypress="return isNumber(event)">
+							 </div>
+						</div>
+
+						<div class="col-md-2">
+								<h4 class="text-center" style="background-color:#dbdede;">Stop</h4>
+								 <div class="active-pink-3 active-pink-4 mb-4">
+							<input class="form-control" id="ti" type="text" placeholder="1465000" aria-label="1465000"  onkeypress="return isNumber(event)">
+							</div>
+						 </div>
+
+						<div class="col-md-2">
+							<div><br /><br /></div>
+							<div class="buttons" style="text-align:center;">
+							<input id="go1" name="action" class="btn btn-primary" type="submit" style="padding: 6px 50px;" onclick="document.pressed=this.value;" value="Find Indels">
+							</div>
+						</div>  
+					</div>
+			</div>
+		 </div>
+	</section>
+	
+	<br />
+	<br />
+	<div class="row" id = "go1t" ></div>
+	
+ </div>
+</div>
+
 
 </div>
+<br />
+<br />
+<br />
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+function onSubmitData(){
+	flag = 0
+	// validate
+	if (($("#di").val().indexOf(',') >-1) || ($("#di").val().indexOf('.') >-1) || ($("#ti").val().indexOf(',') >-1) || ($("#ti").val().indexOf('.') >-1)) {
+		$("#di").val($("#di").val().replace(',', '').replace('.',''))
+		$("#ti").val($("#ti").val().replace(',', '').replace('.',''))
+		flag = 1
+	}
+	
+	console.log("validate");
+	DA = { id1: $("#strain1 option:selected").text(), id2: $("#strain2 option:selected").text(), chrom: $("#chrom option:selected").text(), start:$("#di").val(), stop:$("#ti").val()}
+	console.log(DA);
+	console.log("== V ==");
+	
+	if (DA["start"] == "" || DA["stop"] == "" || DA["id1"] == DA["id2"] || DA["start"].match(/^[0-9 ]+$/) == null || DA["stop"].match(/^[0-9 ]+$/) == null) { 
+		alert("Commas and dots removed from Genome pos. start and stop, as only integer digits are permitted !! \n\nPlease enter valid inputs !!");
+		return false
+	}
+	if (flag == 1) {alert( "Commas and dots removed from Genome pos. start and stop, as only integer digits are permitted !! " )};
+	return true
+};
+
+function isNumber(evt) {
+    evt = (evt) ? evt : window.event;
+    var charCode = (evt.which) ? evt.which : evt.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+        return false;
+    }
+    return true;
+};
+
+var DA;
+$(document).ready(function(){
+  $("#go1").click(function(e){
+      e.preventDefault();
+	  if (onSubmitData()){
+		DA = { id1: $("#strain1 option:selected").text(), id2: $("#strain2 option:selected").text(), chrom: $("#chrom option:selected").text(), start:$("#di").val(), stop:$("#ti").val()}
+		console.log(DA);
+	
+		$.ajax({type: "POST",
+            url: "/tools/pairwise_indel_finder/getData1",
+            data: JSON.stringify(DA),
+			contentType: "application/json; charset=utf-8",
+			dataType: 'json',
+            success:function(result){
+				
+				da = result['data']; 
+				posString = '<br><br><table id="example">';
+				posString += "<thead><tr><th>Chromosome</th><th>Indel Start Position</th><th>Indel Stop Position</th><th>Indel Size</th><th>Strain effect</th><th>Search for primers</th></tr></thead><tbody>";
+				
+				// Populate the table
+				for (var i = 0; i < da.length; i++) {
+					posString += "<tr>";
+					for (var j = 0; j < da[i].length; j++) {
+						posString+='<td>'+da[i][j]+'</td>';
+					}
+					posString += "<td><button data-dat= '"+da[i].join(",")+"'>View Primers</button></td></tr>";
+				}
+				posString += '</tbody></table>';
+				$('#go1t').html(posString);
+				$('#example').DataTable({ "order": [[ 1, "asc" ]] });
+			$('#example tbody').on( 'click', 'button', function () {
+				var data = $(this).data("dat");
+				data += ","+DA['chrom']+":"+DA['start']+"-"+DA['stop']+","+DA['id1']+","+DA['id2']
+				window.open("/tools/pairwise_indel_finder/primers?input="+data, '_blank');
+			} );
+		}});
+	  };
+	});
+});
+</script>
+
+
+
+
+
 {% endblock %}
 
 

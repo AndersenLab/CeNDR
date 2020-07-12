@@ -7,7 +7,6 @@
       href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
 
 <!-- IGV CSS -->
-<link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.9/igv-1.0.9.css">
 
 <!-- jQuery JS -->
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -15,7 +14,7 @@
 <script>$.widget.bridge('uitooltip', $.ui.tooltip);</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo=" crossorigin="anonymous"></script>
 
-<script type="text/javascript" src="//igv.org/web/release/1.0.9/igv-1.0.9.min.js"></script>
+<script type="text/javascript" src="//igv.org/web/release/2.6.2/dist/igv.min.js"></script>
 
 <style>
 
@@ -143,6 +142,24 @@ th {
       </div>
 
       <div class="col-md-4">
+        {% if DATASET_RELEASE >= 20200515 %}
+        <h5>Variant Effect Prediction <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#annotations"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+
+        <form class="form-inline pull-xs-right">
+          <label>
+            <input checked="checked" type="radio" id="bcsq " name="variant-annotation" value="bcsq">
+              BCSQ
+            </label>
+            <br>
+          <label>
+            <input type="radio" id="snpeff" name="variant-annotation" value="snpeff">
+              SNPEff
+            </label>
+            <br>
+        </form>
+
+        {% endif %}
+        
         <h5>Strains <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
         <div class="checkbox">
@@ -388,8 +405,8 @@ $(document).ready(function () {
                         {% endfor %}
                         trackset["Genes"],
                         trackset["Transcripts"],
-                        trackset["MODERATE"],
-                        trackset["HIGH"]
+                        //trackset["MODERATE"],
+                        //trackset["HIGH"]
                         ],
                 };
         igv.createBrowser(div, options);
@@ -397,12 +414,12 @@ $(document).ready(function () {
 // Detect track changes
 $(".track-select").on("change", function() {
   if ($(this).prop("checked") == true) {
-    igv.browser.loadTrack(trackset[$(this).attr("value")]);
+    igv.getBrowser().loadTrack(trackset[$(this).attr("value")]);
   } else {
     remove_track = $(this).attr("value");
-    $.each(igv.browser.trackViews, function(k, v) {
+    $.each(igv.getBrowser().trackViews, function(k, v) {
       if(v.track.id == remove_track) {
-        igv.browser.removeTrack(v.track);
+        igv.getBrowser().removeTrack(v.track);
       }
     })
   }
@@ -448,7 +465,7 @@ function process_gene_search() {
 
 // Make links work!
 $(".container-fluid").on("click", ".ortholink", function() {
-  igv.browser.search($(this).attr("link"))
+  igv.getBrowser().search($(this).attr("link"))
   // Update tables and URL
   refresh_variants();
 });
@@ -480,7 +497,7 @@ function draw_gt_set(genotype_set, genotype_val) {
 
 var xhr;
 function refresh_variants(download = false) {
-    region = $(".igvNavigationSearchInput").val();
+    region = $(".igv-search-container > input").val();
     if (/[IVXMtDNA]+:[0-9,]+-[0-9,]+/g.exec(region) != null) {
       chrom = region.split(":")[0];
       start = region.split(":")[1].split("-")[0].replace(/,/g, "");
@@ -512,7 +529,8 @@ function refresh_variants(download = false) {
               'release': release,
               'variant_impact': variant_impact.join('_'),
               'sample_tracks': sample_tracks.join('_'),
-              'list-all-strains': $('.list-all-strains').prop('checked')
+              'list-all-strains': $('.list-all-strains').prop('checked'),
+              'variant-annotation': $("input[name='variant-annotation']:checked").val(),
              }
 
       if (download == true) {
@@ -616,10 +634,6 @@ function refresh_variants(download = false) {
 
             });
 
-
-
-
-
             // Enable links
             $( "#variants a" ).on( "click", function() {
                 window.location = $(this).attr('href');
@@ -630,7 +644,6 @@ function refresh_variants(download = false) {
 
         } // End if else logic for download
         } // Test for region
-
 }
 
 $("#download").click(function() {
@@ -642,6 +655,9 @@ $("#browser").on("mouseup", function() {
   setTimeout(refresh_variants, 200);
 })
 
+$("input[name='variant-annotation']").change(function() {
+  setTimeout(refresh_variants, 200);
+});
 
 var typingTimer;                //timer identifier
 var doneTypingInterval = 1000;  //time in ms (5 seconds)

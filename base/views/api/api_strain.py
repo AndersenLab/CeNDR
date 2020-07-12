@@ -77,15 +77,15 @@ def get_strains(known_origin=False):
             known_origin: Returns only strains with a known origin
             list_only: Returns a list of isotypes (internal use)
     """
-    ref_strain_list = Strain.query.filter(Strain.reference_strain == True).all()
+    ref_strain_list = Strain.query.filter(Strain.isotype_ref_strain == True).all()
     ref_strain_list = {x.isotype: x.strain for x in ref_strain_list}
     result = Strain.query
     if known_origin or 'origin' in request.path:
         result = result.filter(Strain.latitude != None)
     result = result.all()
     for strain in result:
-        strain.reference_strain = ref_strain_list.get(strain.isotype, None)
-        logger.error(strain.reference_strain)
+        strain.isotype_ref_strain = ref_strain_list.get(strain.isotype, None)
+        logger.error(strain.isotype_ref_strain)
     return result
 
 
@@ -94,7 +94,7 @@ def get_strains(known_origin=False):
 @jsonify_request
 def get_isotypes(known_origin=False, list_only=False):
     """
-        Returns a list of strains when reference_strain == True;
+        Returns a list of strains when isotype_ref_strain == True;
 
         Represents ONE strain per isotype. This is the reference strain.
 
@@ -102,7 +102,7 @@ def get_isotypes(known_origin=False, list_only=False):
             known_origin: Returns only strains with a known origin
             list_only: Returns a list of isotypes (internal use)
     """
-    result = Strain.query.filter(Strain.reference_strain == True) \
+    result = Strain.query.filter(Strain.isotype_ref_strain == True) \
                            .order_by(Strain.isotype)
     if known_origin or 'origin' in request.path:
         result = result.filter(Strain.latitude != None)

@@ -104,7 +104,7 @@
             <td>{{ loop.index }}</td>
             <td>
                 {% for strain in strains %}
-                    {% if strain.reference_strain %}
+                    {% if strain.isotype_ref_strain %}
                         <strong>{{ strain }}</strong>
                     {% endif %}
                 {% endfor %}

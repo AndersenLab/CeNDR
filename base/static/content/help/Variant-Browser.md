@@ -150,4 +150,6 @@ Examples are listed below
 </div>
 
 
+# Annotations
 
+Two types of variant annotations are avaiable.
