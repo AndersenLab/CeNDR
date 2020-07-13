@@ -577,3 +577,8 @@ article {
   font-weight: 600;
 }
 
+/* Tools */
+#glyph {
+  width: 850px;
+  height: 300px;
+}

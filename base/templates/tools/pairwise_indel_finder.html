@@ -3,6 +3,7 @@
 {% block custom_head %}
 	<link rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" />
 	<script type="text/javascript" src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="//igv.org/web/release/2.6.2/dist/igv.min.js"></script>
 {% endblock %}
 
 
@@ -31,6 +32,7 @@
 		</form>
 	</div>
 	<div class="row">
+		<div id="browser"></div>
 		<table id="results" class='table table-striped table-hover table-compact'></table>
 	</div>
 </div>
@@ -40,41 +42,45 @@
 {% block script %}
 
 <script>
-function onSubmitData(){
-	flag = 0
-	// validate
-	if (($("#di").val().indexOf(',') >-1) || ($("#di").val().indexOf('.') >-1) || ($("#ti").val().indexOf(',') >-1) || ($("#ti").val().indexOf('.') >-1)) {
-		$("#di").val($("#di").val().replace(',', '').replace('.',''))
-		$("#ti").val($("#ti").val().replace(',', '').replace('.',''))
-		flag = 1
-	}
-	
-	console.log("validate");
-	DA = { id1: $("#strain1 option:selected").text(), id2: $("#strain2 option:selected").text(), chrom: $("#chrom option:selected").text(), start:$("#di").val(), stop:$("#ti").val()}
-	console.log(DA);
-	console.log("== V ==");
-	
-	if (DA["start"] == "" || DA["stop"] == "" || DA["id1"] == DA["id2"] || DA["start"].match(/^[0-9 ]+$/) == null || DA["stop"].match(/^[0-9 ]+$/) == null) { 
-		alert("Commas and dots removed from Genome pos. start and stop, as only integer digits are permitted !! \n\nPlease enter valid inputs !!");
-		return false
-	}
-	if (flag == 1) {alert( "Commas and dots removed from Genome pos. start and stop, as only integer digits are permitted !! " )};
-	return true
-};
 
-function isNumber(evt) {
-    evt = (evt) ? evt : window.event;
-    var charCode = (evt.which) ? evt.which : evt.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57)) {
-        return false;
-    }
-    return true;
-};
+/*
+	IGV Browser
+*/
+var browserDiv = $("#browser"),
+                options = {
+                    showNavigation: true,
+                    showKaryo: false,
+                    reference: {
+                      id: "WS245",
+                      fastaURL: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS245.genomic.fa",
+                    },
+                };
 
-var DA;
 var loaded = false
 var table
 $(document).ready(function(){
+	
+	$("#browser").on("click", ".ortholink", function() {
+		igv.getBrowser().search($(this).attr("link"))
+		// Update tables and URL
+		refresh_variants();
+	  });
+
+	set_position = function() {
+		// Sets browser position based on input
+		browser = igv.getBrowser()
+		chromosome = $("#chromosome").val()
+		start = $("#start").val()
+		end = $("#stop").val()
+		console.log(`${chromosome}:${start}-${end}`)
+		console.log(browser)
+		browser.search(`${chromosome}:${start}-${end}`)
+	}
+
+	submitForm = function() {
+		$("form").submit()
+	}
+
     $('form').submit(function (e) {
 		e.preventDefault();
 		//DA = { id1: $("#strain1 option:selected").text(), id2: $("#strain2 option:selected").text(), chrom: $("#chrom option:selected").text(), start:$("#di").val(), stop:$("#ti").val()}
@@ -84,28 +90,56 @@ $(document).ready(function(){
 				data: $('form').serialize(),
 				success: function(data) {
 					results = data["results"]
+					console.log(results)
 					// Handle errors
 					$(".form-error").remove();
 					if (Object.keys(data).indexOf("errors") > -1) {
 						for(error in data["errors"]) {
-							console.log($("[for='" + error + "']"))
 							$("[for='" + error + "']").parent().append(`<div class='form-error'>${data["errors"][error]}</div>`)
 						}
 					} else {
 						if (loaded == false) {
+							// Create genome browser
+							browser = igv.createBrowser(browserDiv, options)
+							             .then(function(browser) {
+											 set_position()
+
+											 browser.on('locuschange', function(reference_frame, label) {
+												 $("#chromosome").val(reference_frame["chr"]);
+												 $("#start").val(reference_frame["start"]);
+												 $("#stop").val(reference_frame["end"]);
+												 setTimeout(submitForm, 2000)
+											 })
+										 })
+							tracks = {}
+							// Restructure results by strain
+							for(idx in results) {
+								row = results[idx]
+								if (row["STRAIN"] in tracks == false) {
+									tracks[row["STRAIN"]] = []
+								}
+								tracks[row["STRAIN"]].push(row)
+							}
+
+
 							table = $("#results").DataTable({
 								data: results,
 								paging:   false,
 								ordering: true,
 								searching: false,
+								order: [[1, "asc"]],
+								columnDefs: [
+									{ targets: [0], orderData: [1,2] }
+								],
 								columns: [
-								{ data: "CHROM", title: "Chromosome" },
-								{ data: "START", title: "Start" },
+								{ data: "site", title: "Site" },
+								{ data: "START", title: "Start", visible: false },
+								{ data: "END", title: "End", visible: false },
 								{ data: "STRAIN", title: "Strain" },
-							]
+								{ data: "overlap", title: "overlap"}
+								]
 							});
 							loaded = true;
-							console.log(loaded)
 						} else {
 							table.clear()
 							table.rows.add(results);
@@ -113,7 +147,7 @@ $(document).ready(function(){
 						}
 					}
 				}
-		});
+			});
 	});
 
 	$.ajaxSetup({

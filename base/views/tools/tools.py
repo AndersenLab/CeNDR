@@ -95,8 +95,8 @@ class pairwise_indel_form(Form):
     """
         Form for mapping submission
     """
-    strain_1 = SelectField('Strain 1', choices=STRAIN_CHOICES, default="N2", validators=[Required(), validate_uniq_strains])
-    strain_2 = SelectField('Strain 2', choices=STRAIN_CHOICES, default="CB4856", validators=[Required()])
+    strain_1 = SelectField('Strain 1', choices=STRAIN_CHOICES, default="CX11254", validators=[Required(), validate_uniq_strains])
+    strain_2 = SelectField('Strain 2', choices=STRAIN_CHOICES, default="CX11262", validators=[Required()])
     chromosome = SelectField('Chromosome', choices=CHROMOSOME_CHOICES, validators=[Required()])
     start = FlexIntegerField('Start', validators=[Required(), validate_start_lt_stop])
     stop = FlexIntegerField('Stop', validators=[Required()])
@@ -112,34 +112,39 @@ def pairwise_indel_finder():
     return render_template('tools/pairwise_indel_finder.html', **VARS)
 
 def overlaps(s1, e1, s2, e2):
-    return s1 <= s2 <= e1 or s2 <= e1 <= e2
+    return s1 <= s2 <= e1 or s2 <= s1 <= e2
 
 @tools_bp.route("/pairwise_indel_finder/query_indels", methods=["POST"])
 def pairwise_indel_finder_query():
     form = pairwise_indel_form()
     if form.validate_on_submit():
         data = form.data
-        logger.debug(form.data)
         results = []
         strain_cmp = [data["strain_1"],
                       data["strain_2"]]
         tb = tabix.open("base/static/data/pairwise_indel_finder/sv_data.bed.gz")
-        logger.debug(data)
         query = tb.query(data["chromosome"], data["start"], data["stop"])
         results = []
         for row in query:
             row = dict(zip(SV_COLUMNS, row))
+            row["START"] = int(row["START"])
+            row["END"] = int(row["END"])
             if row["STRAIN"] in strain_cmp and \
                 MIN_SV_SIZE <= int(row["SIZE"]) <= MAX_SV_SIZE:
+                row["site"] = f"{row['CHROM']}:{row['START']}-{row['END']}"
                 results.append(row)
         
         # mark overlaps
-        first = results[0]
-        for row in results[1:]:
-            row["overlap"] = overlaps(first["START"], first["END"], row["START"], row["END"])
-            first = row
+        if results:
+            results[0]['overlap'] = False
+            first = results[0]
+            for idx, row in enumerate(results[1:]):
+                row["overlap"] = overlaps(first["START"], first["END"], row["START"], row["END"])
+                if row["overlap"]:
+                    results[idx]['overlap'] = True
+                first = row
             
-        logger.debug(results)
-
-        return jsonify(results = results)
+            sorted(results, key = lambda x: (x["START"], x["END"]))
+            return jsonify(results = results)
+        return jsonify(results=[])
     return jsonify({"errors": form.errors})
