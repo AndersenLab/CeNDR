@@ -1,9 +1,10 @@
 {% extends "_layouts/default.html" %}
 
 {% block custom_head %}
+	<script type="text/javascript" src="//igv.org/web/release/2.6.2/dist/igv.min.js"></script>
 	<link rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" />
 	<script type="text/javascript" src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-	<script type="text/javascript" src="//igv.org/web/release/2.6.2/dist/igv.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 {% endblock %}
 
 
@@ -23,8 +24,8 @@
 			<div class='col-md-2'>{{ render_field(form.strain_1) }}</div>
 			<div class='col-md-2'>{{ render_field(form.strain_2) }}</div>
 			<div class='col-md-2'>{{ render_field(form.chromosome) }}</div>
-			<div class='col-md-2'>{{ render_field(form.start, placeholder="1,425,000", value=1) }}</div>
-			<div class='col-md-2'>{{ render_field(form.stop, placeholder="1,465,000", value=1000000) }}</div>
+			<div class='col-md-2'>{{ render_field(form.start, placeholder="1,425,000") }}</div>
+			<div class='col-md-2'>{{ render_field(form.stop, placeholder="1,465,000") }}</div>
 			<div class='col-md-2'>
 				<label>&nbsp;</label> <br />
 				<button id='find_indels' type='submit' value="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Find Indels</button>
@@ -56,15 +57,16 @@ var browserDiv = $("#browser"),
                     },
                 };
 
+var browser
+var query_running = false
 var loaded = false
 var table
 $(document).ready(function(){
 	
-	$("#browser").on("click", ".ortholink", function() {
-		igv.getBrowser().search($(this).attr("link"))
-		// Update tables and URL
-		refresh_variants();
-	  });
+	let COLORS = {
+		INS: 'blue',
+		DEL: 'red'
+	}
 
 	set_position = function() {
 		// Sets browser position based on input
@@ -72,13 +74,22 @@ $(document).ready(function(){
 		chromosome = $("#chromosome").val()
 		start = $("#start").val()
 		end = $("#stop").val()
-		console.log(`${chromosome}:${start}-${end}`)
-		console.log(browser)
+		if (end - start > 1000000) {
+			end = start + 1000000
+		}
 		browser.search(`${chromosome}:${start}-${end}`)
 	}
 
+	reset_query = function() {
+		query_running = false
+	}
+
 	submitForm = function() {
-		$("form").submit()
+		if (query_running == false) {
+			query_running = true
+			$("form").submit()
+		}
+		setTimeout(reset_query, 200)
 	}
 
     $('form').submit(function (e) {
@@ -90,7 +101,6 @@ $(document).ready(function(){
 				data: $('form').serialize(),
 				success: function(data) {
 					results = data["results"]
-					console.log(results)
 					// Handle errors
 					$(".form-error").remove();
 					if (Object.keys(data).indexOf("errors") > -1) {
@@ -103,25 +113,13 @@ $(document).ready(function(){
 							browser = igv.createBrowser(browserDiv, options)
 							             .then(function(browser) {
 											 set_position()
-
 											 browser.on('locuschange', function(reference_frame, label) {
 												 $("#chromosome").val(reference_frame["chr"]);
 												 $("#start").val(reference_frame["start"]);
 												 $("#stop").val(reference_frame["end"]);
-												 setTimeout(submitForm, 2000)
+												 setTimeout(submitForm, 500)
 											 })
 										 })
-							tracks = {}
-							// Restructure results by strain
-							for(idx in results) {
-								row = results[idx]
-								if (row["STRAIN"] in tracks == false) {
-									tracks[row["STRAIN"]] = []
-								}
-								tracks[row["STRAIN"]].push(row)
-							}
-
-
 							table = $("#results").DataTable({
 								data: results,
 								paging:   false,
@@ -145,7 +143,42 @@ $(document).ready(function(){
 							table.rows.add(results);
 							table.draw();
 						}
+					
+						// Load tracks
+						rowset = {}
+						rowset[$("#strain_1").val()] = []
+						rowset[$("#strain_2").val()] = []
+						tracks = []
+						
+						// Remove all tracks
+						browser.removeAllTracks()
+
+						// Restructure results by strain
+						for(idx in results) {
+							row = results[idx]
+							rowset[row["STRAIN"]].push(row)
+						}
+						for(strain in rowset) {
+							track = rowset[strain]
+							items = _.map(track, function(row) {
+								result = {
+									chr: row["CHROM"],
+									start: row["START"],
+									end: row["END"],
+									name: `${row["site"]}`,
+									color: COLORS[row["SVTYPE"]],
+								}
+								return(result)
+							})
+							igvTrack = {
+								name: strain,
+								type: "annotation",
+								features: items,
+							}
+							browser.loadTrack(igvTrack)
+						}
 					}
+					query_running = false;
 				}
 			});
 	});
@@ -156,7 +189,10 @@ $(document).ready(function(){
 				xhr.setRequestHeader("X-CSRFToken", "{{ form.csrf_token._value() }}")
 			}
 		}
-	})
+	});
+
+	// Initial request
+	submitForm()
 });
 </script>
 

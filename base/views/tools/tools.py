@@ -95,11 +95,11 @@ class pairwise_indel_form(Form):
     """
         Form for mapping submission
     """
-    strain_1 = SelectField('Strain 1', choices=STRAIN_CHOICES, default="CX11254", validators=[Required(), validate_uniq_strains])
-    strain_2 = SelectField('Strain 2', choices=STRAIN_CHOICES, default="CX11262", validators=[Required()])
+    strain_1 = SelectField('Strain 1', choices=STRAIN_CHOICES, default="N2", validators=[Required(), validate_uniq_strains])
+    strain_2 = SelectField('Strain 2', choices=STRAIN_CHOICES, default="CB4856", validators=[Required()])
     chromosome = SelectField('Chromosome', choices=CHROMOSOME_CHOICES, validators=[Required()])
-    start = FlexIntegerField('Start', validators=[Required(), validate_start_lt_stop])
-    stop = FlexIntegerField('Stop', validators=[Required()])
+    start = FlexIntegerField('Start', default="1,462,000", validators=[Required(), validate_start_lt_stop])
+    stop = FlexIntegerField('Stop', default="1,466,000", validators=[Required()])
 
 
 @tools_bp.route('/pairwise_indel_finder', methods=['GET'])
@@ -131,7 +131,7 @@ def pairwise_indel_finder_query():
             row["END"] = int(row["END"])
             if row["STRAIN"] in strain_cmp and \
                 MIN_SV_SIZE <= int(row["SIZE"]) <= MAX_SV_SIZE:
-                row["site"] = f"{row['CHROM']}:{row['START']}-{row['END']}"
+                row["site"] = f"{row['CHROM']}:{row['START']}-{row['END']} ({row['SVTYPE']})"
                 results.append(row)
         
         # mark overlaps
