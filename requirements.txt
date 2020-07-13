@@ -38,3 +38,4 @@ Flask-Markdown==0.3
 Flask-Dance==3.0.0
 feedgen==0.9.0
 cachelib
+pytabix

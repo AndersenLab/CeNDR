@@ -1,12 +1,14 @@
 import os
 import gzip
-from flask import request, render_template, Blueprint, redirect, url_for
+import tabix
+from flask import request, jsonify, render_template, Blueprint, redirect, url_for
 from base.views.api.api_strain import get_strains
 from base.constants import CHROM_NUMERIC
 from logzero import logger
+from collections import defaultdict
 
-from wtforms import (Form,
-                     StringField,
+from flask_wtf import Form, RecaptchaField
+from wtforms import (StringField,
                      TextAreaField,
                      IntegerField,
                      SelectField,
@@ -38,65 +40,106 @@ def heritability_calculator():
 #   pairwise_indel_finder   #
 #===========================#
 
-print(os.getcwd())
-# Initial load of data
+MIN_SV_SIZE = 50
+MAX_SV_SIZE = 500
+
+# Initial load of strain list from sv_data
 # This is run when the server is started.
-strains = set()
-chromosomes = set()
-with gzip.open("base/static/data/pairwise_indel_finder/sv_data.bed.gz", 'rb') as f:
-    for line in f.readlines():
-        line = line.decode("UTF-8").split("\t")
-        strains.add(line[8])
-
-
-strains = sorted(strains)
-STRAIN_CHOICES = [(x,x) for x in strains]
+sv_strains = open("base/static/data/pairwise_indel_finder/sv_strains.txt", 'r').read().splitlines()
+SV_COLUMNS = ["CHROM",
+              "START",
+              "END",
+              "SUPPORT",
+              "SVTYPE",
+              "STRAND",	
+              "SV_TYPE_CALLER",	
+              "SV_POS_CALLER",	
+              "STRAIN",	
+              "CALLER",	
+              "GT",	
+              "SNPEFF_TYPE",	
+              "SNPEFF_PRED",	
+              "SNPEFF_EFF",	
+              "SVTYPE_CLEAN",
+              "TRANSCRIPT",
+              "SIZE",
+              "HIGH_EFF",
+              "WBGeneID"]
+STRAIN_CHOICES = [(x,x) for x in sv_strains]
 CHROMOSOME_CHOICES = [(x,x) for x in CHROM_NUMERIC.keys()]
+COLUMNS = ["CHROM", "START", "STOP", "?", "TYPE", "STRAND", ""]
+
+def validate_uniq_strains(form, field):
+    strain_1 = form.strain_1.data
+    strain_2 = form.strain_2.data
+    if strain_1 == strain_2:
+        raise ValidationError(f"Strain 1 ({strain_1}) and Strain 2 ({strain_2}) must be different.")
+
+
+def validate_start_lt_stop(form, field):
+    start = form.start.data
+    stop = form.stop.data
+    if start >= stop:
+        raise ValidationError(f"Start ({start:,}) must be less than stop ({stop:,})")
+
+class FlexIntegerField(IntegerField):
+
+    def process_formdata(self, val):
+        logger.debug(val)
+        if val:
+            val[0] = val[0].replace(",", "").replace(".", "")
+        logger.debug(val)
+        return super(FlexIntegerField, self).process_formdata(val)
 
 class pairwise_indel_form(Form):
     """
         Form for mapping submission
     """
-    strain_1 = SelectField('Strain 1', choices=STRAIN_CHOICES, default="N2", validators=[Required()])
+    strain_1 = SelectField('Strain 1', choices=STRAIN_CHOICES, default="N2", validators=[Required(), validate_uniq_strains])
     strain_2 = SelectField('Strain 2', choices=STRAIN_CHOICES, default="CB4856", validators=[Required()])
     chromosome = SelectField('Chromosome', choices=CHROMOSOME_CHOICES, validators=[Required()])
-    start = IntegerField('start', validators=[Required()])
-    stop = IntegerField('stop', validators=[Required()])
+    start = FlexIntegerField('Start', validators=[Required(), validate_start_lt_stop])
+    stop = FlexIntegerField('Stop', validators=[Required()])
 
 
-@tools_bp.route('/tools/pairwise_indel_finder', methods=['GET'])
+@tools_bp.route('/pairwise_indel_finder', methods=['GET'])
 def pairwise_indel_finder():
     form = pairwise_indel_form(request.form)
     VARS = {"title": "Pairwise Indel Finder",
-            "strains": strains,
+            "strains": sv_strains,
             "chroms": CHROM_NUMERIC.keys(),
             "form": form}
     return render_template('tools/pairwise_indel_finder.html', **VARS)
 
-@tools_bp.route("/tools/pairwise_indel_finder/getData1", methods=["POST"])
-def get_indel():
-    clicked=None
-    res = []
-    chkDict = {}
-    chkDictF = {}
-    if request.method == "POST" or request.method == "GET":
-        clicked=request.get_json()
-        strns = [clicked['id1'], clicked['id2']]
-        if clicked['chrom'] in dFileDa:
-            for da in dFileDa[clicked['chrom']]:
-                if (int(da["start"])>= int(clicked['start']) and int(da["start"])< int(clicked['stop'])):
-                    k = da["svpos"]
-                    t = [da["start"], da["end"], da["size"], [da["strain"][i]+"("+da["svtype"][i]+")" for i in range(len(da["strain"])) if da["strain"][i] in strns]]
-                    if len(t[3]) > 0: 
-                        if not k in chkDict: chkDict[k]= []
-                        chkDict[k].append(t)
+def overlaps(s1, e1, s2, e2):
+    return s1 <= s2 <= e1 or s2 <= e1 <= e2
 
-        inc = 1
-        for k in chkDict:
-            dal = [k.split(':')[0], ] + chkDict[k][0]
-            tm = [chkDict[k][0][-1]]
+@tools_bp.route("/pairwise_indel_finder/query_indels", methods=["POST"])
+def pairwise_indel_finder_query():
+    form = pairwise_indel_form()
+    if form.validate_on_submit():
+        data = form.data
+        logger.debug(form.data)
+        results = []
+        strain_cmp = [data["strain_1"],
+                      data["strain_2"]]
+        tb = tabix.open("base/static/data/pairwise_indel_finder/sv_data.bed.gz")
+        logger.debug(data)
+        query = tb.query(data["chromosome"], data["start"], data["stop"])
+        results = []
+        for row in query:
+            row = dict(zip(SV_COLUMNS, row))
+            if row["STRAIN"] in strain_cmp and \
+                MIN_SV_SIZE <= int(row["SIZE"]) <= MAX_SV_SIZE:
+                results.append(row)
+        
+        # mark overlaps
+        first = results[0]
+        for row in results[1:]:
+            row["overlap"] = overlaps(first["START"], first["END"], row["START"], row["END"])
+            first = row
             
-            dal[-1] = ' - '.join(list(set([t[0] for t in tm])))
-            inc +=1
-            res.append(dal)
-        return (json.dumps({"data": res}))
+        logger.debug(results)
+
+        return jsonify(results = results)
+    return jsonify({"errors": form.errors})
