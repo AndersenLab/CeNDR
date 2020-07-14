@@ -11,6 +11,8 @@
 * The API has been removed.
 * A new [collaborators](/about/collaborators) page has been added.
 * Software and Methods have been moved to be per-release, as the pipeline is ever-evolving.
+* Data links have been removed from isotype pages; They are still available on the release pages.
+* A new tool, the [pairwise-indel-finder](/tools/pairwise-indel-finder) has been added.
 
 #### v1.3.4 (2020-02-23)
 

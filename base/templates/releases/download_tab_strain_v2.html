@@ -29,11 +29,17 @@
                     {% if strain.isotype_ref_strain %}
                         <strong>{{ strain }}</strong>
                     {% else %}
-                        {{ strain }}
+                        &nbsp;&nbsp;&nbsp;&nbsp;{{ strain }}
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
+                    {% if strain.isotype_ref_strain %}
+                        <strong>
+                            <a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
+                        </strong>
+                    {% else %}
+                        <a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
+                    {% endif %}
                 </td>
                 <td>
                     {{ strain.strain_bam_url() }}

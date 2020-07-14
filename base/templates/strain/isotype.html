@@ -27,14 +27,6 @@
                 {% endif %}
             </div>{# col-md-6 #}
 
-            <div class="col-md-6">
-                <h4>Data</h4>
-                  <li>{{ isotype_ref_strain.isotype_bam_url() }}</li>
-                {% if isotype_ref_strain.variant_file %}
-                  <li><a href = "#">{{ obj }}.variants.tsv</a></li>
-                {% endif %}
-            </div>{# col-md-6 #}
-
             <div class="col-md-12">
                 {% if isotype_ref_strain.strain_photo_url() %}
                 <h4>Photo</h4>
@@ -92,9 +84,26 @@
                 {% endif %}
                 <div style="clear:both;"></div>
             </li>
-            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="location pull-right">{{ isotype_ref_strain["landscape"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="location pull-right">{{ isotype_ref_strain["substrate"] }}</div><div style="clear:both;"></div></li>
-            <li class="list-group-item"><strong>Sampled By</strong> <div class="location pull-right">{{ isotype_ref_strain["sampled_by"] }}</div><div style="clear:both;"></div></li>
+            
+            <li class="list-group-item">
+                <span class='tooltip-item' data-toggle='tooltip' title='Environment type class'>
+                    <strong>Landscape</strong></span>
+                    <div class="location pull-right">{{ isotype_ref_strain["landscape"] or ""}}</div>
+                    <div style="clear:both;"></div>
+            </li>
+            
+
+            <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'>
+                <strong>Substrate</strong></span>
+                <div class="location pull-right">{{ isotype_ref_strain["substrate"] or "" }}</div>
+                <div style="clear:both;"></div>
+            </li>
+
+            <li class="list-group-item">
+                <strong>Sampled By</strong>
+                <div class="location pull-right">{{ isotype_ref_strain["sampled_by"] }}</div>
+                <div style="clear:both;"></div>
+            </li>
             
             <li class="list-group-item"><strong>Substrate Temperature (C)</strong>
                 <div class='location pull-right'>
