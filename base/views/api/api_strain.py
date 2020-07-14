@@ -85,7 +85,6 @@ def get_strains(known_origin=False):
     result = result.all()
     for strain in result:
         strain.isotype_ref_strain = ref_strain_list.get(strain.isotype, None)
-        logger.error(strain.isotype_ref_strain)
     return result
 
 

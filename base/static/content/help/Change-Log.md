@@ -10,6 +10,7 @@
 * The variant data table has been removed from isotype pages.
 * The API has been removed.
 * A new [collaborators](/about/collaborators) page has been added.
+* Software and Methods have been moved to be per-release, as the pipeline is ever-evolving.
 
 #### v1.3.4 (2020-02-23)
 

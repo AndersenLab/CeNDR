@@ -34,40 +34,15 @@
                   <li><a href = "#">{{ obj }}.variants.tsv</a></li>
                 {% endif %}
             </div>{# col-md-6 #}
-        </div>{# row #}
 
- {% if len(photo_set) > 0 %}
-    <div class='row'>
-        <div class='col-md-12'>
-            <h4>Collections</h4>
-        </div>
-    </div>
-    <div class='row'>
-        <table class='table table-bordered table-condensed table-hover'>
-            <thead>
-                <th>Photo</th>
-                <th>Strains</th>
-            </thead>
-            <tbody>
-        {% for photo, strains in photo_set.items() %}
-            <tr>
-                <td>
-                    <a href='{{ photo }}' target="_blank">
-                        <img class='thumbnail' src='{{ photo }}'/>
-                    </a>
-                </td>
-                <td>
-                    <ul>
-                        {% for s in strains %}<li>{{ s }}</li>{% endfor %}
-                    </ul>
-                </td>
-            </tr>
-            </div>
-        {% endfor %}
-        </tbody>
-        </table>
-    </div>
-    {% endif %}
+            <div class="col-md-12">
+                {% if isotype_ref_strain.strain_photo_url() %}
+                <h4>Photo</h4>
+            <img src="{{ isotype_ref_strain.strain_photo_url() }}" class="col-md-12 thumbnail" name="{{ isotype_ref_strain.strain }}">
+        {% endif %}
+            </div>{# /col-md-6 #}
+        </div>{# row #}
+        
     </div>{# col-md-8 #}
 
     <div class='col-md-4'>

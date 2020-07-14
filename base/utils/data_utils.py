@@ -67,7 +67,6 @@ def get_gs():
 
 class json_encoder(json.JSONEncoder):
     def default(self, o):
-        logger.info(o)
         if hasattr(o, "to_json"):
             return o.to_json()
         if hasattr(o, "__dict__"):
@@ -76,8 +75,6 @@ class json_encoder(json.JSONEncoder):
             return float(o)
         elif isinstance(o, datetime.date):
             return str(o.isoformat())
-        # lists
-        logger.info(o)
         try:
             iterable = iter(o)
             return tuple(iterable)

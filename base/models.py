@@ -9,9 +9,10 @@ from io import StringIO
 from flask import Markup, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, func
+from logzero import logger
 
 from base.constants import URLS
-from base.utils.gcloud import get_item, store_item, query_item, google_storage
+from base.utils.gcloud import get_item, store_item, query_item, get_cendr_bucket, check_blob
 from base.utils.aws import get_aws_client
 from gcloud.datastore.entity import Entity
 from collections import defaultdict
@@ -257,8 +258,7 @@ class trait_ds(datastore_model):
             from the current dataset release
         """
 
-        gs = google_storage()
-        cendr_bucket = gs.get_bucket("elegansvariation.org")
+        cendr_bucket = get_cendr_bucket()
         items = cendr_bucket.list_blobs(prefix=f"reports/{self.gs_path}")
         return {os.path.basename(x.name): f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items}
 
@@ -348,9 +348,7 @@ class Strain(DictSerializable, db.Model):
     
     associated_organism = db.Column(db.String(), nullable=True)
     inbreeding_status = db.Column(db.String(), nullable=True)
-    
-    photo = db.Column(db.String(), nullable=True)
-    
+        
     sampled_by = db.Column(db.String(), nullable=True)
     isolated_by = db.Column(db.String(), nullable=True)
     sampling_date = db.Column(db.Date(), nullable=True)
@@ -374,6 +372,13 @@ class Strain(DictSerializable, db.Model):
             return self.sets.split(",")
         else:
             return []
+
+    def strain_photo_url(self):
+        # Checks if photo exists and returns URL if it does
+        try:
+            return check_blob(f"photos/isolation/{self.strain}.jpg").public_url
+        except AttributeError:
+            return None
 
     def strain_bam_url(self):
         """

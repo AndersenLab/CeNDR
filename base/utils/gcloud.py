@@ -111,6 +111,14 @@ def google_storage(open=False):
     return g.gs
 
 
+def get_cendr_bucket():
+    """
+        Returns the CeNDR bucket
+    """
+    gs = google_storage()
+    return gs.get_bucket("elegansvariation.org")
+
+
 def upload_file(name, fname):
     """
         Upload a file to the CeNDR bucket
@@ -119,8 +127,7 @@ def upload_file(name, fname):
             name - The name of the blob (server-side)
             fname - The filename to upload (client-side)
     """
-    gs = google_storage()
-    cendr_bucket = gs.get_bucket("elegansvariation.org")
+    cendr_bucket = get_cendr_bucket()
     blob = cendr_bucket.blob(name)
     blob.upload_from_filename(fname)
     return blob
@@ -134,11 +141,19 @@ def download_file(name, fname):
             name - The name of the blob (server-side)
             fname - The filename to download (client-side)
     """
-    gs = google_storage()
-    cendr_bucket = gs.get_bucket("elegansvariation.org")
+    cendr_bucket = get_cendr_bucket()
     blob = cendr_bucket.blob(name)
     blob.download_to_file(open(fname, 'wb'))
     return fname
+
+
+def check_blob(fname):
+    """
+        Checks that a file exists and if so returns
+        the URL, otherwise returns nothing
+    """
+    cendr_bucket = get_cendr_bucket()
+    return cendr_bucket.get_blob(fname)
 
 
 def list_release_files(prefix):
@@ -147,8 +162,7 @@ def list_release_files(prefix):
         from the current dataset release
     """
 
-    gs = google_storage()
-    cendr_bucket = gs.get_bucket("elegansvariation.org")
+    cendr_bucket = get_cendr_bucket()
     items = cendr_bucket.list_blobs(prefix=prefix)
     return list([f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items])
 
