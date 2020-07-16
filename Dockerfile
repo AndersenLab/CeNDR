@@ -38,10 +38,10 @@ RUN virtualenv /env
 ENV VIRTUAL_ENV /env
 ENV PATH /env/bin:$PATH
 
-# Use python3.8!
-RUN update-alternatives --install /usr/bin/python python /opt/python3.8/bin/python3.8 2 \
-    && ln -f /opt/python3.8/bin/python3.8 /env/bin/python \
-    && ln -f /opt/python3.8/bin/pip3.8 /env/bin/pip
+# Use python3.7
+RUN update-alternatives --install /usr/bin/python python3 /opt/python3.7/bin/python3.7 2 \
+    && ln -f /opt/python3.7/bin/python3.7 /env/bin/python \
+    && ln -f /opt/python3.7/bin/pip3.7 /env/bin/pip
 
 # Copy the application's requirements.txt and run pip to install all
 # dependencies into the virtualenv.
