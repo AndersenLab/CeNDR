@@ -95,6 +95,26 @@ th {
           <label><input type="checkbox" class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
+        
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="dust" />Dust</label>
+        </div>
+      
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="repeat_masker" />Repeat Masker</label>
+        </div>
+
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="transposons" />Transposons (<a href="https://andersenlab.org/publications/2017Laricchia.pdf">Laricchia <em>et al. 2017</em>)</a></label>
+        </div>
+
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="divergent_regions_all" />Divergent Regions Summary</label>
+        </div>
+
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="divergent_regions_strain" />Divergent Regions Strain<br /> (<a href="">Lee <em>et al. 2020</em>)</a></label>
+        </div>
 
         <h5>Variant Impact <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
@@ -350,6 +370,46 @@ trackset = {"Genes": {
                 displayMode: "SQUISHED",
                 color: "#000000",
                 visibilityWindow: 20000
+            },
+            "transposons": {
+              name: "Transposons",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/laricchia2017.tes_cendr.bed.gz",
+              order: 6,
+              displayMode: "EXPANDED",
+              color: "#34CB80",
+              visibilityWindow: 20000000
+            },
+            "divergent_regions_all": {
+              name: "Divergent Regions (summary)",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_all.bed.gz",
+              order: 6,
+              displayMode: "EXPANDED",
+              color: "#CB3466",
+              visibilityWindow: 20000000
+            },
+            "divergent_regions_strain": {
+              name: "Divergent Regions",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_strain.bed.gz",
+              order: 6,
+              displayMode: "EXPANDED",
+              color: "#9B4763",
+              visibilityWindow: 20000000
+            },
+            "dust": {
+              name: "Dust",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.dust.bed.gz",
+              order: 6,
+              displayMode: "SQUISHED",
+              color: "#583E1A",
+              visibilityWindow: 20000000
+            },
+            "repeat_masker": {
+              name: "repeat_masker",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.repeat_masker.bed.gz",
+              order: 6,
+              displayMode: "SQUISHED",
+              color: "#CB8C34",
+              visibilityWindow: 20000000
             },
 
             {% for isotype in isotype_listing %}

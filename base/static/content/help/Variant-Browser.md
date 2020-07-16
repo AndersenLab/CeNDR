@@ -63,7 +63,7 @@ th {
 <a name="standard-tracks"></a>
 ### Standard Tracks
 
-The genome browser provides five tracks.
+The `Genes` and `Transcripts` tracks are displayed by default.
 
 ##### Genes 
 
@@ -73,11 +73,9 @@ Shows _C. elegans_ genes.
 
 Shows transcripts of genes.
 
-#### Conservation Tracks
-
-The UCSC genome browser provides a [good explanation](https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=cons46way) of the phyloP and phastCons tracks and how to interpret them.
-
 ##### phyloP
+
+The UCSC genome browser provides a [good explanation](https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=cons46way) of the `phyloP` and `phastCons` tracks and how to interpret them.
 
 phyloP (phylogenetic P-values) are designed to detect lineage-specific selection. Positive scores indicate conserved sites (slower evolution than expected under drift) whereas negative scores indicate acceleration (faster evolution than expected under drift).
 
@@ -90,10 +88,17 @@ phyloP (phylogenetic P-values) are designed to detect lineage-specific selection
 * _Onchocerca volvulus_
 * _Brugia malayi_
 
-
 ##### phastCons
 
 phastCons scores range from 0-1 and represent the probability that each nucleotide belongs to a conserved element.
+
+##### Tranpsosons
+
+The transposons track shows transposon calls from [Laricchia _et al._ 2017](https://andersenlab.org/publications/2017Laricchia.pdf). Each call lists the transposon type and __isotype__.
+
+##### Divergent Regions
+
+...
 
 ##### Variants
 

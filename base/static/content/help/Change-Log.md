@@ -14,6 +14,13 @@
 * Data links have been removed from isotype pages; They are still available on the release pages.
 * A new tool, the [pairwise-indel-finder](/tools/pairwise-indel-finder) has been added.
 
+__Genome Browser__
+
+* IGVjs has been upgraded and has a number of new tools.
+* A track for transposons has been added.
+* A track for repeat_masker, and Dust data has been added.
+* A track for divergent regions has been added.
+
 #### v1.3.4 (2020-02-23)
 
 * Logins now redirect to the previous page.
