@@ -233,27 +233,20 @@ td.isotype-item label {
   display: block;
 }
 
-#orthotable {
+#search-table {
   max-height: 500px;
   width: 100%;
   display: block;
   overflow-y: scroll;
 }
 
-#orthotable td, th {
+#search-table td, th {
   width: 25%;
   width: 1px solid #999999;
 }
 
-#ortholog-search-box > #loading-orthotable {
-  padding-top: 5px;
-}
-
-#ortholog-search-box {
-  margin: 2px;
-  padding: 5px;
-  border: 1px solid #e3e3e3;
-  border-radius: 3px;
+#search-table a {
+  cursor: pointer;
 }
 
 #ftable tr td:nth-child(3), #ftable tr td:nth-child(4),

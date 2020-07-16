@@ -11,7 +11,7 @@ api_gene_bp = Blueprint('api_gene',
                      template_folder='api')
 
 
-@api_gene_bp.route('/api/gene/homolog/<string:query>')
+@api_gene_bp.route('/gene/homolog/<string:query>')
 @jsonify_request
 def query_homolog(query=""):
     """Query homolog
@@ -34,7 +34,7 @@ def query_homolog(query=""):
     return results
 
 
-@api_gene_bp.route('/api/gene/lookup/<string:query>')
+@api_gene_bp.route('/gene/lookup/<string:query>')
 @jsonify_request
 def lookup_gene(query=""):
     """Lookup a single gene
@@ -62,7 +62,7 @@ def lookup_gene(query=""):
     return result
 
 
-@api_gene_bp.route('/api/gene/search/<string:query>')
+@api_gene_bp.route('/gene/search/<string:query>')
 @jsonify_request
 def query_gene(query=""):
     """Query gene
@@ -86,7 +86,7 @@ def query_gene(query=""):
     return results
 
 
-@api_gene_bp.route('/api/gene/browser-search/<string:query>')
+@api_gene_bp.route('/gene/browser-search/<string:query>')
 @jsonify_request
 def combined_search(query=""):
     """Combines homolog and gene searches
@@ -102,7 +102,7 @@ def combined_search(query=""):
 
 
 
-@api_gene_bp.route('/api/gene/variants/<string:query>')
+@api_gene_bp.route('/gene/variants/<string:query>')
 @jsonify_request
 def gene_variants(query):
     """Return a list of variants within a gene.
@@ -123,7 +123,7 @@ def gene_variants(query):
 
 
 
-@api_gene_bp.route('/api/browser/search/<string:gene>') # Seach for IGV Browser
+@api_gene_bp.route('/browser/search/<string:gene>') # Seach for IGV Browser
 @jsonify_request
 def api_igv_search(gene):
     """
