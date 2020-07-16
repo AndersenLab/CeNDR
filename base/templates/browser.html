@@ -97,23 +97,23 @@ th {
       {% endfor %}
         
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="dust" />Dust</label>
+          <label><input type="checkbox" class="track-select normal-track" value="Dust" />Dust</label>
         </div>
       
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="repeat_masker" />Repeat Masker</label>
+          <label><input type="checkbox" class="track-select normal-track" value="Repeat Masker" />Repeat Masker</label>
         </div>
 
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="transposons" />Transposons (<a href="https://andersenlab.org/publications/2017Laricchia.pdf">Laricchia <em>et al. 2017</em>)</a></label>
+          <label><input type="checkbox" class="track-select normal-track" value="Transposons" />Transposons (<a href="https://andersenlab.org/publications/2017Laricchia.pdf">Laricchia <em>et al. 2017</em>)</a></label>
         </div>
 
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="divergent_regions_all" />Divergent Regions Summary</label>
+          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions Summary" />Divergent Regions Summary</label>
         </div>
 
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="divergent_regions_strain" />Divergent Regions Strain<br /> (<a href="">Lee <em>et al. 2020</em>)</a></label>
+          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions" />Divergent Regions Strain<br /> (<a href="">Lee <em>et al. 2020</em>)</a></label>
         </div>
 
         <h5>Variant Impact <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
@@ -294,7 +294,7 @@ th {
 
 <script type="text/javascript">
 
-trackset = {"Genes": {
+var trackset = {"Genes": {
                             name: "Genes",
                             displayMode: "EXPANDED",
                             order: 1,
@@ -364,14 +364,14 @@ trackset = {"Genes": {
                 visibilityWindow: 20000
             },
             "phyloP": {
-                name: "phylop",
+                name: "phyloP",
                 url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans.phylop.bw",
                 order: 6,
                 displayMode: "SQUISHED",
                 color: "#000000",
                 visibilityWindow: 20000
             },
-            "transposons": {
+            "Transposons": {
               name: "Transposons",
               url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/laricchia2017.tes_cendr.bed.gz",
               order: 6,
@@ -379,15 +379,15 @@ trackset = {"Genes": {
               color: "#34CB80",
               visibilityWindow: 20000000
             },
-            "divergent_regions_all": {
-              name: "Divergent Regions (summary)",
+            "Divergent Regions Summary": {
+              name: "Divergent Regions Summary",
               url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_all.bed.gz",
               order: 6,
               displayMode: "EXPANDED",
               color: "#CB3466",
               visibilityWindow: 20000000
             },
-            "divergent_regions_strain": {
+            "Divergent Regions": {
               name: "Divergent Regions",
               url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_strain.bed.gz",
               order: 6,
@@ -395,7 +395,7 @@ trackset = {"Genes": {
               color: "#9B4763",
               visibilityWindow: 20000000
             },
-            "dust": {
+            "Dust": {
               name: "Dust",
               url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.dust.bed.gz",
               order: 6,
@@ -403,8 +403,8 @@ trackset = {"Genes": {
               color: "#583E1A",
               visibilityWindow: 20000000
             },
-            "repeat_masker": {
-              name: "repeat_masker",
+            "Repeat Masker": {
+              name: "Repeat Masker",
               url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.repeat_masker.bed.gz",
               order: 6,
               displayMode: "SQUISHED",
@@ -470,22 +470,20 @@ $(document).ready(function () {
                         ],
                 };
         igv.createBrowser(div, options);
+        
+        
 
-// Detect track changes
-$(".track-select").on("change", function() {
-  if ($(this).prop("checked") == true) {
-    igv.getBrowser().loadTrack(trackset[$(this).attr("value")]);
-  } else {
-    remove_track = $(this).attr("value");
-    $.each(igv.getBrowser().trackViews, function(k, v) {
-      if(v.track.id == remove_track) {
-        igv.getBrowser().removeTrack(v.track);
-      }
-    })
-  }
-})
+        // Detect track changes
+        $(".track-select").on("change", function() {
+          if ($(this).prop("checked") == true) {
+            igv.getBrowser().loadTrack(trackset[$(this).attr("value")]);
+          } else {
+            igv.getBrowser().removeTrackByName($(this).attr("value"));
+          }
+        })
 
-var_impact_class = {"LOW": "success",
+
+  var_impact_class = {"LOW": "success",
                     "MODERATE":"warning",
                     "HIGH": "danger",
                     "MODIFIER": "default"}
