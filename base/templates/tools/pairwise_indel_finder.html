@@ -142,6 +142,8 @@ $(document).ready(function(){
 							table.clear()
 							table.rows.add(results);
 							table.draw();
+							// Remove all tracks
+							browser.removeAllTracks()
 						}
 					
 						// Load tracks
@@ -149,9 +151,6 @@ $(document).ready(function(){
 						rowset[$("#strain_1").val()] = []
 						rowset[$("#strain_2").val()] = []
 						tracks = []
-						
-						// Remove all tracks
-						browser.removeAllTracks()
 
 						// Restructure results by strain
 						for(idx in results) {
