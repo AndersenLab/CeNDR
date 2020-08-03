@@ -96,7 +96,8 @@ def get_strains(known_origin=False, issues=False):
 
     result = result.all()
     for strain in result:
-        strain.isotype_ref_strain = ref_strain_list.get(strain.isotype, None)
+        # Set an attribute for the reference strain of every strain
+        strain.reference_strain = ref_strain_list.get(strain.isotype, None)
     return result
 
 

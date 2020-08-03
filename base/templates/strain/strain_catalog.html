@@ -141,7 +141,7 @@
                             <input type="checkbox" name="items-{{ loop.index }}" id="items-{{ loop.index }}" value="{{ isotype }}" info="{{ isotype + " " + strains|join(" ") }}" class="ind_strain" />
                         </td>
                         <td>
-                            <label for="items-{{ isotype_loop_index }}">{{ strains[0].isotype_ref_strain }}</label>
+                            <label for="items-{{ isotype_loop_index }}">{{ strains[0].reference_strain }}</label>
                         </td>
                         <td><a href="{{ url_for('strain.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                         <td>{{ strains|join(", ") }}</td>

@@ -141,6 +141,10 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
         f.flush()
         output_data = []
 
+        #=================#
+        #   BCSQ Output   #
+        #=================#
+
         # Extract TCSQ annotations for all strains
         # Make this only run when BCSQ is running.
         # >> indicates the start of a new strain and its consequences
@@ -158,6 +162,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                 "%CHROM\t%POS\t%REF\t%ALT[\t>>%SAMPLE\t%TBCSQ]\n",
                 f.name]
         out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
+        logger.info(out)
         csq_sites = {}
         # Structure -> site[annotation] -> strain
         if not err:
@@ -175,7 +180,13 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                             csq_anno[anno].append(strain)
                 csq_sites[cpra_key] = csq_anno
 
+        # Now restructure for output
+        return csq_sites
+        
         v = VCF(f.name, gts012=True)
+
+
+
 
         if samples and samples != "ALL":
             samples = samples.split(",")
