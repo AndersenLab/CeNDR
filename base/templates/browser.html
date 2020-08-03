@@ -630,7 +630,7 @@ function refresh_variants(download = false) {
                 }
                 var is_first = true;
                 $.each(rec['ANN'], function(annk, ann) {
-
+                    console.log(rec)
                         if (ann["gene_id"] != null)
                         {
                           ann["gene_id"] = `<a href='/gene/${ann["gene_id"]}'>${ann["gene_id"]}</a>`;
@@ -718,11 +718,6 @@ function refresh_variants(download = false) {
 $("#download").click(function() {
     refresh_variants(download=true);
 });
-
-
-$("#browser").on("mouseup", function() {
-  setTimeout(refresh_variants, 200);
-})
 
 $("input[name='variant-annotation']").change(function() {
   setTimeout(refresh_variants, 200);

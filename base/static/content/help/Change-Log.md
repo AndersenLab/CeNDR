@@ -13,6 +13,7 @@
 * Software and Methods have been moved to be per-release, as the pipeline is ever-evolving.
 * Data links have been removed from isotype pages; They are still available on the release pages.
 * A new tool, the [pairwise-indel-finder](/tools/pairwise-indel-finder) has been added.
+* Reports for Alignment, Concordance, And Variant calling are now produced for all releases.
 
 __Genome Browser__
 
