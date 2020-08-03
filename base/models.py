@@ -354,7 +354,7 @@ class Strain(DictSerializable, db.Model):
     sampling_date = db.Column(db.Date(), nullable=True)
     sampling_date_comment = db.Column(db.String(), nullable=True)
     notes = db.Column(db.String(), nullable=True)
-    sets = db.Column(db.String(), nullable=True)
+    strain_set = db.Column(db.String(), nullable=True)
     issues = db.Column(db.Boolean(), nullable=True)
     issue_notes = db.Column(db.String(), nullable=True)
 
@@ -366,12 +366,6 @@ class Strain(DictSerializable, db.Model):
 
     def to_json(self):
         return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
-
-    def list_sets(self):
-        if self.sets:
-            return self.sets.split(",")
-        else:
-            return []
 
     def strain_photo_url(self):
         # Checks if photo exists and returns URL if it does

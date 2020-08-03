@@ -354,12 +354,6 @@ class Strain(DictSerializable, db.Model):
     def to_json(self):
         return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
 
-    def list_sets(self):
-        if self.sets:
-            return self.sets.split(",")
-        else:
-            return []
-
     def isotype_bam_url(self):
         """
             Return bam / bam_index url set
