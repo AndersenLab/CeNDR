@@ -60,9 +60,14 @@ ann_cols = ['allele',
             'distance_to_feature']
 
 
+def truncate(s):
+    if len(s) >= 20:
+        return s[:20] + " …"
+    return s
+
 @api_variant_bp.route('/api/variant', methods=["GET", "POST"])
 @jsonify_request
-def variant_query(query=None, samples=["N2"], list_all_strains=False, release=config["DATASET_RELEASE"]):
+def variant_query(query=None, samples=None, list_all_strains=False, release=config["DATASET_RELEASE"]):
     """
     Used to query a VCF and return results in a dictionary.
     """
@@ -77,7 +82,8 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                  'variant_impact': ['ALL'],
                  'sample_list': samples,
                  'output': "",
-                 'list-all-strains': list_all_strains}
+                 'list-all-strains': list_all_strains,
+                 'variant-annotation': 'bcsq'}
     else:
         # Query from Browser
         query = request.args
@@ -109,8 +115,8 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
     samples = query['sample_list']
     if query['list-all-strains']:
         samples = "ALL"
-    elif not samples[0]:
-        samples = "N2"
+    elif not samples:
+        samples = "N2" if "N2" in available_samples else available_samples[0]
     else:
         samples = ','.join([x for x in samples if x in available_samples])
 
@@ -141,52 +147,49 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
         f.flush()
         output_data = []
 
-        #=================#
-        #   BCSQ Output   #
-        #=================#
+        if query['variant-annotation'] == 'bcsq':
+            #=================#
+            #   BCSQ Output   #
+            #=================#
 
-        # Extract TCSQ annotations for all strains
-        # Make this only run when BCSQ is running.
-        # >> indicates the start of a new strain and its consequences
-        
-        #   - consequence type
-        #   - gene name
-        #   - ensembl transcript ID
-        #   - coding strand (+ fwd, - rev)
-        #   - amino acid position (in the coding strand orientation)
-        #   - list of corresponding VCF variants
+            # Extract TCSQ annotations for all strains
+            # Make this only run when BCSQ is running.
+            # >> indicates the start of a new strain and its consequences
+            
+            #   - consequence type
+            #   - gene name
+            #   - ensembl transcript ID
+            #   - coding strand (+ fwd, - rev)
+            #   - amino acid position (in the coding strand orientation)
+            #   - list of corresponding VCF variants
 
-        comm = ['bcftools',
-                'query',
-                '-f',
-                "%CHROM\t%POS\t%REF\t%ALT[\t>>%SAMPLE\t%TBCSQ]\n",
-                f.name]
-        out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
-        logger.info(out)
-        csq_sites = {}
-        # Structure -> site[annotation] -> strain
-        if not err:
-            for line in out.decode("UTF-8").splitlines():
-                line = line.split("\t")
-                cpra_key = '_'.join(line[0:2])
-                csq_anno = defaultdict(list)
-                logger.info(line)
-                if len(line) > 5:
-                    for i in line[4:]:
-                        if i.startswith(">>"):
-                            strain = i[2:]
-                            continue
-                        for anno in i.split(","):
-                            csq_anno[anno].append(strain)
-                csq_sites[cpra_key] = csq_anno
+            comm = ['bcftools',
+                    'query',
+                    '-f',
+                    "%CHROM\t%POS\t%REF\t%ALT[\t>>%SAMPLE\t%TBCSQ]\n",
+                    f.name]
+            out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
+            csq_sites = {}
+            # Structure -> site[annotation] -> strain
+            if not err:
+                for line in out.decode("UTF-8").splitlines():
+                    line = line.split("\t")
+                    cpra_key = '_'.join(line[0:2])
+                    csq_anno = defaultdict(list)
+                    if len(line) > 5:
+                        for i in line[4:]:
+                            if i.startswith(">>"):
+                                strain = i[2:]
+                                continue
+                            for anno in i.split(","):
+                                logger.info(strain)
+                                csq_anno[anno].append(strain)
+                    csq_sites[cpra_key] = csq_anno
 
-        # Now restructure for output
-        return csq_sites
-        
+            # Now restructure for output
+            #return csq_sites
+            
         v = VCF(f.name, gts012=True)
-
-
-
 
         if samples and samples != "ALL":
             samples = samples.split(",")
@@ -205,11 +208,14 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                 del INFO['ANN']
 
             # Extract FT (genotype filter status)
-            FT = record.format("FT")
-            if FT is not None:
-                FT = FT.tolist()
-            else:
-                FT = ["PASS" for x in v.samples]
+            try:
+                FT = record.format("FT")
+                if FT is not None:
+                    FT = FT.tolist()
+                else:
+                    FT = ["PASS" for x in v.samples]
+            except KeyError:
+                FT = ["PASS"] * len(v.samples)
 
             gt_set = zip(v.samples, record.gt_types.tolist(), FT, record.gt_bases.tolist())
             gt_set = [dict(zip(gt_set_keys, x)) for x in gt_set]
@@ -221,8 +227,8 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
             rec_out = {
                 "CHROM": record.CHROM,
                 "POS": record.POS,
-                "REF": record.REF,
-                "ALT": record.ALT,
+                "REF": truncate(record.REF),
+                "ALT": [truncate(x) for x in record.ALT],
                 "FILTER": record.FILTER or 'PASS',  # record.FILTER is 'None' for PASS
                 "GT": gt_set,
                 "AF": '{:0.3f}'.format(AF),

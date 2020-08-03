@@ -479,11 +479,6 @@ $(document).ready(function () {
                             })
                          })
 
-
-        console.log(browser)
-        
-        
-
         // Detect track changes
         $(".track-select").on("change", function() {
           if ($(this).prop("checked") == true) {
@@ -512,6 +507,7 @@ function process_gene_search() {
            method: "GET",
            contentType: 'application/xml',
            }).done(function(msg) {
+            console.log(msg)
             row = Array();
             $.each(msg, function(i,row) {
                 if ("chrom" in row) {
@@ -573,6 +569,8 @@ function refresh_variants(download = false) {
       end = region.split(":")[1].split("-")[1].replace(/,/g, "");
       release = {{ DATASET_RELEASE }};
 
+      variant_annotation = $("input[name='variant-annotation']:checked").val()
+
       sample_tracks = []
       $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
 
@@ -599,7 +597,7 @@ function refresh_variants(download = false) {
               'variant_impact': variant_impact.join('_'),
               'sample_tracks': sample_tracks.join('_'),
               'list-all-strains': $('.list-all-strains').prop('checked'),
-              'variant-annotation': $("input[name='variant-annotation']:checked").val(),
+              'variant-annotation': variant_annotation,
              }
 
       if (download == true) {
@@ -616,21 +614,44 @@ function refresh_variants(download = false) {
           xhr.abort();
         }
 
+        // Check that strains are selected otherwise abort
+
         xhr = $.ajax({
           url: "{{ url_for('api_variant.variant_query') }}",
           data: data,
           method: "GET",
           contentType: "application/json",
           success: function(msg) {
-
               $.each(msg, function(k, rec) {
+                var is_first = true;
                 var td_rowspan = 1;
+                if (variant_annotation == "bcsq") {
+                  // BCSQ ANNOTATION
+                  console.log(rec)
+
+                  if (variant_impact.indexOf("ALL") > -1 && rec["CSQ"].length == 0) {
+                    rec["CSQ"] = [{ effect: "", gene_id: null}]
+                  }
+
+                  if (variant_annotation == "bcsq") {
+                    $.each(rec["CSQ"], function(anno, csq) {
+                        console.log(anno)
+                        anno = anno.split("|")
+                        anno[0]
+                        anno[1]
+                        anno[3]
+                        anno[4]
+                        anno[5]
+                    })
+                  }
+
+                } else {
+                  // SNPEFF ANNOTATION
+
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
-                var is_first = true;
                 $.each(rec['ANN'], function(annk, ann) {
-                    console.log(rec)
                         if (ann["gene_id"] != null)
                         {
                           ann["gene_id"] = `<a href='/gene/${ann["gene_id"]}'>${ann["gene_id"]}</a>`;
@@ -680,6 +701,8 @@ function refresh_variants(download = false) {
                     function () {return this.value;}).get();
                 }
 
+
+
                 if (gt_panel.length > 0) {
                   gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
                     // Append genotypes
@@ -700,6 +723,7 @@ function refresh_variants(download = false) {
                     // enable tooltips
                     $('.ttop').tooltip();
                 }
+              }
 
             });
 
