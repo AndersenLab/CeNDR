@@ -25,7 +25,7 @@
                 <div class="col-md-8">
             <p>Pre-defined sets of strains can be ordered below.</p>
                 <p>The <strong>divergent set</strong> includes 12 genotypically different strains and can be used to determine broad-sense heritability after repeated independent measures of your favorite phenotype. <strong>We recommend starting with the divergent set.</strong></p>
-                 <p>Sets <strong>1-6</strong> each contain 48 strains that should be assayed for genetic mapping experiments. We recommend using a single set of 48 strains. After you have scored and optimized your quantitative trait, additional sets can be assayed to increase statistical power for association mapping.</p>
+                 <p>Sets <strong>1-8</strong> each contain 46-48 strains that should be assayed for genetic mapping experiments. We recommend using a single set of 48 strains. After you have scored and optimized your quantitative trait, additional sets can be assayed to increase statistical power for association mapping.</p>
                  </div>
                  <div class="col-md-4">
                  <div class="panel panel-default">
@@ -58,39 +58,30 @@
                                 <input type="checkbox" name="items-10000" id="divergent" value="set_divergent"/>
                             </td>
                             <td><strong><label for="divergent">Divergent Set</label></strong></td>
-                            <td>12</td>
+                            <td>{{ len(strain_sets["D"]) }}</td>
                             <td>
                             <small>
-                                {% for isotype, strains in strain_listing|groupby('isotype') %}
-
-                                    {% for strain in strains %} {% for set_name in strain.list_sets() %} 
-                                        {% if set_name == "divergent" %}{{ isotype }}{% endif %}
-                                    {% endfor %}
-
-                                    {% endfor %}
+                                {% for strain in strain_sets["D"] %}
+                                    {{ strain }}
                                 {% endfor %}
                             </small>
                             </td>
                         </tr>
-                        {% for i in range(1,7) %}
+                        {% for i in range(1,9) %}
                         <tr>
                             <td>
                                 <input id="set-{{ i }}" type="checkbox" name="items-{{ i + 1000 }}"  value="set_{{ i }}"/>
                             </td>
                             <td><strong><label for="set-{{ i }}">Mapping Set {{ i }}</label></strong></td>
-                            <td>48</td>
+                            <td>{{ len(strain_sets["{}".format(i)]) }}</td>
                             <td>
                             <a class="btn btn-link btn-block" data-toggle="collapse" data-target="#view_set_{{ i }}">View Strains</a>
                             <div class="collapse" id="view_set_{{ i }}" >
-                                {% for isotype, strains in strain_listing|groupby('isotype') %}
-                                    {% for strain in strains %} 
-                                        {% for set_name in strain.list_sets() %} 
-                                                {% if set_name == "{}".format(i) %}
-                                                    <li class="col-list">{{ isotype }}</li>
-                                                {% endif %}
-                                        {% endfor %}
+                                <ul>
+                                    {% for strain in strain_sets["{}".format(i)] %}
+                                        <li class="col-list">{{ strain }}</li>
                                     {% endfor %}
-                                {% endfor %}
+                                </ul>
                             </div>
                             </td>
                         </tr>
@@ -150,13 +141,7 @@
                             <input type="checkbox" name="items-{{ loop.index }}" id="items-{{ loop.index }}" value="{{ isotype }}" info="{{ isotype + " " + strains|join(" ") }}" class="ind_strain" />
                         </td>
                         <td>
-                            {% for s in strains %}
-                                {% if s.isotype_ref_strain %}
-                                    <strong>
-                                    <label for="items-{{ isotype_loop_index }}">{{ s }}</label>
-                                    </strong>
-                                {% endif %}
-                            {% endfor %}
+                            <label for="items-{{ isotype_loop_index }}">{{ strains[0].isotype_ref_strain }}</label>
                         </td>
                         <td><a href="{{ url_for('strain.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a></td>
                         <td>{{ strains|join(", ") }}</td>

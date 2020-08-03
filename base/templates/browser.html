@@ -469,7 +469,18 @@ $(document).ready(function () {
                         //trackset["HIGH"]
                         ],
                 };
-        igv.createBrowser(div, options);
+        var browser = igv.createBrowser(div, options)
+                         .then(function(browser) {
+                            /*
+                              Bind browser events
+                            */
+                            browser.on('trackdragend', function(reference_frame, label) {
+                              refresh_variants()
+                            })
+                         })
+
+
+        console.log(browser)
         
         
 

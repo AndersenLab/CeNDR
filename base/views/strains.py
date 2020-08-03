@@ -12,7 +12,7 @@ from flask import (render_template,
                    Markup)
 
 from base.models import Strain
-from base.views.api.api_strain import get_strains, query_strains
+from base.views.api.api_strain import get_strains
 from base.utils.data_utils import dump_json
 from base.utils.gcloud import list_release_files
 from os.path import basename
@@ -109,13 +109,12 @@ def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
 @strain_bp.route('/catalog', methods=['GET', 'POST'])
 @cache.memoize(50)
 def strain_catalog():
-
     # [ ] REVERT; TEMPORARY BAN ON NEW ORDERS
     flash(Markup("<strong>Due to COVID-19, we are unable to accept new orders until further notice.</strong>"), category="danger")
-
     VARS = {"title": "Strain Catalog",
             "warning": request.args.get('warning'),
-            "strain_listing": query_strains()}
+            "strain_listing": get_strains(),
+            "strain_sets": Strain.strain_sets() }
     return render_template('strain/strain_catalog.html', **VARS)
 
 #

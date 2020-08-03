@@ -81,6 +81,7 @@ def configure_ssl(app):
         sslify(app)
     elif app.config['DEBUG']:
         debug_toolbar(app)
+        app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = True
 
 
 def register_commands(app):

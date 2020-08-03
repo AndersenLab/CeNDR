@@ -390,6 +390,16 @@ class Strain(DictSerializable, db.Model):
                    """.strip())
         return url_set
 
+    @classmethod
+    def strain_sets(cls):
+        df = pd.read_sql_table(cls.__tablename__, db.engine)
+        result = df[['strain', 'isotype', 'strain_set']].dropna(how='any') \
+                                             .groupby('strain_set') \
+                                             .agg(list) \
+                                             .to_dict()
+        return result['strain']
+
+
     def isotype_bam_url(self):
         """
             Return bam / bam_index url set

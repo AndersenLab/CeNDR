@@ -112,7 +112,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
     else:
         samples = ','.join([x for x in samples if x in available_samples])
 
-    logger.info(vcf)
+    logger.debug(vcf)
 
     chrom = query['chrom']
     start = query['start']
@@ -129,7 +129,6 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
     if samples != 'ALL':
         logger.debug(samples)
         comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
-    logger.debug(comm)
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
         logger.error(err)
