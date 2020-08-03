@@ -12,7 +12,7 @@ from flask import (render_template,
                    Markup)
 
 from base.models import Strain
-from base.views.api.api_strain import get_strains
+from base.views.api.api_strain import get_strains, query_strains
 from base.utils.data_utils import dump_json
 from base.utils.gcloud import list_release_files
 from os.path import basename
@@ -62,7 +62,7 @@ def Strainetadata():
             first = False
             header = [x.name for x in list(Strain.__mapper__.columns)]
             yield ('\t'.join(header) + "\n").encode('utf-8')
-        for row in query_strains():
+        for row in query_strains(issues=False):
             row = [getattr(row, column.name) for column in col_list]
             yield ('\t'.join(map(str, row)) + "\n").encode('utf-8')
     return Response(generate(), mimetype="text/tab-separated-values")

@@ -1,5 +1,4 @@
 
-<input id="filter" type="text" class="form-control pull-right" style="width:200px;" placeholder="Filter Strain Name" action="#">
 <table class="table table-hover table-condensed strain-table">
     <thead>
         <tr>
@@ -16,10 +15,8 @@
         </tr>
     </thead>
     <div style="height: 30px;"></div>
-    <tbody class="searchable">
         {% set count = namespace(value=0) %}
-        {% for isotype, strains in strain_listing|groupby('isotype') %}
-        {% for strain in strains|sort(attribute='isotype_ref_strain', reverse=True) %}
+        {% for strain in strain_listing_issues %}
             {% if strain.issues == True %}
             <tr {% if strain.isotype_ref_strain %}class="success ref_strain"{% else %}class="strain"{% endif %}>
                 <td>
@@ -37,6 +34,4 @@
             </tr>
             {% endif %}
         {% endfor %}
-        {% endfor %}
-    </tbody>
 </table>

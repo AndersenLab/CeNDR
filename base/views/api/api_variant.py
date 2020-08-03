@@ -13,6 +13,7 @@ from base.utils.decorators import jsonify_request
 from base.config import config
 from collections import Counter
 from logzero import logger
+from collections import defaultdict
 
 from flask import Blueprint
 
@@ -38,7 +39,8 @@ ANN_header = ["allele",
 
 
 def get_vcf(release=config["DATASET_RELEASE"], filter_type="hard"):
-    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.{filter_type}-filter.vcf.gz".format(release=release, filter_type=filter_type)
+    #return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.{filter_type}-filter.vcf.gz".format(release=release, filter_type=filter_type)
+    return "/Users/dec/Documents/andersen_lab/CeNDR/WI.20200515.hard-filter.vcf.gz"
 
 
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
@@ -139,6 +141,40 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
         f.flush()
         output_data = []
 
+        # Extract TCSQ annotations for all strains
+        # Make this only run when BCSQ is running.
+        # >> indicates the start of a new strain and its consequences
+        
+        #   - consequence type
+        #   - gene name
+        #   - ensembl transcript ID
+        #   - coding strand (+ fwd, - rev)
+        #   - amino acid position (in the coding strand orientation)
+        #   - list of corresponding VCF variants
+
+        comm = ['bcftools',
+                'query',
+                '-f',
+                "%CHROM\t%POS\t%REF\t%ALT[\t>>%SAMPLE\t%TBCSQ]\n",
+                f.name]
+        out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
+        csq_sites = {}
+        # Structure -> site[annotation] -> strain
+        if not err:
+            for line in out.decode("UTF-8").splitlines():
+                line = line.split("\t")
+                cpra_key = '_'.join(line[0:2])
+                csq_anno = defaultdict(list)
+                logger.info(line)
+                if len(line) > 5:
+                    for i in line[4:]:
+                        if i.startswith(">>"):
+                            strain = i[2:]
+                            continue
+                        for anno in i.split(","):
+                            csq_anno[anno].append(strain)
+                csq_sites[cpra_key] = csq_anno
+
         v = VCF(f.name, gts012=True)
 
         if samples and samples != "ALL":
@@ -180,6 +216,7 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                 "GT": gt_set,
                 "AF": '{:0.3f}'.format(AF),
                 "ANN": ANN,
+                "CSQ": csq_sites[f"{record.CHROM}_{record.POS}"],
                 "GT_Summary": Counter(record.gt_types.tolist())
             }
 
@@ -215,5 +252,4 @@ def variant_query(query=None, samples=["N2"], list_all_strains=False, release=co
                     header = True
                 output.append('\t'.join(map(str, build_output.values())))
             return Response('\n'.join(output), mimetype="text/csv", headers={"Content-disposition": "attachment; filename=%s" % filename})
-        logger.debug(output_data)
         return output_data

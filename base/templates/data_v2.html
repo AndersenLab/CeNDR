@@ -5,6 +5,10 @@
     top: 20px;
     width: 136px;
 }
+body, html{
+    width: 100%;
+    height: 100%;
+}
 </style>
 {% endblock %}
 
@@ -30,8 +34,11 @@
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active" ><a href="#main" role="tab" data-toggle="tab">Overview</a></li>
         <li role="presentation" ><a href="#Strain-data" role="tab" data-toggle="tab">Strain Data</a></li>
+        <li role="presentation" ><a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a></li>
         <li role="presentation" ><a href="#Pipelines" role="tab" data-toggle="tab">Methods / Pipelines</a></li>
         <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
+        <li role="presentation" ><a href="#Concordance" role="tab" data-toggle="tab">Concordance</a></li>
+        <li role="presentation" ><a href="#Variant-calling" role="tab" data-toggle="tab">Variant Calling</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -132,14 +139,18 @@
         <div role="tabpanel" class="tab-pane" id="Strain-data">
 
             <h2>BAM / VCF</h2>
+
+            <p>If you do not see a strain you are looking for here, check the <a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a> tab.
+            Some strains have been flagged and removed from distribution and analysis pipelines for a variety of reasons.</p>
+
             {% set show_issues = False %}
             {% include('releases/download_tab_strain_v2.html') %}
 
-            <h2>Strain Issues</h2>
+        </div>
 
+        <div role="tabpanel" class="tab-pane" id="Strain-issues">
             {% set show_issues = True %}
             {% include('releases/download_tab_strain_v2_issues.html') %}
-
         </div>
 
         <div role="tabpanel" class="tab-pane" id="Pipelines">
@@ -147,7 +158,15 @@
         </div>
 
         <div role="tabpanel" class="tab-pane" id="Alignment">
-            <object style="width:100%;height:150vh;" type="text/html" data="/static/reports/{{ selected_release }}/alignment_report.html"></object>
+            <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/alignment_report.html"></object>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Concordance">
+            <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/concordance_report.html"></object>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Variant-calling">
+            <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/gatk_report.html"></object>
         </div>
 
 

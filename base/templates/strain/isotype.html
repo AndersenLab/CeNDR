@@ -20,7 +20,7 @@
                 {% if isotype[0].previous_names %}
                 <h4>Alternative Names</h4>
                 <ul>
-                {% for i in isotype[0].previous_names.split(",") %}
+                {% for i in isotype[0].previous_names.split("|") %}
                   <li>{{ i }}</li>
                 {% endfor %}
                 </ul>

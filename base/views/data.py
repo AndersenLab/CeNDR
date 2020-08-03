@@ -31,6 +31,7 @@ def data(selected_release=config["DATASET_RELEASE"]):
     title = "Releases"
     sub_page = selected_release
     strain_listing = query_strains(release=selected_release)
+    strain_listing_issues = query_strains(release=selected_release, issues=True)
     release_summary = Strain.release_summary(selected_release)
     RELEASES = config["RELEASES"]
     DATASET_RELEASE, WORMBASE_VERSION = list(filter(lambda x: x[0] == selected_release, RELEASES))[0]
