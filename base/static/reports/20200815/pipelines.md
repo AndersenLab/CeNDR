@@ -41,6 +41,7 @@ Additionally, Insertion or deletion (indel) variants less than 50 bp are more re
 1. __Heterozygous SNV polarization__: Because _C. elegans_ is a selfing species, heterozygous SNV sites are most likely errors. Biallelic heterozygous SNVs were converted to homozygous REF or ALT if we had sufficient evidence for conversion. Only biallelic SNVs that are not on mitochondria DNA were included in this step. Specifically, the SNV was converted if the normalized Phred-scaled likelihoods (PL) met the following criteria (a smaller PL means more confidence). Any heterozygous SNVs that did not meet these criteria were left unchanged.
     * If PL-ALT/PL-REF <= 0.5 and PL-ALT <= 200, convert to homozygous ALT
     * If PL-REF/PL-ALT <= 0.5 and PL-REF <= 200, convert to homozygous REF
+
 2. __Soft filtering__: Low quality sites were flagged but not modified or removed.
 For the site-level soft filter, variant sites that meet the following conditions were flagged as PASS. These stats were computed across all samples for each site.
 
@@ -56,11 +57,12 @@ For the site-level soft filter, variant sites that meet the following conditions
     * Read depth (DP) > 5
     * Site is not heterozygous
 
-3. __SnpEff Annotation__: The predicted impact of each variant site was annotated with SnpEff (4.3.1t). 
 
-4. The single strain VCF and tsv files were created with the soft-filtered, SnpEff annotated VCF file.
+1. __SnpEff Annotation__: The predicted impact of each variant site was annotated with SnpEff (4.3.1t). 
 
-5. For the hard-filtered VCF, low quality sites were modified or removed using the following criteria. 
+2. The single strain VCF and tsv files were created with the soft-filtered, SnpEff annotated VCF file.
+
+3. For the hard-filtered VCF, low quality sites were modified or removed using the following criteria. 
 	
     * For the site-level hard filter, variant sites not flagged as PASS were removed.
 	* For the sample-level hard filter, genotypes not flagged as PASS were converted to missing (`./.`), with the exception that heterozygous sites on mitochondria where kept unchanged.
@@ -71,16 +73,20 @@ For the site-level soft filter, variant sites that meet the following conditions
 
 #### Determination of filter thresholds
 
-We re-examined our filter thresholds for this release. Please see the [filter optimization report](/static/reports/filter_optimization/20200803_optimization_report.html) for details.
+We re-examined our filter thresholds for this release. A variant simulation pipeline was used as part of this process:
 
-#### __Concordance__
+* __Variant Simulations - __[andersenlab/variant-simulations-nf](https://github.com/andersenlab/variant-simulations-nf)
+
+Please see the [filter optimization report](/static/reports/filter_optimization/20200803_optimization_report.html) for further details.
+
+### __Concordance__
 __[andersenlab/concordance-nf](https://github.com/andersenlab/concordance-nf) -- ([ae3d80](https://github.com/andersenlab/concordance-nf/tree/ae3d80))__
 
 <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Isotypes are groups of strains that carry distinct genome-wide haplotypes.">Isotype</span> groups contain strains that are likely identical to each other and sampled from the same isolation locations. For any phenotypic assay, only the isotype reference strain needs to be scored. Users interested in individual strain genotypes can use the strain-level data.
 
-Strains were grouped into isotypes using following steps:
+Strains were grouped into isotypes using the following steps:
 
-1. Using all high quality variants (the `hard-filter` VCF), concordance for each pair of strains was calculated as a fraction of shared variants over the total variants in each pair.
+1. Using all high quality variants (the hard-filter VCF), concordance for each pair of strains was calculated as a fraction of shared variants over the total variants in each pair.
 	
 2. Strain pairs with concordance > 0.9995 were grouped into the same isotype group. The threshold 0.9995 was determined by:
 		
@@ -94,8 +100,4 @@ Strains were grouped into isotypes using following steps:
     * If one existing isotype matches to multiple new isotype groups.
     * If one new isotype group contains strains from multiple existing isotypes.
 	
-When issues arise, the pairwise concordance between all strains within the isotypes involved were manually examined. Strains and isotypes may be re-assigned with the goal that strains within the same isotype group should have high concordance with each other, and strains from different isotype groups should have lower concordance. 
-
-### Additional Pipelines
-
-* __Variant Simulations - __[andersenlab/variant-simulations-nf](https://github.com/andersenlab/variant-simulations-nf)
+When issues arose, the pairwise concordance between all strains within an isotype were examined manually. Strains and isotypes may be re-assigned with the goal that strains within the same isotype group should have high concordance with each other, and strains from different isotype groups should have lower concordance. 

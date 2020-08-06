@@ -2,7 +2,7 @@
 
 --- 
 
-#### v1.5 (XXXX-XX-XX)
+#### v1.5 (2020-08-15)
 
 * The primary data model has moved from isotypes to strains.
 * The backend of the site has been substantially restructured to improve maintainability.

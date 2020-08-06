@@ -92,6 +92,11 @@ p {
   padding: 5px 15px;
 }
 
+ul {
+  margin-bottom: 10px !important;
+}
+
+
 #report-container img {
   max-width: 100%;
 }
