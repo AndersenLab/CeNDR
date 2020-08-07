@@ -49,8 +49,8 @@ def map_page():
 #
 # Strain Data
 #
-@strain_bp.route('/strain_data.tsv')
-def Strainetadata():
+@strain_bp.route('/CelegansStrainData.tsv')
+def strain_data_tsv():
     """
         Dumps strain dataset; Normalizes lat/lon on the way out.
     """
@@ -93,7 +93,7 @@ def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
     # High impact variants
     logger.info(release)
 
-    VARS = {"title": isotype_name,
+    VARS = {"title": f"Isotype {isotype_name}",
             "isotype": isotype,
             "isotype_name": isotype_name,
             "isotype_ref_strain": [x for x in isotype if x.isotype_ref_strain][0],

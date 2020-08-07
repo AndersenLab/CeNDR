@@ -92,7 +92,7 @@ phyloP (phylogenetic P-values) are designed to detect lineage-specific selection
 
 phastCons scores range from 0-1 and represent the probability that each nucleotide belongs to a conserved element.
 
-##### Tranpsosons
+##### Transposons
 
 The transposons track shows transposon calls from [Laricchia _et al._ 2017](https://andersenlab.org/publications/2017Laricchia.pdf). Each call lists the transposon type and __isotype__.
 
