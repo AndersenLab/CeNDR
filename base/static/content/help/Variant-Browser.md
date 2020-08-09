@@ -98,7 +98,13 @@ The transposons track shows transposon calls from [Laricchia _et al._ 2017](http
 
 ##### Divergent Regions
 
-...
+Hyper-divergent regions are genomic intervals that contain sequences not found in the N2 reference strain. They were identified by high levels of variation and low coverage from read alignments. For a complete description, please see [_Lee et al._ 2020](https://andersenlab.org/publications/2020LeebioRxiv.pdf).
+
+Two divergent tracks are available:
+
+* __Divergent Regions Summary__ - Divergent region intervals and their observed frequency across wild isolate strains.
+* __Divergent Regions Strain__ - Divergent region intervals for individual strains.
+
 
 ##### Variants
 
