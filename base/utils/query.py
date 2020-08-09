@@ -40,7 +40,7 @@ def get_weekly_visits():
         out.append({'date': date, 'count': row['metrics'][0]['values'][0]})
     df = pd.DataFrame(out) \
            .sort_values('date') \
-           .reindex_axis(['date', 'count'], axis=1)
+           .reindex(['date', 'count'], axis=1)
     df['count'] = df['count'].astype(int)
     df['count'] = df['count'].dropna().cumsum()
     return df

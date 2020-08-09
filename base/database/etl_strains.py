@@ -95,7 +95,7 @@ def fetch_andersen_strains():
         # Fix strain reference
         record['isotype_ref_strain'] = record['isotype_ref_strain'] == "TRUE"
         record['sequenced'] = record['wgs_seq'] == "TRUE"
-        
+
         # set (python built-in) --> strain_set
         record['strain_set'] = record['set']
 
