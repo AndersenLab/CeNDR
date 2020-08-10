@@ -11,9 +11,10 @@ import (
 func handler(w http.ResponseWriter, r *http.Request) {
 	log.Print("helloworld: received a request")
 
-	cmd := exec.CommandContext(r.Context(), "/usr/bin/env Rscript", "H2_script.R")
+	cmd := exec.CommandContext(r.Context(), "Rscript", "H2_script.R")
 	cmd.Stderr = os.Stderr
 	out, err := cmd.Output()
+	fmt.Println(err)
 	if err != nil {
 		w.WriteHeader(500)
 	}
