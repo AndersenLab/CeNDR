@@ -7,6 +7,11 @@ from base.constants import CHROM_NUMERIC
 from logzero import logger
 from collections import defaultdict
 
+import fileinput, glob
+import json, re
+import time, os
+from datetime import datetime
+
 from flask_wtf import Form, RecaptchaField
 from wtforms import (StringField,
                      TextAreaField,
@@ -17,6 +22,8 @@ from wtforms import (StringField,
                      RadioField)
 from wtforms.validators import Required, Length, Email, DataRequired
 from wtforms.validators import ValidationError
+from numpy import percentile 
+import statistics as st
 
 #
 # Gene View
@@ -192,10 +199,8 @@ def getRes():
     return render_template('tools/heritability_calculator_processing.html')
 
 
-@tools_bp.route('/checkHTdata', methods=['GET', 'POST'])
-def checkHTData():
-    from numpy import percentile 
-    import statistics as st
+@tools_bp.route('/check_h2', methods=['GET', 'POST'])
+def check_h2_data():
     data = []
     res = {}
     if request.method == "POST" or request.method == "GET":

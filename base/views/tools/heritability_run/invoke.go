@@ -8,7 +8,7 @@ import (
 	"os/exec"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func runH2(w http.ResponseWriter, r *http.Request) {
 	log.Print("helloworld: received a request")
 
 	cmd := exec.CommandContext(r.Context(), "Rscript", "H2_script.R")
@@ -24,7 +24,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	log.Print("helloworld: starting server...")
 
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", runH2)
+	//http.HandleFunc("/", viewH2)
 
 	port := os.Getenv("PORT")
 	if port == "" {

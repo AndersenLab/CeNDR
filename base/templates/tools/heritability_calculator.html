@@ -22,12 +22,10 @@
   <ol>
     <li><strong>AssayNumber</strong> - a numeric indicator of independent assays.</li>
     <li><strong>Strain</strong> - one of the CeNDR isotype reference strain names.</li>
-    <li><strong>TraitName</strong> - a user-supplied name of a trait with no
-      spaces (<i>e.g.</i> BroodSize)</li>.
+    <li><strong>TraitName</strong> - a user-supplied name of a trait with no spaces (<i>e.g.</i> BroodSize).</li>
     <li><strong>Replicate</strong> - independent measures of a trait within one independent assay. You
       can think of this column as a numerical value for a technical replicate.</li>
-    <li><strong>Value</strong> - the measured output of the
-      trait (<i>e.g.</i> 297 for BroodSize).</li>
+    <li><strong>Value</strong> - the measured output of the trait (<i>e.g.</i> 297 for BroodSize).</li>
   </ol>
 
   <p>NA values will not be used in broad-sense heritability calculations.</p>
@@ -123,7 +121,7 @@ var validatetd = function(hotdata){
 	if (uvFl < 1){
 		DA = JSON.stringify(hot.getData());
 		$.ajax({type: "POST",
-			url: "/checkHTdata",
+			url: "{{ url_for('tools.check_h2_data') }}",
 			data: JSON.stringify(DA),
 			contentType: "application/json; charset=utf-8",
 			dataType: 'json',
