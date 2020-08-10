@@ -144,6 +144,8 @@ def pairwise_indel_finder_query():
                     results[idx]['overlap'] = True
                 first = row
             
+            # Filter overlaps
+            results = [x for x in results if x['overlap'] == False]
             sorted(results, key = lambda x: (x["START"], x["END"]))
             return jsonify(results = results)
         return jsonify(results=[])
