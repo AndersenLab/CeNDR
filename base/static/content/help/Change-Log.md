@@ -14,13 +14,14 @@
 * Data links have been removed from isotype pages; They are still available on the release pages.
 * A new tool, the [pairwise-indel-finder](/tools/pairwise-indel-finder) has been added.
 * Reports for Alignment, Concordance, And Variant calling are now produced for all releases.
+* Publications have been updated.
 
 __Genome Browser__
 
 * IGVjs has been upgraded and has a number of new tools.
-* A track for transposons has been added.
 * A track for repeat_masker, and Dust data has been added.
-* A track for divergent regions has been added.
+* A track for transposons from [_Laricchia et al._ 2017](https://andersenlab.org/publications/2017Laricchia.pdf) been added.
+* Tracks for divergent regions from [_Lee et al._ 2020](https://andersenlab.org/publications/2020LeebioRxiv.pdf) have been added.
 
 #### v1.3.4 (2020-02-23)
 

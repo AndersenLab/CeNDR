@@ -186,6 +186,8 @@ def publications():
     req = requests.get(
         "https://docs.google.com/spreadsheets/d/1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs/export?format=csv&id=1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs&gid=0")
     df = pd.read_csv(StringIO(req.content.decode("UTF-8")))
+    df['pmid'] = df['pmid'].astype(int)
+    df = df.sort_values(by='pmid', ascending=False)
     df = df.apply(lambda x: f"""<strong><a href="{x.url}">{x.title.strip(".")}</a>
                                 </strong><br />
                                 {x.authors}<br />
