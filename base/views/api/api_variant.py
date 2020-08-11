@@ -39,8 +39,7 @@ ANN_header = ["allele",
 
 
 def get_vcf(release=config["DATASET_RELEASE"], filter_type="hard"):
-    #return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.{filter_type}-filter.vcf.gz".format(release=release, filter_type=filter_type)
-    return "/Users/dec/Documents/andersen_lab/CeNDR/WI.20200515.hard-filter.vcf.gz"
+    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.{filter_type}-filter.vcf.gz".format(release=release, filter_type=filter_type)
 
 
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
@@ -60,9 +59,9 @@ ann_cols = ['allele',
             'distance_to_feature']
 
 
-def truncate(s):
-    if len(s) >= 20:
-        return s[:20] + " …"
+def truncate(s, max_len = 20):
+    if len(s) >= max_len:
+        return s[:max_len] + " …"
     return s
 
 @api_variant_bp.route('/api/variant', methods=["GET", "POST"])
@@ -71,7 +70,6 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
     """
     Used to query a VCF and return results in a dictionary.
     """
-    logger.info(query)
     if query:
         # Query in Python
         chrom, start, end = re.split(':|\-', query)
@@ -120,8 +118,6 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
     else:
         samples = ','.join([x for x in samples if x in available_samples])
 
-    logger.debug(vcf)
-
     chrom = query['chrom']
     start = query['start']
     end = query['end']
@@ -135,7 +131,6 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
 
     # Query samples
     if samples != 'ALL':
-        logger.debug(samples)
         comm = comm[0:2] + ['--force-samples', '--samples', samples] + comm[2:]
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     if not out and err:
@@ -146,6 +141,7 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
         f.write(out)
         f.flush()
         output_data = []
+        csq_sites = {}
 
         if query['variant-annotation'] == 'bcsq':
             #=================#
@@ -169,10 +165,11 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
                     "%CHROM\t%POS\t%REF\t%ALT[\t>>%SAMPLE\t%TBCSQ]\n",
                     f.name]
             out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
-            csq_sites = {}
             # Structure -> site[annotation] -> strain
             if not err:
                 for line in out.decode("UTF-8").splitlines():
+                    if '@' in line:
+                        continue
                     line = line.split("\t")
                     cpra_key = '_'.join(line[0:2])
                     csq_anno = defaultdict(list)
@@ -182,12 +179,13 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
                                 strain = i[2:]
                                 continue
                             for anno in i.split(","):
-                                logger.info(strain)
+                                if anno.startswith("intron"):
+                                    continue
+                                # Truncate very long annotation elements
+                                anno = '|'.join([truncate(x, 30) for x in anno.split("|")])
                                 csq_anno[anno].append(strain)
+                    csq_anno = {k: list(set(v)) for k, v in csq_anno.items()}
                     csq_sites[cpra_key] = csq_anno
-
-            # Now restructure for output
-            #return csq_sites
             
         v = VCF(f.name, gts012=True)
 
@@ -233,7 +231,7 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
                 "GT": gt_set,
                 "AF": '{:0.3f}'.format(AF),
                 "ANN": ANN,
-                "CSQ": csq_sites[f"{record.CHROM}_{record.POS}"],
+                "CSQ": csq_sites.get(f"{record.CHROM}_{record.POS}", {}),
                 "GT_Summary": Counter(record.gt_types.tolist())
             }
 

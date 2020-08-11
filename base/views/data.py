@@ -93,7 +93,7 @@ def download_script_strain_v2():
 def browser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", query=None):
     VARS = {'title': "Variant Browser",
             'DATASET_RELEASE': int(release),
-            'isotype_listing': get_isotypes(list_only=True),
+            'strain_listing': get_isotypes(),
             'region': region,
             'query': query,
             'fluid_container': True}
