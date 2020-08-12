@@ -1,11 +1,15 @@
 import os
-import gzip
 import tabix
+
 from flask import request, jsonify, render_template, Blueprint, redirect, url_for
 from base.views.api.api_strain import get_strains
 from base.constants import CHROM_NUMERIC
+from base.config import HERITABILITY_URL
+from requests_futures.sessions import FuturesSession
 from logzero import logger
 from collections import defaultdict
+from requests_futures.sessions import FuturesSession
+from base.utils.data_utils import hash_it
 
 import fileinput, glob
 import json, re
@@ -25,6 +29,7 @@ from wtforms.validators import ValidationError
 from numpy import percentile 
 import statistics as st
 
+import pandas as pd
 #
 # Gene View
 #
@@ -72,8 +77,8 @@ SV_COLUMNS = ["CHROM",
               "SIZE",
               "HIGH_EFF",
               "WBGeneID"]
-STRAIN_CHOICES = [(x,x) for x in sv_strains]
-CHROMOSOME_CHOICES = [(x,x) for x in CHROM_NUMERIC.keys()]
+STRAIN_CHOICES = [(x, x) for x in sv_strains]
+CHROMOSOME_CHOICES = [(x, x) for x in CHROM_NUMERIC.keys()]
 COLUMNS = ["CHROM", "START", "STOP", "?", "TYPE", "STRAND", ""]
 
 def validate_uniq_strains(form, field):
@@ -163,16 +168,11 @@ def pairwise_indel_finder_query():
     return jsonify({"errors": form.errors})
 
 
-#==================#
-#   heritability   #
-#==================#
+# ================== #
+#   heritability     #
+# ================== #
 
-#####################################################
-## Absolute path to the jobsD folder within the site structure.
-## Edit this according to site folder structure, for docker execution for H2script.
-jobsDpath = "/"
 
-#####################################################
 @tools_bp.route('tools/heritability_calculator_res', methods=['GET', 'POST'])
 def getRes():
     if request.method == "POST" or request.method == "GET":
@@ -224,19 +224,39 @@ def check_h2_data():
         
     return res	
 
+
+@tools_bp.route("/submit_h2", methods=["POST"])
+def submit_h2():
+    """
+        This endpoint is used to submit a heritability job.
+    """
+    session = FuturesSession()
+    data = request.get_json()
+    data = [x for x in data[1:] if x[0] is not None]
+    header = ["AssayNumber", "Strain", "TraitName", "Replicate", "Value"]
+    data = pd.DataFrame(data, columns=header)
+    data = data.to_csv(index=False, sep="\t")
+
+    # Generate an ID for the data based on its hash
+    data_hash = hash_it(data, length=32)
+    
+    # Perform request
+    result = session.post(HERITABILITY_URL, data={'data': data,
+                                                  'hash': data_hash})
+    return result
+
 @tools_bp.route('/getHTdata', methods=['GET', 'POST'])
 def getHTData():
-    global jbid
     if request.method == "POST" or request.method == "GET":
-        clicked=request.get_json()
+        data = request.get_json()
+        logger.info(data)
         htcalData = json.loads(clicked)
         ## create chartData.
         flag = 0
         if (clicked == ""): flag = 1
         clicked = ""
         chData = []
-        jbd = "htj_"+str(jbid)+"_"+str(time.time())
-        jbid+=1
+
         #create url
         u = "/indexHT_res?jbd="+jbd
         trait = []

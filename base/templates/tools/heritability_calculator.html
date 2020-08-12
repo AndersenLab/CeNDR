@@ -121,8 +121,8 @@ var validatetd = function(hotdata){
 	if (uvFl < 1){
 		DA = JSON.stringify(hot.getData());
 		$.ajax({type: "POST",
-			url: "{{ url_for('tools.check_h2_data') }}",
-			data: JSON.stringify(DA),
+			url: "{{ url_for('tools.submit_h2') }}",
+			data: DA,
 			contentType: "application/json; charset=utf-8",
 			dataType: 'json',
 			success:function(result){
@@ -181,10 +181,10 @@ $("#hcalc").on("click", function(evt){
 	document.getElementById("STRerrorContainer").innerHTML = "";
 	flg = validatetd(hot.getData());
 	if (flg[0] == 0 && flg[1] == true && uvFl>0){
-		DA = JSON.stringify(hot.getData());
+    DA = JSON.stringify(hot.getData());
 		
 		$.ajax({type: "POST",
-			url: "/getHTdata",
+			url: "{{ url_for('tools.submit_h2') }}",
 			data: JSON.stringify(DA),
 			contentType: "application/json; charset=utf-8",
 			dataType: 'json',

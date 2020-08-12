@@ -3,17 +3,6 @@ library(boot)
 library(lme4)
 library(dplyr)
 
-args = commandArgs(trailingOnly=TRUE)
-usage_cmd = "USAGE: Rscprit H2_script.R input_file output_file"
-if (length(args) < 2){
-  print(usage_cmd)
-}
-
-inputF = args[1]
-outputF = args[2]
-
-data <- read.table(inputF, sep = ',', header = TRUE)
-
 ########################
 ### define functions ###
 ########################
@@ -61,11 +50,10 @@ H2.test <- function(data){
 }
 
 # df is data frame that contains strain and Value column
-H2.calc <- function(data, boot = T){
-  df <- as.data.frame(data)
-  df <- dplyr::select(df,Strain,Value)
+H2.calc <- function(data, boot = TRUE){
+  df <- dplyr::select(data, Strain, Value)
   
-  if(boot == T){
+  if(boot == TRUE){
     # bootstrapping with 1000 replications
     # can reduce value to save time (500 is reasonable most of the time).
     # if you Error in bca.ci(boot.out, conf, index[1L], L = L, t = t.o, t0 = t0.o,  : estimated adjustment 'a' is NA, then you need to increase R value.
@@ -86,10 +74,24 @@ H2.calc <- function(data, boot = T){
   
 }
 
-#### Example run
-#H2.test.boot <- function(data, indicies)
-#H2.test <- function(data)
-#H2.calc(data, boot = T)
+# RUN
+args = commandArgs(trailingOnly=TRUE)
+usage_cmd = "USAGE: Rscprit H2_script.R input_file output_file"
+if (length(args) < 2){
+  print(usage_cmd)
+}
 
+# Read in data
+input_data = args[1]
+output_fname = args[2]
+hash = args[3]
+data <- data.table::fread(input_data)
+hash <- readLines(hash)
+
+# Run H2 calculation
 result <- H2.calc(data, boot = T)
-write.table(result, outputF, sep = '\t')
+
+result$hash <- hash
+
+# Write the result
+data.table::fwrite(result, output_fname, sep = '\t')

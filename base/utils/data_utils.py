@@ -98,7 +98,7 @@ def sorted_files(path):
 
 
 def hash_it(object, length=10):
-    logger.info(object)
+    logger.debug(object)
     return hashlib.sha1(str(object).encode('utf-8')).hexdigest()[0:length]
 
 

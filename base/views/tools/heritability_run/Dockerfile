@@ -11,7 +11,8 @@ RUN conda create -n heritability \
 				 r-lme4 \
 				 r-dplyr \
 				 r-boot \
-				  && conda clean -a
+				 r-data.table \
+				 && conda clean -a
 ENV PATH /opt/conda/envs/heritability/bin:$PATH
 LABEL Name="heritability" Author="Daniel Cook"
 
@@ -20,6 +21,9 @@ WORKDIR /app
 
 # Copy local code to the container image.
 COPY invoke.go ./
+
+# Install google cloud storage
+RUN CGO_ENABLED=0 GOOS=linux go get cloud.google.com/go/storage
 
 # Build the binary.
 # -mod=readonly ensures immutable go.mod and go.sum in container builds.
