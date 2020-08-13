@@ -25,7 +25,12 @@ from base.views.data import data_bp
 from base.views.mapping import mapping_bp
 from base.views.gene import gene_bp
 from base.views.user import user_bp
+
+# Tools
 from base.views.tools import tools_bp
+from base.views.tools import heritability_bp
+
+# Readiness and health checks
 from base.views.check import check_bp
 
 # API
@@ -115,7 +120,10 @@ def register_blueprints(app):
     app.register_blueprint(mapping_bp, url_prefix='')
     app.register_blueprint(gene_bp, url_prefix='/gene')
     app.register_blueprint(user_bp, url_prefix='/user')
+    
+    # Tools
     app.register_blueprint(tools_bp, url_prefix='/tools')
+    app.register_blueprint(heritability_bp, url_prefix='/tools')
 
     # API
     app.register_blueprint(api_strain_bp, url_prefix='/api')

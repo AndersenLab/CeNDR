@@ -1,15 +1,26 @@
 {% extends "_layouts/default.html" %}
 
+{% block custom_head %}
+	<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+{% endblock %}
+
+
 {% block style %}{% endblock %}
 
 {% block content %}
-  
-  <p>This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild
+
+<div class="row">
+  <div class="col-md-12">
+
+  <p>
+	This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild
 	isolates. The broad-sense heritability is the amount of trait variance that comes from genetic differences in the
 	assayed group of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental)
-  variance.</p>
+    variance.
+  </p>
   
-	<p>To obtain the best estimate of heritability, please measure a set of at least five wild strains in three
+  <p>
+	To obtain the best estimate of heritability, please measure a set of at least five wild strains in three
 	independent assays. These assays should use different nematode growths, synchronizations, bacterial food
 	preparations, and any other experimental condition. You should measure trait variance across as many
 	different experimental conditions (in one block) as you would typically encounter in a large experiment.
@@ -17,7 +28,8 @@
   
   <p>
 	Please organize your data in a long format, where each row is an independent observation of one strain in one
-  trait. The columns of the data set should be:</p>
+	  trait. The columns of the data set should be:
+  </p>
   
   <ol>
     <li><strong>AssayNumber</strong> - a numeric indicator of independent assays.</li>
@@ -29,32 +41,35 @@
   </ol>
 
   <p>NA values will not be used in broad-sense heritability calculations.</p>
-  <br />
-  <br />
-	<div style="text-align:center;"><button id="hcalc" name="hcalc">Calculate heritability</button></div>
-  <br />
-  <br />
   
-	<div id="chartContainer" ></div>
-	<div id="TNerrorContainer" ></div>
-	<div id="DUPerrorContainer" ></div>
-  <div id="STRerrorContainer" ></div>
+  </div>{# /col-md-8 #}
+</div>{# /row #}
+
+<div class="row">
+	<div class="col-md-12">
   
 	<div class="row">
-    <div class="col-md-12">
-    
-    Prepare your data according to the column headers (described above). Data should be pasted in the table below.<br />
-    <div id="errorDisp"></div>
-      <div id="entry"></div>
-            <small class="text-muted">Paste your data into the table above.</small>
-            <br />
-            <br />
-    </div>{# /col-md-12 #}
-  </div>{# /row #}
-<br />
-<br />
-<br />
-</div>
+		<div class="col-md-12">
+		
+			<div id="errorDisp"></div>
+			<div id="entry"></div>
+
+			<small class="text-muted">Prepare your data according to the column headers (described above). Data should be pasted in the table below.</small>
+
+			<div id="trait_summary" class="text-info"></div>
+			<div id="trait_name_error" class="text-danger"></div>
+			<div id="duplicate_error" class="text-danger"></div>
+			<div id="strain_count_error" class="text-danger"></div>		
+			
+		</div>{# /col-md-12 #}
+	</div>{# /row #}
+
+	<div class='col-md-3 pull-right'>
+		<button id="hcalc" name="hcalc" type="submit" style="margin-top: 15px;" class="btn btn-primary btn-block" disabled>Calculate Heritability</button>
+	</div>{#/ col-md-12 #}
+
+	</div>{# /col-md-12 #}
+</div>{# /row #}
 {% endblock %}
 
 {% block script %}
@@ -65,10 +80,10 @@ var data = [
     ];
 var noNAs = 0;
 function dataValidator(instance, td, row, col, prop, value, cellProperties) {
-    Handsontable.renderers.TextRenderer.apply(this, arguments);
-    if (row === 0 && col === 0) {
+	Handsontable.renderers.TextRenderer.apply(this, arguments);
+    if (row === 0) {
         cellProperties.readOnly = true;
-    }
+	}
     if (row === 0) {
         td.style.fontWeight = 'bold';
         td.style.backgroundColor = '#EAEAEA';
@@ -79,66 +94,52 @@ function dataValidator(instance, td, row, col, prop, value, cellProperties) {
         td.style.fontWeight = 'bold';
     }
 
-	if (dupR.indexOf(""+row) > -1) {
+	if (duplicate_rows.indexOf(row) > -1) {
 		td.style.background = '#0CEF13';
 	}
 	
-	document.getElementById("chartContainer").innerHTML = "";
-	document.getElementById("TNerrorContainer").innerHTML = "";
-	document.getElementById("DUPerrorContainer").innerHTML = "";
-	document.getElementById("STRerrorContainer").innerHTML = "";
 }
-var uvFl = 0;
-var fl = 0;
-var dupR = [];
-var validatetd = function(hotdata){
-	dupR = [];
-	strHD = []
-	//check for duplicates
-	for (i in hotdata){
-		if (i !=0 && hotdata[i].toString() != ",,,,"){
-			for (j=0; j<i; j++){
-				ar = hotdata[j].toString();
-				if (ar == hotdata[i].toString()){
-					fl+=1;
-					dupR.push(i);
-				}
-			}
-			if (strHD.indexOf(hotdata[i][1]) == -1){strHD.push(hotdata[i][1])}
-		}
+
+var isValid = false
+var duplicate_rows = [];
+var validate_data = function(data){
+	// Performs error checks:
+	// 1) Duplicates
+	// 2) Strain Count
+	// 3) Trait Name
+	pass = true
+
+	// Check for duplicates
+	dup_search = _.map(data, (item, idx) => item.toString());
+	dup_values =  _.chain(dup_search).groupBy().filter(x => x.length > 1 && x[0] !== ",,,,").flatten().uniq().value()
+	duplicate_rows = _.map(dup_search, (item, idx) => _.indexOf(dup_values, item) > -1 ? idx : null).filter(x => x !== null)
+
+	// if dups are present alert user
+	$("#duplicate_error").text("")
+	if (duplicate_rows.length > 0) {
+		$("#duplicate_error").text("Please check the data because duplicate rows are present. The duplicate rows are shown in green.")
+		pass = false
+	}
+
+	// Count number of strains
+	n_strains = _.uniq(_.pluck(data, 1).filter((x, idx) => idx > 0 && x !== null)).length
+
+	$("#strain_count_error").text("")
+	if (n_strains < 5) {
+		$("#strain_count_error").text("Please check the data because fewer than five strains are present. Please measure trait values for at least five wild strains in at least three independent assays.")
+		pass = false
+	}
+
+	// Trait Name
+	trait_count = _.uniq(_.pluck(data, 2).filter((x, idx) => idx > 0 && x !== null)).length
+
+	$("#trait_name_error").text("")
+	if (trait_count > 1) {
+		$("#trait_name_error").text("Please check the data. The TraitName has multiple unique values. Only data for a single trait allowed.")
+		pass = false
 	}
 	
-	hot.updateSettings({
-		cells: function (row, col, prop) {
-        var cellProperties = {};
-        cellProperties.renderer = dataValidator;
-        return cellProperties;
-    }
-	});
-
-	// check univariate analysis
-	uva = []
-	if (uvFl < 1){
-		DA = JSON.stringify(hot.getData());
-		$.ajax({type: "POST",
-			url: "{{ url_for('tools.submit_h2') }}",
-			data: DA,
-			contentType: "application/json; charset=utf-8",
-			dataType: 'json',
-			success:function(result){
-				var node= document.getElementById("chartContainer");
-				node.innerHTML = "";
-				newP = document.createElement("p");
-				newP.style.color = "black";
-				newP.appendChild(document.createTextNode("Input data has the range "+result['minimum']+" to "+result['maximum']+", quartiles "+result['25% quartile']+", "+result['50% quartile']+", "+result['75% quartile']+", and variance of "+result['variance']+"."));
-				newP.appendChild(document.createElement('br'));
-				newP.appendChild(document.createTextNode("If you are satisfied with entered data, please click the Calculate heritability button again."));
-				node.appendChild(newP);
-				uvFl += 1
-			}
-		});
-	}
-	return [fl, strHD.length>4]
+	return pass
 }
 
 var container = document.getElementById("entry");
@@ -165,89 +166,60 @@ var hot = new Handsontable(container, {
         var cellProperties = {};
         cellProperties.renderer = dataValidator;
         return cellProperties;
-    }
-});
-
-
-var clipText;
-var clipRows =[];
-var chartJson = [];
-var traits =[];
-
-$("#hcalc").on("click", function(evt){
-	document.getElementById('hcalc').disabled = true;
-	document.getElementById("TNerrorContainer").innerHTML = "";
-	document.getElementById("DUPerrorContainer").innerHTML = "";
-	document.getElementById("STRerrorContainer").innerHTML = "";
-	flg = validatetd(hot.getData());
-	if (flg[0] == 0 && flg[1] == true && uvFl>0){
-    DA = JSON.stringify(hot.getData());
-		
-		$.ajax({type: "POST",
-			url: "{{ url_for('tools.submit_h2') }}",
-			data: JSON.stringify(DA),
-			contentType: "application/json; charset=utf-8",
-			dataType: 'json',
-			success:function(result){
-				
-				newP = document.createElement("p");
-				newP.appendChild(document.createElement('br'));
-				if (result["url"] != ""){
-					var node= document.getElementById("chartContainer");
-					node.innerHTML = "";
-					document.getElementById("TNerrorContainer").innerHTML = "";
-	document.getElementById("DUPerrorContainer").innerHTML = "";
-	document.getElementById("STRerrorContainer").innerHTML = "";
-					newP.appendChild(document.createTextNode("Data are being processed. Please click on the following link for results in 10-15 minutes.  "));
-					var a = document.createElement('a');
-					a.setAttribute('href',window.location.origin+result["url"]);
-					a.innerHTML = window.location.origin+result["url"];
-					newP.appendChild(a);
-				}else{
-					document.getElementById('hcalc').disabled = true;
-	document.getElementById("TNerrorContainer").innerHTML = "";
-	document.getElementById("DUPerrorContainer").innerHTML = "";
-	document.getElementById("STRerrorContainer").innerHTML = "";
-					var node= document.getElementById("TNerrorContainer");
-					node.innerHTML = "";
-					newP.style.color = "red";
-					newP.appendChild(document.createTextNode("Please check the data. The TraitName has multiple unique values. Only data for a single trait allowed."));
-					uvFl = 0
-					fl = 0
-				}
-				newP.appendChild(document.createElement('br'));
-				node.appendChild(newP);
-			}
-		});
-	}else{
-		document.getElementById("DUPerrorContainer").innerHTML = "";
-		document.getElementById("STRerrorContainer").innerHTML = "";
-		
-		if (flg[0] != 0) {
-			var node= document.getElementById("DUPerrorContainer");
-			newP = document.createElement("p");
-			newP.style.color = "red";
-			newP.appendChild(document.createTextNode("Please check the data because duplicate rows are present. The duplicate rows are shown in green."));
-			newP.appendChild(document.createElement('br'));
-			node.appendChild(newP);
-			
-		}
-		if (flg[1] == false){
-			var node= document.getElementById("STRerrorContainer");
-			newP = document.createElement("p");
-			newP.style.color = "red";
-			newP.appendChild(document.createTextNode("Please check the data because fewer than five strains are present. Please measure trait values for at least five wild strains in at least three independent assays."));
-			newP.appendChild(document.createElement('br'));
-			node.appendChild(newP);
-		}
-		uvFl = 0
-		fl = 0
 	}
-	evt.stopPropagation();
-	document.getElementById('hcalc').disabled = false;
 });
 
+hot.addHook("afterChange", function() {
+	isValid = validate_data(hot.getData());
+	console.log(duplicate_rows);
+	hot.render();
 
+	if (isValid) {
+		document.getElementById('hcalc').disabled = false;
+
+		// Fetch dataset statistics
+		$.ajax({type: "POST",
+		url: "{{ url_for('heritability.check_data') }}",
+		data: JSON.stringify(hot.getData()),
+		contentType: "application/json; charset=utf-8",
+		dataType: 'json',
+		success:function(result) {
+			console.log(result)
+			$("#trait_summary").html(`
+			Input data summary:
+			<ul>
+				<li>Minimum: ${result['minimum']}</li>
+				<li>Maximum: ${result['maximum']}</li>
+				<li>25% Quartile: ${result['25']}</li>
+				<li>50% Quartile: ${result['50']}</li>
+				<li>75% Quartile: ${result['75']}</li>
+				<li>Variance: ${result['variance']}</li>
+			`)
+		}
+		});
+		
+	} else {
+		$("#trait_summary").html("")
+		document.getElementById('hcalc').disabled = true;
+	}
+
+})
+
+// submit result
+$("#hcalc").on("click", function(e) {
+	if (isValid) {
+		$.ajax({
+				type: "POST",
+				url: "{{ url_for('heritability.submit_h2') }}",
+				data: JSON.stringify(hot.getData()),
+				contentType: "application/json; charset=utf-8",
+				dataType: 'json',
+				success:function(result){
+					console.log(result);
+				}
+		})
+	}
+})
 </script>
 
 {% endblock %}

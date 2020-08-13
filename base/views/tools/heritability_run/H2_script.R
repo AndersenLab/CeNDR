@@ -2,6 +2,7 @@
 library(boot)
 library(lme4)
 library(dplyr)
+library(futile.logger)
 
 ########################
 ### define functions ###
@@ -54,10 +55,10 @@ H2.calc <- function(data, boot = TRUE){
   df <- dplyr::select(data, Strain, Value)
   
   if(boot == TRUE){
-    # bootstrapping with 1000 replications
+    # bootstrapping with 500 replications
     # can reduce value to save time (500 is reasonable most of the time).
     # if you Error in bca.ci(boot.out, conf, index[1L], L = L, t = t.o, t0 = t0.o,  : estimated adjustment 'a' is NA, then you need to increase R value.
-    results <- boot(data=df, statistic=H2.test.boot, R=10000) 
+    results <- boot(data=df, statistic=H2.test.boot, R=500) 
     
     # get 95% confidence interval
     ci <- boot.ci(results, type="bca")

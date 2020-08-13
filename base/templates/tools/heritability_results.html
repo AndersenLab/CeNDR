@@ -1,0 +1,216 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-lightbox/0.7.0/bootstrap-lightbox.css" rel="stylesheet" />
+	<link rel="stylesheet" href="/static/css/d3-exploding-boxplot.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
+	<script src="/static/js/d3-exploding-boxplot.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.0.0/jspdf.umd.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
+	<style type="text/css">
+		.rounded {
+			font-family: Helvetica, Tahoma, Geneva, sans-serif;
+			text-decoration:none;
+			border-radius: 30px 30px 30px 30px;
+			font-weight: bold;
+			display:inline-block;
+		}
+		.btn.clicked {
+			background: #44A9FC;
+		}
+		table, th, td {
+			border: 1px solid black;
+		}
+	</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div><button id="pdd" type="button" class="btn btn-secondary" onClick='getPDF("containerfluid")'>PDF</button></div> <!-- createPDF() getPDF("containerfluid") -->
+<div id="dataContainer" class="container-fluid" style="margin-right: -50px; margin-left: 50px; margin-top: -20px; padding-left: 30px; padding-right: 50px; padding-top: 40px;">
+	
+	<h4 style="text-align: center;"><b> Heritability Calculator </b></h4>
+	<p align=" justify">
+	This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild
+	isolates. The broad-sense heritability is the amount of trait variance that comes from genetic differences in the
+	assayed group of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental)
+	variance.
+	</p>
+	<br />
+	<br />
+	<div id="htresarea"></div>
+	<br />
+	<br />
+</div>
+<div id="containerfluid">
+	<div id="svgchartarea"></div>
+	<canvas id="canvas" ></canvas> <!-- width="900" height="400"></canvas -->
+	<div id="png-container"></div>
+	
+</div>
+<div class="row" id = "go1t" >
+    <h2>Data</h2>
+	<table id="example" class="table table-hover table-condensed table-striped" style="width:100%">
+        <thead>
+            <tr>    
+                <th style="text-align:center;font-weight: bold;">AssayNumber</th>
+                <th style="text-align:center;font-weight: bold;">Strain</th>
+                <th style="text-align:center;font-weight: bold;">TraitName</th>
+                <th style="text-align:center;font-weight: bold;">Replicate</th>
+                <th style="text-align:center;font-weight: bold;">Value</th>
+            </tr>
+        </thead>
+		<tbody>
+		<!-- add jinja template to fill table-->
+		{% for i in range(0, data|length) %}
+            <tr><td style="text-align:center;"> {{ data[i][0] }} </td><td style="text-align:center;"> {{ data[i][1] }} </td><td style="text-align:center;"> {{ data[i][2] }} </td><td style="text-align:center;"> {{ data[i][3] }} </td><td style="text-align:center;"> {{ data[i][4] }} </td></tr>
+        {% endfor %}
+		</tbody>
+    </table>
+	</div>
+	
+{% endblock %}
+
+{% block script %}
+
+<script>
+Element.prototype.remove = function() {
+		this.parentElement.removeChild(this);
+	}
+NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+		for(var i = this.length - 1; i >= 0; i--) {
+			if(this[i] && this[i].parentElement) {
+				this[i].parentElement.removeChild(this[i]);
+			}
+		}
+	}
+
+var trait = "{{ trait }}"
+var XX = ""+"{{ XX }}"
+var X = ""+"{{ X }}"
+var Y = ""+"{{ Y }}"
+var Fnam = "{{ fnam }}"
+var imag
+var chartJson = {{ data|tojson|safe }};
+var traits =[];
+var img, ctx, canvs;
+
+async function drawImg(canvas, image, DOMURL, w, h){
+
+    return new Promise(resolve => {
+
+          image.onload = function () {
+				var ctx = canvas.getContext("2d");
+				ctx.fillStyle = "#FFFFFF";
+				ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(image, 0, 0, w, h);
+				var png = canvas.toDataURL("image/jpg",1);
+				imag = png
+				document.getElementById('png-container').innerHTML = '<img id="img1" src="'+png+'"/>';
+				DOMURL.revokeObjectURL(png);
+				console.log(this.complete);
+	if (this.complete){
+	imag = this.src
+
+	}
+                resolve('resolved');
+             }
+
+    });
+
+  }
+  
+var loadCanvas = function(){
+	var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
+
+	var canvas = document.getElementById("canvas");
+	canvas.width = 1000; 
+	canvas.height = 480; 
+	var ctx = canvas.getContext("2d");
+	var DOMURL = self.URL || self.webkitURL || self;
+	image = document.createElement("IMG"); 
+	var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+	var url = DOMURL.createObjectURL(svg);
+
+	drawImg(canvas, image, DOMURL, 1000, 480).then(() => {
+	
+	var doc = new jsPDF('p', 'px', 'a4');
+	var source = document.getElementById('dataContainer'); 
+	margins = {
+      top: 40,
+      bottom: 40,
+      left: 40,
+      width: 522
+    };
+		doc.setFontSize(16);
+		doc.text(doc.internal.pageSize.getWidth()/2, 50, 'Heritability Calculator', {'align': 'center'});
+		//doc.fromHTML('This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild isolates.', 20, 70)
+		doc.fromHTML('The broad-sense heritability is the amount of trait variance that comes from genetic differences in the assayed group ', 20, 85, {'align': 'justify', 'maxWidth': doc.internal.pageSize.getWidth()-40},function(){},margins)
+		doc.fromHTML('of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental) variance.', 20, 100, {'align': 'justify', 'maxWidth': doc.internal.pageSize.getWidth()-40},function(){},margins)
+		doc.fromHTML('Broad-sense heritability (<i> H</i>', 20, 120) 
+		doc.setFontSize(4);
+		doc.fromHTML('<i>2</i>', 123, 115)
+		doc.setFontSize(10);
+		doc.fromHTML(') = {{ XX }}% (range {{ X }}% to {{ Y }}%)', 130, 120)
+		doc.fromHTML('Trait: {{ trait }}', 20, 140)
+		
+		doc.addImage(document.getElementById('img1').src, 'JPEG', 10, 170, 430,200, NaN, 'FAST');
+		
+	var a = document.createElement('a');
+		 var pdfblob = new Blob([ doc.output('blob') ], { type : 'application/pdf'});
+		 a.href = window.URL.createObjectURL(pdfblob);
+		 a.download = "{{ fnam }}.pdf";
+		 a.click();
+	})
+	image.src = url;
+	document.getElementById("svgchartarea").remove();
+	document.getElementById('canvas').remove();
+	location.reload();
+}
+
+  
+var getPDF = function(){
+	loadCanvas();
+
+}
+
+$(document).ready(function(){
+	if (chartJson.length != 0){
+		var node= document.getElementById("svgchartarea");
+		node.querySelectorAll('*').forEach(n => n.remove());
+		newPt = document.createElement("p")
+		newPt.innerHTML = "Broad-sense heritability (<i> H<sup>2</sup> </i>) = {{ XX }}% (range {{ X }}% to {{ Y }}%)";
+		document.getElementById("htresarea").appendChild(newPt);
+		newPt = document.createElement("p")
+		newPt.appendChild(document.createTextNode("Trait: " + "{{ trait }}"));
+		document.getElementById("htresarea").appendChild(newPt);
+	
+		// chart(data,aes)
+		// aesthetic :
+		// y : point's value on y axis Value
+		// group : how to group data on x axis Strain
+		// color : color of the point / boxplot AssayNumber
+		// label : displayed text in toolbox AssayNumber_Strain_Replicate : Value
+	
+		var chart = d3.exploding_boxplot(chartJson,
+            {y:'v',group:'s',color:'a',label:'t'})
+
+		//call chart on a div
+		chart('#svgchartarea')
+
+	}else{
+		newPt.appendChild(document.createTextNode("Chart data is empty!"));
+	}
+})
+
+$( document ).ready(function() {
+	$("a[href^='http://'], a[href^='https://'], a[href$='pdf']").attr("target","_blank");
+});
+</script>
+
+
+{% endblock %}

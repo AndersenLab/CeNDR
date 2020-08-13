@@ -12,6 +12,7 @@ RUN conda create -n heritability \
 				 r-dplyr \
 				 r-boot \
 				 r-data.table \
+				 r-futile.logger \
 				 && conda clean -a
 ENV PATH /opt/conda/envs/heritability/bin:$PATH
 LABEL Name="heritability" Author="Daniel Cook"

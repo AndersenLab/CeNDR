@@ -11,7 +11,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"time"
 
 	"cloud.google.com/go/storage"
 )
@@ -27,6 +26,7 @@ func check(e error) {
 }
 
 func copyBlob(bucket string, source string, blob string) {
+	log.Printf("%s --> %s", source, blob)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	check(err)
@@ -41,6 +41,8 @@ func copyBlob(bucket string, source string, blob string) {
 	wc := client.Bucket(bucket).Object(blob).NewWriter(ctx)
 	_, err = io.Copy(wc, f)
 	check(err)
+	err = wc.Close()
+	check(err)
 }
 
 func fileExists(filename string) bool {
@@ -51,24 +53,19 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func runTask() {
+func runTask(dataHash string) {
 	// Run the heritability analysis. This is used to run it in the background.
-	for {
-		// Execute R script
-		if fileExists("hash.txt") {
-			cmd := exec.CommandContext(r.Context(), "Rscript", "H2_script.R", datasetName, resultName, "hash.txt")
-			cmd.Stderr = os.Stderr
-			_, err := cmd.Output()
-			check(err)
+	// Execute R script
+	cmd := exec.Command("Rscript", "H2_script.R", datasetName, resultName, "hash.txt")
+	cmd.Stderr = os.Stderr
+	_, err := cmd.Output()
+	check(err)
 
-			// Copy results to google storage.
-			datasetBlob := fmt.Sprintf("reports/heritability_%s/%s/%s", heritabilityVersion, dataHash, datasetName)
-			resultBlob := fmt.Sprintf("reports/heritability_%s/%s/%s", heritabilityVersion, dataHash, resultName)
-			copyBlob("elegansvariation.org", datasetName, datasetBlob)
-			copyBlob("elegansvariation.org", resultName, resultBlob)
-		}
-		time.Sleep(1000 * time.Millisecond)
-	}
+	// Copy results to google storage.
+	datasetBlob := fmt.Sprintf("reports/heritability_%s/%s/%s", heritabilityVersion, dataHash, datasetName)
+	resultBlob := fmt.Sprintf("reports/heritability_%s/%s/%s", heritabilityVersion, dataHash, resultName)
+	copyBlob("elegansvariation.org", datasetName, datasetBlob)
+	copyBlob("elegansvariation.org", resultName, resultBlob)
 }
 
 func runH2(w http.ResponseWriter, r *http.Request) {
@@ -79,16 +76,19 @@ func runH2(w http.ResponseWriter, r *http.Request) {
 	// Get POST data and save as CSV
 	data := r.FormValue("data")
 	dataHash := r.FormValue("hash")
+	log.Printf("hash: %s", dataHash)
 	f, err := os.Create(datasetName)
 	check(err)
 	f.WriteString(data)
+	f.Close()
 
 	// Write the hash
 	h, err := os.Create("hash.txt")
 	check(err)
 	h.WriteString(dataHash)
-
 	f.Close()
+
+	runTask(dataHash)
 
 	if err := json.NewEncoder(w).Encode("submitted h2"); err != nil {
 		log.Printf("Error sending response: %v", err)
@@ -97,8 +97,6 @@ func runH2(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
-	go runTask()
 
 	http.HandleFunc("/", runH2)
 
