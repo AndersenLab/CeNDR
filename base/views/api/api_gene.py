@@ -3,6 +3,7 @@ from base.models import Homologs, WormbaseGeneSummary
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_, func
 from base.views.api.api_variant import variant_query
+from logzero import logger
 
 from flask import Blueprint
 
@@ -130,6 +131,9 @@ def api_igv_search(gene):
         API gene search for IGV
     """
     result = lookup_gene(gene)
-    return {'result': [{"chromosome": result.chrom,
-            "start": result.start,
-            "end": result.end}]}
+    if result:
+        return {'result': [{"chromosome": result.chrom,
+                'start': result.start,
+                'end': result.end}]}
+    else:
+        return {'error': 'not found'}

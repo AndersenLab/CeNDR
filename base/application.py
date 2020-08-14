@@ -37,6 +37,7 @@ from base.views.check import check_bp
 from base.views.api.api_strain import api_strain_bp
 from base.views.api.api_gene import api_gene_bp
 from base.views.api.api_variant import api_variant_bp
+from base.views.api.api_data import api_data_bp
 
 # Auth
 from base.auth import (auth_bp,
@@ -129,6 +130,7 @@ def register_blueprints(app):
     app.register_blueprint(api_strain_bp, url_prefix='/api')
     app.register_blueprint(api_gene_bp, url_prefix='/api')
     app.register_blueprint(api_variant_bp, url_prefix='/api')
+    app.register_blueprint(api_data_bp, url_prefix='/api')
 
     # Auth
     app.register_blueprint(auth_bp, url_prefix='')
