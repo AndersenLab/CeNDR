@@ -69,7 +69,7 @@ th {
   white-space: nowrap;
 }
 
-#variants, #variants-csq {
+#variants {
   font-size: 12px;
 }
 
@@ -162,24 +162,7 @@ th {
       </div>
 
       <div class="col-md-4">
-        {% if DATASET_RELEASE >= 20200815 %}
-        <h5>Variant Effect Prediction <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#annotations"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
-        <form class="form-inline pull-xs-right">
-          <label>
-            <input checked="checked" type="radio" id="bcsq " name="variant-annotation" value="bcsq">
-              BCSQ
-            </label>
-            <br>
-          <label>
-            <input type="radio" id="snpeff" name="variant-annotation" value="snpeff">
-              SNPEff
-            </label>
-            <br>
-        </form>
-
-        {% endif %}
-        
         <h5>Isotype (reference strain) <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
         <div class="checkbox">
@@ -283,33 +266,6 @@ th {
     </thead>
     <tbody></tbody>
 </table>
-
-{# 
-  - consequence type
-  - gene name
-  - ensembl transcript ID
-  - coding strand (+ fwd, - rev)
-  - amino acid position (in the coding strand orientation)
-  - list of corresponding VCF variants 
-#}
-
-<table style='border-radius: 5px' class="table table-hover table-striped table-condensed table-bordered table-responsive" id="variants-csq">
-  <thead>
-    <tr>
-      <th>CHROM:POS</th>
-      <th>REF / ALT</th>
-      <th><span class='tooltip-item' data-toggle='tooltip' title='Allele Frequency'>AF</span></th>
-      <th>Consequence Type</th>
-      <th>Gene Name</th>
-      <th>Transcript ID</th>
-      <th>Coding Strand</th>
-      <th>Amino Acid Position</th>
-      <th>Variants</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
 
       </div>
   </div>
@@ -589,14 +545,6 @@ function draw_gt_set(genotype_set, genotype_val) {
 
 }
 
-function draw_csq_gt(strain_set) {
-  // Draws a label around strain genotypes
-  // By default, all CSQ genotypes are ALT and passing.
-  return $.map(strain_set, function(v) {
-    return `<div class='label ttop gt-2 PASS'>${v}</div>`
-  });
-}
-
 var xhr;
 function refresh_variants(download = false) {
     region = $(".igv-search-container > input").val();
@@ -644,7 +592,6 @@ function refresh_variants(download = false) {
       } else {
 
         $("#variants > tbody").html("");
-        $("#variants-csq > tbody").html("");
         data['output'] = 'json';
         data =  $.param(data);
 
@@ -660,59 +607,10 @@ function refresh_variants(download = false) {
           method: "GET",
           contentType: "application/json",
           success: function(msg) {
+              console.log(msg)
               $.each(msg, function(k, rec) {
                 var is_first = true;
                 var td_rowspan = 1;
-                if (variant_annotation == "bcsq") {
-                  
-                  /*
-                    BCSQ ANNOTATION
-                  */
-                  //console.log(rec)
-                  if (variant_impact.indexOf("ALL") > -1 && rec["CSQ"].length == 0) {
-                    rec["CSQ"] = [{ effect: "", gene_id: null}]
-                  }
-                  row = [`${rec["CHROM"]}:${rec["POS"]}`,
-                         `${rec["REF"]} / ${rec["ALT"]}`,
-                         `${rec["AF"]}`].concat(new Array(6).fill())
-
-                  if (Object.keys(rec["CSQ"]).length > 0) {
-                    
-                    $.each(rec["CSQ"], function(anno, csq) {
-                        //  "consequence_type": anno[0],
-                        //  "gene_name": anno[1],
-                        //  "transcript_id": anno[2],
-                        //  "biotype": anno[3],
-                        //  "coding_strand": anno[4],
-                        //  "aa_pos"
-                        //  "variants"
-                        var anno = anno.split("|")
-                        // Reset length of row
-                        row = row.slice(0,3)
-                        anno.splice(3, 1)
-                        row = row.concat(anno)
-
-                        // Split variants
-                        if (row.length == 9) {
-                          row[8] = row[8].split("+").join("\n")
-                        }
-
-                        $("#variants-csq > tbody").append(`<tr><td>${row.join("</td><td>")}</td></tr>`);
-
-                        // Append CSQ results
-                        $("#variants-csq > tbody").append(`<tr><td colspan=9>${draw_csq_gt(csq).join(" ")}</td></tr>`)
-
-                    })
-                  } else {
-                      // Add a line for individual genotypes
-                      $("#variants-csq > tbody").append(`<tr><td>${row.join("</td><td>")}</td></tr>`);
-                  }
-
-                } else {
-                  /*
-                    SNPEFF ANNOTATION
-                  */
-
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
@@ -755,18 +653,13 @@ function refresh_variants(download = false) {
                           fail_variant_class = ""
                         }
                         $("#variants > tbody").append(`<tr ${fail_variant_class}>${variant_items}<td>${items.join("</td><td>")}</td></tr>`);
-                    }
-                );
+                });
 
                 if ($(".list-all-strains").prop('checked') == true) {
-                    gt_panel = $(".isotype-item").map(
-                    function () {return this.value;}).get();
+                    gt_panel = $(".isotype-item").map(function () {return this.value;}).get();
                 } else {
-                    gt_panel = $(".isotype-item:checked").map(
-                    function () {return this.value;}).get();
+                    gt_panel = $(".isotype-item:checked").map(function () {return this.value;}).get();
                 }
-
-
 
                 if (gt_panel.length > 0) {
                   gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
@@ -788,20 +681,19 @@ function refresh_variants(download = false) {
                     // enable tooltips
                     $('.ttop').tooltip();
                 }
-              }
 
-            });
+              });
 
             // Enable links
-            $( "#variants a" ).on( "click", function() {
+            $("#variants a").on("click", function() {
                 window.location = $(this).attr('href');
-            });
+            })
 
           }
-        });
-
+        }) {# /ajax #}
+        
         } // End if else logic for download
-        } // Test for region
+    } // Test for region
 }
 
 $("#download").click(function() {

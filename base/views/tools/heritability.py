@@ -119,10 +119,11 @@ def heritability_result(data_hash):
     ready = False
 
     if data:
-        data = data.download_as_string().decode('utf-8').splitlines()
+        data = data.download_as_string().decode('utf-8')
+        data = pd.read_csv(io.StringIO(data), sep="\t")
+        data = data.to_dict('records')
+        trait = data[0]['TraitName']
         # Get trait and set title
-        data = [x.split("\t") for x in data[1:]]
-        trait = data[0][2]
         title = f"Heritability Results: {trait}"
     else:
         title = f"Heritability Results"
@@ -131,6 +132,7 @@ def heritability_result(data_hash):
         result = result.download_as_string().decode('utf-8')
         result = pd.read_csv(io.StringIO(result), sep="\t")
         result = result.to_dict('records')[0]
+        fnam=datetime.today().strftime('%Y%m%d.')+trait
         ready = True
 
     return render_template("tools/heritability_results.html", **locals())

@@ -141,52 +141,7 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
         f.write(out)
         f.flush()
         output_data = []
-        csq_sites = {}
 
-        if query['variant-annotation'] == 'bcsq':
-            #=================#
-            #   BCSQ Output   #
-            #=================#
-
-            # Extract TCSQ annotations for all strains
-            # Make this only run when BCSQ is running.
-            # >> indicates the start of a new strain and its consequences
-            
-            #   - consequence type
-            #   - gene name
-            #   - ensembl transcript ID
-            #   - coding strand (+ fwd, - rev)
-            #   - amino acid position (in the coding strand orientation)
-            #   - list of corresponding VCF variants
-
-            comm = ['bcftools',
-                    'query',
-                    '-f',
-                    "%CHROM\t%POS\t%REF\t%ALT[\t>>%SAMPLE\t%TBCSQ]\n",
-                    f.name]
-            out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
-            # Structure -> site[annotation] -> strain
-            if not err:
-                for line in out.decode("UTF-8").splitlines():
-                    if '@' in line:
-                        continue
-                    line = line.split("\t")
-                    cpra_key = '_'.join(line[0:2])
-                    csq_anno = defaultdict(list)
-                    if len(line) > 5:
-                        for i in line[4:]:
-                            if i.startswith(">>"):
-                                strain = i[2:]
-                                continue
-                            for anno in i.split(","):
-                                if anno.startswith("intron"):
-                                    continue
-                                # Truncate very long annotation elements
-                                anno = '|'.join([truncate(x, 30) for x in anno.split("|")])
-                                csq_anno[anno].append(strain)
-                    csq_anno = {k: list(set(v)) for k, v in csq_anno.items()}
-                    csq_sites[cpra_key] = csq_anno
-            
         v = VCF(f.name, gts012=True)
 
         if samples and samples != "ALL":
@@ -231,7 +186,6 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
                 "GT": gt_set,
                 "AF": '{:0.3f}'.format(AF),
                 "ANN": ANN,
-                "CSQ": csq_sites.get(f"{record.CHROM}_{record.POS}", {}),
                 "GT_Summary": Counter(record.gt_types.tolist())
             }
 
