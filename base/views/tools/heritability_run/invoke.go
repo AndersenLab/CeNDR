@@ -56,14 +56,14 @@ func fileExists(filename string) bool {
 func runTask(dataHash string) {
 	// Run the heritability analysis. This is used to run it in the background.
 	// Execute R script
-	cmd := exec.Command("Rscript", "H2_script.R", datasetName, resultName, "hash.txt")
+	cmd := exec.Command("Rscript", "H2_script.R", datasetName, resultName, "hash.txt", heritabilityVersion)
 	cmd.Stderr = os.Stderr
 	_, err := cmd.Output()
 	check(err)
 
 	// Copy results to google storage.
-	datasetBlob := fmt.Sprintf("reports/heritability_%s/%s/%s", heritabilityVersion, dataHash, datasetName)
-	resultBlob := fmt.Sprintf("reports/heritability_%s/%s/%s", heritabilityVersion, dataHash, resultName)
+	datasetBlob := fmt.Sprintf("reports/heritability/%s/%s", heritabilityVersion, dataHash, datasetName)
+	resultBlob := fmt.Sprintf("reports/heritability/%s/%s", heritabilityVersion, dataHash, resultName)
 	copyBlob("elegansvariation.org", datasetName, datasetBlob)
 	copyBlob("elegansvariation.org", resultName, resultBlob)
 }

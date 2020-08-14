@@ -1,4 +1,5 @@
 import os
+import io
 import json
 import requests
 import pandas as pd
@@ -48,6 +49,7 @@ def heritability():
 def h2_task(data, data_hash):
     """
         This is designed to be run in the background on the server.
+        It will run a heritability analysis on google cloud run
     """
     # Perform h2 request
     result = requests.post(config['HERITABILITY_URL'], data={'data': data,
@@ -111,17 +113,25 @@ def check_data():
 
 @heritability_bp.route("/heritability/h2/<data_hash>")
 def heritability_result(data_hash):
-    title = f"H2 Results"
-    data_blob = f"reports/heritability_v1/{data_hash}/data.tsv"
-    result_blob = f"reports/heritability_v1/{data_hash}/result.tsv"
-    
-    data = check_blob(data_blob)
-    data = data.download_as_string().decode('utf-8').splitlines()
-    
-    result = check_blob(result_blob).download_as_string().decode('utf-8')
+    title = f"Heritability Results"
+    data = check_blob(f"reports/heritability/{data_hash}/data.tsv")
+    result = check_blob(f"reports/heritability/{data_hash}/result.tsv")
+    ready = False
 
-    data = [x.split("\t") for x in data[1:]]
-    trait = data[0][2]
+    if data:
+        data = data.download_as_string().decode('utf-8').splitlines()
+        # Get trait and set title
+        data = [x.split("\t") for x in data[1:]]
+        trait = data[0][2]
+        title = f"Heritability Results: {trait}"
+    else:
+        title = f"Heritability Results"
+
+    if result:
+        result = result.download_as_string().decode('utf-8')
+        result = pd.read_csv(io.StringIO(result), sep="\t")
+        result = result.to_dict('records')[0]
+        ready = True
 
     return render_template("tools/heritability_results.html", **locals())
 
