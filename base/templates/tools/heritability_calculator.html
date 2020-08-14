@@ -186,6 +186,7 @@ hot.addHook("afterChange", function() {
 		success:function(result) {
 			console.log(result)
 			$("#trait_summary").html(`
+			<br />
 			Input data summary:
 			<ul>
 				<li>Minimum: ${result['minimum']}</li>

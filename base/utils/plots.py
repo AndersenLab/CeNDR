@@ -10,13 +10,9 @@ import datetime
 import plotly
 import plotly.graph_objs as go
 import plotly.figure_factory as ff
-import plotly.graph_objs as go
 
 import numpy as np
 import pandas as pd
-
-from plotly import tools
-from logzero import logger
 
 COLORS = ['rgba(93, 164, 214, 0.65)',
           'rgba(255, 65, 54, 0.65)',
@@ -125,12 +121,12 @@ def pxg_plot(df, trait_name):
     offset = 0.0
     df.GT = pd.Categorical(df.GT)
     for marker_n, marker in enumerate(peak_markers):
-        mset = df[df.MARKER==marker]
+        mset = df[df.MARKER == marker]
         for gt_n, gt in enumerate(set(mset.GT)):
             x_coord = marker_n + gt_n + offset
             tickvals.append(x_coord)
             ticktext.append(gt)
-            gset = mset[mset.GT==gt]
+            gset = mset[mset.GT == gt]
             gset = gset.assign(x=(marker_n + gt_n + offset)*1.0)
             gset = gset.assign(x_distr=gset.x + (np.random.standard_normal(len(gset.GT))/15)-0.75)
             trace = go.Box(
@@ -150,7 +146,6 @@ def pxg_plot(df, trait_name):
                 line=dict(width=2)
             )
             trace_jitter = go.Scatter(
-                #name=marker+str(marker_n) + str(gt_n),
                 y=gset.TRAIT,
                 x=gset.x_distr,
                 xaxis='x1',
@@ -170,20 +165,19 @@ def pxg_plot(df, trait_name):
             offset += 1
 
         # Add marker labels
-        trace_marker_label = go.Scatter(
-                name=marker,
-                y=[1],
-                x=[marker_n + offset-1],
-                yaxis='y2',
-                text=[marker],
-                hoverinfo='none',
-                mode='text',
-                textposition='bottom',
-                textfont=dict(
-                    family='courier',
-                    size=25
-                )
-        )
+        trace_marker_label = go.Scatter(name=marker,
+                                        y=[1],
+                                        x=[marker_n + offset-1],
+                                        yaxis='y2',
+                                        text=[marker],
+                                        hoverinfo='none',
+                                        mode='text',
+                                        textposition='bottom',
+                                        textfont=dict(
+                                            family='courier',
+                                            size=25
+                                        )
+                                        )
         trace_set.append(trace_marker_label)
         offset += 2.5
 
@@ -218,7 +212,6 @@ def pxg_plot(df, trait_name):
                                include_plotlyjs=False,
                                show_link=False,
                                config={"displayModeBar": False})
-
 
 
 def fine_mapping_plot(df):

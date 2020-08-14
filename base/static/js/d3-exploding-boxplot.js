@@ -80,15 +80,15 @@ function(d3,d3tip)
       groups = d3.nest()
                 .key(functorkey(aes.group))
                 .entries(data)
-    }else{
+    } else {
       groups = [{key:'',values:data}]
     }
 
     var xscale = d3.scale.ordinal()
                   .domain(groups.map(function(d){return d.key}))
 									.rangeRoundBands([0,width-margin.left-margin.right],boxpadding)
-
-	UniqueNames= $.unique(data.map(function (d) {return d.a;}));
+							
+	UniqueNames= $.unique(data.map(function (d) {return d.AssayNumber;}));
 	default_colors = [];
 	UniqueNames.forEach(function(d){c=getRandomColor(); default_colors.push(c)});
     var colorscale = d3.scale.ordinal()
@@ -108,9 +108,8 @@ function(d3,d3tip)
 
 		//default tool tip function
 		var _tipFunction = function(d) {
-				//return ' <span style="color:#000000"><b>'+
-				//		functorkey(aes.label)(d)+'</b></span><span style="color:#000000;" > : <b>'+ tickFormat(functorkey(aes.y)(d)) + '</b></span>';
-				return ' <span style="color:#000000"><b>'+ tickFormat(functorkey(aes.y)(d)) + '</b></span>';
+				return ' <span style="color:#000000"><b>'+
+						functorkey(aes.label)(d)+'</b></span><span style="color:#000000;" > : <b>'+ tickFormat(functorkey(aes.y)(d)) + '</b></span>';
 			}
 
 
@@ -182,8 +181,6 @@ function(d3,d3tip)
 			.attr("transform","translate(0,"+(i+2)*15+")")
 		  eleg.append("circle")
 			.attr("transform","translate(-10,"+-4+")")
-			//.attr('cx',xscale.rangeBand()*0.5)
-			//.attr('cy',yscale(g.quartiles[1]))
 			.attr('r',5)
 			.attr('fill',default_colors[i])
 			

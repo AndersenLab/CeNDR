@@ -7,8 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.7/d3.js" charset="utf-8"></script>
     <script src="https://d3js.org/queue.v1.min.js"> </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.7/d3-tip.min.js"></script>
-	<script src="/static/js/d3-exploding-boxplot.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.0.0/jspdf.umd.min.js"></script>
+    <script src="/static/js/d3-exploding-boxplot.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
 	<style type="text/css">
@@ -53,18 +53,35 @@
     </div>{# /col-md-8 #}
 </div>{# /row #}
 
-{% if data and result %}
+{% if not result %}
+
+<div class="row">
+    <div class='col-md-8 col-md-offset-2'>
+        <p class='text-info'>
+            <strong>The heritability calculation is currently being run. Please check back in a few minutes for results.</strong>
+        </p>
+    </div>
+</div>
+
+{% endif %}
 
 <div class="row">
     <div class="col-md-12">
+        {% if data %}
         <div id="svgchartarea"></div>
+        {% endif %}
+
+        {% if result %}
         <canvas id="canvas" ></canvas> <!-- width="900" height="400"></canvas -->
         <div id="png-container"></div>
+        {% endif %}
+
     </div>{# /col-md-8 #}
 </div>{# /row #}
 
 <div class="row">
     <h2>Data</h2>
+    <a class='btn btn-text pull-right' href="https://storage.googleapis.com/elegansvariation.org/reports/heritability/{{ data_hash }}/data.tsv">Download Table</a>
 	<table class="table table-hover table-condensed table-striped">
         <thead>
             <tr>    
@@ -76,29 +93,21 @@
             </tr>
         </thead>
 		<tbody>
-		{% for i in range(0, data|length) %}
-            <tr><td> {{ data[i][0] }} </td><td style="text-align:center;"> {{ data[i][1] }} </td><td style="text-align:center;"> {{ data[i][2] }} </td><td style="text-align:center;"> {{ data[i][3] }} </td><td style="text-align:center;"> {{ data[i][4] }} </td></tr>
+		{% for row in data %}
+            <tr><td> {{ row['AssayNumber'] }} </td>
+                <td> {{ row['Strain'] }} </td>
+                <td> {{ row['TraitName'] }} </td>
+                <td> {{ row['Replicate'] }} </td>
+                <td> {{ row['Value']|string|truncate(8, end= "") }} </td>
+            </tr>
         {% endfor %}
 		</tbody>
     </table>
 	</div>
-
-{% else %}
-
-<div class="row">
-    <div class='col-md-8 col-md-offset-2'>
-        <p class='text-info'>
-            <strong>Heritability Calculation is currently being run. Please check back in a few minutes for results.</strong>
-        </p>
-    </div>
-</div>
-
-{% endif %}
-
 {% endblock %}
 
 {% block script %}
-{% if data and result %}
+{% if result  %}
     <script>
     Element.prototype.remove = function() {
             this.parentElement.removeChild(this);
@@ -112,9 +121,6 @@
         }
 
     var trait = "{{ trait }}"
-    var XX = ""+"{{ result['H2'] }}"
-    var X = ""+"{{ result['ci_l'] }}"
-    var Y = ""+"{{ result['ci_r'] }}"
     var Fnam = "{{ fnam }}"
     var imag
     var chartJson = {{ data|tojson|safe }};
@@ -163,25 +169,25 @@
         var doc = new jsPDF('p', 'px', 'a4');
         var source = document.getElementById('dataContainer'); 
         margins = {
-        top: 40,
-        bottom: 40,
-        left: 40,
-        width: 522
+            top: 40,
+            bottom: 40,
+            left: 40,
+            width: 522
         };
-            doc.setFontSize(16);
-            doc.text(doc.internal.pageSize.getWidth()/2, 50, 'Heritability Calculator', {'align': 'center'});
-            //doc.fromHTML('This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild isolates.', 20, 70)
-            doc.fromHTML('The broad-sense heritability is the amount of trait variance that comes from genetic differences in the assayed group ', 20, 85, {'align': 'justify', 'maxWidth': doc.internal.pageSize.getWidth()-40},function(){},margins)
-            doc.fromHTML('of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental) variance.', 20, 100, {'align': 'justify', 'maxWidth': doc.internal.pageSize.getWidth()-40},function(){},margins)
-            doc.fromHTML('Broad-sense heritability (<i> H</i>', 20, 120) 
-            doc.setFontSize(4);
-            doc.fromHTML('<i>2</i>', 123, 115)
-            doc.setFontSize(10);
-            doc.fromHTML(') = {{ result['H2'] }}% (range {{ result['ci_l'] }}% to {{ result['ci_r'] }}%)', 130, 120)
-            doc.fromHTML('Trait: {{ trait }}', 20, 140)
-            
-            doc.addImage(document.getElementById('img1').src, 'JPEG', 10, 170, 430,200, NaN, 'FAST');
-            
+    
+        doc.setFontSize(16);
+        doc.text(doc.internal.pageSize.getWidth()/2, 50, 'Heritability Calculator', {'align': 'center'});
+        doc.fromHTML('The broad-sense heritability is the amount of trait variance that comes from genetic differences in the assayed group ', 20, 85, {'align': 'justify', 'maxWidth': doc.internal.pageSize.getWidth()-40},function(){},margins)
+        doc.fromHTML('of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental) variance.', 20, 100, {'align': 'justify', 'maxWidth': doc.internal.pageSize.getWidth()-40},function(){},margins)
+        doc.fromHTML('Broad-sense heritability (<i> H</i>', 20, 120) 
+        doc.setFontSize(4);
+        doc.fromHTML('<i>2</i>', 123, 115)
+        doc.setFontSize(10);
+        doc.fromHTML(') = {{ (result['H2']*100)|round(2) }}% (range {{ (result['ci_l']*100)|round(2) }}% to {{ (result['ci_r']*100)|round(2) }}%)', 130, 120)
+        doc.fromHTML('Trait: {{ trait }}', 20, 140)
+        
+        doc.addImage(document.getElementById('img1').src, 'JPEG', 10, 170, 430,200, NaN, 'FAST');
+        
         var a = document.createElement('a');
             var pdfblob = new Blob([ doc.output('blob') ], { type : 'application/pdf'});
             a.href = window.URL.createObjectURL(pdfblob);
@@ -191,12 +197,12 @@
         image.src = url;
         document.getElementById("svgchartarea").remove();
         document.getElementById('canvas').remove();
-        location.reload();
+        //location.reload();
     }
 
     
     var getPDF = function(){
-        //loadCanvas();
+        loadCanvas();
     }
 
     $(document).ready(function(){
@@ -217,12 +223,12 @@
             // group : how to group data on x axis Strain
             // color : color of the point / boxplot AssayNumber
             // label : displayed text in toolbox AssayNumber_Strain_Replicate : Value
-        
+            console.log(chartJson)
             var chart = d3.exploding_boxplot(chartJson,
                 {y: 'Value',
                  group:'Strain',
                  color:'AssayNumber',
-                 label:'AssayNumber'})
+                 label: "label"})
 
             //call chart on a div
             chart('#svgchartarea')

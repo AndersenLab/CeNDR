@@ -62,9 +62,7 @@ func runTask(dataHash string) {
 	check(err)
 
 	// Copy results to google storage.
-	datasetBlob := fmt.Sprintf("reports/heritability/%s/%s", dataHash, datasetName)
 	resultBlob := fmt.Sprintf("reports/heritability/%s/%s", dataHash, resultName)
-	copyBlob("elegansvariation.org", datasetName, datasetBlob)
 	copyBlob("elegansvariation.org", resultName, resultBlob)
 }
 

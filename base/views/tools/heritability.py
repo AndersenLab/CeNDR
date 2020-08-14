@@ -1,34 +1,26 @@
-import os
 import io
-import json
 import requests
-import pandas as pd
 import statistics as st
-from numpy import percentile 
+
+import numpy as np
+import pandas as pd
+
+from base.utils.data_utils import hash_it
+from base.utils.gcloud import check_blob, upload_file
+from base.config import config
 
 from flask import (request,
                    jsonify,
                    render_template,
-                   Blueprint,
-                   redirect,
-                   url_for,
-                   Response)
+                   Blueprint)
 from logzero import logger
-from base.utils.data_utils import hash_it
 from datetime import datetime
 from threading import Thread
 
-from base.utils.gcloud import check_blob
-
-from base.config import config
-from flask import (request,
-                   jsonify,
-                   render_template,
-                   Blueprint,
-                   redirect,
-                   url_for,
-                   Response,
-                   Blueprint)
+COLORS = ['rgba(93, 164, 214, 0.65)',
+          'rgba(255, 65, 54, 0.65)',
+          'rgba(207, 114, 255, 0.65)',
+          'rgba(127, 96, 0, 0.65)']
 
 # ================== #
 #   heritability     #
@@ -73,6 +65,10 @@ def submit_h2():
     data_hash = hash_it(data, length=32)
     logger.info(data_hash)
 
+    # Upload data immediately.
+    data_blob = f"reports/heritability/{data_hash}/data.tsv"
+    upload_file(data_blob, data, as_string=True)
+
     thread = Thread(target=h2_task, args=(data, data_hash,))
     thread.daemon = True
     thread.start()
@@ -83,32 +79,39 @@ def submit_h2():
 
 @heritability_bp.route('/heritability', methods=["POST"])
 def check_data():
-    data = []
-    res = {}
-    if request.method == "POST" or request.method == "GET":
+    """
+        This check is used to report on the:
 
-        data = request.get_json()
-        data = [x for x in data[1:] if x[0] is not None]
-        header = ["AssayNumber", "Strain", "TraitName", "Replicate", "Value"]
-        data = pd.DataFrame(data, columns=header)
+        Minimum
+        Maximum
+        Quartiles: 25, 50, 75
+        Variance
 
-        # filter missing
-        data = data[data.Value.apply(lambda x: x not in [None, "", "NA"])]
+        using an AJAX request - it appears at the bottom
+        before the user submits.
+    """
+    data = request.get_json()
+    data = [x for x in data[1:] if x[0] is not None]
+    header = ["AssayNumber", "Strain", "TraitName", "Replicate", "Value"]
+    data = pd.DataFrame(data, columns=header)
 
-        # Convert to list
-        data = data.Value.astype(float).tolist()
+    # filter missing
+    data = data[data.Value.apply(lambda x: x not in [None, "", "NA"])]
 
-        res = {}
-        res["variance"] = "{:.2f}".format(st.variance(data))
-        res["sd"] = "{:.2f}".format(st.stdev(data))
-        res["minimum"] = "{:.2f}".format(min(data))
-        res["maximum"] = "{:.2f}".format(max(data))
-        # Calculate quartiles
-        All_quartiles = percentile(data, [25, 50, 75])
-        res["25"] = "{:.2f}".format(All_quartiles[0])
-        res["50"] = "{:.2f}".format(All_quartiles[1])
-        res["75"] = "{:.2f}".format(All_quartiles[2])
-    return res
+    # Convert to list
+    data = data.Value.astype(float).tolist()
+
+    result = {}
+    result["variance"] = "{:.2f}".format(st.variance(data))
+    result["sd"] = "{:.2f}".format(st.stdev(data))
+    result["minimum"] = "{:.2f}".format(min(data))
+    result["maximum"] = "{:.2f}".format(max(data))
+    # Calculate quartiles
+    All_quartiles = np.percentile(data, [25, 50, 75])
+    result["25"] = "{:.2f}".format(All_quartiles[0])
+    result["50"] = "{:.2f}".format(All_quartiles[1])
+    result["75"] = "{:.2f}".format(All_quartiles[2])
+    return result
 
 
 @heritability_bp.route("/heritability/h2/<data_hash>")
@@ -118,46 +121,21 @@ def heritability_result(data_hash):
     result = check_blob(f"reports/heritability/{data_hash}/result.tsv")
     ready = False
 
-    if data:
-        data = data.download_as_string().decode('utf-8')
-        data = pd.read_csv(io.StringIO(data), sep="\t")
-        data = data.to_dict('records')
-        trait = data[0]['TraitName']
-        # Get trait and set title
-        title = f"Heritability Results: {trait}"
-    else:
-        title = f"Heritability Results"
+    data = data.download_as_string().decode('utf-8')
+    data = pd.read_csv(io.StringIO(data), sep="\t")
+    data['AssayNumber'] = data['AssayNumber'].astype(str)
+    data['label'] = data.apply(lambda x: f"{x['AssayNumber']}: {x['Value']}", 1)
+    data = data.to_dict('records')
+    trait = data[0]['TraitName']
+    # Get trait and set title
+    title = f"Heritability Results: {trait}"
 
     if result:
         result = result.download_as_string().decode('utf-8')
         result = pd.read_csv(io.StringIO(result), sep="\t")
         result = result.to_dict('records')[0]
+
         fnam=datetime.today().strftime('%Y%m%d.')+trait
         ready = True
 
     return render_template("tools/heritability_results.html", **locals())
-
-
-def getRes():
-    if request.method == "POST" or request.method == "GET":
-        results = []
-        ctd = []
-        data = request.args.get('jbd')
-
-        if os.path.isfile('./jobsD/'+data+'.out'): 
-            for li in fileinput.input('./jobsD/'+data+'.txt'):
-                if not li.startswith("AssayNumber"): results.append(li.rstrip().split(','))
-                
-            with open('./jobsD/'+data+'.json') as json_file:
-                ctd = json.load(json_file)
-            
-            trait = ctd[1]['t']
-            
-            da = []
-            for li in fileinput.input('./jobsD/'+data+'.out'):
-                if not li.startswith('"H2"'): da = [str("{:.2f}".format(float(x)*100)) for x in li.rstrip().split('\t')[1:]]
-            XX = da[0]
-            X = da[1]
-            Y = da[2]
-            return(render_template('tools/heritability_calculator_res.html', res=results, cdt=json.dumps(ctd), trait=trait, XX=XX, X=X, Y=Y, fnam=datetime.today().strftime('%Y%m%d.')+trait))
-    return render_template('tools/heritability_calculator_processing.html')

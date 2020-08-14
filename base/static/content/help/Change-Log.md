@@ -8,13 +8,14 @@
 * The backend of the site has been substantially restructured to improve maintainability.
 * A table of strains with issues has been added to the data releases page.
 * The variant data table has been removed from isotype pages.
-* The API has been removed.
+* New strain collection images have been added.
+* The API has been removed. It did not see a lot of usage and become cumbersome to maintain.
 * A new [collaborators](/about/collaborators) page has been added.
 * Software and Methods have been moved to be per-release, as the pipeline is ever-evolving.
 * Data links have been removed from isotype pages; They are still available on the release pages.
-* A new tool, the [pairwise-indel-finder](/tools/pairwise-indel-finder) has been added.
 * Reports for Alignment, Concordance, And Variant calling are now produced for all releases.
 * Publications have been updated.
+* A new tool for calculating [heritability](/tools/heritability) has been released.
 
 __Genome Browser__
 

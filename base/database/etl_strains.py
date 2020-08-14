@@ -72,6 +72,7 @@ def fetch_andersen_strains():
     strain_records = WI.get_all_records()
     # Only take records with a release reported
     strain_records = list(filter(lambda x: x.get('release') not in ['', None, 'NA'], strain_records))
+    results = []
     for n, record in enumerate(strain_records):
         record = {k.lower(): v for k, v in record.items()}
         for k, v in record.items():
@@ -81,6 +82,7 @@ def fetch_andersen_strains():
                 record[k] = v
             if k in ['sampling_date'] and v:
                 record[k] = parser.parse(v)
+
         if record['latitude']:
             # Round elevation
             elevation = fetch_elevations(record['latitude'], record['longitude'])
@@ -92,6 +94,16 @@ def fetch_andersen_strains():
         # Set issue bools
         record["issues"] = record["issues"] == "TRUE"
 
+        # Set isotype_ref_strain = FALSE if no isotype is assigned.
+        if record['isotype'] in [None, "", "NA"]:
+            record['isotype_ref_strain'] = False
+            record['wgs_seq'] = False
+
+        # Skip strains that lack an isotype
+        if record['isotype'] in [None, "", "NA"] and record['issues'] is False:
+            continue
+
+
         # Fix strain reference
         record['isotype_ref_strain'] = record['isotype_ref_strain'] == "TRUE"
         record['sequenced'] = record['wgs_seq'] == "TRUE"
@@ -102,7 +114,7 @@ def fetch_andersen_strains():
         # Remove space after comma delimiter
         if record['previous_names']:
             record['previous_names'] = str(record['previous_names']).replace(", ", ",").strip()
-        strain_records[n] = record
+        results.append(record)
 
 
-    return strain_records
+    return results

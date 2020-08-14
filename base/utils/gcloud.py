@@ -1,6 +1,4 @@
 import json
-import hashlib
-import base64
 from flask import g
 from base.utils.data_utils import dump_json
 from gcloud import datastore, storage
@@ -119,17 +117,21 @@ def get_cendr_bucket():
     return gs.get_bucket("elegansvariation.org")
 
 
-def upload_file(name, fname):
+def upload_file(blob, obj, as_string = False):
     """
         Upload a file to the CeNDR bucket
 
         Args:
-            name - The name of the blob (server-side)
+            blob - The name of the blob (server-side)
             fname - The filename to upload (client-side)
     """
+    logger.info(f"Uploading: {blob} --> {obj}")
     cendr_bucket = get_cendr_bucket()
-    blob = cendr_bucket.blob(name)
-    blob.upload_from_filename(fname)
+    blob = cendr_bucket.blob(blob)
+    if as_string:
+        blob.upload_from_string(obj)
+    else:
+        blob.upload_from_filename(obj)
     return blob
 
 

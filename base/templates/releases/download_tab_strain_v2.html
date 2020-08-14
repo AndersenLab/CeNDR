@@ -14,7 +14,6 @@
                             </span>
             </th>
             <th style="width: 200px;">Strain BAM</th>
-            <th>Strain VCF</th>
         </tr>
     </thead>
     <div style="height: 30px;"></div>
@@ -43,9 +42,6 @@
                 </td>
                 <td>
                     {{ strain.strain_bam_url() }}
-                </td>
-                <td>
-                    <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/strain/vcf/{{ strain }}.{{ selected_release }}.vcf.gz">VCF</a>
                 </td>
             </tr>
             {% endif %}
