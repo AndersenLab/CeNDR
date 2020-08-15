@@ -86,6 +86,7 @@ def download_script_strain_v2():
 #   Browser     #
 # ============= #
 
+
 @data_bp.route('/browser')
 @data_bp.route('/browser/<int:release>')
 @data_bp.route('/browser/<int:release>/<region>')

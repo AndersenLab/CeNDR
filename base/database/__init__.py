@@ -164,6 +164,14 @@ def initialize_sqlite_database(sel_wormbase_version,
     diff = int((arrow.utcnow() - start).total_seconds())
     console.log(f"{diff} seconds")
 
+    #===========================#
+    #   Generate gene id dict   #
+    #===========================#
+    # Create a gene dictionary to match wormbase IDs to either the locus name
+    # or a sequence id
+    gene_dict = {x.gene_id: x.locus or x.sequence_name for x in WormbaseGeneSummary.query.all()}
+    pickle.dump(gene_dict, open("base/static/data/gene_dict.pkl", 'rb'))
+
 
 def download_sqlite_database():
     SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"

@@ -4,6 +4,7 @@
 Author: Daniel E. Cook
 """
 import re
+import pickle
 from cyvcf2 import VCF
 from flask import request, Response
 from tempfile import NamedTemporaryFile
@@ -13,13 +14,15 @@ from base.utils.decorators import jsonify_request
 from base.config import config
 from collections import Counter
 from logzero import logger
-from collections import defaultdict
 
 from flask import Blueprint
 
 api_variant_bp = Blueprint('api_variant',
                            __name__,
                            template_folder='api')
+
+# Load the gene dictionary on server start
+gene_id_dict = pickle.load(open("base/static/data/gene_dict.pkl", 'rb'))
 
 ANN_header = ["allele",
               "effect",
@@ -157,7 +160,10 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
             if "ANN" in INFO.keys():
                 ANN_set = INFO['ANN'].split(",")
                 for ANN_rec in ANN_set:
-                    ANN.append(dict(zip(ANN_header, ANN_rec.split("|"))))
+                    annotation_dict = dict(zip(ANN_header, ANN_rec.split("|")))
+                    # Fill in locus id for gene name
+                    annotation_dict["gene_name"] = gene_id_dict.get(annotation_dict["gene_id"])
+                    ANN.append(annotation_dict)
                 del INFO['ANN']
 
             # Extract FT (genotype filter status)
