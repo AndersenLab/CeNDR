@@ -17,11 +17,6 @@ from logzero import logger
 from datetime import datetime
 from threading import Thread
 
-COLORS = ['rgba(93, 164, 214, 0.65)',
-          'rgba(255, 65, 54, 0.65)',
-          'rgba(207, 114, 255, 0.65)',
-          'rgba(127, 96, 0, 0.65)']
-
 # ================== #
 #   heritability     #
 # ================== #
@@ -30,7 +25,6 @@ COLORS = ['rgba(93, 164, 214, 0.65)',
 heritability_bp = Blueprint('heritability',
                             __name__,
                             template_folder='tools')
-
 
 @heritability_bp.route('/heritability')
 def heritability():
