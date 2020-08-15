@@ -457,7 +457,7 @@ class Strain(DictSerializable, db.Model):
                 release - the data release
         """
         counts = {'strain_count': cls.query.filter((cls.release <= release) & (cls.issues == False)).count(),
-                  'strain_count_sequenced': cls.query.filter((cls.release <= release) & (cls.sequenced == True)).count(),
+                  'strain_count_sequenced': cls.query.filter((cls.release <= release) & (cls.issues == False) & (cls.sequenced == True)).count(),
                   'isotype_count': cls.query.filter((cls.release <= release) & (cls.issues == False) & (cls.isotype != None)).group_by(cls.isotype).count()}
         return counts
 
