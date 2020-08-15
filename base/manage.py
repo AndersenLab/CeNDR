@@ -76,6 +76,7 @@ def update_credentials():
         exit(secho(str(err, 'utf-8'), fg='red'))
     os.remove("env_config.zip")
 
+
 @click.command(help="Decrypt credentials")
 def decrypt_credentials():
     from base.application import create_app
