@@ -56,10 +56,10 @@ class URLS:
     GENE_GFF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_VERSION}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_VERSION}.annotations.gff3.gz"
 
     # Maps wormbase ID to locus name
-    GENE_IDS_URL = f"ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/annotation/geneIDs/c_elegans.PRJNA13758.current.geneIDs.txt.gz"
+    GENE_IDS_URL = "ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/annotation/geneIDs/c_elegans.PRJNA13758.current.geneIDs.txt.gz"
 
     # Lists C. elegans orthologs
-    ORTHOLOG_URL = f"ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/PRJNA13758/annotation/orthologs/c_elegans.PRJNA13758.current_development.orthologs.txt"
+    ORTHOLOG_URL = "ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/PRJNA13758/annotation/orthologs/c_elegans.PRJNA13758.current_development.orthologs.txt"
 
     #
     # Ortholog URLs

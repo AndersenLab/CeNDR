@@ -90,3 +90,6 @@ mapping_worker/*
 photos/*
 
 *.done
+
+# Heritability run go tool
+invoke

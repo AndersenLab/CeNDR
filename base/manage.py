@@ -14,20 +14,11 @@ from base.utils.gcloud import get_item
 from base.utils.data_utils import zipdir
 from base.database import (initialize_sqlite_database,
                            download_sqlite_database)
-from base.models import WormbaseGeneSummary
 from base import constants
 from subprocess import Popen, PIPE
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 # Do not remove gunicorn import
 secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
-
-# Mapping worker database
-db_mapping_worker = create_engine('sqlite:///mapping_worker/genes.db')
-WormbaseGeneSummary.metadata.create_all(db_mapping_worker)
-db_mapping_worker_session = sessionmaker(bind=db_mapping_worker)()
-
 
 @click.command(help="Initialize the database")
 @click.argument("wormbase_version", default=constants.WORMBASE_VERSION)

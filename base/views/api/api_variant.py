@@ -75,7 +75,7 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
     """
     if query:
         # Query in Python
-        chrom, start, end = re.split(':|\-', query)
+        chrom, start, end = re.split(':|-', query)
         query = {'chrom': chrom,
                  'start': int(start),
                  'end': int(end),

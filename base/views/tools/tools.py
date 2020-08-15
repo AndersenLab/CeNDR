@@ -1,39 +1,17 @@
-import os
 import tabix
 
 from flask import (request,
                    jsonify,
                    render_template,
-                   Blueprint,
-                   redirect,
-                   url_for,
-                   Response)
-from base.views.api.api_strain import get_strains
+                   Blueprint)
 from base.constants import CHROM_NUMERIC
 from logzero import logger
-import requests
-from requests_futures.sessions import FuturesSession
-from base.utils.data_utils import hash_it
 
-import fileinput, glob
-import json, re
-import time, os
-from datetime import datetime
-
-from flask_wtf import Form, RecaptchaField
-from wtforms import (StringField,
-                     TextAreaField,
+from wtforms import (Form,
                      IntegerField,
-                     SelectField,
-                     FieldList,
-                     HiddenField,
-                     RadioField)
-from wtforms.validators import Required, Length, Email, DataRequired
-from wtforms.validators import ValidationError
-
-
-
-import pandas as pd
+                     SelectField)
+from wtforms.validators import (Required,
+                                ValidationError)
 
 # Tools blueprint
 tools_bp = Blueprint('tools',
@@ -80,6 +58,7 @@ STRAIN_CHOICES = [(x, x) for x in sv_strains]
 CHROMOSOME_CHOICES = [(x, x) for x in CHROM_NUMERIC.keys()]
 COLUMNS = ["CHROM", "START", "STOP", "?", "TYPE", "STRAND", ""]
 
+
 def validate_uniq_strains(form, field):
     strain_1 = form.strain_1.data
     strain_2 = form.strain_2.data
@@ -102,7 +81,6 @@ class FlexIntegerField(IntegerField):
             val[0] = val[0].replace(",", "").replace(".", "")
         logger.debug(val)
         return super(FlexIntegerField, self).process_formdata(val)
-
 
 class pairwise_indel_form(Form):
     """

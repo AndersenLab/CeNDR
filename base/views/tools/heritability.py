@@ -110,7 +110,7 @@ def check_data():
 
 @heritability_bp.route("/heritability/h2/<data_hash>")
 def heritability_result(data_hash):
-    title = f"Heritability Results"
+    title = "Heritability Results"
     data = check_blob(f"reports/heritability/{data_hash}/data.tsv")
     result = check_blob(f"reports/heritability/{data_hash}/result.tsv")
     ready = False

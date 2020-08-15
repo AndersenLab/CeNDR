@@ -1,5 +1,4 @@
 import yaml
-import requests
 from base.extensions import cache
 from flask import (render_template,
                    request,
