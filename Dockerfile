@@ -46,7 +46,7 @@ RUN update-alternatives --install /usr/bin/python python3 /opt/python3.7/bin/pyt
 # Copy the application's requirements.txt and run pip to install all
 # dependencies into the virtualenv.
 ADD requirements.txt /app/requirements.txt
-RUN pip install setuptools>=40.3.0
+RUN pip install setuptools=40.3.0
 RUN pip install -r /app/requirements.txt
 
 # Add the application source code.
