@@ -21,7 +21,6 @@ for l in fileinput.input("./data/filter_combined2.bed"):
 					tmp[reg]["svtype"][tmp[reg]["strain"].index(da[8])] = list(set(tmp[reg]["svtype"][tmp[reg]["strain"].index(da[8])] + [da[4],])) 
 
 
-@tools_bp.route("/tools/pairwise_indel_finder/getData1")
 def get_indel():
     clicked=None
     res = []

@@ -4,6 +4,7 @@ import requests
 from os.path import basename
 from base.config import config
 from flask import Flask, render_template
+from flask_wtf.csrf import CSRFProtect
 from base.utils.text_utils import render_markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.exceptions import HTTPException
@@ -27,8 +28,9 @@ from base.views.gene import gene_bp
 from base.views.user import user_bp
 
 # Tools
-from base.views.tools import tools_bp
-from base.views.tools import heritability_bp
+from base.views.tools import (tools_bp,
+                              heritability_bp,
+                              indel_primer_bp)
 
 # Readiness and health checks
 from base.views.check import check_bp
@@ -109,6 +111,7 @@ def register_extensions(app):
     markdown(app)
     cache.init_app(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
     sqlalchemy(app)
+    CSRFProtect(app)
 
 
 def register_blueprints(app):
@@ -125,6 +128,7 @@ def register_blueprints(app):
     # Tools
     app.register_blueprint(tools_bp, url_prefix='/tools')
     app.register_blueprint(heritability_bp, url_prefix='/tools')
+    app.register_blueprint(indel_primer_bp, url_prefix='/tools')
 
     # API
     app.register_blueprint(api_strain_bp, url_prefix='/api')
