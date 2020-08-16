@@ -12,7 +12,8 @@ from base.config import config
 from flask import (request,
                    jsonify,
                    render_template,
-                   Blueprint)
+                   Blueprint,
+                   abort)
 from logzero import logger
 from datetime import datetime
 from threading import Thread
@@ -115,6 +116,8 @@ def heritability_result(data_hash):
     result = check_blob(f"reports/heritability/{data_hash}/result.tsv")
     ready = False
 
+    if data is None:
+        return abort(404, description="Heritability report not found")
     data = data.download_as_string().decode('utf-8')
     data = pd.read_csv(io.StringIO(data), sep="\t")
     data['AssayNumber'] = data['AssayNumber'].astype(str)
