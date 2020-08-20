@@ -55,12 +55,17 @@ function(d3,d3tip)
   var exploding_boxplot = function(data,aes)
   {
     //defaults
+    var strn = []
+	data.sort(sortByProperty(aes.color));
+	data.forEach(function(d,i){data[i][aes.y] = parseFloat(d[aes.y]); if (strn.indexOf(d[aes.group])==-1){strn.push(d[aes.group]);}});
+	i = ((strn.length % 25) > 0) ? parseInt(strn.length / 25)+1 : parseInt(strn.length / 25);
+
     var iqr = 1.5
     var height = 480
     var width = 900
     var boxpadding = 0.2
     var margin = {top:10,bottom:30,left:40,right:10}
-		var rotateXLabels = false;
+	var rotateXLabels = true;
 
     aes.color = aes.color || aes.group
     aes.radius = aes.radius || d3.functor(3)

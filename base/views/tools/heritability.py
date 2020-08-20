@@ -8,6 +8,7 @@ import pandas as pd
 from base.utils.data_utils import hash_it
 from base.utils.gcloud import check_blob, upload_file
 from base.config import config
+from base.forms import heritability_form
 
 from flask import (request,
                    jsonify,
@@ -29,7 +30,8 @@ heritability_bp = Blueprint('heritability',
 
 @heritability_bp.route('/heritability')
 def heritability():
-    VARS = {"title": "Heritability Calculator"}
+    VARS = {"title": "Heritability Calculator",
+            "form": heritability_form()}
     return render_template('tools/heritability_calculator.html', **VARS)
 
 

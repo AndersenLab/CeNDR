@@ -93,6 +93,12 @@ class order_form(Form):
             total_price += price
         return total_price
 
+#
+# Heritability Form
+#
+class heritability_form(Form):
+    pass
+
 
 #
 # Perform Mapping Form

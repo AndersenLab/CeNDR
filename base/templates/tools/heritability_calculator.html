@@ -40,8 +40,10 @@
     <li><strong>Value</strong> - the measured output of the trait (<i>e.g.</i> 297 for BroodSize).</li>
   </ol>
 
+  <div id='set-example' class='btn btn-primary btn-sm pull-right'>Use example data</div>
   <p>NA values will not be used in broad-sense heritability calculations.</p>
   
+
   </div>{# /col-md-8 #}
 </div>{# /row #}
 
@@ -171,7 +173,6 @@ var hot = new Handsontable(container, {
 
 hot.addHook("afterChange", function() {
 	isValid = validate_data(hot.getData());
-	console.log(duplicate_rows);
 	hot.render();
 
 	if (isValid) {
@@ -184,7 +185,6 @@ hot.addHook("afterChange", function() {
 		contentType: "application/json; charset=utf-8",
 		dataType: 'json',
 		success:function(result) {
-			console.log(result)
 			$("#trait_summary").html(`
 			<br />
 			Input data summary:
@@ -206,6 +206,23 @@ hot.addHook("afterChange", function() {
 
 })
 
+// Enable setting example data
+$("#set-example").on('click', function() {
+    fetch('https://storage.googleapis.com/elegansvariation.org/reports/heritability/heritability_example.tsv')
+        .then(response => response.text())
+        .then(function(data) {
+                ex_data = _.map(data.split("\n"), x => x.split("\t"))
+                hot.loadData(ex_data);
+                document.documentElement.scrollTo({
+                    top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+                    behavior: 'smooth'
+                  });
+                }
+        )
+})
+
+var csrf_token = "{{ form.csrf_token._value() }}"
+
 // submit result
 $("#hcalc").on("click", function(e) {
 	if (isValid) {
@@ -213,14 +230,23 @@ $("#hcalc").on("click", function(e) {
 				type: "POST",
 				url: "{{ url_for('heritability.submit_h2') }}",
 				data: JSON.stringify(hot.getData()),
-				contentType: "application/json; charset=utf-8",
+                contentType: "application/json; charset=utf-8",
 				dataType: 'json',
 				success:function(result){
 					window.location = `heritability/h2/${result.data_hash}`
 				}
 		})
 	}
-})
+});
+
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+        }
+    }
+});
+
 </script>
 
 {% endblock %}
