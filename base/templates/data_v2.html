@@ -85,9 +85,19 @@ body, html{
                         <td><strong>Soft Filter Variants</strong></td>
                         <td>The soft-filtered VCF includes all variants and annotations called by the GATK pipeline. The QC status of each variant (INFO field=<code>FILTER</code>) and genotype (Format Field=<code>FT</code>) is specified by a VCF Field.</td>
                         <td>
+                            <strong>All Strains</strong>
+                            <br />
                             <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz">WI.{{ selected_release }}.soft-filter.vcf.gz</a>
                             <br />
                             <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.vcf.gz.csi</a>
+                            <br />
+                            <br />
+                            <strong>Isotypes</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.isotype.vcf.gz">WI.{{ selected_release }}.soft-filter.isotype.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.csi</a>
+                            <br />
                         </td>
                     </tr>
 
@@ -95,18 +105,32 @@ body, html{
                         <td><strong>Hard Filter Variants</strong></td>
                         <td>The hard-filtered VCF includes only high-quality variants after all variants and genotypes with a failed QC status are removed.</td>
                         <td>
+                            <strong>All Strains</strong>
+                            <br />
                             <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz">WI.{{ selected_release }}.hard-filter.vcf.gz</a>
                             <br />
                             <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.vcf.gz.csi</a>
+                            <br />
+                            <br />
+                            <strong>Isotypes</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.isotype.vcf.gz">WI.{{ selected_release }}.hard-filter.isotype.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.isotype.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.isotype.vcf.gz.csi</a>
+                            <br />
                         </td>
                     </tr>
 
                     <tr>
                         <td><strong>Imputed Variants</strong></td>
-                        <td>The imputed VCF includes all the variants from the hard-filtered VCF but all missing genotypes have been imputed using BEAGLE.</td>
-                        <td><a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz">WI.{{ selected_release }}.impute.vcf.gz</a>
+                        <td>The imputed VCF includes all the variants from the hard-filtered Isotype VCF, but all missing genotypes have been imputed using BEAGLE.</td>
+                        <td>
+                            <strong>Isotypes</strong>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.vcf.gz.csi">WI.{{ selected_release }}.impute.vcf.gz.csi</a>
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.isotype.vcf.gz">WI.{{ selected_release }}.impute.isotype.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.isotype.vcf.gz.csi">WI.{{ selected_release }}.impute.isotype.vcf.gz.csi</a>
+                            <br />
                         </td>
                     </tr>
 
@@ -127,6 +151,27 @@ body, html{
                         <td>You can download individual strain BAMs using this script.</td>
                         <td><a href="{{ url_for('data.download_script_strain_v2') }}">download_bams.sh</a></td>
                     </tr>
+
+                    <tr>
+                        <td><strong>Phylogeny</strong></td>
+                        <td>
+                            Trees were generated using by converting the hard-filtered VCF to Phylip format using <a href="https://github.com/edgardomortiz/vcf2phylip/tree/030b8d">vcf2phylip [rev #030b8d]</a>.
+                            Then, the Phylip format was converted to Stockholm format using <a href="https://bioconvert.readthedocs.io/en/master/index.html">bioconvert v0.3.0</a>. Finally, Stockholm format was used
+                            to construct a tree with <a href="https://github.com/tseemann/quicktree">quicktree v2.5</a> using default settings.
+                        </td>
+                        <strong>All Strains</strong>
+                        <td>
+                            <strong>All Strains</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.min4.tree">WI.{{ selected_release }}.hard-filter.min4.tree</a> (<a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.min4.tree.pdf">PDF</a>)
+                            <br />
+                            <br />
+                            <strong>Isotype</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.isotype.min4.tree">WI.{{ selected_release }}.hard-filter.isotype.min4.tree</a> (<a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.isotype.min4.tree.pdf">PDF</a>)
+                        </td>
+                    </tr>
+
                     <hr />
                 </tbody>
             </table>
