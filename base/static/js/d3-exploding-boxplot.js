@@ -93,9 +93,12 @@ function(d3,d3tip)
                   .domain(groups.map(function(d){return d.key}))
 									.rangeRoundBands([0,width-margin.left-margin.right],boxpadding)
 							
-	UniqueNames= $.unique(data.map(function (d) {return d.AssayNumber;}));
+	UniqueNames= $.unique(data.map(function (d) { return d.AssayNumber; }));
 	default_colors = [];
-	UniqueNames.forEach(function(d){c=getRandomColor(); default_colors.push(c)});
+	if (aes.pal) { default_colors=aes.pal }
+	else {
+	    UniqueNames.forEach(function(d){c=getRandomColor(); default_colors.push(c)});
+	}
     var colorscale = d3.scale.ordinal()
             .domain(d3.set(data.map(functorkey(aes.color))).values())
             .range(default_colors)
@@ -143,14 +146,14 @@ function(d3,d3tip)
 
       var xaxisG = container.append('g')
             .attr('class','d3-exploding-boxplot x axis')
-            .attr("transform", "translate(0,"+ (height-margin.top-margin.bottom) +")")
+            .attr("transform", "translate(0,"+ (height-margin.top-margin.bottom-15) +")")
             .call(xAxis);
 
 			if(rotateXLabels){
 				xaxisG.selectAll('text')
-				    .attr("transform", "rotate(90)")
+				    .attr("transform", "rotate(-20)")
 						.attr("dy",".35em")
-						.attr("x","9").attr("y","0")
+						.attr("x","-40").attr("y","15")
 				    .style("text-anchor", "start");
 			}
 
