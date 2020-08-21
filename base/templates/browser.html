@@ -239,11 +239,8 @@ th {
 <div class="panel panel-default">
   <div class="panel-body">
     <span class="label gt-0 PASS">Passing REF</span>&nbsp;
-    <span class="label gt-2 PASS">Passing ALT</span>&nbsp;
-    <span class="label gt-0 mapping_quality min_depth dv_dp het">Failing REF</span>&nbsp;
-    <span class="label gt-2 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
-    <span class="label gt-1 het">Heterozygous</span>
-    <strong><a class='btn btn-link' href='{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-filters'>Help</a></strong>
+    <span class="label gt-2 PASS">Passing ALT</span>&nbsp;&nbsp;&nbsp;<small><strong>Note: </strong> The variant browser now only shows hard-filtered variants.</small>
+    <strong><a class='btn btn-link pull-right' href='{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-filters'>Help</a></strong>
   </div>
 </div>
 </div>
@@ -329,8 +326,8 @@ var trackset = {"Genes": {
                    },
             "Variants": {
                             name: "Variants",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.soft-filter.vcf.gz",
-                            indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.soft-filter.vcf.gz.tbi",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz",
+                            indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz.tbi",
                             order: Number.MAX_VALUE,
                             height: 500,
                             displayMode: "SQUISHED",
