@@ -21,7 +21,6 @@ from base.utils.data_utils import is_number, list_duplicates
 from slugify import slugify
 from gcloud.exceptions import BadRequest
 
-
 from logzero import logger
 
 

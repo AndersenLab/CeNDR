@@ -52,6 +52,9 @@ RUN pip install -r /app/requirements.txt
 # Add the application source code.
 ADD . /app
 
+# tmp to spill error
+RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask
+
 # Download the database; GAE_VERSION set as dummy variable
 RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask download_db
 
