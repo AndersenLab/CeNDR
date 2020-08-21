@@ -148,16 +148,13 @@ Missing genotypes are excluded.
 <a name='variant-filters'></a>
 ### Variant filters
 
-Variants displayed on the genome browser are 'soft-filtered', meaning that in some cases they are poor quality. However, we still report them but using a different set of colors to indicate that they should be interpretted carefully. When you hover your mouse over filtered variants on the browser page, the name of the filter will appear as a tooltip.
+Variants displayed on the genome browser are 'hard-filtered', meaning that filters have been applied, and poor-quality variants and genotypes have been removed or set to missing.
 
-Examples are listed below
+Genotypes are displayed as follows:
 
 <div class="panel-body">
     <span class="label gt-0 PASS">CB4856</span> - A passing reference variant<br />
     <span class="label gt-2 PASS">DL238</span> - A passing alternative variant<br />
-    <span class="label gt-0 mapping_quality min_depth dv_dp het">QX1211</span> - A reference variant<br />
-    <span class="label gt-2 mapping_quality min_depth dv_dp het">XZ1516</span> - An alternative variant<br />
-    <span class="label gt-1 het">JU1218</span> - A heterozygous variant
 </div>
 
 

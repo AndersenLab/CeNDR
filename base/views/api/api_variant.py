@@ -42,7 +42,7 @@ ANN_header = ["allele",
 
 
 def get_vcf(release=config["DATASET_RELEASE"], filter_type="hard"):
-    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.{filter_type}-filter.vcf.gz".format(release=release, filter_type=filter_type)
+    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.{filter_type}-filter.isotype.vcf.gz".format(release=release, filter_type=filter_type)
 
 
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]
@@ -105,8 +105,7 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
     # (2) Variant query of the hard-filter VCF - querying the BCSQ annotations
 
     # Determine which VCF is going to be queried
-    filter_type = "hard" if query["variant-annotation"] == "bcsq" else "soft"
-    vcf = get_vcf(release=query['release'], filter_type=filter_type)
+    vcf = get_vcf(release=query['release'], filter_type='hard')
     available_samples = VCF(vcf).samples
 
     # Limit queries to 100kb
