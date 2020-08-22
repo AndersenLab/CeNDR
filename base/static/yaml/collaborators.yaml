@@ -1,4 +1,11 @@
 # Photos should be stored in the static location under static/img/people/
+# This list will be alphebetized automatically
+- first_name: Michael
+  last_name: Ailion
+  photo: michael_ailion.gif
+  title: University of Washington
+  website: http://depts.washington.edu/ailion/
+
 - first_name: Marie-Anne 
   last_name: Félix
   photo: Marie.png
@@ -11,11 +18,6 @@
   title: New York University
   website: https://biology.as.nyu.edu/object/MatthewRockman
 
-- first_name: Michael
-  last_name: Ailion
-  photo: michael_ailion.gif
-  title: University of Washington
-  website: http://depts.washington.edu/ailion/
 
 - first_name: Christian
   last_name: Braendle
@@ -34,3 +36,15 @@
   title: Academia Sinica
   photo: john_wang.jpg
   website: http://www.biodiv.tw/index.php/en/people/faculty/dr-john-wang
+
+- first_name: Mark
+  last_name: Sterken
+  title: Wageningen University
+  photo: mark_sterken.jpeg
+  website: https://www.wur.nl/en/Persons/Mark-dr.-MG-Mark-Sterken.htm
+
+- first_name: Yen-Ping
+  last_name: Hsueh
+  website: http://www.imb.sinica.edu.tw/en/research/faculty/yenping.html
+  photo: yenping.jpg
+  title: Academia Sinica

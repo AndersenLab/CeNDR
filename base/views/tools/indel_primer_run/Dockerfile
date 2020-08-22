@@ -5,26 +5,33 @@ RUN apt-get update && apt-get install -y procps && \
 RUN conda config --add channels defaults && \
     conda config --add channels bioconda && \
     conda config --add channels conda-forge
-RUN conda create -n vcfkit \
-                 python=3.7 \
-                 numpy \
-                 scipy \
-                 biopython \
-                 bwa \
-                 samtools \
-                 bcftools \
-                 vcftools \
-                 blast \
-                 primer3=2.5.0 \
-				 && conda clean -a
+RUN conda create -n vcf-kit \
+              python=3.7 \
+              pytest \
+              pytest-cov \
+              coveralls \
+              biopython \
+              "matplotlib>=1.3.1" \
+              "scipy>=0.13.3" \
+              "numpy>=1.8.0" \
+              "cython>=0.20.1" \
+              "cyvcf2>=0.6.5" \
+              "intervaltree>=2.1.0" \
+              "networkx>=1.11" \
+              "bwa>=0.7.12" \
+              "samtools>=1.10" \
+              "bcftools>=1.10" \
+              "blast>=2.2.31" \
+              "muscle>=3.8.31" \
+              "primer3>=2.5.0"
 
 ENV PATH /opt/conda/envs/vcfkit/bin:$PATH
 LABEL Name="vcf-kit" Author="Daniel Cook"
 
-# Now install VCF-Kit
+# Now install VCF-Kit 0.2.5
 RUN git clone https://www.github.com/andersenlab/vcf-kit && \
     cd vcf-kit && \
-    git checkout --track origin/python3 && \
+    git checkout 4dceaab0d373a51624b55843f567f41da1f83037 && \
     python setup.py install
 
 # Create and change to the app directory.

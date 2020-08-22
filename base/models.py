@@ -425,21 +425,23 @@ class Strain(DictSerializable, db.Model):
                 df - the strain dataset
         """
         df = pd.read_sql_table(cls.__tablename__, db.engine)
+        # Remove strains with issues
+        df = df[df["issues"] == False]
         cumulative_isotype = df[['isotype', 'sampling_date']].sort_values(['sampling_date'], axis=0) \
-                                                              .drop_duplicates(['isotype']) \
-                                                              .groupby(['sampling_date'], as_index=True) \
-                                                              .count() \
-                                                              .cumsum() \
-                                                              .reset_index()
+                                                             .drop_duplicates(['isotype']) \
+                                                             .groupby(['sampling_date'], as_index=True) \
+                                                             .count() \
+                                                             .cumsum() \
+                                                             .reset_index()
         cumulative_isotype = cumulative_isotype.append({'sampling_date': np.datetime64(datetime.datetime.today().strftime("%Y-%m-%d")),
                                                         'isotype': len(df['isotype'].unique())}, ignore_index=True)
         cumulative_strain = df[['strain', 'sampling_date']].sort_values(['sampling_date'], axis=0) \
-                                                            .drop_duplicates(['strain']) \
-                                                            .dropna(how='any') \
-                                                            .groupby(['sampling_date']) \
-                                                            .count() \
-                                                            .cumsum() \
-                                                            .reset_index()
+                                                           .drop_duplicates(['strain']) \
+                                                           .dropna(how='any') \
+                                                           .groupby(['sampling_date']) \
+                                                           .count() \
+                                                           .cumsum() \
+                                                           .reset_index()
         cumulative_strain = cumulative_strain.append({'sampling_date': np.datetime64(datetime.datetime.today().strftime("%Y-%m-%d")),
                                                       'strain': len(df['strain'].unique())}, ignore_index=True)
         df = cumulative_isotype.set_index('sampling_date') \
