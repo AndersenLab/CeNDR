@@ -33,7 +33,7 @@ def strain():
     return redirect(url_for('strain.map_page'))
 
 
-@strain_bp.route('/global-strain-map/')
+@strain_bp.route('/global-strain-map')
 @cache.memoize(50)
 def map_page():
     """
@@ -42,7 +42,7 @@ def map_page():
     """
     VARS = {'title': "Global Strain Map",
             'strain_listing': dump_json(get_strains(known_origin=True))}
-    return render_template('strain/global_Strain_map.html', **VARS)
+    return render_template('strain/global_strain_map.html', **VARS)
 
 
 #
@@ -121,7 +121,7 @@ def strain_catalog():
 #
 
 
-@strain_bp.route('/submit/')
+@strain_bp.route('/submit')
 def strain_submission_page():
     """
         Google form for submitting strains
@@ -134,7 +134,7 @@ def strain_submission_page():
 # Protocols
 #
 
-@strain_bp.route("/protocols/")
+@strain_bp.route("/protocols")
 @cache.cached(timeout=50)
 def protocols():
     title = "Protocols"
