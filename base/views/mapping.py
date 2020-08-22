@@ -262,14 +262,3 @@ def report_view(report_slug, trait_name=None, rerun=None):
     report_template = f"reports/{trait.REPORT_VERSION}.html"
     return render_template(report_template, **VARS)
 
-
-@mapping_bp.route('/mapping/public/', methods=['GET'])
-def public_mapping():
-    query = request.args.get("query")
-    title = "Public Mappings"
-    pub_mappings = query_item('mapping', filters=[('is_public', '=', True)])
-    return render_template('public_mapping.html', **locals())
-
-
-
-

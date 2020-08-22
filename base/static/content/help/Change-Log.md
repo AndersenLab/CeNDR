@@ -15,6 +15,7 @@
 * Data links have been removed from isotype pages; They are still available on the release pages.
 * Reports for Alignment, Concordance, And Variant calling are now produced for all releases.
 * Publications have been updated.
+* The public mappings page was removed as our mapping infrastructure is changing.
 * A new tool for calculating [heritability](/tools/heritability) has been released.
 
 __Genome Browser__

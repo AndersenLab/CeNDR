@@ -33,7 +33,7 @@ Or use this bibtex entry
 
 Hyper-divergent regions are genomic intervals that contain sequences not found in the N2 reference strain. They were identified by high levels of variation and low coverage from read alignments. For a more full description, please read [this paper](https://andersenlab.org/publications/2020LeebioRxiv.pdf). We highly recommend that you use the variant browser and view the BAM files for strains of interest. We also released a genomic view track to see where we have classified divergent regions. If you find that your region of interest overlaps with a hyper-divergent region, then we recommend taking any variants as preliminary. Long-read sequencing is required to identify the actual genomic sequences in this region.
 
-### How much confidence do we have in the Indel variants?
+### How much confidence do we have in the indel variants?
 
 GATK calls indel variants (1-50 bp) and short structural variants. The variant calling at these sites was not optimized and ran default parameters. These variants should be considered preliminary until confirmed by PCR or long-read sequencing.
 

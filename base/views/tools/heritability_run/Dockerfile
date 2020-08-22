@@ -1,4 +1,3 @@
-# docker build --file alignment.Dockerfile -t swantonlab/alignment .
 FROM continuumio/miniconda3
 RUN apt-get update && apt-get install -y procps && \
     apt-get clean
