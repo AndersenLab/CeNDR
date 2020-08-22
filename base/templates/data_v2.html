@@ -81,7 +81,7 @@ body, html{
                     </tr>
 
                     <tr>
-                        <td><strong>Soft Filter Variants</strong></td>
+                        <td><strong>Soft-Filtered Variants</strong></td>
                         <td>The soft-filtered VCF includes all variants and annotations called by the GATK pipeline. The QC status of each variant (INFO field=<code>FILTER</code>) and genotype (Format Field=<code>FT</code>) is specified by a VCF Field.</td>
                         <td>
                             <strong>All Strains</strong>
@@ -101,7 +101,7 @@ body, html{
                     </tr>
 
                     <tr>
-                        <td><strong>Hard Filter Variants</strong></td>
+                        <td><strong>Hard-Filtered Variants</strong></td>
                         <td>The hard-filtered VCF includes only high-quality variants after all variants and genotypes with a failed QC status are removed.</td>
                         <td>
                             <strong>All Strains</strong>
@@ -122,7 +122,7 @@ body, html{
 
                     <tr>
                         <td><strong>Imputed Variants</strong></td>
-                        <td>The imputed VCF includes all the variants from the hard-filtered Isotype VCF, but all missing genotypes have been imputed using BEAGLE.</td>
+                        <td>The imputed VCF includes all the variants from the hard-filtered Isotype VCF, but all missing genotypes have been imputed using <a href="https://faculty.washington.edu/browning/beagle/beagle.html">Beagle v5.1</a>.</td>
                         <td>
                             <strong>Isotypes</strong>
                             <br />
@@ -145,18 +145,11 @@ body, html{
                         <td><a href="https://storage.googleapis.com/andersenlab.org/publications/2017Laricchia/tes_cender.bed">tes_cender.bed</a></td>
                     </tr>
 
-                    <tr>
-                        <td><strong>Download BAMs Script</strong></td>
-                        <td>You can download individual strain BAMs using this script.</td>
-                        <td><a href="{{ url_for('data.download_script_strain_v2') }}">download_bams.sh</a></td>
-                    </tr>
 
                     <tr>
-                        <td><strong>Phylogeny</strong></td>
+                        <td><strong>Tree</strong></td>
                         <td>
-                            Trees were generated using by converting the hard-filtered VCF to Phylip format using <a href="https://github.com/edgardomortiz/vcf2phylip/tree/030b8d">vcf2phylip [rev #030b8d]</a>.
-                            Then, the Phylip format was converted to Stockholm format using <a href="https://bioconvert.readthedocs.io/en/master/index.html">bioconvert v0.3.0</a>. Finally, Stockholm format was used
-                            to construct a tree with <a href="https://github.com/tseemann/quicktree">quicktree v2.5</a> using default settings.
+                            Tree generated using neighbour-joining algorithm as implemented in <a href="https://github.com/tseemann/quicktree">QuickTree</a> in Newick and PDF format.
                         </td>
                         <strong>All Strains</strong>
                         <td>
@@ -170,6 +163,13 @@ body, html{
                             <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.isotype.min4.tree">WI.{{ selected_release }}.hard-filter.isotype.min4.tree</a> (<a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.isotype.min4.tree.pdf">PDF</a>)
                         </td>
                     </tr>
+
+                    <tr>
+                        <td><strong>Download BAMs Script</strong></td>
+                        <td>You can batch download individual strain BAMs using this script.</td>
+                        <td><a href="{{ url_for('data.download_script_strain_v2') }}">download_bams.sh</a></td>
+                    </tr>
+
 
                     <hr />
                 </tbody>
