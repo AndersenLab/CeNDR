@@ -8,7 +8,8 @@ from flask import (render_template,
                    Blueprint,
                    abort,
                    flash,
-                   Markup)
+                   Markup,
+                   stream_with_context)
 
 from base.models import Strain
 from base.views.api.api_strain import get_strains, query_strains
@@ -48,23 +49,22 @@ def map_page():
 #
 # Strain Data
 #
+
 @strain_bp.route('/CelegansStrainData.tsv')
 def strain_data_tsv():
     """
         Dumps strain dataset; Normalizes lat/lon on the way out.
     """
-    col_list = list(Strain.__mapper__.columns)
-    
+
     def generate():
-        first = True
-        if first:
-            first = False
-            header = [x.name for x in list(Strain.__mapper__.columns)]
-            yield ('\t'.join(header) + "\n").encode('utf-8')
+        col_list = list(Strain.__mapper__.columns)
+        header = [x.name for x in col_list]
+        yield '\t'.join(header) + "\n"
         for row in query_strains(issues=False):
             row = [getattr(row, column.name) for column in col_list]
-            yield ('\t'.join(map(str, row)) + "\n").encode('utf-8')
-    return Response(generate(), mimetype="text/tab-separated-values")
+            yield '\t'.join(map(str, row)) + "\n"
+
+    return Response(stream_with_context(generate()), mimetype="text/tab-separated-values")
 
 
 #
