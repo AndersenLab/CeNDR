@@ -1,0 +1,383 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+
+	<link rel="stylesheet" href="/static/js/DataTables/datatables.css" />
+	<link href="/static/css/lightbox.css" rel="stylesheet" />
+	<script type="text/javascript" src="static/js/DataTables/datatables.min.js"></script>
+	<script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+	<script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
+	<script src="https://unpkg.com/jspdf@latest/dist/jspdf.node.min.js"></script>
+	<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+	<script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+	<script type="text/javascript" src="static/js/FileSaver.min.js"></script>
+	
+	<style type="text/css">
+		.rounded {
+			font-family: Helvetica, Tahoma, Geneva, sans-serif;
+			text-decoration:none;
+			border-radius: 30px 30px 30px 30px;
+			font-weight: bold;
+			display:inline-block;
+		}
+		.btn.clicked {
+			background: #44A9FC;
+		}
+	</style>
+	<script src="http://www.protobi.com/javascripts/d3.v3.min.js"></script>
+	<style type="text/css">
+		.arrow{
+			stroke-width:2;
+			stroke:#000;
+		}
+
+		#arrow{
+			stroke-width:1;
+		}
+	</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="btn-group" role="group">
+  <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Download
+  </button>
+  <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+    <!--div class="col-sm-4" ><button id="pdfd" type="button" class="btn btn-secondary" onClick='window.print()'>Print</button></div-->
+    <div class="col-sm-4" ><button id="pdd" type="button" class="btn btn-secondary" onClick='getPDF("containerfluid")'>PDF</button></div>
+    <div class="col-sm-4" ><button id="mdd" type="button" class="btn btn-secondary" onClick='getMarkdown("containerfluid")'>CSV</button></div>
+  </div>
+</div>
+
+<div id="containerfluid" class="container-fluid">
+	<div class="row" id = "go1t" >
+	<p>
+	<center><h3><b>Selected Indel site</b></h3></center>
+	</p>
+	<br /><br /><br />
+	<table id="example" class="display" style="width:100%;">
+        <thead>
+            <tr>
+                <th>Indel Start Position</th>
+                <th>Indel Stop Position</th>
+                <th>Indel Size</th>
+                <th>Strain effect</th>
+            </tr>
+        </thead>
+		<tbody>
+			<tr>
+			{% for d in data1[1:][:4] %}
+			<td>{{ d }} </td>
+			{% endfor %}
+			</tr>
+		</tbody>
+    </table>
+	</div>
+	<!-- br /><br / -->
+	<div style=''>
+	<p>
+	<center><h3><b>Primer information</b></h3></center>
+	</p>
+
+	<div id="svgchartarea"></div>
+	<canvas id="canvas" width="900" height="210"></canvas>
+	<div id="png-container"></div>	
+	<div>
+	
+	{% for p in params %}
+		<h4>{{ p }}</h4>
+	{% endfor %}
+	
+	</div>
+	
+	<br /><br /><br /><br />
+	<table id="example1" class="display" style="width:100%;font-size: 10px;"> <!--  margin-left: -130px;" -->
+        <thead>
+            <tr>
+                <th>LeftPrimer Sequence</th>
+                <th>Start Position</th>
+                <th>Stop Position</th>
+                <th>Melting Temp</th>
+                <th>RightPrimer Sequence</th>
+                <th>Start Position</th>
+                <th>Stop Position</th>
+                <th>Melting Temp</th>
+                <th>AmpliconSize in strain1</th>
+                <th>AmpliconSize in strain2</th>
+            </tr>
+        </thead>
+		<!--  if pres is defined and variable|length  -->
+		<tbody>
+			{% for p in pres %}
+			<tr>
+			{% for d in p %}
+			<td>{{ d }} </td>
+			{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+		<!-- endif -->
+    </table>
+	</div>
+
+</div>
+<br />
+<br />
+<br />
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+Element.prototype.remove = function() {
+		this.parentElement.removeChild(this);
+	}
+	NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+		for(var i = this.length - 1; i >= 0; i--) {
+			if(this[i] && this[i].parentElement) {
+				this[i].parentElement.removeChild(this[i]);
+			}
+		}
+	}
+
+function onSubmitData(val){
+	return true
+}
+
+
+$(document).ready(function(){
+	$('#example').DataTable();
+	$('#example1').DataTable({ "order": [[ 1, "asc" ]] });
+	gda = JSON.parse('{{ graphd  | tojson | safe }}');
+	
+	data = gda
+	if (data["search_reg"] != ":1000000000-0"){
+		d = data["search_reg"].split(':')[1].split('-')
+		indel = data["indel_reg"].split(':')[1].split('-')
+		d = d.concat(indel.concat(data["primer_reg"])).map(Number);
+		var svg = d3.select("#svgchartarea")
+			.append("svg")
+			.attr("width", 1000)
+
+		// Create the scale
+		var x = d3.scale.linear()
+			.domain([d3.min(d), d3.max(d)])
+			.range([100, 800]);
+
+		defs = svg.append("defs")
+
+		defs.append("marker")
+		.attr({
+			"id":"arrow",
+			"viewBox":"0 -5 10 10",
+			"refX":5,
+			"refY":0,
+			"markerWidth":5,
+			"markerHeight":5,
+			"orient":"auto"
+			})
+			.append("path")
+			.attr("d", "M0,-5L10,0L0,5")
+			.attr("class","arrowHead")
+			.style("fill", "black");
+
+
+		svg
+			.append("g")
+			.append("rect")
+			.attr("width", 900)
+			.attr("height", 210)
+			.attr("fill", "white")
+
+		// Draw the axis
+		svg
+			.append("g")
+				.attr("transform", "translate(0,75)")
+				.call(d3.svg.axis()
+				.scale(x)
+				.ticks(3)
+				.orient("bottom"));
+		indelg = svg
+			.append("g")
+			.attr("transform", "translate(0,50)");
+
+		indelg.append("rect")
+			.attr("width",x(Number(indel[1]))-x(Number(indel[0])))
+			.attr("height",function(d) { return 10; })
+			.attr("x",function(d,i) { return x(Number(indel[0])); })
+			.attr("fill", "red")
+			.attr("transform", "translate(0,15)");
+
+		indelg.append("line")
+			.attr("x1", x(d3.min([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])))
+			.attr("y1", 0)
+			.attr("x2", x(d3.min([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])))
+			.attr("y2", 30)
+			.attr("stroke-width", 1)
+			.attr("stroke", "black");
+
+		indelg.append("line")
+			.attr("x1",x(d3.min([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])))
+			.attr("y1",30)
+			.attr("x2",x(d3.max([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])))
+			.attr("y2",30)
+			.attr("transform","translate(0,-30)")
+			.attr("stroke-width", 2)
+			.attr("stroke", "black");
+
+		indelg.append('line')
+		.attr({
+			"class":"arrow",
+			"marker-end":"url(#arrow)",
+			"x1":x(d3.min([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])),
+			"y1":30,
+			"x2":x(d3.max([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])),
+			"y2":30,
+			"transform":"translate(0,-30)"
+		});
+
+
+		indelg.append("line")
+			.attr("x1", x(d3.max([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])))
+			.attr("y1", 0)
+			.attr("x2", x(d3.max([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])))
+			.attr("y2", 30)
+			.attr("stroke-width", 1)
+			.attr("stroke", "black");
+
+		indelg.append("line")
+			.attr("x1",x(d3.max([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])))
+			.attr("y1",30)
+			.attr("x2",x(d3.min([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])))
+			.attr("y2",30)
+			.attr("transform","translate(0,-30)")
+			.attr("stroke-width", 2)
+			.attr("stroke", "black");
+
+		indelg.append('line')
+		.attr({
+			"class":"arrow",
+			"marker-end":"url(#arrow)",
+			"x1":x(d3.max([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])),
+			"y1":30,
+			"x2":x(d3.min([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])),
+			"y2":30,
+			"transform":"translate(0,-30)"
+		});
+
+		var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
+		var DOMURL = self.URL || self.webkitURL || self;
+		var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+		var url = DOMURL.createObjectURL(svg);
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+		
+		var img = new Image();
+		
+		img.onload = function() {
+			ctx.drawImage(img, 0, 0);
+			var png = canvas.toDataURL("image/png");
+			document.getElementById('png-container').innerHTML = '<img src="'+png+'"/>';
+			DOMURL.revokeObjectURL(png);
+		};
+		img.src = url;
+		document.getElementById("svgchartarea").remove();
+		document.getElementById('canvas').remove();
+
+	} else {
+		d3.select("#svgchartarea").html('<center><h3><b style="color: red;"> NO PRIMERS FOUND! </b></h3></center>')
+	}
+});
+</script>
+
+<script type="text/javascript">
+var turndownService = new TurndownService();
+
+var getPDF = function(el) {
+	var doc = new jsPDF('p', 'px', 'a4');
+	var source = document.getElementById('containerfluid');
+	doc.html(
+		source,
+		{
+		html2canvas: {
+			scale:Math.min(( doc.internal.pageSize.getWidth() /  ($('#containerfluid').width() +50)), ( doc.internal.pageSize.getHeight() / ($('#containerfluid').height() +50)))
+		},
+		callback: function (doc) {
+		 var a = document.createElement('a');
+		 var pdfblob = new Blob([ doc.output('blob') ], { type : 'application/pdf'});
+		 a.href = window.URL.createObjectURL(pdfblob);
+		 a.download = "{{ fnam }}.pdf";
+		 a.click();
+	   }}
+	);
+}
+
+var getMarkdown = function(el) {
+	var markdown = turndownService.turndown(document.getElementById(el))
+	ms = markdown.split("\n\n")
+	fl = 0
+	counter = 1
+	counterChk = 0
+	cntr =11
+	outMS = ""
+	for (i in ms){
+		if (!ms[i].startsWith('Search') && !ms[i].startsWith('Show') && !ms[i].startsWith('Previous') && ms[i] != "" && !ms[i].startsWith("![](") && ms[i] != "  \n  \n  " && ms[i] != "  \n  \n  \n  "){
+			if (ms[i].startsWith("\n") || ms[i].startsWith(" ")){ fl = 0 }
+			if (ms[i].startsWith('##')){outMS += '\n'}
+			if (fl == 2){
+				outMS += ms[i];
+				counterChk +=1
+				if (counterChk == cntr){ 
+					outMS += '\n';
+					counterChk = 0;
+					cntr = 10;}
+				else{outMS+=','}
+				
+			}
+			
+			if ( ["Indel Start Position", "LeftPrimer Sequence"].indexOf(ms[i]) > -1 ){
+				fl = 1
+			}
+			if (fl == 1){ 
+				outMS += '"'+ms[i]+'"';
+				counter += 1;
+				}
+			if ( ["Strain effect", "AmpliconSize in strain2"].indexOf(ms[i]) > -1){
+				fl = 2
+				outMS += '\n'
+				counterChk = 0
+			}else if(outMS != "" && !outMS.endsWith('\n') && ms[i] != " " && fl != 2){outMS += ','}
+			if (fl == 0){ outMS += '"'+ms[i]+'"\n' }
+		}
+	}
+	outMS.replace(',,', ',');
+	outMS.replace('\n,', '\n');
+	outMS.replace('\_', '_');
+	outMS.replace('####', '');
+	outMS.replace('###', '');
+	var blob = new Blob([outMS], {type: 'text/plain'});
+    if(window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob, "{{ fnam }}.csv");
+    }
+    else{
+        var elem = window.document.createElement('a');
+        elem.href = window.URL.createObjectURL(blob);
+        elem.download = "{{ fnam }}.csv";        
+        document.body.appendChild(elem);
+        elem.click();        
+        document.body.removeChild(elem);
+    }
+}
+
+$( document ).ready(function() {
+	$("a[href^='http://'], a[href^='https://'], a[href$='pdf']").attr("target","_blank");
+});
+</script>
+
+
+
+{% endblock %}

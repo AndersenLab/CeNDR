@@ -38,6 +38,7 @@ body, html{
         <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
         <li role="presentation" ><a href="#Variant-calling" role="tab" data-toggle="tab">Variant Calling</a></li>
         <li role="presentation" ><a href="#Concordance" role="tab" data-toggle="tab">Concordance</a></li>
+        <li role="presentation" ><a href="#Haplotypes" role="tab" data-toggle="tab">Haplotypes</a></li>
         <li role="presentation" ><a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a></li>
     </ul>
 
@@ -164,6 +165,16 @@ body, html{
                     </tr>
 
                     <tr>
+                        <td><strong>Haplotypes</strong></td>
+                        <td>...</td>
+                        <td>
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png">PNG</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.pdf">PDF</a>
+                        </td>
+                    </tr>
+
+                    <tr>
                         <td><strong>Download BAMs Script</strong></td>
                         <td>You can batch download individual strain BAMs using this script.</td>
                         <td><a href="{{ url_for('data.download_script_strain_v2') }}">download_bams.sh</a></td>
@@ -210,6 +221,10 @@ body, html{
 
         <div role="tabpanel" class="tab-pane" id="Variant-calling">
             <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/gatk_report.html"></object>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Haplotypes">
+            <img style="width:100%" src="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png""></img>
         </div>
 
 

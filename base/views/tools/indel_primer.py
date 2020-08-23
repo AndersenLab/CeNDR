@@ -1,11 +1,16 @@
 import tabix
+import arrow
+import requests
 from flask import Blueprint, jsonify, render_template, request
 from flask_wtf import Form
 from logzero import logger
 from wtforms import IntegerField, SelectField
 from wtforms.validators import Required, ValidationError
 
+from base.utils.gcloud import check_blob, upload_file
+from base.utils.data_utils import hash_it
 from base.constants import CHROM_NUMERIC
+from threading import Thread
 
 # Tools blueprint
 indel_primer_bp = Blueprint('indel_primer',
@@ -21,7 +26,8 @@ MAX_SV_SIZE = 500
 
 # Initial load of strain list from sv_data
 # This is run when the server is started.
-sv_strains = open("base/static/data/pairwise_indel_finder/sv_strains.txt", 'r').read().splitlines()
+SV_STRAINS = requests.get("https://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv_strains.txt").text.splitlines()
+SV_DATA_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/WI.HARD_FILTERED.FP.bed.gz"
 SV_COLUMNS = ["CHROM",
               "START",
               "END",
@@ -42,7 +48,7 @@ SV_COLUMNS = ["CHROM",
               "HIGH_EFF",
               "WBGeneID"]
 
-STRAIN_CHOICES = [(x, x) for x in sv_strains]
+STRAIN_CHOICES = [(x, x) for x in SV_STRAINS]
 CHROMOSOME_CHOICES = [(x, x) for x in CHROM_NUMERIC.keys()]
 COLUMNS = ["CHROM", "START", "STOP", "?", "TYPE", "STRAND", ""]
 
@@ -89,10 +95,10 @@ def indel_primer():
     """
     form = pairwise_indel_form(request.form)
     VARS = {"title": "Pairwise Indel Finder",
-            "strains": sv_strains,
+            "strains": SV_STRAINS,
             "chroms": CHROM_NUMERIC.keys(),
             "form": form}
-    return render_template('tools/pairwise_indel_finder.html', **VARS)
+    return render_template('tools/indel_primer.html', **VARS)
 
 
 def overlaps(s1, e1, s2, e2):
@@ -107,7 +113,7 @@ def pairwise_indel_finder_query():
         results = []
         strain_cmp = [data["strain_1"],
                       data["strain_2"]]
-        tb = tabix.open("base/static/data/pairwise_indel_finder/sv_data.bed.gz")
+        tb = tabix.open(SV_DATA_URL)
         query = tb.query(data["chromosome"], data["start"], data["stop"])
         results = []
         for row in query:
@@ -135,3 +141,43 @@ def pairwise_indel_finder_query():
             return jsonify(results=results)
         return jsonify(results=[])
     return jsonify({"errors": form.errors})
+
+
+def indel_primer_task(data, data_hash):
+    """
+        This is designed to be run in the background on the server.
+        It will run a heritability analysis on google cloud run
+    """
+    # Perform h2 request
+    #result = requests.post(config['HERITABILITY_URL'], data={'data': data,
+    #                                                         'hash': data_hash})
+    logger.debug(data)
+
+
+@indel_primer_bp.route('/pairwise_indel_finder/submit', methods=["POST"])
+def submit_indel_primer():
+    """
+        This endpoint is used to submit a heritability job.
+        The endpoint request is executed as a background task to keep the job alive.
+    """
+    data = request.get_json()
+    data['date'] = str(arrow.utcnow())
+
+    # Generate an ID for the data based on its hash
+    data_hash = hash_it(data, length=32)
+    logger.debug(data_hash)
+
+    # Upload query information
+    data_blob = f"reports/indel_primer/{data_hash}/data.json"
+    upload_file(data_blob, str(data), as_string=True)
+
+    thread = Thread(target=indel_primer_task, args=(data, data_hash,))
+    thread.daemon = True
+    thread.start()
+    return jsonify({'thread_name': str(thread.name),
+                    'started': True,
+                    'data_hash': data_hash})
+
+
+def pairwise_indel_query_results():
+    return render_template("tools/indel_primer_results.html")

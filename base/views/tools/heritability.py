@@ -60,7 +60,7 @@ def submit_h2():
     
     # Generate an ID for the data based on its hash
     data_hash = hash_it(data, length=32)
-    logger.info(data_hash)
+    logger.debug(data_hash)
 
     # Upload data immediately.
     data_blob = f"reports/heritability/{data_hash}/data.tsv"
