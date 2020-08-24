@@ -17,6 +17,7 @@
 * Publications have been updated.
 * The public mappings page was removed as our mapping infrastructure is changing.
 * A new tool for calculating [heritability](/tools/heritability) has been released.
+* A tool for generating primers for genotyping indels will be released soon.
 
 __Genome Browser__
 

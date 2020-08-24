@@ -46,14 +46,14 @@ seqs <- scanFa(REFERENCE, ranges)
 vcf[, sequence := as.character(seqs)]
 
 # Setup VCF columns
-vcf[, POS := START + 1]
+vcf[, POS := START]
 vcf[, ID := "."]
 
-vcf[, REF := dplyr::case_when(SVTYPE == "INS" ~ sequence[1],
+vcf[, REF := dplyr::case_when(SVTYPE == "INS" ~ substr(sequence, 1, 1),
                               SVTYPE == "DEL" ~ sequence), by=1:nrow(vcf)]
 # insert size is - 1 of size for ref.
-vcf[, ALT := dplyr::case_when(SVTYPE == "DEL" ~ sequence[1],
-                              SVTYPE == "INS" ~ paste0(rep("N", SIZE), collapse="")), by=1:nrow(vcf)]
+vcf[, ALT := dplyr::case_when(SVTYPE == "DEL" ~ substr(sequence, 1, 1),
+                              SVTYPE == "INS" ~ paste0(substr(sequence, 1, 1), paste0(rep("N", SIZE), collapse=""), collapse="")), by=1:nrow(vcf)]
 vcf[, QUAL := 1]
 vcf[, INFO := paste0("INDEL=1;", "END=", vcf$END, "TYPE=", SVTYPE)]
 vcf[, FILTER := "PASS"]
@@ -63,6 +63,8 @@ vcf[, SVTYPE := NULL]
 vcf[, SIZE := NULL]
 vcf[, START := NULL]
 vcf[, END := NULL]
+vcf[, sequence := NULL]
+
 
 
 setcolorder(vcf, c("CHROM",
