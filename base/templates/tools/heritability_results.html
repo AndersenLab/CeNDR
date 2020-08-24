@@ -1,0 +1,314 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-lightbox/0.7.0/bootstrap-lightbox.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/d3-exploding-boxplot.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.7/d3.js" charset="utf-8"></script>
+    <script src="https://d3js.org/queue.v1.min.js"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.6.7/d3-tip.min.js"></script>
+    <script src="/static/js/d3-exploding-boxplot.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"></script>
+	<style type="text/css">
+		.rounded {
+			font-family: Helvetica, Tahoma, Geneva, sans-serif;
+			text-decoration:none;
+			border-radius: 30px 30px 30px 30px;
+			font-weight: bold;
+			display:inline-block;
+		}
+		.btn.clicked {
+			background: #44A9FC;
+        }
+        table th, td {
+            text-align: center;
+        }
+	</style>
+
+    {% if not result %}
+        <meta http-equiv="refresh" content="10; url={{ request.path }}">
+    {% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+{% if data and result %}
+    <div class='pull-right'>
+        <button id="ppg" type="button" class="btn btn-secondary" onClick='ppage()'>Previous</button>
+        <button id="npg" type="button" class="btn btn-secondary"  onClick='npage()'>Next</button>
+    </div>
+    <button id="pdd" type="button" class="btn btn-secondary" onClick='getPDF("containerfluid")'>PDF</button>
+{% endif %}
+
+<div id="dataContainer" class="row">
+    <div class='col-md-8 col-md-offset-2'>
+    
+    <h4>Heritability Calculator</h4>
+
+    <p>
+        This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild
+        isolates. The broad-sense heritability is the amount of trait variance that comes from genetic differences in the
+        assayed group of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental)
+        variance.
+    </p>
+
+    <div id="htresarea"></div>
+
+    </div>{# /col-md-8 #}
+</div>{# /row #}
+
+{% if not result %}
+
+<div class="row">
+    <div class='col-md-8 col-md-offset-2'>
+        <p class='text-info'>
+            <strong>
+                The heritability calculation is currently being run. Please check back in a few minutes for results.
+                This page will reload automatically.
+            </strong>
+        </p>
+    </div>
+</div>
+
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        {% if data %}
+        <div id="svgchartarea"></div>
+        {% endif %}
+
+        {% if result %}
+        <canvas id="canvas" ></canvas> <!-- width="900" height="400"></canvas -->
+        <div id="png-container"></div>
+        {% endif %}
+
+    </div>{# /col-md-8 #}
+</div>{# /row #}
+
+<div class="row">
+    <h2>Data</h2>
+    <a class='btn btn-text pull-right' href="https://storage.googleapis.com/elegansvariation.org/reports/heritability/{{ data_hash }}/data.tsv">Download Table</a>
+	<table class="table table-hover table-condensed table-striped">
+        <thead>
+            <tr>    
+                <th>AssayNumber</th>
+                <th>Strain</th>
+                <th>TraitName</th>
+                <th>Replicate</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+		<tbody>
+		{% for row in data %}
+            <tr><td> {{ row['AssayNumber'] }} </td>
+                <td> {{ row['Strain'] }} </td>
+                <td> {{ row['TraitName'] }} </td>
+                <td> {{ row['Replicate'] }} </td>
+                <td> {{ row['Value']|string|truncate(8, end= "") }} </td>
+            </tr>
+        {% endfor %}
+		</tbody>
+    </table>
+	</div>
+{% endblock %}
+
+{% block script %}
+{% if result  %}
+    <script>
+    Element.prototype.remove = function() {
+            this.parentElement.removeChild(this);
+        }
+    NodeList.prototype.remove = HTMLCollection.prototype.remove = function() {
+            for(var i = this.length - 1; i >= 0; i--) {
+                if(this[i] && this[i].parentElement) {
+                    this[i].parentElement.removeChild(this[i]);
+                }
+            }
+        }
+
+    var trait = "{{ trait }}"
+    var Fnam = "{{ fnam }}"
+    var imag
+    var chartJson = {{ data|tojson|safe }};
+    var traits =[];
+    var img, ctx, canvs;
+    var maxP = 1;
+    var minP = 1;
+    var curP = 1;
+    var strn = [];
+    
+    var sortByProperty = function(property){
+       return function(a,b){
+          if(a[property] > b[property])
+             return 1;
+          else if(a[property] < b[property])
+             return -1;
+    
+          return 0;
+       }
+    }
+
+    var ppage = function(){
+        curP= (curP===1)? 1:curP-1;
+        loadPlot(curP);
+    }
+
+    var npage = function(){
+        curP= (curP===maxP)?maxP:curP+1;
+        loadPlot(curP);
+    }
+
+    function range(start, end){
+        if (start===end){return ([start,]);}
+        if (start<end){return ([start, ...range(start + 1, end)]);}
+        if (end<start){return ([start, ...range(start - 1, end)]);}
+    }
+
+    function getRandomColor() {
+        var letters = '123456789ABCDEF'.split('');
+        var color = '#';
+        for (var i = 0; i < 6; i++ ) { 
+                color += letters[Math.round(Math.random() * 14)];
+        }
+        return color;
+    }
+
+    var cpal = []
+    var loadPlot = function(jj){
+        df = [];
+        ran = range(25*(jj-1), (25*(jj)-1));
+        chartJson.forEach(function(d,i){
+            if (ran.indexOf((strn.indexOf(d['Strain'])))>-1) { df.push(d); } 
+        });
+        UniqueNames= $.unique(chartJson.map(function (d) {return d.a;}));
+        if (cpal.length == 0){
+            for (var cc=0; cc<UniqueNames.length; cc++){cpal.push(getRandomColor())};
+        }
+
+        var chart = d3.exploding_boxplot(df, {y:'Value', group:'Strain', color:'AssayNumber', label:'TraitName', pal:cpal})
+        document.getElementById("svgchartarea").innerHTML = "";
+        chart('#svgchartarea')
+    }
+
+    async function drawImg(canvas, image, DOMURL, w, h){
+
+        return new Promise(resolve => {
+
+            image.onload = function () {
+                    var ctx = canvas.getContext("2d");
+                    ctx.fillStyle = "#FFFFFF";
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.drawImage(image, 0, 0, w, h);
+                    var png = canvas.toDataURL("image/jpg",1);
+                    imag = png
+                    document.getElementById('png-container').innerHTML = '<img id="img1" src="'+png+'"/>';
+                    DOMURL.revokeObjectURL(png);
+        if (this.complete){
+        imag = this.src
+
+        }
+                    resolve('resolved');
+                }
+
+        });
+
+    }
+    
+    var loadCanvas = function(){
+        var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
+
+        var canvas = document.getElementById("canvas");
+        canvas.width = 1000; 
+        canvas.height = 480; 
+        var ctx = canvas.getContext("2d");
+        var DOMURL = self.URL || self.webkitURL || self;
+        image = document.createElement("IMG"); 
+        var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+        var url = DOMURL.createObjectURL(svg);
+
+        drawImg(canvas, image, DOMURL, 1000, 480).then(() => {
+        
+        var doc = new jsPDF('p', 'px', 'a4');
+        var source = document.getElementById('dataContainer'); 
+        margins = {
+            top: 40,
+            bottom: 40,
+            left: 40,
+            width: 522
+        };
+    
+        doc.setFontSize(16);
+        doc.text(doc.internal.pageSize.getWidth()/2, 50, 'Heritability Calculator', {'align': 'center'});
+        doc.fromHTML('The broad-sense heritability is the amount of trait variance that comes from genetic differences in the assayed group ', 20, 85, {'align': 'justify', 'maxWidth': doc.internal.pageSize.getWidth()-40},function(){},margins)
+        doc.fromHTML('of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental) variance.', 20, 100, {'align': 'justify', 'maxWidth': doc.internal.pageSize.getWidth()-40},function(){},margins)
+        doc.fromHTML('Broad-sense heritability (<i> H</i>', 20, 120) 
+        doc.setFontSize(4);
+        doc.fromHTML('<i>2</i>', 123, 115)
+        doc.setFontSize(10);
+        doc.fromHTML(') = {{ (result['H2']*100)|round(2) }}% (range {{ (result['ci_l']*100)|round(2) }}% to {{ (result['ci_r']*100)|round(2) }}%)', 130, 120)
+        doc.fromHTML('Trait: {{ trait }}', 20, 140)
+        
+        doc.addImage(document.getElementById('img1').src, 'JPEG', 10, 170, 430,200, NaN, 'FAST');
+        
+        var a = document.createElement('a');
+            var pdfblob = new Blob([ doc.output('blob') ], { type : 'application/pdf'});
+            a.href = window.URL.createObjectURL(pdfblob);
+            a.download = "{{ fnam }}.pdf";
+            a.click();
+        })
+        image.src = url;
+        document.getElementById("svgchartarea").remove();
+        document.getElementById('canvas').remove();
+        //location.reload();
+    }
+
+    var getPDF = function(){
+        loadCanvas();
+    }
+
+    $(document).ready(function(){
+        if (chartJson.length != 0){
+            var node= document.getElementById("svgchartarea");
+            $("#svgchartarea").html("")
+            //node.querySelectorAll('*').forEach(n => n.remove());
+            newPt = document.createElement("p")
+            newPt.innerHTML = "Broad-sense heritability (<i> H<sup>2</sup> </i>) = {{ (result['H2']*100)|round(2) }}% (range {{ (result['ci_l']*100)|round(2) }}% to {{ (result['ci_r']*100)|round(2) }}%)";
+            document.getElementById("htresarea").appendChild(newPt);
+            newPt = document.createElement("p")
+            newPt.appendChild(document.createTextNode("Trait: " + "{{ trait }}"));
+            document.getElementById("htresarea").appendChild(newPt);
+        
+            // chart(data,aes)
+            // aesthetic :
+            // y : point's value on y axis Value
+            // group : how to group data on x axis Strain
+            // color : color of the point / boxplot AssayNumber
+            // label : displayed text in toolbox AssayNumber_Strain_Replicate : Value
+            console.log(chartJson)
+
+            chartJson.sort(sortByProperty("Strain"));
+		    chartJson.forEach(function(d,i){
+                if (strn.indexOf(d['Strain']) == -1) {
+                    strn.push(d['Strain']);}
+                });
+		    maxP = ((strn.length % 25) > 0) ? parseInt(strn.length / 25)+1 : parseInt(strn.length / 25);
+
+            loadPlot(1);
+
+        } else {
+            newPt.appendChild(document.createTextNode("Chart data is empty!"));
+        }
+    })
+
+    $( document ).ready(function() {
+        $("a[href^='http://'], a[href^='https://'], a[href$='pdf']").attr("target","_blank");
+    });
+    </script>
+{% endif %}
+
+{% endblock %}

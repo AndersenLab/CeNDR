@@ -2,6 +2,30 @@
 
 --- 
 
+#### v1.5 (2020-08-15)
+
+* The primary data model has moved from isotypes to strains.
+* The backend of the site has been substantially restructured to improve maintainability.
+* A table of strains with issues has been added to the data releases page.
+* The variant data table has been removed from isotype pages.
+* New strain collection images have been added.
+* The API has been removed. It did not see a lot of usage and become cumbersome to maintain.
+* A new [collaborators](/about/collaborators) page has been added.
+* Software and Methods have been moved to be per-release, as the pipeline is ever-evolving.
+* Data links have been removed from isotype pages; They are still available on the release pages.
+* Reports for Alignment, Concordance, And Variant calling are now produced for all releases.
+* Publications have been updated.
+* The public mappings page was removed as our mapping infrastructure is changing.
+* A new tool for calculating [heritability](/tools/heritability) has been released.
+* A tool for generating primers for genotyping indels will be released soon.
+
+__Genome Browser__
+
+* IGVjs has been upgraded and has a number of new tools.
+* A track for repeat_masker, and Dust data has been added.
+* A track for transposons from [_Laricchia et al._ 2017](https://andersenlab.org/publications/2017Laricchia.pdf) been added.
+* Tracks for divergent regions from [_Lee et al._ 2020](https://andersenlab.org/publications/2020LeebioRxiv.pdf) have been added.
+
 #### v1.3.4 (2020-02-23)
 
 * Logins now redirect to the previous page.

@@ -63,7 +63,7 @@ th {
 <a name="standard-tracks"></a>
 ### Standard Tracks
 
-The genome browser provides five tracks.
+The `Genes` and `Transcripts` tracks are displayed by default.
 
 ##### Genes 
 
@@ -73,11 +73,9 @@ Shows _C. elegans_ genes.
 
 Shows transcripts of genes.
 
-#### Conservation Tracks
-
-The UCSC genome browser provides a [good explanation](https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=cons46way) of the phyloP and phastCons tracks and how to interpret them.
-
 ##### phyloP
+
+The UCSC genome browser provides a [good explanation](https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=cons46way) of the `phyloP` and `phastCons` tracks and how to interpret them.
 
 phyloP (phylogenetic P-values) are designed to detect lineage-specific selection. Positive scores indicate conserved sites (slower evolution than expected under drift) whereas negative scores indicate acceleration (faster evolution than expected under drift).
 
@@ -90,10 +88,23 @@ phyloP (phylogenetic P-values) are designed to detect lineage-specific selection
 * _Onchocerca volvulus_
 * _Brugia malayi_
 
-
 ##### phastCons
 
 phastCons scores range from 0-1 and represent the probability that each nucleotide belongs to a conserved element.
+
+##### Transposons
+
+The transposons track shows transposon calls from [Laricchia _et al._ 2017](https://andersenlab.org/publications/2017Laricchia.pdf). Each call lists the transposon type and __isotype__.
+
+##### Divergent Regions
+
+Hyper-divergent regions are genomic intervals that contain sequences not found in the N2 reference strain. They were identified by high levels of variation and low coverage from read alignments. For a complete description, please see [_Lee et al._ 2020](https://andersenlab.org/publications/2020LeebioRxiv.pdf).
+
+Two divergent tracks are available:
+
+* __Divergent Regions Summary__ - Divergent region intervals and their observed frequency across wild isolate strains.
+* __Divergent Regions Strain__ - Divergent region intervals for individual strains.
+
 
 ##### Variants
 
@@ -137,17 +148,16 @@ Missing genotypes are excluded.
 <a name='variant-filters'></a>
 ### Variant filters
 
-Variants displayed on the genome browser are 'soft-filtered', meaning that in some cases they are poor quality. However, we still report them but using a different set of colors to indicate that they should be interpretted carefully. When you hover your mouse over filtered variants on the browser page, the name of the filter will appear as a tooltip.
+Variants displayed on the genome browser are 'hard-filtered', meaning that filters have been applied, and poor-quality variants and genotypes have been removed or set to missing.
 
-Examples are listed below
+Genotypes are displayed as follows:
 
 <div class="panel-body">
     <span class="label gt-0 PASS">CB4856</span> - A passing reference variant<br />
     <span class="label gt-2 PASS">DL238</span> - A passing alternative variant<br />
-    <span class="label gt-0 mapping_quality min_depth dv_dp het">QX1211</span> - A reference variant<br />
-    <span class="label gt-2 mapping_quality min_depth dv_dp het">XZ1516</span> - An alternative variant<br />
-    <span class="label gt-1 het">JU1218</span> - A heterozygous variant
 </div>
 
 
+# Annotations
 
+Two types of variant annotations are avaiable.

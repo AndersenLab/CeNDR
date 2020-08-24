@@ -9,12 +9,11 @@ import datetime
 from io import StringIO
 import pandas as pd
 import requests
-from base.application import cache
 from flask import Blueprint
-from flask import render_template, url_for, Markup, request, redirect, session
+from flask import render_template, url_for, request, redirect, session
 from base.utils.query import get_mappings_summary, get_weekly_visits, get_unique_users
-from base.application import app, db_2, cache
-from base.models2 import strain_m
+from base.config import config
+from base.models import Strain
 from base.forms import donation_form
 from base.views.api.api_strain import get_isotypes
 from base.utils.google_sheets import add_to_order_ws
@@ -58,6 +57,12 @@ def committee():
     committee_data = load_yaml("advisory-committee.yaml")
     return render_template('about/committee.html', **locals())
 
+@about_bp.route('/collaborators/')
+def collaborators():
+    title = "Collaborators"
+    collaborator_data = load_yaml("collaborators.yaml")
+    return render_template('about/collaborators.html', **locals())
+
 
 @about_bp.route('/staff/')
 def staff():
@@ -91,7 +96,7 @@ def donate():
         order_obj['url'] = f"https://elegansvariation.org/order/{order_obj['invoice_hash']}"
         send_email({"from": "no-reply@elegansvariation.org",
                     "to": [order_obj["email"]],
-                    "cc": app.config.get("CC_EMAILS"),
+                    "cc": config.get("CC_EMAILS"),
                     "subject": f"CeNDR Dontaion #{order_obj['invoice_hash']}",
                     "text": DONATE_SUBMISSION_EMAIL.format(invoice_hash=order_obj["invoice_hash"],
                                                            donation_amount=order_obj.get('total'))})
@@ -117,7 +122,7 @@ def statistics():
     # Strain collections plot
     #
 
-    df = strain_m.cum_sum_strain_isotype()
+    df = Strain.cum_sum_strain_isotype()
     strain_collection_plot = time_series_plot(df,
                                               x_title='Year',
                                               y_title='Count',
@@ -132,12 +137,12 @@ def statistics():
     #
     df = get_mappings_summary()
     report_summary_plot = time_series_plot(df,
-                                            x_title='Date',
-                                            y_title='Count',
-                                            range=[datetime.datetime(2016, 3, 1),
-                                                   datetime.datetime.today()],
-                                            colors=['rgb(149, 150, 255)', 'rgb(81, 151, 35)']
-                                            )
+                                           x_title='Date',
+                                           y_title='Count',
+                                           range=[datetime.datetime(2016, 3, 1),
+                                                  datetime.datetime.today()],
+                                           colors=['rgb(149, 150, 255)', 'rgb(81, 151, 35)']
+                                           )
 
     n_reports = int(max(df.reports))
     n_traits = int(max(df.traits))
@@ -181,6 +186,8 @@ def publications():
     req = requests.get(
         "https://docs.google.com/spreadsheets/d/1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs/export?format=csv&id=1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs&gid=0")
     df = pd.read_csv(StringIO(req.content.decode("UTF-8")))
+    df['pmid'] = df['pmid'].astype(int)
+    df = df.sort_values(by='pmid', ascending=False)
     df = df.apply(lambda x: f"""<strong><a href="{x.url}">{x.title.strip(".")}</a>
                                 </strong><br />
                                 {x.authors}<br />

@@ -28,7 +28,7 @@
                             <div id="alert"></div>
                             {% if request.blueprint %}
                                 {% if title %}
-                                    <h2>{{ title }}{% if subtitle %} <small>{{subtitle}}</small>{% endif %}</h2>
+                                    <h2>{{ title }} {% if subtitle %} <small>{{ subtitle }}</small>{% endif %}</h2>
                                 {% endif %}
                             {% endif %}
                             {% if warning %}
@@ -53,7 +53,12 @@
                                     {% endif %}
                                     {% endif %}
                                 {% endif %}
-                              <li><strong>{{ title }}</strong></li>
+                                {% if subtitle %}
+                                    <li>{{ title }}</li>
+                                    <li><strong>{{ subtitle }}</strong></li>
+                                {% else %}
+                                    <li><strong>{{ title }}</strong></li>
+                                {% endif %}
                             </ol>
                             {% endif %}
                         </div>

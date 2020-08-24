@@ -26,6 +26,7 @@
             <li><a href="{{ url_for("about.statistics") }}">Statistics</a></li>
             <li><a href="{{ url_for("about.staff") }}">Staff</a></li>
             <li><a href="{{ url_for("about.committee") }}">Scientific Advisory Committee</a></li>
+            <li><a href="{{ url_for("about.collaborators") }}">Collaborators</a></li>
             <li><a href="{{ url_for("about.donate") }}">Donate</a></li>
             <li><a href="{{ url_for("about.funding") }}">Funding</a></li>
             <li><a href="{{ url_for("about.publications") }}">Publications</a></li>
@@ -48,7 +49,7 @@
         <ul class="dropdown-menu dropdown-menu-left">
           <li><a href="{{ url_for("data.browser") }}">Variant Browser</a></li>
           <li><a href="{{ url_for("data.data") }}">Releases</a></li>
-          <li><a href="{{ url_for('docs') }}">API</a></li>
+         {#<li><a href="{{ url_for('docs') }}">API</a></li>#}
         </ul>
         </li>
 
@@ -56,7 +57,14 @@
           <a href="{{ url_for("mapping.mapping")}}" role="button" aria-haspopup="true" aria-expanded="false">Genetic Mapping<span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
             <li><a href="{{ url_for("mapping.mapping")}}">Perform Mapping</a></li>
-            <li><a href="{{ url_for("mapping.public_mapping")}}">Public Mappings</a></li>
+          </ul>
+        </li>
+
+        <li class="dropdown">
+          <a href="{{ url_for("tools.tools")}}" role="button" aria-haspopup="true" aria-expanded="false">Tools<span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a href="{{ url_for("indel_primer.indel_primer")}}">Pairwise indel finder</a></li>
+            <li><a href="{{ url_for("heritability.heritability")}}">Heritability Calculator</a></li>
           </ul>
         </li>
 
@@ -75,12 +83,12 @@
             <li class="dropdown">
               <a href="{{ url_for('user.user', username=user['username']) }}" role="button" aria-haspopup="true" aria-expanded="false">{{ user['username'] }}<span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-left">
-                <li><a href="{{ url_for('logout') }}" class='nav-link' role='button'>Logout</a></li>
+                <li><a href="{{ url_for('auth.logout') }}" class='nav-link' role='button'>Logout</a></li>
               </ul>
             </li>
         {% else %}
         <li class="nav-item">
-            <a href='{{ url_for('choose_login') }}' class='nav-link' role='button'>Login</a>
+            <a href='{{ url_for('auth.choose_login') }}' class='nav-link' role='button'>Login</a>
         </li>
         {% endif %}
       </ul>

@@ -9,9 +9,7 @@ Site utility functions.
 import arrow
 import pandas as pd
 import datetime
-import pandas as pd
-from logzero import logger
-from base.application import cache
+from base.extensions import cache
 from base.utils.gcloud import query_item, google_analytics
 
 @cache.cached(timeout=60*60*24*7, key_prefix='visits')
@@ -27,7 +25,7 @@ def get_weekly_visits():
             'reportRequests': [
                 {
                     'viewId': '117392266',
-                    'dateRanges': [{'startDate':'2015-01-01', 'endDate': arrow.now().date().isoformat()}],
+                    'dateRanges': [{'startDate': '2015-01-01', 'endDate': arrow.now().date().isoformat()}],
                     'metrics': [{'expression': 'ga:sessions'}],
                     'dimensions': [{'name': 'ga:year'}, {'name': 'ga:week'}],
                     'orderBys': [{"fieldName": "ga:sessions", "sortOrder": "DESCENDING"}],
@@ -42,7 +40,7 @@ def get_weekly_visits():
         out.append({'date': date, 'count': row['metrics'][0]['values'][0]})
     df = pd.DataFrame(out) \
            .sort_values('date') \
-           .reindex_axis(['date', 'count'], axis=1)
+           .reindex(['date', 'count'], axis=1)
     df['count'] = df['count'].astype(int)
     df['count'] = df['count'].dropna().cumsum()
     return df
@@ -72,8 +70,6 @@ def get_mappings_summary():
 def get_unique_users():
     """
         Counts the number of unique mapping users
-
-        Cached weekly
     """
     users = query_item('user', projection=['user_email'])
     return len(users)

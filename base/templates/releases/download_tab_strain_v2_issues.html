@@ -1,0 +1,37 @@
+
+<table class="table table-hover table-condensed strain-table">
+    <thead>
+        <tr>
+            <th style="width: 200px;">
+                <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                            Strain
+                            </span>
+            </th>
+            <th style="width: 80%;">
+                <span class="tooltip-item">
+                            Issues
+                            </span>
+            </th>
+        </tr>
+    </thead>
+    <div style="height: 30px;"></div>
+        {% set count = namespace(value=0) %}
+        {% for strain in strain_listing_issues %}
+            {% if strain.issues == True %}
+            <tr {% if strain.isotype_ref_strain %}class="success ref_strain"{% else %}class="strain"{% endif %}>
+                <td>
+                    {% if strain.isotype_ref_strain %}
+                        <strong>{{ strain }}</strong>
+                    {% else %}
+                        {{ strain }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if strain.issue_notes %}
+                        {{ strain.issue_notes }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+</table>

@@ -1,6 +1,5 @@
 indexes:
 
-
 - kind: trait
   properties:
   - name: report_name

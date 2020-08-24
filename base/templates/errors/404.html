@@ -1,0 +1,9 @@
+{% extends "_layouts/default.html" %}
+
+{% block title %}404: Page Not Found{% endblock %}
+
+{% block content %}
+  <h1>Page Not Found :(</h1>
+  <h3>What you were looking for is just not here.</h3>
+  <h3>Instead, look at all these <a href="{{ url_for('strain.map_page') }}">worms</a>!</h3>
+{% endblock %}

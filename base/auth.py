@@ -1,4 +1,3 @@
-import requests
 import arrow
 import os
 from flask import (redirect,
@@ -6,29 +5,30 @@ from flask import (redirect,
                    url_for,
                    session,
                    request,
-                   flash,
-                   Markup)
-from base.application import app
+                   flash)
 from functools import wraps
-from base.models2 import user_m
+from base.models import user_ds
 from base.utils.data_utils import unique_id
 from slugify import slugify
 from logzero import logger
 
-from flask import Flask, redirect, url_for
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
-#from flask_dance.contrib.dropbox import make_dropbox_blueprint, dropbox
 from flask_dance.consumer import oauth_authorized
 
+from flask import Blueprint
+auth_bp = Blueprint('auth',
+                    __name__,
+                    template_folder='')
 
-google_bp = make_google_blueprint(scope=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
+google_bp = make_google_blueprint(scope=["https://www.googleapis.com/auth/userinfo.profile",
+                                         "https://www.googleapis.com/auth/userinfo.email"],
                                   offline=True)
 github_bp = make_github_blueprint(scope="user:email")
 # dropbox_bp = make_dropbox_blueprint()
 
 
-@app.route("/login/select", methods=['GET'])
+@auth_bp.route("/login/select", methods=['GET'])
 def choose_login(error=None):
     # Relax scope for Google
     if not session.get("login_referrer", "").endswith("/login/select"):
@@ -44,7 +44,6 @@ def choose_login(error=None):
 def authorized(blueprint, token):
     if google.authorized:
         user_info = google.get("/oauth2/v2/userinfo")
-        logger.debug(user_info)
         assert user_info.ok
         user_info = {'google': user_info.json()}
         user_email = user_info['google']['email'].lower()
@@ -53,21 +52,12 @@ def authorized(blueprint, token):
         user_email = [x for x in user_emails.json() if x['primary']][0]["email"].lower()
         user_info = {'github': github.get('/user').json()}
         user_info['github']['email'] = user_email
-    # elif dropbox.authorized:
-    #     logger.debug(dropbox.authorized)
-    #     dbx_info = dropbox.get("/get_account").json()
-    #     logger.debug(dbx_info)
-    #     user_email = dbx_info["email"]
-    #     user_info = {'dropbox': dbx_info}
     else:
         flash("Error logging in!")
-        return redirect(url_for("choose_login"))
+        return redirect(url_for("auth.choose_login"))
 
     # Create or get existing user.
-    logger.info(user_email)
-    user = user_m(user_email)
-    logger.debug(user)
-    logger.debug(user._exists)
+    user = user_ds(user_email)
     if not user._exists:
         user.user_email = user_email
         user.user_info = user_info
@@ -76,26 +66,28 @@ def authorized(blueprint, token):
         user.username = slugify("{}_{}".format(user_email.split("@")[0], unique_id()[0:4]))
 
     user.last_login = arrow.utcnow().datetime
-    logger.debug(user)
     user.save()
 
-    session['user'] = user
+    session['user'] = user.to_dict()
     logger.debug(session)
 
     flash("Successfully logged in!", 'success')
-    return redirect(session.get("login_referrer", None) or url_for('primary.primary'))
+    return redirect(session.get("login_referrer", url_for('primary.primary')))
+
 
 def login_required(f):
     @wraps(f)
     def func(*args, **kwargs):
         if not session.get('user'):
+            logger.info(session)
             with app.app_context():
                 session['redirect_url'] = request.url
-                return redirect(url_for('choose_login'))
+                return redirect(url_for('auth.choose_login'))
         return f(*args, **kwargs)
     return func
 
-@app.route('/logout')
+
+@auth_bp.route('/logout')
 def logout():
     """
         Logs the user out.

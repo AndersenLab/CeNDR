@@ -1,7 +1,12 @@
 {% extends "_layouts/default.html" %}
 
 {% block content %}
-    {% if session.get('user') %}
+<div class='alert alert-warning'>
+    <strong>Note</strong><br />
+    The genome-wide association mapping portal is temporarily closed as we update the underlying algorithms,
+    strain sets, and variant data. Please check out <a href="https://github.com/AndersenLab/NemaScan">NemaScan</a> as we work to improve <i>C. elegans</i> association mappings.
+</div>
+    {% if session.get('user') and False %}
     <form method="POST" action=".">
         <div class="row">
             <div class="col-md-6">
@@ -100,7 +105,7 @@
         </div>{#/ row #}
     </form>
     {% else %}
-        <strong>Please <a href='{{ url_for("choose_login") }}'>login</a> to perform a mapping.</strong>
+        {#<strong>Please <a href='{{ url_for("auth.choose_login") }}'>login</a> to perform a mapping.</strong>#}
     {% endif %}
 
 {% endblock %}

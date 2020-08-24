@@ -7,7 +7,6 @@
       href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
 
 <!-- IGV CSS -->
-<link rel="stylesheet" type="text/css" href="//igv.org/web/release/1.0.9/igv-1.0.9.css">
 
 <!-- jQuery JS -->
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -15,7 +14,7 @@
 <script>$.widget.bridge('uitooltip', $.ui.tooltip);</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo=" crossorigin="anonymous"></script>
 
-<script type="text/javascript" src="//igv.org/web/release/1.0.9/igv-1.0.9.min.js"></script>
+<script type="text/javascript" src="//igv.org/web/release/2.6.2/dist/igv.min.js"></script>
 
 <style>
 
@@ -96,6 +95,26 @@ th {
           <label><input type="checkbox" class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
+        
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="Dust" />Dust</label>
+        </div>
+      
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="Repeat Masker" />Repeat Masker</label>
+        </div>
+
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="Transposons" />Transposons (<a href="https://andersenlab.org/publications/2017Laricchia.pdf">Laricchia <em>et al.</em> 2017)</a></label>
+        </div>
+
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions Summary" />Divergent Regions Summary</label>
+        </div>
+
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions" />Divergent Regions Strain<br /> (<a href="">Lee <em>et al.</em> 2020)</a></label>
+        </div>
 
         <h5>Variant Impact <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
@@ -143,7 +162,8 @@ th {
       </div>
 
       <div class="col-md-4">
-        <h5>Strains <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+
+        <h5>Isotype (reference strain) <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
         <div class="checkbox">
             <label><input type="checkbox" class="list-all-strains" value="list-all-strains" />List all strain genotypes </label>
@@ -159,20 +179,20 @@ th {
 
           <tbody class="searchable">
 
-            {% for isotype in isotype_listing %}
+            {% for strain in strain_listing %}
 
             <tr>
               <td>
-                {{ isotype }}
+                {{ strain.isotype }} ({{ strain.strain }})
               </td>
               <td>
                   <label>
-                  <input type="checkbox" class="track-select isotype-item sample-track" value="{{ isotype }}" />
+                  <input type="checkbox" class="track-select isotype-item sample-track" value="{{ strain.strain }}" />
                   VCF</label>
               </td>
               <td>
                   <label>
-                  <input type="checkbox" class="track-select sample-track-alignment" value="{{ isotype }}_bam" />
+                  <input type="checkbox" class="track-select sample-track-alignment" value="{{ strain.strain }}_bam" />
                   BAM</label>
               </td>
             </tr>
@@ -219,11 +239,8 @@ th {
 <div class="panel panel-default">
   <div class="panel-body">
     <span class="label gt-0 PASS">Passing REF</span>&nbsp;
-    <span class="label gt-2 PASS">Passing ALT</span>&nbsp;
-    <span class="label gt-0 mapping_quality min_depth dv_dp het">Failing REF</span>&nbsp;
-    <span class="label gt-2 mapping_quality min_depth dv_dp het">Failing ALT</span>&nbsp;
-    <span class="label gt-1 het">Heterozygous</span>
-    <strong><a class='btn btn-link' href='{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-filters'>Help</a></strong>
+    <span class="label gt-2 PASS">Passing ALT</span>&nbsp;&nbsp;&nbsp;<small><strong>Note: </strong> The variant browser now only shows hard-filtered variants.</small>
+    <strong><a class='btn btn-link pull-right' href='{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-filters'>Help</a></strong>
   </div>
 </div>
 </div>
@@ -247,7 +264,6 @@ th {
     <tbody></tbody>
 </table>
 
-
       </div>
   </div>
 {% endblock %}
@@ -257,19 +273,20 @@ th {
 
 <script type="text/javascript">
 
-trackset = {"Genes": {
+var trackset = {"Genes": {
                             name: "Genes",
                             displayMode: "EXPANDED",
                             order: 1,
-                            url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_gene_WS258.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_gene.WS276.bed.gz",
                             indexed: false,
                             searchable: false,
                             color: "#5c5cd6",
-                            height: 30
+                            height: 65
                      },
             "Transcripts": {
                             name: "Transcripts",
-                            url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_transcript_WS258.bed",
+                            url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_transcripts_WS253.bed.gz",
+                            indexed: true,
                             order: 2,
                             color: "#a366ff",
                             displayMode: "SQUISHED",
@@ -281,7 +298,7 @@ trackset = {"Genes": {
                             order: 3,
                             color: "#33cc33",
                             displayMode: "EXPANDED",
-                            height: 20
+                            height: 35
                    },
             "MODERATE": {
                             name: "MODERATE",
@@ -289,7 +306,7 @@ trackset = {"Genes": {
                             order: 4,
                             color: "#ffc500",
                             displayMode: "EXPANDED",
-                            height: 20
+                            height: 35
                    },
             "HIGH": {
                             name: "HIGH",
@@ -297,7 +314,7 @@ trackset = {"Genes": {
                             order: 5,
                             color: "#ff0000",
                             displayMode: "EXPANDED",
-                            height: 20
+                            height: 35
                    },
             "MODIFIER": {
                             name: "MODIFIER",
@@ -305,13 +322,14 @@ trackset = {"Genes": {
                             order: 5,
                             color: "#999999",
                             displayMode: "EXPANDED",
-                            height: 20
+                            height: 35
                    },
             "Variants": {
                             name: "Variants",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.soft-filter.vcf.gz",
-                            indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.soft-filter.vcf.gz.tbi",
+                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz",
+                            indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz.tbi",
                             order: Number.MAX_VALUE,
+                            height: 500,
                             displayMode: "SQUISHED",
                             color: "#000000",
                             homvarColor: "#0066ff",
@@ -334,11 +352,54 @@ trackset = {"Genes": {
                 color: "#000000",
                 visibilityWindow: 20000
             },
+            "Transposons": {
+              name: "Transposons",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/laricchia2017.tes_cendr.bed.gz",
+              order: 6,
+              displayMode: "EXPANDED",
+              color: "#34CB80",
+              visibilityWindow: 20000000
+            },
+            "Divergent Regions Summary": {
+              name: "Divergent Regions Summary",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_all.bed.gz",
+              order: 6,
+              height: 40,
+              displayMode: "EXPANDED",
+              color: "#CB3466",
+              visibilityWindow: 20000000
+            },
+            "Divergent Regions": {
+              name: "Divergent Regions",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_strain.bed.gz",
+              order: 6,
+              height: 200,
+              displayMode: "EXPANDED",
+              color: "#9B4763",
+              visibilityWindow: 20000000
+            },
+            "Dust": {
+              name: "Dust",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.dust.bed.gz",
+              order: 6,
+              displayMode: "SQUISHED",
+              color: "#583E1A",
+              visibilityWindow: 20000000
+            },
+            "Repeat Masker": {
+              name: "Repeat Masker",
+              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.repeat_masker.bed.gz",
+              order: 6,
+              displayMode: "SQUISHED",
+              color: "#CB8C34",
+              visibilityWindow: 20000000
+            },
 
-            {% for isotype in isotype_listing %}
-            {{ isotype }} : {
-              name: "{{ isotype }}",
-              url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/isotype/vcf/{{ isotype }}.{{ DATASET_RELEASE }}.vcf.gz",
+            {% for strain in strain_listing %}
+            {{ strain.strain }} : {
+              name: "{{ strain.strain }}",
+              url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/strain/vcf/{{ strain.strain }}.{{ DATASET_RELEASE }}.vcf.gz",
+              indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/strain/vcf/{{ strain.strain }}.{{ DATASET_RELEASE }}.vcf.gz.tbi",
               order: 100,
               displayMode: "EXPANDED",
               color: "#ffffff",
@@ -347,10 +408,11 @@ trackset = {"Genes": {
               visibilityWindow: 20000,
               searchable: false
             },
-            {{ isotype }}_bam : {
-              id: "{{ isotype }}_bam",
-              name: "{{ isotype }}",
-              url: "//s3.us-east-2.amazonaws.com/elegansvariation.org/bam/{{ isotype }}.bam",
+            {{ strain }}_bam : {
+              id: "{{ strain.strain }}_bam",
+              name: "{{ strain.strain }}",
+              url: "//s3.us-east-2.amazonaws.com/elegansvariation.org/bam/strain/{{ strain }}.bam",
+              indexURL: "//s3.us-east-2.amazonaws.com/elegansvariation.org/bam/strain/{{ strain }}.bam.bai",
               order: 100,
               visibilityWindow: 20000,
               searchable: false
@@ -388,27 +450,29 @@ $(document).ready(function () {
                         {% endfor %}
                         trackset["Genes"],
                         trackset["Transcripts"],
-                        trackset["MODERATE"],
-                        trackset["HIGH"]
                         ],
                 };
-        igv.createBrowser(div, options);
+        var browser = igv.createBrowser(div, options)
+                         .then(function(browser) {
+                            /*
+                              Bind browser events
+                            */
+                            browser.on('trackdragend', function(reference_frame, label) {
+                              refresh_variants()
+                            })
+                         })
 
-// Detect track changes
-$(".track-select").on("change", function() {
-  if ($(this).prop("checked") == true) {
-    igv.browser.loadTrack(trackset[$(this).attr("value")]);
-  } else {
-    remove_track = $(this).attr("value");
-    $.each(igv.browser.trackViews, function(k, v) {
-      if(v.track.id == remove_track) {
-        igv.browser.removeTrack(v.track);
-      }
-    })
-  }
-})
+        // Detect track changes
+        $(".track-select").on("change", function() {
+          if ($(this).prop("checked") == true) {
+            igv.getBrowser().loadTrack(trackset[$(this).attr("value")]);
+          } else {
+            igv.getBrowser().removeTrackByName($(this).attr("value"));
+          }
+        })
 
-var_impact_class = {"LOW": "success",
+
+  var_impact_class = {"LOW": "success",
                     "MODERATE":"warning",
                     "HIGH": "danger",
                     "MODIFIER": "default"}
@@ -426,6 +490,7 @@ function process_gene_search() {
            method: "GET",
            contentType: 'application/xml',
            }).done(function(msg) {
+            console.log(msg)
             row = Array();
             $.each(msg, function(i,row) {
                 if ("chrom" in row) {
@@ -448,7 +513,7 @@ function process_gene_search() {
 
 // Make links work!
 $(".container-fluid").on("click", ".ortholink", function() {
-  igv.browser.search($(this).attr("link"))
+  igv.getBrowser().search($(this).attr("link"))
   // Update tables and URL
   refresh_variants();
 });
@@ -480,11 +545,14 @@ function draw_gt_set(genotype_set, genotype_val) {
 
 var xhr;
 function refresh_variants(download = false) {
-    region = $(".igvNavigationSearchInput").val();
+    region = $(".igv-search-container > input").val();
     if (/[IVXMtDNA]+:[0-9,]+-[0-9,]+/g.exec(region) != null) {
       chrom = region.split(":")[0];
       start = region.split(":")[1].split("-")[0].replace(/,/g, "");
       end = region.split(":")[1].split("-")[1].replace(/,/g, "");
+      release = {{ DATASET_RELEASE }};
+
+      variant_annotation = $("input[name='variant-annotation']:checked").val()
 
       sample_tracks = []
       $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
@@ -508,14 +576,16 @@ function refresh_variants(download = false) {
       data = {'chrom': chrom,
               'start': parseInt(start),
               'end': parseInt(end),
+              'release': release,
               'variant_impact': variant_impact.join('_'),
               'sample_tracks': sample_tracks.join('_'),
-              'list-all-strains': $('.list-all-strains').prop('checked')
+              'list-all-strains': $('.list-all-strains').prop('checked'),
+              'variant-annotation': variant_annotation,
              }
 
       if (download == true) {
           data['output'] = 'tsv';
-          url =  "{{ url_for('variant_query') }}?" + $.param(data);
+          url =  "{{ url_for('api_variant.variant_query') }}?" + $.param(data);
           window.open(url, sprintf("%s_%s_%s.csv", chrom, start, end));
       } else {
 
@@ -527,21 +597,22 @@ function refresh_variants(download = false) {
           xhr.abort();
         }
 
+        // Check that strains are selected otherwise abort
+
         xhr = $.ajax({
-          url: "{{ url_for('variant_query') }}",
+          url: "{{ url_for('api_variant.variant_query') }}",
           data: data,
           method: "GET",
           contentType: "application/json",
           success: function(msg) {
-
+              console.log(msg)
               $.each(msg, function(k, rec) {
+                var is_first = true;
                 var td_rowspan = 1;
                 if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
-                var is_first = true;
                 $.each(rec['ANN'], function(annk, ann) {
-
                         if (ann["gene_id"] != null)
                         {
                           ann["gene_id"] = `<a href='/gene/${ann["gene_id"]}'>${ann["gene_id"]}</a>`;
@@ -580,15 +651,12 @@ function refresh_variants(download = false) {
                           fail_variant_class = ""
                         }
                         $("#variants > tbody").append(`<tr ${fail_variant_class}>${variant_items}<td>${items.join("</td><td>")}</td></tr>`);
-                    }
-                );
+                });
 
                 if ($(".list-all-strains").prop('checked') == true) {
-                    gt_panel = $(".isotype-item").map(
-                    function () {return this.value;}).get();
+                    gt_panel = $(".isotype-item").map(function () {return this.value;}).get();
                 } else {
-                    gt_panel = $(".isotype-item:checked").map(
-                    function () {return this.value;}).get();
+                    gt_panel = $(".isotype-item:checked").map(function () {return this.value;}).get();
                 }
 
                 if (gt_panel.length > 0) {
@@ -612,34 +680,27 @@ function refresh_variants(download = false) {
                     $('.ttop').tooltip();
                 }
 
-            });
-
-
-
-
+              });
 
             // Enable links
-            $( "#variants a" ).on( "click", function() {
+            $("#variants a").on("click", function() {
                 window.location = $(this).attr('href');
-            });
+            })
 
           }
-        });
-
+        }) {# /ajax #}
+        
         } // End if else logic for download
-        } // Test for region
-
+    } // Test for region
 }
 
 $("#download").click(function() {
     refresh_variants(download=true);
 });
 
-
-$("#browser").on("mouseup", function() {
+$("input[name='variant-annotation']").change(function() {
   setTimeout(refresh_variants, 200);
-})
-
+});
 
 var typingTimer;                //timer identifier
 var doneTypingInterval = 1000;  //time in ms (5 seconds)

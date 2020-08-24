@@ -1,145 +1,178 @@
 import os
 import json
-import yaml
+import requests
 from os.path import basename
-from flask import Flask, render_template, jsonify
-from flask_debugtoolbar import DebugToolbarExtension
-from flask_caching import Cache
-from flask_sqlalchemy import SQLAlchemy
-from base.utils.data_utils import json_encoder
+from base.config import config
+from flask import Flask, render_template
+from flask_wtf.csrf import CSRFProtect
 from base.utils.text_utils import render_markdown
-from base.constants import CENDR_VERSION, APP_CONFIG
-from flaskext.markdown import Markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
-from flaskext.markdown import Markdown
+from werkzeug.exceptions import HTTPException
 
-# Create
-app = Flask(__name__,
-            static_url_path='/static')
+from base.manage import (initdb,
+                         update_strains,
+                         update_credentials,
+                         decrypt_credentials,
+                         download_db)
 
-app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+# --------- #
+#  Routing  #
+# --------- #
+from base.views.about import about_bp
+from base.views.primary import primary_bp
+from base.views.strains import strain_bp
+from base.views.order import order_bp
+from base.views.data import data_bp
+from base.views.mapping import mapping_bp
+from base.views.gene import gene_bp
+from base.views.user import user_bp
 
-# Add markdown
-Markdown(app)
+# Tools
+from base.views.tools import (tools_bp,
+                              heritability_bp,
+                              indel_primer_bp)
 
-# Configuration - First load non-sensitive configuration info
-app.config['json_encoder'] = json_encoder
+# Readiness and health checks
+from base.views.check import check_bp
 
-# Load Credentials
-# (BASE_VARS are the same regardless of whether we are debugging or in production)
-BASE_VARS = yaml.load(open("env_config/base.yaml").read())
-APP_CONFIG_VARS = yaml.load(open(f"env_config/{APP_CONFIG}.yaml").read())
+# API
+from base.views.api.api_strain import api_strain_bp
+from base.views.api.api_gene import api_gene_bp
+from base.views.api.api_variant import api_variant_bp
+from base.views.api.api_data import api_data_bp
 
-app.config.update(BASE_VARS)
-app.config.update(APP_CONFIG_VARS)
-
-# Setup cache
-cache = Cache(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
-
-# Database
-db_2 = SQLAlchemy(app)
-
-# Set the json_encoder
-app.json_encoder = json_encoder
-
-
-def autoconvert(s):
-    for fn in (int, float):
-        try:
-            return fn(s)
-        except ValueError:
-            pass
-    return s
+# Auth
+from base.auth import (auth_bp,
+                       google_bp,
+                       github_bp)
 
 
-if os.getenv('HOME') == "/root":
-    """
-        Running on server
-    """
-    app.debug = False
-    from flask_sslify import SSLify
-    # Ignore leading slash of urls; skips must use start of path
-    sslify = SSLify(app)
-elif app.config['DEBUG']:
-    app.debug = True
-    #app.config["debug"] = True
-    app.config['SECRET_KEY'] = "test"
-    toolbar = DebugToolbarExtension(app)
+# ---- End Routing ---- #
+
+# Extensions
+from base.extensions import (markdown,
+                             cache,
+                             debug_toolbar,
+                             sslify,
+                             sqlalchemy)
+
+# Template filters
+from base.filters import (comma, format_release)
+
+
+def create_app(config=config):
+    """Returns an initialized Flask application."""
+    app = Flask(__name__,
+                static_url_path='/static')
+
+    # Fix wsgi proxy
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+    app.config.update(config)
+
+    register_commands(app)
+    register_blueprints(app)
+    register_template_filters(app)
+    register_extensions(app)
+    register_errorhandlers(app)
+    configure_jinja(app)
+    configure_ssl(app)
+
+    return app
+
+
+def configure_ssl(app):
+    """Configure SSL"""
+    if os.getenv('HOME') == "/root":
+        # Running on server
+        app.debug = False
+        # Ignore leading slash of urls; skips must use start of path
+        sslify(app)
+    elif app.config['DEBUG']:
+        debug_toolbar(app)
+        app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = True
+
+
+def register_commands(app):
+    """Register custom commands for the Flask CLI."""
+    for command in [initdb,
+                    update_strains,
+                    update_credentials,
+                    decrypt_credentials,
+                    download_db]:
+        app.cli.add_command(command)
+
+
+def register_template_filters(app):
+    for t_filter in [comma, format_release]:
+        app.template_filter()(t_filter)
+
+
+def register_extensions(app):
+    markdown(app)
+    cache.init_app(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
+    sqlalchemy(app)
+    CSRFProtect(app)
+
+
+def register_blueprints(app):
+    """Register blueprints with the Flask application."""
+    app.register_blueprint(primary_bp, url_prefix='')
+    app.register_blueprint(about_bp, url_prefix='/about')
+    app.register_blueprint(strain_bp, url_prefix='/strain')
+    app.register_blueprint(order_bp, url_prefix='/order')
+    app.register_blueprint(data_bp, url_prefix='/data')
+    app.register_blueprint(mapping_bp, url_prefix='')
+    app.register_blueprint(gene_bp, url_prefix='/gene')
+    app.register_blueprint(user_bp, url_prefix='/user')
+    
+    # Tools
+    app.register_blueprint(tools_bp, url_prefix='/tools')
+    app.register_blueprint(heritability_bp, url_prefix='/tools')
+    app.register_blueprint(indel_primer_bp, url_prefix='/tools')
+
+    # API
+    app.register_blueprint(api_strain_bp, url_prefix='/api')
+    app.register_blueprint(api_gene_bp, url_prefix='/api')
+    app.register_blueprint(api_variant_bp, url_prefix='/api')
+    app.register_blueprint(api_data_bp, url_prefix='/api')
+
+    # Auth
+    app.register_blueprint(auth_bp, url_prefix='')
+    app.register_blueprint(google_bp, url_prefix='/login')
+    app.register_blueprint(github_bp, url_prefix='/login')
+
+    # Healthchecks
+    app.register_blueprint(check_bp, url_prefix='')
 
 
 def gs_static(url, prefix='static'):
     return f"https://storage.googleapis.com/elegansvariation.org/{prefix}/{url}"
 
 
-# Template filters
-from base.utils.template_filters import *
-
-# About Pages
-from base.views.about import about_bp
-app.register_blueprint(about_bp, url_prefix='/about')
-
-# Strain Pages
-from base.views.strains import strain_bp
-app.register_blueprint(strain_bp, url_prefix='/strain')
-
-# Order Pages
-from base.views.order import order_bp
-app.register_blueprint(order_bp, url_prefix='/order')
-
-# Data Pages
-from base.views.data import data_bp
-app.register_blueprint(data_bp, url_prefix='/data')
-
-# Mapping Pages -
-from base.views.mapping import mapping_bp
-app.register_blueprint(mapping_bp, url_prefix='')
-
-# Gene Pages
-from base.views.gene import gene_bp
-app.register_blueprint(gene_bp, url_prefix='/gene')
-
-# Main Pages - Homepage, Outreach, Contact
-from base.views.primary import primary_bp
-app.register_blueprint(primary_bp, url_prefix='')
-
-# User Pages
-from base.views.user import user_bp
-app.register_blueprint(user_bp, url_prefix='/user')
-
-# Authentication
-from base.auth import google_bp, github_bp #, dropbox_bp
-app.register_blueprint(google_bp, url_prefix='/login')
-app.register_blueprint(github_bp, url_prefix='/login')
-#app.register_blueprint(dropbox_bp, url_prefix='/login')
+def configure_jinja(app):
+    # Injects "contexts" into templates
+    @app.context_processor
+    def inject():
+        return dict(json=json,
+                    list=list,
+                    str=str,
+                    int=int,
+                    len=len,
+                    gs_static=gs_static,
+                    basename=basename,
+                    render_markdown=render_markdown)
 
 
-# Inject globals
-@app.context_processor
-def inject():
-    """
-        Used to inject variables that
-        need to be accessed globally
-    """
-    return dict(version=CENDR_VERSION,
-                json=json,
-                list=list,
-                str=str,
-                int=int,
-                len=len,
-                gs_static=gs_static,
-                basename=basename,
-                render_markdown=render_markdown)
+def register_errorhandlers(app):
 
+    def render_error(e="generic"):
+        return render_template("errors/%s.html" % e.code), e.code
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html', page_title="Not found"), 404
+    for e in [
+        requests.codes.INTERNAL_SERVER_ERROR,
+        requests.codes.NOT_FOUND,
+        requests.codes.UNAUTHORIZED
+    ]:
+        app.errorhandler(e)(render_error)
 
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html', page_title="Not found"), 500
-
-
-from base.views.api import *
-from base.manage import (init_db)
+    app.register_error_handler(HTTPException, render_error)

@@ -1,4 +1,4 @@
-# Photos should be stored in the static location under static/img/committee/
+# Photos should be stored in the static location under static/img/people/
 - first_name: Erik
   last_name: Andersen
   photo: Erik_C_Andersen.jpg
@@ -29,5 +29,5 @@
 - first_name: Paul
   last_name: Sternberg
   photo: Sternberg.jpg
-  title: Howard Hughes Medical Institute; California Institute of Technology
+  title: California Institute of Technology
   website: https://wormlab.caltech.edu/

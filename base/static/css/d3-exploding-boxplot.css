@@ -1,0 +1,57 @@
+.axis {
+    font: 10px sans-serif;
+  }
+  
+  .axis path,
+  .axis line {
+    fill: none;
+    stroke: #000;
+    stroke-width: 2px;
+    shape-rendering: crispEdges;
+  }
+  
+  .x.axis path {
+    /*display: none;*/
+  }
+  
+  rect.d3-exploding-boxplot.box{
+    opacity: 40%;
+    stroke: #000;
+    stroke-width: 2px;
+    z-index: -1000;
+  }
+  
+  line.d3-exploding-boxplot.line,
+  rect.d3-exploding-boxplot.box
+  {
+    stroke: #000;
+    stroke-width: 2px;
+    z-index: -1000;
+  }
+  
+  line.d3-exploding-boxplot.vline{
+    stroke-dasharray:5,5;
+    stroke: #000;
+    stroke-width: 2px;
+    z-index: -1000;
+  }
+  
+  .d3-exploding-boxplot.tip{
+    font: normal 14px 'Lato', 'Open sans', sans-serif;
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: #f5f5f5; //#333333;
+    color: #000; //#DDDDDD;
+    border-radius: 2px;
+  }
+  
+  g.tick text,
+  g.axis text{
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    cursor: default;
+  }

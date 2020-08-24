@@ -26,16 +26,21 @@ automatic_scaling:
     target_utilization: 0.6
 
 resources:
-  cpu: .5
-  memory_gb: 0.5
-  disk_size_gb: 10
+  cpu: 2
+  memory_gb: 2
+  disk_size_gb: 20
 
-# Handlers define how to route requests to your application.
-handlers:
-- url: /cronmapping
-  script: run.app 
-  login: admin
+liveness_check:
+  path: "/liveness_check"
+  check_interval_sec: 30
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
 
-- url: .*
-  script: run.app  # a WSGI application in the main module's global scope
-
+readiness_check:
+  path: "/readiness_check"
+  check_interval_sec: 5
+  timeout_sec: 4
+  failure_threshold: 2
+  success_threshold: 2
+  app_start_timeout_sec: 300

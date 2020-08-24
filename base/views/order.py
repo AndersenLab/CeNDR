@@ -8,7 +8,7 @@ These views handle strain orders
 """
 import uuid
 from base.forms import order_form
-from base.application import app
+from base.config import config
 from base.utils.email import send_email, ORDER_SUBMISSION_EMAIL
 from base.utils.google_sheets import add_to_order_ws, lookup_order
 from flask import render_template, request, url_for, redirect, Blueprint, abort, flash, session
@@ -73,7 +73,7 @@ def order_page():
         order_obj["url"] = "https://elegansvariation.org/order/" + order_obj["invoice_hash"]
         send_email({"from": "no-reply@elegansvariation.org",
                     "to": [order_obj["email"]],
-                    "cc": app.config.get("CC_EMAILS"),
+                    "cc": config.get("CC_EMAILS"),
                     "subject": "CeNDR Order #" + str(order_obj["invoice_hash"]),
                     "text": ORDER_SUBMISSION_EMAIL.format(**order_obj)})
 

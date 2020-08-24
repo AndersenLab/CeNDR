@@ -1,3 +1,16 @@
 vcf_test
 cendr-api-docs
 scripts
+*.vcf.gz
+*.csi
+base/*.db
+.download
+.envrc
+.flake8
+.gitmodules
+.nextflow
+.vscode
+tests/
+mapping_worker/
+.git
+__pycache__

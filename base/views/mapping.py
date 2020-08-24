@@ -6,21 +6,17 @@ import pandas as pd
 import simplejson as json
 
 from base.constants import BIOTYPES, TABLE_COLORS
-from base.models2 import trait_m
+from base.models import trait_ds
 from datetime import date
-from dateutil.relativedelta import relativedelta
 from flask import render_template, request, redirect, url_for, abort
 from slugify import slugify
 from base.forms import mapping_submission_form
 from logzero import logger
 from flask import session, flash, Blueprint, g
 from base.utils.data_utils import unique_id
-from base.constants import (REPORT_VERSION,
-                            DATASET_RELEASE,
-                            CENDR_VERSION,
-                            WORMBASE_VERSION)
+from base.config import config
 
-from base.utils.gcloud import query_item, get_item, delete_item
+from base.utils.gcloud import query_item, delete_item
 
 from base.utils.plots import pxg_plot, plotly_distplot
 
@@ -62,7 +58,7 @@ def mapping():
         trait_set = []
         secret_hash = unique_id()[0:8]
         for trait_name in trait_list:
-            trait = trait_m()
+            trait = trait_ds()
             trait_data = form.trait_data.processed_data[['ISOTYPE', 'STRAIN', trait_name]].dropna(how='any') \
                                                                                           .to_csv(index=False,
                                                                                                   sep="\t",
@@ -131,7 +127,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
             logger.info(n)
             logger.info(existing_trait.key)
             delete_item(existing_trait)
-        trait = trait_m(trait_set[0])
+        trait = trait_ds(trait_set[0])
 
         mapping_items = query_item('mapping', filters=[('report_slug', '=', report_slug), ('trait_slug', '=', trait_name)])
         for existing_mapping in mapping_items:
@@ -166,7 +162,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
         # Resolve REPORT --> TRAIT
         # Fetch trait and convert to trait object.
         cur_trait = [x for x in trait_set if x['trait_name'] == trait_name][0]
-        trait = trait_m(cur_trait.key.name)
+        trait = trait_ds(cur_trait.key.name)
         trait.__dict__.update(cur_trait)
         logger.info(trait)
     except IndexError:
@@ -265,15 +261,4 @@ def report_view(report_slug, trait_name=None, rerun=None):
 
     report_template = f"reports/{trait.REPORT_VERSION}.html"
     return render_template(report_template, **VARS)
-
-
-@mapping_bp.route('/mapping/public/', methods=['GET'])
-def public_mapping():
-    query = request.args.get("query")
-    title = "Public Mappings"
-    pub_mappings = query_item('mapping', filters=[('is_public', '=', True)])
-    return render_template('public_mapping.html', **locals())
-
-
-
 

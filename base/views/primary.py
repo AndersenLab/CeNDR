@@ -54,26 +54,17 @@ def news_item(filename=""):
     return render_template('news_item.html', **locals())
 
 
-
-# @primary_bp.route("/special/")
-# def dbx_help(filename=""):
-#     """
-#         Help
-#     """
-#     f = requests.get("https://dl.dropbox.com/s/al68jcsc8xc3yqo/faq.md?dl=1")
-#     return Markup(markdown.markdown(f.text))
-
-
 @primary_bp.route("/help/")
 @primary_bp.route("/help/<filename>/")
 def help_item(filename=""):
     """
         Help
     """
-    files = ["FAQ", "Variant-Browser", "Variant-Prediction", "Methods", "Software", "Change-Log"]
+    files = ["FAQ", "Variant-Browser", "Variant-Prediction", "Change-Log"]
     if not filename:
         filename = "FAQ"
-    title = filename.replace("-", " ")
+    title = "Help"
+    subtitle = filename.replace("-", " ")
     return render_template('help_item.html', **locals())
 
 

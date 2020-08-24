@@ -21,7 +21,6 @@ from base.utils.data_utils import is_number, list_duplicates
 from slugify import slugify
 from gcloud.exceptions import BadRequest
 
-
 from logzero import logger
 
 
@@ -92,6 +91,12 @@ class order_form(Form):
         for item, price in self.item_price():
             total_price += price
         return total_price
+
+#
+# Heritability Form
+#
+class heritability_form(Form):
+    pass
 
 
 #

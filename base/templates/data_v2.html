@@ -1,0 +1,287 @@
+{% extends "_layouts/default.html" %} {% block custom_head %}
+<style>
+#checkout.affix {
+    position: fixed;
+    top: 20px;
+    width: 136px;
+}
+body, html{
+    width: 100%;
+    height: 100%;
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <ul class="nav nav-pills">
+            <h3>Releases</h3>
+            {% for RELEASE, WB_VERSION in RELEASES %}
+                <li {% if RELEASE == selected_release %}class="active"{% endif %}><a href="{{ url_for('data.data', selected_release = RELEASE) }}">{{ RELEASE }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<hr />
+<div>
+
+<div class="row">
+    <div class="col-md-12">
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active" ><a href="#main" role="tab" data-toggle="tab">Datasets</a></li>
+        <li role="presentation" ><a href="#Strain-data" role="tab" data-toggle="tab">Alignment Data</a></li>
+        <li role="presentation" ><a href="#Pipelines" role="tab" data-toggle="tab">Methods / Pipelines</a></li>
+        <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
+        <li role="presentation" ><a href="#Variant-calling" role="tab" data-toggle="tab">Variant Calling</a></li>
+        <li role="presentation" ><a href="#Concordance" role="tab" data-toggle="tab">Concordance</a></li>
+        <li role="presentation" ><a href="#Haplotypes" role="tab" data-toggle="tab">Haplotypes</a></li>
+        <li role="presentation" ><a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a></li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content">
+
+        <div role="tabpanel" class="tab-pane active" id="main">  
+            <br />
+                <div class='col-md-4 pull-right'>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Release summary</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li><strong>Strains:</strong> {{ release_summary.get('strain_count') }}</li>
+                                <li><strong>WGS strains:</strong> {{ release_summary.get('strain_count_sequenced') }}</li>
+                                <li><strong>Isotypes:</strong> {{ release_summary.get('isotype_count') }}</li>
+                                <li><strong>Genome</strong> {{ WORMBASE_VERSION }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            
+            <h2>Release Notes</h2>
+
+            {{ render_markdown(selected_release + "/release_notes.md", directory="base/static/reports") }}
+
+            </blockquote>
+
+            <h2>Datasets</h2>
+            <table class='table'>
+                <thead>
+                    <th class='col-md-2'>Dataset</th>
+                    <th class='col-md-6'>Description</th>
+                    <th class='col-md-3'>Download</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Strain Data</strong></td>
+                        <td>Includes strain, isotype, location information, and more.</td>
+                        <td><a href="{{ url_for('strain.strain_data_tsv') }}">CelegansStrainData.tsv</a></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Soft-Filtered Variants</strong></td>
+                        <td>The soft-filtered VCF includes all variants and annotations called by the GATK pipeline. The QC status of each variant (INFO field=<code>FILTER</code>) and genotype (Format Field=<code>FT</code>) is specified by a VCF Field.</td>
+                        <td>
+                            <strong>All Strains</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz">WI.{{ selected_release }}.soft-filter.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.vcf.gz.csi</a>
+                            <br />
+                            <br />
+                            <strong>Isotypes</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.isotype.vcf.gz">WI.{{ selected_release }}.soft-filter.isotype.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.csi</a>
+                            <br />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Hard-Filtered Variants</strong></td>
+                        <td>The hard-filtered VCF includes only high-quality variants after all variants and genotypes with a failed QC status are removed. To obtain vcf for a single or a subset of strains, use <code>bcftools view --samples</code></td>
+                        <td>
+                            <strong>All Strains</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz">WI.{{ selected_release }}.hard-filter.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.vcf.gz.csi</a>
+                            <br />
+                            <br />
+                            <strong>Isotypes</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.isotype.vcf.gz">WI.{{ selected_release }}.hard-filter.isotype.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.isotype.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.isotype.vcf.gz.csi</a>
+                            <br />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Imputed Variants</strong></td>
+                        <td>The imputed VCF includes all the variants from the hard-filtered Isotype VCF, but all missing genotypes have been imputed using <a href="https://faculty.washington.edu/browning/beagle/beagle.html">Beagle v5.1</a>.</td>
+                        <td>
+                            <strong>Isotypes</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.isotype.vcf.gz">WI.{{ selected_release }}.impute.isotype.vcf.gz</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.isotype.vcf.gz.csi">WI.{{ selected_release }}.impute.isotype.vcf.gz.csi</a>
+                            <br />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Reference Genome FASTA ({{ WORMBASE_VERSION }})</strong></td>
+                        <td>The reference genome build from Wormbase used for alignment and annotation.</td>
+                        <td><a href="ftp://ftp.wormbase.org/pub/wormbase/releases/{{ WORMBASE_VERSION }}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{{ WORMBASE_VERSION }}.genomic.fa.gz">c_elegans.PRJNA13758.{{ WORMBASE_VERSION }}.genomic.fa.gz</a></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Transposon Calls</strong></td>
+                        <td>We have performed transposon calling for a subset of isotypes as part of <a href="https://andersenlab.org/publications/2017Laricchia.pdf">Laricchia <i>et al.</i></a></td>
+                        <td><a href="https://storage.googleapis.com/andersenlab.org/publications/2017Laricchia/tes_cender.bed">tes_cender.bed</a></td>
+                    </tr>
+
+
+                    <tr>
+                        <td><strong>Tree</strong></td>
+                        <td>
+                            Tree generated using neighbour-joining algorithm as implemented in <a href="https://github.com/tseemann/quicktree">QuickTree</a> in Newick and PDF format.
+                        </td>
+                        <td>
+                            <strong>All Strains</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.min4.tree">WI.{{ selected_release }}.hard-filter.min4.tree</a> (<a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.min4.tree.pdf">PDF</a>)
+                            <br />
+                            <br />
+                            <strong>Isotype</strong>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.isotype.min4.tree">WI.{{ selected_release }}.hard-filter.isotype.min4.tree</a> (<a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.isotype.min4.tree.pdf">PDF</a>)
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Haplotypes</strong></td>
+                        <td>Haplotypes for isotypes were calculated and plotted as described in <a href="https://www.biorxiv.org/content/10.1101/2020.07.23.218420v2.full">Lee <i>et al.</i></a></td>
+                        <td>
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png">PNG</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.pdf">PDF</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Download BAMs Script</strong></td>
+                        <td>You can batch download individual strain BAMs using this script.</td>
+                        <td><a href="{{ url_for('data.download_script_strain_v2') }}">download_bams.sh</a></td>
+                    </tr>
+
+
+                    <hr />
+                </tbody>
+            </table>
+
+        </div>
+
+        {#
+            DATASETS
+        #}
+        <div role="tabpanel" class="tab-pane" id="Strain-data">
+
+            <h2>Alignment (BAM)</h2>
+
+            <p>If you do not see a strain, check the <a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a> tab.
+            Some strains have been flagged and removed from distribution and analysis pipelines for a variety of reasons.</p>
+
+            {% set show_issues = False %}
+            {% include('releases/download_tab_strain_v2.html') %}
+
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Strain-issues">
+            {% set show_issues = True %}
+            {% include('releases/download_tab_strain_v2_issues.html') %}
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Pipelines">
+            {{ render_markdown(selected_release + "/pipelines.md", directory="base/static/reports") }}
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Alignment">
+            <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/alignment_report.html"></object>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Concordance">
+            <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/concordance_report.html"></object>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Variant-calling">
+            <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/gatk_report.html"></object>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Haplotypes">
+            <img style="width:100%" src="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png""></img>
+        </div>
+
+
+    </div>{# Tab Set #}
+
+    </div>{# Download content #}
+</div>{# /Download Tab #}
+
+
+
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function() {
+
+    (function($) {
+
+        $('#filter').keyup(function() {
+            $('.searchable tr').hide();
+            $(this).val().split(',').forEach(function(r) {
+                var rex = new RegExp(r, "i");
+                $('.searchable tr').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            })
+        })
+
+    }(jQuery));
+
+});
+
+$(document).ready(function() {
+
+    $(function() { 
+        // for bootstrap 3 use 'shown.bs.tab', for bootstrap 2 use 'shown' in the next line
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            // save the latest tab; use cookies if you like 'em better:
+            sessionStorage.setItem('lastTab', $(this).attr('href'));
+        });
+    
+        // go to the latest tab, if it exists:
+        var lastTab = sessionStorage.getItem('lastTab');
+        if (lastTab) {
+            $('[href="' + lastTab + '"]').tab('show');
+        }
+    });
+
+    $('#filter').keydown(function(event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
+});
+
+
+
+</script>
+{% endblock %}
+

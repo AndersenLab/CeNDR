@@ -8,18 +8,16 @@ These functions will concern genetic data.
 """
 import pickle
 import base64
-import pandas as pd
-from logzero import logger
 from cachelib import BaseCache
 from base.utils.gcloud import get_item, store_item
 from time import time
-from base.constants import CENDR_VERSION
+from base.config import config
 
 
 class DatastoreCache(BaseCache):
     def __init__(self, default_timeout=500):
         BaseCache.__init__(self, default_timeout)
-        self.key_prefix = CENDR_VERSION
+        self.key_prefix = config["CENDR_VERSION"]
 
     def set(self, key, value, timeout=None):
         expires = time() + timeout
@@ -30,10 +28,9 @@ class DatastoreCache(BaseCache):
         except:
             return False
 
-
     def get(self, key):
         try:
-            item = get_item('cache',  self.key_prefix + "/" + key)
+            item = get_item('cache', self.key_prefix + "/" + key)
             value = item.get('value')
             value = pickle.loads(base64.b64decode(value))
             expires = item.get('expires')
@@ -57,7 +54,6 @@ class DatastoreCache(BaseCache):
     def has(self, key):
         try:
             item = get_item('cache', key)
-            value = item.get('value')
             expires = item.get('expires')
             if expires == 0 or expires > time():
                 return True
@@ -69,6 +65,5 @@ class DatastoreCache(BaseCache):
             store_item('cache', k, value=v)
 
 
-
 def datastore_cache(app, config, args, kwargs):
-   return DatastoreCache(*args, **kwargs)
+    return DatastoreCache(*args, **kwargs)

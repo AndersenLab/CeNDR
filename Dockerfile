@@ -18,9 +18,9 @@ libgraphviz-dev \
 pkg-config \
 && rm -rf /var/lib/apt/lists/*
 
-ENV BCFTOOLS_BIN="bcftools-1.4.tar.bz2" \
+ENV BCFTOOLS_BIN="bcftools-1.10.tar.bz2" \
 BCFTOOLS_PLUGINS="/usr/local/libexec/bcftools" \
-BCFTOOLS_VERSION="1.4"
+BCFTOOLS_VERSION="1.10"
 
 # Install BCFTools
 RUN curl -fsSL https://github.com/samtools/bcftools/releases/download/$BCFTOOLS_VERSION/$BCFTOOLS_BIN -o /opt/$BCFTOOLS_BIN \
@@ -38,18 +38,24 @@ RUN virtualenv /env
 ENV VIRTUAL_ENV /env
 ENV PATH /env/bin:$PATH
 
-# Use python3.6!
-RUN update-alternatives --install /usr/bin/python python /opt/python3.6/bin/python3.6 2 \
-    && ln -f /opt/python3.6/bin/python3.6 /env/bin/python \
-    && ln -f /opt/python3.6/bin/pip3.6 /env/bin/pip
+# Use python3.7
+RUN update-alternatives --install /usr/bin/python python3 /opt/python3.7/bin/python3.7 2 \
+    && ln -f /opt/python3.7/bin/python3.7 /env/bin/python \
+    && ln -f /opt/python3.7/bin/pip3.7 /env/bin/pip
 
 # Copy the application's requirements.txt and run pip to install all
 # dependencies into the virtualenv.
 ADD requirements.txt /app/requirements.txt
+RUN pip install setuptools==40.3.0
 RUN pip install -r /app/requirements.txt
 
 # Add the application source code.
 ADD . /app
 
+# tmp to spill error
+RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask
+
+# Download the database; GAE_VERSION set as dummy variable
+RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask download_db
 
 CMD gunicorn -b :$PORT main:app

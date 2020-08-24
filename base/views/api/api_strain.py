@@ -1,33 +1,37 @@
-from base.models2 import strain_m
-from base.application import app
+from base.models import Strain
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_
 from flask import request
 from logzero import logger
 
-@app.route('/api/strain/query/<string:query>')
+from flask import Blueprint
+
+api_strain_bp = Blueprint('api_strain',
+                          __name__,
+                          template_folder='api')
+
+
+@api_strain_bp.route('/strain/query/<string:query>')
 @jsonify_request
 def search_strains(query):
-    base_query = strain_m.query.filter(strain_m.isotype != None)
+    base_query = Strain.query.filter(Strain.isotype != None)
     query = query.upper()
-    results = base_query.filter(or_(strain_m.isotype == query,
-                                    strain_m.isotype.like(f"{query}%"),
-                                    strain_m.strain == query,
-                                    strain_m.strain.like(f"{query}%"),
-                                    strain_m.previous_names.like(f"%{query}|%"),
-                                    strain_m.previous_names.like(f"%,{query}|"),
-                                    strain_m.previous_names.like(f"%{query}"),
-                                    strain_m.previous_names == query))
-    results = list([x.to_json() for x in results])
-    return results    
+    results = base_query.filter(or_(Strain.isotype == query,
+                                    Strain.isotype.like(f"{query}%"),
+                                    Strain.strain == query,
+                                    Strain.strain.like(f"{query}%"),
+                                    Strain.previous_names.like(f"%{query},%"),
+                                    Strain.previous_names.like(f"%,{query},"),
+                                    Strain.previous_names.like(f"%{query}"),
+                                    Strain.previous_names == query))
+    return list([x.to_json() for x in results])
 
 
-
-@app.route('/api/strain/')
-@app.route('/api/strain/<string:strain_name>')
-@app.route('/api/strain/isotype/<string:isotype_name>')
+@api_strain_bp.route('/strain/')
+@api_strain_bp.route('/strain/<string:strain_name>')
+@api_strain_bp.route('/strain/isotype/<string:isotype_name>')
 @jsonify_request
-def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_names=False, resolve_isotype=False):
+def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_names=False, resolve_isotype=False, issues=False):
     """
         Return the full strain database set
 
@@ -37,33 +41,40 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
         all_strain_names - Return list of all possible strain names (internal use).
         resolve_isotype - Use to search for strains and return their isotype
     """
-    base_query = strain_m.query
+    query = Strain.query
     if release:
-        base_query = base_query.filter(strain_m.release <= release)
+        query = query.filter(Strain.release <= release)
     if strain_name or resolve_isotype:
-        results = base_query.filter(or_(strain_m.previous_names.like(f"%{strain_name}|%"),
-                                        strain_m.previous_names.like(f"%,{strain_name}|"),
-                                        strain_m.previous_names.like(f"%{strain_name}"),
-                                        strain_m.previous_names == strain_name,
-                                        strain_m.strain == strain_name)).first()
+        query = query.filter(or_(Strain.previous_names.like(f"%{strain_name},%"),
+                                        Strain.previous_names.like(f"%,{strain_name},"),
+                                        Strain.previous_names.like(f"%{strain_name}"),
+                                        Strain.previous_names == strain_name,
+                                        Strain.strain == strain_name)).first()
     elif isotype_name:
-        results = base_query.filter(strain_m.isotype == isotype_name).all()
+        query = query.filter(Strain.isotype == isotype_name)
     else:
-        results = base_query.all()
+        query = query
+
+    if issues is False:
+        query = query.filter(Strain.issues == False)
+        query = query.filter(Strain.isotype != None)
+        query = query.all()
+    else:
+        query = query.all()
 
     if all_strain_names:
-        previous_strain_names = sum([x.previous_names.split("|") for x in results if x.previous_names], [])
-        results = [x.strain for x in results] + previous_strain_names
+        previous_strain_names = sum([x.previous_names.split(",") for x in query if x.previous_names], [])
+        results = [x.strain for x in query] + previous_strain_names
     if resolve_isotype:
-        if results:
+        if query:
             # LSJ1/LSJ2 prev. N2; So N2 needs to be specific.
             if strain_name == 'N2':
                 return 'N2'
-            return results.isotype
-    return results
+            return query.isotype
+    return query
 
 
-def get_strains(known_origin=False):
+def get_strains(known_origin=False, issues=False):
     """
         Returns a list of strains;
 
@@ -71,26 +82,31 @@ def get_strains(known_origin=False):
 
         Args:
             known_origin: Returns only strains with a known origin
-            list_only: Returns a list of isotypes (internal use)
+            issues: Return only strains without issues
     """
-    ref_strain_list = strain_m.query.filter(strain_m.reference_strain == True).all()
+    ref_strain_list = Strain.query.filter(Strain.isotype_ref_strain == True).all()
     ref_strain_list = {x.isotype: x.strain for x in ref_strain_list}
-    result = strain_m.query
+    result = Strain.query
     if known_origin or 'origin' in request.path:
-        result = result.filter(strain_m.latitude != None)
+        result = result.filter(Strain.latitude != None)
+
+    if issues is False:
+        result = result.filter(Strain.isotype != None)
+        result = result.filter(Strain.issues == False)
+
     result = result.all()
     for strain in result:
-        strain.reference_strain = ref_strain_list[strain.isotype]
-        logger.error(strain.reference_strain)
+        # Set an attribute for the reference strain of every strain
+        strain.reference_strain = ref_strain_list.get(strain.isotype, None)
     return result
 
 
-@app.route('/api/isotype')
-@app.route('/api/isotype/origin')
+@api_strain_bp.route('/isotype')
+@api_strain_bp.route('/isotype/origin')
 @jsonify_request
 def get_isotypes(known_origin=False, list_only=False):
     """
-        Returns a list of strains when reference_strain == True;
+        Returns a list of strains when isotype_ref_strain == True;
 
         Represents ONE strain per isotype. This is the reference strain.
 
@@ -98,10 +114,10 @@ def get_isotypes(known_origin=False, list_only=False):
             known_origin: Returns only strains with a known origin
             list_only: Returns a list of isotypes (internal use)
     """
-    result = strain_m.query.filter(strain_m.reference_strain == True) \
-                           .order_by(strain_m.isotype)
+    result = Strain.query.filter(Strain.isotype_ref_strain == True) \
+                           .order_by(Strain.isotype)
     if known_origin or 'origin' in request.path:
-        result = result.filter(strain_m.latitude != None)
+        result = result.filter(Strain.latitude != None)
     result = result.all()
     if list_only:
         result = [x.isotype for x in result]

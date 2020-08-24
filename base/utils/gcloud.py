@@ -1,13 +1,11 @@
 import json
-import hashlib
-import base64
 from flask import g
 from base.utils.data_utils import dump_json
-from base.constants import DATASET_RELEASE
 from gcloud import datastore, storage
 from logzero import logger
 import googleapiclient.discovery
 from google.oauth2 import service_account
+
 
 def google_datastore(open=False):
     """
@@ -46,6 +44,7 @@ def store_item(kind, name, **kwargs):
             m[key] = 'JSON:' + dump_json(value)
         else:
             m[key] = value
+    logger.debug(f"store: {kind} - {name}")
     ds.put(m)
 
 
@@ -81,7 +80,7 @@ def get_item(kind, name):
     """
     ds = google_datastore()
     result = ds.get(ds.key(kind, name))
-    logger.info(f"datastore: {kind} - {name}")
+    logger.debug(f"get: {kind} - {name}")
     try:
         result_out = {'_exists': True}
         for k, v in result.items():
@@ -110,31 +109,53 @@ def google_storage(open=False):
     return g.gs
 
 
-def get_md5(fname):
+def get_cendr_bucket():
     """
-        Generates an md5sum that should match the google storage md5sum.
+        Returns the CeNDR bucket
     """
-    hash = hashlib.md5()
-    with open(fname, 'rb') as f:
-        for chunk in iter(lambda: f.read(2**20), b''):
-            hash.update(chunk)
-    return str(base64.b64encode(hash.digest()), 'utf-8')
+    gs = google_storage()
+    return gs.get_bucket("elegansvariation.org")
 
 
-
-def upload_file(name, fname):
+def upload_file(blob, obj, as_string = False):
     """
         Upload a file to the CeNDR bucket
 
         Args:
-            name - The name of the blob (server-side)
+            blob - The name of the blob (server-side)
             fname - The filename to upload (client-side)
     """
-    gs = google_storage()
-    cendr_bucket = gs.get_bucket("elegansvariation.org")
-    blob = cendr_bucket.blob(name)
-    blob.upload_from_filename(fname)
+    logger.info(f"Uploading: {blob} --> {obj}")
+    cendr_bucket = get_cendr_bucket()
+    blob = cendr_bucket.blob(blob)
+    if as_string:
+        blob.upload_from_string(obj)
+    else:
+        blob.upload_from_filename(obj)
     return blob
+
+
+def download_file(name, fname):
+    """
+        Download a file from the CeNDR bucket
+
+        Args:
+            name - The name of the blob (server-side)
+            fname - The filename to download (client-side)
+    """
+    cendr_bucket = get_cendr_bucket()
+    blob = cendr_bucket.blob(name)
+    blob.download_to_file(open(fname, 'wb'))
+    return fname
+
+
+def check_blob(fname):
+    """
+        Checks that a file exists and if so returns
+        the URL, otherwise returns nothing
+    """
+    cendr_bucket = get_cendr_bucket()
+    return cendr_bucket.get_blob(fname)
 
 
 def list_release_files(prefix):
@@ -143,8 +164,7 @@ def list_release_files(prefix):
         from the current dataset release
     """
 
-    gs = google_storage()
-    cendr_bucket = gs.get_bucket("elegansvariation.org")
+    cendr_bucket = get_cendr_bucket()
     items = cendr_bucket.list_blobs(prefix=prefix)
     return list([f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items])
 
@@ -156,5 +176,4 @@ def google_analytics():
     credentials = service_account.Credentials.from_service_account_file('env_config/client-secret.json',
                                                       scopes=['https://www.googleapis.com/auth/analytics.readonly'])
     return googleapiclient.discovery.build('analyticsreporting', 'v4', credentials=credentials)
-
 

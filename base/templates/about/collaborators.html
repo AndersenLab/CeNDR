@@ -1,0 +1,21 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+    <div class="row">
+        {% for member in collaborator_data|sort(attribute='last_name') %}
+            <div class="col-md-12 clearfix">
+                
+                <img src="{{ gs_static('img/people/' + member.photo) }}" style="width: 150px; " alt="{{ member.first_name }}" class="thumbnail hidden-xs lab-member-photo" />
+                <img src="{{ gs_static('img/people/' + member.photo) }}" style="width: 150px; " alt="{{ member.first_name }}" class="thumbnail visible-xs lab-member-photo-small" />
+                
+                <br />
+                
+                <h4><a href="{{ member.website }}">{{ member.first_name }} {{ member.last_name }}</a></h4>
+                <h4><small>{{ member.title }}</small></h4>
+                
+                <br />
+
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

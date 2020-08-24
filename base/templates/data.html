@@ -35,16 +35,19 @@
     {% if int(selected_release) >= 20170531 %}
     <li role="presentation"><a href="#haplotype" role="tab" data-toggle="tab">Images</a></li>
     {% endif %}
+    <li role="presentation"><a href="#pipelines" role="tab" data-toggle="tab">Pipelines / Methods</a></li>
   </ul>
 
   <!-- Tab panes -->
   <div class="tab-content">
 
     <div role="tabpanel" class="tab-pane active" id="download">
-        {% include('releases/download_tab.html') %}
+        {% include('releases/download_tab_isotype_v1.html') %}
     </div>
     <div role="tabpanel" class="tab-pane" id="summary">
-        {% include('releases/variant_summary_tab.html') %}
+        {% if vcf_summary %}
+            {% include('releases/variant_summary_tab.html') %}
+        {% endif %}
     </div>
     <div role="tabpanel" class="tab-pane" id="phylogeny">
         {% if phylo_url %}
@@ -52,6 +55,10 @@
             <strong><a href="{{ phylo_url }}">Download a PDF of the phylogeny</a></strong>
         {% endif %}
         <img style='width:100%' src='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/popgen/trees/genome.svg'>
+    </div>
+
+    <div role="tabpanel" class="tab-pane" id="pipelines">
+        {{ render_markdown(selected_release + "/pipelines.md", directory="base/static/reports") }}
     </div>
 
     {% if int(selected_release) >= 20170531 %}

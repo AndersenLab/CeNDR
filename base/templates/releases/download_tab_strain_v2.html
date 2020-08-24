@@ -1,0 +1,51 @@
+
+<input id="filter" type="text" class="form-control pull-right" style="width:200px;" placeholder="Filter Strain Name" action="#">
+<table class="table table-hover table-condensed strain-table">
+    <thead>
+        <tr>
+            <th style="width: 200px;">
+                <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+                            Strain
+                            </span>
+            </th>
+            <th style="width: 200px;">
+                <span class="tooltip-item" data-toggle="tooltip" data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+                            Isotype
+                            </span>
+            </th>
+            <th style="width: 200px;">Strain BAM</th>
+        </tr>
+    </thead>
+    <div style="height: 30px;"></div>
+    <tbody class="searchable">
+        {% set count = namespace(value=0) %}
+        {% for isotype, strains in strain_listing|groupby('isotype') %}
+        {% for strain in strains|sort(attribute='isotype_ref_strain', reverse=True) %}
+            {% if strain.issues == False %}
+            {% set count.value = count.value + 1 %}
+            <tr {% if strain.isotype_ref_strain %}class="success ref_strain"{% else %}class="strain"{% endif %}>
+                <td>
+                    {% if strain.isotype_ref_strain %}
+                        <strong>{{ strain }}</strong>
+                    {% else %}
+                        &nbsp;&nbsp;&nbsp;&nbsp;{{ strain }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if strain.isotype_ref_strain %}
+                        <strong>
+                            <a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
+                        </strong>
+                    {% else %}
+                        <a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ strain.strain_bam_url() }}
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        {% endfor %}
+    </tbody>
+</table>
