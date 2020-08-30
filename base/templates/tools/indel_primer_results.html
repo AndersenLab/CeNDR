@@ -1,10 +1,8 @@
 {% extends "_layouts/default.html" %}
 
 {% block custom_head %}
-
-	<link rel="stylesheet" href="/static/js/DataTables/datatables.css" />
-	<link href="/static/css/lightbox.css" rel="stylesheet" />
-	<script type="text/javascript" src="static/js/DataTables/datatables.min.js"></script>
+    <script src="http://www.protobi.com/javascripts/d3.v3.min.js"></script>
+    <link href="/static/css/lightbox.css" rel="stylesheet" />
 	<script src="https://html2canvas.hertzen.com/dist/html2canvas.js"></script>
 	<script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
 	<script src="https://unpkg.com/jspdf@latest/dist/jspdf.node.min.js"></script>
@@ -22,64 +20,84 @@
 		}
 		.btn.clicked {
 			background: #44A9FC;
-		}
-	</style>
-	<script src="http://www.protobi.com/javascripts/d3.v3.min.js"></script>
-	<style type="text/css">
-		.arrow{
-			stroke-width:2;
-			stroke:#000;
-		}
+        }
+        
+        .primer-table {
+            font-size: 10px;
+            font-family: monospace;
+        }
 
-		#arrow{
-			stroke-width:1;
-		}
+        .primer-table th {
+            width: 10%
+        }
+
 	</style>
+
+    {% if not ready %}
+        <meta http-equiv="refresh" content="10; url={{ request.path }}">
+    {% endif %}
 
 {% endblock %}
 
 
 {% block content %}
 
+{% if not ready %}
+    <p>
+        Indel Primer Analysis is currently running. Please wait a few minutes. This page will automatically reload.
+    </p>
+{% endif %}
+
+{% if data and ready %}
 <div class="btn-group" role="group">
   <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     Download
   </button>
   <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-    <!--div class="col-sm-4" ><button id="pdfd" type="button" class="btn btn-secondary" onClick='window.print()'>Print</button></div-->
     <div class="col-sm-4" ><button id="pdd" type="button" class="btn btn-secondary" onClick='getPDF("containerfluid")'>PDF</button></div>
     <div class="col-sm-4" ><button id="mdd" type="button" class="btn btn-secondary" onClick='getMarkdown("containerfluid")'>CSV</button></div>
   </div>
 </div>
 
-<div id="containerfluid" class="container-fluid">
+<div id="containerfluid" class="container">
 	<div class="row" id = "go1t" >
 	<p>
-	<center><h3><b>Selected Indel site</b></h3></center>
+        <center>
+            <h3>
+                <b>
+                    Selected Indel site
+                </b>
+            </h3>
+        </center>
 	</p>
 	<br /><br /><br />
 	<table id="example" class="display" style="width:100%;">
         <thead>
             <tr>
-                <th>Indel Start Position</th>
-                <th>Indel Stop Position</th>
+                <th>Indel Site</th>
                 <th>Indel Size</th>
-                <th>Strain effect</th>
+                <th>Variant Type</th>
             </tr>
         </thead>
 		<tbody>
 			<tr>
-			{% for d in data1[1:][:4] %}
-			<td>{{ d }} </td>
-			{% endfor %}
+                <td>{{ data['site'] }}</td>
+                <td>{{ data['size'] }}</td>
+                <td>{{ data['svtype'] }}</td>
 			</tr>
 		</tbody>
     </table>
 	</div>
-	<!-- br /><br / -->
-	<div style=''>
+
+	<div>
 	<p>
-	<center><h3><b>Primer information</b></h3></center>
+	<center>
+        <h3>
+            <b>
+                Primer information
+            </b>
+        </h3>
+    </center>
 	</p>
 
 	<div id="svgchartarea"></div>
@@ -92,47 +110,22 @@
 	{% endfor %}
 	
 	</div>
-	
-	<br /><br /><br /><br />
-	<table id="example1" class="display" style="width:100%;font-size: 10px;"> <!--  margin-left: -130px;" -->
-        <thead>
-            <tr>
-                <th>LeftPrimer Sequence</th>
-                <th>Start Position</th>
-                <th>Stop Position</th>
-                <th>Melting Temp</th>
-                <th>RightPrimer Sequence</th>
-                <th>Start Position</th>
-                <th>Stop Position</th>
-                <th>Melting Temp</th>
-                <th>AmpliconSize in strain1</th>
-                <th>AmpliconSize in strain2</th>
-            </tr>
-        </thead>
-		<!--  if pres is defined and variable|length  -->
-		<tbody>
-			{% for p in pres %}
-			<tr>
-			{% for d in p %}
-			<td>{{ d }} </td>
-			{% endfor %}
-			</tr>
-			{% endfor %}
-		</tbody>
-		<!-- endif -->
-    </table>
+        {{ format_table.to_html(index=False, classes='table table-condensed table-hover primer-table') | safe }}
 	</div>
 
 </div>
 <br />
 <br />
 <br />
+{% endif %}
 
 {% endblock %}
 
 {% block script %}
 
+{% if data and ready %}
 <script>
+    
 Element.prototype.remove = function() {
 		this.parentElement.removeChild(this);
 	}
@@ -150,23 +143,15 @@ function onSubmitData(val){
 
 
 $(document).ready(function(){
-	$('#example').DataTable();
-	$('#example1').DataTable({ "order": [[ 1, "asc" ]] });
-	gda = JSON.parse('{{ graphd  | tojson | safe }}');
-	
-	data = gda
-	if (data["search_reg"] != ":1000000000-0"){
-		d = data["search_reg"].split(':')[1].split('-')
-		indel = data["indel_reg"].split(':')[1].split('-')
-		d = d.concat(indel.concat(data["primer_reg"])).map(Number);
+
 		var svg = d3.select("#svgchartarea")
 			.append("svg")
 			.attr("width", 1000)
 
 		// Create the scale
 		var x = d3.scale.linear()
-			.domain([d3.min(d), d3.max(d)])
-			.range([100, 800]);
+			.domain([ {{ result.amp_start.min() }}, {{ result.amp_stop.max() }}])
+			.range([100, 900]);
 
 		defs = svg.append("defs")
 
@@ -178,13 +163,11 @@ $(document).ready(function(){
 			"refY":0,
 			"markerWidth":5,
 			"markerHeight":5,
-			"orient":"auto"
+            "orient":"auto",
+            "fill": "black"
 			})
 			.append("path")
 			.attr("d", "M0,-5L10,0L0,5")
-			.attr("class","arrowHead")
-			.style("fill", "black");
-
 
 		svg
 			.append("g")
@@ -201,74 +184,65 @@ $(document).ready(function(){
 				.scale(x)
 				.ticks(3)
 				.orient("bottom"));
-		indelg = svg
+        
+                indelg = svg
 			.append("g")
-			.attr("transform", "translate(0,50)");
-
+            .attr("transform", "translate(0,50)");
+        
+        // Draw the indel
 		indelg.append("rect")
-			.attr("width",x(Number(indel[1]))-x(Number(indel[0])))
+			.attr("width",x( {{ indel_stop }} ) - x( {{ indel_start }} ) )
 			.attr("height",function(d) { return 10; })
-			.attr("x",function(d,i) { return x(Number(indel[0])); })
+			.attr("x",function(d,i) { return x( {{ indel_start }}); })
 			.attr("fill", "red")
 			.attr("transform", "translate(0,15)");
 
-		indelg.append("line")
-			.attr("x1", x(d3.min([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])))
-			.attr("y1", 0)
-			.attr("x2", x(d3.min([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])))
-			.attr("y2", 30)
-			.attr("stroke-width", 1)
-			.attr("stroke", "black");
+        // Draw the primers
+        {% for row in records %}
 
-		indelg.append("line")
-			.attr("x1",x(d3.min([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])))
-			.attr("y1",30)
-			.attr("x2",x(d3.max([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])))
-			.attr("y2",30)
-			.attr("transform","translate(0,-30)")
-			.attr("stroke-width", 2)
-			.attr("stroke", "black");
+            // Left Primer
+            indelg.append("line")
+                .attr("class", "row-{{ loop.index }}")
+                .attr("x1", x( {{ row.left_primer_start }}  ))
+                .attr("y1",30)
+                .attr("x2", x( {{ row.left_primer_stop }} ))
+                .attr("y2",30)
+                .attr("marker-end", "url(#arrow)")
+                .attr("transform", "translate(0,{{ -30 * (len(records) - loop.index + 1) }})")
+                .attr("stroke-width", 2)
+                .attr("stroke", "black");
 
-		indelg.append('line')
-		.attr({
-			"class":"arrow",
-			"marker-end":"url(#arrow)",
-			"x1":x(d3.min([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])),
-			"y1":30,
-			"x2":x(d3.max([Number(data["primer_reg"][0]), Number(data["primer_reg"][1])])),
-			"y2":30,
-			"transform":"translate(0,-30)"
-		});
+            // Right Primer
+            indelg.append("line")
+                .attr("class", "row-{{ loop.index }}")
+                .attr("x1", x( {{ row.right_primer_stop }}  ))
+                .attr("y1",30)
+                .attr("x2", x( {{ row.right_primer_start }} ))
+                .attr("y2",30)
+                .attr("marker-end", "url(#arrow)")
+                .attr("transform","translate(0,{{ -30 * (len(records) - loop.index + 1) }})")
+                .attr("stroke-width", 2)
+                .attr("stroke", "black")
 
+        // Hover highlight primer set
+        $("tr").hover(function(x) {
+            var row_id = $(this).children().first().text();
+            console.log("Great")
+            d3.selectAll(`.row-${row_id}`)
+                .attr("stroke", "#0093FF")
+                .attr("stroke-width", 4)
+                .attr("fill", "red")
+        },
+        function(x) {
+            var row_id = $(this).children().first().text();
+            d3.selectAll(`.row-${row_id}`)
+                        .attr("stroke", "black")
+                        .attr("stroke-width", 2)
+        })
 
-		indelg.append("line")
-			.attr("x1", x(d3.max([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])))
-			.attr("y1", 0)
-			.attr("x2", x(d3.max([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])))
-			.attr("y2", 30)
-			.attr("stroke-width", 1)
-			.attr("stroke", "black");
-
-		indelg.append("line")
-			.attr("x1",x(d3.max([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])))
-			.attr("y1",30)
-			.attr("x2",x(d3.min([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])))
-			.attr("y2",30)
-			.attr("transform","translate(0,-30)")
-			.attr("stroke-width", 2)
-			.attr("stroke", "black");
-
-		indelg.append('line')
-		.attr({
-			"class":"arrow",
-			"marker-end":"url(#arrow)",
-			"x1":x(d3.max([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])),
-			"y1":30,
-			"x2":x(d3.min([Number(data["primer_reg"][2]), Number(data["primer_reg"][3])])),
-			"y2":30,
-			"transform":"translate(0,-30)"
-		});
-
+        {% endfor %}
+        
+        
 		var svgString = new XMLSerializer().serializeToString(document.querySelector('svg'));
 		var DOMURL = self.URL || self.webkitURL || self;
 		var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
@@ -278,6 +252,7 @@ $(document).ready(function(){
 		
 		var img = new Image();
 		
+        {#
 		img.onload = function() {
 			ctx.drawImage(img, 0, 0);
 			var png = canvas.toDataURL("image/png");
@@ -291,6 +266,7 @@ $(document).ready(function(){
 	} else {
 		d3.select("#svgchartarea").html('<center><h3><b style="color: red;"> NO PRIMERS FOUND! </b></h3></center>')
 	}
+    #}
 });
 </script>
 
@@ -377,7 +353,7 @@ $( document ).ready(function() {
 	$("a[href^='http://'], a[href^='https://'], a[href$='pdf']").attr("target","_blank");
 });
 </script>
-
+{% endif %}
 
 
 {% endblock %}

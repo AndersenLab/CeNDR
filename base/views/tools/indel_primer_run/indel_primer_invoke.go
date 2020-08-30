@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -16,17 +17,15 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-const vcfURL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/WI.HARD_FILTERED.FP.vcf.gz"
-const datasetName = "results.tsv"
-const resultName = "data.json"
+const resultName = "results.tsv"
 
 func check(e error) {
 	if e != nil {
-		panic(e)
+		log.Fatal(e)
 	}
 }
 
-func DownloadFile(filepath string, url string) error {
+func downloadFile(filepath string, url string) error {
 
 	// Get the data
 	resp, err := http.Get(url)
@@ -87,24 +86,42 @@ func runIndelPrimer(w http.ResponseWriter, r *http.Request) {
 	dataHash := r.FormValue("hash")
 	strain1 := r.FormValue("strain1")
 	strain2 := r.FormValue("strain2")
+	vcfURL := r.FormValue("vcf_url")
 
 	// Download Index
 	indexURL := fmt.Sprintf("%s.csi", vcfURL)
-	DownloadFile(path.Base(indexURL), indexURL)
+	downloadFile(path.Base(indexURL), indexURL)
 
-	fmt.Printf("vk primer indel --region %v --ref=WS276 --samples=%v %v", site, fmt.Sprintf("%s,%s", strain1, strain2), vcfURL)
-	cmd := exec.Command("vk", "primer", "indel", "--region", site, "--ref", "WS276", "--samples", fmt.Sprintf("%s,%s", strain1, strain2), vcfURL)
+	log.Printf("vk primer indel --region %v --nprimers 10 --ref=WS276 --samples=%v %v", site, fmt.Sprintf("%s,%s", strain1, strain2), vcfURL)
+	cmd := exec.Command("conda",
+		"run",
+		"-n",
+		"vcf-kit",
+		"vk",
+		"primer",
+		"indel",
+		"--region",
+		site,
+		"--nprimers",
+		"10",
+		"--ref",
+		"WS276",
+		"--samples",
+		fmt.Sprintf("%s,%s", strain1, strain2),
+		vcfURL)
 
 	cmd.Stderr = os.Stderr
-	_, err := cmd.Output()
+	out, err := cmd.Output()
 	check(err)
 	fmt.Println(err)
 
-	// Copy results to google storage.
-	resultBlob := fmt.Sprintf("reports/indel_primer/%s/data.json", dataHash, resultName)
+	// write file to output
+	ioutil.WriteFile(resultName, out, 0755)
+
+	resultBlob := fmt.Sprintf("reports/indel_primer/%s/%s", dataHash, resultName)
 	copyBlob("elegansvariation.org", resultName, resultBlob)
 
-	if err := json.NewEncoder(w).Encode("submitted h2"); err != nil {
+	if err := json.NewEncoder(w).Encode("submitted indel primer"); err != nil {
 		log.Printf("Error sending response: %v", err)
 	}
 

@@ -580,3 +580,7 @@ article {
   width: 850px;
   height: 300px;
 }
+
+.btn-link {
+    cursor: pointer;
+}
