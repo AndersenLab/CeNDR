@@ -24,8 +24,8 @@
 			<div class='col-md-2'>{{ render_field(form.strain_1) }}</div>
 			<div class='col-md-2'>{{ render_field(form.strain_2) }}</div>
 			<div class='col-md-2'>{{ render_field(form.chromosome) }}</div>
-			<div class='col-md-2'>{{ render_field(form.start, placeholder="1,425,000") }}</div>
-			<div class='col-md-2'>{{ render_field(form.stop, placeholder="1,465,000") }}</div>
+			<div class='col-md-2'>{{ render_field(form.start, placeholder="2,028,824") }}</div>
+			<div class='col-md-2'>{{ render_field(form.stop, placeholder="2,029,217") }}</div>
 			<div class='col-md-2'>
 				<label>&nbsp;</label> <br />
 				<button id='find_indels' type='submit' value="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Find Indels</button>
@@ -221,7 +221,9 @@ $(document).ready(function(){
 			}
 		}
 	});
-    
+   
+    submitForm()
+
 });
 </script>
 

@@ -96,8 +96,8 @@ class pairwise_indel_form(Form):
     strain_1 = SelectField('Strain 1', choices=STRAIN_CHOICES, default="N2", validators=[Required(), validate_uniq_strains])
     strain_2 = SelectField('Strain 2', choices=STRAIN_CHOICES, default="CB4856", validators=[Required()])
     chromosome = SelectField('Chromosome', choices=CHROMOSOME_CHOICES, validators=[Required()])
-    start = FlexIntegerField('Start', default="1,462,000", validators=[Required(), validate_start_lt_stop])
-    stop = FlexIntegerField('Stop', default="1,466,000", validators=[Required()])
+    start = FlexIntegerField('Start', default="2,018,824", validators=[Required(), validate_start_lt_stop])
+    stop = FlexIntegerField('Stop', default="2,039,217", validators=[Required()])
 
 
 @indel_primer_bp.route('/pairwise_indel_finder', methods=['GET'])
@@ -178,13 +178,18 @@ def submit_indel_primer():
     """
     data = request.get_json()
 
-
-
     # Generate an ID for the data based on its hash
     data_hash = hash_it(data, length=32)
     data['date'] = str(arrow.utcnow())
-    logger.debug(data)
 
+    # Check whether analysis has previously been run and if so - skip
+    result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
+    if result:
+        return jsonify({'thread_name': 'done',
+                        'started': True,
+                        'data_hash': data_hash})
+
+    logger.debug("Submitting Indel Primer Job")
     # Upload query information
     data_blob = f"reports/indel_primer/{data_hash}/input.json"
     upload_file(data_blob, json.dumps(data), as_string=True)
@@ -204,7 +209,7 @@ def submit_indel_primer():
 @indel_primer_bp.route("/indel_primer/result/<data_hash>")
 @indel_primer_bp.route("/indel_primer/result/<data_hash>/tsv/<filename>")
 def pairwise_indel_query_results(data_hash, filename = None):
-    title = "Heritability Results"
+    title = "Indel Primer Results"
     data = check_blob(f"reports/indel_primer/{data_hash}/input.json")
     result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
     ready = False
@@ -218,12 +223,6 @@ def pairwise_indel_query_results(data_hash, filename = None):
     title = f"Indel Primer Results {data['site']}"
     subtitle = f"{data['strain_1']} | {data['strain_2']}"
 
-    params = [f"Strain 1 : {data['strain_1']}",
-              f"Strain 2 : {data['strain_2']}",
-              f"Site : {data['site']}",
-              "Primer length : 18-22 bp",
-              "Annealing temp : 55-65ºC"]
-
     # Set indel information
     size = data['size']
     chrom, indel_start, indel_stop = re.split(":|-", data['site'])
@@ -233,61 +232,64 @@ def pairwise_indel_query_results(data_hash, filename = None):
         result = result.download_as_string().decode('utf-8')
         result = pd.read_csv(io.StringIO(result), sep="\t")
 
-        # left primer
-        result['left_primer_start'] = result.amplicon_region.apply(lambda x: x.split(":")[1].split("-")[0]).astype(int)
-        result['left_primer_stop'] = result.apply(lambda x: len(x['primer_left']) + x['left_primer_start'], axis=1)
-
-        # right primer
-        result['right_primer_stop'] = result.amplicon_region.apply(lambda x: x.split(":")[1].split("-")[1]).astype(int)
-        result['right_primer_start'] = result.apply(lambda x:  x['right_primer_stop'] - len(x['primer_right']), axis=1)
-
-        # Output left and right melting temperatures.
-        result[["left_melting_temp", "right_melting_temp"]] = result["melting_temperature"].str.split(",", expand = True)
-
-        # REF Strain and ALT Strain
-        ref_strain = result['0/0'].unique()[0]
-        alt_strain = result['1/1'].unique()[0]
-
-        # Extract chromosome and amplicon start/stop
-        result[[None, "amp_start", "amp_stop"]] = result.amplicon_region.str.split(pat=":|-", expand=True)
-
-        # Convert types
-        result.amp_start = result.amp_start.astype(int)
-        result.amp_stop = result.amp_stop.astype(int)
-
-        result["N"] = np.arange(len(result)) + 1
-        # Setup output table
-        format_table = result[["N",
-                               "CHROM",
-                               "primer_left",
-                               "left_primer_start",
-                               "left_primer_stop",
-                               "left_melting_temp",
-                               "primer_right",
-                               "right_primer_start",
-                               "right_primer_stop",
-                               "right_melting_temp",
-                               "REF_product_size",
-                               "ALT_product_size"]]
-
-        # Format table column names
-        COLUMN_NAMES = ["Primer Set",
-                        "Chrom",
-                        "Left Primer (LP)",
-                        "LP Start",
-                        "LP Stop",
-                        "LP Melting Temp",
-                        "Right Primer (RP)",
-                        "RP Start",
-                        "RP Stop",
-                        "RP Melting Temp",
-                        f"{ref_strain} (REF) amplicon size",
-                        f"{alt_strain} (ALT) amplicon size"]
-
-        format_table.columns = COLUMN_NAMES
-
-        records = result.to_dict('records')
+        # Check for no results
+        empty = True if len(result) == 0 else False
         ready = True
+        if empty is False:
+            # left primer
+            result['left_primer_start'] = result.amplicon_region.apply(lambda x: x.split(":")[1].split("-")[0]).astype(int)
+            result['left_primer_stop'] = result.apply(lambda x: len(x['primer_left']) + x['left_primer_start'], axis=1)
+
+            # right primer
+            result['right_primer_stop'] = result.amplicon_region.apply(lambda x: x.split(":")[1].split("-")[1]).astype(int)
+            result['right_primer_start'] = result.apply(lambda x:  x['right_primer_stop'] - len(x['primer_right']), axis=1)
+
+            # Output left and right melting temperatures.
+            result[["left_melting_temp", "right_melting_temp"]] = result["melting_temperature"].str.split(",", expand = True)
+
+            # REF Strain and ALT Strain
+            ref_strain = result['0/0'].unique()[0]
+            alt_strain = result['1/1'].unique()[0]
+
+            # Extract chromosome and amplicon start/stop
+            result[[None, "amp_start", "amp_stop"]] = result.amplicon_region.str.split(pat=":|-", expand=True)
+
+            # Convert types
+            result.amp_start = result.amp_start.astype(int)
+            result.amp_stop = result.amp_stop.astype(int)
+
+            result["N"] = np.arange(len(result)) + 1
+            # Setup output table
+            format_table = result[["N",
+                                "CHROM",
+                                "primer_left",
+                                "left_primer_start",
+                                "left_primer_stop",
+                                "left_melting_temp",
+                                "primer_right",
+                                "right_primer_start",
+                                "right_primer_stop",
+                                "right_melting_temp",
+                                "REF_product_size",
+                                "ALT_product_size"]]
+
+            # Format table column names
+            COLUMN_NAMES = ["Primer Set",
+                            "Chrom",
+                            "Left Primer (LP)",
+                            "LP Start",
+                            "LP Stop",
+                            "LP Melting Temp",
+                            "Right Primer (RP)",
+                            "RP Start",
+                            "RP Stop",
+                            "RP Melting Temp",
+                            f"{ref_strain} (REF) amplicon size",
+                            f"{alt_strain} (ALT) amplicon size"]
+
+            format_table.columns = COLUMN_NAMES
+
+            records = result.to_dict('records')
 
     if request.path.endswith("tsv"):
         # Return TSV of results

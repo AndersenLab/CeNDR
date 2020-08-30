@@ -12,7 +12,7 @@
     <style type="text/css">
         .table {
             border: 1px solid black;
-            font-size: 11px;
+            font-size: 12px;
             font-family: monospace;
         }
 
@@ -29,7 +29,7 @@
         }
 
         .primer-table {
-            font-size: 10px;
+            font-size: 11px;
             font-family: monospace;
         }
 
@@ -68,6 +68,16 @@
 {% endif %}
 
 {% if data and ready %}
+    {% if empty %}
+        <div class="row">
+            <div class="col-md-12">
+                <h4>No Results</h4>
+                <p>
+                    <strong>Unfortunately, no primers could be found for this site.</strong>
+                </p>
+            </div>{# /col-md-4 #}
+        </div>{# /row #}
+    {% else %}
     <div class="row">
         <div class='pull-left col-md-4'>
             <a role="button" id="pdd" class="btn btn-default" onClick='getPDF("containerfluid")'>PDF</a>
@@ -119,14 +129,14 @@
     <small>The red line indicates the location of the indel. Arrows indicate the locations of primer sets.</small>
 
 </div>{# /report #}
-
+{% endif %}
 {% endif %}
 
 {% endblock %}
 
 {% block script %}
 
-{% if data and ready %}
+{% if data and ready and empty == False %}
 <script>
 
 Element.prototype.remove = function() {
@@ -149,7 +159,8 @@ $(document).ready(function() {
         var row_id = 0
 		var svg = d3.select("#svgchartarea")
 			.append("svg")
-			.attr("width", "1000px")
+            .attr("width", "1000px")
+            .attr("height", "{{ len(result) * 30 + 100 }}px")
 
 		// Create the scale
 		var x = d3.scale.linear()
@@ -198,16 +209,26 @@ $(document).ready(function() {
 			.attr("height",function(d) { return 10; })
 			.attr("x",function(d,i) { return x( {{ indel_start }}); })
 			.attr("fill", "red")
-			.attr("transform", "translate(0,15)");
+            .attr("transform", "translate(0,15)");
+        
+        // Indel label
+        indelg.append("text")
+            .attr("width",x( {{ indel_stop }} ) - x( {{ indel_start }} ) )
+            .attr("height",function(d) { return 10; })
+            .attr("x",function(d,i) { return x( {{ indel_start }}); })
+			.attr("fill", "red")
+            .attr("transform", "translate(0,12)")
+            .text("{{ data['svtype'] }} ({{ data['strain_2'] }})")
 
         // Draw the primers
         {% for row in records %}
 
             indelg.append("text")
-                .attr("x", 80)
+                .attr("x", 60)
                 .attr("y", 37)
+                .style("text-anchor", "end")
                 .attr("font-size", "20")
-                .attr("transform", "translate(0,{{ -30 * (len(records) - loop.index + 1) }})")
+                .attr("transform", "translate(0,{{ 30 * (loop.index) }})")
                 .text("{{ loop.index }}")
 
             // Left Primer
@@ -218,7 +239,7 @@ $(document).ready(function() {
                 .attr("x2", x( {{ row.left_primer_stop }} ))
                 .attr("y2",30)
                 .attr("marker-end", "url(#arrow)")
-                .attr("transform", "translate(0,{{ -30 * (len(records) - loop.index + 1) }})")
+                .attr("transform", "translate(0,{{ 30 * (loop.index) }})")
                 .attr("stroke-width", 2)
                 .attr("stroke", "black");
 
@@ -230,14 +251,14 @@ $(document).ready(function() {
                 .attr("x2", x( {{ row.right_primer_start }} ))
                 .attr("y2",30)
                 .attr("marker-end", "url(#arrow)")
-                .attr("transform","translate(0,{{ -30 * (len(records) - loop.index + 1) }})")
+                .attr("transform","translate(0,{{ 30 * (loop.index) }})")
                 .attr("stroke-width", 2)
                 .attr("stroke", "black")
 
         {% endfor %}
 
         // Hover highlight primer set
-        $("tr").hover(function(x) {
+        $(".primer-table tr").hover(function(x) {
             row_id = $(this).children().first().text();
             d3.selectAll(`.row-${row_id}`)
                 .attr("stroke", "#0093FF")
