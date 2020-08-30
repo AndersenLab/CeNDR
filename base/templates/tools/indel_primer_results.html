@@ -203,6 +203,13 @@ $(document).ready(function() {
         // Draw the primers
         {% for row in records %}
 
+            indelg.append("text")
+                .attr("x", 80)
+                .attr("y", 37)
+                .attr("font-size", "20")
+                .attr("transform", "translate(0,{{ -30 * (len(records) - loop.index + 1) }})")
+                .text("{{ loop.index }}")
+
             // Left Primer
             indelg.append("line")
                 .attr("class", "row-{{ loop.index }}")
