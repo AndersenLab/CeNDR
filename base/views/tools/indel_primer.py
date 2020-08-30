@@ -7,7 +7,12 @@ import requests
 import numpy as np
 import pandas as pd
 from cyvcf2 import VCF
-from flask import Blueprint, jsonify, render_template, request, abort
+from flask import (Blueprint,
+                   jsonify,
+                   render_template,
+                   request,
+                   abort,
+                   Response)
 from flask_wtf import Form
 from logzero import logger
 from wtforms import IntegerField, SelectField
@@ -197,7 +202,8 @@ def submit_indel_primer():
 
 
 @indel_primer_bp.route("/indel_primer/result/<data_hash>")
-def pairwise_indel_query_results(data_hash):
+@indel_primer_bp.route("/indel_primer/result/<data_hash>/tsv/<filename>")
+def pairwise_indel_query_results(data_hash, filename = None):
     title = "Heritability Results"
     data = check_blob(f"reports/indel_primer/{data_hash}/input.json")
     result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
@@ -265,7 +271,7 @@ def pairwise_indel_query_results(data_hash):
                                "ALT_product_size"]]
 
         # Format table column names
-        COLUMN_NAMES = ["N",
+        COLUMN_NAMES = ["Primer Set",
                         "Chrom",
                         "Left Primer (LP)",
                         "LP Start",
@@ -281,7 +287,12 @@ def pairwise_indel_query_results(data_hash):
         format_table.columns = COLUMN_NAMES
 
         records = result.to_dict('records')
-        logger.debug(result)
         ready = True
 
+    if request.path.endswith("tsv"):
+        # Return TSV of results
+        return Response(format_table.to_csv(sep="\t"), mimetype="text/tab-separated-values")
+
     return render_template("tools/indel_primer_results.html", **locals())
+
+
