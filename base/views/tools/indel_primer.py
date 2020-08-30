@@ -1,12 +1,19 @@
+import io
+import re
+import json
 import tabix
 import arrow
 import requests
-from flask import Blueprint, jsonify, render_template, request
+import numpy as np
+import pandas as pd
+from cyvcf2 import VCF
+from flask import Blueprint, jsonify, render_template, request, abort
 from flask_wtf import Form
 from logzero import logger
 from wtforms import IntegerField, SelectField
 from wtforms.validators import Required, ValidationError
 
+from base.config import config
 from base.utils.gcloud import check_blob, upload_file
 from base.utils.data_utils import hash_it
 from base.constants import CHROM_NUMERIC
@@ -26,22 +33,24 @@ MAX_SV_SIZE = 500
 
 # Initial load of strain list from sv_data
 # This is run when the server is started.
-SV_STRAINS = requests.get("https://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv_strains.txt").text.splitlines()
-SV_DATA_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/WI.HARD_FILTERED.FP.bed.gz"
+# NOTE: Tabix cannot make requests over https!
+SV_BED_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.bed.gz"
+SV_VCF_URL = "https://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.vcf.gz"
+SV_STRAINS = VCF(SV_VCF_URL).samples
 SV_COLUMNS = ["CHROM",
               "START",
               "END",
               "SUPPORT",
               "SVTYPE",
-              "STRAND",	
-              "SV_TYPE_CALLER",	
-              "SV_POS_CALLER",	
-              "STRAIN",	
-              "CALLER",	
-              "GT",	
-              "SNPEFF_TYPE",	
-              "SNPEFF_PRED",	
-              "SNPEFF_EFF",	
+              "STRAND",
+              "SV_TYPE_CALLER",
+              "SV_POS_CALLER",
+              "STRAIN",
+              "CALLER",
+              "GT",
+              "SNPEFF_TYPE",
+              "SNPEFF_PRED",
+              "SNPEFF_EFF",
               "SVTYPE_CLEAN",
               "TRANSCRIPT",
               "SIZE",
@@ -70,10 +79,8 @@ def validate_start_lt_stop(form, field):
 class FlexIntegerField(IntegerField):
 
     def process_formdata(self, val):
-        logger.debug(val)
         if val:
             val[0] = val[0].replace(",", "").replace(".", "")
-        logger.debug(val)
         return super(FlexIntegerField, self).process_formdata(val)
 
 
@@ -113,7 +120,7 @@ def pairwise_indel_finder_query():
         results = []
         strain_cmp = [data["strain_1"],
                       data["strain_2"]]
-        tb = tabix.open(SV_DATA_URL)
+        tb = tabix.open(SV_BED_URL)
         query = tb.query(data["chromosome"], data["start"], data["stop"])
         results = []
         for row in query:
@@ -143,35 +150,45 @@ def pairwise_indel_finder_query():
     return jsonify({"errors": form.errors})
 
 
-def indel_primer_task(data, data_hash):
+def indel_primer_task(data_hash, site, strain1, strain2, vcf_url):
     """
         This is designed to be run in the background on the server.
-        It will run a heritability analysis on google cloud run
+        It will run a an indel_primer request using google cloud run
     """
-    # Perform h2 request
-    #result = requests.post(config['HERITABILITY_URL'], data={'data': data,
-    #                                                         'hash': data_hash})
-    logger.debug(data)
+    # Perform indel_primer_request
+    logger.info("Submitting Primer Task")
+    result = requests.post(config['INDEL_PRIMER_URL'], data={'hash': data_hash,
+                                                             'site': site,
+                                                             'strain1': strain1,
+                                                             'strain2': strain2,
+                                                             'vcf_url': vcf_url.replace("https", "http")})
+    logger.debug(result)
 
 
 @indel_primer_bp.route('/pairwise_indel_finder/submit', methods=["POST"])
 def submit_indel_primer():
     """
-        This endpoint is used to submit a heritability job.
+        This endpoint is used to submit an indel primer job.
         The endpoint request is executed as a background task to keep the job alive.
     """
     data = request.get_json()
-    data['date'] = str(arrow.utcnow())
+
+
 
     # Generate an ID for the data based on its hash
     data_hash = hash_it(data, length=32)
-    logger.debug(data_hash)
+    data['date'] = str(arrow.utcnow())
+    logger.debug(data)
 
     # Upload query information
-    data_blob = f"reports/indel_primer/{data_hash}/data.json"
-    upload_file(data_blob, str(data), as_string=True)
+    data_blob = f"reports/indel_primer/{data_hash}/input.json"
+    upload_file(data_blob, json.dumps(data), as_string=True)
 
-    thread = Thread(target=indel_primer_task, args=(data, data_hash,))
+    thread = Thread(target=indel_primer_task, args=(data_hash,
+                                                    data['site'],
+                                                    data['strain_1'],
+                                                    data['strain_2'],
+                                                    SV_VCF_URL))
     thread.daemon = True
     thread.start()
     return jsonify({'thread_name': str(thread.name),
@@ -179,5 +196,92 @@ def submit_indel_primer():
                     'data_hash': data_hash})
 
 
-def pairwise_indel_query_results():
-    return render_template("tools/indel_primer_results.html")
+@indel_primer_bp.route("/indel_primer/result/<data_hash>")
+def pairwise_indel_query_results(data_hash):
+    title = "Heritability Results"
+    data = check_blob(f"reports/indel_primer/{data_hash}/input.json")
+    result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
+    ready = False
+
+    if data is None:
+        return abort(404, description="Indel primer report not found")
+    logger.debug(data.download_as_string().decode("utf-8"))
+    data = json.loads(data.download_as_string().decode('utf-8'))
+    logger.info(data)
+    # Get trait and set title
+    title = f"Indel Primer Results {data['site']}"
+    subtitle = f"{data['strain_1']} | {data['strain_2']}"
+
+    params = [f"Strain 1 : {data['strain_1']}",
+              f"Strain 2 : {data['strain_2']}",
+              f"Site : {data['site']}",
+              "Primer length : 18-22 bp",
+              "Annealing temp : 55-65ºC"]
+
+    # Set indel information
+    size = data['size']
+    chrom, indel_start, indel_stop = re.split(":|-", data['site'])
+    indel_start, indel_stop = int(indel_start), int(indel_stop)
+
+    if result:
+        result = result.download_as_string().decode('utf-8')
+        result = pd.read_csv(io.StringIO(result), sep="\t")
+
+        # left primer
+        result['left_primer_start'] = result.amplicon_region.apply(lambda x: x.split(":")[1].split("-")[0]).astype(int)
+        result['left_primer_stop'] = result.apply(lambda x: len(x['primer_left']) + x['left_primer_start'], axis=1)
+
+        # right primer
+        result['right_primer_stop'] = result.amplicon_region.apply(lambda x: x.split(":")[1].split("-")[1]).astype(int)
+        result['right_primer_start'] = result.apply(lambda x:  x['right_primer_stop'] - len(x['primer_right']), axis=1)
+
+        # Output left and right melting temperatures.
+        result[["left_melting_temp", "right_melting_temp"]] = result["melting_temperature"].str.split(",", expand = True)
+
+        # REF Strain and ALT Strain
+        ref_strain = result['0/0'].unique()[0]
+        alt_strain = result['1/1'].unique()[0]
+
+        # Extract chromosome and amplicon start/stop
+        result[[None, "amp_start", "amp_stop"]] = result.amplicon_region.str.split(pat=":|-", expand=True)
+
+        # Convert types
+        result.amp_start = result.amp_start.astype(int)
+        result.amp_stop = result.amp_stop.astype(int)
+
+        result["N"] = np.arange(len(result)) + 1
+        # Setup output table
+        format_table = result[["N",
+                               "CHROM",
+                               "primer_left",
+                               "left_primer_start",
+                               "left_primer_stop",
+                               "left_melting_temp",
+                               "primer_right",
+                               "right_primer_start",
+                               "right_primer_stop",
+                               "right_melting_temp",
+                               "REF_product_size",
+                               "ALT_product_size"]]
+
+        # Format table column names
+        COLUMN_NAMES = ["N",
+                        "Chrom",
+                        "Left Primer (LP)",
+                        "LP Start",
+                        "LP Stop",
+                        "LP Melting Temp",
+                        "Right Primer (RP)",
+                        "RP Start",
+                        "RP Stop",
+                        "RP Melting Temp",
+                        f"{ref_strain} (REF) amplicon size",
+                        f"{alt_strain} (ALT) amplicon size"]
+
+        format_table.columns = COLUMN_NAMES
+
+        records = result.to_dict('records')
+        logger.debug(result)
+        ready = True
+
+    return render_template("tools/indel_primer_results.html", **locals())

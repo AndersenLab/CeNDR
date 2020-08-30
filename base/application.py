@@ -153,7 +153,8 @@ def configure_jinja(app):
     # Injects "contexts" into templates
     @app.context_processor
     def inject():
-        return dict(json=json,
+        return dict(version=os.environ.get("GAE_VERSION", "-9-9-9").split("-", 1)[1].replace("-", "."),
+                    json=json,
                     list=list,
                     str=str,
                     int=int,
