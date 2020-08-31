@@ -200,7 +200,7 @@ $(document).ready(function(){
                                     contentType: "application/json; charset=utf-8",
                                     dataType: 'json',
                                     success:function(result){
-                                        window.location = `indel_primer/result/${result.data_hash}`
+                                        window.open(`indel_primer/result/${result.data_hash}`, "_blank")
                                     }
                             })
                         });

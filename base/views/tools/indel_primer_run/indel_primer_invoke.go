@@ -104,6 +104,7 @@ func runIndelPrimer(w http.ResponseWriter, r *http.Request) {
 		site,
 		"--nprimers",
 		"10",
+		"--polymorphic",
 		"--ref",
 		"WS276",
 		"--samples",
