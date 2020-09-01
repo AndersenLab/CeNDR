@@ -16,7 +16,9 @@
 		<p>
 			This web-based tool is designed to compare any two wild <i>C. elegans</i> strains for insertion-deletion (indel) variants that can be genotyped using PCR. These molecular markers can be used to follow each respective genetic background in crosses. Enter a specific genomic region. The following page will output indel variants that can be genotyped by PCR. For each of these indels, you can search for primers to genotype them in the two wild strains using differential PCR
 			product sizes. Primers are designed to avoid natural variants in either strain to ensure that the PCR works in both genetic backgrounds.
-		</p>
+        </p>
+        
+        <p>Primers might not be found flanking some indel sites. Click on additional indel sites to find one that has good quality primers.</p>
 	</div>
 	<div class='row'>
 		<form id='form-submit' method="POST">
@@ -184,7 +186,7 @@ $(document).ready(function(){
                         $(".generate-primers").on("click", function(e) {
                             console.log("Submitted")
 
-                            $(this).text("Please Wait...")
+                            $(this).text("Submitted")
 
                             var data = {
                                 site: $(this).attr("site"),

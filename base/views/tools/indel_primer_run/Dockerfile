@@ -12,6 +12,7 @@ RUN conda create -n vcf-kit \
               coveralls \
               biopython \
               logzero \
+              curl \
               "matplotlib>=1.3.1" \
               "scipy>=0.13.3" \
               "numpy>=1.8.0" \
