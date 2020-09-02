@@ -83,7 +83,7 @@
         {% endif %}
 
         {% if result %}
-        <canvas id="canvas" ></canvas> <!-- width="900" height="400"></canvas -->
+        <canvas id="canvas" ></canvas>
         <div id="png-container"></div>
         {% endif %}
 
@@ -264,7 +264,6 @@
         image.src = url;
         document.getElementById("svgchartarea").remove();
         document.getElementById('canvas').remove();
-        //location.reload();
     }
 
     var getPDF = function(){

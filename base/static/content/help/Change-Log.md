@@ -2,6 +2,10 @@
 
 --- 
 
+##### v1.5.1 (2020-08-30)
+
+* The [primer indel tool](/tools/pairwise_indel_finder) has been released.
+
 #### v1.5 (2020-08-15)
 
 * The primary data model has moved from isotypes to strains.

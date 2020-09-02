@@ -5,11 +5,14 @@ RUN conda config --add channels defaults && \
     conda config --add channels bioconda && \
     conda config --add channels conda-forge
 RUN conda create -n vcf-kit \
+			  conda-forge::go=1.13.15 \
               python=3.7 \
               pytest \
               pytest-cov \
               coveralls \
               biopython \
+              logzero \
+              curl \
               "matplotlib>=1.3.1" \
               "scipy>=0.13.3" \
               "numpy>=1.8.0" \
@@ -31,7 +34,7 @@ LABEL Name="vcf-kit" Author="Daniel Cook"
 # Now install VCF-Kit 0.2.8
 RUN git clone https://www.github.com/andersenlab/vcf-kit && \
     cd vcf-kit && \
-    git checkout 1c7ae5a053e95ba66a525539e799ea486f144f94 && \
+    git checkout 25c7c032628ffd02f4c474758dec7402979c2b12 && \
     python setup.py install
 
 RUN vk genome wormbase --ref=WS276
@@ -39,15 +42,15 @@ RUN vk genome wormbase --ref=WS276
 # Create and change to the app directory.
 WORKDIR /app
 
+# Copy local code to the container image.
+COPY indel_primer_invoke.go ./
 
-# # Copy local code to the container image.
-# COPY invoke.go ./
+# Install google cloud storage
+RUN CGO_ENABLED=0 GOOS=linux go get cloud.google.com/go/storage
 
-# # Install google cloud storage
-# RUN CGO_ENABLED=0 GOOS=linux go get cloud.google.com/go/storage
+# Build the binary.
+# -mod=readonly ensures immutable go.mod and go.sum in container builds. .
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o server
 
-# # Build the binary.
-# # -mod=readonly ensures immutable go.mod and go.sum in container builds.
-# RUN CGO_ENABLED=0 GOOS=linux go build -v -o server
-
-# COPY ./H2_script.R ./
+# Run the web service on container startup.
+CMD ["/app/server"]
