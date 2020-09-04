@@ -58,6 +58,8 @@ def strain_data_tsv():
 
     def generate():
         col_list = list(Strain.__mapper__.columns)
+        col_order = [1, 0, 3, 4, 5, 7, 8, 9, 10, 28, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 2, 6]
+        col_list[:] = [col_list[i] for i in col_order]
         header = [x.name for x in col_list]
         yield '\t'.join(header) + "\n"
         for row in query_strains(issues=False):
