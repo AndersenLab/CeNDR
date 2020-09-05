@@ -41,7 +41,9 @@
                     {% endif %}
                 </td>
                 <td>
-                    {{ strain.strain_bam_url() }}
+                    {% if strain.sequenced %}
+                        {{ strain.strain_bam_url() }}
+                    {% endif %}
                 </td>
             </tr>
             {% endif %}
