@@ -14,11 +14,22 @@
 <div class="container-fluid">
 	<div class = "row">
 		<p>
-			This web-based tool is designed to compare any two wild <i>C. elegans</i> strains for insertion-deletion (indel) variants that can be genotyped using PCR. These molecular markers can be used to follow each respective genetic background in crosses. Enter a specific genomic region. The following page will output indel variants that can be genotyped by PCR. For each of these indels, you can search for primers to genotype them in the two wild strains using differential PCR
-			product sizes. Primers are designed to avoid natural variants in either strain to ensure that the PCR works in both genetic backgrounds.
+            This web-based tool is designed to compare any two wild <em>C. elegans</em> strains for insertion-deletion (indel) variants that can be genotyped using PCR.
+            These molecular markers can be used to follow each respective genetic background in crosses.
+        </p>
+
+        <p>
+            Enter a specific genomic region. The browser will show indel variants between these two strains.
+            The table will show regions to search for primers. Primers might not be found flanking some indel sites.
+            Click on additional indel sites to find one that has good quality primers.
+            For each of these indels, you can search for primers to genotype them in the two wild strains using differential PCR product sizes.
+            Primers are designed to avoid natural variants in either strain to ensure that the PCR works in both genetic backgrounds.
         </p>
         
-        <p>Primers might not be found flanking some indel sites. Click on additional indel sites to find one that has good quality primers.</p>
+        <p>
+            The browser also shows divergent regions, where the reference genome and some wild isolates have sequences with many variants.
+            These regions should be avoided because indel calls are less reliable and high levels of variation will make primer searches more error-prone.
+        </p>
 	</div>
 	<div class='row'>
 		<form id='form-submit' method="POST">
@@ -58,6 +69,16 @@ var browserDiv = $("#browser"),
                       fastaURL: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS245.genomic.fa",
                     },
                 };
+
+var divergent_track_summary = {
+                    name: "Divergent Regions",
+                    url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_all.bed.gz",
+                    order: 6,
+                    height: 40,
+                    displayMode: "EXPANDED",
+                    color: "#CB3466",
+                    visibilityWindow: 20000000
+                  }
 
 var browser
 var query_running = false
@@ -115,12 +136,13 @@ $(document).ready(function(){
 							// Create genome browser
 							browser = igv.createBrowser(browserDiv, options)
 							             .then(function(browser) {
+                                            browser.loadTrack(divergent_track_summary)
 											 set_position()
 											 browser.on('locuschange', function(reference_frame, label) {
 												 $("#chromosome").val(reference_frame["chr"]);
 												 $("#start").val(reference_frame["start"]);
 												 $("#stop").val(reference_frame["end"]);
-												 setTimeout(submitForm, 500)
+                                                 setTimeout(submitForm, 500)
 											 })
                                          })
 
@@ -147,8 +169,9 @@ $(document).ready(function(){
 							table.clear()
 							table.rows.add(results);
 							table.draw();
-							// Remove all tracks
-							browser.removeAllTracks()
+                            // Remove strain tracks
+                            var remove_tracks = _.filter(_.map(browser.findTracks(), x => x.name), y => ["", "Divergent Regions"].includes(y) == false)
+							_.each(remove_tracks, x => browser.removeTrackByName(x))
 						}
 					
 						// Load tracks
