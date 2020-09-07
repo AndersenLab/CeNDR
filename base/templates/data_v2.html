@@ -168,9 +168,19 @@ body, html{
                         <td><strong>Haplotypes</strong></td>
                         <td>Haplotypes for isotypes were calculated and plotted as described in <a href="https://www.biorxiv.org/content/10.1101/2020.07.23.218420v2.full">Lee <i>et al.</i></a></td>
                         <td>
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png">PNG</a>
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png">haplotype.png</a>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.pdf">PDF</a>
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.pdf">haplotype.pdf</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Sweep haplotypes</strong></td>
+                        <td>The most frequent haplotype that covers at least 25% of the chromosome and is found on chromosome centers was determined and classified as a selective sweep. For more details, see <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3365839/">Andersen <i>et al.<i></a> and <a href="https://www.biorxiv.org/content/10.1101/2020.07.23.218420v2.full">Lee <i>et al.</i></a>. The plot shows red (swept), gray (non-swept), and white (not classified) regions.</td>
+                        <td>
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/sweep.pdf">sweep.pdf</a>
+                            <br />
+                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/sweep_summary.tsv">sweep_summary.tsv</a>
                         </td>
                     </tr>
 
@@ -194,7 +204,7 @@ body, html{
 
             <h2>Alignment (BAM)</h2>
 
-            <p>If you do not see a strain, check the <a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a> tab.
+            <p>Only strains with whole-genome sequencing data have BAM files for download. If you do not see a strain, check the <a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a> tab.
             Some strains have been flagged and removed from distribution and analysis pipelines for a variety of reasons.</p>
 
             {% set show_issues = False %}
