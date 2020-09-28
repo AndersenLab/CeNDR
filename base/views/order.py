@@ -40,10 +40,6 @@ def order_page():
     """
         This view handles the order page.
     """
-
-    # [ ] REVERT; TEMPORARY BLOCK ON ORDERS
-    return redirect("strains.strain_catalog", **locals())
-
     form = order_form()
     if session.get('user') and not form.email.data:
         form.email.data = session.get('user')['user_email']

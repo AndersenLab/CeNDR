@@ -112,6 +112,7 @@ def register_extensions(app):
     cache.init_app(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
     sqlalchemy(app)
     CSRFProtect(app)
+    app.config['csrf'] = CSRFProtect(app)
 
 
 def register_blueprints(app):
