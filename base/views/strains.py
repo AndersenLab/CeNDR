@@ -110,8 +110,7 @@ def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
 @strain_bp.route('/catalog', methods=['GET', 'POST'])
 @cache.memoize(50)
 def strain_catalog():
-    # [ ] REVERT; TEMPORARY BAN ON NEW ORDERS
-    flash(Markup("<strong>Due to COVID-19, we are unable to accept new orders until further notice.</strong>"), category="danger")
+    flash(Markup("Strain mapping sets 7 and 8 will not be available until later this year."), category="warning")
     VARS = {"title": "Strain Catalog",
             "warning": request.args.get('warning'),
             "strain_listing": get_strains(),

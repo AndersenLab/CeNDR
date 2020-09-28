@@ -9,6 +9,7 @@
 {% endblock %} 
 {% block content %}
 <form method="POST" action="{{ url_for('order.order_page') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <div class="row">
                 <div class="col-md-10">
                             <h3>Strain Sets</h3>
@@ -70,7 +71,8 @@
                         {% for i in range(1,9) %}
                         <tr>
                             <td>
-                                <input id="set-{{ i }}" type="checkbox" name="items-{{ i + 1000 }}"  value="set_{{ i }}"/>
+                                {# REVERT - enable mapping set 7 and 8 #}
+                                <input id="set-{{ i }}" type="checkbox" name="items-{{ i + 1000 }}"  {% if i >= 7 %}disabled{% endif %} value="set_{{ i }}"/>
                             </td>
                             <td><strong><label for="set-{{ i }}">Mapping Set {{ i }}</label></strong></td>
                             <td>{{ len(strain_sets["{}".format(i)]) }}</td>
@@ -213,8 +215,7 @@ $("#checkAll").click(function() {
 
 $("input:checkbox").click(function(x) {
     highlight_set_buttons();
-    // [ ] REVERT; Checkout button temporary ban on orders
-    // $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
+    $('#checkoutBox').prop('disabled', !$("input:checkbox").is(":checked"));
 });
 
 $("#submitPaste").click(function() {
@@ -237,8 +238,6 @@ $("#submitPaste").click(function() {
     $('#myModal').modal('hide');
 })
 
-
-
 $("button[id^='set']").click(function() {
     set_name = $(this).attr("id");
     if ($("." + set_name).first().prop("checked") == false) {
@@ -256,6 +255,7 @@ $("button[id^='checkout']").click(function() {
     }).get();
     console.log(checkedValues);
 });
+
 
 
 $(document).ready(function() {
