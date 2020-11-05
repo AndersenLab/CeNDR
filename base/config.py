@@ -12,7 +12,8 @@ CENDR_VERSION = CENDR_VERSION.replace("-", '.')
 # BUILDS AND RELEASES
 # The first release is the current release
 # (RELEASE, ANNOTATION_GENOME)
-RELEASES = [("20200815", "WS276"),
+RELEASES = [("20201015", "WS276"),
+            ("20200815", "WS276"),
             ("20180527", "WS263"),
             ("20170531", "WS258"),
             ("20160408", "WS245")]
