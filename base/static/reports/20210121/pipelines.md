@@ -5,13 +5,13 @@ This tab links to the nextflow pipelines used to process wild isolate sequence d
 ![](/static/img/overview.drawio.svg)
 
 ### FASTQ QC and Trimming
-__[andersenlab/trim-fq-nf](https://github.com/andersenlab/trim-fq-nf) -- (<strong>Latest</strong> [f0b63e](https://github.com/AndersenLab/trim-fq-nf/tree/f0b63e))__
+__[andersenlab/trim-fq-nf](https://github.com/andersenlab/trim-fq-nf) -- (<strong>Latest</strong> [d637d0b](https://github.com/AndersenLab/trim-fq-nf/tree/d637d0b))__
 
 Adapters and low quality sequences were trimmed off of raw reads using [fastp (0.20.0)](https://github.com/OpenGene/fastp) and default parameters. Reads shorter than 20 bp after trimming were discarded. 
 
 ### __Alignment__
 
-__[andersenlab/alignment-nf](https://github.com/andersenlab/alignment-nf) -- ([892b37](https://github.com/AndersenLab/alignment-nf/tree/892b37))__
+__[andersenlab/alignment-nf](https://github.com/andersenlab/alignment-nf) -- ([1c96b4a](https://github.com/AndersenLab/alignment-nf/tree/1c96b4a))__
 
 Trimmed reads were aligned to _C. elegans_ reference genome (project PRJNA13758 version WS276 from the [Wormbase](https://wormbase.org/)) using `bwa mem` [BWA (0.7.17)](http://bio-bwa.sourceforge.net/). Libraries of the same strain were merged together and indexed by [sambamba (0.7.0)](https://lomereiter.github.io/sambamba/). Duplicates were flagged with [Picard (2.21.3)](https://broadinstitute.github.io/picard/).
 
@@ -19,7 +19,7 @@ Strains with less than 14x coverage were not included in the alignment report an
 
 ### __Variant Calling__
 
-__[andersenlab/wi-gatk](https://github.com/andersenlab/wi-gatk) -- ([c9dd1e](https://github.com/AndersenLab/wi-gatk/tree/c9dd1e))__
+__[andersenlab/wi-gatk](https://github.com/andersenlab/wi-gatk) -- ([a84ba4f](https://github.com/AndersenLab/wi-gatk/tree/a84ba4f))__
 
 Variants for each strain were called using `gatk HaplotypeCaller`. After the initial variant calling, variants were combined and then recalled jointly using `gatk GenomicsDBImport` and `gatk GenotypeGVCFs` [GATK (4.1.4.0)](https://gatk.broadinstitute.org/hc/en-us/sections/360007279452-4-1-4-0?page=6#articles).
 
@@ -78,15 +78,15 @@ We re-examined our filter thresholds for this release. A variant simulation pipe
 Please see the [filter optimization report](/static/reports/filter_optimization/20200803_optimization_report.html) for further details.
 
 ### __Isotype Assignment__
-__[andersenlab/concordance-nf](https://github.com/andersenlab/concordance-nf) -- ([ae3d80](https://github.com/andersenlab/concordance-nf/tree/ae3d80))__
+__[andersenlab/concordance-nf](https://github.com/andersenlab/concordance-nf) -- ([5160f9f](https://github.com/andersenlab/concordance-nf/tree/5160f9f))__
 
 <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Isotypes are groups of strains that carry distinct genome-wide haplotypes.">Isotype</span> groups contain strains that are likely identical to each other and were sampled from the same isolation locations. For any phenotypic assay, only the isotype reference strain needs to be scored. Users interested in individual strain genotypes can use the strain-level data.
 
 Strains were grouped into isotypes using the following steps:
 
-1. Using all high quality variants (the hard-filtered VCF) and `bcftools gtcheck`, concordance for each pair of strains was calculated as a fraction of shared variants over the total variants in each pair.
+1. Using all high quality variants (only SNPs from the hard-filtered VCF) and `bcftools gtcheck`, concordance for each pair of strains was calculated as a fraction of shared variants over the total variants in each pair.
 	
-2. Strain pairs with concordance > 0.9995 were grouped into the same isotype group. The threshold 0.9995 was determined by:
+2. Strain pairs with concordance > 0.9997 were grouped into the same isotype group. The threshold 0.9997 was determined by:
 		
     * Examining the distribution of concordance scores.
     * Capturing similarity between strains to minimize the number of strains that get  assigned to multiple isotype groups.
