@@ -15,7 +15,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-const heritabilityVersion = "v1"
+// change to v2 20210121
+const heritabilityVersion = "v2"
 const datasetName = "data.tsv"
 const resultName = "result.tsv"
 
@@ -56,7 +57,7 @@ func fileExists(filename string) bool {
 func runTask(dataHash string) {
 	// Run the heritability analysis. This is used to run it in the background.
 	// Execute R script
-	cmd := exec.Command("Rscript", "H2_script.R", datasetName, resultName, "hash.txt", heritabilityVersion)
+	cmd := exec.Command("Rscript", "H2_script.R", datasetName, resultName, "hash.txt", heritabilityVersion, "strain_data.tsv")
 	cmd.Stderr = os.Stderr
 	_, err := cmd.Output()
 	check(err)
