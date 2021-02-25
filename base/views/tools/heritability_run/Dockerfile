@@ -9,6 +9,8 @@ RUN conda create -n heritability \
 				 r=3.6.0 \
 				 r-lme4 \
 				 r-dplyr \
+				 r-tidyr \
+				 r-glue \
 				 r-boot \
 				 r-data.table \
 				 r-futile.logger \
@@ -30,6 +32,9 @@ RUN CGO_ENABLED=0 GOOS=linux go get cloud.google.com/go/storage
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o server
 
 COPY ./H2_script.R ./
+
+# get strain data
+COPY ./strain_data.tsv ./
 
 # Run the web service on container startup.
 CMD ["/app/server"]
