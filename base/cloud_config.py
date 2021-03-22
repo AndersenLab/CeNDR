@@ -8,9 +8,8 @@ from logzero import logger
 from google.oauth2 import service_account
 from google.cloud import datastore, storage
 
-from base.constants import REPORT_V1_FILE_LIST, REPORT_V2_FILE_LIST
+from base.constants import REPORT_V1_FILE_LIST, REPORT_V2_FILE_LIST, GOOGLE_CLOUD_BUCKET
 from base.utils.data_utils import dump_json, unique_id
-from base.utils.gcloud import download_file
 
 class CloudConfig:
 
@@ -37,6 +36,12 @@ class CloudConfig:
     if not self.storage_client:
       self.storage_client = storage.Client(credentials=service_account.Credentials.from_service_account_file('env_config/client-secret.json'))
     return self.storage_client
+
+  def download_file(self, name, fname):
+    client = self.get_storage_client()
+    bucket = client.get_bucket(GOOGLE_CLOUD_BUCKET)
+    blob = bucket.blob(name)
+    blob.download_to_file(open(fname, 'wb'))
 
   def ds_save(self):
     data = {'cloud_config': self.cc}
@@ -140,7 +145,7 @@ class CloudConfig:
       for n in files:
         name = f"data_reports/{dataset}/{n}"
         fname = f"{local_path}/{n}"
-        download_file(name=name, fname=fname)
+        self.download_file(name=name, fname=fname)
     except:
       return None
     return files
@@ -154,7 +159,7 @@ class CloudConfig:
       else:
         return
 
-    download_file(name=db_name, fname=db_fname)
+    self.download_file(name=db_name, fname=db_fname)
     return True
 
   def create_backup(self):
