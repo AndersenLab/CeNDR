@@ -1,0 +1,8 @@
+{% extends "_layouts/default.html" %}
+
+{% block title %}Internal Server Error{% endblock %}
+
+{% block content %}
+  <h1>You don't have permission to do that :(</h1>
+  <h3>Login or register <a href="{{ url_for('auth.choose_login') }}">here</a></h3>
+{% endblock %}

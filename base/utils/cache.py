@@ -9,7 +9,7 @@ These functions will concern genetic data.
 import pickle
 import base64
 from cachelib import BaseCache
-from base.utils.gcloud import get_item, store_item
+from base.utils.gcloud import get_item, store_item, delete_items_by_query
 from time import time
 from base.config import config
 
@@ -23,7 +23,7 @@ class DatastoreCache(BaseCache):
         expires = time() + timeout
         try:
             value = base64.b64encode(pickle.dumps(value))
-            store_item('cache', self.key_prefix + "/" + key, value=value, expires=expires, exclude_from_indexes=['value', 'expires'])
+            store_item('cache', self.key_prefix + "/" + key, value=value, expires=expires, exclude_from_indexes=['value'])
             return True
         except:
             return False
@@ -67,3 +67,10 @@ class DatastoreCache(BaseCache):
 
 def datastore_cache(app, config, args, kwargs):
     return DatastoreCache(*args, **kwargs)
+
+
+def delete_expired_cache():
+    epoch_time = int(time())
+    filters = [("expires", "<", epoch_time)]
+    num_deleted = delete_items_by_query('cache', filters=filters, projection=['expires'])
+    return num_deleted

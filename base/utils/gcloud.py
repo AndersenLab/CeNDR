@@ -1,10 +1,14 @@
 import json
+import datetime
+import googleapiclient.discovery
+
 from flask import g
-from base.utils.data_utils import dump_json
 from gcloud import datastore, storage
 from logzero import logger
-import googleapiclient.discovery
 from google.oauth2 import service_account
+
+from base.constants import GOOGLE_CLOUD_BUCKET, GOOGLE_CLOUD_PROJECT_ID
+from base.utils.data_utils import dump_json
 
 
 def google_datastore(open=False):
@@ -14,7 +18,7 @@ def google_datastore(open=False):
         Args:
             open - Return the client without storing it in the g object.
     """
-    client = datastore.Client(project='andersen-lab')
+    client = datastore.Client(project=GOOGLE_CLOUD_PROJECT_ID)
     if open:
         return client
     if not hasattr(g, 'ds'):
@@ -27,6 +31,42 @@ def delete_item(item):
     batch = ds.batch()
     batch.delete(item.key)
     batch.commit()
+
+
+def delete_by_ref(kind, id):
+    ds = google_datastore()
+    key = ds.key(kind, id)
+    batch = ds.batch()
+    batch.delete(key)
+    batch.commit()
+
+
+def delete_items_by_query(kind, filters=None, projection=()):
+    """
+        Deletes all items that are returned by a query. 
+        Items are deleted in page-sized batches as the results are being returned
+        Returns the number of items deleted
+    """
+    # filters:
+    # [("var_name", "=", 1)]
+    ds = google_datastore()
+    query = ds.query(kind=kind, projection=projection)
+    deleted_items = 0
+    if filters:
+        for var, op, val in filters:
+            query.add_filter(var, op, val)
+
+    query = query.fetch()
+    while True:
+        data, more, cursor = query.next_page()
+        keys = []
+        for entity in data:
+            keys.append(entity.key)
+        ds.delete_multi(keys)
+        deleted_items += len(keys)
+        if more is False:
+            break
+    return deleted_items
 
 
 def store_item(kind, name, **kwargs):
@@ -48,7 +88,7 @@ def store_item(kind, name, **kwargs):
     ds.put(m)
 
 
-def query_item(kind, filters=None, projection=(), order=None, limit=None):
+def query_item(kind, filters=None, projection=(), order=None, limit=None, keys_only=False):
     """
         Filter items from google datastore using a query
     """
@@ -56,6 +96,8 @@ def query_item(kind, filters=None, projection=(), order=None, limit=None):
     # [("var_name", "=", 1)]
     ds = google_datastore()
     query = ds.query(kind=kind, projection=projection)
+    if keys_only:
+        query.keys_only()
     if order:
         query.order = order
     if filters:
@@ -101,12 +143,13 @@ def google_storage(open=False):
         Args:
             open - Return the client without storing it in the g object.
     """
-    client = storage.Client(project='andersen-lab')
+    client = storage.Client(project=GOOGLE_CLOUD_PROJECT_ID)
     if open:
-        return client
-    if not hasattr(g, 'gs'):
-        g.gs = client
-    return g.gs
+      return client
+    if g and not hasattr(g, 'gs'):
+      g.gs = client
+      return g.gs
+    return client
 
 
 def get_cendr_bucket():
@@ -114,7 +157,7 @@ def get_cendr_bucket():
         Returns the CeNDR bucket
     """
     gs = google_storage()
-    return gs.get_bucket("elegansvariation.org")
+    return gs.get_bucket(GOOGLE_CLOUD_BUCKET)
 
 
 def upload_file(blob, obj, as_string = False):
@@ -166,7 +209,7 @@ def list_release_files(prefix):
 
     cendr_bucket = get_cendr_bucket()
     items = cendr_bucket.list_blobs(prefix=prefix)
-    return list([f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items])
+    return list([f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/{x.name}" for x in items])
 
 
 def google_analytics():
@@ -177,3 +220,30 @@ def google_analytics():
                                                       scopes=['https://www.googleapis.com/auth/analytics.readonly'])
     return googleapiclient.discovery.build('analyticsreporting', 'v4', credentials=credentials)
 
+
+def generate_download_signed_url_v4(blob_path, expiration=datetime.timedelta(minutes=15)):
+    """Generates a v4 signed URL for downloading a blob. """
+    # blob_name = 'your-object-name'
+    storage_client = storage.Client.from_service_account_json('env_config/client-secret.json')
+    bucket = storage_client.bucket(GOOGLE_CLOUD_BUCKET)
+    blob = bucket.blob(blob_path)
+
+    url = blob.generate_signed_url(
+        expiration=expiration,
+        method="GET"
+    )
+    return url
+
+
+def generate_upload_signed_url_v4(blob_name, content_type="application/octet-stream"):
+    """Generates a v4 signed URL for uploading a blob using HTTP PUT. """
+    storage_client = storage.Client.from_service_account_json('env_config/client-secret.json')
+    bucket = storage_client.bucket(GOOGLE_CLOUD_BUCKET)
+    blob = bucket.blob(blob_name)
+
+    url = blob.generate_signed_url(
+      expiration=datetime.timedelta(minutes=15),
+      method="PUT",
+      content_type=content_type
+    )
+    return url

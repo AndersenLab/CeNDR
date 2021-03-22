@@ -34,9 +34,9 @@
         </li>
 
         <li class="dropdown">
-          <a href="{{ url_for("strain.map_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
+          <a href="{{ url_for("strain.strain_list")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="{{ url_for("strain.map_page")}}">Global Strain Map</a></li>
+            <li><a href="{{ url_for("strain.strain_list")}}">Strains</a></li>
             <li><a href="{{ url_for("strain.strain_catalog")}}">Strain Catalog</a></li>
             <li><a href="{{ url_for("strain.protocols") }}">Protocols</a></li>
             <li role="separator" class="divider"></li>
@@ -47,8 +47,8 @@
         <li class="dropdown">
         <a href="{{ url_for("data.data")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Data<span class="caret"></span></a>
         <ul class="dropdown-menu dropdown-menu-left">
+          <li><a href="{{ url_for("data.data") }}">Genomic Data</a></li>
           <li><a href="{{ url_for("data.browser") }}">Variant Browser</a></li>
-          <li><a href="{{ url_for("data.data") }}">Releases</a></li>
          {#<li><a href="{{ url_for('docs') }}">API</a></li>#}
         </ul>
         </li>
@@ -75,20 +75,33 @@
         <li class="nav-item">
           <a href="{{ url_for("primary.help_item") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
         </li>
-        
+
         <li class="nav-item">
           <a href="{{ url_for("primary.contact") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Contact Us</a>
         </li>
-        {% if user %}
+
+        {% if (session["is_logged_in"] and session["is_admin"]) %}
+        <li class="dropdown">
+          <a href="{{ url_for("admin.admin")}}" role="button" aria-haspopup="true" aria-expanded="false">Admin<span class="caret"></span></a>
+          <ul class="dropdown-menu dropdown-menu-left">
+            <li><a href="{{ url_for("users.users")}}"> Users </a></li>
+            <li><a href="{{ url_for("admin.admin_strain_sheet")}}"> Strains </a></li>
+            <li><a href="{{ url_for("admin.admin_publications_sheet")}}"> CeNDR Publications </a></li>
+            <li><a href="{{ url_for("data_admin.data_admin")}}"> Data Releases </a></li>
+          </ul>
+        </li>
+        {% endif %}
+        
+        {% if session["is_logged_in"] %}
             <li class="dropdown">
-              <a href="{{ url_for('user.user', username=user['username']) }}" role="button" aria-haspopup="true" aria-expanded="false">{{ user['username'] }}<span class="caret"></span></a>
+              <a href="{{ url_for('user.user_profile') }}" role="button" aria-haspopup="true" aria-expanded="false"> Account <span class="caret"></span></a>
               <ul class="dropdown-menu dropdown-menu-left">
                 <li><a href="{{ url_for('auth.logout') }}" class='nav-link' role='button'>Logout</a></li>
               </ul>
             </li>
         {% else %}
         <li class="nav-item">
-            <a href='{{ url_for('auth.choose_login') }}' class='nav-link' role='button'>Login</a>
+            <a href='{{ url_for("auth.choose_login") }}' class='nav-link' role='button'>Login</a>
         </li>
         {% endif %}
       </ul>

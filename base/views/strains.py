@@ -22,34 +22,31 @@ from logzero import logger
 strain_bp = Blueprint('strain',
                       __name__,
                       template_folder='strain')
-
 #
-# Global Strain Map
+# Strain List Page
 #
 @strain_bp.route('/')
 def strain():
     """
-        Redirect base route to the global strain map
+        Redirect base route to the strain list page
     """
-    return redirect(url_for('strain.map_page'))
+    return redirect(url_for('strain.strain_list'))
 
-
-@strain_bp.route('/global-strain-map')
+@strain_bp.route('/strain_list')
 @cache.memoize(50)
-def map_page():
+def strain_list():
     """
-        Global strain map shows the locations of all wild isolates
-        within the SQLite database.
+        Strain list shows global strain map with the locations of all wild isolates
+        within the SQLite database and a table of all strains
     """
-    VARS = {'title': "Global Strain Map",
-            'strain_listing': dump_json(get_strains(known_origin=True))}
-    return render_template('strain/global_strain_map.html', **VARS)
-
+    VARS = {'title': "Strains",
+        'strain_listing_issues': get_strains(issues=True),
+        'strain_listing': get_strains()}
+    return render_template('strain/strain_list.html', **VARS)
 
 #
 # Strain Data
 #
-
 @strain_bp.route('/CelegansStrainData.tsv')
 def strain_data_tsv():
     """

@@ -1,0 +1,239 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+
+<script src="https://apis.google.com/js/client.js"></script>
+
+{% endblock %}
+
+
+{% block content %}
+{% from "macros.html" import render_field %}
+
+
+{% if report.initialized == True %}
+
+<div class="row">
+  <div class='col-md-2'></div> <!-- /col-md-2 -->
+  <div class="row">
+
+    <div class='col-md-8'>
+      <h3>
+        <div style="text-align:center;">
+          <br> <strong> {{ report.kind }} </strong>
+          <br> <strong> {{ report.name }} </strong>
+          <hr>
+        </div>
+      </h3>
+        </div> <!-- /col-md-8 -->
+  </div> <!-- /row -->
+  <div class="row">
+    <div class='col-md-2'></div> <!-- /col-md-2 -->
+    <div class='col-md-8'>
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> Dataset: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            {{ report.dataset }} 
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> Wormbase: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            {{ report.wormbase }} 
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> Version: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            {{ report.version }} 
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> Created On: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            {{ report.created_on }} 
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> Report Cloud Location: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            data-reports/{{report.dataset}}/
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> Report Last Synced: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            {{report.report_synced_on}}
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            <button id='sync-btn' value="sync-btn" class="btn btn-primary btn-block" onclick="document.location='{{ url_for('data_admin.data_sync_report', id=report.name) }}'">
+              <span class="glyphicon glyphicon-transfer" aria-hidden="true"></span> Sync Report
+            </button>
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+      
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> DB Cloud Location: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            db/cendr.{{report.dataset}}.{{report.wormbase}}.db
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> DB Last Synced: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            {{ report.db_synced_on }}
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            <button id='sync-btn' value="sync-btn" class="btn btn-primary btn-block" onclick="document.location='{{ url_for('data_admin.data_sync_db', id=report.name) }}'">
+              <span class="glyphicon glyphicon-transfer" aria-hidden="true"></span> Sync DB
+            </button>
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+            <strong> Published On: </strong>
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            {{ report.published_on }}
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+
+        <br>
+        <div class='row'>
+          <div class='col-md-4'> 
+          </div> <!-- /col-md-4 -->
+          <div class='col-md-8'> 
+            <button id='sync-btn' value="sync-btn" class="btn btn-primary btn-block" onclick="document.location='{{ url_for('data_admin.data_publish_report', id=report.name) }}'">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Publish Report
+            </button>
+            <button id='sync-btn' value="sync-btn" class="btn btn-primary btn-block" onclick="document.location='{{ url_for('data_admin.data_hide_report', id=report.name) }}'">
+              <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Hide Report
+            </button>
+          </div> <!-- /col-md-8 -->
+        </div> <!-- /row !-->
+        
+    </div> <!-- /col-md-8 -->
+  </div> <!-- /row -->
+</div> <!-- /row -->
+
+{% else %}
+
+<form id='form-submit' method="POST" action="{{ kind }}">
+  {{ form.csrf_token }}
+  <input hidden name="jwt_csrf_token" value="{{ jwt_csrf_token }}">
+
+  <div class="row">
+    <div class="col-md-10">		
+    </div> <!-- /col-md-10 -->
+    <div class="col-md-2">
+      <button id='save-btn' value="save-btn" type='submit' class="btn btn-primary btn-block">
+        <span class="glyphicon glyphicon-save" aria-hidden="true"></span> 
+        Save
+      </button>
+    </div> <!-- /col-md-2 -->
+  </div> <!-- /row -->
+
+  <div class="row">
+    <div class='col-md-3'></div> <!-- /col-md-3 -->
+      <div class='col-md-6'>
+        {{ render_field(form.dataset) }}
+      </div> <!-- /col-md-6 -->
+  </div> <!-- /row -->
+
+  <div class="row">
+    <div class='col-md-3'></div> <!-- /col-md-3 -->
+      <div class='col-md-6'>
+        {{ render_field(form.wormbase) }}
+      </div> <!-- /col-md-6 -->
+  </div> <!-- /row -->
+
+  <div class="row">
+    <div class='col-md-3'></div> <!-- /col-md-3 -->
+      <div class='col-md-6'>
+        {{ render_field(form.version) }}
+      </div> <!-- /col-md-6 -->
+  </div> <!-- /row -->
+
+</form>
+
+
+{% endif %}
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+function upload(url, file) {
+  $.ajax({
+    url: url,
+    type: 'PUT',
+    data: file,
+    contentType: file.type,
+    success: function () {
+      console.log('SUCCESS')
+    },
+    error: function (e) {
+      console.error('ERROR: ' + JSON.stringify(e));
+    },
+    processData: false
+  });
+}
+
+$("#upload-alignment-report").click(function() {
+  var file = $("#alignment_report")[0].files[0];
+{% autoescape off %}
+  const signed_url = String.raw`{{ alignment_upload_url }}`;
+{% endautoescape %}
+  return upload(signed_url, file);
+})
+
+
+</script>
+{% endblock %}

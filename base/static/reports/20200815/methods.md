@@ -1,4 +1,4 @@
-# Methods / Pipelines
+# Methods
 
 This tab links to the nextflow pipelines used to process wild isolate sequence data.
 

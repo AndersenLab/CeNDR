@@ -7,13 +7,14 @@ These views handle strain orders
 
 """
 import uuid
+from flask import render_template, request, url_for, redirect, Blueprint, abort, flash
+
 from base.forms import order_form
 from base.config import config
 from base.utils.email import send_email, ORDER_SUBMISSION_EMAIL
 from base.utils.google_sheets import add_to_order_ws, lookup_order
-from flask import render_template, request, url_for, redirect, Blueprint, abort, flash, session
-from datetime import datetime
-from base.utils.data_utils import chicago_date, hash_it
+from base.utils.data_utils import chicago_date
+from base.utils.jwt import jwt_required, get_current_user
 
 order_bp = Blueprint('order',
                      __name__,
@@ -34,15 +35,16 @@ def order():
     return redirect(url_for('strain.strain_catalog'))
 
 
-
 @order_bp.route('/create', methods=['GET', 'POST'])
+@jwt_required(optional=True)
 def order_page():
     """
         This view handles the order page.
     """
     form = order_form()
-    if session.get('user') and not form.email.data:
-        form.email.data = session.get('user')['user_email']
+    user = get_current_user()
+    if user and hasattr(user, 'email') and not form.email.data:
+      form.email.data = user.email
 
     # Fetch items
     items = form.items.data

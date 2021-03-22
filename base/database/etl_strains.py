@@ -15,6 +15,7 @@ from base.utils.google_sheets import get_google_sheet
 from logzero import logger
 from base.config import config
 
+NULL_VALS = ["None", "", "NA", None]
 
 def elevation_cache(func):
     """quick and simple cache for lat/lon"""
@@ -71,16 +72,18 @@ def fetch_andersen_strains():
     WI = get_google_sheet(config['ANDERSEN_LAB_STRAIN_SHEET'])
     strain_records = WI.get_all_records()
     # Only take records with a release reported
-    strain_records = list(filter(lambda x: x.get('release') not in ['', None, 'NA'], strain_records))
+    strain_records = list(filter(lambda x: x.get('release') not in NULL_VALS, strain_records))
     results = []
     for n, record in enumerate(strain_records):
         record = {k.lower(): v for k, v in record.items()}
         for k, v in record.items():
             # Set NA to None
-            if v in ["NA", '']:
+            if v in NULL_VALS:
                 v = None
                 record[k] = v
             if k in ['sampling_date'] and v:
+                print('k: ' + k)
+                print('v: ' + v)
                 record[k] = parser.parse(v)
 
         if record['latitude']:
@@ -95,12 +98,12 @@ def fetch_andersen_strains():
         record["issues"] = record["issues"] == "TRUE"
 
         # Set isotype_ref_strain = FALSE if no isotype is assigned.
-        if record['isotype'] in [None, "", "NA"]:
+        if record['isotype'] in NULL_VALS:
             record['isotype_ref_strain'] = False
             record['wgs_seq'] = False
 
         # Skip strains that lack an isotype
-        if record['isotype'] in [None, "", "NA"] and record['issues'] is False:
+        if record['isotype'] in NULL_VALS and record['issues'] is False:
             continue
 
 

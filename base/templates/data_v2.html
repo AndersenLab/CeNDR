@@ -33,13 +33,13 @@ body, html{
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
         <li role="presentation" class="active" ><a href="#main" role="tab" data-toggle="tab">Datasets</a></li>
-        <li role="presentation" ><a href="#Strain-data" role="tab" data-toggle="tab">Alignment Data</a></li>
-        <li role="presentation" ><a href="#Pipelines" role="tab" data-toggle="tab">Methods / Pipelines</a></li>
-        <li role="presentation" ><a href="#Alignment" role="tab" data-toggle="tab">Alignment</a></li>
-        <li role="presentation" ><a href="#Variant-calling" role="tab" data-toggle="tab">Variant Calling</a></li>
+        <li role="presentation" ><a href="#Methods" role="tab" data-toggle="tab">Methods</a></li>
+        <li role="presentation" ><a href="#Alignment-summary" role="tab" data-toggle="tab">Alignment Summary</a></li>
+        <li role="presentation" ><a href="#Variant-summary" role="tab" data-toggle="tab">Variant Summary</a></li>
         <li role="presentation" ><a href="#Concordance" role="tab" data-toggle="tab">Concordance</a></li>
         <li role="presentation" ><a href="#Haplotypes" role="tab" data-toggle="tab">Haplotypes</a></li>
-        <li role="presentation" ><a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a></li>
+        <li role="presentation" ><a href="#Swept-haplotypes" role="tab" data-toggle="tab">Swept Haplotypes</a></li>
+        <li role="presentation" ><a href="#Species-tree" role="tab" data-toggle="tab">Species Tree</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -79,6 +79,18 @@ body, html{
                         <td><strong>Strain Data</strong></td>
                         <td>Includes strain, isotype, location information, and more.</td>
                         <td><a href="{{ url_for('strain.strain_data_tsv') }}">CelegansStrainData.tsv</a></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Strain Issues</strong></td>
+                        <td>This <a href="{{ url_for('data.strain_issues', selected_release = selected_release) }}">link</a> contains all strain issues for this release</td>
+                        <td></td>
+                    </tr>
+
+                    <tr>
+                        <td><strong>Alignment Data</strong></td>
+                        <td>This <a href="{{ url_for('data.alignment_data', selected_release = selected_release) }}">link</a> contains all alignment data as BAM or BAI files.</td>
+                        <td></td>
                     </tr>
 
                     <tr>
@@ -195,7 +207,7 @@ body, html{
                     <tr>
                         <td><strong>Download BAMs Script</strong></td>
                         <td>You can batch download individual strain BAMs using this script.</td>
-                        <td><a href="{{ url_for('data.download_script_strain_v2') }}">download_bams.sh</a></td>
+                        <td><a href="{{ url_for('data.download_script_strain_v2', selected_release=selected_release) }}">download_bams.sh</a></td>
                     </tr>
 
 
@@ -208,41 +220,33 @@ body, html{
         {#
             DATASETS
         #}
-        <div role="tabpanel" class="tab-pane" id="Strain-data">
 
-            <h2>Alignment (BAM)</h2>
-
-            <p>Only strains with whole-genome sequencing data have BAM files for download. If you do not see a strain, check the <a href="#Strain-issues" role="tab" data-toggle="tab">Strain Issues</a> tab.
-            Some strains have been flagged and removed from distribution and analysis pipelines for a variety of reasons.</p>
-
-            {% set show_issues = False %}
-            {% include('releases/download_tab_strain_v2.html') %}
-
+        <div role="tabpanel" class="tab-pane" id="Methods">
+            {{ render_markdown(selected_release + "/methods.md", directory="base/static/reports") }}
         </div>
 
-        <div role="tabpanel" class="tab-pane" id="Strain-issues">
-            {% set show_issues = True %}
-            {% include('releases/download_tab_strain_v2_issues.html') %}
-        </div>
-
-        <div role="tabpanel" class="tab-pane" id="Pipelines">
-            {{ render_markdown(selected_release + "/pipelines.md", directory="base/static/reports") }}
-        </div>
-
-        <div role="tabpanel" class="tab-pane" id="Alignment">
+        <div role="tabpanel" class="tab-pane" id="Alignment-summary">
             <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/alignment_report.html"></object>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Variant-summary">
+            <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/gatk_report.html"></object>
         </div>
 
         <div role="tabpanel" class="tab-pane" id="Concordance">
             <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/concordance_report.html"></object>
         </div>
 
-        <div role="tabpanel" class="tab-pane" id="Variant-calling">
-            <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/gatk_report.html"></object>
+        <div role="tabpanel" class="tab-pane" id="Species-tree">
+            <object style="width:100%;height:200vh;" type="application/pdf" data="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.min4.tree.pdf"></object>
         </div>
 
         <div role="tabpanel" class="tab-pane" id="Haplotypes">
-            <img style="width:100%" src="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png""></img>
+            <img style="width:100%" src="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png"></img>
+        </div>
+
+        <div role="tabpanel" class="tab-pane" id="Swept-haplotypes">
+            <object style="width:100%;height:200vh;" type="application/pdf" data="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/sweep.pdf"></object>
         </div>
 
 
@@ -282,12 +286,6 @@ $(document).ready(function() {
             // save the latest tab; use cookies if you like 'em better:
             sessionStorage.setItem('lastTab', $(this).attr('href'));
         });
-    
-        // go to the latest tab, if it exists:
-        var lastTab = sessionStorage.getItem('lastTab');
-        if (lastTab) {
-            $('[href="' + lastTab + '"]').tab('show');
-        }
     });
 
     $('#filter').keydown(function(event) {
