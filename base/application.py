@@ -119,7 +119,6 @@ def register_template_filters(app):
 def register_extensions(app):
     markdown(app)
     cache.init_app(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
-    #sqlalchemy(app)
     sqlalchemy.init_app(app)
     # protect all routes (except the ones listed) from cross site request forgery
     csrf = CSRFProtect(app)
@@ -128,7 +127,8 @@ def register_extensions(app):
     csrf.exempt(maintenance_bp)
     app.config['csrf'] = csrf
     jwt.init_app(app)
-
+    CSRFProtect(app)
+    app.config['csrf'] = CSRFProtect(app)
 
 def register_blueprints(app):
     """Register blueprints with the Flask application."""
