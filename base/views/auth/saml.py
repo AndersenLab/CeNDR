@@ -103,7 +103,6 @@ def saml_sso2():
   """
       Single Sign On (2) route for SAML which includes user attributes
   """
-  print('SSO2')
   req = prepare_flask_request(request)
   saml_auth = init_saml_auth(req)
   return_to = session.get("login_referrer")

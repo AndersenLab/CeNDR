@@ -181,4 +181,6 @@ def download_sqlite_database():
   storage_client = storage.Client.from_service_account_json('env_config/client-secret.json')
   bucket = storage_client.bucket(GOOGLE_CLOUD_BUCKET)
   blob = bucket.blob(blob_path)
+  console.log(f"Downloading DB file STARTED: {SQLITE_FILE}")
   blob.download_to_file(open(file_path, 'wb'))
+  console.log(f"Downloading DB file COMPLETE: {SQLITE_FILE}")

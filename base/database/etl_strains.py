@@ -82,8 +82,6 @@ def fetch_andersen_strains():
                 v = None
                 record[k] = v
             if k in ['sampling_date'] and v:
-                print('k: ' + k)
-                print('v: ' + v)
                 record[k] = parser.parse(v)
 
         if record['latitude']:

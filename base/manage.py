@@ -46,9 +46,6 @@ def update_credentials():
     from base.application import create_app
     app = create_app()
     app.app_context().push()
-
-    print(app.config['SQLALCHEMY_DATABASE_URI'])
-    print(app.config['SQLITE_BASENAME'])
     
     click.secho("Zipping env_config", fg='green')
     zipdir('env_config/', 'env_config.zip')
@@ -77,8 +74,6 @@ def decrypt_credentials():
     from base.application import create_app
     app = create_app()
     app.app_context().push()
-
-    print(app.config['SQLALCHEMY_DATABASE_URI'])
     
     click.secho("Decrypting env_config.zip.enc", fg='green')
     zip_creds = get_item('credential', 'travis-ci-cred')
