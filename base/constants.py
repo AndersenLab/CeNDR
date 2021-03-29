@@ -9,6 +9,9 @@ Author: Daniel E. Cook (danielecook@gmail.com)
 
 WORMBASE_VERSION = 'WS276'
 
+STRAIN_PHOTO_PATH = 'photos/Celegans/'
+STRAIN_THUMBNAIL_PATH = 'photos/Celegans/thumbnails/'
+
 USER_ROLES = [('user', 'User'), ('admin', 'Admin')]
 
 class PRICES:

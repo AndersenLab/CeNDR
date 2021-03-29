@@ -12,7 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, func
 from werkzeug.security import safe_str_cmp
 
-from base.constants import GOOGLE_CLOUD_BUCKET
+from base.constants import GOOGLE_CLOUD_BUCKET, STRAIN_THUMBNAIL_PATH, STRAIN_PHOTO_PATH
 from base.extensions import sqlalchemy
 from base.utils.gcloud import get_item, store_item, query_item, get_cendr_bucket, check_blob
 from base.utils.aws import get_aws_client
@@ -509,14 +509,14 @@ class Strain(DictSerializable, db.Model):
     def strain_photo_url(self):
         # Checks if photo exists and returns URL if it does
         try:
-            return check_blob(f"photos/isolation/{self.strain}.jpg").public_url
+            return check_blob(f"{STRAIN_PHOTO_PATH}{self.strain}.jpg").public_url
         except AttributeError:
             return None
 
     def strain_thumbnail_url(self):
         # Checks if thumbnail exists and returns URL if it does
         try:
-            return check_blob(f"photos/isolation/{self.strain}.thumb.jpg").public_url
+            return check_blob(f"{STRAIN_THUMBNAIL_PATH}{self.strain}.jpg").public_url
         except AttributeError:
             return None
 
