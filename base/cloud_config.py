@@ -16,7 +16,8 @@ class CloudConfig:
   ds_client = None
   storage_client = None
   kind = 'cloud-config'
-  default_cc = { 'releases' : [{'dataset': '20200815', 'wormbase': 'WS276', 'version': 'v2'},
+  default_cc = { 'releases' : [{'dataset': '20210121', 'wormbase': 'WS276', 'version': 'v2'},
+                              {'dataset': '20200815', 'wormbase': 'WS276', 'version': 'v2'},
                               {'dataset': '20180527', 'wormbase': 'WS263', 'version': 'v1'},
                               {'dataset': '20170531', 'wormbase': 'WS258', 'version': 'v1'},
                               {'dataset': '20160408', 'wormbase': 'WS245', 'version': 'v1'}] }
