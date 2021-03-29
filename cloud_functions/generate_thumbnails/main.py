@@ -5,7 +5,7 @@ from google.cloud import storage
 client = storage.Client()
 
 def generate_thumbnails(data, context):
-  thumbnail_regex = "^photos\/Celegans\/thumbnails\/.*\.(jpg|jpeg)$"
+  thumbnail_regex = "^photos\/Celegans\/.*\.thumb.(jpg|jpeg)$"
   image_regex = "^photos\/Celegans\/.*\.(jpg|jpeg)$"
 
   # Only generate thumbnails for matching paths
