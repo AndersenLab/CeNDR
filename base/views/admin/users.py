@@ -26,7 +26,7 @@ users_bp = Blueprint('users',
 def users(id=None):
   if id is None:
     title = 'All'
-    users = user_ds.get_all()
+    users = user_ds().get_all()
     return render_template('admin/users_list.html', **locals())
   else:
     return redirect(url_for('users.users_edit'), id=id)

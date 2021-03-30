@@ -32,7 +32,7 @@ cloud_config = config['cloud_config']
 def data_admin(id=None):
   if id is None:
     title = 'All'
-    items = data_report_ds.get_all()
+    items = data_report_ds().get_all()
   else:
     return redirect(url_for('data_admin.data_edit', id=id))
 

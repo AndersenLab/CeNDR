@@ -22,7 +22,8 @@ class CloudConfig:
                               {'dataset': '20170531', 'wormbase': 'WS258', 'version': 'v1'},
                               {'dataset': '20160408', 'wormbase': 'WS245', 'version': 'v1'}] }
 
-  def __init__(self, name, cc=default_cc, local=True):
+  def __init__(self, name, cc=default_cc, kind_prefix='', local=True):
+    self.kind = '{}{}'.format(kind_prefix, self.kind)
     self.name = name
     self.filename = f"{name}.txt"
     self.cc = cc

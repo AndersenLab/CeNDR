@@ -12,6 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, func
 from werkzeug.security import safe_str_cmp
 
+from base.config import config
 from base.constants import GOOGLE_CLOUD_BUCKET, STRAIN_PHOTO_PATH
 from base.extensions import sqlalchemy
 from base.utils.gcloud import get_item, store_item, query_item, get_cendr_bucket, check_blob
@@ -85,6 +86,7 @@ class trait_ds(datastore_model):
         If a task is re-run the report will only display the latest version.
     """
     kind = 'trait'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
 
     def __init__(self, *args, **kwargs):
         """
@@ -278,6 +280,7 @@ class mapping_ds(datastore_model):
         The mapping/peak interval model
     """
     kind = 'mapping'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
     
     def __init__(self, *args, **kwargs):
         super(mapping_ds, self).__init__(*args, **kwargs)
@@ -289,6 +292,7 @@ class user_ds(datastore_model):
         information on users.
     """
     kind = 'user'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
     
     def __init__(self, *args, **kwargs):
         super(user_ds, self).__init__(*args, **kwargs)
@@ -316,7 +320,7 @@ class user_ds(datastore_model):
     def reports(self):
         filters = [('user_id', '=', self.name)]
         # Note this requires a composite index defined very precisely.
-        results = query_item('trait', filters=filters, order=['user_id', '-created_on'])
+        results = query_item(self.kind, filters=filters, order=['user_id', '-created_on'])
         results = sorted(results, key=lambda x: x['created_on'], reverse=True)
         results_out = defaultdict(list)
         for row in results:
@@ -324,8 +328,8 @@ class user_ds(datastore_model):
         # Generate report objects
         return results_out
 
-    def get_all(keys_only=False):
-        results = query_item('user', keys_only=keys_only)
+    def get_all(self, keys_only=False):
+        results = query_item(self.kind, keys_only=keys_only)
         return results
 
     def set_password(self, password, salt):
@@ -357,17 +361,18 @@ class markdown_ds(datastore_model):
         documents uploaded to the site
     """
     kind = 'markdown'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
     
     def __init__(self, *args, **kwargs):
       super(markdown_ds, self).__init__(*args, **kwargs)
 
-    def get_all(keys_only=False):
-      results = query_item('markdown', keys_only=keys_only)
+    def get_all(self, keys_only=False):
+      results = query_item(self.kind, keys_only=keys_only)
       return results
 
-    def query_by_type(type, keys_only=False):
+    def query_by_type(self, type, keys_only=False):
       filters = [('type', '=', type)]
-      results = query_item('markdown', filters=filters, keys_only=keys_only)
+      results = query_item(self.kind, filters=filters, keys_only=keys_only)
       return results
 
     def save(self, *args, **kwargs):
@@ -384,6 +389,7 @@ class data_report_ds(datastore_model):
       releases of genomic data
   """
   kind = 'data-report'
+  kind = '{}{}'.format(config['DS_PREFIX'], kind)
 
   def init(self):
     self.dataset = ''
@@ -399,8 +405,8 @@ class data_report_ds(datastore_model):
   def __init__(self, *args, **kwargs):
     super(data_report_ds, self).__init__(*args, **kwargs)
 
-  def get_all(keys_only=False):
-    results = query_item('data-report', keys_only=keys_only)
+  def get_all(self, keys_only=False):
+    results = query_item(self.kind, keys_only=keys_only)
     return results
 
   def list_bucket_dirs():
@@ -432,6 +438,7 @@ class config_ds(datastore_model):
       for the site's data sources
   """
   kind = 'config'
+  kind = '{}{}'.format(config['DS_PREFIX'], kind)
 
   def __init__(self, *args, **kwargs):
     super(config_ds, self).__init__(*args, **kwargs)

@@ -58,7 +58,7 @@ def get_config(APP_CONFIG):
   cc = None
   local = True if CLOUD_CONFIG == 1 else False
   # Add configuration variables from cloud
-  cc = CloudConfig(DEFAULT_CLOUD_CONFIG, local=local)
+  cc = CloudConfig(DEFAULT_CLOUD_CONFIG, kind_prefix=config['DS_PREFIX'], local=local)
   cc.load()
   cc.get_external_content()
   props = cc.get_properties()
