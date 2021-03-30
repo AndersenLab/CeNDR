@@ -18,12 +18,12 @@ def google_datastore(open=False):
         Args:
             open - Return the client without storing it in the g object.
     """
-    client = datastore.Client(project=GOOGLE_CLOUD_PROJECT_ID)
-    if open:
-        return client
-    if not hasattr(g, 'ds'):
-        g.ds = client
-    return g.ds
+    if (g and open == False):
+      if not hasattr(g, 'ds'):
+        g.ds = datastore.Client(project=GOOGLE_CLOUD_PROJECT_ID)
+      return g.ds
+
+    return datastore.Client(project=GOOGLE_CLOUD_PROJECT_ID)
 
 
 def delete_item(item):
@@ -143,13 +143,13 @@ def google_storage(open=False):
         Args:
             open - Return the client without storing it in the g object.
     """
-    client = storage.Client(project=GOOGLE_CLOUD_PROJECT_ID)
-    if open:
-      return client
-    if g and not hasattr(g, 'gs'):
-      g.gs = client
+    if (g and open == False):
+      if not hasattr(g, 'gs'):
+        g.gs = storage.Client(project=GOOGLE_CLOUD_PROJECT_ID)
       return g.gs
-    return client
+
+    return storage.Client(project=GOOGLE_CLOUD_PROJECT_ID)
+
 
 
 def get_cendr_bucket():
@@ -223,9 +223,8 @@ def google_analytics():
 
 def generate_download_signed_url_v4(blob_path, expiration=datetime.timedelta(minutes=15)):
     """Generates a v4 signed URL for downloading a blob. """
-    # blob_name = 'your-object-name'
-    storage_client = storage.Client.from_service_account_json('env_config/client-secret.json')
-    bucket = storage_client.bucket(GOOGLE_CLOUD_BUCKET)
+    client = google_storage()
+    bucket = client.bucket(GOOGLE_CLOUD_BUCKET)
     blob = bucket.blob(blob_path)
 
     url = blob.generate_signed_url(
@@ -237,8 +236,8 @@ def generate_download_signed_url_v4(blob_path, expiration=datetime.timedelta(min
 
 def generate_upload_signed_url_v4(blob_name, content_type="application/octet-stream"):
     """Generates a v4 signed URL for uploading a blob using HTTP PUT. """
-    storage_client = storage.Client.from_service_account_json('env_config/client-secret.json')
-    bucket = storage_client.bucket(GOOGLE_CLOUD_BUCKET)
+    client = google_storage()
+    bucket = client.bucket(GOOGLE_CLOUD_BUCKET)
     blob = bucket.blob(blob_name)
 
     url = blob.generate_signed_url(
