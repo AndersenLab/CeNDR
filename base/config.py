@@ -55,6 +55,9 @@ def get_config(APP_CONFIG):
                   "WORMBASE_VERSION": WORMBASE_VERSION,
                   "RELEASES": RELEASES})
 
+  config['DS_PREFIX'] = ''
+  if APP_CONFIG == 'development':
+    config['DS_PREFIX'] = 'DEV_'
   cc = None
   local = True if CLOUD_CONFIG == 1 else False
   # Add configuration variables from cloud

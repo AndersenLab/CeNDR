@@ -7,14 +7,13 @@ User profile
 
 """
 from flask import request, render_template, Blueprint, redirect, url_for
-from flask_jwt_extended import jwt_required, get_jwt
-from flask_jwt_extended.utils import get_current_user
 from slugify import slugify
 
-from base.utils.jwt import assign_access_refresh_tokens
+from base.config import config
 from base.models import user_ds
 from base.forms import user_register_form, user_update_form
-from base.config import config
+from base.utils.jwt import jwt_required, get_jwt, get_current_user, assign_access_refresh_tokens
+
 
 user_bp = Blueprint('user',
                     __name__)
