@@ -7,6 +7,7 @@ from flask import make_response, render_template, Blueprint
 
 from base.config import config
 from base.constants import GOOGLE_CLOUD_BUCKET
+from base.extensions import cache
 from base.views.api.api_strain import get_isotypes, query_strains
 from base.models import Strain
 from base.utils.gcloud import list_release_files, generate_download_signed_url_v4
@@ -21,6 +22,7 @@ data_bp = Blueprint('data',
 
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
+@cache.memoize(50)
 def data(selected_release=None):
     """
         Default data page - lists
@@ -44,6 +46,7 @@ def data(selected_release=None):
     return render_template('data_v2.html', **locals())
 
 
+@cache.memoize(50)
 def data_v01(selected_release):
     # Legacy releases (Pre 20200101)
     title = "Genomic Data"
@@ -64,11 +67,13 @@ def data_v01(selected_release):
     wormbase_genome_version = dict(config["RELEASES"])[selected_release]
     return render_template('data.html', **locals())
 
+
 # ======================= #
 #   Alignment Data Page   #
 # ======================= #
 @data_bp.route('/release/latest/alignment')
 @data_bp.route('/release/<string:selected_release>/alignment')
+@cache.memoize(50)
 def alignment_data(selected_release=None):
     """
         Alignment data page
@@ -92,6 +97,7 @@ def alignment_data(selected_release=None):
 # =========================== #
 @data_bp.route('/release/latest/strain_issues')
 @data_bp.route('/release/<string:selected_release>/strain_issues')
+@cache.memoize(50)
 def strain_issues(selected_release=None):
     """
         Strain Issues page
@@ -113,6 +119,7 @@ def strain_issues(selected_release=None):
 #   Download Script   #
 # =================== #
 @data_bp.route('/release/<string:selected_release>/download/download_isotype_bams.sh')
+@cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script(selected_release):
   script_content = generate_bam_download_script(release=selected_release)
@@ -124,6 +131,7 @@ def download_script(selected_release):
 
 @data_bp.route('/release/latest/download/download_strain_bams.sh')
 @data_bp.route('/release/<string:selected_release>/download/download_strain_bams.sh')
+@cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script_strain_v2(selected_release=None):
   if selected_release is None:
@@ -144,17 +152,20 @@ def download_bam_url(blob_name=''):
   return render_template('download.html', **locals())
 
 
+@cache.memoize(timeout=60*60*24)
 def generate_bam_download_script(release):
   ''' Generates signed downloads urls for every sequenced strain and creates a script to download them ''' 
   script_content = ''
   expiration = timedelta(days=7)
   strain_listing = query_strains(release=release, is_sequenced=True)
+
   for strain in strain_listing:
     bam_path = 'bam/{}.bam'.format(strain)
     bai_path = 'bam/{}.bam.bai'.format(strain)
-    script_content += '\n\n# Strain: {}'.format(strain)
+    script_content += f'\n\n# Strain: {strain}'
     script_content += '\nwget "{}"'.format(generate_download_signed_url_v4(bam_path, expiration=expiration))
     script_content += '\nwget "{}"'.format(generate_download_signed_url_v4(bai_path, expiration=expiration))
+
   return script_content
 
 
