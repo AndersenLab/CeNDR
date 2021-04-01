@@ -13,6 +13,7 @@ from base.utils.gcloud import get_item, store_item, delete_items_by_query
 from time import time
 from base.config import config
 
+kind = config['DS_PREFIX'] + 'cache'
 
 class DatastoreCache(BaseCache):
     def __init__(self, default_timeout=500):
@@ -23,14 +24,14 @@ class DatastoreCache(BaseCache):
         expires = time() + timeout
         try:
             value = base64.b64encode(pickle.dumps(value))
-            store_item('cache', self.key_prefix + "/" + key, value=value, expires=expires, exclude_from_indexes=['value'])
+            store_item(kind, self.key_prefix + "/" + key, value=value, expires=expires, exclude_from_indexes=['value'])
             return True
         except:
             return False
 
     def get(self, key):
         try:
-            item = get_item('cache', self.key_prefix + "/" + key)
+            item = get_item(kind, self.key_prefix + "/" + key)
             value = item.get('value')
             value = pickle.loads(base64.b64decode(value))
             expires = item.get('expires')
@@ -46,14 +47,14 @@ class DatastoreCache(BaseCache):
         results = {}
         for key in keys:
             try:
-                results.update({key: get_item('cache', key)})
+                results.update({key: get_item(kind, key)})
             except AttributeError:
                 pass
         return results
 
     def has(self, key):
         try:
-            item = get_item('cache', key)
+            item = get_item(kind, key)
             expires = item.get('expires')
             if expires == 0 or expires > time():
                 return True
@@ -62,7 +63,7 @@ class DatastoreCache(BaseCache):
 
     def set_many(self, mapping, timeout):
         for k, v in mapping.items():
-            store_item('cache', k, value=v)
+            store_item(kind, k, value=v)
 
 
 def datastore_cache(app, config, args, kwargs):
@@ -72,5 +73,5 @@ def datastore_cache(app, config, args, kwargs):
 def delete_expired_cache():
     epoch_time = int(time())
     filters = [("expires", "<", epoch_time)]
-    num_deleted = delete_items_by_query('cache', filters=filters, projection=['expires'])
+    num_deleted = delete_items_by_query(kind, filters=filters, projection=['expires'])
     return num_deleted
