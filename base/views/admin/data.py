@@ -14,7 +14,7 @@ from base.constants import REPORT_V2_FILE_LIST, REPORT_V1_FILE_LIST, REPORT_VERS
 from base.config import config
 from base.models import data_report_ds
 from base.forms import data_report_form
-from base.utils.jwt import get_jwt, admin_required, get_current_user
+from base.utils.jwt_utils import get_jwt, admin_required, get_current_user
 from base.utils.data_utils import unique_id
 from base.utils.gcloud import delete_by_ref
 

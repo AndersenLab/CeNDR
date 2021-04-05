@@ -6,10 +6,12 @@ from flask import g
 from gcloud import datastore, storage
 from logzero import logger
 from google.oauth2 import service_account
+from google.cloud import tasks_v2
+from google.protobuf import timestamp_pb2
+import requests
 
-from base.constants import GOOGLE_CLOUD_BUCKET, GOOGLE_CLOUD_PROJECT_ID
+from base.constants import GOOGLE_CLOUD_BUCKET, GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION
 from base.utils.data_utils import dump_json
-
 
 def google_datastore(open=False):
     """
@@ -223,26 +225,84 @@ def google_analytics():
 
 def generate_download_signed_url_v4(blob_path, expiration=datetime.timedelta(minutes=15)):
     """Generates a v4 signed URL for downloading a blob. """
-    client = google_storage()
-    bucket = client.bucket(GOOGLE_CLOUD_BUCKET)
-    blob = bucket.blob(blob_path)
-
-    url = blob.generate_signed_url(
+    cendr_bucket = get_cendr_bucket()
+    try: 
+      blob = cendr_bucket.blob(blob_path)
+      url = blob.generate_signed_url(
         expiration=expiration,
         method="GET"
-    )
+      )
+    except:
+      return None
     return url
 
 
 def generate_upload_signed_url_v4(blob_name, content_type="application/octet-stream"):
     """Generates a v4 signed URL for uploading a blob using HTTP PUT. """
-    client = google_storage()
-    bucket = client.bucket(GOOGLE_CLOUD_BUCKET)
-    blob = bucket.blob(blob_name)
-
-    url = blob.generate_signed_url(
-      expiration=datetime.timedelta(minutes=15),
-      method="PUT",
-      content_type=content_type
-    )
+    cendr_bucket = get_cendr_bucket()
+    try:
+      blob = cendr_bucket.blob(blob_name)
+      url = blob.generate_signed_url(
+        expiration=datetime.timedelta(minutes=15),
+        method="PUT",
+        content_type=content_type
+      )
+    except:
+      return None
     return url
+
+
+def google_task(open=False):
+    """
+        Fetch google datastore credentials
+
+        Args:
+            open - Return the client without storing it in the g object.
+    """
+    client = tasks_v2.CloudTasksClient()
+    if open:
+      return client
+    if g:
+      if not hasattr(g, 'tc'):
+        g.tc = client
+      return g.tc
+    return client
+
+
+def add_task(queue, url, payload, delay_seconds=None, task_name=None):
+  client = google_task()
+  parent = client.queue_path(GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION, queue)
+  
+  task = {
+    "http_request": { 
+      "http_method": tasks_v2.HttpMethod.POST,
+      "url": url,
+    }
+  }
+
+  if payload is not None:
+    if isinstance(payload, dict):
+      payload = json.dumps(payload)
+      task["http_request"]["headers"] = {"Content-type": "application/json"}
+
+    converted_payload = payload.encode()
+    task["http_request"]["body"] = converted_payload
+
+
+  if delay_seconds is not None:
+    # Convert "seconds from now" into an rfc3339 datetime string then into a Timestamp protobuf.
+    d = datetime.datetime.utcnow() + datetime.timedelta(seconds=delay_seconds)
+    timestamp = timestamp_pb2.Timestamp()
+    timestamp.FromDatetime(d)
+    task["schedule_time"] = timestamp
+
+  if task_name is not None:
+    task["name"] = f"{parent}/tasks/{task_name}"
+
+  response = client.create_task(request={"parent": parent, "task": task})
+  if response:
+    logger.debug("Created task {}".format(response.name))
+    return True
+  else :
+    logger.error("Failed to create task {}".format(response.name))
+    return False

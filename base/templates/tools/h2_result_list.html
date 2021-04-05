@@ -1,0 +1,50 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-10">
+  </div> <!-- /col-md-10 -->
+  <div class="col-md-2">
+    <a id='create' value="create" type='submit' href="{{ url_for('heritability.heritability_create') }}" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
+      New Calculation
+    </a>
+  </div> <!-- /col-md-2 -->
+</div> <!-- /row -->
+
+<div class="row">
+  <div class="col-md-12">
+    <table>
+      <thead>
+        <tr class="header">
+          <th><strong> Label </strong></th>
+          <th><strong> Data Hash </strong></th>
+          <th><strong> Status </strong></th>
+          <th><strong> Created: </strong></th>
+          <th><strong> </strong></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            {% if item %}
+              <td> {{ item.label }} </td>
+              <td> {{ item.data_hash }} </td>
+              <td> {{ item.status }} </td>
+              <td> {{ item.created_on }} </td>
+              <td>
+                <a href="{{ url_for('heritability.heritability_result', id=item.key.name) }}"> 
+                  View
+                </a>
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div> <!-- /col-md-12 -->
+</div> <!-- /row -->
+
+
+{% endblock %}

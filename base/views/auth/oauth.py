@@ -9,7 +9,7 @@ from flask_dance.consumer import oauth_authorized
 from base.config import config
 from base.models import user_ds
 from base.utils.data_utils import unique_id
-from base.utils.jwt import assign_access_refresh_tokens
+from base.utils.jwt_utils import assign_access_refresh_tokens
 
 
 google_bp = make_google_blueprint(client_id=config['GOOGLE_CLIENT_ID'], 
@@ -36,6 +36,7 @@ def create_or_update_google_user(user_info):
   user.last_login = now
   user.set_properties(username=user_email, password=unique_id(), salt=config['PASSWORD_SALT'], full_name=user_name, email=user_email.lower())
   user.verified_email = True;
+  user.user_type = 'OAUTH'
   user.save()
   return user
 

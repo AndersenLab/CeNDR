@@ -14,7 +14,7 @@ from base.config import config
 from base.utils.email import send_email, ORDER_SUBMISSION_EMAIL
 from base.utils.google_sheets import add_to_order_ws, lookup_order
 from base.utils.data_utils import chicago_date
-from base.utils.jwt import jwt_required, get_current_user
+from base.utils.jwt_utils import jwt_required, get_current_user
 
 order_bp = Blueprint('order',
                      __name__,

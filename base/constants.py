@@ -39,6 +39,7 @@ CHROM_NUMERIC = {"I": 1,
 
 GOOGLE_CLOUD_BUCKET = 'elegansvariation.org'
 GOOGLE_CLOUD_PROJECT_ID = 'andersen-lab'
+GOOGLE_CLOUD_LOCATION = 'us-central1'
 
 # WI Strain Info Dataset
 GOOGLE_SHEETS = {"orders": "1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM",

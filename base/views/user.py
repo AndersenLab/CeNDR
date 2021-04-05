@@ -12,7 +12,7 @@ from slugify import slugify
 from base.config import config
 from base.models import user_ds
 from base.forms import user_register_form, user_update_form
-from base.utils.jwt import jwt_required, get_jwt, get_current_user, assign_access_refresh_tokens
+from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user, assign_access_refresh_tokens
 
 
 user_bp = Blueprint('user',
@@ -40,6 +40,7 @@ def user_register():
     id = slugify(username)
     user = user_ds(id)
     user.set_properties(username=username, password=password, salt=config['PASSWORD_SALT'], full_name=full_name, email=email, roles=roles)
+    user.user_type = 'LOCAL'
     user.save()
     return assign_access_refresh_tokens(username, user.roles, url_for("user.user_profile"))
   return render_template('user/register.html', **locals())

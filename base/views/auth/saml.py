@@ -9,7 +9,7 @@ from flask import (redirect,
 									Blueprint)
 from slugify import slugify
 from base.models import user_ds
-from base.utils.jwt import assign_access_refresh_tokens
+from base.utils.jwt_utils import assign_access_refresh_tokens
 
 from urllib.parse import urlparse
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
@@ -21,20 +21,17 @@ saml_bp = Blueprint('saml',
                     __name__,
                     template_folder='')
 
-pd = {
-  'eduPersonPrincipalName': 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6',
-  'mail': 'urn:oid:0.9.2342.19200300.100.1.3',
-  'o': 'urn:oid:2.5.4.10',
-  'displayName': 'urn:oid:2.16.840.1.113730.3.1.241',
-  'uid':  'urn:oid:0.9.2342.19200300.100.1.1',
-}
+attr_epp = 'urn:oid:1.3.6.1.4.1.5923.1.1.1.6'
+attr_mail = 'urn:oid:0.9.2342.19200300.100.1.3'
+attr_o = 'urn:oid:2.5.4.10'
+attr_name = 'urn:oid:2.16.840.1.113730.3.1.241'
+attr_uid =  'urn:oid:0.9.2342.19200300.100.1.1'
 
 
 def get_or_register_user(saml_auth):
   try:
     attributes = saml_auth.get_attributes()
-    username = attributes[pd.get('eduPersonPrincipalName')]
-    username = username[0]
+    username = attributes.get(attr_epp, [''])[0]
     id = slugify(username)
     if id is None:
       return None
@@ -46,17 +43,11 @@ def get_or_register_user(saml_auth):
       user.roles = ['user']
 
     user.username = username
-    user.email = attributes[pd['mail']]
+    user.email = attributes.get(attr_mail, [''])[0]
     user.verified_email = True
-    user.o = attributes[pd['o']] if hasattr(attributes, pd['o']) else ['']
-    user.full_name = attributes[pd['displayName']] if hasattr(attributes, pd['displayName']) else ['']
-    user.uid = attributes[pd['uid']] if hasattr(attributes, pd['uid']) else ['']
-
-    # properties are initially arrays
-    user.email = user.email[0]
-    user.o = user.o[0]
-    user.full_name = user.full_name[0]
-    user.uid = user.uid[0]
+    user.o = attributes.get(attr_o, [''])[0]
+    user.name = attributes.get(attr_name, [''])[0]
+    user.uid = attributes.get(attr_uid, [''])[0]
 
     # store the rest of the saml info
     user.samlUserdata = attributes
@@ -66,6 +57,7 @@ def get_or_register_user(saml_auth):
     user.samlNameIdSPNameQualifier = saml_auth.get_nameid_spnq()
     user.samlSessionIndex = saml_auth.get_session_index()
     user.last_login = now
+    user.user_type = 'SAML'
     user.save()
     return user
   except:

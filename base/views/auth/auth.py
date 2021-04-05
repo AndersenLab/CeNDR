@@ -13,7 +13,7 @@ from slugify import slugify
 
 from base.models import user_ds
 from base.forms import basic_login_form
-from base.utils.jwt import (create_access_token, 
+from base.utils.jwt_utils import (create_access_token, 
                             set_access_cookies,
                             get_jwt_identity,
                             jwt_required,
@@ -64,7 +64,8 @@ def basic_login():
       if user.check_password(password, config['PASSWORD_SALT']):
         user.last_login = arrow.utcnow().datetime
         user.save()
-        return assign_access_refresh_tokens(username, user.roles, '/')
+        referrer = session.get('login_referrer', '/')
+        return assign_access_refresh_tokens(username, user.roles, referrer)
     flash('Wrong username or password', 'error')
     return redirect(request.referrer)
   return render_template('basic_login.html', **locals())

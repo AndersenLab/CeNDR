@@ -11,7 +11,7 @@ from flask import request, render_template, Blueprint, redirect, url_for
 
 from base.models import user_ds
 from base.forms import admin_edit_user_form
-from base.utils.jwt import jwt_required, get_jwt, admin_required
+from base.utils.jwt_utils import jwt_required, get_jwt, admin_required
 from base.utils.gcloud import delete_by_ref
 
 

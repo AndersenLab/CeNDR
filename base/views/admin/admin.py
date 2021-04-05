@@ -1,7 +1,7 @@
 from flask import (render_template,
                   Blueprint)
 from base.config import config
-from base.utils.jwt import admin_required
+from base.utils.jwt_utils import admin_required
 
 # Admin blueprint
 admin_bp = Blueprint('admin',

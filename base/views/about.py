@@ -20,7 +20,7 @@ from base.utils.google_sheets import add_to_order_ws
 from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
 from base.utils.data_utils import load_yaml, chicago_date, hash_it
 from base.utils.plots import time_series_plot
-from base.utils.jwt import jwt_required, get_current_user
+from base.utils.jwt_utils import jwt_required, get_current_user
 
 about_bp = Blueprint('about',
                      __name__,

@@ -1,16 +1,17 @@
 import requests
 
 from datetime import timedelta
-from base.utils.jwt import jwt_required
 from simplejson.errors import JSONDecodeError
 from flask import make_response, render_template, Blueprint
 
-from base.config import config
 from base.constants import GOOGLE_CLOUD_BUCKET
+from base.config import config
 from base.extensions import cache
-from base.views.api.api_strain import get_isotypes, query_strains
 from base.models import Strain
 from base.utils.gcloud import list_release_files, generate_download_signed_url_v4
+from base.utils.jwt_utils import jwt_required
+from base.views.api.api_strain import get_isotypes, query_strains
+
 
 data_bp = Blueprint('data',
                     __name__,
@@ -160,11 +161,17 @@ def generate_bam_download_script(release):
   strain_listing = query_strains(release=release, is_sequenced=True)
 
   for strain in strain_listing:
-    bam_path = 'bam/{}.bam'.format(strain)
-    bai_path = 'bam/{}.bam.bai'.format(strain)
     script_content += f'\n\n# Strain: {strain}'
-    script_content += '\nwget "{}"'.format(generate_download_signed_url_v4(bam_path, expiration=expiration))
-    script_content += '\nwget "{}"'.format(generate_download_signed_url_v4(bai_path, expiration=expiration))
+
+    bam_path = 'bam/{}.bam'.format(strain)
+    bam_signed_url = generate_download_signed_url_v4(bam_path, expiration=expiration)
+    if bam_signed_url:
+      script_content += '\nwget "{}"'.format(bam_signed_url)
+    
+    bai_path = 'bam/{}.bam.bai'.format(strain)
+    bai_signed_url = generate_download_signed_url_v4(bai_path, expiration=expiration)
+    if bai_signed_url:
+      script_content += '\nwget "{}"'.format(bai_signed_url)
 
   return script_content
 
