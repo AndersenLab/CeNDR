@@ -1,7 +1,9 @@
 language: bash
 
-install:
+before_install:
 - openssl aes-256-cbc -K $encrypted_0cdf204cee1e_key -iv $encrypted_0cdf204cee1e_iv -in env_config.zip.enc -out env_config.zip -d
+
+install:
 - unzip -qo env_config.zip
 - export VERSION_NUM=1-5-5
 - export APP_CONFIG=development
