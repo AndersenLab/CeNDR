@@ -173,7 +173,7 @@ def google_analytics():
     """
         Fetch google api client for google analytics
     """
-    credentials = service_account.Credentials.from_service_account_file('env_config2/client-secret.json',
+    credentials = service_account.Credentials.from_service_account_file('env_config/client-secret.json',
                                                       scopes=['https://www.googleapis.com/auth/analytics.readonly'])
     return googleapiclient.discovery.build('analyticsreporting', 'v4', credentials=credentials)
 

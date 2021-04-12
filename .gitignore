@@ -70,8 +70,8 @@ gcloud_fargate.json
 
 mapping_worker/.envrc
 
-env_config2/
-env_config2.zip
+env_config/
+env_config.zip
 
 
 .python-version
