@@ -1,8 +1,6 @@
 language: bash
-before_install:
-- openssl aes-256-cbc -K $encrypted_acc9648b3300_key -iv $encrypted_acc9648b3300_iv
-  -in env_config2.zip.enc -out env_config2.zip -d
 install:
+- openssl aes-256-cbc -K $encrypted_acc9648b3300_key -iv $encrypted_acc9648b3300_iv -in env_config2.zip.enc -out env_config2.zip -d
 - unzip -qo env_config2.zip
 - export VERSION_NUM=1-5-5
 - export APP_CONFIG=development
