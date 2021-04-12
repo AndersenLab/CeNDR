@@ -46,15 +46,15 @@ def update_credentials():
     from base.application import create_app
     app = create_app()
     app.app_context().push()
-    click.secho("Zipping env_config", fg='green')
-    zipdir('env_config/', 'env_config.zip')
+    click.secho("Zipping env_config2", fg='green')
+    zipdir('env_config2/', 'env_config2.zip')
     zip_creds = get_item('credential', 'travis-ci-cred')
     click.secho("Encrypting credentials", fg='green')
-    if os.path.exists("env_config.zip.enc"):
-        os.remove("env_config.zip.enc")
+    if os.path.exists("env_config2.zip.enc"):
+        os.remove("env_config2.zip.enc")
     comm = ['travis',
             'encrypt-file',
-            'env_config.zip',
+            'env_config2.zip',
             "--org",
             '--key',
             zip_creds['key'],
@@ -65,7 +65,7 @@ def update_credentials():
     secho(str(out, 'utf-8'), fg='green')
     if err:
         exit(secho(str(err, 'utf-8'), fg='red'))
-    os.remove("env_config.zip")
+    os.remove("env_config2.zip")
 
 
 @click.command(help="Decrypt credentials")
@@ -73,11 +73,11 @@ def decrypt_credentials():
     from base.application import create_app
     app = create_app()
     app.app_context().push()
-    click.secho("Decrypting env_config.zip.enc", fg='green')
+    click.secho("Decrypting env_config2.zip.enc", fg='green')
     zip_creds = get_item('credential', 'travis-ci-cred')
     comm = ['travis',
             'encrypt-file',
-            'env_config.zip.enc',
+            'env_config2.zip.enc',
             '--force',
             '--key',
             zip_creds['key'],
@@ -88,10 +88,10 @@ def decrypt_credentials():
     click.secho(str(out, 'utf-8'), fg='green')
     if err:
         exit(secho(str(err, 'utf-8'), fg='red'))
-    click.secho("Unzipping env_config.zip", fg='green')
-    comm = ['unzip', '-qo', 'env_config.zip']
+    click.secho("Unzipping env_config2.zip", fg='green')
+    comm = ['unzip', '-qo', 'env_config2.zip']
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
     click.secho(str(out, 'utf-8'), fg='green')
     if err:
         exit(secho(str(err, 'utf-8'), fg='red'))
-    os.remove("env_config.zip")
+    os.remove("env_config2.zip")

@@ -37,8 +37,8 @@ def get_config(APP_CONFIG):
     (BASE_VARS are the same regardless of whether we are debugging or in production)
     """
     config = dict()
-    BASE_VARS = load_yaml("env_config/base.yaml")
-    APP_CONFIG_VARS = load_yaml(f"env_config/{APP_CONFIG}.yaml")
+    BASE_VARS = load_yaml("env_config2/base.yaml")
+    APP_CONFIG_VARS = load_yaml(f"env_config2/{APP_CONFIG}.yaml")
     config.update(BASE_VARS)
     config.update(APP_CONFIG_VARS)
     # Add configuration variables
