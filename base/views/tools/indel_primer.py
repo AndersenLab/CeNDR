@@ -39,7 +39,9 @@ MAX_SV_SIZE = 500
 # Initial load of strain list from sv_data
 # This is run when the server is started.
 # NOTE: Tabix cannot make requests over https!
-SV_STRAINS = VCF("https://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.vcf.gz").samples
+SV_BED_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.bed.gz"
+SV_VCF_URL = "https://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.vcf.gz"
+SV_STRAINS = VCF(SV_VCF_URL).samples
 SV_COLUMNS = ["CHROM",
               "START",
               "END",
@@ -123,7 +125,7 @@ def pairwise_indel_finder_query():
         results = []
         strain_cmp = [data["strain_1"],
                       data["strain_2"]]
-        tb = tabix.open("http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.bed.gz")
+        tb = tabix.open(SV_BED_URL)
         query = tb.query(data["chromosome"], data["start"], data["stop"])
         results = []
         for row in query:
@@ -196,7 +198,7 @@ def submit_indel_primer():
                                                     data['site'],
                                                     data['strain_1'],
                                                     data['strain_2'],
-                                                    "https://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.vcf.gz"))
+                                                    SV_VCF_URL))
     thread.daemon = True
     thread.start()
     return jsonify({'thread_name': str(thread.name),
