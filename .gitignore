@@ -61,7 +61,7 @@ target/
 #Random
 *.DS_Store
 
-*.json
+package-lock.json
 
 tmp/
 
@@ -93,3 +93,5 @@ photos/*
 
 # Heritability run go tool
 invoke
+
+.vscode/launch.json

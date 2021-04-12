@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://www.elegansvariation.org/", "http://localhost:5000/"],
+    "responseHeader": ["Content-Type", "Access-Control-Allow-Origin"],
+    "method": ["GET", "HEAD", "DELETE", "PUT", "POST"],
+    "maxAgeSeconds": 3600
+  }
+]

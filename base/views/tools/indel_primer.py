@@ -40,7 +40,7 @@ MAX_SV_SIZE = 500
 # This is run when the server is started.
 # NOTE: Tabix cannot make requests over https!
 SV_BED_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.bed.gz"
-SV_VCF_URL = "https://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.vcf.gz"
+SV_VCF_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.vcf.gz"
 SV_STRAINS = VCF(SV_VCF_URL).samples
 SV_COLUMNS = ["CHROM",
               "START",

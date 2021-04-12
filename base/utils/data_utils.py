@@ -35,7 +35,6 @@ from rich.progress import (
     TaskID,
 )
 
-
 def flatten_dict(d, max_depth=1):
     def expand(key, value):
         if hasattr(value, "__dict__"):
@@ -63,7 +62,6 @@ def get_gs():
     if not hasattr(g, 'gs'):
         g.gs = storage.Client(project='andersen-lab').get_bucket('elegansvariation.org')
     return g.gs
-
 
 class json_encoder(json.JSONEncoder):
     def default(self, o):

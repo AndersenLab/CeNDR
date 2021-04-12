@@ -1,6 +1,5 @@
 {% extends "_layouts/default.html" %}
 
-
 {% block content %}
 <div class="row">
       <div class="col-md-6">
@@ -37,10 +36,19 @@ However, this species is found worldwide, and wild strains are as different from
 
 
   <div class="col-md-6">
-<div id="map" class="col-md-8" style="height: 500px; width:100%"></div>
+<div id="map" class="col-md-8" style="height: 500px; width:100%">
+  <script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoic3dhY2hzcHJlc3MiLCJhIjoiY2trZDJyZWtmMHM3OTJvcWlpNmE3cTQ1ZSJ9.UwY-WYd78c7SnO1S_37vtg';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/outdoors-v11', // stylesheet location
+        center: [ '0', '0'], // starting position [lng, lat]
+        zoom: -2 // starting zoom
+    });
+  </script>
+</div>
   </div>
   </div>
-
     <div class="row">
     <div class="col-md-6">
       <div class="row">
@@ -78,67 +86,45 @@ However, this species is found worldwide, and wild strains are as different from
 {% block script %}
 
 <script>
+  if (document.getElementById('map')) {
+    ACCESS_TOKEN = mapboxgl.accessToken;
+    var markerHeight = 50, markerRadius = 10, linearOffset = 25;
+    var popupOffset = {
+        'top': [0, 0],
+        'top-left': [0,0],
+        'top-right': [0,0],
+        'bottom': [0, -markerHeight],
+        'bottom-left': [linearOffset, (markerHeight - markerRadius + linearOffset) * -1],
+        'bottom-right': [-linearOffset, (markerHeight - markerRadius + linearOffset) * -1],
+        'left': [markerRadius, (markerHeight - markerRadius) * -1],
+        'right': [-markerRadius, (markerHeight - markerRadius) * -1]
+    };
 
-// Icons
-var icon_norm = L.icon({
-    iconUrl: '/static/img/icons/marker.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 16],
-    popupAnchor: [-3, -76]
-});
-
-var icon_hover = L.icon({
-    iconUrl: '/static/img/icons/selected.png',
-    iconSize: [24, 24],
-    iconAnchor: [12, 16],
-    popupAnchor: [-3, -76]
-});
-
-// Default click_s
-var click_s = {
-  target: {
-    options: {strain: "", title: "", isotype: "", landscape: "", loc: "", comma: "", isolation_date: "", location: "", substrate: "", isolated_by: ""},
-    setIcon: function(){},
-  },
-  latlng: { lat: "", lng: ""},
-}
-
-
-  ACCESS_TOKEN = 'pk.eyJ1IjoianByNyIsImEiOiJjaWhxbTRvdmswMDFzdGRtMDd0cGN6cG9lIn0.YzgwcnxBn6_DauMzz5fiQg';
-  MB_ATTR = 'Map data &copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors, ' +
-    '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-    'Imagery © <a href="https://mapbox.com">Mapbox</a>';
-  MB_URL = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=' + ACCESS_TOKEN;
-  OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  OSM_ATTRIB = '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-
-  var southWest = L.latLng(-90, -180),
-    northEast = L.latLng(90, 180),
-    bounds = L.latLngBounds(southWest, northEast);
-
-  var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -50], 2);
-  L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
-  strain_info = [];
-  strain_names = [];
-  markers = [];
   data = {{ strain_listing|tojson|safe }}
-  strain_info = data;
-  data.forEach(function(d) {
-  strain_names.push(d.strain);
-   m = L.marker([d.latitude, d.longitude], { icon: icon_norm, 
-                                         strain: d.strain,
-                                         title: d.strain,
-                                         isotype: d.isotype,
-                                         isolation_date : d.isolation_date,
-                                         loc : d.location,
-                                         landscape: d.landscape,
-                                         substrate: d.substrate,
-                                         comma: ",  ",
-                                         isolated_by: d.isolated_by }).addTo(map)
-  markers.push(m);
- });
-var strain_layer = L.layerGroup(markers);
 
+    data.forEach(function(d) {
+        if (d.latitude) {
+            const innerHTML = `
+                <div>
+                    <ul style="list-style-type:none; padding-left:0px">
+                        ${d.isotype ? '<li><b><a href="../strain/isotype/' + d.isotype + '">Isotype: ' + d.isotype + '</a></b></li>': ''}
+                        ${d.strain ? '<li>Strain: ' + d.strain + '</li>': ''}
+                        ${d.isolation ? '<li>Isolation: ' + d.isolation + '</li>': ''}
+                        ${d.elevation ? '<li>Elevation: ' + d.elevation + '</li>': ''}
+                        ${d.isolation ? '<li>Location: ' + d.location + '</li>': ''}
+                    </ul>
+                </div>
+            `;
+            p = new mapboxgl.Popup()
+                .setHTML(innerHTML)
+                .setOffset(popupOffset);
+            m = new mapboxgl.Marker()
+                .setLngLat([d.longitude, d.latitude])
+                .setPopup(p)
+                .addTo(map);
+        }
+    })
+}
 </script>
 
 {% endblock %}
