@@ -35,7 +35,7 @@
     {% if int(selected_release) >= 20170531 %}
     <li role="presentation"><a href="#haplotype" role="tab" data-toggle="tab">Images</a></li>
     {% endif %}
-    <li role="presentation"><a href="#methods" role="tab" data-toggle="tab">Methods</a></li>
+    <li role="presentation"><a href="#pipelines" role="tab" data-toggle="tab">Pipelines / Methods</a></li>
   </ul>
 
   <!-- Tab panes -->
@@ -57,8 +57,8 @@
         <img style='width:100%' src='https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/popgen/trees/genome.svg'>
     </div>
 
-    <div role="tabpanel" class="tab-pane" id="methods">
-        {{ render_markdown(selected_release + "/methods.md", directory="base/static/reports") }}
+    <div role="tabpanel" class="tab-pane" id="pipelines">
+        {{ render_markdown(selected_release + "/pipelines.md", directory="base/static/reports") }}
     </div>
 
     {% if int(selected_release) >= 20170531 %}

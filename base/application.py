@@ -2,15 +2,13 @@ import os
 import json
 import requests
 from os.path import basename
+from base.config import config
 from flask import Flask, render_template
 from flask_wtf.csrf import CSRFProtect
+from base.utils.text_utils import render_markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.exceptions import HTTPException
 
-
-from base.constants import GOOGLE_CLOUD_BUCKET
-from base.config import config
-from base.utils.text_utils import render_markdown
 from base.manage import (initdb,
                          update_strains,
                          update_credentials,
@@ -28,12 +26,6 @@ from base.views.data import data_bp
 from base.views.mapping import mapping_bp
 from base.views.gene import gene_bp
 from base.views.user import user_bp
-from base.views.maintenance import maintenance_bp
-from base.views.admin.admin import admin_bp
-from base.views.admin.users import users_bp
-from base.views.admin.data import data_admin_bp
-
-
 
 # Tools
 from base.views.tools import (tools_bp,
@@ -50,9 +42,9 @@ from base.views.api.api_variant import api_variant_bp
 from base.views.api.api_data import api_data_bp
 
 # Auth
-from base.views.auth import (auth_bp, 
-                             google_bp, 
-                             saml_bp)
+from base.auth import (auth_bp,
+                       google_bp,
+                       github_bp)
 
 
 # ---- End Routing ---- #
@@ -62,8 +54,7 @@ from base.extensions import (markdown,
                              cache,
                              debug_toolbar,
                              sslify,
-                             sqlalchemy,
-                             jwt)
+                             sqlalchemy)
 
 # Template filters
 from base.filters import (comma, format_release)
@@ -119,16 +110,10 @@ def register_template_filters(app):
 def register_extensions(app):
     markdown(app)
     cache.init_app(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
-    sqlalchemy.init_app(app)
-    # protect all routes (except the ones listed) from cross site request forgery
-    csrf = CSRFProtect(app)
-    csrf.exempt(auth_bp)
-    csrf.exempt(saml_bp)
-    csrf.exempt(maintenance_bp)
-    app.config['csrf'] = csrf
-    jwt.init_app(app)
+    sqlalchemy(app)
     CSRFProtect(app)
     app.config['csrf'] = CSRFProtect(app)
+
 
 def register_blueprints(app):
     """Register blueprints with the Flask application."""
@@ -139,8 +124,6 @@ def register_blueprints(app):
     app.register_blueprint(data_bp, url_prefix='/data')
     app.register_blueprint(mapping_bp, url_prefix='')
     app.register_blueprint(gene_bp, url_prefix='/gene')
-
-    # User
     app.register_blueprint(user_bp, url_prefix='/user')
     
     # Tools
@@ -155,22 +138,16 @@ def register_blueprints(app):
     app.register_blueprint(api_data_bp, url_prefix='/api')
 
     # Auth
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(saml_bp, url_prefix='/saml')
+    app.register_blueprint(auth_bp, url_prefix='')
     app.register_blueprint(google_bp, url_prefix='/login')
+    app.register_blueprint(github_bp, url_prefix='/login')
 
-    # Admin
-    app.register_blueprint(admin_bp, url_prefix='/admin')
-    app.register_blueprint(users_bp, url_prefix='/admin/users')
-    app.register_blueprint(data_admin_bp, url_prefix='/admin/data')
-
-    # Healthchecks/Maintenance
-    app.register_blueprint(maintenance_bp, url_prefix='/tasks')
+    # Healthchecks
     app.register_blueprint(check_bp, url_prefix='')
 
 
 def gs_static(url, prefix='static'):
-    return f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/{prefix}/{url}"
+    return f"https://storage.googleapis.com/elegansvariation.org/{prefix}/{url}"
 
 
 def configure_jinja(app):

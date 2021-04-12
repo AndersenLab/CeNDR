@@ -6,6 +6,7 @@
       {% block style %}{% endblock %}
     </head>
     <body>
+    {% set user = session.get('user', None) %}
     <div class="page-content">
         <div class="wrap">
             <div class="container{% if fluid_container %}-fluid{% endif %}">

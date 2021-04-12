@@ -9,15 +9,11 @@
       <h1 class='text-center'>Select Login</h1>
       <hr />
         <br />
-        <div class="list-group register-collection">
-          <a href="{{ url_for('user.user_register') }}" class="list-group-item list-group-item-action"><i class='fa fa-user-plus'></i>  Register </a>
-        </div>
-
 
       <div class="list-group login-collection">
-          <a href="{{ url_for('auth.basic_login') }}" class="list-group-item list-group-item-action"><i class='fa fa-user'></i>  Username/Password </a>
           <a href="{{ url_for('google.login') }}" class="list-group-item list-group-item-action"><i class='fa fa-google'></i> Google</a>
-          <a href="{{ url_for('saml.saml_sso2') }}" class="list-group-item list-group-item-action"><i class='fa fa-university'></i>  Northwestern SSO </a>
+          <a href="{{ url_for('github.login') }}" class="list-group-item list-group-item-action"><i class='fa fa-github'></i> GitHub</a>
+          {# <a href="{{ url_for('dropbox.login') }}" class="list-group-item list-group-item-action"><i class='fa fa-dropbox'></i> Dropbox</a>#}
     </div>
 
     </div>

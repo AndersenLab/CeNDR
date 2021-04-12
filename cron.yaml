@@ -2,7 +2,3 @@ cron:
 - description: test_mapping_pipeline
   url: /report/1c28542b/telomere-resids
   schedule: every 24 hours
-
-- description: delete_expired_cache_entries
-  url: /tasks/cleanup_cache
-  schedule: every 24 hours

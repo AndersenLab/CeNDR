@@ -2,27 +2,20 @@ import json
 import pandas as pd
 import numpy as np
 
-from flask_wtf import FlaskForm, RecaptchaField, Form
+from flask_wtf import Form, RecaptchaField
 
 from wtforms import (StringField,
-                     DateField,
-                     BooleanField,
                      TextAreaField,
                      IntegerField,
                      SelectField,
-                     SelectMultipleField,
-                     widgets,
                      FieldList,
                      HiddenField,
                      RadioField)
-from wtforms.fields.simple import PasswordField
-from wtforms.validators import Required, Length, Email, DataRequired, EqualTo, Optional
+from wtforms.validators import Required, Length, Email, DataRequired
 from wtforms.validators import ValidationError
-from wtforms.fields.html5 import EmailField
 
-from base.constants import PRICES, USER_ROLES, SHIPPING_OPTIONS, PAYMENT_OPTIONS
 from base.utils.gcloud import query_item
-from base.models import user_ds
+from base.constants import PRICES
 from base.views.api.api_strain import query_strains
 from base.utils.data_utils import is_number, list_duplicates
 from slugify import slugify
@@ -30,83 +23,24 @@ from gcloud.exceptions import BadRequest
 
 from logzero import logger
 
-class MultiCheckboxField(SelectMultipleField):
-  widget = widgets.ListWidget(prefix_label=False)
-  option_widget = widgets.CheckboxInput() 
-
-
-class basic_login_form(FlaskForm):
-  """
-      The simple username/password login form
-  """
-  username = StringField('Username', [Required(), Length(min=5, max=30)])
-  password = PasswordField('Password', [Required(), Length(min=5, max=30)])
-  recaptcha = RecaptchaField()
-
-
-class markdown_form(FlaskForm):
-  """
-      markdown editing form
-  """
-  title = StringField('Title', [Optional()])
-  content = StringField('Content', [Optional()])
-  date = DateField('Date  (mm-dd-YYYY)', [Optional()], format='%m-%d-%Y')
-  type = StringField('Type', [Optional()])
-  publish = BooleanField('Publish', [Optional()])
-
-
-class user_register_form(FlaskForm):
-  """
-      Register as a new user with username/password
-  """
-  username = StringField('Username', [Required(), Length(min=5, max=30)])
-  full_name = StringField('Full Name', [Required(), Length(min=5, max=50)])
-  email = EmailField('Email Address', [Required(), Email(), Length(min=6, max=50)])
-  password = PasswordField('Password', [Required(), EqualTo('confirm_password', message='Passwords must match'), Length(min=5, max=30)])
-  confirm_password = PasswordField('Confirm Password', [Required(), EqualTo('password', message='Passwords must match'), Length(min=5, max=30)])
-  recaptcha = RecaptchaField()
-
-  def validate_username(form, field):
-    user = user_ds(field.data)
-    if user._exists:
-      raise ValidationError("Username already exists")
-
-
-class user_update_form(FlaskForm):
-  """
-      Modifies an existing users profile
-  """
-  full_name = StringField('Full Name', [Required(), Length(min=5, max=50)])
-  email = EmailField('Email Address', [Required(), Email(), Length(min=6, max=50)])
-  password = PasswordField('Password', [Optional(), EqualTo('confirm_password', message='Passwords must match'), Length(min=5, max=30)])
-  confirm_password = PasswordField('Confirm Password', [Optional(), EqualTo('password', message='Passwords must match'), Length(min=5, max=30)])
-
-
-class admin_edit_user_form(FlaskForm):
-  """
-  A form for one or more roles
-  """
-  roles = MultiCheckboxField('User Roles', choices=USER_ROLES)
-  
-
-class data_report_form(FlaskForm):
-  """
-  A form for creating a data release
-  """
-  dataset = SelectField('Release Dataset', validators=[Required()])
-  wormbase = StringField('Wormbase Version WS:', validators=[Required()])
-  version = SelectField('Report Version', validators=[Required()])
-
 
 class donation_form(Form):
-  """
-      The donation form
-  """
-  name = StringField('Name', [Required(), Length(min=3, max=100)])
-  address = TextAreaField('Address', [Length(min=10, max=200)])
-  email = StringField('Email', [Email(), Length(min=3, max=100)])
-  total = IntegerField('Donation Amount')
-  recaptcha = RecaptchaField()
+    """
+        The donation form
+    """
+    name = StringField('Name', [Required(), Length(min=3, max=100)])
+    address = TextAreaField('Address', [Length(min=10, max=200)])
+    email = StringField('Email', [Email(), Length(min=3, max=100)])
+    total = IntegerField('Donation Amount')
+    recaptcha = RecaptchaField()
+
+
+SHIPPING_OPTIONS = [('UPS', 'UPS'),
+                    ('FEDEX', 'FEDEX'),
+                    ('Flat Rate Shipping', '${} Flat Fee'.format(PRICES.SHIPPING))]
+
+PAYMENT_OPTIONS = [('check', 'Check'),
+                   ('credit_card', 'Credit Card')]
 
 
 class order_form(Form):

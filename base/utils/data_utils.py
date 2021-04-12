@@ -12,17 +12,19 @@ import hashlib
 import os
 import uuid
 import zipfile
-import pytz
-import yaml
-
 from collections import Counter
 from datetime import datetime as dt
+
+import pytz
+import yaml
 from flask import g, json
 from gcloud import storage
 from logzero import logger
+
 from concurrent.futures import ThreadPoolExecutor
 from typing import Iterable
 from urllib.request import urlretrieve
+
 from rich.progress import (
     BarColumn,
     DownloadColumn,
@@ -32,8 +34,6 @@ from rich.progress import (
     Progress,
     TaskID,
 )
-
-from base.constants import GOOGLE_CLOUD_BUCKET, GOOGLE_CLOUD_PROJECT_ID
 
 def flatten_dict(d, max_depth=1):
     def expand(key, value):
@@ -56,11 +56,11 @@ def load_yaml(yaml_file):
 
 def get_gs():
     """
-        Gets the google storage bucket which
+        Gets the elegansvariation.org google storage bucket which
         stores static assets and report data.
     """
     if not hasattr(g, 'gs'):
-        g.gs = storage.Client(project=GOOGLE_CLOUD_PROJECT_ID).get_bucket(GOOGLE_CLOUD_BUCKET)
+        g.gs = storage.Client(project='andersen-lab').get_bucket('elegansvariation.org')
     return g.gs
 
 class json_encoder(json.JSONEncoder):
@@ -98,11 +98,6 @@ def sorted_files(path):
 def hash_it(object, length=10):
     logger.debug(object)
     return hashlib.sha1(str(object).encode('utf-8')).hexdigest()[0:length]
-
-
-def hash_password(password):
-    h = hashlib.md5(password.encode())
-    return h.hexdigest()
 
 
 def chicago_date():

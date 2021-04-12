@@ -46,7 +46,6 @@ def update_credentials():
     from base.application import create_app
     app = create_app()
     app.app_context().push()
-    
     click.secho("Zipping env_config", fg='green')
     zipdir('env_config/', 'env_config.zip')
     zip_creds = get_item('credential', 'travis-ci-cred')
@@ -74,7 +73,6 @@ def decrypt_credentials():
     from base.application import create_app
     app = create_app()
     app.app_context().push()
-    
     click.secho("Decrypting env_config.zip.enc", fg='green')
     zip_creds = get_item('credential', 'travis-ci-cred')
     comm = ['travis',

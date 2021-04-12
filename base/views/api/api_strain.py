@@ -31,7 +31,7 @@ def search_strains(query):
 @api_strain_bp.route('/strain/<string:strain_name>')
 @api_strain_bp.route('/strain/isotype/<string:isotype_name>')
 @jsonify_request
-def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_names=False, resolve_isotype=False, issues=False, is_sequenced=False):
+def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_names=False, resolve_isotype=False, issues=False):
     """
         Return the full strain database set
 
@@ -54,9 +54,6 @@ def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_
         query = query.filter(Strain.isotype == isotype_name)
     else:
         query = query
-
-    if is_sequenced is True:
-        query = query.filter(Strain.sequenced == True)
 
     if issues is False:
         query = query.filter(Strain.issues == False)

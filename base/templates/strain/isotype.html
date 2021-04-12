@@ -25,23 +25,15 @@
                 </ul>
                 {% endif %}
             </div>{# col-md-6 #}
+
             <div class="col-md-12">
-            {% for i in isotype %}
-                {% if i.strain_photo_url() %}
-                    <row>
-                        <div class="col-md-4">
-                            <a href="{{ i.strain_photo_url() }}" src="_blank">
-                                <figure class="figure" style="padding:10px">
-                                    <img class="figure-img img-fluid img-thumbnail" src="{{ i.strain_thumbnail_url() }}" name="{{ i.strain }}">
-                                    <figcaption class="figure-caption text-center">{{ i.strain }}</figcaption>
-                                </figure>
-                            </a>
-                        </div>
-                    </row>
-                {% endif %}
-            {% endfor %}
+                {% if isotype_ref_strain.strain_photo_url() %}
+                <h4>Photo</h4>
+            <img src="{{ isotype_ref_strain.strain_photo_url() }}" class="col-md-12 thumbnail" name="{{ isotype_ref_strain.strain }}">
+        {% endif %}
             </div>{# /col-md-6 #}
-        </div>{# row #}        
+        </div>{# row #}
+        
     </div>{# col-md-8 #}
 
     <div class='col-md-4'>
@@ -147,7 +139,7 @@
             </li>
 
             <li class="list-group-item">
-                <small>Data in this table is for the isotype reference strain.</small>
+                <small>Data in this table is for the reference strain.</small>
             </li>
 
             </ul>

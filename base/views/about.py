@@ -20,7 +20,6 @@ from base.utils.google_sheets import add_to_order_ws
 from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
 from base.utils.data_utils import load_yaml, chicago_date, hash_it
 from base.utils.plots import time_series_plot
-from base.utils.jwt_utils import jwt_required, get_current_user
 
 about_bp = Blueprint('about',
                      __name__,
@@ -76,7 +75,6 @@ def staff():
 
 
 @about_bp.route('/donate/', methods=['GET', 'POST'])
-@jwt_required(optional=True)
 def donate():
     """
         Process donation
@@ -85,9 +83,8 @@ def donate():
     form = donation_form(request.form)
 
     # Autofill email
-    user = get_current_user()
-    if user and hasattr(user, 'email') and not form.email.data:
-      form.email.data = user.email
+    if session.get('user') and not form.email.data:
+        form.email.data = session.get('user')['user_email']
 
     if form.validate_on_submit():
         # order_number is generated as a unique string
@@ -186,11 +183,8 @@ def publications():
         List of publications that have referenced CeNDR
     """
     title = "Publications"
-    csv_prefix = config['GOOGLE_SHEET_PREFIX']
-    sheet_id = config['CENDR_PUBLICATIONS_STRAIN_SHEET']
-    csv_export_suffix = 'export?format=csv&id={}&gid=0'.format(sheet_id)
-    url = '{}/{}/{}'.format(csv_prefix, sheet_id, csv_export_suffix)
-    req = requests.get(url)
+    req = requests.get(
+        "https://docs.google.com/spreadsheets/d/1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs/export?format=csv&id=1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs&gid=0")
     df = pd.read_csv(StringIO(req.content.decode("UTF-8")))
     df['pmid'] = df['pmid'].astype(int)
     df = df.sort_values(by='pmid', ascending=False)
