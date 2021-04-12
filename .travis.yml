@@ -1,7 +1,7 @@
 language: bash
 before_install:
-- openssl aes-256-cbc -K $encrypted_0cdf204cee1e_key -iv $encrypted_0cdf204cee1e_iv
-  -in env_config.zip.enc -out env_config.zip -d
+- openssl aes-256-cbc -K $encrypted_acc9648b3300_key -iv $encrypted_acc9648b3300_iv
+  -in env_config2.zip.enc -out env_config2.zip -d
 install:
 - unzip -qo env_config.zip
 - export VERSION_NUM=1-5-5
@@ -19,5 +19,4 @@ deploy:
   no_promote: true
   no_stop_previous_version: true
   skip_cleanup: true
-dd:
-  secure: obFq1XF+zh14/ModyqcOgg86Vf/45KZWsl4SQuitn7tybUaQZ7kK82lhgUOilIRNdB2nYPMXL/qXhnk1vRZo8o/k9nDkVxIIRoFwZNULZ965SZVMigCAcX7oqrzm4Orydhdu9/yWPSVmmCIKp3qsXl4uY0s3K6qqkerrfzkwzjW4X+xZizApgkeIB+IVLU2T3ej0d3FthB4SMVXBj+cwvrj4ZUyApSRybQ13TnZJLQMx7QNDRRwptWI++N8izsuAN7cbvgTQXs3M3FCDn0FMvhtNHN8MYD9PzkyX4ltl04HXnkcm/HHEbew5RtuNQ1C6M3Wm+3oQcKyfqaK6bKvqDdPTAKxDcgWeeFmTqngx8/3f8IrZurwI67MEQSP4r1xoOFcQRVUtiK3g2Vj+aC0vGHWbztHvj43KCpzlDOz7PUdC+3xfkMfttrJWVJGlWHerEmdWjXhm572Hhz2X3tINWjycOYRWY/HBFCETqgT1gLrTWRlkWQhSBji3RYJmiAisdt9lcoRGJAtyc8Dy6sitxPrkJjg1U8atw6IivHzHu+ErrVgE2k+l46EOeQozpEnTrLORRQ8MFH4ugtPR8eKNqTQBp4kJDUKFu7/6mJ9fNCO5nX558CEU3CKLdAeaHibnnc1tfHAjRiKdbUC57NPRv1dF8il6F5s2HCoDxh4O6bY=
+  
