@@ -6,6 +6,7 @@ very infrequently (if ever).
 
 Author: Daniel E. Cook (danielecook@gmail.com)
 """
+import os
 
 WORMBASE_VERSION = 'WS276'
 
@@ -37,8 +38,13 @@ CHROM_NUMERIC = {"I": 1,
                  "MtDNA": 7}
 
 
-GOOGLE_CLOUD_BUCKET = 'elegansvariation.org'
-GOOGLE_CLOUD_PROJECT_ID = 'andersen-lab'
+
+GOOGLE_CLOUD_BUCKET='elegansvariation'
+GOOGLE_CLOUD_PROJECT_ID='andersen-lab-302418'
+if os.environ.get('DEPLOYMENT', '') == 'AndersenLab':
+  GOOGLE_CLOUD_BUCKET='elegansvariation.org'
+  GOOGLE_CLOUD_PROJECT_ID='andersen-lab'
+
 GOOGLE_CLOUD_LOCATION = 'us-central1'
 
 # WI Strain Info Dataset

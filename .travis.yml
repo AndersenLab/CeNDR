@@ -1,7 +1,18 @@
 language: bash
 
+env:
+  - GOOGLE_CLOUD_BUCKET='elegansvariation'
+  - GOOGLE_CLOUD_PROJECT_ID='andersen-lab-302418'
+  - ENV_CONFIG_ZIP='env_config_mti.zip.enc'
+  - DECRYPT_CMD='openssl aes-256-cbc -K $encrypted_eb81f51f2e9b_key -iv $encrypted_eb81f51f2e9b_iv -in env_config_mti.zip.enc -out env_config.zip -d'
+if: env(DEPLOYMENT)=AndersenLab
+  - GOOGLE_CLOUD_BUCKET='elegansvariation.org'
+  - GOOGLE_CLOUD_PROJECT_ID='andersen-lab'
+  - ENV_CONFIG_ZIP='env_config_al.zip.enc'
+  - DECRYPT_CMD='openssl aes-256-cbc -K $encrypted_f7a2e30d9b29_key -iv $encrypted_f7a2e30d9b29_iv -in env_config_al.zip.enc -out env_config.zip -d'
+
 install:
-- openssl aes-256-cbc -K $encrypted_86f5a1ab1ccf_key -iv $encrypted_86f5a1ab1ccf_iv -in env_config.zip.enc -out env_config.zip -d
+- ${DECRYPT_CMD}
 - unzip -qo env_config.zip
 - export VERSION_NUM=1-5-8
 - export APP_CONFIG=master
@@ -13,7 +24,7 @@ install:
 deploy:
   provider: gae
   version: "${GAE_VERSION}"
-  project: andersen-lab
+  project: "${GOOGLE_CLOUD_PROJECT_ID}"
   keyfile: env_config/client-secret.json
   on:
     all_branches: true
