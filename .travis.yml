@@ -1,11 +1,10 @@
 language: bash
 
 env:
-  - GOOGLE_CLOUD_BUCKET='elegansvariation' GOOGLE_CLOUD_PROJECT_ID='andersen-lab-302418' ENV_CONFIG_ZIP='env_config_mti.zip.enc'
+  - GOOGLE_CLOUD_BUCKET="elegansvariation" GOOGLE_CLOUD_PROJECT_ID="andersen-lab-302418" ENV_CONFIG_ZIP="env_config_mti.zip.enc"
 
 install:
-- mv "${ENV_CONFIG_ZIP}" env_config.zip
-- openssl aes-256-cbc -K $encrypted_f7a2e30d9b29_key -iv $encrypted_f7a2e30d9b29_iv -in "${ENV_CONFIG_ZIP}" -out env_config.zip -d
+- openssl aes-256-cbc -K $encrypted_eb81f51f2e9b_key -iv $encrypted_eb81f51f2e9b_iv -in "${ENV_CONFIG_ZIP}" -out env_config.zip -d
 - unzip -qo env_config.zip
 - export VERSION_NUM=1-5-9
 - export APP_CONFIG=master
