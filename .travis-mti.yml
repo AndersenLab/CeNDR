@@ -13,6 +13,8 @@ install:
 - if [ "${TRAVIS_BRANCH}" != "master" ]; then export APP_CONFIG=development; fi;
 - export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
 - export GOOGLE_APPLICATION_CREDENTIALS=env_config/client-secret.json
+- export GOOGLE_CLOUD_BUCKET=${GOOGLE_CLOUD_BUCKET}
+- export GOOGLE_CLOUD_PROJECT_ID=${GOOGLE_CLOUD_PROJECT_ID}
 
 deploy:
   provider: gae
