@@ -39,12 +39,8 @@ CHROM_NUMERIC = {"I": 1,
 
 
 
-GOOGLE_CLOUD_BUCKET='elegansvariation'
-GOOGLE_CLOUD_PROJECT_ID='andersen-lab-302418'
-if os.environ.get('DEPLOYMENT', '') == 'AndersenLab':
-  GOOGLE_CLOUD_BUCKET='elegansvariation.org'
-  GOOGLE_CLOUD_PROJECT_ID='andersen-lab'
-
+GOOGLE_CLOUD_BUCKET = os.environ.get('GOOGLE_CLOUD_BUCKET', 'elegansvariation')
+GOOGLE_CLOUD_PROJECT_ID = os.environ.get('GOOGLE_CLOUD_PROJECT_ID', 'andersen-lab-302418')
 GOOGLE_CLOUD_LOCATION = 'us-central1'
 
 # WI Strain Info Dataset
