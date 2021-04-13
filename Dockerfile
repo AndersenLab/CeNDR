@@ -16,6 +16,11 @@ tabix \
 graphviz \
 libgraphviz-dev \
 pkg-config \
+libxml2 \
+xmlsec1 \
+libxml2-dev \
+libxmlsec1-dev \
+libxmlsec1-openssl \
 && rm -rf /var/lib/apt/lists/*
 
 ENV BCFTOOLS_BIN="bcftools-1.10.tar.bz2" \

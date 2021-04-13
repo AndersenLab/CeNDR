@@ -17,12 +17,12 @@ from flask_wtf import Form
 from logzero import logger
 from wtforms import IntegerField, SelectField
 from wtforms.validators import Required, ValidationError
+from threading import Thread
 
 from base.config import config
+from base.constants import CHROM_NUMERIC, GOOGLE_CLOUD_BUCKET 
 from base.utils.gcloud import check_blob, upload_file
 from base.utils.data_utils import hash_it
-from base.constants import CHROM_NUMERIC
-from threading import Thread
 
 # Tools blueprint
 indel_primer_bp = Blueprint('indel_primer',
@@ -39,8 +39,9 @@ MAX_SV_SIZE = 500
 # Initial load of strain list from sv_data
 # This is run when the server is started.
 # NOTE: Tabix cannot make requests over https!
-SV_BED_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.bed.gz"
-SV_VCF_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.vcf.gz"
+SV_BED_URL = f"http://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/tools/pairwise_indel_primer/sv.20200815.bed.gz"
+SV_VCF_URL = f"http://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/tools/pairwise_indel_primer/sv.20200815.vcf.gz"
+
 SV_STRAINS = VCF(SV_VCF_URL).samples
 SV_COLUMNS = ["CHROM",
               "START",

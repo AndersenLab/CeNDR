@@ -1,4 +1,4 @@
-# Methods / Pipelines
+# Methods
 
 __Note__: These methods operated on sequence data at the isotype level.
 

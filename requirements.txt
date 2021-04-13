@@ -40,3 +40,13 @@ Flask-Dance==3.0.0
 feedgen==0.9.0
 cachelib
 pytabix
+python3-saml
+flask_jwt_extended
+google-cloud
+google-cloud-tasks
+google-cloud-storage
+google-cloud-datastore
+google_cloud_logging
+google-api-core
+grpcio
+google-python-cloud-debugger

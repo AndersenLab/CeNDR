@@ -6,9 +6,7 @@
       {% block style %}{% endblock %}
     </head>
     <body>
-    {% set user = session.get('user') or None %}
     {% include "_includes/navbar.html" %}
-
     <div class="page-content">
         <div class="wrap">
             <div class="container{% if fluid_container %}-fluid{% endif %}">
@@ -44,9 +42,9 @@
                                 {% if title %}
                                 {% if title.lower() != request.blueprint.lower() %}
                                 {% endif %}
-                                    {% if request.blueprint == 'user' and session.get('user')%}
+                                    {% if request.blueprint == 'user' and is_logged_in%}
                                     {# Direct to user profile #}
-                                    <li>User</li>
+                                    <li>Profile</li>
                                     {% else %}
                                     {% if request.blueprint != "primary" %}
                                     <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
@@ -88,6 +86,6 @@
             </div>
         </div><!-- closes wrap-->
     </div><!-- closes page-content-->
-    {% if config.DEBUG %}{{ user }}{% endif %}
+    {% if config.DEBUG %}{{ session }}{% endif %}
     </body>
 </html>
