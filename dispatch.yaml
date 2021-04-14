@@ -5,4 +5,4 @@ dispatch:
 
   # dev site
   - url: "*dev.elegansvariation.org*"
-    service: default
+    service: dev
