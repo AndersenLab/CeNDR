@@ -190,5 +190,5 @@ def browser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", q
             'strain_listing': get_isotypes(),
             'region': region,
             'query': query,
-            'fluid_container': True}
+            'fluid_container': False}
     return render_template('browser.html', **VARS)
