@@ -21,6 +21,42 @@ data_bp = Blueprint('data',
 #   Data Page   #
 # ============= #
 
+@cache.memoize(50)
+def generate_v2_file_list(selected_release):
+  path = f'releases/{selected_release}'
+  prefix = f'https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/{path}'
+  release_files = list_release_files(f"{path}/")
+  
+  f = dict()
+
+  f['soft_filter_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.soft-filter.vcf.gz'
+  f['soft_filter_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.soft-filter.vcf.gz.csi'
+  f['soft_filter_isotype_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.soft-filter.isotype.vcf.gz'
+  f['soft_filter_isotype_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.soft-filter.isotype.vcf.gz.csi'
+  f['hard_filter_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.hard-filter.vcf.gz'
+  f['hard_filter_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.hard-filter.vcf.gz.csi'
+  f['hard_filter_isotype_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.hard-filter.isotype.vcf.gz'
+  f['hard_filter_isotype_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.hard-filter.isotype.vcf.gz.csi'
+  f['impute_isotype_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.impute.isotype.vcf.gz'
+  f['impute_isotype_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.impute.isotype.vcf.gz.csi'
+  
+  f['hard_filter_min4_tree'] = f'{prefix}/tree/WI.{selected_release}.hard-filter.min4.tree'
+  f['hard_filter_min4_tree_pdf'] = f'{prefix}/tree/WI.{selected_release}.hard-filter.min4.tree.pdf'
+  f['hard_filter_isotype_min4_tree'] = f'{prefix}/tree/WI.{selected_release}.hard-filter.isotype.min4.tree'
+  f['hard_filter_isotype_min4_tree_pdf'] = f'{prefix}/tree/WI.{selected_release}.hard-filter.isotype.min4.tree.pdf'
+  
+  f['haplotype_png'] = f'{prefix}/haplotype/haplotype.png'
+  f['haplotype_pdf'] = f'{prefix}/haplotype/haplotype.pdf'
+  f['sweep_pdf'] = f'{prefix}/haplotype/sweep.pdf'
+  f['sweep_summary_tsv'] = f'{prefix}/haplotype/sweep_summary.tsv'
+
+  for key, value in f.items():
+    if value not in release_files:
+      f[key] = None
+  
+  return f
+
+
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
 @cache.memoize(50)
@@ -44,6 +80,7 @@ def data(selected_release=None):
     RELEASES = config["RELEASES"]
     DATASET_RELEASE, WORMBASE_VERSION = list(filter(lambda x: x[0] == selected_release, RELEASES))[0]
     REPORTS = ["alignment"]
+    f = generate_v2_file_list(selected_release)
     return render_template('data_v2.html', **locals())
 
 
