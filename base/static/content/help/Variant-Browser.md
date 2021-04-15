@@ -65,15 +65,15 @@ th {
 
 The `Genes` and `Transcripts` tracks are displayed by default.
 
-##### Genes 
+#### Genes 
 
 Shows _C. elegans_ genes.
 
-##### Transcripts
+#### Transcripts
 
 Shows transcripts of genes.
 
-##### phyloP
+#### phyloP
 
 The UCSC genome browser provides a [good explanation](https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=cons46way) of the `phyloP` and `phastCons` tracks and how to interpret them.
 
@@ -88,15 +88,15 @@ phyloP (phylogenetic P-values) are designed to detect lineage-specific selection
 * _Onchocerca volvulus_
 * _Brugia malayi_
 
-##### phastCons
+#### phastCons
 
 phastCons scores range from 0-1 and represent the probability that each nucleotide belongs to a conserved element.
 
-##### Transposons
+#### Transposons
 
 The transposons track shows transposon calls from [Laricchia _et al._ 2017](https://andersenlab.org/publications/2017Laricchia.pdf). Each call lists the transposon type and __isotype__.
 
-##### Divergent Regions
+#### Divergent Regions
 
 Hyper-divergent regions are genomic intervals that contain sequences not found in the N2 reference strain. They were identified by high levels of variation and low coverage from read alignments. For a complete description, please see [_Lee et al._ 2020](https://andersenlab.org/publications/2020LeebioRxiv.pdf).
 
@@ -106,7 +106,7 @@ Two divergent tracks are available:
 * __Divergent Regions Strain__ - Divergent region intervals for individual strains.
 
 
-##### Variants
+#### Variants
 
 The variants track shows variation across the species for all isotypes sequenced. Variants are colored according to the legend:
 
