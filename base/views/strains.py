@@ -26,29 +26,59 @@ strains_bp = Blueprint('strains',
 # Strain List Page
 #
 @strains_bp.route('/')
-@strains_bp.route('/<active_tab>/')
-def strains(active_tab=' '):
+@cache.memoize(50)
+def strains():
+    """
+        Redirect base route to the strain list page
+    """
+    return redirect(url_for('strains.strains_map'))
+
+@strains_bp.route('/map')
+@cache.memoize(50)
+def strains_map():
     """
         Redirect base route to the strain list page
     """
     VARS = {
-        'title': active_tab,
-        'strain_listing_issues': get_strains(issues=True),
+        'title': 'Strain Map',
         'strain_listing': get_strains()}
-    return render_template('strain/strain_list.html', **VARS)
+    return render_template('strain/strains_map.html', **VARS)
 
-@strains_bp.route('/strain_list')
+@strains_bp.route('/isotype_list')
 @cache.memoize(50)
 def strains_list():
     """
-        Strain list shows global strain map with the locations of all wild isolates
+        Strain list of all wild isolates
         within the SQLite database and a table of all strains
     """
     VARS = {
-        'title': 'Strains',
-        'strain_listing_issues': get_strains(issues=True),
+        'title': 'Isotype List',
         'strain_listing': get_strains()}
-    return render_template('strain/strain_list.html', **VARS)
+    return render_template('strain/strains_list.html', **VARS)
+
+@strains_bp.route('/issues')
+@cache.memoize(50)
+def strains_issues():
+    """
+        Strain issues shows latest data releases table of strain issues
+    """
+    VARS = {
+        'title': 'Strain Issues',
+        'strain_listing_issues': get_strains(issues=True)}
+    return render_template('strain/strain_issues.html', **VARS)
+
+
+@strains_bp.route('/external-links')
+@cache.memoize(50)
+def external_links():
+    """
+        Strain issues shows latest data releases table of strain issues
+    """
+    VARS = {
+        'title': 'External Links'
+        }
+    return render_template('strain/external_links.html', **VARS)
+
 
 #
 # Strain Data
