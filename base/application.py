@@ -127,8 +127,6 @@ def register_extensions(app):
     csrf.exempt(maintenance_bp)
     app.config['csrf'] = csrf
     jwt.init_app(app)
-    CSRFProtect(app)
-    app.config['csrf'] = CSRFProtect(app)
 
 def register_blueprints(app):
     """Register blueprints with the Flask application."""

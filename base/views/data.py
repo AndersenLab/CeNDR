@@ -2,9 +2,9 @@ import requests
 
 from datetime import timedelta
 from simplejson.errors import JSONDecodeError
-from flask import make_response, render_template, Blueprint
+from flask import make_response, render_template, Blueprint, send_file
 
-from base.constants import GOOGLE_CLOUD_BUCKET
+from base.constants import BAM_BAI_DOWNLOAD_SCRIPT_NAME, GOOGLE_CLOUD_BUCKET
 from base.config import config
 from base.extensions import cache
 from base.models import Strain
@@ -123,11 +123,8 @@ def strain_issues(selected_release=None):
 @cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script(selected_release):
-  script_content = generate_bam_download_script(release=selected_release)
-  download_page = render_template('download_script.sh', **locals())
-  response = make_response(download_page)
-  response.headers["Content-Type"] = "text/plain"
-  return response
+  return send_file(BAM_BAI_DOWNLOAD_SCRIPT_NAME, as_attachment=True)
+
 
 
 @data_bp.route('/release/latest/download/download_strain_bams.sh')
@@ -135,13 +132,7 @@ def download_script(selected_release):
 @cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script_strain_v2(selected_release=None):
-  if selected_release is None:
-      selected_release = config['DATASET_RELEASE']
-  script_content = generate_bam_download_script(release=selected_release)
-  download_page = render_template('download_script.sh', **locals())
-  response = make_response(download_page)
-  response.headers["Content-Type"] = "text/plain"
-  return response
+  return send_file(BAM_BAI_DOWNLOAD_SCRIPT_NAME, as_attachment=True)
 
 
 @data_bp.route('/download/files/<string:blob_name>')
@@ -151,29 +142,6 @@ def download_bam_url(blob_name=''):
   blob_path = 'bam/' + blob_name
   signed_download_url = generate_download_signed_url_v4(blob_path)
   return render_template('download.html', **locals())
-
-
-@cache.memoize(timeout=60*60*24)
-def generate_bam_download_script(release):
-  ''' Generates signed downloads urls for every sequenced strain and creates a script to download them ''' 
-  script_content = ''
-  expiration = timedelta(days=7)
-  strain_listing = query_strains(release=release, is_sequenced=True)
-
-  for strain in strain_listing:
-    script_content += f'\n\n# Strain: {strain}'
-
-    bam_path = 'bam/{}.bam'.format(strain)
-    bam_signed_url = generate_download_signed_url_v4(bam_path, expiration=expiration)
-    if bam_signed_url:
-      script_content += '\nwget "{}"'.format(bam_signed_url)
-    
-    bai_path = 'bam/{}.bam.bai'.format(strain)
-    bai_signed_url = generate_download_signed_url_v4(bai_path, expiration=expiration)
-    if bai_signed_url:
-      script_content += '\nwget "{}"'.format(bai_signed_url)
-
-  return script_content
 
 
 # ============= #
