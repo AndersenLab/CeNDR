@@ -11,7 +11,7 @@ api_strain_bp = Blueprint('api_strain',
                           template_folder='api')
 
 
-@api_strain_bp.route('/strain/query/<string:query>')
+@api_strain_bp.route('/strains/query/<string:query>')
 @jsonify_request
 def search_strains(query):
     base_query = Strain.query.filter(Strain.isotype != None)
@@ -27,9 +27,9 @@ def search_strains(query):
     return list([x.to_json() for x in results])
 
 
-@api_strain_bp.route('/strain/')
-@api_strain_bp.route('/strain/<string:strain_name>')
-@api_strain_bp.route('/strain/isotype/<string:isotype_name>')
+@api_strain_bp.route('/strains/')
+@api_strain_bp.route('/strains/<string:strain_name>')
+@api_strain_bp.route('/strains/isotype/<string:isotype_name>')
 @jsonify_request
 def query_strains(strain_name=None, isotype_name=None, release=None, all_strain_names=False, resolve_isotype=False, issues=False, is_sequenced=False):
     """

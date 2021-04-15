@@ -18,7 +18,6 @@ body, html{
 
 
 {% block content %}
-
 <div class="row">
     <div class="col-md-12">
         <ul class="nav nav-pills">
@@ -83,7 +82,7 @@ body, html{
                     <tr>
                         <td><strong>Strain Data</strong></td>
                         <td>Includes strain, isotype, location information, and more.</td>
-                        <td><a href="{{ url_for('strain.strain_data_tsv') }}">CelegansStrainData.tsv</a></td>
+                        <td><a href="{{ url_for('strains.strains_data_tsv') }}">CelegansStrainData.tsv</a></td>
                     </tr>
 
                     <tr>
@@ -247,7 +246,7 @@ body, html{
         </div>
 
         <div role="tabpanel" class="tab-pane" id="Haplotypes">
-            <img style="width:100%" src="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png"></img>
+          <object style="width:100%;height:200vh;" type="application/pdf" data="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.pdf"></object>
         </div>
 
         <div role="tabpanel" class="tab-pane" id="Swept-haplotypes">

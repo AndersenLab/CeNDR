@@ -19,27 +19,33 @@ from os.path import basename
 from base.config import config
 from logzero import logger
 
-strain_bp = Blueprint('strain',
+strains_bp = Blueprint('strains',
                       __name__,
                       template_folder='strain')
 #
 # Strain List Page
 #
-@strain_bp.route('/')
-def strain():
+@strains_bp.route('/')
+@strains_bp.route('/<active_tab>/')
+def strains(active_tab=' '):
     """
         Redirect base route to the strain list page
     """
-    return redirect(url_for('strain.strain_list'))
+    VARS = {
+        'title': active_tab,
+        'strain_listing_issues': get_strains(issues=True),
+        'strain_listing': get_strains()}
+    return render_template('strain/strain_list.html', **VARS)
 
-@strain_bp.route('/strain_list')
+@strains_bp.route('/strain_list')
 @cache.memoize(50)
-def strain_list():
+def strains_list():
     """
         Strain list shows global strain map with the locations of all wild isolates
         within the SQLite database and a table of all strains
     """
-    VARS = {'title': "Strains",
+    VARS = {
+        'title': 'Strains',
         'strain_listing_issues': get_strains(issues=True),
         'strain_listing': get_strains()}
     return render_template('strain/strain_list.html', **VARS)
@@ -47,8 +53,8 @@ def strain_list():
 #
 # Strain Data
 #
-@strain_bp.route('/CelegansStrainData.tsv')
-def strain_data_tsv():
+@strains_bp.route('/CelegansStrainData.tsv')
+def strains_data_tsv():
     """
         Dumps strain dataset; Normalizes lat/lon on the way out.
     """
@@ -69,8 +75,8 @@ def strain_data_tsv():
 #
 # Isotype View
 #
-@strain_bp.route('/isotype/<isotype_name>/')
-@strain_bp.route('/isotype/<isotype_name>/<release>')
+@strains_bp.route('/isotype/<isotype_name>/')
+@strains_bp.route('/isotype/<isotype_name>/<release>')
 @cache.memoize(50)
 def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
     """
@@ -104,9 +110,9 @@ def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
 # Strain Catalog
 #
 
-@strain_bp.route('/catalog', methods=['GET', 'POST'])
+@strains_bp.route('/catalog', methods=['GET', 'POST'])
 @cache.memoize(50)
-def strain_catalog():
+def strains_catalog():
     flash(Markup("Strain mapping sets 7 and 8 will not be available until later this year."), category="warning")
     VARS = {"title": "Strain Catalog",
             "warning": request.args.get('warning'),
@@ -119,8 +125,8 @@ def strain_catalog():
 #
 
 
-@strain_bp.route('/submit')
-def strain_submission_page():
+@strains_bp.route('/submit')
+def strains_submission_page():
     """
         Google form for submitting strains
     """
@@ -132,7 +138,7 @@ def strain_submission_page():
 # Protocols
 #
 
-@strain_bp.route("/protocols")
+@strains_bp.route("/protocols")
 @cache.cached(timeout=50)
 def protocols():
     title = "Protocols"

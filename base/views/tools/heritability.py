@@ -172,5 +172,4 @@ def heritability_result_list():
     data_hash = x['data_hash']
     if check_blob(f"reports/heritability/{data_hash}/result.tsv"):
       x.status = 'COMPLETE'
-      x.save()
   return render_template('tools/h2_result_list.html', **locals())

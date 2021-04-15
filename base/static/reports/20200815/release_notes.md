@@ -2,4 +2,4 @@ The <strong>20200815</strong> release includes genotypes from whole-genome seque
 Genotypes are compared for concordance, and strains that are 99.95% identical to 
 each other are [grouped into isotypes]({{ url_for("primary.help_item", filename="FAQ", _anchor="strain-groups") }}).
 One strain within each isotype is the reference strain for that isotype. To look up isotype assignment, see <strong>Alignment Data</strong> tab.
-All isotype reference strains are [available on CeNDR]({{ url_for("strain.strain_catalog") }}).
+All isotype reference strains are [available on CeNDR]({{ url_for("strains.strains_catalog") }}).
