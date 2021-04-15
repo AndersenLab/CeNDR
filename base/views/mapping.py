@@ -45,6 +45,7 @@ def mapping():
     VARS = {'title': 'Perform Mapping',
             'form': form}
 
+    # todo: replace session user id and props with datastore user and props
     user = session.get('user')
     if form.validate_on_submit() and user:
         transaction = g.ds.transaction()
@@ -141,6 +142,7 @@ def report_view(report_slug, trait_name=None, rerun=None):
                                 trait_name=trait_name))
 
     # Verify user has permission to view report
+    # todo: replace session user id and props with datastore user and props
     user = session.get('user')
     if not trait.get('is_public'):
         if user:

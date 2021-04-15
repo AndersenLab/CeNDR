@@ -1,0 +1,8 @@
+dispatch:
+  # Send all production traffic to main site
+  - url: "www.elegansvariation.org/*"
+    service: default
+
+  # dev site
+  - url: "dev.elegansvariation.org/*"
+    service: dev

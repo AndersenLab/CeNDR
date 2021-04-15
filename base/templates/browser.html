@@ -411,8 +411,8 @@ var trackset = {"Genes": {
             {{ strain }}_bam : {
               id: "{{ strain.strain }}_bam",
               name: "{{ strain.strain }}",
-              url: "//s3.us-east-2.amazonaws.com/elegansvariation.org/bam/strain/{{ strain }}.bam",
-              indexURL: "//s3.us-east-2.amazonaws.com/elegansvariation.org/bam/strain/{{ strain }}.bam.bai",
+              url: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam",
+              indexURL: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam.bai",
               order: 100,
               visibilityWindow: 20000,
               searchable: false
@@ -764,10 +764,6 @@ $(document).ready(function() {
     });
 
 });
-
-
-
-
 
 </script>
 

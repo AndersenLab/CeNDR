@@ -5,17 +5,20 @@ Author: Daniel E. Cook
 """
 import re
 import pickle
+
 from cyvcf2 import VCF
 from flask import request, Response
 from tempfile import NamedTemporaryFile
 from subprocess import Popen, PIPE
 from collections import OrderedDict
-from base.utils.decorators import jsonify_request
-from base.config import config
 from collections import Counter
 from logzero import logger
-
 from flask import Blueprint
+
+from base.constants import GOOGLE_CLOUD_BUCKET
+from base.config import config
+from base.utils.decorators import jsonify_request
+
 
 api_variant_bp = Blueprint('api_variant',
                            __name__,
@@ -42,7 +45,7 @@ ANN_header = ["allele",
 
 
 def get_vcf(release=config["DATASET_RELEASE"], filter_type="hard"):
-    return "http://storage.googleapis.com/elegansvariation.org/releases/{release}/variation/WI.{release}.{filter_type}-filter.isotype.vcf.gz".format(release=release, filter_type=filter_type)
+    return f"http://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/releases/{release}/variation/WI.{release}.{filter_type}-filter.isotype.vcf.gz"
 
 
 gt_set_keys = ["SAMPLE", "GT", "FT", "TGT"]

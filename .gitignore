@@ -72,6 +72,10 @@ mapping_worker/.envrc
 
 env_config/
 env_config.zip
+env_config_mti/
+env_config_mti.zip
+env_config_al/
+env_config_al.zip
 
 
 .python-version
@@ -95,3 +99,4 @@ photos/*
 invoke
 
 .vscode/launch.json
+cloud_functions/heritability_run/strain_data.tsv

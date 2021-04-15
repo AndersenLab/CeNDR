@@ -2,6 +2,7 @@
 
 {% block custom_head %}
 	<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+  <link href = "https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"
 {% endblock %}
 
 
@@ -9,28 +10,27 @@
 
 {% block content %}
 
+<div class="spinner-border"></div>
+
+
 <div class="row">
   <div class="col-md-12">
-
   <p>
 	This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild
 	isolates. The broad-sense heritability is the amount of trait variance that comes from genetic differences in the
 	assayed group of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental)
     variance.
   </p>
-  
   <p>
 	To obtain the best estimate of heritability, please measure a set of at least five wild strains in three
 	independent assays. These assays should use different nematode growths, synchronizations, bacterial food
 	preparations, and any other experimental condition. You should measure trait variance across as many
 	different experimental conditions (in one block) as you would typically encounter in a large experiment.
   </p>
-  
   <p>
 	Please organize your data in a long format, where each row is an independent observation of one strain in one
 	  trait. The columns of the data set should be:
   </p>
-  
   <ol>
     <li><strong>AssayNumber</strong> - a numeric indicator of independent assays.</li>
     <li><strong>Strain</strong> - one of the CeNDR isotype reference strain names.</li>
@@ -40,38 +40,94 @@
     <li><strong>Value</strong> - the measured output of the trait (<i>e.g.</i> 297 for BroodSize).</li>
   </ol>
 
-  <div id='set-example' class='btn btn-primary btn-sm pull-right'>Use example data</div>
-  <p>NA values will not be used in broad-sense heritability calculations.</p>
-  
+<p>NA values will not be used in broad-sense heritability calculations.</p>
 
-  </div>{# /col-md-8 #}
+  </div>{# /col-md-12 #}
 </div>{# /row #}
 
+
+{% if hide_form == True %}
+
 <div class="row">
-	<div class="col-md-12">
+  <div class="col-md-3"></div> {# /col-md-3 #}
+  <div class="col-md-3">
+    <a id='create' value="create" type='submit' href="{{ url_for('heritability.heritability_create') }}" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
+      New Calculation
+    </a>
+  </div> {# /col-md-3 #}
+  <div class="col-md-3">
+    <a id='create' value="create" type='submit' href="{{ url_for('heritability.heritability_result_list') }}" class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-list" aria-hidden="true"></span> 
+      My Reports
+    </a>
+  </div> {# /col-md-3 #}
+  <div class="col-md-3"></div> {# /col-md-3 #}
+
+</div>{# /row #}
+
+{% else %}
+
+<div class="row">
+
+  <div class='col-md-3'>
+  </div>{#/ col-md-3 #}
+
+  <div class='col-md-3'></div> {# /col-md-3 #}
+
+  <div class='col-md-3'>
+    <a id='set-example' value="set-example" type='submit' class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-import" aria-hidden="true"></span> 
+      Load sample data
+    </a>
+  </div> {# /col-md-3 #}
+
+  <div class="col-md-3">
+    <a id='hcalc' value="hcalc" type='submit' class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> 
+      Calculate Heritability
+    </a>
+  </div> {# /col-md-3 #}
   
-	<div class="row">
-		<div class="col-md-12">
-		
-			<div id="errorDisp"></div>
-			<div id="entry"></div>
+</div>{# /row #}
 
-			<small class="text-muted">Prepare your data according to the column headers (described above). Data should be pasted in the table below.</small>
+<br>
+<form>
+  <div class="form-group">
+    <label for="calcLabel">Label:</label>
+    <input type="text" class="form-control" id="calcLabel" placeholder="Enter a description for this data">
+  </div>
+  <div id="calc_label_error" class="text-danger"></div>
+</form>
 
-			<div id="trait_summary" class="text-info"></div>
-			<div id="trait_name_error" class="text-danger"></div>
-			<div id="duplicate_error" class="text-danger"></div>
-			<div id="strain_count_error" class="text-danger"></div>		
-			
-		</div>{# /col-md-12 #}
-	</div>{# /row #}
+<div class="row">
+  <div class="col-md-12">
+    <div id="errorDisp"></div>
+    <div id="trait_summary" class="text-info"></div>
+    <div id="trait_name_error" class="text-danger"></div>
+    <div id="duplicate_error" class="text-danger"></div>
+    <div id="strain_count_error" class="text-danger"></div>	
+    <div id="strain_name_error" class="text-danger"></div>	
+    <small class="text-muted">Prepare your data according to the column headers (described below). Data should be pasted in the table below.</small>
+    <div id="entry"></div>
+  </div>{# /col-md-12 #}
+</div>{# /row #}
 
-	<div class='col-md-3 pull-right'>
-		<button id="hcalc" name="hcalc" type="submit" style="margin-top: 15px;" class="btn btn-primary btn-block" disabled>Calculate Heritability</button>
-	</div>{#/ col-md-12 #}
+	
 
 	</div>{# /col-md-12 #}
 </div>{# /row #}
+
+
+<form id='form-submit' method='post' enctype='multipart/form-data' hidden>
+{{ form.csrf_token }}
+<input hidden name="jwt_csrf_token" value="{{ jwt_csrf_token }}">
+<input hidden name="label" value="">
+</form>
+
+{% endif %}
+
+
 {% endblock %}
 
 {% block script %}
@@ -82,28 +138,62 @@ var data = [
     ];
 var noNAs = 0;
 function dataValidator(instance, td, row, col, prop, value, cellProperties) {
-	Handsontable.renderers.TextRenderer.apply(this, arguments);
-    if (row === 0) {
-        cellProperties.readOnly = true;
+  Handsontable.renderers.TextRenderer.apply(this, arguments);
+  if (row === 0) {
+    cellProperties.readOnly = true;
 	}
-    if (row === 0) {
-        td.style.fontWeight = 'bold';
-        td.style.backgroundColor = '#EAEAEA';
-    }
+  if (row === 0) {
+    td.style.fontWeight = 'bold';
+    td.style.backgroundColor = '#EAEAEA';
+  }
 	
-    if (['NA',].indexOf(String(value).trim()) >= 0) {
-        td.style.background = '#FC6666';
-        td.style.fontWeight = 'bold';
-    }
+  if (['NA',].indexOf(String(value).trim()) >= 0) {
+    td.style.background = '#FC6666';
+    td.style.fontWeight = 'bold';
+  }
 
 	if (duplicate_rows.indexOf(row) > -1) {
-		td.style.background = '#0CEF13';
+    td.style.background = 'RED';
 	}
+
+  if (trait_names.includes(value)) {
+    td.style.background = 'RED';
+  }
+
+  if (unknown_strains.includes(value)) {
+    td.style.background = 'RED';
+  }
 	
 }
 
-var isValid = false
+{% autoescape off %}
+var strain_list = {{ strain_list }};
+{% endautoescape %}
+
+var isValid = false;
 var duplicate_rows = [];
+var trait_names = [];
+var unknown_strains = [];
+
+
+var trim_data = function(data) {
+  for (let i = 0; i < data.length; i++) {
+    for (let j = 0; j < data[i].length; j++) {
+      if (data[i][j]) {
+        data[i][j] = data[i][j].replace("\r\n", "").replace("\r", "").replace("\n", "");
+        data[i][j] = data[i][j].trim()
+      }
+    }
+    var stringData = JSON.stringify(data[i])
+    if(JSON.stringify(['','','','','']) == stringData || "[null,null,null,null,null]" == stringData) {
+      data.splice(i, 1);
+      i--;
+    }
+  }
+  return data;
+}
+
+
 var validate_data = function(data){
 	// Performs error checks:
 	// 1) Duplicates
@@ -111,36 +201,67 @@ var validate_data = function(data){
 	// 3) Trait Name
 	pass = true
 
+  data = trim_data(data);
 	// Check for duplicates
-	dup_search = _.map(data, (item, idx) => item.toString());
-	dup_values =  _.chain(dup_search).groupBy().filter(x => x.length > 1 && x[0] !== ",,,,").flatten().uniq().value()
-	duplicate_rows = _.map(dup_search, (item, idx) => _.indexOf(dup_values, item) > -1 ? idx : null).filter(x => x !== null)
+  occurences = []
+  duplicate_rows = []
+  for (let i = 0; i < data.length; i++) {
+    item = JSON.stringify(data[i]);
+    if (occurences[item]) {
+      duplicate_rows.push(i)
+    }
+    occurences[item] = true;
+  };
 
 	// if dups are present alert user
 	$("#duplicate_error").text("")
 	if (duplicate_rows.length > 0) {
-		$("#duplicate_error").text("Please check the data because duplicate rows are present. The duplicate rows are shown in green.")
+		$("#duplicate_error").text("Please check the data because duplicate rows are present. The duplicate rows are shown in red.")
+		pass = false
+	}
+
+  // Strain names
+	var strain_names = _.uniq(_.pluck(data, 1).filter((x, idx) => idx > 0 && x !== null && x.length > 0));
+  unknown_strains = _.difference(strain_names, strain_list);
+  $("#strain_name_error").text("");
+	if (unknown_strains.length > 0) {
+		$("#strain_name_error").text("Please check the data - Some of the strains were not recognized")
 		pass = false
 	}
 
 	// Count number of strains
-	n_strains = _.uniq(_.pluck(data, 1).filter((x, idx) => idx > 0 && x !== null)).length
-
-	$("#strain_count_error").text("")
+	n_strains = strain_names.length;
+	$("#strain_count_error").text("");
 	if (n_strains < 5) {
 		$("#strain_count_error").text("Please check the data because fewer than five strains are present. Please measure trait values for at least five wild strains in at least three independent assays.")
 		pass = false
 	}
 
 	// Trait Name
-	trait_count = _.uniq(_.pluck(data, 2).filter((x, idx) => idx > 0 && x !== null)).length
+  trait_names = _.uniq(_.pluck(data, 2).filter((x, idx) => idx > 0 && x !== null && x.length > 0));
+	trait_count = trait_names.length;
 
 	$("#trait_name_error").text("")
-	if (trait_count > 1) {
+	if (trait_count >= 2) {
+    pass = false
 		$("#trait_name_error").text("Please check the data. The TraitName has multiple unique values. Only data for a single trait allowed.")
+    var most_common_trait = _.chain(_.pluck(data, 2)).countBy().pairs().max(_.last).head().value();
+    const index = trait_names.indexOf(most_common_trait);
+    if (index !== -1) {
+      trait_names.splice(index, 1);
+    }
+	} else {
+    trait_names = []
+  }
+
+  // Data label
+  label_len = $("#calcLabel").val().length
+  $("#calc_label_error").text("")
+	if (label_len == 0) {
+		$("#calc_label_error").text("Please include a brief description of the data.")
 		pass = false
 	}
-	
+
 	return pass
 }
 
@@ -171,40 +292,26 @@ var hot = new Handsontable(container, {
 	}
 });
 
+
+$("#calcLabel").on('change', function() {
+	onFormChange()
+})
+
 hot.addHook("afterChange", function() {
-	isValid = validate_data(hot.getData());
+	onFormChange()
+})
+
+function onFormChange() {
+  isValid = validate_data(hot.getData());
 	hot.render();
 
 	if (isValid) {
 		document.getElementById('hcalc').disabled = false;
-
-		// Fetch dataset statistics
-		$.ajax({type: "POST",
-		url: "{{ url_for('heritability.check_data') }}",
-		data: JSON.stringify(hot.getData()),
-		contentType: "application/json; charset=utf-8",
-		dataType: 'json',
-		success:function(result) {
-			$("#trait_summary").html(`
-			<br />
-			Input data summary:
-			<ul>
-				<li>Minimum: ${result['minimum']}</li>
-				<li>Maximum: ${result['maximum']}</li>
-				<li>25% Quartile: ${result['25']}</li>
-				<li>50% Quartile: ${result['50']}</li>
-				<li>75% Quartile: ${result['75']}</li>
-				<li>Variance: ${result['variance']}</li>
-			`)
-		}
-		});
-		
 	} else {
 		$("#trait_summary").html("")
 		document.getElementById('hcalc').disabled = true;
 	}
-
-})
+}
 
 // Enable setting example data
 $("#set-example").on('click', function() {
@@ -225,16 +332,24 @@ var csrf_token = "{{ form.csrf_token._value() }}"
 
 // submit result
 $("#hcalc").on("click", function(e) {
+  $("#hcalc").addClass("disabled")
 	if (isValid) {
+    var data = new FormData($('form#form-submit')[0]);
+    data.append('table_data', JSON.stringify(hot.getData()));
+    data.set('label', $("#calcLabel").val());
 		$.ajax({
 				type: "POST",
+        processData: false,
+        contentType: false,
+        dataType: 'json',
 				url: "{{ url_for('heritability.submit_h2') }}",
-				data: JSON.stringify(hot.getData()),
-                contentType: "application/json; charset=utf-8",
-				dataType: 'json',
-				success:function(result){
-					window.location = `heritability/h2/${result.data_hash}`
-				}
+				data: data,
+				success:function(result) {
+					window.location = `../heritability/h2/${result.id}`
+				},
+        error:function(error) {
+          $("#hcalc").removeClass("disabled")
+        }
 		})
 	}
 });

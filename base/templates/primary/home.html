@@ -28,16 +28,16 @@
   <div class="row">
     <div class="col-md-4 col-sm-4">
       <div class="thumbnail img-responsive" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px" >
-        <a href="{{ url_for("strain.map_page") }}" ><img src="/static/img/main/strain_map.png" style="border-radius: 5px 5px 0px 0px;"></a>
+        <a href="{{ url_for("strains.strains") }}" ><img src="/static/img/main/strain_map.png" style="border-radius: 5px 5px 0px 0px;"></a>
         <div class="caption">
-          <p><a href="{{ url_for("strain.map_page") }}" class="btn btn-primary btn-block" role="button">Strains</a></p>
+          <p><a href="{{ url_for("strains.strains") }}" class="btn btn-primary btn-block" role="button">Strains</a></p>
           <p>Wild <em>C. elegans</em> isolates and information are available.</p>
         </div>
       </div>
     </div>
     <div class="col-md-4 col-sm-4">
       <div class="thumbnail" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px" >
-        <a href="{{ url_for("data.data") }}"><img src="/static/img/main/variant-calling.png" style="border-radius: 5px 5px 0px 0px; "></a>
+        <a href="{{ url_for("data.data") }}"><img src="/static/img/main/variant-summary.png" style="border-radius: 5px 5px 0px 0px; "></a>
         <div class="caption">
           <p><a href="{{ url_for("data.data") }}" class="btn btn-primary btn-block" role="button">Data</a></p>
             <p>Aligned sequence data and variant data for <em>C. elegans</em> wild isolates are available.</p>
