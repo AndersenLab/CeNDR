@@ -1,5 +1,5 @@
 queue:
-- name: heritability-calc
+- name: h2calc
   max_concurrent_requests: 1
   rate: 1/s
   retry_parameters:
