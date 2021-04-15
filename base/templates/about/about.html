@@ -68,7 +68,7 @@ However, this species is found worldwide, and wild strains are as different from
 <p>To facilitate the study of natural diversity by <em>C. elegans</em> research groups, we created the <em>C. elegans</em> Natural Diversity Resource (CeNDR). We have three major goals:</p>
 
 <ol>
-<li>To accept, organize, and distribute wild strains to research groups that want to investigate their favorite trait(s) across natural <em>C. elegans</em> strains. See <strong><a href="{{ url_for('strain.strain_catalog') }}">Strains</a></strong>.</li>
+<li>To accept, organize, and distribute wild strains to research groups that want to investigate their favorite trait(s) across natural <em>C. elegans</em> strains. See <strong><a href="{{ url_for('strains.strains_catalog') }}">Strains</a></strong>.</li>
 
 <li>To sequence the whole genomes of wild <em>C. elegans</em> strains, provide the aligned sequence data, and facilitate discovery of genetic variation across the entire species. See <strong><a href="{{ url_for('data.data') }}">Data</a></strong>.</li>
 
@@ -107,7 +107,7 @@ However, this species is found worldwide, and wild strains are as different from
             const innerHTML = `
                 <div>
                     <ul style="list-style-type:none; padding-left:0px">
-                        ${d.isotype ? '<li><b><a href="../strain/isotype/' + d.isotype + '">Isotype: ' + d.isotype + '</a></b></li>': ''}
+                        ${d.isotype ? '<li><b><a href="../strains/isotype/' + d.isotype + '">Isotype: ' + d.isotype + '</a></b></li>': ''}
                         ${d.strain ? '<li>Strain: ' + d.strain + '</li>': ''}
                         ${d.isolation ? '<li>Isolation: ' + d.isolation + '</li>': ''}
                         ${d.elevation ? '<li>Elevation: ' + d.elevation + '</li>': ''}

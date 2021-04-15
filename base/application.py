@@ -22,7 +22,7 @@ from base.manage import (initdb,
 # --------- #
 from base.views.about import about_bp
 from base.views.primary import primary_bp
-from base.views.strains import strain_bp
+from base.views.strains import strains_bp
 from base.views.order import order_bp
 from base.views.data import data_bp
 from base.views.mapping import mapping_bp
@@ -134,7 +134,7 @@ def register_blueprints(app):
     """Register blueprints with the Flask application."""
     app.register_blueprint(primary_bp, url_prefix='')
     app.register_blueprint(about_bp, url_prefix='/about')
-    app.register_blueprint(strain_bp, url_prefix='/strain')
+    app.register_blueprint(strains_bp, url_prefix='/strains')
     app.register_blueprint(order_bp, url_prefix='/order')
     app.register_blueprint(data_bp, url_prefix='/data')
     app.register_blueprint(mapping_bp, url_prefix='')

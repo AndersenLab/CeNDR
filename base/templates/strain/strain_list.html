@@ -1,6 +1,5 @@
 {% extends "_layouts/default.html" %}
 
-
 {% block content %}
 
 <div class="row">
@@ -9,7 +8,7 @@
   <!-- Nav tabs -->
   <ul class="nav nav-tabs" role="tablist">
       <li role="presentation" class="active"><a href="#Map" role="tab" data-toggle="tab">Map</a></li>
-      <li role="presentation" ><a href="#List" role="tab" data-toggle="tab">List</a></li>
+      <li role="presentation" ><a href="#List" role="tab" data-toggle="tab">Isotype List</a></li>
       <li role="presentation" ><a href="#Issues" role="tab" data-toggle="tab">Issues</a></li>
       <li role="presentation" ><a href="#External-links" role="tab" data-toggle="tab">External Links</a></li>
   </ul>
@@ -67,7 +66,7 @@
           <li class="list-group-item"><strong>Sampled By</strong> <div class="sampled_by pull-right"></div><div style="clear:both;"></div></li>
         </ul>
       </div>  {# /panel #}
-      <a class="btn btn-primary btn-s btn-block" href='{{ url_for("strain.strain_submission_page") }}' role="button">Submit Strains</a></p>
+      <a class="btn btn-primary btn-s btn-block" href='{{ url_for("strains.strains_submission_page") }}' role="button">Submit Strains</a></p>
     </div>{# /col-md-4 #}
   </div> {# /tabpanel #}
 
@@ -123,7 +122,7 @@
             <label for="items-{{ isotype_loop_index }}">{{ strains[0].reference_strain }}</label>
           </td>
           <td>
-            <a href="{{ url_for('strain.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a>
+            <a href="{{ url_for('strains.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a>
           </td>
           <td>
             {{ strains|join(", ") }}
@@ -167,6 +166,10 @@
 
 <script>
 
+$(document).ready(function() {
+
+});
+
 // Icons
 var icon_norm = L.icon({
     iconUrl: '/static/img/icons/marker.png',
@@ -208,7 +211,7 @@ function set_panel_from_search(m) {
   click_s.target.setIcon(icon_norm)
   s = m.layer.options
   $(".strain").text(s.strain);
-  $(".isotype").html("<strong><a href='/strain/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".isotype").html("<strong><a href='/strains/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
   $(".isotype_ref_strain").text(s.isotype_ref_strain);
   $(".release").text(s.release);
   $(".isolation_date").text(s.isolation_date);
@@ -232,7 +235,7 @@ function set_panel_content(m) {
   elevation = s.elevation
   latlng = m.latlng.lat + comma + m.latlng;
   $(".strain").text(s.strain);
-  $(".isotype").html("<strong><a href='/strain/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".isotype").html("<strong><a href='/strains/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
   $(".release").text(s.release);
   $(".isotype_ref_strain").text(s.isotype_ref_strain);
   $(".isolation_date").text(s.isolation_date);

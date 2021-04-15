@@ -33,7 +33,6 @@ def about():
         About us Page - Gives an overview of CeNDR
     """
     title = "About"
-
     strain_listing = get_isotypes(known_origin=True)
     return render_template('about/about.html', **locals())
 

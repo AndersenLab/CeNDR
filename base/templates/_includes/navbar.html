@@ -34,13 +34,14 @@
         </li>
 
         <li class="dropdown">
-          <a href="{{ url_for("strain.strain_list")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
+          <a href="{{ url_for("strains.strains")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
           <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="{{ url_for("strain.strain_list")}}">Strains</a></li>
-            <li><a href="{{ url_for("strain.strain_catalog")}}">Strain Catalog</a></li>
-            <li><a href="{{ url_for("strain.protocols") }}">Protocols</a></li>
+            <li><a href="{{ url_for("strains.strains")}}">Strains</a></li>
+            <li><a href="{{ url_for("strains.strains", active_tab='List')}}">Isotype List</a></li>
+            <li><a href="{{ url_for("strains.strains_catalog")}}">Strain Catalog</a></li>
+            <li><a href="{{ url_for("strains.protocols") }}">Protocols</a></li>
             <li role="separator" class="divider"></li>
-            <li><a href="{{ url_for("strain.strain_submission_page") }}">Submit Strains</a></li>
+            <li><a href="{{ url_for("strains.strains_submission_page") }}">Submit Strains</a></li>
           </ul>
         </li>
 
