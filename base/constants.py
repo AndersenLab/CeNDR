@@ -13,6 +13,8 @@ WORMBASE_VERSION = 'WS276'
 STRAIN_PHOTO_PATH = 'photos/Celegans/'
 
 USER_ROLES = [('user', 'User'), ('admin', 'Admin')]
+BAM_BAI_DOWNLOAD_SCRIPT_NAME = "bam_bai_signed_download_script.sh"
+
 
 class PRICES:
   DIVERGENT_SET = 160

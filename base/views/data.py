@@ -2,9 +2,9 @@ import requests
 
 from datetime import timedelta
 from simplejson.errors import JSONDecodeError
-from flask import make_response, render_template, Blueprint
+from flask import make_response, render_template, Blueprint, send_file
 
-from base.constants import GOOGLE_CLOUD_BUCKET
+from base.constants import BAM_BAI_DOWNLOAD_SCRIPT_NAME, GOOGLE_CLOUD_BUCKET
 from base.config import config
 from base.extensions import cache
 from base.models import Strain
@@ -20,6 +20,42 @@ data_bp = Blueprint('data',
 # ============= #
 #   Data Page   #
 # ============= #
+
+@cache.memoize(50)
+def generate_v2_file_list(selected_release):
+  path = f'releases/{selected_release}'
+  prefix = f'https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/{path}'
+  release_files = list_release_files(f"{path}/")
+  
+  f = dict()
+
+  f['soft_filter_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.soft-filter.vcf.gz'
+  f['soft_filter_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.soft-filter.vcf.gz.csi'
+  f['soft_filter_isotype_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.soft-filter.isotype.vcf.gz'
+  f['soft_filter_isotype_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.soft-filter.isotype.vcf.gz.csi'
+  f['hard_filter_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.hard-filter.vcf.gz'
+  f['hard_filter_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.hard-filter.vcf.gz.csi'
+  f['hard_filter_isotype_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.hard-filter.isotype.vcf.gz'
+  f['hard_filter_isotype_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.hard-filter.isotype.vcf.gz.csi'
+  f['impute_isotype_vcf_gz'] = f'{prefix}/variation/WI.{selected_release}.impute.isotype.vcf.gz'
+  f['impute_isotype_vcf_gz_csi'] = f'{prefix}/variation/WI.{selected_release}.impute.isotype.vcf.gz.csi'
+  
+  f['hard_filter_min4_tree'] = f'{prefix}/tree/WI.{selected_release}.hard-filter.min4.tree'
+  f['hard_filter_min4_tree_pdf'] = f'{prefix}/tree/WI.{selected_release}.hard-filter.min4.tree.pdf'
+  f['hard_filter_isotype_min4_tree'] = f'{prefix}/tree/WI.{selected_release}.hard-filter.isotype.min4.tree'
+  f['hard_filter_isotype_min4_tree_pdf'] = f'{prefix}/tree/WI.{selected_release}.hard-filter.isotype.min4.tree.pdf'
+  
+  f['haplotype_png'] = f'{prefix}/haplotype/haplotype.png'
+  f['haplotype_pdf'] = f'{prefix}/haplotype/haplotype.pdf'
+  f['sweep_pdf'] = f'{prefix}/haplotype/sweep.pdf'
+  f['sweep_summary_tsv'] = f'{prefix}/haplotype/sweep_summary.tsv'
+
+  for key, value in f.items():
+    if value not in release_files:
+      f[key] = None
+  
+  return f
+
 
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
@@ -44,6 +80,7 @@ def data(selected_release=None):
     RELEASES = config["RELEASES"]
     DATASET_RELEASE, WORMBASE_VERSION = list(filter(lambda x: x[0] == selected_release, RELEASES))[0]
     REPORTS = ["alignment"]
+    f = generate_v2_file_list(selected_release)
     return render_template('data_v2.html', **locals())
 
 
@@ -123,11 +160,8 @@ def strain_issues(selected_release=None):
 @cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script(selected_release):
-  script_content = generate_bam_download_script(release=selected_release)
-  download_page = render_template('download_script.sh', **locals())
-  response = make_response(download_page)
-  response.headers["Content-Type"] = "text/plain"
-  return response
+  return send_file(BAM_BAI_DOWNLOAD_SCRIPT_NAME, as_attachment=True)
+
 
 
 @data_bp.route('/release/latest/download/download_strain_bams.sh')
@@ -135,13 +169,7 @@ def download_script(selected_release):
 @cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script_strain_v2(selected_release=None):
-  if selected_release is None:
-      selected_release = config['DATASET_RELEASE']
-  script_content = generate_bam_download_script(release=selected_release)
-  download_page = render_template('download_script.sh', **locals())
-  response = make_response(download_page)
-  response.headers["Content-Type"] = "text/plain"
-  return response
+  return send_file(BAM_BAI_DOWNLOAD_SCRIPT_NAME, as_attachment=True)
 
 
 @data_bp.route('/download/files/<string:blob_name>')
@@ -151,29 +179,6 @@ def download_bam_url(blob_name=''):
   blob_path = 'bam/' + blob_name
   signed_download_url = generate_download_signed_url_v4(blob_path)
   return render_template('download.html', **locals())
-
-
-@cache.memoize(timeout=60*60*24)
-def generate_bam_download_script(release):
-  ''' Generates signed downloads urls for every sequenced strain and creates a script to download them ''' 
-  script_content = ''
-  expiration = timedelta(days=7)
-  strain_listing = query_strains(release=release, is_sequenced=True)
-
-  for strain in strain_listing:
-    script_content += f'\n\n# Strain: {strain}'
-
-    bam_path = 'bam/{}.bam'.format(strain)
-    bam_signed_url = generate_download_signed_url_v4(bam_path, expiration=expiration)
-    if bam_signed_url:
-      script_content += '\nwget "{}"'.format(bam_signed_url)
-    
-    bai_path = 'bam/{}.bam.bai'.format(strain)
-    bai_signed_url = generate_download_signed_url_v4(bai_path, expiration=expiration)
-    if bai_signed_url:
-      script_content += '\nwget "{}"'.format(bai_signed_url)
-
-  return script_content
 
 
 # ============= #
@@ -190,5 +195,5 @@ def browser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", q
             'strain_listing': get_isotypes(),
             'region': region,
             'query': query,
-            'fluid_container': True}
+            'fluid_container': False}
     return render_template('browser.html', **VARS)

@@ -18,6 +18,7 @@ body, html{
 
 
 {% block content %}
+
 <div class="row">
     <div class="col-md-12">
         <ul class="nav nav-pills">
@@ -36,14 +37,14 @@ body, html{
 
     <!-- Nav tabs -->
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation" class="active" ><a href="#main" role="tab" data-toggle="tab">Datasets</a></li>
-        <li role="presentation" ><a href="#Methods" role="tab" data-toggle="tab">Methods</a></li>
-        <li role="presentation" ><a href="#Alignment-summary" role="tab" data-toggle="tab">Alignment Summary</a></li>
-        <li role="presentation" ><a href="#Variant-summary" role="tab" data-toggle="tab">Variant Summary</a></li>
-        <li role="presentation" ><a href="#Concordance" role="tab" data-toggle="tab">Concordance</a></li>
-        <li role="presentation" ><a href="#Haplotypes" role="tab" data-toggle="tab">Haplotypes</a></li>
-        <li role="presentation" ><a href="#Swept-haplotypes" role="tab" data-toggle="tab">Swept Haplotypes</a></li>
-        <li role="presentation" ><a href="#Species-tree" role="tab" data-toggle="tab">Species Tree</a></li>
+        <li role="presentation" class="main active" ><a href="#main" role="tab" data-toggle="tab">Datasets</a></li>
+        <li role="presentation" class="methods" ><a href="#Methods" role="tab" data-toggle="tab">Methods</a></li>
+        <li role="presentation" class="alignment_summary" ><a href="#Alignment-summary" role="tab" data-toggle="tab">Alignment Summary</a></li>
+        <li role="presentation" class="variant_summary" ><a href="#Variant-summary" role="tab" data-toggle="tab">Variant Summary</a></li>
+        <li role="presentation" class="concordance" ><a href="#Concordance" role="tab" data-toggle="tab">Concordance</a></li>
+        <li role="presentation" class="haplotypes" ><a href="#Haplotypes" role="tab" data-toggle="tab">Haplotypes</a></li>
+        <li role="presentation" class="swept-haplotypes" ><a href="#Swept-haplotypes" role="tab" data-toggle="tab">Swept Haplotypes</a></li>
+        <li role="presentation" class="species-tree"><a href="#Species-tree" role="tab" data-toggle="tab">Species Tree</a></li>
     </ul>
 
     <!-- Tab panes -->
@@ -103,16 +104,32 @@ body, html{
                         <td>
                             <strong>All Strains</strong>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz">WI.{{ selected_release }}.soft-filter.vcf.gz</a>
+                        {% if f.get('soft_filter_vcf_gz') %}
+                            <a href="{{ f['soft_filter_vcf_gz'] }}"> WI.{{ selected_release }}.soft-filter.vcf.gz </a>
+                        {% else %}
+                            WI.{{ selected_release }}.soft-filter.vcf.gz is not included in this release
+                        {% endif %}
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.vcf.gz.csi</a>
+                        {% if f.get('soft_filter_vcf_gz_csi') %}
+                            <a href="{{ f.get('soft_filter_vcf_gz_csi') }}"> WI.{{ selected_release }}.soft-filter.vcf.gz.csi </a>
+                        {% else %}
+                            WI.{{ selected_release }}.soft-filter.vcf.gz.csi is not included in this release
+                        {% endif %}
                             <br />
                             <br />
                             <strong>Isotypes</strong>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.isotype.vcf.gz">WI.{{ selected_release }}.soft-filter.isotype.vcf.gz</a>
+                        {% if f.get('soft_filter_isotype_vcf_gz') %} 
+                            <a href="{{ f.get('soft_filter_isotype_vcf_gz') }}"> WI.{{ selected_release }}.soft-filter.isotype.vcf.gz </a>
+                        {% else %}
+                            WI.{{ selected_release }}.soft-filter.isotype.vcf.gz is not included in this release
+                        {% endif %}
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.csi">WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.csi</a>
+                        {% if f.get('soft_filter_isotype_vcf_gz_csi') %} 
+                            <a href="{{ f.get('soft_filter_isotype_vcf_gz') }}"> WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.csi </a>
+                        {% else %}
+                            WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.csi is not included in this release
+                        {% endif %}
                             <br />
                         </td>
                     </tr>
@@ -123,16 +140,32 @@ body, html{
                         <td>
                             <strong>All Strains</strong>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz">WI.{{ selected_release }}.hard-filter.vcf.gz</a>
+                        {% if f.get('hard_filter_vcf_gz') %} 
+                            <a href="{{ f.get('hard_filter_vcf_gz') }}"> WI.{{ selected_release }}.hard-filter.vcf.gz </a>
+                        {% else %}
+                            WI.{{ selected_release }}.hard-filter.vcf.gz is not included in this release
+                        {% endif %}
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.vcf.gz.csi</a>
+                        {% if f.get('hard_filter_vcf_gz_csi') %} 
+                            <a href="{{ f.get('hard_filter_vcf_gz_csi') }}"> WI.{{ selected_release }}.hard-filter.vcf.gz.csi </a>
+                        {% else %}
+                            WI.{{ selected_release }}.hard-filter.vcf.gz.csi is not included in this release
+                        {% endif %}
                             <br />
                             <br />
                             <strong>Isotypes</strong>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.isotype.vcf.gz">WI.{{ selected_release }}.hard-filter.isotype.vcf.gz</a>
+                        {% if f.get('hard_filter_isotype_vcf_gz') %} 
+                            <a href="{{ f.get('hard_filter_isotype_vcf_gz') }}"> WI.{{ selected_release }}.hard-filter.isotype.vcf.gz </a>
+                        {% else %}
+                            WI.{{ selected_release }}.hard-filter.isotype.vcf.gz is not included in this release
+                        {% endif %}
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.hard-filter.isotype.vcf.gz.csi">WI.{{ selected_release }}.hard-filter.isotype.vcf.gz.csi</a>
+                        {% if f.get('hard_filter_isotype_vcf_gz_csi') %} 
+                            <a href="{{ f.get('hard_filter_isotype_vcf_gz') }}"> WI.{{ selected_release }}.hard-filter.isotype.vcf.gz.csi </a>
+                        {% else %}
+                            WI.{{ selected_release }}.hard-filter.isotype.vcf.gz.csi is not included in this release
+                        {% endif %}
                             <br />
                         </td>
                     </tr>
@@ -143,9 +176,17 @@ body, html{
                         <td>
                             <strong>Isotypes</strong>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.isotype.vcf.gz">WI.{{ selected_release }}.impute.isotype.vcf.gz</a>
+                        {% if f.get('impute_isotype_vcf_gz') %} 
+                            <a href="{{ f.get('impute_isotype_vcf_gz') }}"> WI.{{ selected_release }}.impute.isotype.vcf.gz </a>
+                        {% else %}
+                            WI.{{ selected_release }}.impute.isotype.vcf.gz is not included in this release
+                        {% endif %}
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/variation/WI.{{ selected_release }}.impute.isotype.vcf.gz.csi">WI.{{ selected_release }}.impute.isotype.vcf.gz.csi</a>
+                        {% if f.get('impute_isotype_vcf_gz_csi') %} 
+                            <a href="{{ f.get('impute_isotype_vcf_gz_csi') }}"> WI.{{ selected_release }}.impute.isotype.vcf.gz.csi </a>
+                        {% else %}
+                            WI.{{ selected_release }}.impute.isotype.vcf.gz.csi is not included in this release
+                        {% endif %}
                             <br />
                         </td>
                     </tr>
@@ -171,12 +212,33 @@ body, html{
                         <td>
                             <strong>All Strains</strong>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.min4.tree">WI.{{ selected_release }}.hard-filter.min4.tree</a> (<a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.min4.tree.pdf">PDF</a>)
+                        {% if f.get('hard_filter_min4_tree') %} 
+                            <a href="{{ f.get('hard_filter_min4_tree') }}"> WI.{{ selected_release }}.hard-filter.min4.tree </a> 
+                        {% else %}
+                            WI.{{ selected_release }}.hard-filter.min4.tree is not included in this release
+                        {% endif %}
+                            <br />
+                        {% if f.get('hard_filter_min4_tree_pdf') %} 
+                            <a href="{{ f.get('hard_filter_min4_tree_pdf') }}"> WI.{{ selected_release }}.hard-filter.min4.tree.pdf </a>
+                        {% else %}
+                            WI.{{ selected_release }}.hard-filter.min4.tree.pdf is not included in this release
+                        {% endif %}
                             <br />
                             <br />
                             <strong>Isotype</strong>
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.isotype.min4.tree">WI.{{ selected_release }}.hard-filter.isotype.min4.tree</a> (<a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.isotype.min4.tree.pdf">PDF</a>)
+                        {% if f.get('hard_filter_isotype_min4_tree') %} 
+                            <a href="{{ f.get('hard_filter_isotype_min4_tree') }}"> WI.{{ selected_release }}.hard-filter.isotype.min4.tree </a> 
+                        {% else %}
+                            WI.{{ selected_release }}.hard-filter.isotype.min4.tree is not included in this release
+                        {% endif %}
+                            <br />
+                        {% if f.get('hard_filter_isotype_min4_tree_pdf') %} 
+                            <a href="{{ f.get('hard_filter_isotype_min4_tree_pdf') }}"> WI.{{ selected_release }}.hard-filter.isotype.min4.tree.pdf </a>
+                        {% else %}
+                            WI.{{ selected_release }}.hard-filter.isotype.min4.tree.pdf is not included in this release
+                        {% endif %}
+                            <br />
                         </td>
                     </tr>
 
@@ -184,9 +246,17 @@ body, html{
                         <td><strong>Haplotypes</strong></td>
                         <td>Haplotypes for isotypes were calculated and plotted as described in <a href="https://www.biorxiv.org/content/10.1101/2020.07.23.218420v2.full">Lee <i>et al.</i></a></td>
                         <td>
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.png">haplotype.png</a>
+                        {% if f.get('haplotype_png') %} 
+                            <a href="{{ f.get('haplotype_png') }}"> haplotype.png </a>
+                        {% else %}
+                            haplotype.png is not included in this release
+                        {% endif %}
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.pdf">haplotype.pdf</a>
+                        {% if f.get('haplotype_pdf') %} 
+                            <a href="{{ f.get('haplotype_pdf')}}"> haplotype.pdf </a>
+                        {% else %}
+                            haplotype.pdf is not included in this release
+                        {% endif %}
                         </td>
                     </tr>
 
@@ -194,9 +264,17 @@ body, html{
                         <td><strong>Sweep Haplotypes</strong></td>
                         <td>The most frequent haplotype that covers at least 25% of the chromosome and is found on chromosome centers was determined and classified as a selective sweep. For more details, see <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3365839/">Andersen <i>et al.</i></a> and <a href="https://www.biorxiv.org/content/10.1101/2020.07.23.218420v2.full">Lee <i>et al.</i></a>. The plot shows red (swept), gray (non-swept), and white (not classified) regions.</td>
                         <td>
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/sweep.pdf">sweep.pdf</a>
+                        {% if f.get('haplotype_pdf') %} 
+                            <a href="{{ f.get('haplotype_pdf') }}"> sweep.pdf </a>
+                        {% else %}
+                            sweep.pdf is not included in this release
+                        {% endif %}
                             <br />
-                            <a href="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/sweep_summary.tsv">sweep_summary.tsv</a>
+                        {% if f.get('sweep_summary_tsv') %} 
+                            <a href="{{ f.get('sweep_summary_tsv') }}"> sweep_summary.tsv </a>
+                        {% else %}
+                            sweep_summary.tsv is not included in this release
+                        {% endif %}
                         </td>
                     </tr>
 
@@ -241,17 +319,23 @@ body, html{
             <object style="width:100%;height:200vh;" type="text/html" data="/static/reports/{{ selected_release }}/concordance_report.html"></object>
         </div>
 
+    {% if f.get('hard_filter_isotype_min4_tree_pdf') %} 
         <div role="tabpanel" class="tab-pane" id="Species-tree">
-            <object style="width:100%;height:200vh;" type="application/pdf" data="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/tree/WI.{{ selected_release }}.hard-filter.min4.tree.pdf"></object>
+            <object style="width:100%;height:200vh;" type="application/pdf" data="{{ f.get('hard_filter_isotype_min4_tree_pdf') }}"></object>
         </div>
+    {% endif %}
 
+    {% if f.get('haplotype_pdf') %} 
         <div role="tabpanel" class="tab-pane" id="Haplotypes">
-          <object style="width:100%;height:200vh;" type="application/pdf" data="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/haplotype.pdf"></object>
+            <object style="width:100%;height:200vh;" type="application/pdf" data="{{ f.get('haplotype_pdf') }}"></object>
         </div>
+    {% endif %}
 
+    {% if f.get('sweep_pdf') %} 
         <div role="tabpanel" class="tab-pane" id="Swept-haplotypes">
-            <object style="width:100%;height:200vh;" type="application/pdf" data="https://storage.googleapis.com/elegansvariation.org/releases/{{ selected_release }}/haplotype/sweep.pdf"></object>
+            <object style="width:100%;height:200vh;" type="application/pdf" data="{{ f.get('sweep_pdf') }}"></object>
         </div>
+    {% endif %}
 
 
     </div>{# Tab Set #}

@@ -6,3 +6,7 @@ cron:
 - description: delete_expired_cache_entries
   url: /tasks/cleanup_cache
   schedule: every 24 hours
+
+- description: generate_bam_bai_signed_download_script
+  url: /tasks/create_bam_bai_download_script
+  schedule: every 24 hours

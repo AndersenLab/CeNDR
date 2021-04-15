@@ -16,6 +16,9 @@
 
 <script type="text/javascript" src="//igv.org/web/release/2.6.2/dist/igv.min.js"></script>
 
+{% endblock %}
+
+{% block style %}
 <style>
 
 .label {
@@ -113,7 +116,7 @@ th {
         </div>
 
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions" />Divergent Regions Strain<br /> (<a href="">Lee <em>et al.</em> 2020)</a></label>
+          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions" />Divergent Regions Strain<br /> (<a href="https://andersenlab.org/publications/2020LeebioRxiv.pdf">Lee <em>et al.</em> 2020)</a></label>
         </div>
 
         <h5>Variant Impact <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
