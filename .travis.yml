@@ -6,8 +6,8 @@ env:
 install:
 - openssl aes-256-cbc -K $encrypted_86f5a1ab1ccf_key -iv $encrypted_86f5a1ab1ccf_iv -in env_config.zip.enc -out env_config.zip -d
 - unzip -qo env_config.zip
-- export VERSION_NUM=1-5-9a
-- export APP_CONFIG=master
+- export VERSION_NUM=9-9-9-9
+- export APP_CONFIG=development
 - export CLOUD_CONFIG=1
 - if [ "${TRAVIS_BRANCH}" != "master" ]; then export APP_CONFIG=development; fi;
 - export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
