@@ -1,12 +1,13 @@
 dispatch:
-  # Send all production traffic to main site
-  - url: "www.elegansvariation.org/*"
-    service: default
-
-  # Send all production traffic to main site
-  - url: "elegansvariation.org/*"
+    # Send all production traffic to main site
+  - url: "*www.elegansvariation.org/*"
     service: default
 
   # dev site
-  - url: "dev.elegansvariation.org/*"
+  - url: "*dev.elegansvariation.org/*"
     service: dev
+
+  # Send all production traffic to main site
+  - url: "*elegansvariation.org/*"
+    service: default
+  
