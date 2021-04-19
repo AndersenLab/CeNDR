@@ -169,7 +169,7 @@ body, html{
                             <br />
                         </td>
                     </tr>
-
+{% if f.get('impute_isotype_vcf_gz') %} 
                     <tr>
                         <td><strong>Imputed Variants</strong></td>
                         <td>The imputed VCF includes all the variants from the hard-filtered Isotype VCF, but all missing genotypes have been imputed using <a href="https://faculty.washington.edu/browning/beagle/beagle.html">Beagle v5.1</a>.</td>
@@ -190,7 +190,7 @@ body, html{
                             <br />
                         </td>
                     </tr>
-
+{% endif %}
                     <tr>
                         <td><strong>Reference Genome FASTA ({{ WORMBASE_VERSION }})</strong></td>
                         <td>The reference genome build from Wormbase used for alignment and annotation.</td>
