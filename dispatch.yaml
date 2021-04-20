@@ -7,6 +7,10 @@ dispatch:
   - url: "*dev.elegansvariation.org/*"
     service: dev
 
+   # test site
+  - url: "*test.elegansvariation.org/*"
+    service: test
+
   # Send all production traffic to main site
   - url: "*elegansvariation.org/*"
     service: default
