@@ -3,7 +3,7 @@
  * Import this file using the following HTML or equivalent:
  * <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css" /> */
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
-/* line 5, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 5, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -25,45 +25,45 @@ time, mark, audio, video {
   vertical-align: baseline;
 }
 
-/* line 22, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 22, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 html {
   line-height: 1;
 }
 
-/* line 24, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 24, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 ol, ul {
   list-style: none;
 }
 
-/* line 26, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 26, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-/* line 28, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 28, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 caption, th, td {
   text-align: left;
   font-weight: normal;
   vertical-align: middle;
 }
 
-/* line 30, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 30, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 q, blockquote {
   quotes: none;
 }
-/* line 103, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 103, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 q:before, q:after, blockquote:before, blockquote:after {
   content: "";
   content: none;
 }
 
-/* line 32, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 32, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 a img {
   border: none;
 }
 
-/* line 116, ../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
+/* line 116, ../../../../../../../../../Library/Ruby/Gems/2.3.0/gems/compass-core-1.0.3/stylesheets/compass/reset/_utilities.scss */
 article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
   display: block;
 }
@@ -838,38 +838,39 @@ header #latest-update-top div .read-more-btn:hover {
   /* line 814, ../sass/custom-styles.scss */
   .home-main-container .home-top-container .left-container .cendr-globe-logo img {
     width: 160px !important;
+    max-height: unset !important;
   }
-  /* line 819, ../sass/custom-styles.scss */
+  /* line 820, ../sass/custom-styles.scss */
   .home-main-container .home-top-container .left-container .welcome-message {
     width: 70%;
     float: left;
     margin: 80px 0 0 30px;
   }
-  /* line 826, ../sass/custom-styles.scss */
+  /* line 827, ../sass/custom-styles.scss */
   .home-main-container .home-top-container .youtube-video-homepage {
     width: 100%;
     text-align: center;
   }
-  /* line 834, ../sass/custom-styles.scss */
+  /* line 835, ../sass/custom-styles.scss */
   .home-main-container .homepage-major-services .services-container li {
     width: 38%;
     margin: 20px 0 40px;
     padding: 0 30px;
   }
 }
-/* line 845, ../sass/custom-styles.scss */
+/* line 846, ../sass/custom-styles.scss */
 .styled-checkbox {
   position: absolute;
   opacity: 0;
 }
-/* line 849, ../sass/custom-styles.scss */
+/* line 850, ../sass/custom-styles.scss */
 .styled-checkbox + label {
   position: relative;
   cursor: pointer;
   padding: 0;
   border-radius: 50%;
 }
-/* line 857, ../sass/custom-styles.scss */
+/* line 858, ../sass/custom-styles.scss */
 .styled-checkbox + label:before {
   content: '';
   margin-right: 10px;
@@ -881,31 +882,31 @@ header #latest-update-top div .read-more-btn:hover {
   border-radius: 50%;
   border: 1px solid #CCC;
 }
-/* line 870, ../sass/custom-styles.scss */
+/* line 871, ../sass/custom-styles.scss */
 .styled-checkbox:hover + label:before {
   background: #FFC400;
   border-radius: 50%;
 }
-/* line 876, ../sass/custom-styles.scss */
+/* line 877, ../sass/custom-styles.scss */
 .styled-checkbox:focus + label:before {
   box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
 }
-/* line 881, ../sass/custom-styles.scss */
+/* line 882, ../sass/custom-styles.scss */
 .styled-checkbox:checked + label:before {
   background: #FFC400;
 }
-/* line 886, ../sass/custom-styles.scss */
+/* line 887, ../sass/custom-styles.scss */
 .styled-checkbox:disabled + label {
   color: #b8b8b8;
   cursor: auto;
 }
-/* line 892, ../sass/custom-styles.scss */
+/* line 893, ../sass/custom-styles.scss */
 .styled-checkbox:disabled + label:before {
   box-shadow: none;
   background: #f8f8f8;
   border: 1px solid #eee;
 }
-/* line 899, ../sass/custom-styles.scss */
+/* line 900, ../sass/custom-styles.scss */
 .styled-checkbox:checked + label:after {
   content: '';
   position: absolute;
@@ -919,71 +920,71 @@ header #latest-update-top div .read-more-btn:hover {
 }
 
 @media (max-width: 768px) {
-  /* line 924, ../sass/custom-styles.scss */
+  /* line 925, ../sass/custom-styles.scss */
   .home-main-container .home-top-container .left-container .cendr-globe-logo {
     width: 30%;
     display: inline-block;
   }
-  /* line 929, ../sass/custom-styles.scss */
+  /* line 930, ../sass/custom-styles.scss */
   .home-main-container .home-top-container .left-container .welcome-message {
     width: 60%;
     float: unset;
     display: inline-block;
     margin-top: 55px;
   }
-  /* line 935, ../sass/custom-styles.scss */
+  /* line 936, ../sass/custom-styles.scss */
   .home-main-container .home-top-container .left-container .welcome-message .visible-xs {
     text-align: left !important;
     font-size: 1.8em !important;
   }
-  /* line 944, ../sass/custom-styles.scss */
+  /* line 945, ../sass/custom-styles.scss */
   .home-main-container .homepage-major-services .services-container {
     padding: 0 30px;
   }
-  /* line 947, ../sass/custom-styles.scss */
+  /* line 948, ../sass/custom-styles.scss */
   .home-main-container .homepage-major-services .services-container li {
     width: 100%;
     margin: 0 0 40px;
     padding: 0 20%;
   }
-  /* line 952, ../sass/custom-styles.scss */
+  /* line 953, ../sass/custom-styles.scss */
   .home-main-container .homepage-major-services .services-container li h3 {
     margin-bottom: 0;
     font-size: 1.4em;
   }
-  /* line 961, ../sass/custom-styles.scss */
+  /* line 962, ../sass/custom-styles.scss */
   .home-main-container .mailing-list-container h4 {
     width: 100%;
     margin-bottom: 20px;
   }
-  /* line 966, ../sass/custom-styles.scss */
+  /* line 967, ../sass/custom-styles.scss */
   .home-main-container .mailing-list-container #mc_embed_signup {
     width: 100%;
     text-align: center;
   }
-  /* line 971, ../sass/custom-styles.scss */
+  /* line 972, ../sass/custom-styles.scss */
   .home-main-container .mailing-list-container #mc_embed_signup .form-group input[type=submit] {
     margin-top: -7px;
   }
-  /* line 979, ../sass/custom-styles.scss */
+  /* line 980, ../sass/custom-styles.scss */
   .home-main-container .news-homepage-container ul.news-listing {
     columns: 1;
     -webkit-columns: 1;
     -moz-columns: 1;
   }
-  /* line 984, ../sass/custom-styles.scss */
+  /* line 985, ../sass/custom-styles.scss */
   .home-main-container .news-homepage-container ul.news-listing li {
     width: 100%;
   }
 
-  /* line 994, ../sass/custom-styles.scss */
+  /* line 995, ../sass/custom-styles.scss */
   tbody tr td .view-strain-list {
     columns: 1 !important;
     -webkit-columns: 1 !important;
     -moz-columns: 1 !important;
     margin-top: 25px;
   }
-  /* line 1000, ../sass/custom-styles.scss */
+  /* line 1001, ../sass/custom-styles.scss */
   tbody tr td .view-strain-list li {
     margin-left: 0 !important;
     width: 100% !important;
