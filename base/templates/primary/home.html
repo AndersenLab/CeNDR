@@ -1,74 +1,57 @@
 {% extends "_layouts/default.html" %}
 
 {% block content %}
-<div class="row">
-      <div class="col-md-12">
-        <div class="row">
-          <div class="col-md-2 col-sm-2">
-              <img src="/static/img/logo.png" alt="Andersen Lab Logo" class="pull-left hidden-xs" style="margin-right:0px; width: 135px; margin-bottom:60px;"/>
-              <p style="text-align:center; position:relative; left:10px;" class="visible-xs"><img src="/static/img/logo.png" alt="CeNDR Logo"  style="margin-right:40px; max-height:150px; margin: auto; display: inline; margin-bottom:20px;" class=" img-responsive"/></p>
-          </div>
-          <div class="col-md-8 col-sm-10">
-            <div class="hidden-xs lead" style="font-size: 1.4em;"><strong>Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</strong></div>
-            <div class="visible-xs lead" style="font-size: 1.4em; text-align: center;"><strong>Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</strong></div>
-            <p>The <em>Caenorhabditis elegans</em> Natural Diversity Resource (CeNDR) provides three major services: </p>
-            <ol>
-              <li>Collection, maintenance, and distribution of wild <em>C. elegans</em> strains</li>
-              <li>Organization and dissemination of whole-genome sequences for wild <em>C. elegans</em> strains</li>
-              <li>Facilitation of genetic mappings to empower individual researchers in gene discovery</li>
-            </ol>
-          </div>
+<div class="row home-main-container">
+    <div class="home-top-container">
+        <div class="left-container">
+            <div class="cendr-globe-logo">
+                <img src="/static/img/logo.png" alt="Andersen Lab Logo" class="pull-left hidden-xs" />
+                <p style="text-align:center; position:relative; left:10px;" class="visible-xs"><img src="/static/img/logo.png" alt="CeNDR Logo" style="margin-right:40px; max-height:150px; margin: auto; display: inline; margin-bottom:20px;" class=" img-responsive" /></p>
+            </div>
+            <div class="welcome-message">
+                <h1 class="hidden-xs lead">
+                  <strong>Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</strong>
+                </h1>
+                <div class="visible-xs lead" style="font-size: 1.4em; text-align: center;">
+                  <strong>Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</strong>
+                </div>
+                <a href="{{ url_for('about.getting_started') }}" type="button" class="btn-get-started">Get Started</a>
+            </div>
+        </div>
+        <div class="youtube-video-homepage">
 
-          <div class="col-md-2">
-                     <img src="/static/img/logos/NU.png" class="pull-right hidden-xs hidden-sm img-responsive" style="width: 140px; margin-top:15px;"/>
-          </div>
+            <video width="610" height="343" controls autoplay="true" muted="true" loop>
+                <source src="https://storage.googleapis.com/elegansvariation/static/video/CeNDR-Web-Video-looped.mp4    " type="video/mp4">
+            </video>
+
         </div>
-  </div>
-</div>
-  <div class="row">
-    <div class="col-md-4 col-sm-4">
-      <div class="thumbnail img-responsive" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px" >
-        <a href="{{ url_for("strains.strains") }}" ><img src="/static/img/main/strain_map.png" style="border-radius: 5px 5px 0px 0px;"></a>
-        <div class="caption">
-          <p><a href="{{ url_for("strains.strains") }}" class="btn btn-primary btn-block" role="button">Strains</a></p>
-          <p>Wild <em>C. elegans</em> isolates and information are available.</p>
-        </div>
-      </div>
     </div>
-    <div class="col-md-4 col-sm-4">
-      <div class="thumbnail" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px" >
-        <a href="{{ url_for("data.data") }}"><img src="/static/img/main/variant-summary.png" style="border-radius: 5px 5px 0px 0px; "></a>
-        <div class="caption">
-          <p><a href="{{ url_for("data.data") }}" class="btn btn-primary btn-block" role="button">Data</a></p>
-            <p>Aligned sequence data and variant data for <em>C. elegans</em> wild isolates are available.</p>
-        </div>
-      </div>
+    <div class="homepage-major-services">
+        <h2>The <i>Caenorhabditis elegans</i> Natural Diversity Resource <br>provides four major services:</h2>
+        <ul class="services-container">
+            <li>
+                <h3>Collection, maintenance, <br>and distribution of <br>wild strains</h3>
+                <a href="{{ url_for('strains.strains_list') }}">Strains</a>
+            </li>
+            <li>
+                <h3>Organization and dissemination of whole-genome sequences and variant data</h3>
+                <a href="{{ url_for('data.data') }}">Data</a>
+            </li>
+            <li>
+                <h3>Facilitation of genetic mappings to empower researchers in quantitative genetics</h3>
+                <a href="{{ url_for('mapping.mapping') }}">Mapping</a>
+            </li>
+            <li>
+                <h3>Utilities to enable the study of natural variation from genotyping to heritability</h3>
+                <a href="{{ url_for('tools.tools') }}">Tools</a>
+            </li>
+        </ul>
     </div>
-    <div class="col-md-4 col-sm-4">
-      <div class="thumbnail" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px">
-        <a href="{{ url_for("mapping.mapping") }}" ><img src="/static/img/main/map_data.png" alt="perform gwa" style="border-radius: 5px 5px 0px 0px;"></a>
-        <div class="caption">
-          <p><a href="{{ url_for("mapping.mapping") }}" class="btn btn-primary btn-block" role="button">Perform Mapping</a></p>
-          <p>Map your own traits using genome-wide association.</p>
-        </div>
-      </div>
-    </div>
-</div>
 
-<div class='row'>
+    <div class="cendr-publication-container">
 
-  <div class='col-md-12'>
-      <a href='{{ url_for('about.getting_started') }}' type="button" class="btn btn-success btn-block">Getting Started</a>
-      <br />
-  </div>
+        <h2>Please cite the CeNDR publication</h2>
 
-</div>
-
-<div class="row">
-    <div class='col-md-6'>
-        
-        <h3>Please cite the CeNDR publication</h3>
-        
         <div class="pub">
             <div class="pub-img"></div>
             <div class="pub-img-small">
@@ -76,55 +59,61 @@
                     <img src="/static/img/2016CookOxford.thumb.png" alt="2016CookOxford">
                 </a>
             </div>
-            <strong>CeNDR, the <em> Caenorhabditis elegans</em> natural diversity resource</strong><br />Cook DE, Zdraljevic S, Roberts JP, Andersen EC
-                <br>                
-                (2016 Oct 3) <em>Nucleic Acids Research</em> 
+            <div class="cendr-publication-info">
+                <strong>CeNDR, the <em> Caenorhabditis elegans</em> natural diversity resource</strong><br />Cook DE, Zdraljevic S, Roberts JP, Andersen EC
+                <br>
+                (2016 Oct 3) <em>Nucleic Acids Research</em>
                 <br />[ <a href="http://nar.oxfordjournals.org/content/early/2016/10/03/nar.gkw893.full">Article on Nucleic Acids Research</a> | <a title="Document Object Identifier; Takes you to the Journal Website" href="https://dx.doi.org/10.1093/nar/gkw893" target="_blank">DOI</a> | <a href="https://www.ncbi.nlm.nih.gov/pubmed/27701074" target="_blank">Pubmed</a> ]
                 <br /><br />
                 <em>Please reference this article if you use strains, data, and/or mappings from CeNDR.</em>
-        </div>{# /pub #}
-    
-    <br /><br />
-    {# Begin MailChimp Signup Form #}
-    <h4>Signup for our mailing list</h4>
-    <div id="mc_embed_signup">
-    <form action="https://elegansvariation.us17.list-manage.com/subscribe/post?u=57ac68003daa4fada64672c12&amp;id=5983a0c891" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="form validate form-inline" target="_blank" novalidate>
-        <div id="mc_embed_signup_scroll">
-        
-    <div class="form-group">
-        <input type="email" value="" name="EMAIL" placeholder='email' class="required email form-control" id="mce-EMAIL">
-        <input type="submit" value="Subscribe" name="subscribe" class="btn btn-primary">
-    </div>
-        <div id="mce-responses" class="clear">
-            <div class="response" id="mce-error-response" style="display:none"></div>
-            <div class="response" id="mce-success-response" style="display:none"></div>
-        </div>    <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-        <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_57ac68003daa4fada64672c12_5983a0c891" tabindex="-1" value=""></div>
-        </div>
-    </form>
-    </div>{# /mc-embed-signup #}
-
-    </div>{# /col-md-6 #}
-    
-    <div class="col-md-6">
-        {% if files %}
-            <div>
-            <h4>News <a href = "{{ url_for('primary.feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a> 
-                <a href = "{{ url_for('primary.news_item') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
-                <a href = "{{ url_for('primary.help_item' , filename = 'Change-Log') }}" type="button" style="background-color: #f4e5fe; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">Change Log</a>
-            </h4>
-                {% for f in files%}
-    
-                    <h4 class="list-group-item-heading"><a href="{{ url_for('primary.news_item', filename = f.strip(".md")) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></h4>
-                    </a> <br />
-    
-                {% endfor %}
             </div>
+        </div>{# /pub #}
+    </div>
+
+    <div class="mailing-list-container">
+
+        {# Begin MailChimp Signup Form #}
+        <h4>Signup for our mailing list</h4>
+        <div id="mc_embed_signup">
+            <form action="https://elegansvariation.us17.list-manage.com/subscribe/post?u=57ac68003daa4fada64672c12&amp;id=5983a0c891" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="form validate form-inline" target="_blank" novalidate>
+                <div id="mc_embed_signup_scroll">
+
+                    <div class="form-group">
+                        <input type="email" value="" name="EMAIL" placeholder='email' class="required email form-control" id="mce-EMAIL">
+                        <input type="submit" value="Subscribe" name="subscribe" class="btn btn-primary">
+                    </div>
+                    <div id="mce-responses" class="clear">
+                        <div class="response" id="mce-error-response" style="display:none"></div>
+                        <div class="response" id="mce-success-response" style="display:none"></div>
+                    </div> <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+                    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_57ac68003daa4fada64672c12_5983a0c891" tabindex="-1" value=""></div>
+                </div>
+            </form>
+        </div>{# /mc-embed-signup #}
+    </div>
+
+    <div class="news-homepage-container">
+        {% if files %}
+        <div>
+            <h4>News <a href="{{ url_for('primary.feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a>
+                <a href="{{ url_for('primary.news_item') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
+                <a href="{{ url_for('primary.help_item' , filename = 'Change-Log') }}" type="button" style="background-color: #f4e5fe; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">Change Log</a>
+            </h4>
+            <ul class="news-listing">
+                {% for f in files%}
+
+                <li class="list-group-item-heading"><a href="{{ url_for('primary.news_item', filename = f.strip(".md")) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></li>
+                </a>
+
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
-    
-        
-    </div>{# /col-md-6 #}
-</div>{# /row #}
+
+    </div>
+</div>
+
+
 
 {% endblock %}
 
