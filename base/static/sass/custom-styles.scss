@@ -109,9 +109,8 @@ header {
         }
 
         .navbar-cendr-brand {
-            border-left: 1px solid #707070;
             margin: 0 0 0 10px;
-            padding: 3px 0 3px 14px;
+            padding: 0px 0px 0px 14px;
             font-size: 1.8em;
             color: #000;
             font-weight: 500;
@@ -147,6 +146,7 @@ header {
     .navbar-static-top {
         background: $purple !important;
         margin-bottom: 0;
+        border-bottom: 0;
     }
 
     .navbar-nav {
@@ -459,14 +459,11 @@ header {
 
 /* New Home UI/UX Styles */
 .home-main-container {
-    margin-top: -26px !important;
     display: inline-block;
 
     .home-top-container {
         background-color: #EBE8F2;
         display: inline-block;
-        padding: 0 0 15px;
-        margin: 0 0 30px;
 
         .left-container {
             width: 45%;
@@ -512,10 +509,9 @@ header {
         }
 
 
-        .youtube-video-homepage {
+        .video-homepage {
             width: 55%;
             display: inline-block;
-            padding: 40px 0 20px;
         }
     }
 
@@ -824,8 +820,8 @@ header {
                 }
             }
 
-            .youtube-video-homepage {
-                width: 100%;
+            .video-homepage {
+                width: 50%;
                 text-align: center;
             }
         }

@@ -65,6 +65,7 @@ def basic_login():
         user.last_login = arrow.utcnow().datetime
         user.save()
         referrer = session.get('login_referrer', '/')
+        flash('Logged In', 'success')
         return assign_access_refresh_tokens(username, user.roles, referrer)
     flash('Wrong username or password', 'error')
     return redirect(request.referrer)

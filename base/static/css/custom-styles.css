@@ -174,9 +174,8 @@ header #top-nav .NU-logo img {
 }
 /* line 111, ../sass/custom-styles.scss */
 header #top-nav .navbar-cendr-brand {
-  border-left: 1px solid #707070;
   margin: 0 0 0 10px;
-  padding: 3px 0 3px 14px;
+  padding: 0px 0px 0px 14px;
   font-size: 1.8em;
   color: #000;
   font-weight: 500;
@@ -211,6 +210,7 @@ header #top-nav .login-topnav a.nav-link:hover {
 header .navbar-static-top {
   background: #401F68 !important;
   margin-bottom: 0;
+  border-bottom: 0;
 }
 /* line 156, ../sass/custom-styles.scss */
 header .navbar-nav li.dropdown > a,
@@ -496,7 +496,6 @@ header #latest-update-top div .read-more-btn:hover {
 /* New Home UI/UX Styles */
 /* line 461, ../sass/custom-styles.scss */
 .home-main-container {
-  margin-top: -26px !important;
   display: inline-block;
   /* Major Services section */
   /* Cendr Publication */
@@ -507,7 +506,6 @@ header #latest-update-top div .read-more-btn:hover {
 .home-main-container .home-top-container {
   background-color: #EBE8F2;
   display: inline-block;
-  padding: 0 0 15px;
   margin: 0 0 30px;
 }
 /* line 471, ../sass/custom-styles.scss */
@@ -554,10 +552,9 @@ header #latest-update-top div .read-more-btn:hover {
   background: rgba(255, 196, 0, 0.5);
 }
 /* line 515, ../sass/custom-styles.scss */
-.home-main-container .home-top-container .youtube-video-homepage {
+.home-main-container .home-top-container .video-homepage {
   width: 55%;
   display: inline-block;
-  padding: 40px 0 20px;
 }
 /* line 523, ../sass/custom-styles.scss */
 .home-main-container .homepage-major-services {
@@ -828,7 +825,6 @@ header #latest-update-top div .read-more-btn:hover {
   /* line 805, ../sass/custom-styles.scss */
   .home-main-container .home-top-container {
     width: 100%;
-    padding: 0 40px 15px;
   }
   /* line 809, ../sass/custom-styles.scss */
   .home-main-container .home-top-container .left-container {
@@ -847,7 +843,7 @@ header #latest-update-top div .read-more-btn:hover {
     margin: 80px 0 0 30px;
   }
   /* line 827, ../sass/custom-styles.scss */
-  .home-main-container .home-top-container .youtube-video-homepage {
+  .home-main-container .home-top-container .video-homepage {
     width: 100%;
     text-align: center;
   }

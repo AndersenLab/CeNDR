@@ -115,9 +115,14 @@
       </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
   </nav>
-  <div id="latest-update-top">
-    <div>
-      <b>LATEST UPDATE: </b> <a href="/news/2021-03-29-Version-1.6/" class="update-title">New release of data for 2021</a> <span>v1.6 (2021-03-29)</span> <a href="/news/2021-03-29-Version-1.6/" class="read-more-btn">read more</a>
+
+  <div id="snackbar">
+    <div id="messages">
+    {% for category, msg in get_flashed_messages(with_categories=true) %}
+      <div class="flash-{{ category }} alert alert-dismissable alert-{{ category }} flash-banner">
+        <p class="snackbar-msg-txt snackbar-msg-txt-{{ category }}">{{ msg }}</p>
+      </div>
+    {% endfor %}
     </div>
   </div>
 </header>
