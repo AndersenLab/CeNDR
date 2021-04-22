@@ -18,13 +18,9 @@
                 <a href="{{ url_for('about.getting_started') }}" type="button" class="btn-get-started">Get Started</a>
             </div>
         </div>
-        <div class="youtube-video-homepage">
-
-            <video width="610" height="343" controls autoplay="true" muted="true" loop>
-                <source src="https://storage.googleapis.com/elegansvariation/static/video/CeNDR-Web-Video-looped.mp4    " type="video/mp4">
-            </video>
-
-        </div>
+        <video class="video-homepage-content" controls autoplay="true" muted="true" loop>
+            <source src="https://storage.googleapis.com/elegansvariation.org/static/video/CeNDR-Web-Video-looped.mp4" type="video/mp4">
+        </video>
     </div>
     <div class="homepage-major-services">
         <h2>The <i>Caenorhabditis elegans</i> Natural Diversity Resource <br>provides four major services:</h2>
@@ -102,7 +98,7 @@
             <ul class="news-listing">
                 {% for f in files%}
 
-                <li class="list-group-item-heading"><a href="{{ url_for('primary.news_item', filename = f.strip(".md")) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></li>
+                <li class="list-group-item-heading"><a href="{{ url_for('primary.news_item', filename = f.strip('.md')) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></li>
                 </a>
 
                 {% endfor %}
@@ -115,7 +111,4 @@
 
 
 
-{% endblock %}
-
-{% block script%}
 {% endblock %}

@@ -281,7 +281,6 @@ td.isotype-item label {
     position: absolute;
     top: 0;
     visibility: hidden;
-    margin-top: -1px;
 }
 
 .dropdown-menu li:hover .sub-menu {
@@ -294,6 +293,7 @@ td.isotype-item label {
 
 .nav-tabs .dropdown-menu, .nav-pills .dropdown-menu, .navbar .dropdown-menu {
     margin-top: 0;
+    margin-bottom: 0;
 }
 
 .navbar .sub-menu:before {
@@ -583,4 +583,43 @@ article {
 
 .btn-link {
     cursor: pointer;
+}
+
+/* landing page video */
+.video-homepage-content {
+  width: 45%;
+  margin-bottom: -2.5px;
+  border-image-width: 0px;
+}
+
+/*  Message Snackbar */
+.flash-banner {
+  min-height: 50px;
+  border: 0px;
+  border-radius: 0px;
+  padding: 0px;
+  margin: 0px;
+}
+
+.snackbar-msg-txt {
+  padding-top:12.5px;
+  text-align: center;
+  color: #FFFFFF;
+  font-size: 1.1em;
+}
+
+.alert-success {
+  background-color: #58B947;
+}
+
+.alert-error {
+  background-color: #EF553F;
+}
+
+.alert-danger {
+  background-color: #FFC520;
+}
+
+.page-title-txt {
+  padding-top: 25px;
 }

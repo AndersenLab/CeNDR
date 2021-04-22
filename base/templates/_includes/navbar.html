@@ -4,12 +4,12 @@
     <ul class="login-topnav">
       {% if (session["is_logged_in"] and session["is_admin"]) %}
       <li class="dropdown">
-        <a href="{{ url_for("admin.admin")}}" role="button" aria-haspopup="true" aria-expanded="false">Admin<span class="caret"></span></a>
+        <a href="{{ url_for('admin.admin')}}" role="button" aria-haspopup="true" aria-expanded="false">Admin<span class="caret"></span></a>
         <ul class="dropdown-menu dropdown-menu-left">
           <li><a href="{{ url_for('users.users')}}"> Users </a></li>
           <li><a href="{{ url_for('admin.admin_strain_sheet')}}"> Strains </a></li>
           <li><a href="{{ url_for('admin.admin_publications_sheet')}}"> CeNDR Publications </a></li>
-          <li><a href="{{ url_for("data_admin.data_admin")}}"> Data Releases </a></li>
+          <li><a href="{{ url_for('data_admin.data_admin')}}"> Data Releases </a></li>
         </ul>
       </li>
       {% endif %}
@@ -49,65 +49,65 @@
           <li class="dropdown">
             <a href="{{ url_for("about.about") }}" role="button" aria-haspopup="true" aria-expanded="false">About<span class="caret"></span></a>
             <ul class="dropdown-menu dropdown-menu-left">
-              <li><a href="{{ url_for("about.about") }}">About CeNDR</a></li>
-              <li><a href="{{ url_for("about.statistics") }}">Statistics</a></li>
-              <li><a href="{{ url_for("about.staff") }}">Staff</a></li>
-              <li><a href="{{ url_for("about.committee") }}">Scientific Advisory Committee</a></li>
-              <li><a href="{{ url_for("about.collaborators") }}">Collaborators</a></li>
-              <li><a href="{{ url_for("about.donate") }}">Donate</a></li>
-              <li><a href="{{ url_for("about.funding") }}">Funding</a></li>
-              <li><a href="{{ url_for("about.publications") }}">Publications</a></li>
+              <li><a href="{{ url_for('about.about') }}">About CeNDR</a></li>
+              <li><a href="{{ url_for('about.statistics') }}">Statistics</a></li>
+              <li><a href="{{ url_for('about.staff') }}">Staff</a></li>
+              <li><a href="{{ url_for('about.committee') }}">Scientific Advisory Committee</a></li>
+              <li><a href="{{ url_for('about.collaborators') }}">Collaborators</a></li>
+              <li><a href="{{ url_for('about.donate') }}">Donate</a></li>
+              <li><a href="{{ url_for('about.funding') }}">Funding</a></li>
+              <li><a href="{{ url_for('about.publications') }}">Publications</a></li>
             </ul>
           </li>
 
           <li class="dropdown">
             <a href="{{ url_for("strains.strains")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
             <ul class="dropdown-menu dropdown-menu-left">
-              <li><a href="{{ url_for("strains.strains_map")}}">Strain Map</a></li>
-              <li><a href="{{ url_for("strains.strains_list")}}">Isotype List</a></li>
-              <li><a href="{{ url_for("strains.strains_issues")}}">Strain Issues</a></li>
-              <li><a href="{{ url_for("strains.strains_catalog")}}">Strain Catalog</a></li>
-              <li><a href="{{ url_for("strains.protocols") }}">Protocols</a></li>
+              <li><a href="{{ url_for('strains.strains_catalog')}}">Strain Catalog</a></li>
+              <li><a href="{{ url_for('strains.strains_list')}}">Isotype List</a></li>
+              <li><a href="{{ url_for('strains.strains_map')}}">Strain Map</a></li>
+              <li><a href="{{ url_for('strains.strains_issues')}}">Strain Issues</a></li>
+              <li><a href="{{ url_for('strains.protocols') }}">Protocols</a></li>
               <li role="separator" class="divider"></li>
-              <li><a href="{{ url_for("strains.strains_submission_page") }}">Submit Strains</a></li>
-              <li><a href="{{ url_for("strains.external_links")}}">External Links</a></li>
+              <li><a href="{{ url_for('strains.strains_submission_page') }}">Submit Strains</a></li>
+              <li><a href="{{ url_for('strains.external_links')}}">External Links</a></li>
             </ul>
           </li>
 
           <li class="dropdown">
-            <a href="{{ url_for("data.data")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Data<span class="caret"></span></a>
+            <a href="{{ url_for('data.data')}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Data<span class="caret"></span></a>
             <ul class="dropdown-menu dropdown-menu-left">
-              <li><a href="{{ url_for("data.data") }}">Genomic Data</a></li>
-              <li><a href="{{ url_for("data.browser") }}">Variant Browser</a></li>
+              <li><a href="{{ url_for('data.data') }}">Genomic Data</a></li>
+              <li><a href="{{ url_for('data.browser') }}">Variant Browser</a></li>
               {#<li><a href="{{ url_for('docs') }}">API</a></li>#}
             </ul>
           </li>
 
           <li class="dropdown">
-            <a href="{{ url_for("mapping.mapping")}}" role="button" aria-haspopup="true" aria-expanded="false">Genetic Mapping<span class="caret"></span></a>
+            <a href="{{ url_for('mapping.mapping')}}" role="button" aria-haspopup="true" aria-expanded="false">Genetic Mapping<span class="caret"></span></a>
             <ul class="dropdown-menu dropdown-menu-left">
-              <li><a href="{{ url_for("mapping.mapping")}}">Perform Mapping</a></li>
+              <li><a href="{{ url_for('mapping.mapping')}}">Perform Mapping</a></li>
             </ul>
           </li>
 
           <li class="dropdown">
-            <a href="{{ url_for("tools.tools")}}" role="button" aria-haspopup="true" aria-expanded="false">Tools<span class="caret"></span></a>
+            <a href="{{ url_for('tools.tools')}}" role="button" aria-haspopup="true" aria-expanded="false">Tools<span class="caret"></span></a>
             <ul class="dropdown-menu dropdown-menu-left">
-              <li><a href="{{ url_for("indel_primer.indel_primer")}}">Pairwise indel finder</a></li>
-              <li><a href="{{ url_for("heritability.heritability")}}">Heritability calculator</a></li>
+              <li><a href="{{ url_for('indel_primer.indel_primer')}}">Pairwise indel finder</a></li>
+              <li><a href="{{ url_for('heritability.heritability')}}">Heritability calculator</a></li>
             </ul>
           </li>
 
           <li class="nav-item">
-            <a href="{{ url_for("primary.outreach") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Outreach</a>
+            <a href="{{ url_for('primary.outreach') }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Outreach</a>
           </li>
 
           <li class="nav-item">
-            <a href="{{ url_for("primary.help_item") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
+            <a href="{{ url_for('primary.help_item') }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
           </li>
 
           <li class="nav-item">
-            <a href="{{ url_for("primary.contact") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Contact Us</a>
+            <a href="{{ url_for('primary.contact') }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Contact Us</a>
           </li>
 
 
@@ -115,9 +115,14 @@
       </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
   </nav>
-  <div id="latest-update-top">
-    <div>
-      <b>LATEST UPDATE: </b> <a href="/news/2021-03-29-Version-1.6/" class="update-title">New release of data for 2021</a> <span>v1.6 (2021-03-29)</span> <a href="/news/2021-03-29-Version-1.6/" class="read-more-btn">read more</a>
+
+  <div id="snackbar">
+    <div id="messages">
+    {% for category, msg in get_flashed_messages(with_categories=true) %}
+      <div class="flash-{{ category }} alert alert-dismissable alert-{{ category }} flash-banner">
+        <p class="snackbar-msg-txt snackbar-msg-txt-{{ category }}">{{ msg }}</p>
+      </div>
+    {% endfor %}
     </div>
   </div>
 </header>
