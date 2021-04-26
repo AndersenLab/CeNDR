@@ -8,6 +8,8 @@ from flask import (redirect,
                   flash,
 									Blueprint)
 from slugify import slugify
+
+from base.config import config
 from base.models import user_ds
 from base.utils.jwt_utils import assign_access_refresh_tokens
 
@@ -68,7 +70,7 @@ def init_saml_auth(req):
       Loads the saml config from settings.json 
       to generate the SAML XML
   """
-  saml_auth = OneLogin_Saml2_Auth(req, custom_base_path=f"env_config/saml")
+  saml_auth = OneLogin_Saml2_Auth(req, custom_base_path=config['SAML_PATH'])
   return saml_auth
 
 
