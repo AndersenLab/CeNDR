@@ -33,6 +33,9 @@ attr_uid =  'urn:oid:0.9.2342.19200300.100.1.1'
 def get_or_register_user(saml_auth):
   try:
     attributes = saml_auth.get_attributes()
+    print(attributes)
+    error_reason = saml_auth.get_last_error_reason()
+    print(error_reason)
     username = attributes.get(attr_epp, [''])[0]
     id = slugify(username)
     if id is None:
