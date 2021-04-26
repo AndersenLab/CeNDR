@@ -4,7 +4,7 @@ from base.application import create_app
 try:
   import googleclouddebugger
   googleclouddebugger.enable(
-      breakpoint_enable_canary=False,
+      breakpoint_enable_canary=True,
       service_account_json_file='env_config/client-secret.json')
 except ImportError:
   pass
