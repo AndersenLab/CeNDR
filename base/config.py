@@ -28,8 +28,6 @@ DATASET_RELEASE, WORMBASE_VERSION = RELEASES[0]
 # SQLITE DATABASE
 SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
 
-SAML_PATH = "env_config"
-
 def load_yaml(path):
   return yaml.load(open(path), Loader=yaml.SafeLoader)
 
@@ -48,7 +46,6 @@ def get_config(APP_CONFIG):
 
   config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{SQLITE_PATH}".replace("base/", "")
   config['json_encoder'] = json_encoder
-  config['SAML_PATH'] = SAML_PATH
   config.update({"CENDR_VERSION": CENDR_VERSION,
                   "APP_CONFIG": APP_CONFIG,
                   "DATASET_RELEASE": DATASET_RELEASE,
