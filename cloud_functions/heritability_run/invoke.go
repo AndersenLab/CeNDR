@@ -37,12 +37,12 @@ type dsInfo struct {
 }
 
 type dsEntry struct {
-	Username    string
-	Label       string
-	Data_hash   string
-	Status      string
-	Modified_on time.Time
-	Created_on  time.Time
+	Username    string         `datastore:"username"`
+	Label       string         `datastore:"label"`
+	Data_hash   string         `datastore:"data_hash"`
+	Status      string         `datastore:"status"`
+	Modified_on time.Time      `datastore:"modified_on"`
+	Created_on  time.Time      `datastore:"created_on"`
 	K           *datastore.Key `datastore:"__key__"`
 }
 
