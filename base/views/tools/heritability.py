@@ -168,6 +168,7 @@ def heritability_result_list():
   title = "Heritability Results"
   user = get_current_user()
   items = h2calc_ds().query_by_username(user.name)
+  items = sorted(items, key=lambda x: x['created_on'], reverse=True)
   for x in items:
     data_hash = x['data_hash']
     if check_blob(f"reports/heritability/{data_hash}/result.tsv"):

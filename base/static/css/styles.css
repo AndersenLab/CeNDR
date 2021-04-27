@@ -623,3 +623,19 @@ article {
 .page-title-txt {
   padding-top: 25px;
 }
+
+table.h2-calc-result-table {
+  width: 100%;
+}
+
+table.h2-calc-result-table th {
+  padding: 5px 0px;
+  text-align: left;
+  font-size: 20px;
+}
+
+
+table.h2-calc-result-table td {
+  padding: 5px 0px;
+  text-align: left;
+}

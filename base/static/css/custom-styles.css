@@ -278,10 +278,6 @@ header #latest-update-top div .read-more-btn:hover {
   font-weight: 400;
   line-height: 48px;
 }
-/* line 225, ../sass/custom-styles.scss */
-.page-content a {
-  text-decoration: underline;
-}
 
 /* Footer */
 /* line 232, ../sass/custom-styles.scss */

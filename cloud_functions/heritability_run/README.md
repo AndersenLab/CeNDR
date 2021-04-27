@@ -1,4 +1,4 @@
-This directory contains the code to start the Google Cloud Run Microservice for the Heritability Tool
+# This directory contains the code to start the Google Cloud Run Microservice for the Heritability Tool
 
 Build using:
 
