@@ -624,6 +624,10 @@ article {
   padding-top: 25px;
 }
 
+.hresult-btn-row {
+  padding:40px 0px;
+}
+
 table.h2-calc-result-table {
   width: 100%;
 }
