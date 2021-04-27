@@ -1,5 +1,5 @@
 from threading import Thread
-from base.utils.gcloud import generate_download_signed_url_v4
+from base.utils.gcloud import generate_download_signed_url_v4, upload_file
 import os
 import time
 
@@ -40,7 +40,8 @@ def create_bam_bai_download_script():
 def generate_bam_bai_download_script(joined_strain_list):
   ''' Generates signed downloads urls for every sequenced strain and creates a script to download them ''' 
   expiration = timedelta(days=7)
-  filename = f'base/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}'
+  filename = f'{BAM_BAI_DOWNLOAD_SCRIPT_NAME}'
+  blobPath = f'bam/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}'
 
   if os.path.exists(filename):
     os.remove(filename)
@@ -62,3 +63,5 @@ def generate_bam_bai_download_script(joined_strain_list):
       f.write('\nwget "{}"'.format(bai_signed_url))
 
   f.close()
+  upload_file(f"{BAM_BAI_DOWNLOAD_SCRIPT_NAME}", blobPath)
+
