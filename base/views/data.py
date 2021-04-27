@@ -1,4 +1,5 @@
 import requests
+import os
 
 from datetime import timedelta
 from simplejson.errors import JSONDecodeError
@@ -8,7 +9,7 @@ from base.constants import BAM_BAI_DOWNLOAD_SCRIPT_NAME, GOOGLE_CLOUD_BUCKET
 from base.config import config
 from base.extensions import cache
 from base.models import Strain
-from base.utils.gcloud import list_release_files, generate_download_signed_url_v4
+from base.utils.gcloud import list_release_files, generate_download_signed_url_v4, download_file
 from base.utils.jwt_utils import jwt_required
 from base.views.api.api_strain import get_isotypes, query_strains
 
@@ -160,6 +161,8 @@ def strain_issues(selected_release=None):
 @cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script(selected_release):
+  if not os.path.exists(BAM_BAI_DOWNLOAD_SCRIPT_NAME):
+    download_file(f'bam/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}', BAM_BAI_DOWNLOAD_SCRIPT_NAME)
   return send_file(BAM_BAI_DOWNLOAD_SCRIPT_NAME, as_attachment=True)
 
 
