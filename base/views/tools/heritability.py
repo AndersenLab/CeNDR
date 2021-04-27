@@ -31,7 +31,7 @@ heritability_bp = Blueprint('heritability',
                             template_folder='tools')
 
 
-def create_h2_task(data_hash):
+def create_h2_task(data_hash, ds_id, ds_kind):
   """
       This is designed to be run in the background on the server.
       It will run a heritability analysis on google cloud run
@@ -41,7 +41,7 @@ def create_h2_task(data_hash):
   # Perform h2 request
   queue = config['HERITABILITY_CALC_TASK_QUEUE']
   url = config['HERITABILITY_CALC_URL']
-  data = {'hash': data_hash}
+  data = {'hash': data_hash, 'ds_id': ds_id, 'ds_kind': ds_kind}
   result = add_task(queue, url, data, task_name=data_hash)
 
   # Update report status
@@ -114,7 +114,7 @@ def submit_h2():
   hr.save()
 
   # Schedule the task
-  create_h2_task(data_hash)
+  create_h2_task(data_hash, id, hr.kind)
   return jsonify({'started': True,
                   'data_hash': data_hash,
                   'id': id})
