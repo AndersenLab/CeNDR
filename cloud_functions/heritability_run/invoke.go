@@ -1,6 +1,6 @@
 package main
 
-// VERSION v1
+// VERSION v2
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"time"
 
+	"cloud.google.com/go/datastore"
 	"cloud.google.com/go/storage"
 )
 
@@ -22,15 +23,57 @@ const heritabilityVersion = "v2"
 const datasetName = "data.tsv"
 const resultName = "result.tsv"
 const bucketName = "elegansvariation.org"
+const projectID = "andersen-lab"
 
 type Payload struct {
-	Hash string
+	Hash    string
+	Ds_id   string
+	Ds_kind string
 }
 
-func check(e error) {
+type dsInfo struct {
+	Kind string
+	Id   string
+}
+
+type dsEntry struct {
+	Username    string
+	Label       string
+	Data_hash   string
+	Status      string
+	Modified_on time.Time
+	Created_on  time.Time
+	K           *datastore.Key `datastore:"__key__"`
+}
+
+func check(e error, i dsInfo) {
 	if e != nil {
+		setDatastoreStatus(i.Kind, i.Id, "ERROR")
 		panic(e)
 	}
+}
+
+func setDatastoreStatus(kind string, id string, status string) {
+	ctx := context.Background()
+	dsClient, err := datastore.NewClient(ctx, projectID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dsClient.Close()
+
+	k := datastore.NameKey(kind, id, nil)
+	e := new(dsEntry)
+	if err := dsClient.Get(ctx, k, e); err != nil {
+		log.Fatal(err)
+	}
+
+	e.Status = status
+
+	if _, err := dsClient.Put(ctx, k, e); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Updated status msg: %q\n", e.Status)
 }
 
 func downloadFile(w io.Writer, object string) ([]byte, error) {
@@ -59,11 +102,11 @@ func downloadFile(w io.Writer, object string) ([]byte, error) {
 	return data, nil
 }
 
-func copyBlob(bucket string, source string, blob string) {
+func copyBlob(bucket string, source string, blob string, i dsInfo) {
 	log.Printf("%s --> %s", source, blob)
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
-	check(err)
+	check(err, i)
 
 	// source
 	f, err := os.Open(source)
@@ -74,9 +117,9 @@ func copyBlob(bucket string, source string, blob string) {
 
 	wc := client.Bucket(bucket).Object(blob).NewWriter(ctx)
 	_, err = io.Copy(wc, f)
-	check(err)
+	check(err, i)
 	err = wc.Close()
-	check(err)
+	check(err, i)
 }
 
 func fileExists(filename string) bool {
@@ -87,17 +130,17 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func runTask(dataHash string, queueName string, taskName string) {
+func runTask(dataHash string, queueName string, taskName string, i dsInfo) {
 	// Run the heritability analysis. This is used to run it in the background.
 	// Execute R script
 	cmd := exec.Command("Rscript", "H2_script.R", datasetName, resultName, "hash.txt", heritabilityVersion, "strain_data.tsv")
 	cmd.Stderr = os.Stderr
 	o, err := cmd.Output()
-	check(err)
+	check(err, i)
 
 	// Copy results to google storage.
 	resultBlob := fmt.Sprintf("reports/heritability/%s/%s", dataHash, resultName)
-	copyBlob(bucketName, resultName, resultBlob)
+	copyBlob(bucketName, resultName, resultBlob, i)
 
 	// Log & output details of the task.
 	output := fmt.Sprintf("Completed task: task queue(%s), task name(%s), output(%s)",
@@ -135,26 +178,27 @@ func h2Handler(w http.ResponseWriter, r *http.Request) {
 	var p Payload
 	err1 := json.Unmarshal([]byte(string(body)), &p)
 	if err1 != nil {
-		log.Printf("Error parsing payload JSON: %v", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		log.Printf("Error parsing payload JSON: %v", err1)
+		http.Error(w, err1.Error(), http.StatusBadRequest)
 		return
 	}
 	log.Printf("payload: %+v", p)
+	i := dsInfo{Kind: p.Ds_kind, Id: p.Ds_id}
 
 	// Download the dataset
 	dataBlob := fmt.Sprintf("reports/heritability/%s/%s", p.Hash, datasetName)
 	dataset, err2 := downloadFile(os.Stdout, dataBlob)
-	check(err2)
+	check(err2, i)
 
 	// Store it locally
 	f, err3 := os.Create(datasetName)
-	check(err3)
+	check(err3, i)
 	f.Write(dataset)
 	f.Close()
 
 	// Write the hash
 	h, err4 := os.Create("hash.txt")
-	check(err4)
+	check(err4, i)
 	h.WriteString(p.Hash + "\n")
 	f.Close()
 
@@ -166,8 +210,13 @@ func h2Handler(w http.ResponseWriter, r *http.Request) {
 	)
 	log.Println(output)
 
+	// Update datastore
+	setDatastoreStatus(p.Ds_kind, p.Ds_id, "RUNNING")
+
 	// Execute the R script
-	runTask(p.Hash, queueName, taskName)
+	runTask(p.Hash, queueName, taskName, i)
+
+	setDatastoreStatus(p.Ds_kind, p.Ds_id, "COMPLETE")
 
 	if err5 := json.NewEncoder(w).Encode("submitted h2"); err5 != nil {
 		log.Printf("Error sending response: %v", err5)
