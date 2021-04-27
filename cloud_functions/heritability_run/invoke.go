@@ -32,8 +32,10 @@ type Payload struct {
 }
 
 type dsInfo struct {
-	Kind string
-	Id   string
+	Kind      string
+	Id        string
+	Msg       string
+	Data_hash string
 }
 
 type dsEntry struct {
@@ -41,6 +43,7 @@ type dsEntry struct {
 	Label       string         `datastore:"label"`
 	Data_hash   string         `datastore:"data_hash"`
 	Status      string         `datastore:"status"`
+	Status_msg  string         `datastore:"status_msg"`
 	Modified_on time.Time      `datastore:"modified_on"`
 	Created_on  time.Time      `datastore:"created_on"`
 	K           *datastore.Key `datastore:"__key__"`
@@ -48,12 +51,13 @@ type dsEntry struct {
 
 func check(e error, i dsInfo) {
 	if e != nil {
-		setDatastoreStatus(i.Kind, i.Id, "ERROR")
+		msg := e.Error() + "\n" + i.Msg
+		setDatastoreStatus(i.Kind, i.Id, "ERROR", msg)
 		panic(e)
 	}
 }
 
-func setDatastoreStatus(kind string, id string, status string) {
+func setDatastoreStatus(kind string, id string, status string, msg string) {
 	ctx := context.Background()
 	dsClient, err := datastore.NewClient(ctx, projectID)
 	if err != nil {
@@ -68,12 +72,15 @@ func setDatastoreStatus(kind string, id string, status string) {
 	}
 
 	e.Status = status
+	e.Status_msg = msg
 
 	if _, err := dsClient.Put(ctx, k, e); err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Updated status msg: %q\n", e.Status)
+	fmt.Printf("Updated status: %q\n", e.Status)
+	fmt.Printf("Updated status msg: %q\n", e.Status_msg)
+
 }
 
 func downloadFile(w io.Writer, object string) ([]byte, error) {
@@ -136,6 +143,9 @@ func runTask(dataHash string, queueName string, taskName string, i dsInfo) {
 	cmd := exec.Command("Rscript", "H2_script.R", datasetName, resultName, "hash.txt", heritabilityVersion, "strain_data.tsv")
 	cmd.Stderr = os.Stderr
 	o, err := cmd.Output()
+
+	i.Msg = string(o)
+	i.Data_hash = dataHash
 	check(err, i)
 
 	// Copy results to google storage.
@@ -211,12 +221,12 @@ func h2Handler(w http.ResponseWriter, r *http.Request) {
 	log.Println(output)
 
 	// Update datastore
-	setDatastoreStatus(p.Ds_kind, p.Ds_id, "RUNNING")
+	setDatastoreStatus(p.Ds_kind, p.Ds_id, "RUNNING", "")
 
 	// Execute the R script
 	runTask(p.Hash, queueName, taskName, i)
 
-	setDatastoreStatus(p.Ds_kind, p.Ds_id, "COMPLETE")
+	setDatastoreStatus(p.Ds_kind, p.Ds_id, "COMPLETE", "")
 
 	if err5 := json.NewEncoder(w).Encode("submitted h2"); err5 != nil {
 		log.Printf("Error sending response: %v", err5)
