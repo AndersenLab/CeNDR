@@ -1,6 +1,8 @@
+from datetime import datetime
 import os
 import json
 import requests
+
 from os.path import basename
 from flask import Flask, render_template
 from flask_wtf.csrf import CSRFProtect
@@ -175,17 +177,29 @@ def configure_jinja(app):
     # Injects "contexts" into templates
     @app.context_processor
     def inject():
-        return dict(version=os.environ.get("GAE_VERSION", "-9-9-9").split("-", 1)[1].replace("-", "."),
-                    json=json,
-                    list=list,
-                    str=str,
-                    int=int,
-                    len=len,
-                    gs_static=gs_static,
-                    basename=basename,
-                    render_markdown=render_markdown)
+      return dict(version=os.environ.get("GAE_VERSION", "-9-9-9").split("-", 1)[1].replace("-", "."),
+                  json=json,
+                  list=list,
+                  str=str,
+                  int=int,
+                  len=len,
+                  gs_static=gs_static,
+                  basename=basename,
+                  render_markdown=render_markdown)
 
+    # Datetime filters for Jinja
+    @app.template_filter('date_format')
+    def _jinja2_filter_datetime(date, fmt=None):
+      if fmt:
+        return date.strftime(fmt)
+      else:
+        return date.strftime('%c')
 
+'''
+2021-04-14 17:26:51.348674+00:00
+
+'%Y-%m-%d %H:%M:%S.%f+%z'
+'''
 def register_errorhandlers(app):
 
     def render_error(e="generic"):
