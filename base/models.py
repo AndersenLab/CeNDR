@@ -410,6 +410,33 @@ class h2calc_ds(datastore_model):
       super(h2calc_ds, self).save(*args, **kwargs)
 
 
+
+class ip_calc_ds(datastore_model):
+    """
+        The Indel Primer Calculation Task Model - for creating and retrieving
+        data and status information about an indel primer calculation task 
+        executed in Google Cloud Run
+    """
+    kind = 'ip_calc'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
+
+    
+    def __init__(self, *args, **kwargs):
+      super(ip_calc_ds, self).__init__(*args, **kwargs)
+
+    def query_by_username(self, username, keys_only=False):
+      filters = [('username', '=', username)]
+      results = query_item(self.kind, filters=filters, keys_only=keys_only)
+      return results
+
+    def save(self, *args, **kwargs):
+      now = arrow.utcnow().datetime
+      self.modified_on = now
+      if not self._exists:
+        self.created_on = now
+      super(ip_calc_ds, self).save(*args, **kwargs)
+
+
 class data_report_ds(datastore_model):
   """
       The Data Report model - for creating and retrieving
