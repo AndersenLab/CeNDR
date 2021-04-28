@@ -181,6 +181,11 @@ def download_bam_url(blob_name=''):
   title = blob_name
   blob_path = 'bam/' + blob_name
   signed_download_url = generate_download_signed_url_v4(blob_path)
+  msg = 'download will begin shortly...'
+  if not signed_download_url:
+    msg = 'error fetching download link'
+    signed_download_url = ''
+
   return render_template('download.html', **locals())
 
 

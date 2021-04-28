@@ -147,10 +147,10 @@ def google_storage(open=False):
     """
     if (g and open == False):
       if not hasattr(g, 'gs'):
-        g.gs = storage.Client(project=GOOGLE_CLOUD_PROJECT_ID)
+        g.gs = storage.Client.from_service_account_json('env_config/client-secret.json')
       return g.gs
 
-    return storage.Client(project=GOOGLE_CLOUD_PROJECT_ID)
+    return storage.Client.from_service_account_json('env_config/client-secret.json')
 
 
 
@@ -225,10 +225,6 @@ def google_analytics():
 
 def generate_download_signed_url_v4(blob_path, expiration=datetime.timedelta(minutes=15)):
     """Generates a v4 signed URL for downloading a blob. """
-    #credentials = service_account.Credentials.from_service_account_file('env_config/client-secret.json')
-    #storage_client = storage.Client(credentials=credentials)
-    #cendr_bucket = storage_client.bucket(GOOGLE_CLOUD_BUCKET)
-
     cendr_bucket = get_cendr_bucket()
 
     try: 
@@ -243,7 +239,7 @@ def generate_download_signed_url_v4(blob_path, expiration=datetime.timedelta(min
       print(type(inst))
       print(inst.args)
       print(inst)
-      return ''
+      return None
 
 
 def generate_upload_signed_url_v4(blob_name, content_type="application/octet-stream"):
