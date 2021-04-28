@@ -1,4 +1,3 @@
-from base.models import ip_calc_ds
 import io
 import re
 import json
@@ -20,10 +19,11 @@ from wtforms import IntegerField, SelectField
 from wtforms.validators import Required, ValidationError
 from threading import Thread
 
-from base.config import config
 from base.constants import CHROM_NUMERIC, GOOGLE_CLOUD_BUCKET 
+from base.config import config
+from base.models import ip_calc_ds
 from base.utils.gcloud import add_task, check_blob, upload_file
-from base.utils.data_utils import hash_it
+from base.utils.data_utils import hash_it, unique_id
 from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
 
 # Tools blueprint
@@ -104,6 +104,7 @@ class pairwise_indel_form(Form):
 
 
 @indel_primer_bp.route('/pairwise_indel_finder', methods=['GET'])
+@jwt_required()
 def indel_primer():
     """
         Main view
@@ -121,6 +122,7 @@ def overlaps(s1, e1, s2, e2):
 
 
 @indel_primer_bp.route("/pairwise_indel_finder/query_indels", methods=["POST"])
+@jwt_required()
 def pairwise_indel_finder_query():
     form = pairwise_indel_form()
     if form.validate_on_submit():
@@ -162,12 +164,9 @@ def create_ip_task(data_hash, site, strain1, strain2, vcf_url, username):
       This is designed to be run in the background on the server.
       It will run a heritability analysis on google cloud run
   """
-  ip = ip_calc_ds()
+  id = unique_id()
+  ip = ip_calc_ds(id)
   ip.data_hash = data_hash
-  ip.site = site
-  ip.strain1 = strain1
-  ip.strain2 = strain2
-  ip.vcf_url = vcf_url
   ip.username = username
   ip.save()
 
@@ -179,7 +178,7 @@ def create_ip_task(data_hash, site, strain1, strain2, vcf_url, username):
            'strain1': strain1,
            'strain2': strain2,
            'vcf_url': vcf_url.replace("https", "http"),
-           'ds_id': ip.name,
+           'ds_id': id,
            'ds_kind': ip.kind }
            
   result = add_task(queue, url, data, task_name=data_hash)
