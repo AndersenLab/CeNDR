@@ -3,7 +3,7 @@
 {% block content %}
 
 <h2>
-<a id='download-link' href='{{ signed_download_url }}'>{{ title }}</a> download will begin shortly...
+<a id='download-link' href='{{ signed_download_url }}'>{{ title }}</a> {{ msg }}
 </h2>
 
 {% endblock %}
@@ -12,7 +12,9 @@
 
 <script>
 $(document).ready(function() {
-  $('#download-link').get(0).click();
+  if ($('#download-link').attr('href').length > 0) {
+    $('#download-link').get(0).click();
+  }
 });
 
 </script>
