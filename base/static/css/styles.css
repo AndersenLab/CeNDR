@@ -633,13 +633,18 @@ table.h2-calc-result-table {
 }
 
 table.h2-calc-result-table th {
-  padding: 5px 0px;
+  padding-left: 15px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 0px;
   text-align: left;
   font-size: 20px;
 }
 
-
 table.h2-calc-result-table td {
-  padding: 5px 0px;
+  padding-left: 15px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 0px;
   text-align: left;
 }

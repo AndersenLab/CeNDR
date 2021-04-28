@@ -1,3 +1,4 @@
+from base.models import ip_calc_ds
 import io
 import re
 import json
@@ -21,8 +22,9 @@ from threading import Thread
 
 from base.config import config
 from base.constants import CHROM_NUMERIC, GOOGLE_CLOUD_BUCKET 
-from base.utils.gcloud import check_blob, upload_file
+from base.utils.gcloud import add_task, check_blob, upload_file
 from base.utils.data_utils import hash_it
+from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
 
 # Tools blueprint
 indel_primer_bp = Blueprint('indel_primer',
@@ -155,29 +157,47 @@ def pairwise_indel_finder_query():
         return jsonify(results=[])
     return jsonify({"errors": form.errors})
 
+def create_ip_task(data_hash, site, strain1, strain2, vcf_url, username):
+  """
+      This is designed to be run in the background on the server.
+      It will run a heritability analysis on google cloud run
+  """
+  ip = ip_calc_ds()
+  ip.data_hash = data_hash
+  ip.site = site
+  ip.strain1 = strain1
+  ip.strain2 = strain2
+  ip.vcf_url = vcf_url
+  ip.username = username
+  ip.save()
 
-def indel_primer_task(data_hash, site, strain1, strain2, vcf_url):
-    """
-        This is designed to be run in the background on the server.
-        It will run a an indel_primer request using google cloud run
-    """
-    # Perform indel_primer_request
-    logger.info("Submitting Primer Task")
-    result = requests.post(config['INDEL_PRIMER_URL'], data={'hash': data_hash,
-                                                             'site': site,
-                                                             'strain1': strain1,
-                                                             'strain2': strain2,
-                                                             'vcf_url': vcf_url.replace("https", "http")})
-    logger.debug(result)
+  # Perform ip request
+  queue = config['INDEL_PRIMER_TASK_QUEUE']
+  url = config['INDEL_PRIMER_URL']
+  data = { 'hash': data_hash,
+           'site': site,
+           'strain1': strain1,
+           'strain2': strain2,
+           'vcf_url': vcf_url.replace("https", "http"),
+           'ds_id': ip.name,
+           'ds_kind': ip.kind }
+           
+  result = add_task(queue, url, data, task_name=data_hash)
+
+  # Update report status
+  ip.status = 'SCHEDULED' if result else 'FAILED'
+  ip.save()
 
 
 @indel_primer_bp.route('/pairwise_indel_finder/submit', methods=["POST"])
+@jwt_required()
 def submit_indel_primer():
     """
         This endpoint is used to submit an indel primer job.
         The endpoint request is executed as a background task to keep the job alive.
     """
     data = request.get_json()
+    user = get_current_user()
 
     # Generate an ID for the data based on its hash
     data_hash = hash_it(data, length=32)
@@ -194,21 +214,15 @@ def submit_indel_primer():
     # Upload query information
     data_blob = f"reports/indel_primer/{data_hash}/input.json"
     upload_file(data_blob, json.dumps(data), as_string=True)
+    create_ip_task(data_hash=data_hash, site=data.get('site'), strain1=data.get('strain_1'), strain2=data.get('strain_2'), vcf_url=SV_VCF_URL, username=user.name)
 
-    thread = Thread(target=indel_primer_task, args=(data_hash,
-                                                    data['site'],
-                                                    data['strain_1'],
-                                                    data['strain_2'],
-                                                    SV_VCF_URL))
-    thread.daemon = True
-    thread.start()
-    return jsonify({'thread_name': str(thread.name),
-                    'started': True,
-                    'data_hash': data_hash})
+    return jsonify({ 'started': True,
+                    'data_hash': data_hash })
 
 
 @indel_primer_bp.route("/indel_primer/result/<data_hash>")
 @indel_primer_bp.route("/indel_primer/result/<data_hash>/tsv/<filename>")
+@jwt_required()
 def pairwise_indel_query_results(data_hash, filename = None):
     title = "Indel Primer Results"
     data = check_blob(f"reports/indel_primer/{data_hash}/input.json")
@@ -217,7 +231,6 @@ def pairwise_indel_query_results(data_hash, filename = None):
 
     if data is None:
         return abort(404, description="Indel primer report not found")
-    logger.debug(data.download_as_string().decode("utf-8"))
     data = json.loads(data.download_as_string().decode('utf-8'))
     logger.info(data)
     # Get trait and set title
