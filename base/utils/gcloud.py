@@ -243,7 +243,7 @@ def generate_download_signed_url_v4(blob_path, expiration=datetime.timedelta(min
       print(type(inst))
       print(inst.args)
       print(inst)
-      return None
+      return ''
 
 
 def generate_upload_signed_url_v4(blob_name, content_type="application/octet-stream"):
