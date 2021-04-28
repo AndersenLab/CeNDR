@@ -46,7 +46,7 @@ type dsEntry struct {
 	Username    string         `datastore:"username"`
 	Data_hash   string         `datastore:"data_hash"`
 	Status      string         `datastore:"status"`
-	Status_msg  string         `datastore:"status_msg"`
+	Status_msg  string         `datastore:"status_msg,noindex"`
 	Modified_on time.Time      `datastore:"modified_on"`
 	Created_on  time.Time      `datastore:"created_on"`
 	K           *datastore.Key `datastore:"__key__"`
@@ -135,7 +135,7 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-func runIndelPrimer(p Payload, i dsInfo) (string, error) {
+func runIndelPrimer(p Payload, i dsInfo) ([]byte, error) {
 	/*
 		Runs the herritability analysis
 	*/
@@ -233,8 +233,8 @@ func ipHandler(w http.ResponseWriter, r *http.Request) {
 	// Execute the indel primer
 	setDatastoreStatus(p.Ds_kind, p.Ds_id, "RUNNING", "")
 	result, err2 := runIndelPrimer(p, i)
-	setDatastoreStatus(p.Ds_kind, p.Ds_id, "COMPLETE", result)
 	check(err2, i)
+	setDatastoreStatus(p.Ds_kind, p.Ds_id, "COMPLETE", string(result))
 
 	if err5 := json.NewEncoder(w).Encode("submitted indel-primer-2"); err5 != nil {
 		log.Printf("Error sending response: %v", err5)
