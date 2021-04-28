@@ -63,5 +63,5 @@ def generate_bam_bai_download_script(joined_strain_list):
       f.write('\nwget "{}"'.format(bai_signed_url))
 
   f.close()
-  upload_file(f"{BAM_BAI_DOWNLOAD_SCRIPT_NAME}", blobPath)
+  upload_file(blobPath, f"{BAM_BAI_DOWNLOAD_SCRIPT_NAME}")
 
