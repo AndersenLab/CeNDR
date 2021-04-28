@@ -51,3 +51,27 @@
         {% endfor %}
     </tbody>
 </table>
+
+
+<script>
+
+$(document).ready(function() {
+
+    (function($) {
+
+        var patterns = [];
+        $('#filter').keyup(function() {
+            $('.searchable tr').hide();
+            console.log($(this).val());
+            $(this).val().split(',').forEach(function(r) {
+                var rex = new RegExp(r, "i");
+                $('.searchable tr').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            })  
+        })
+
+    }(jQuery));
+});
+
+</script>
