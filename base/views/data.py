@@ -161,8 +161,8 @@ def strain_issues(selected_release=None):
 @cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script(selected_release):
-  if not os.path.exists(BAM_BAI_DOWNLOAD_SCRIPT_NAME):
-    download_file(f'bam/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}', BAM_BAI_DOWNLOAD_SCRIPT_NAME)
+  if not os.path.exists(f'base/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}'):
+    download_file(f'bam/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}', f'base/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}')
   return send_file(BAM_BAI_DOWNLOAD_SCRIPT_NAME, as_attachment=True)
 
 
@@ -172,6 +172,8 @@ def download_script(selected_release):
 @cache.cached(timeout=60*60*24)
 @jwt_required()
 def download_script_strain_v2(selected_release=None):
+  if not os.path.exists(f'base/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}'):
+    download_file(f'bam/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}', f'base/{BAM_BAI_DOWNLOAD_SCRIPT_NAME}')
   return send_file(BAM_BAI_DOWNLOAD_SCRIPT_NAME, as_attachment=True)
 
 
