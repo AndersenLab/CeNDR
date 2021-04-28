@@ -47,6 +47,7 @@ COPY invoke.go ./
 
 # Install google cloud storage
 RUN CGO_ENABLED=0 GOOS=linux go get cloud.google.com/go/storage
+RUN CGO_ENABLED=0 GOOS=linux go get cloud.google.com/go/datastore
 
 # Build the binary.
 # -mod=readonly ensures immutable go.mod and go.sum in container builds. .
