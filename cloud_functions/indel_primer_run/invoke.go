@@ -45,6 +45,10 @@ type dsInfo struct {
 type dsEntry struct {
 	Username    string         `datastore:"username"`
 	Data_hash   string         `datastore:"data_hash"`
+	Site        string         `datastore:"site"`
+	Strain1     string         `datastore:"strain1"`
+	Strain2     string         `datastore:"strain2"`
+	Empty       bool           `datastore:"empty"`
 	Status      string         `datastore:"status"`
 	Status_msg  string         `datastore:"status_msg,noindex"`
 	Modified_on time.Time      `datastore:"modified_on"`
@@ -184,7 +188,7 @@ func runIndelPrimer(p Payload, i dsInfo) ([]byte, error) {
 	resultBlob := fmt.Sprintf("reports/indel_primer/%s/%s", dataHash, resultName)
 	copyBlob(bucketName, resultName, resultBlob, i)
 
-	return string(out), err
+	return out, err
 
 }
 
@@ -234,7 +238,9 @@ func ipHandler(w http.ResponseWriter, r *http.Request) {
 	setDatastoreStatus(p.Ds_kind, p.Ds_id, "RUNNING", "")
 	result, err2 := runIndelPrimer(p, i)
 	check(err2, i)
-	setDatastoreStatus(p.Ds_kind, p.Ds_id, "COMPLETE", string(result))
+	log.Printf("result: %+v", result)
+
+	setDatastoreStatus(p.Ds_kind, p.Ds_id, "COMPLETE", "")
 
 	if err5 := json.NewEncoder(w).Encode("submitted indel-primer-2"); err5 != nil {
 		log.Printf("Error sending response: %v", err5)

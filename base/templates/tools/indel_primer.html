@@ -31,6 +31,16 @@
             These regions should be avoided because indel calls are less reliable and high levels of variation will make primer searches more error-prone.
         </p>
 	</div>
+  <div class='row'>
+    <div class='col-md-10'></div>
+    <div class='col-md-2'>
+      <a role="button" class="btn btn-primary btn-block" href='{{ url_for("indel_primer.indel_primer_result_list") }}' >
+        <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+        My Indel Primers
+
+      </a>
+    </div>
+  </div>
 	<div class='row'>
 		<form id='form-submit' method="POST">
 			{{ form.csrf_token }}
@@ -225,7 +235,7 @@ $(document).ready(function(){
                                     contentType: "application/json; charset=utf-8",
                                     dataType: 'json',
                                     success:function(result){
-                                        window.open(`indel_primer/result/${result.data_hash}`, "_blank")
+                                        window.open(`indel_primer/result/${result.id}`, "_blank")
                                     }
                             })
                         });
