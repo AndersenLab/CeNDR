@@ -97,7 +97,7 @@ def configure_ssl(app):
         # Running on server
         app.debug = False
         # Ignore leading slash of urls; skips must use start of path
-        sslify(app)
+        sslify(app, skips=['tasks'])
     elif app.config['DEBUG']:
         debug_toolbar(app)
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = True
