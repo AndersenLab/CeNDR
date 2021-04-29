@@ -4,7 +4,7 @@ import os
 import time
 
 from datetime import timedelta
-from flask import jsonify, Blueprint
+from flask import jsonify, Blueprint, request, flash, abort
 
 from base.config import config
 from base.constants import BAM_BAI_DOWNLOAD_SCRIPT_NAME
@@ -15,26 +15,40 @@ maintenance_bp = Blueprint('maintenance',
                      __name__)
 
 
+def verify_req_origin(request):
+  if request.remote_addr == '0.1.0.2' or request.remote_addr == '10.0.0.1':
+    return True
+  return False
+
+
 @maintenance_bp.route('/cleanup_cache', methods=['GET'])
 def cleanup_cache():
-  result = delete_expired_cache()
-  response = jsonify({"result": result})
-  response.status_code = 200
-  return response
+  if verify_req_origin(request):
+    result = delete_expired_cache()
+    response = jsonify({"result": result})
+    response.status_code = 200
+    return response
+  
+  flash('You do not have access to this page', 'error')
+  return abort(401)
 
 @maintenance_bp.route('/create_bam_bai_download_script', methods=['GET'])
 def create_bam_bai_download_script():
-  strain_listing = query_strains(release=config["DATASET_RELEASE"], is_sequenced=True)
-  joined_strain_list = ''
-  for strain in strain_listing:
-    joined_strain_list += strain.strain + ','
-  
-  thread = Thread(target=generate_bam_bai_download_script, args={joined_strain_list: joined_strain_list})
-  thread.start()
+  if verify_req_origin(request):
+    strain_listing = query_strains(release=config["DATASET_RELEASE"], is_sequenced=True)
+    joined_strain_list = ''
+    for strain in strain_listing:
+      joined_strain_list += strain.strain + ','
+    
+    thread = Thread(target=generate_bam_bai_download_script, args={joined_strain_list: joined_strain_list})
+    thread.start()
 
-  response = jsonify({})
-  response.status_code = 200
-  return response
+    response = jsonify({})
+    response.status_code = 200
+    return response
+  
+  flash('You do not have access to this page', 'error')
+  return abort(401)
 
 
 def generate_bam_bai_download_script(joined_strain_list):
