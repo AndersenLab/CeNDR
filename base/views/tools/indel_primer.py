@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from cyvcf2 import VCF
 from flask import (Blueprint,
+                   flash,
                    jsonify,
                    render_template,
                    request,
@@ -103,6 +104,17 @@ class pairwise_indel_form(Form):
     stop = FlexIntegerField('Stop', default="2,039,217", validators=[Required()])
 
 
+
+@indel_primer_bp.route("/pairwise_indel_finder/ip/all")
+@jwt_required()
+def indel_primer_result_list():
+  title = "Indel Primer Results"
+  user = get_current_user()
+  items = ip_calc_ds().query_by_username(user.name)
+  items = sorted(items, key=lambda x: x['created_on'], reverse=True)
+  return render_template('tools/ip_result_list.html', **locals())
+
+
 @indel_primer_bp.route('/pairwise_indel_finder', methods=['GET'])
 @jwt_required()
 def indel_primer():
@@ -159,15 +171,15 @@ def pairwise_indel_finder_query():
         return jsonify(results=[])
     return jsonify({"errors": form.errors})
 
-def create_ip_task(data_hash, site, strain1, strain2, vcf_url, username):
+def create_ip_task(id, data_hash, site, strain1, strain2, vcf_url):
   """
       This is designed to be run in the background on the server.
       It will run a heritability analysis on google cloud run
   """
-  id = unique_id()
   ip = ip_calc_ds(id)
-  ip.data_hash = data_hash
-  ip.username = username
+  ip.site = site
+  ip.strain1 = strain1
+  ip.strain2 = strain2
   ip.save()
 
   # Perform ip request
@@ -197,32 +209,51 @@ def submit_indel_primer():
     """
     data = request.get_json()
     user = get_current_user()
+    id = unique_id()
+    ip = ip_calc_ds(id)
+    ip.username = user.name
 
     # Generate an ID for the data based on its hash
     data_hash = hash_it(data, length=32)
     data['date'] = str(arrow.utcnow())
+    ip.data_hash = data_hash
+    ip.site = data.get('site')
+    ip.strain1 = data.get('strain_1')
+    ip.strain2 = data.get('strain_2')
+    ip.save()
 
     # Check whether analysis has previously been run and if so - skip
     result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
     if result:
         return jsonify({'thread_name': 'done',
                         'started': True,
-                        'data_hash': data_hash})
+                        'data_hash': data_hash,
+                        'id': id})
 
     logger.debug("Submitting Indel Primer Job")
     # Upload query information
     data_blob = f"reports/indel_primer/{data_hash}/input.json"
     upload_file(data_blob, json.dumps(data), as_string=True)
-    create_ip_task(data_hash=data_hash, site=data.get('site'), strain1=data.get('strain_1'), strain2=data.get('strain_2'), vcf_url=SV_VCF_URL, username=user.name)
+    create_ip_task(id=id, data_hash=data_hash, site=data.get('site'), strain1=data.get('strain_1'), strain2=data.get('strain_2'), vcf_url=SV_VCF_URL)
 
     return jsonify({ 'started': True,
-                    'data_hash': data_hash })
+                    'data_hash': data_hash,
+                    'id': id })
 
 
-@indel_primer_bp.route("/indel_primer/result/<data_hash>")
-@indel_primer_bp.route("/indel_primer/result/<data_hash>/tsv/<filename>")
+@indel_primer_bp.route("/indel_primer/result/<id>")
+@indel_primer_bp.route("/indel_primer/result/<id>/tsv/<filename>")
 @jwt_required()
-def pairwise_indel_query_results(data_hash, filename = None):
+def pairwise_indel_query_results(id, filename = None):
+    user = get_current_user()
+    ip = ip_calc_ds(id)
+
+    if (not ip._exists) or (ip.username != user.name):
+      flash('You do not have access to that report', 'danger')
+      abort(401)
+
+    data_hash = ip.data_hash
+
     title = "Indel Primer Results"
     data = check_blob(f"reports/indel_primer/{data_hash}/input.json")
     result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
@@ -248,6 +279,9 @@ def pairwise_indel_query_results(data_hash, filename = None):
         # Check for no results
         empty = True if len(result) == 0 else False
         ready = True
+        ip.status = 'COMPLETE'
+        ip.empty = empty
+        ip.save()
         if empty is False:
             # left primer
             result['left_primer_start'] = result.amplicon_region.apply(lambda x: x.split(":")[1].split("-")[0]).astype(int)

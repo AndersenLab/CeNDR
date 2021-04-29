@@ -45,6 +45,10 @@ type dsInfo struct {
 type dsEntry struct {
 	Username    string         `datastore:"username"`
 	Data_hash   string         `datastore:"data_hash"`
+	Site        string         `datastore:"site"`
+	Strain1     string         `datastore:"strain1"`
+	Strain2     string         `datastore:"strain2"`
+	Empty       bool           `datastore:"empty"`
 	Status      string         `datastore:"status"`
 	Status_msg  string         `datastore:"status_msg,noindex"`
 	Modified_on time.Time      `datastore:"modified_on"`
