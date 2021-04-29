@@ -80,8 +80,8 @@
     {% else %}
     <div class="row">
         <div class='pull-left col-md-4'>
-            <a role="button" id="pdd" class="btn btn-default" onClick='getPDF("containerfluid")'>PDF</a>
-            <a role="button" class="btn btn-default" href="{{ url_for('indel_primer.pairwise_indel_query_results', id=id, filename=data['site'] + '.tsv') }}" class="col-sm-4" >TSV</a>
+            <a role="button" id="pdd" class="btn btn-default btn-primary" onClick='getPDF("containerfluid")'>PDF</a>
+            <a role="button" class="btn btn-default btn-primary" href="{{ url_for('indel_primer.pairwise_indel_query_results', id=id, filename=data['site'] + '.tsv') }}" class="col-sm-4" >TSV</a>
         </div>
     </div>{# /row #}
 

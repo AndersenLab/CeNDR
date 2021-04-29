@@ -82,6 +82,15 @@ th {
 
 
 {% block content %}
+<div class="row btn-top-row">
+  <div class='col-md-10'></div>
+  <div class='col-md-2'>
+    <a class="btn btn-primary btn-block" href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}" role="button">
+      <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> 
+      Help
+    </a>
+  </div>
+</div>
 <div class="row">
       <div class="col-md-12">
     <div class="well">
@@ -230,24 +239,37 @@ th {
 
 
 <div class="row">
-<div class="col-md-12 col-lg-12">
-<h3>Variants</h3>
+  <div class="col-md-12 col-lg-12" style='text-align:center'>
+    <h3>Variants</h3>
+  </div> {# /col-lg-12 #}
+</div> {# /row #}
 
+<div class="row">
+  <div class="col-md-10">
+    <p><small><strong>A Maximum of 1000 variants or 100kb will be queried and returned</strong>. Heterozygous calls are likely errors. When rows are yellow, it indicates the entire variant failed QC.</small></p>
+    <small>Hovering over a failing genotype will list the filter applied. Genotypes are shown as follows:</small>
+  </div> {# /col-md-10 #}
+  <div class="col-md-2">
+    <button id='download' class="btn btn-primary btn-block">Download</button>
+  </div> {# /col-md-10 #}
+</div> {# /row #}
 
-<button id='download' class='btn btn-primary btn-xs pull-right'>Download</button>
-<p><small><strong>A Maximum of 1000 variants or 100kb will be queried and returned</strong>. Heterozygous calls are likely errors. When rows are yellow, it indicates the entire variant failed QC.</small></p>
+<div class="row">
+  <div class="col-md-12 col-lg-12">
+    <div class='panel'>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <span class="label gt-0 PASS">Passing REF</span>&nbsp;
+          <span class="label gt-2 PASS">Passing ALT</span>&nbsp;&nbsp;&nbsp;<small><strong>Note: </strong> The variant browser now only shows hard-filtered variants: </small>
+          <strong><a href='{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-filters'> Details </a></strong>
+        </div>
+      </div>
+    </div>
+  </div> {# /col-lg-12 #}
+</div> {# /row #}
 
-<small>Hovering over a failing genotype will list the filter applied. Genotypes are shown as follows:</small>
-<div class='panel'>
-<div class="panel panel-default">
-  <div class="panel-body">
-    <span class="label gt-0 PASS">Passing REF</span>&nbsp;
-    <span class="label gt-2 PASS">Passing ALT</span>&nbsp;&nbsp;&nbsp;<small><strong>Note: </strong> The variant browser now only shows hard-filtered variants.</small>
-    <strong><a class='btn btn-link pull-right' href='{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-filters'>Help</a></strong>
-  </div>
-</div>
-</div>
-
+<div class="row">
+  <div class="col-md-12 col-lg-12">
 <table style='border-radius: 5px' class="table table-hover table-striped table-condensed table-bordered table-responsive" id="variants">
     <thead>
       <tr>
@@ -555,8 +577,6 @@ function refresh_variants(download = false) {
       end = region.split(":")[1].split("-")[1].replace(/,/g, "");
       release = {{ DATASET_RELEASE }};
 
-      variant_annotation = $("input[name='variant-annotation']:checked").val()
-
       sample_tracks = []
       $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
 
@@ -583,7 +603,6 @@ function refresh_variants(download = false) {
               'variant_impact': variant_impact.join('_'),
               'sample_tracks': sample_tracks.join('_'),
               'list-all-strains': $('.list-all-strains').prop('checked'),
-              'variant-annotation': variant_annotation,
              }
 
       if (download == true) {
@@ -699,10 +718,6 @@ function refresh_variants(download = false) {
 
 $("#download").click(function() {
     refresh_variants(download=true);
-});
-
-$("input[name='variant-annotation']").change(function() {
-  setTimeout(refresh_variants, 200);
 });
 
 var typingTimer;                //timer identifier

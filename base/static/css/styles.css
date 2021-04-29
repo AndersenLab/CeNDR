@@ -628,8 +628,14 @@ article {
   padding-top: 25px;
 }
 
-.hresult-btn-row {
+.btn-mid-row {
   padding:40px 0px;
 }
 
 
+.btn-top-row {
+  padding-top: 0px;
+  padding-bottom: 40px;
+  padding-left: 0px;
+  padding-right: 0px;
+}

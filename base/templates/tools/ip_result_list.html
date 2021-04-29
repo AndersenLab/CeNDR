@@ -5,7 +5,7 @@
 <div class="row">
   <div class="col-md-12">
 
-    <table class='strain-table table-striped table-hover table-compact' style='width:100%;table-layout:fixed;'>
+    <table class='table strain-table table-striped table-hover table-compact' style='width:100%;table-layout:fixed;'>
       
       <thead>
         <tr class="header">
@@ -27,7 +27,11 @@
               <td colspan="2"> {{ item.site }} </td>
               <td> {{ item.strain1 }} </td>
               <td> {{ item.strain2 }} </td>
-              <td> {{ item.empty }} </td>
+            {% if item.empty %}
+              <td><i class="glyphicon glyphicon-ok"></i></td>
+            {% else %}
+              <td></td>
+            {% endif %}
               <td>
                 {% if item.status == 'COMPLETE' %}
                 <a href="{{ url_for('indel_primer.pairwise_indel_query_results', id=item.key.name) }}">
