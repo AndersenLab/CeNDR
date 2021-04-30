@@ -4,9 +4,6 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
 {% endblock %}
 
-
-{% block style %}{% endblock %}
-
 {% block content %}
 
 
@@ -286,7 +283,10 @@ var hot = new Handsontable(container, {
         var cellProperties = {};
         cellProperties.renderer = dataValidator;
         return cellProperties;
-	}
+	  },
+    beforePaste: (data, coords) => {
+      disableScrolling()
+    }
 });
 
 
@@ -316,6 +316,7 @@ $("#set-example").on('click', function() {
         .then(response => response.text())
         .then(function(data) {
                 ex_data = _.map(data.split("\n"), x => x.split("\t"))
+                disableScrolling();
                 hot.loadData(ex_data);
                 document.documentElement.scrollTo({
                     top: document.documentElement.scrollHeight - document.documentElement.clientHeight,
@@ -358,6 +359,19 @@ $.ajaxSetup({
         }
     }
 });
+
+function disableScrolling() {
+  var x=window.scrollX;
+  var y=window.scrollY;
+  window.onscroll = function() {
+    window.scrollTo(x, y);
+  };
+  setTimeout(enableScrolling, 500);
+}
+
+function enableScrolling(){
+  window.onscroll=function(){};
+}
 
 </script>
 
