@@ -304,10 +304,13 @@ def add_task(queue, url, payload, delay_seconds=None, task_name=None):
   if task_name is not None:
     task["name"] = f"{parent}/tasks/{task_name}"
 
-  response = client.create_task(request={"parent": parent, "task": task})
-  if response:
+  try:
+    response = client.create_task(request={"parent": parent, "task": task})
     logger.debug("Created task {}".format(response.name))
-    return True
-  else :
-    logger.error("Failed to create task {}".format(response.name))
-    return False
+  except Exception as e:
+    logger.error(f"Failed to create task {e}")
+    eType = str(type(e).__name__)
+    if eType == 'AlreadyExists':
+      response = 'SCHEDULED'
+    
+  return response
