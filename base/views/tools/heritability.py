@@ -107,6 +107,16 @@ def submit_h2():
   hr.status = 'NEW'
   hr.save()
 
+  # Check whether analysis has previously been run and if so - skip
+  result = check_blob(f"reports/heritability/{data_hash}/result.tsv")
+  if result:
+    hr.status = 'COMPLETE'
+    hr.save()
+    return jsonify({'thread_name': 'done',
+                    'started': True,
+                    'data_hash': data_hash,
+                    'id': id})
+
   # Upload data immediately.
   data_blob = f"reports/heritability/{data_hash}/data.tsv"
   upload_file(data_blob, data, as_string=True)

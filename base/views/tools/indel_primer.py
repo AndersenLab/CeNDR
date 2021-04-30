@@ -176,11 +176,8 @@ def create_ip_task(id, data_hash, site, strain1, strain2, vcf_url):
       This is designed to be run in the background on the server.
       It will run a heritability analysis on google cloud run
   """
+  logger.debug("Submitting Indel Primer Job")
   ip = ip_calc_ds(id)
-  ip.site = site
-  ip.strain1 = strain1
-  ip.strain2 = strain2
-  ip.save()
 
   # Perform ip request
   queue = config['INDEL_PRIMER_TASK_QUEUE']
@@ -225,18 +222,19 @@ def submit_indel_primer():
     # Check whether analysis has previously been run and if so - skip
     result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
     if result:
-        return jsonify({'thread_name': 'done',
-                        'started': True,
-                        'data_hash': data_hash,
-                        'id': id})
+      ip.status = 'COMPLETE'
+      ip.save()
+      return jsonify({'thread_name': 'done',
+                      'started': True,
+                      'data_hash': data_hash,
+                      'id': id})
 
-    logger.debug("Submitting Indel Primer Job")
     # Upload query information
     data_blob = f"reports/indel_primer/{data_hash}/input.json"
     upload_file(data_blob, json.dumps(data), as_string=True)
     create_ip_task(id=id, data_hash=data_hash, site=data.get('site'), strain1=data.get('strain_1'), strain2=data.get('strain_2'), vcf_url=SV_VCF_URL)
 
-    return jsonify({ 'started': True,
+    return jsonify({'started': True,
                     'data_hash': data_hash,
                     'id': id })
 
