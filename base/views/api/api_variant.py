@@ -95,7 +95,7 @@ def variant_query(query=None, samples=None, list_all_strains=False, release=conf
                  'start': int(query['start']),
                  'end': int(query['end']),
                  'release': query['release'],
-                 'variant_impact': query['variant_impact'].split("_"),
+                 'variant_impact': ['ALL'],
                  'sample_list': query['sample_tracks'].split("_"),
                  'output': query['output'],
                  'list-all-strains': list_all_strains or query['list-all-strains'] == 'true',
