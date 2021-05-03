@@ -1,4 +1,4 @@
-# Variant Browser
+# Genome Browser
 
 
 <style>
@@ -114,20 +114,6 @@ The variants track shows variation across the species for all isotypes sequenced
   <div class="legend-box" style="background-color: #c2c2d6;"></div> <strong>Reference</strong>&nbsp;&nbsp;
   <div class="legend-box" style="background-color: #0066ff;"></div> <strong>Alternate</strong>
 </div>
-
-<a name="variant-effects"></a>
-### Variant Effects
-
-There are three tracks (LOW, MODERATE, HIGH) that can be used to show variants and their predicted impacts as annotated by [SnpEff](https://snpeff.sourceforge.net/). The tracks are color coded based on severity as follows:
-
-<div class='text-center'>
-  <label><div class="legend-box" style="background-color: #66d866;"> </div> LOW</label>&nbsp;&nbsp;
-  <label><div class="legend-box" style="background-color: #ffd33f;"></div> MODERATE</label>
-  <label><div class="legend-box" style="background-color: #ff3f3f;"></div> HIGH</label>
-</div>
-
-
-These annotations can be used to assess what functional affects a given variant may have and are grouped into LOW, MODERATE, and HIGH impact variants. More information on variant predictions is available on the [Variant Prediction](/help/Variant-Prediction/) page.
 
 <a name="ind-strains"></a>
 ### Strain Specific Tracks
