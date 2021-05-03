@@ -19,12 +19,10 @@ maintenance_bp = Blueprint('maintenance',
   
 
 def verify_req_origin(request):
-    addr = request.remote_addr
-    headers = request.headers
-    logger.log(f'CRONaddr: {addr}')
-    logger.log(f'CRONheaders: {headers}')
-
+  cron_header = request.headers.get('X-Appengine-Cron')
+  if cron_header:
     return True
+  return False
 
 
 @maintenance_bp.route('/cleanup_cache', methods=['GET'])
