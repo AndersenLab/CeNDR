@@ -92,7 +92,7 @@ th {
   </div>
 </div>
 <div class="row">
-      <div class="col-md-12">
+    <div class="col-md-12">
     <div class="well">
     <div class="row">
       <div class="col-md-2">
@@ -102,55 +102,19 @@ th {
           <label><input type="checkbox" checked class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
-      {% for i in ["phyloP", "phastCons", "Variants"] %}
+      {% for i in ["phyloP", "phastCons", "Variants", "Dust", "Repeat Masker", "Divergent Regions Summary" ] %}
         <div class="checkbox">
           <label><input type="checkbox" class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
-        
-        <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="Dust" />Dust</label>
-        </div>
-      
-        <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="Repeat Masker" />Repeat Masker</label>
-        </div>
 
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="Transposons" />Transposons (<a href="https://andersenlab.org/publications/2017Laricchia.pdf">Laricchia <em>et al.</em> 2017)</a></label>
+          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions" />Divergent Regions Strain<br /> (<a href="https://andersenlab.org/publications/2020LeebioRxiv.pdf"  target='_blank'>Lee <em>et al.</em> 2020)</a></label>
         </div>
-
+              
         <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions Summary" />Divergent Regions Summary</label>
+          <label><input type="checkbox" class="track-select normal-track" value="Transposons" />Transposons (<a href="https://andersenlab.org/publications/2017Laricchia.pdf" target='_blank'>Laricchia <em>et al.</em> 2017)</a></label>
         </div>
-
-        <div class="checkbox">
-          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions" />Divergent Regions Strain<br /> (<a href="https://andersenlab.org/publications/2020LeebioRxiv.pdf">Lee <em>et al.</em> 2020)</a></label>
-        </div>
-
-        <h5>Variant Impact <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-effects"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
-
-
-        <div class="checkbox">
-              <label><input type="checkbox" class="track-select variant-impact" value="ALL" />No Annotation <div class="legend-box" style="background-color: #fff;"></div></label>
-        </div>
-
-        <div class="checkbox">
-              <label><input type="checkbox" class="track-select variant-impact" value="MODIFIER" />MODIFIER <div class="legend-box" style="background-color: #6f6f6f;"></div></label>
-        </div>
-
-        <div class="checkbox">
-            <label><input type="checkbox" class="track-select variant-impact" value="LOW" />LOW <div class="legend-box" style="background-color: #66d866;"></div></label>
-        </div>
-
-        <div class="checkbox">
-              <label><input type="checkbox" class="track-select variant-impact" value="MODERATE" checked />MODERATE <div class="legend-box" style="background-color: #ffd33f;"></div></label>
-        </div>
-
-        <div class="checkbox">
-              <label><input type="checkbox" class="track-select variant-impact" value="HIGH" checked />HIGH <div class="legend-box" style="background-color: #ff3f3f;"></div></label>
-        </div>
-
 
       </div>
       <div class="col-md-6">
@@ -225,18 +189,6 @@ th {
 
 <div id="browser"></div>
 
-<div id="row" id="browser-legend">
-
-    <div class="col-lg-12">
-        <div class="legend-box" style="background-color: #c2c2d6;"></div> <strong>Reference</strong>&nbsp;&nbsp;
-        <div class="legend-box" style="background-color: #0066ff;"></div> <strong>Alternate</strong>
-          <label><div class="legend-box" style="background-color: #66d866;"> </div> LOW</label>&nbsp;&nbsp;
-        <label><div class="legend-box" style="background-color: #ffd33f;"></div> MODERATE</label>
-        <label><div class="legend-box" style="background-color: #ff3f3f;"></div> HIGH</label>
-    </div>
-
-</div>
-
 
 <div class="row">
   <div class="col-md-12 col-lg-12" style='text-align:center'>
@@ -260,7 +212,7 @@ th {
       <div class="panel panel-default">
         <div class="panel-body">
           <span class="label gt-0 PASS">Passing REF</span>&nbsp;
-          <span class="label gt-2 PASS">Passing ALT</span>&nbsp;&nbsp;&nbsp;<small><strong>Note: </strong> The variant browser now only shows hard-filtered variants: </small>
+          <span class="label gt-2 PASS">Passing ALT</span>&nbsp;&nbsp;&nbsp;<small><strong>Note: </strong> The genome browser now only shows hard-filtered variants: </small>
           <strong><a href='{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-filters'> Details </a></strong>
         </div>
       </div>
@@ -298,209 +250,202 @@ th {
 
 <script type="text/javascript">
 
+var tracks = [];
 var trackset = {"Genes": {
-                            name: "Genes",
-                            displayMode: "EXPANDED",
-                            order: 1,
-                            url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_gene.WS276.bed.gz",
-                            indexed: false,
-                            searchable: false,
-                            color: "#5c5cd6",
-                            height: 65
-                     },
-            "Transcripts": {
-                            name: "Transcripts",
-                            url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_transcripts_WS253.bed.gz",
-                            indexed: true,
-                            order: 2,
-                            color: "#a366ff",
-                            displayMode: "SQUISHED",
-                            searchable: false
-                           },
-            "LOW": {
-                            name: "LOW",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.LOW.bed.gz",
-                            order: 3,
-                            color: "#33cc33",
-                            displayMode: "EXPANDED",
-                            height: 35
-                   },
-            "MODERATE": {
-                            name: "MODERATE",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODERATE.bed.gz",
-                            order: 4,
-                            color: "#ffc500",
-                            displayMode: "EXPANDED",
-                            height: 35
-                   },
-            "HIGH": {
-                            name: "HIGH",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.HIGH.bed.gz",
-                            order: 5,
-                            color: "#ff0000",
-                            displayMode: "EXPANDED",
-                            height: 35
-                   },
-            "MODIFIER": {
-                            name: "MODIFIER",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODIFIER.bed.gz",
-                            order: 5,
-                            color: "#999999",
-                            displayMode: "EXPANDED",
-                            height: 35
-                   },
-            "Variants": {
-                            name: "Variants",
-                            url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz",
-                            indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz.tbi",
-                            order: Number.MAX_VALUE,
-                            height: 500,
-                            displayMode: "SQUISHED",
-                            color: "#000000",
-                            homvarColor: "#0066ff",
-                            homrefColor: "#c2c2d6",
-                            visibilityWindow: 20000
-                        },
-            "phastCons": {
-                name: "phastCons",
-                url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans.phastcons.bw",
-                order: 6,
-                displayMode: "SQUISHED",
-                color: "#000000",
-                visibilityWindow: 20000
-            },
-            "phyloP": {
-                name: "phylop",
-                url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans.phylop.bw",
-                order: 6,
-                displayMode: "SQUISHED",
-                color: "#000000",
-                visibilityWindow: 20000
-            },
-            "Transposons": {
-              name: "Transposons",
-              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/laricchia2017.tes_cendr.bed.gz",
-              order: 6,
-              displayMode: "EXPANDED",
-              color: "#34CB80",
-              visibilityWindow: 20000000
-            },
-            "Divergent Regions Summary": {
-              name: "Divergent Regions Summary",
-              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_all.bed.gz",
-              order: 6,
-              height: 40,
-              displayMode: "EXPANDED",
-              color: "#CB3466",
-              visibilityWindow: 20000000
-            },
-            "Divergent Regions": {
-              name: "Divergent Regions",
-              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_strain.bed.gz",
-              order: 6,
-              height: 200,
-              displayMode: "EXPANDED",
-              color: "#9B4763",
-              visibilityWindow: 20000000
-            },
-            "Dust": {
-              name: "Dust",
-              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.dust.bed.gz",
-              order: 6,
-              displayMode: "SQUISHED",
-              color: "#583E1A",
-              visibilityWindow: 20000000
-            },
-            "Repeat Masker": {
-              name: "Repeat Masker",
-              url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.repeat_masker.bed.gz",
-              order: 6,
-              displayMode: "SQUISHED",
-              color: "#CB8C34",
-              visibilityWindow: 20000000
-            },
-
-            {% for strain in strain_listing %}
-            {{ strain.strain }} : {
-              name: "{{ strain.strain }}",
-              url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/strain/vcf/{{ strain.strain }}.{{ DATASET_RELEASE }}.vcf.gz",
-              indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/strain/vcf/{{ strain.strain }}.{{ DATASET_RELEASE }}.vcf.gz.tbi",
-              order: 100,
-              displayMode: "EXPANDED",
-              color: "#ffffff",
-              homvarColor: "#0066ff",
-              homrefColor: "#c2c2d6",
-              visibilityWindow: 20000,
-              searchable: false
-            },
-            {{ strain }}_bam : {
-              id: "{{ strain.strain }}_bam",
-              name: "{{ strain.strain }}",
-              url: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam",
-              indexURL: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam.bai",
-              order: 100,
-              visibilityWindow: 20000,
-              searchable: false
-            },
-            {% endfor %}
-
-
-
-}
+                  name: "Genes",
+                  displayMode: "EXPANDED",
+                  order: 1,
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_gene.WS276.bed.gz",
+                  indexed: false,
+                  searchable: false,
+                  color: "#5c5cd6",
+                  height: 65
+                },
+                "Transcripts": {
+                  name: "Transcripts",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_transcripts_WS253.bed.gz",
+                  indexed: true,
+                  order: 2,
+                  color: "#a366ff",
+                  displayMode: "SQUISHED",
+                  searchable: false
+                },
+              {% for strain in strain_listing %}
+                {{ strain.strain }} : {
+                  name: "{{ strain.strain }}",
+                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/strain/vcf/{{ strain.strain }}.{{ DATASET_RELEASE }}.vcf.gz",
+                  indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/strain/vcf/{{ strain.strain }}.{{ DATASET_RELEASE }}.vcf.gz.tbi",
+                  order: 100,
+                  displayMode: "EXPANDED",
+                  color: "#ffffff",
+                  homvarColor: "#0066ff",
+                  homrefColor: "#c2c2d6",
+                  visibilityWindow: 20000,
+                  searchable: false
+                },
+                {{ strain }}_bam : {
+                  id: "{{ strain.strain }}_bam",
+                  name: "{{ strain.strain }}",
+                  url: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam",
+                  indexURL: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam.bai",
+                  order: 100,
+                  visibilityWindow: 20000,
+                  searchable: false
+                },
+              {% endfor %}
+                "LOW": {
+                  name: "LOW",
+                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.LOW.bed.gz",
+                  order: 3,
+                  color: "#33cc33",
+                  displayMode: "EXPANDED",
+                  height: 35
+                },
+                "MODERATE": {
+                  name: "MODERATE",
+                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODERATE.bed.gz",
+                  order: 4,
+                  color: "#ffc500",
+                  displayMode: "EXPANDED",
+                  height: 35
+                },
+                "HIGH": {
+                  name: "HIGH",
+                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.HIGH.bed.gz",
+                  order: 5,
+                  color: "#ff0000",
+                  displayMode: "EXPANDED",
+                  height: 35
+                },
+                "MODIFIER": {
+                  name: "MODIFIER",
+                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODIFIER.bed.gz",
+                  order: 5,
+                  color: "#999999",
+                  displayMode: "EXPANDED",
+                  height: 35
+                },
+                "Variants": {
+                  name: "Variants",
+                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz",
+                  indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz.tbi",
+                  order: Number.MAX_VALUE,
+                  height: 500,
+                  displayMode: "SQUISHED",
+                  color: "#000000",
+                  homvarColor: "#0066ff",
+                  homrefColor: "#c2c2d6",
+                  visibilityWindow: 20000
+                },
+                "phastCons": {
+                  name: "phastCons",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans.phastcons.bw",
+                  order: 6,
+                  displayMode: "SQUISHED",
+                  color: "#000000",
+                  visibilityWindow: 20000
+                },
+                "phyloP": {
+                  name: "phyloP",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans.phylop.bw",
+                  order: 6,
+                  displayMode: "SQUISHED",
+                  color: "#000000",
+                  visibilityWindow: 20000
+                },
+                "Transposons": {
+                  name: "Transposons",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/laricchia2017.tes_cendr.bed.gz",
+                  order: 6,
+                  displayMode: "EXPANDED",
+                  color: "#34CB80",
+                  visibilityWindow: 20000000
+                },
+                "Divergent Regions Summary": {
+                  name: "Divergent Regions Summary",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_all.bed.gz",
+                  order: 6,
+                  height: 40,
+                  displayMode: "EXPANDED",
+                  color: "#CB3466",
+                  visibilityWindow: 20000000
+                },
+                "Divergent Regions": {
+                  name: "Divergent Regions",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_strain.bed.gz",
+                  order: 6,
+                  height: 200,
+                  displayMode: "EXPANDED",
+                  color: "#9B4763",
+                  visibilityWindow: 20000000
+                },
+                "Dust": {
+                  name: "Dust",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.dust.bed.gz",
+                  order: 6,
+                  displayMode: "SQUISHED",
+                  color: "#583E1A",
+                  visibilityWindow: 20000000
+                },
+                "Repeat Masker": {
+                  name: "Repeat Masker",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.repeat_masker.bed.gz",
+                  order: 6,
+                  displayMode: "SQUISHED",
+                  color: "#CB8C34",
+                  visibilityWindow: 20000000
+                }
+};
 
 $(document).ready(function () {
-      {% for k,v in impact_items %}
-        {% if v in var_eff %}
-          $('.track-select[value="{{ v }}"]').prop('checked', true);
-        {% endif %}
-      {% endfor %}
+  var div = $("#browser")[0], 
+      options = {
+        search: {
+          url: "/api/browser/search/$FEATURE$",
+          coords: 1,
+          resultsField: 'result'
+        },
+        showNavigation: true,
+        showKaryo: false,
+        reference: {
+          id: "WS245",
+          fastaURL: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS245.genomic.fa",
+        },
+        locus: "{{ region }}",
+        tracks: [
+          trackset["Genes"],
+          trackset["Transcripts"]
+        ]
+      };
+      var browser = igv.createBrowser(div, options)
+                      .then(function(browser) {
+                        /*
+                          Bind browser events
+                        */
+                        browser.on('trackdragend', function(reference_frame, label) {
+                          refresh_variants()
+                        });
 
-        var div = $("#browser")[0],
-                options = {
-                    search: {
-                      url: "/api/browser/search/$FEATURE$",
-                      coords: 1,
-                      resultsField: 'result'
-                    },
-                    showNavigation: true,
-                    showKaryo: false,
-                    reference: {
-                      id: "WS245",
-                      fastaURL: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS245.genomic.fa",
-                    },
-                    locus: "{{ region }}",
-                    tracks: [
-                        {% for i in var_eff %}
-                          trackset["{{ i }}"],
-                        {% endfor %}
-                        trackset["Genes"],
-                        trackset["Transcripts"],
-                        ],
-                };
-        var browser = igv.createBrowser(div, options)
-                         .then(function(browser) {
-                            /*
-                              Bind browser events
-                            */
-                            browser.on('trackdragend', function(reference_frame, label) {
-                              refresh_variants()
-                            })
-                         })
+                        // Detect track changes
+                        $(".track-select").on("change", function() {
+                          $('.track-select').each(function(i, obj) {
+                            const track_name = $(this).attr("value");
+                            if ($(this).prop("checked") == true){
+                              if (!tracks.includes(track_name)) {
+                                igv.getBrowser().loadTrack(trackset[track_name]);
+                                tracks.push(track_name);
+                              }
+                            } else {
+                              igv.getBrowser().removeTrackByName(track_name);
+                              const i = tracks.indexOf(track_name);
+                              if (i !== -1) {
+                                tracks.splice(i, 1);
+                              }
+                            }                          
+                          });
+                        });
 
-        // Detect track changes
-        $(".track-select").on("change", function() {
-          if ($(this).prop("checked") == true) {
-            igv.getBrowser().loadTrack(trackset[$(this).attr("value")]);
-          } else {
-            igv.getBrowser().removeTrackByName($(this).attr("value"));
-          }
-        })
-
-
-  var_impact_class = {"LOW": "success",
-                    "MODERATE":"warning",
-                    "HIGH": "danger",
-                    "MODIFIER": "default"}
+                      });
 
 
 function process_gene_search() {
@@ -523,7 +468,7 @@ function process_gene_search() {
                 } else {
                     link = row["locus"];
                 }
-                gene_name = `<a link='${link}' class='ortholink'>${row["locus"]}</a>`;
+                gene_name = `<a onclick="set_position('${link}')" link='${link}' class='ortholink'>${row["locus"]}</a>`;
                 homolog_species = row["homolog_species"] || "<em>C. elegans</em>";
                 homolog_source = row["homolog_source"] || "Wormbase";
                 result = [gene_name, row['homolog_gene'] || row["gene_symbol"], homolog_species, row["homolog_source"] || "Wormbase"]  ;
@@ -580,27 +525,18 @@ function refresh_variants(download = false) {
       sample_tracks = []
       $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
 
-      sample_tracks_alignment = []
-      $(".sample-track-alignment:checked").each(function() { sample_tracks_alignment.push(this.value) })
-
-      normal_tracks = []
-      $(".normal-track:checked").each(function() { normal_tracks.push(this.value) })
-      variant_impact = []
-      $(".variant-impact:checked").each(function() { variant_impact.push(this.value) })
-
-      track_set = $.extend(normal_tracks, variant_impact, sample_tracks, sample_tracks_alignment);
       tracks = [];
-      for (track in track_set) {
-           if ($(`.track-select[value=${track}]`).prop("checked") == true){
-              tracks += track_set[track];
-           }
-      }
+      $('.track-select').each(function(i, obj) {
+        if ($(this).prop("checked") == true) {
+          tracks.push($(this).attr("value"));
+        }                      
+      });
 
       data = {'chrom': chrom,
               'start': parseInt(start),
               'end': parseInt(end),
               'release': release,
-              'variant_impact': variant_impact.join('_'),
+              'variant_impact': ['ALL'],
               'sample_tracks': sample_tracks.join('_'),
               'list-all-strains': $('.list-all-strains').prop('checked'),
              }
@@ -631,7 +567,7 @@ function refresh_variants(download = false) {
               $.each(msg, function(k, rec) {
                 var is_first = true;
                 var td_rowspan = 1;
-                if (variant_impact.indexOf("ALL") > -1 && rec["ANN"].length == 0) {
+                if (rec["ANN"].length == 0) {
                   rec["ANN"] = [{ effect: "", gene_id: null}]
                 }
                 $.each(rec['ANN'], function(annk, ann) {
@@ -639,11 +575,7 @@ function refresh_variants(download = false) {
                         {
                           ann["gene_id"] = `<a href='/gene/${ann["gene_id"]}'>${ann["gene_id"]}</a>`;
                         }
-                        if (ann.impact != undefined) {
-                          impact = `<span style='color: white;' class='label label-${var_impact_class[ann.impact]}'>${ann.impact}</span>`
-                        } else {
-                          impact = ""
-                        }
+                        impact = ""
 
                         items = [ann.gene_name,
                                  ann.gene_id,
@@ -739,13 +671,13 @@ $(".igvNavigationSearchInput").on("input paste", function() {
 });
 
 $(".track-select").on("change", function() {
-  refresh_variants();
+  setTimeout(refresh_variants, 200);
 });
 
 $(".igvNavigationSearchInput").keypress(function(e) {
-    if(e.which == 13) {
-      setTimeout(refresh_variants, 200);
-    }
+  if(e.which == 13) {
+    setTimeout(refresh_variants, 200);
+  }
 });
 
 
@@ -755,7 +687,10 @@ setTimeout(refresh_variants, 1000);
 
 });
 
-
+set_position = function(coord) {
+  // Sets browser position based on input
+  igv.getBrowser().search(coord);
+}
 
 $(document).ready(function() {
 

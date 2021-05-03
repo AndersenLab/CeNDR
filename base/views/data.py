@@ -200,7 +200,7 @@ def download_bam_url(blob_name=''):
 @data_bp.route('/browser/<int:release>/<region>')
 @data_bp.route('/browser/<int:release>/<region>/<query>')
 def browser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", query=None):
-    VARS = {'title': "Variant Browser",
+    VARS = {'title': "Genome Browser",
             'DATASET_RELEASE': int(release),
             'strain_listing': get_isotypes(),
             'region': region,
