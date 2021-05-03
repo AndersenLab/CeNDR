@@ -1,22 +1,27 @@
-from threading import Thread
-from base.utils.gcloud import generate_download_signed_url_v4, upload_file
 import os
 import time
 
+from threading import Thread
 from datetime import timedelta
 from flask import jsonify, Blueprint, request, flash, abort
+from logzero import logger
 
-from base.config import config
 from base.constants import BAM_BAI_DOWNLOAD_SCRIPT_NAME
+from base.config import config
+from base.utils.gcloud import generate_download_signed_url_v4, upload_file
 from base.views.api.api_strain import query_strains
 from base.utils.cache import delete_expired_cache
 
 maintenance_bp = Blueprint('maintenance',
                      __name__)
 
+# if request.remote_addr == '0.1.0.2' or request.remote_addr == '10.0.0.1':
+  
 
 def verify_req_origin(request):
-  if request.remote_addr == '0.1.0.2' or request.remote_addr == '10.0.0.1':
+  if request.headers.get('HTTP_X_APPENGINE_CRON'):
+    addr = request.remote_addr
+    logger.log(f'CRON: {addr}')
     return True
   return False
 
