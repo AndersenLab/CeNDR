@@ -91,15 +91,78 @@ var divergent_track_summary = {
                   }
 
 var browser
+var results
 var query_running = false
 var loaded = false
 var table
+
 $(document).ready(function(){
 	
 	let COLORS = {
 		INS: 'blue',
 		DEL: 'red'
 	}
+
+  var form = document.getElementById('form-submit');
+
+  form.addEventListener('change', function() {
+    if (loaded) {
+      set_position();
+    }
+  });
+
+  generate_data_table = function() {
+    table = $("#results").DataTable({
+      data: results,
+      paging:   false,
+      ordering: true,
+      searching: false,
+      order: [[1, "asc"]],
+      columnDefs: [
+        { targets: [0], orderData: [1,2] }
+      ],
+      columns: [
+      { data: "site", title: "Site" },
+      { data: "START", title: "Start", visible: false },
+      { data: "END", title: "End", visible: false },
+                      { data: "STRAIN", title: "Strain" },
+                      { data: "generate_primers", renderer: "html" }
+      ]
+    });
+  }
+
+  load_tracks = function() {
+    // Load tracks
+    rowset = {}
+    rowset[$("#strain_1").val()] = []
+    rowset[$("#strain_2").val()] = []
+    tracks = []
+
+    // Restructure results by strain
+    for(idx in results) {
+      row = results[idx]
+      rowset[row["STRAIN"]].push(row)
+    }
+    for(strain in rowset) {
+      track = rowset[strain]
+      items = _.map(track, function(row) {
+        result = {
+          chr: row["CHROM"],
+          start: row["START"],
+          end: row["END"],
+          name: `${row["site"]}`,
+          color: COLORS[row["SVTYPE"]],
+        }
+        return(result)
+      })
+      igvTrack = {
+        name: strain,
+        type: "annotation",
+        features: items,
+      }
+      browser.loadTrack(igvTrack)
+    }
+  }
 
 	set_position = function() {
 		// Sets browser position based on input
@@ -144,107 +207,59 @@ $(document).ready(function(){
 					} else {
 						if (loaded == false) {
 							// Create genome browser
-							browser = igv.createBrowser(browserDiv, options)
-							             .then(function(browser) {
-                                            browser.loadTrack(divergent_track_summary)
-											 set_position()
-											 browser.on('locuschange', function(reference_frame, label) {
-												 $("#chromosome").val(reference_frame["chr"]);
-												 $("#start").val(reference_frame["start"]);
-												 $("#stop").val(reference_frame["end"]);
-                                                 setTimeout(submitForm, 500)
-											 })
-                                         })
-
-							table = $("#results").DataTable({
-								data: results,
-								paging:   false,
-								ordering: true,
-								searching: false,
-								order: [[1, "asc"]],
-								columnDefs: [
-									{ targets: [0], orderData: [1,2] }
-								],
-								columns: [
-								{ data: "site", title: "Site" },
-								{ data: "START", title: "Start", visible: false },
-								{ data: "END", title: "End", visible: false },
-                                { data: "STRAIN", title: "Strain" },
-                                { data: "generate_primers", renderer: "html" }
-								]
+              browser = igv.createBrowser(browserDiv, options)
+                          .then(function(browser) {
+                            browser.loadTrack(divergent_track_summary);
+                            set_position();
+                            browser.on('locuschange', function(reference_frame, label) {
+                              $("#chromosome").val(reference_frame["chr"]);
+                              $("#start").val(reference_frame["start"]);
+                              $("#stop").val(reference_frame["end"]);
+                              setTimeout(submitForm, 500)
                             });
-
-							loaded = true;
+                            generate_data_table();
+                            load_tracks(browser, results);
+                            loaded = true;
+                          });
 						} else {
 							table.clear()
 							table.rows.add(results);
 							table.draw();
-                            // Remove strain tracks
-                            var remove_tracks = _.filter(_.map(browser.findTracks(), x => x.name), y => ["", "Divergent Regions"].includes(y) == false)
+              load_tracks();
+              // Remove strain tracks
+              var remove_tracks = _.filter(_.map(browser.findTracks(), x => x.name), y => ["", "Divergent Regions"].includes(y) == false)
 							_.each(remove_tracks, x => browser.removeTrackByName(x))
 						}
-					
-						// Load tracks
-						rowset = {}
-						rowset[$("#strain_1").val()] = []
-						rowset[$("#strain_2").val()] = []
-						tracks = []
 
-						// Restructure results by strain
-						for(idx in results) {
-							row = results[idx]
-							rowset[row["STRAIN"]].push(row)
-						}
-						for(strain in rowset) {
-							track = rowset[strain]
-							items = _.map(track, function(row) {
-								result = {
-									chr: row["CHROM"],
-									start: row["START"],
-									end: row["END"],
-									name: `${row["site"]}`,
-									color: COLORS[row["SVTYPE"]],
-								}
-								return(result)
-							})
-							igvTrack = {
-								name: strain,
-								type: "annotation",
-								features: items,
-                            }
-                            browser.loadTrack(igvTrack)
-                        }
+            // Activate primer generation links
+            $(".generate-primers").on("click", function(e) {
+              console.log("Submitted")
+              $(this).text("Submitted")
 
-                        // Activate primer generation links
-                        $(".generate-primers").on("click", function(e) {
-                            console.log("Submitted")
-
-                            $(this).text("Submitted")
-
-                            var data = {
-                                site: $(this).attr("site"),
-                                strain_1: $("#strain_1").val(),
-                                strain_2: $("#strain_2").val(),
-                                size: $(this).attr("size"),
-                                svtype: $(this).attr("svtype")
-                            }
-                            $.ajax({
-                                    type: "POST",
-                                    url: "{{ url_for('indel_primer.submit_indel_primer') }}",
-                                    data: JSON.stringify(data),
-                                    contentType: "application/json; charset=utf-8",
-                                    dataType: 'json',
-                                    success:function(result){
-                                        window.open(`indel_primer/result/${result.id}`, "_blank")
-                                    }
-                            })
-                        });
+              var data = {
+                site: $(this).attr("site"),
+                strain_1: $("#strain_1").val(),
+                strain_2: $("#strain_2").val(),
+                size: $(this).attr("size"),
+                svtype: $(this).attr("svtype")
+              }
+              $.ajax({
+                type: "POST",
+                url: "{{ url_for('indel_primer.submit_indel_primer') }}",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success:function(result){
+                    window.open(`indel_primer/result/${result.id}`, "_blank")
+                }
+              })
+            });
 
 					}
-                    query_running = false;
+          query_running = false;
 
 				}
-            });
+      });
             
         
 	});
