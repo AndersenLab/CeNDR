@@ -15,8 +15,6 @@ from base.utils.cache import delete_expired_cache
 maintenance_bp = Blueprint('maintenance',
                      __name__)
 
-# if request.remote_addr == '0.1.0.2' or request.remote_addr == '10.0.0.1':
-  
 
 def verify_req_origin(request):
   cron_header = request.headers.get('X-Appengine-Cron')
