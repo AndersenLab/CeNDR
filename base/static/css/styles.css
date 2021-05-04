@@ -638,3 +638,13 @@ article {
   padding-left: 0px;
   padding-right: 0px;
 }
+
+.dataTables_filter {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.dataTables_length {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
