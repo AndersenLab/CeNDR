@@ -23,6 +23,9 @@ table.dataTable thead .sorting {
 
 {% block content %}
 
+{% from "macros.html" import render_dataTable_top_menu %}
+{{ render_dataTable_top_menu() }}
+
 <div class="row">
   <div class="col-md-12">
     <table id='ip-table' class='strain-table table-striped table-hover table-compact' style='width:100%;table-layout:fixed;'>
@@ -59,7 +62,7 @@ table.dataTable thead .sorting {
                 {% endif %}
               </td>
             {% endif %}
-            <td class="data-date" data-order="{{ item.created_on }}""> {{ item.created_on|date_format }} </td>
+            <td class="data-date" data-order="{{ item.created_on }}"> {{ item.created_on|date_format }} </td>
           </tr>
         {% endfor %}
       </tbody>
@@ -78,7 +81,7 @@ table.dataTable thead .sorting {
       
   $(document).ready(function(){
 
-    $('#ip-table').DataTable( {
+    dTable = $('#ip-table').DataTable( {
       paging: true,
       pageLength: 25,
       aaSorting: [ [5,'desc'] ],
@@ -89,8 +92,18 @@ table.dataTable thead .sorting {
         null,
         null,
         null
-      ]
-    } );
+      ],
+      dom:"tipr"
+    });
+
+    $('#filter').keyup(function(){  
+      dTable.search($(this).val()).draw();
+    });
+
+    $('#page-length').change(function(){  
+      dTable.page.len($(this).val()).draw();
+    });
+
   });
 
 </script>

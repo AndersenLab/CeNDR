@@ -648,3 +648,7 @@ article {
   padding-top: 10px;
   padding-bottom: 10px;
 }
+
+.dataTables-menu-top {
+  padding-bottom: 10px;
+}
