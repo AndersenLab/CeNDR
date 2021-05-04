@@ -92,6 +92,7 @@ def submit_h2():
   data = [x for x in data[1:] if x[0] is not None]
   header = ["AssayNumber", "Strain", "TraitName", "Replicate", "Value"]
   data = pd.DataFrame(data, columns=header)
+  trait = data.values[0][2]
   data = data.to_csv(index=False, sep="\t")
   
   # Generate an ID for the data based on its hash
@@ -105,6 +106,7 @@ def submit_h2():
   hr.data_hash = data_hash
   hr.username = user.name
   hr.status = 'NEW'
+  hr.trait = trait
   hr.save()
 
   # Check whether analysis has previously been run and if so - skip
