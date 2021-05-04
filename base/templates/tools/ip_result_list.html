@@ -1,22 +1,39 @@
 {% extends "_layouts/default.html" %}
 
+{% block custom_head %}
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" />
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block style %}
+<style>
+
+table.dataTable thead .sorting_asc {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_asc.png") no-repeat center left;
+}
+table.dataTable thead .sorting_desc {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_desc.png") no-repeat center left;
+}
+table.dataTable thead .sorting {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_both.png") no-repeat center left;
+}
+
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="row">
   <div class="col-md-12">
-
-    <table class='table strain-table table-striped table-hover table-compact' style='width:100%;table-layout:fixed;'>
-      
+    <table id='ip-table' class='strain-table table-striped table-hover table-compact' style='width:100%;table-layout:fixed;'>
       <thead>
         <tr class="header">
-          <th><strong> Site </strong></th>
-          <th></th>
-          <th><strong> Strain 1 </strong></th>
-          <th><strong> Strain 2 </strong></th>
-          <th><strong> Empty </strong></th>
-          <th><strong> Status </strong></th>
-          <th><strong> Date </strong></th>
-          <th></th>
+          <th style='width:25%' class='data-site sorting'><strong> Site </strong></th>
+          <th style='width:13%' class='data-s1 sorting'><strong> Strain 1 </strong></th>
+          <th style='width:13%' class='data-s2 sorting'><strong> Strain 2 </strong></th>
+          <th style='width:9%'  class='data-empty ordering'><strong> Empty </strong></th>
+          <th style='width:15%' class='data-status ordering'><strong> Status </strong></th>
+          <th style='width:25%' class='data-date ordering'><strong> Date </strong></th>
         </tr>
       </thead>
 
@@ -24,15 +41,15 @@
         {% for item in items %}
           <tr>
             {% if item %}
-              <td colspan="2"> {{ item.site }} </td>
-              <td> {{ item.strain1 }} </td>
-              <td> {{ item.strain2 }} </td>
+              <td class="data-site"> {{ item.site }} </td>
+              <td class="data-s1"> {{ item.strain1 }} </td>
+              <td class="data-s2"> {{ item.strain2 }} </td>
             {% if item.empty %}
-              <td><i class="glyphicon glyphicon-ok"></i></td>
+              <td class="data-empty" data-order='1'><i class="glyphicon glyphicon-ok" data-order='1'></i></td>
             {% else %}
-              <td></td>
+              <td class="data-empty" data-order='0'></td>
             {% endif %}
-              <td>
+              <td class="data-status">
                 {% if item.status == 'COMPLETE' %}
                 <a href="{{ url_for('indel_primer.pairwise_indel_query_results', id=item.key.name) }}">
                   {{ item.status }}
@@ -42,7 +59,7 @@
                 {% endif %}
               </td>
             {% endif %}
-            <td colspan="2"> {{ item.created_on|date_format }} </td>
+            <td class="data-date" data-order="{{ item.created_on }}""> {{ item.created_on|date_format }} </td>
           </tr>
         {% endfor %}
       </tbody>
@@ -51,6 +68,32 @@
 
   </div> <!-- /col-md-12 -->
 </div> <!-- /row -->
+
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+      
+  $(document).ready(function(){
+
+    $('#ip-table').DataTable( {
+      paging: true,
+      pageLength: 25,
+      aaSorting: [ [5,'desc'] ],
+      aoColumns: [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    } );
+  });
+
+</script>
 
 
 {% endblock %}
