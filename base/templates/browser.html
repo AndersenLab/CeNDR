@@ -285,7 +285,7 @@ var trackset = {"Genes": {
                 },
                 {{ strain }}_bam : {
                   id: "{{ strain.strain }}_bam",
-                  name: "{{ strain.strain }}",
+                  name: "{{ strain.strain }}_bam",
                   url: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam",
                   indexURL: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam.bai",
                   order: 100,
@@ -293,38 +293,6 @@ var trackset = {"Genes": {
                   searchable: false
                 },
               {% endfor %}
-                "LOW": {
-                  name: "LOW",
-                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.LOW.bed.gz",
-                  order: 3,
-                  color: "#33cc33",
-                  displayMode: "EXPANDED",
-                  height: 35
-                },
-                "MODERATE": {
-                  name: "MODERATE",
-                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODERATE.bed.gz",
-                  order: 4,
-                  color: "#ffc500",
-                  displayMode: "EXPANDED",
-                  height: 35
-                },
-                "HIGH": {
-                  name: "HIGH",
-                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.HIGH.bed.gz",
-                  order: 5,
-                  color: "#ff0000",
-                  displayMode: "EXPANDED",
-                  height: 35
-                },
-                "MODIFIER": {
-                  name: "MODIFIER",
-                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/tracks/{{ DATASET_RELEASE }}.MODIFIER.bed.gz",
-                  order: 5,
-                  color: "#999999",
-                  displayMode: "EXPANDED",
-                  height: 35
-                },
                 "Variants": {
                   name: "Variants",
                   url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz",
@@ -397,6 +365,24 @@ var trackset = {"Genes": {
                 }
 };
 
+function reload_tracks() {
+  $('.track-select').each(function(i, obj) {
+    const track_name = $(this).attr("value");
+    if ($(this).prop("checked") == true){
+      if (!tracks.includes(track_name)) {
+        igv.getBrowser().loadTrack(trackset[track_name]);
+        tracks.push(track_name);
+      }
+    } else {
+      igv.getBrowser().removeTrackByName(track_name);
+      const i = tracks.indexOf(track_name);
+      if (i !== -1) {
+        tracks.splice(i, 1);
+      }
+    }                          
+  });
+}
+
 $(document).ready(function () {
   var div = $("#browser")[0], 
       options = {
@@ -412,10 +398,7 @@ $(document).ready(function () {
           fastaURL: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS245.genomic.fa",
         },
         locus: "{{ region }}",
-        tracks: [
-          trackset["Genes"],
-          trackset["Transcripts"]
-        ]
+        tracks: []
       };
       var browser = igv.createBrowser(div, options)
                       .then(function(browser) {
@@ -428,21 +411,7 @@ $(document).ready(function () {
 
                         // Detect track changes
                         $(".track-select").on("change", function() {
-                          $('.track-select').each(function(i, obj) {
-                            const track_name = $(this).attr("value");
-                            if ($(this).prop("checked") == true){
-                              if (!tracks.includes(track_name)) {
-                                igv.getBrowser().loadTrack(trackset[track_name]);
-                                tracks.push(track_name);
-                              }
-                            } else {
-                              igv.getBrowser().removeTrackByName(track_name);
-                              const i = tracks.indexOf(track_name);
-                              if (i !== -1) {
-                                tracks.splice(i, 1);
-                              }
-                            }                          
-                          });
+                          reload_tracks();
                         });
 
                       });
@@ -522,16 +491,7 @@ function refresh_variants(download = false) {
       end = region.split(":")[1].split("-")[1].replace(/,/g, "");
       release = {{ DATASET_RELEASE }};
 
-      sample_tracks = []
-      $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
-
-      tracks = [];
-      $('.track-select').each(function(i, obj) {
-        if ($(this).prop("checked") == true) {
-          tracks.push($(this).attr("value"));
-        }                      
-      });
-
+      reload_tracks();
       data = {'chrom': chrom,
               'start': parseInt(start),
               'end': parseInt(end),
@@ -662,16 +622,9 @@ $("#gene-search").on("input", function(e) {
   typingTimer = setTimeout(process_gene_search, doneTypingInterval);
 })
 
-$(".checkbox").on("click", function() {
-  setTimeout(refresh_variants, 200);
-})
 
 $(".igvNavigationSearchInput").on("input paste", function() {
   refresh_variants();
-});
-
-$(".track-select").on("change", function() {
-  setTimeout(refresh_variants, 200);
 });
 
 $(".igvNavigationSearchInput").keypress(function(e) {
