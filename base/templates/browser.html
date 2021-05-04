@@ -362,14 +362,15 @@ function reload_tracks() {
     const track_name = $(this).attr("value");
     if ($(this).prop("checked") == true){
       if (!tracks.includes(track_name)) {
-        igv.getBrowser().loadTrack(trackset[track_name]);
         tracks.push(track_name);
+        igv.getBrowser().loadTrack(trackset[track_name]);
       }
     } else {
       igv.getBrowser().removeTrackByName(track_name);
-      const i = tracks.indexOf(track_name);
-      if (i !== -1) {
+      i = tracks.indexOf(track_name);
+      while(i != -1) {
         tracks.splice(i, 1);
+        i = tracks.indexOf(track_name);
       }
     }                          
   });
@@ -398,12 +399,13 @@ $(document).ready(function () {
                           Bind browser events
                         */
                         browser.on('trackdragend', function(reference_frame, label) {
-                          refresh_variants()
+                          refresh_variants();
                         });
 
                         // Detect track changes
                         $(".track-select").on("change", function() {
                           reload_tracks();
+                          setTimeout(refresh_variants, 1000);
                         });
 
                       });
@@ -482,10 +484,11 @@ function refresh_variants(download = false) {
       start = region.split(":")[1].split("-")[0].replace(/,/g, "");
       end = region.split(":")[1].split("-")[1].replace(/,/g, "");
       release = {{ DATASET_RELEASE }};
-      reload_tracks();
 
-      sample_tracks = []
-      $(".sample-track:checked").each(function() { sample_tracks.push(this.value) })
+      sample_tracks = [];
+      $(".sample-track:checked").each(function(i, e) { sample_tracks.push(e.value) })
+
+      variant_annotation = $("input[name='variant-annotation']:checked").val()
 
       data = {'chrom': chrom,
               'start': parseInt(start),
@@ -494,6 +497,7 @@ function refresh_variants(download = false) {
               'variant_impact': ['ALL'],
               'sample_tracks': sample_tracks.join('_'),
               'list-all-strains': $('.list-all-strains').prop('checked'),
+              'variant-annotation': variant_annotation
              }
 
       if (download == true) {
@@ -604,7 +608,7 @@ function refresh_variants(download = false) {
 }
 
 $("#download").click(function() {
-    refresh_variants(download=true);
+  refresh_variants(download=true);
 });
 
 var typingTimer;                //timer identifier
@@ -619,18 +623,19 @@ $("#gene-search").on("input", function(e) {
 
 
 $(".igvNavigationSearchInput").on("input paste", function() {
-  refresh_variants();
+  setTimeout(refresh_variants, 100);
 });
 
 $(".igvNavigationSearchInput").keypress(function(e) {
   if(e.which == 13) {
-    setTimeout(refresh_variants, 200);
+    setTimeout(refresh_variants, 100);
   }
 });
 
 
 
 // Initial load
+setTimeout(reload_tracks, 500);
 setTimeout(refresh_variants, 1000);
 
 });
