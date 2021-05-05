@@ -4,8 +4,15 @@ queue:
   rate: 1/s
   retry_parameters:
     task_retry_limit: 3
+    min_backoff_seconds: 60
+    max_backoff_seconds: 600
+    max_doublings: 3
+
 - name: ipcalc
   max_concurrent_requests: 1
   rate: 1/s
   retry_parameters:
     task_retry_limit: 3
+    min_backoff_seconds: 60
+    max_backoff_seconds: 600
+    max_doublings: 3
