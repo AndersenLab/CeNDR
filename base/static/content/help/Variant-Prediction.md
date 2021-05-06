@@ -1,6 +1,6 @@
 # Variant Prediction
 
-We use [SnpEff](https://snpeff.sourceforge.net/) to perform variant prediction. Variants are labeled as having a LOW, MODERATE, or HIGH impact based on the location and nature of the variant. We do not include MODIFIER annotations provided by SnpEff. Variant impacts are detailed within [The Sequence Ontology Project](https://www.sequenceontology.org/).
+We use [SnpEff](https://pcingola.github.io/SnpEff/) to perform variant prediction. Variants are labeled as having a LOW, MODERATE, or HIGH impact based on the location and nature of the variant. We do not include MODIFIER annotations provided by SnpEff. Variant impacts are detailed within [The Sequence Ontology Project](http://www.sequenceontology.org/).
 
 <table class="table table-striped table-hover">
 <thead>

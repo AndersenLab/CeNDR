@@ -1,0 +1,22 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+
+<h2>
+<a id='download-link' href='{{ signed_download_url }}'>{{ title }}</a> {{ msg }}
+</h2>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+$(document).ready(function() {
+  if ($('#download-link').attr('href').length > 0) {
+    $('#download-link').get(0).click();
+  }
+});
+
+</script>
+
+{% endblock %}

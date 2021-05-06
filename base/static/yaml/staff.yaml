@@ -5,17 +5,20 @@
   photo: Robyn.jpg
   email: Robyn.Tanny@northwestern.edu
 
-- first_name: Daniel
-  last_name: Cook
-  title: Developer/Maintainer
-  pub_names: ["Cook DE"]
-  photo: Daniel_E_Cook.jpg
-  website: https://www.danielecook.com
-  email: Dec@u.northwestern.edu
-  github: danielecook
+- first_name: Katie
+  last_name: Evans
+  title: Bioinformaticist
+  photo: Kathryn_Evans.jpeg
+  email: kathryn.evans@u.northwestern.edu
 
-- first_name: Dan
-  last_name: Lu
-  title: Staff Bioinformaticist
-  photo: DanLu.jpg
-  email: dan.lu@northwestern.edu
+- first_name: Sophia
+  last_name: Gibson
+  title: Bioinformaticist
+  photo: SophieGibson.jpeg
+  email: sophia.gibson@northwestern.edu
+
+- first_name: Ryan
+  last_name: McKeown
+  title: Bioinformaticist
+  photo: Ryan.jpeg
+  email: RyanMcKeown2021@u.northwestern.edu

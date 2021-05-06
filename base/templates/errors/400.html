@@ -1,0 +1,9 @@
+{% extends "_layouts/default.html" %}
+
+{% block title %}Internal Server Error{% endblock %}
+
+{% block content %}
+  <h1>Internal Server Error :(</h1>
+  <h3>We're having some problems</h3>
+  <h3>Instead, look at all these <a href="{{ url_for('strains.strains') }}">worms</a>!</h3>
+{% endblock %}

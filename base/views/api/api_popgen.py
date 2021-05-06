@@ -1,17 +1,18 @@
 from flask import jsonify
-from base.application import app
 from subprocess import Popen, PIPE
-from base.constants import DATASET_RELEASE
+
+from base.constants import GOOGLE_CLOUD_BUCKET
+from base.config import config
+from base.application import app
 from base.views.api.api_variant import variant_query
 from base.views.api.api_strain import get_isotypes
 from base.utils.decorators import jsonify_request
-from logzero import logger
 
 
 @app.route('/api/popgen/tajima/<string:chrom>/<int:start>/<int:end>')
 @app.route('/api/popgen/tajima/<string:chrom>/<int:start>/<int:end>/<int:release>')
 @jsonify_request
-def tajima(chrom, start, end, release = DATASET_RELEASE):
+def tajima(chrom, start, end, release = config['DATASET_RELEASE']):
     """
         Args:
             chrom
@@ -30,7 +31,7 @@ def tajima(chrom, start, end, release = DATASET_RELEASE):
     # No tajima bedfile exists for 20160408 - so use next version.
     if release < 20170531:
         release = 20170531
-    url = f"http://storage.googleapis.com/elegansvariation.org/releases/{release}/popgen/WI.{release}.tajima.bed.gz"
+    url = f"http://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/releases/{release}/popgen/WI.{release}.tajima.bed.gz"
     comm = ['tabix', url, "{chrom}:{start}-{end}".format(**locals())]
     out, err = Popen(comm, stdout=PIPE, stderr=PIPE).communicate()
 
@@ -46,13 +47,15 @@ def tajima(chrom, start, end, release = DATASET_RELEASE):
 @app.route('/api/popgen/gt/<string:chrom>/<int:pos>')
 @app.route('/api/popgen/gt/<string:chrom>/<int:pos>/<int:release>')
 @jsonify_request
-def get_allele_geo(chrom, pos, isotypes=None, release = DATASET_RELEASE):
+def get_allele_geo(chrom, pos, isotypes=None, release=None):
     """
         Args:
             chrom
             pos
             isotypes
     """
+    if release == None:
+      release = config['DATASET_RELEASE']
     try:
         variant = variant_query(f"{chrom}:{pos}-{pos+1}", list_all_strains=True, release=release)[0]
     except IndexError:

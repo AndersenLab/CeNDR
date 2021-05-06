@@ -1,0 +1,29 @@
+language: bash
+
+env:
+  - GOOGLE_CLOUD_BUCKET="elegansvariation.org" GOOGLE_CLOUD_PROJECT_ID="andersen-lab"
+
+install:
+- openssl aes-256-cbc -K $encrypted_f7a2e30d9b29_key -iv $encrypted_f7a2e30d9b29_iv -in env_config_al.zip.enc -out env_config.zip -d
+- unzip -qo env_config.zip
+- mv env_config_al env_config
+- export VERSION_NUM=1-5-9
+- export APP_CONFIG=master
+- export CLOUD_CONFIG=1
+- if [ "${TRAVIS_BRANCH}" != "master" ]; then export APP_CONFIG=development; fi;
+- export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
+- export GOOGLE_APPLICATION_CREDENTIALS=env_config/client-secret.json
+- export GOOGLE_CLOUD_BUCKET=${GOOGLE_CLOUD_BUCKET}
+- export GOOGLE_CLOUD_PROJECT_ID=${GOOGLE_CLOUD_PROJECT_ID}
+
+
+deploy:
+  provider: gae
+  version: "${GAE_VERSION}"
+  project: "${GOOGLE_CLOUD_PROJECT_ID}"
+  keyfile: env_config/client-secret.json
+  on:
+    all_branches: true
+  no_promote: true
+  no_stop_previous_version: true
+  skip_cleanup: true

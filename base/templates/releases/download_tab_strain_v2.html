@@ -34,10 +34,10 @@
                 <td>
                     {% if strain.isotype_ref_strain %}
                         <strong>
-                            <a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
+                            <a href="{{ url_for('strains.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
                         </strong>
                     {% else %}
-                        <a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
+                        <a href="{{ url_for('strains.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a>
                     {% endif %}
                 </td>
                 <td>
@@ -51,3 +51,27 @@
         {% endfor %}
     </tbody>
 </table>
+
+
+<script>
+
+$(document).ready(function() {
+
+    (function($) {
+
+        var patterns = [];
+        $('#filter').keyup(function() {
+            $('.searchable tr').hide();
+            console.log($(this).val());
+            $(this).val().split(',').forEach(function(r) {
+                var rex = new RegExp(r, "i");
+                $('.searchable tr').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            })  
+        })
+
+    }(jQuery));
+});
+
+</script>

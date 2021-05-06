@@ -6,29 +6,19 @@
       {% block style %}{% endblock %}
     </head>
     <body>
-    {% set user = session.get('user') or None %}
     {% include "_includes/navbar.html" %}
 
     <div class="page-content">
         <div class="wrap">
             <div class="container{% if fluid_container %}-fluid{% endif %}">
                 <div class='content'>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div id="messages-wrap">
-                              <div id="messages">
-                                {% for category, msg in get_flashed_messages(with_categories=true) %}
-                                <div class="flash-{{ category }} alert alert-dismissable alert-{{ category }} flash-banner">
-                                    <p>{{ msg }}</p>
-                                </div>
-                                {% endfor %}
-                              </div>
-                            </div>{# /messages-wrap #}
-
+                    <div>
+                        <div>
+                      
                             <div id="alert"></div>
                             {% if request.blueprint %}
                                 {% if title %}
-                                    <h2>{{ title }} {% if subtitle %} <small>{{ subtitle }}</small>{% endif %}</h2>
+                                    <h2 class='page-title-txt'>{{ title }} {% if subtitle %} <small>{{ subtitle }}</small>{% endif %}</h2>
                                 {% endif %}
                             {% endif %}
                             {% if warning %}
@@ -44,9 +34,9 @@
                                 {% if title %}
                                 {% if title.lower() != request.blueprint.lower() %}
                                 {% endif %}
-                                    {% if request.blueprint == 'user' and session.get('user')%}
+                                    {% if request.blueprint == 'user' and is_logged_in%}
                                     {# Direct to user profile #}
-                                    <li>User</li>
+                                    <li>Profile</li>
                                     {% else %}
                                     {% if request.blueprint != "primary" %}
                                     <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
@@ -88,6 +78,6 @@
             </div>
         </div><!-- closes wrap-->
     </div><!-- closes page-content-->
-    {% if config.DEBUG %}{{ user }}{% endif %}
+    {% if config.DEBUG %}{{ session }}{% endif %}
     </body>
 </html>

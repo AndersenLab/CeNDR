@@ -1,0 +1,26 @@
+{% extends "_layouts/default.html" %}
+{% block content %}
+{% from "macros.html" import render_field %}
+
+  <div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+      <div class="panel panel-default">
+        <div class="panel-heading">Register</div>
+        <div class="panel-body">
+          <form id='form-submit' method="POST" action="register">
+            {{ form.csrf_token }}
+            {{ render_field(form.username) }}
+            {{ render_field(form.full_name) }}
+            {{ render_field(form.email) }}
+            {{ render_field(form.password) }}
+            {{ render_field(form.confirm_password) }}
+            {{ form.recaptcha }}
+          <br />
+          <button id='register' type='submit' value="Register" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-log-in" aria-hidden="true"></span> Register </button>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}

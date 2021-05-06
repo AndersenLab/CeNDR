@@ -1,10 +1,12 @@
 import os
 import arrow
 import pickle
-
 from rich.console import Console
+from google.cloud import storage
+
 from base import constants
-from base.constants import URLS
+from base.constants import URLS, GOOGLE_CLOUD_BUCKET
+from base.config import config
 from base.utils.data_utils import download
 from base.utils.gcloud import upload_file
 from base.models import (db,
@@ -13,11 +15,6 @@ from base.models import (db,
                          Metadata,
                          WormbaseGene,
                          WormbaseGeneSummary)
-from base.config import (CENDR_VERSION,
-                         APP_CONFIG,
-                         DATASET_RELEASE,
-                         WORMBASE_VERSION,
-                         RELEASES)
 # ETL Pipelines - fetch and format data for
 # input into the sqlite database
 from base.database.etl_homologene import fetch_homologene
@@ -28,7 +25,6 @@ from base.database.etl_wormbase import (fetch_gene_gff_summary,
 
 console = Console()
 DOWNLOAD_PATH = ".download"
-
 
 def download_fname(download_path: str, download_url: str):
     return os.path.join(download_path,
@@ -46,6 +42,7 @@ def initialize_sqlite_database(sel_wormbase_version,
     start = arrow.utcnow()
     console.log("Initializing Database")
 
+    DATASET_RELEASE = config['DATASET_RELEASE']
     SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{sel_wormbase_version}.db"
     SQLITE_BASENAME = os.path.basename(SQLITE_PATH)
 
@@ -59,24 +56,26 @@ def initialize_sqlite_database(sel_wormbase_version,
 
         # Parallel URL download
         console.log("Downloading Wormbase Data")
-        download([URLS.GENE_GFF_URL,
-                  URLS.GENE_GTF_URL,
+        GENE_GFF_URL = URLS.GENE_GFF_URL.format(WB=sel_wormbase_version)
+        GENE_GTF_URL = URLS.GENE_GTF_URL.format(WB=sel_wormbase_version)
+        download([GENE_GFF_URL,
+                  GENE_GTF_URL,
                   URLS.GENE_IDS_URL,
                   URLS.HOMOLOGENE_URL,
                   URLS.ORTHOLOG_URL,
                   URLS.TAXON_ID_URL],
-                 DOWNLOAD_PATH)
+                  DOWNLOAD_PATH)
 
-        gff_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_GFF_URL)
-        gtf_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_GTF_URL)
+        gff_fname = download_fname(DOWNLOAD_PATH, GENE_GFF_URL)
+        gtf_fname = download_fname(DOWNLOAD_PATH, GENE_GTF_URL)
         gene_ids_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_IDS_URL)
         homologene_fname = download_fname(DOWNLOAD_PATH, URLS.HOMOLOGENE_URL)
         ortholog_fname = download_fname(DOWNLOAD_PATH, URLS.ORTHOLOG_URL)
 
     from base.application import create_app
     app = create_app()
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{SQLITE_BASENAME}"
     app.app_context().push()
+    app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{SQLITE_BASENAME}"
 
     if strain_only is True:
         db.metadata.drop_all(bind=db.engine, checkfirst=True, tables=[Strain.__table__])
@@ -105,11 +104,11 @@ def initialize_sqlite_database(sel_wormbase_version,
     console.log('Inserting metadata')
     metadata = {}
     metadata.update(vars(constants))
-    metadata.update({"CENDR_VERSION": CENDR_VERSION,
-                     "APP_CONFIG": APP_CONFIG,
-                     "DATASET_RELEASE": DATASET_RELEASE,
+    metadata.update({"CENDR_VERSION": config['CENDR_VERSION'],
+                     "APP_CONFIG": config['APP_CONFIG'],
+                     "DATASET_RELEASE": config['DATASET_RELEASE'],
                      "WORMBASE_VERSION": sel_wormbase_version,
-                     "RELEASES": RELEASES,
+                     "RELEASES": config['RELEASES'],
                      "DATE": arrow.utcnow()})
     for k, v in metadata.items():
         if not k.startswith("_"):
@@ -174,6 +173,14 @@ def initialize_sqlite_database(sel_wormbase_version,
 
 
 def download_sqlite_database():
-    SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
-    SQLITE_BASENAME = os.path.basename(SQLITE_PATH)
-    download([f"https://storage.googleapis.com/elegansvariation.org/db/{SQLITE_BASENAME}"], "base")
+  DATASET_RELEASE = config['DATASET_RELEASE']
+  WORMBASE_VERSION = config['WORMBASE_VERSION']
+  SQLITE_FILE = f"cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
+  blob_path = f"db/{SQLITE_FILE}"
+  file_path = f"base/{SQLITE_FILE}"
+  storage_client = storage.Client.from_service_account_json('env_config/client-secret.json')
+  bucket = storage_client.bucket(GOOGLE_CLOUD_BUCKET)
+  blob = bucket.blob(blob_path)
+  console.log(f"Downloading DB file STARTED: {SQLITE_FILE}")
+  blob.download_to_file(open(file_path, 'wb'))
+  console.log(f"Downloading DB file COMPLETE: {SQLITE_FILE}")

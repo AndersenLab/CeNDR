@@ -1,0 +1,11 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+
+<a id='create' href="{{sheet_url}}" target='b_blank' class="btn btn-primary btn-block">
+      <span class="glyphicon glyphicon-new-window" aria-hidden="true"></span> New Window
+    </a>
+
+<iframe src="{{sheet_url}}" width="100%" height="800"></iframe>
+
+{% endblock %}

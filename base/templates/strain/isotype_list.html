@@ -1,0 +1,360 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-12">
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+      <li role="presentation" name="map" class="active"><a href="#Map" role="tab" data-toggle="tab">Map</a></li>
+      <li role="presentation" name="list"><a href="#List" role="tab" data-toggle="tab">Isotype List</a></li>
+      <li role="presentation" name="issues"><a href="#Issues" role="tab" data-toggle="tab">Issues</a></li>
+      <li role="presentation" name="external-links"><a href="#External-links" role="tab" data-toggle="tab">External Links</a></li>
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+
+    <!-- #Map tab panel -->
+    <div role="tabpanel" class="tab-pane fade active in" id="Map">
+      <div class="col-md-8">
+        <div id="map" style="height: 500px; width:100%"></div>
+        <div class='text-center'>
+          <small><strong>Hover over or click a pin to see information about a <i>C. elegans</i> wild isolate</strong></small>
+        </div>{# /text-center #}
+      </div>{# /col-md-8 #}
+
+      <div class="col-md-4">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <img src = "/static/img/icons/selected.png" width="20px;" />
+            <strong>Strain Information</strong>
+          </div>
+          <ul class="list-group">
+
+          <li class="list-group-item">
+            <strong><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+              Isotype
+            </span></strong> 
+            <div class="isotype pull-right"></div>
+            <div style="clear:both;"></div>
+          </li>
+
+          <li class="list-group-item">
+            <strong><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="The name of the strain.">
+              Strain
+            </span></strong> 
+            <div class="strain pull-right"></div>
+            <div style="clear:both;"></div>
+          </li>
+
+          <li class="list-group-item">
+            <strong><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+              Reference Strain
+            </span></strong> 
+            <div class="isotype_ref_strain pull-right"></div>
+            <div style="clear:both;"></div>
+          </li>
+
+          <li class="list-group-item"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Dataset in which isotype was originally released"><strong>Release</strong> <div class="release pull-right"></div><div style="clear:both;"></div></li>
+          <li class="list-group-item"><strong>Isolation Date</strong> <div class="isolation_date pull-right"></div><div style="clear:both;"></div></li>
+          <li class="list-group-item"><strong>Latitude, Longitude</strong> <div class="latlng pull-right"><div class="comma"></div></div><div style="clear:both;"></div></li>
+          <li class="list-group-item"><strong>Elevation</strong> <div class="elevation pull-right"><div style="clear:both;"></div></li>
+          <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Environment type class'><strong>Landscape</strong></span> <div class="landscape pull-right"></div><div style="clear:both;"></div></li>
+          <li class="list-group-item"><span class='tooltip-item' data-toggle='tooltip' title='Material in or on which nematodes were isolated'><strong>Substrate</strong></span> <div class="substrate pull-right"></div><div style="clear:both;"></div></li>
+          <li class="list-group-item"><strong>Sampled By</strong> <div class="sampled_by pull-right"></div><div style="clear:both;"></div></li>
+        </ul>
+      </div>  {# /panel #}
+      <a class="btn btn-primary btn-s btn-block" href='{{ url_for("strains.strains_submission_page") }}' role="button">Submit Strains</a></p>
+    </div>{# /col-md-4 #}
+  </div> {# /tabpanel #}
+
+  <!-- #List tab panel -->
+  <div role="tabpanel" class="tab-pane fade" id="List">
+    <div class="row">
+      <div class="col-md-8"></div>
+      <div class="col-md-4">
+        <input id="filter" type="text" class="form-control" placeholder="Enter Strain Name" action="#" autocomplete="off">
+      </div> {# /col-md-4 #}
+  </div>  {# /row #}
+  <div class="row">
+    <table class="table table-hover table-striped">
+      <thead>
+        <tr>
+          <th style="width: 20px">
+            # 
+          </th>
+          <th style="width: 200px;">
+            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+              Reference Strain
+            </span>
+          </th>
+          <th style="width: 200px;">
+            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+              Isotype
+            </span>
+          </th>
+          <th style="width: 200px;">
+            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Individually isolated strains; If strains are assigned to the same isotype they are > 99.93% genetically identical">
+              Strains
+            </span>
+          </th>
+          <th>
+            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Previous names assigned to a strain or alternative names">
+              Alternative Names
+            </span>
+          </th>
+          <th>
+            <span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Date of original release">
+              Release
+            </span>
+          </th>
+        </tr>
+      </thead>
+
+      <tbody class="searchable">
+      {% for isotype, strains in strain_listing|groupby('isotype') %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>
+            {% set isotype_loop_index = loop.index %}
+            <label for="items-{{ isotype_loop_index }}">{{ strains[0].reference_strain }}</label>
+          </td>
+          <td>
+            <a href="{{ url_for('strains.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a>
+          </td>
+          <td>
+            {{ strains|join(", ") }}
+          </td>
+        {% if strains[0].previous_names %}
+          <td>{{ strains[0].previous_names }}</td>
+        {% else %}
+          <td></td>
+        {% endif %}
+          <td>
+            {{ strains[0]['release'] }}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      </table>
+    </div> {# /row #}
+  </div> {# /tabpanel #}
+
+  <!-- #Strain issues panel -->
+  <div role="tabpanel" class="tab-pane fade" id="Issues">
+    {% include('releases/download_tab_strain_v2_issues.html') %}
+  </div> {# /tabpanel #}
+
+  <!-- #External Links panel -->
+  <div role="tabpanel" class="tab-pane fade" id="External-links">
+    <a href="https://justbio.com/worldwideworms/" target="_blank" rel="noopener noreferrer">
+      <img src="/static/img/logos/wwworms.png" style="height: 200px;" alt="World Wide Worms"></img>
+    </a>
+  </div> {# /tabpanel #}
+
+
+</div> {# /tab-content #}
+</div> {# /col-md-12 #}
+</div> {# /row #}
+
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+
+// Icons
+var icon_norm = L.icon({
+    iconUrl: '/static/img/icons/marker.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+var icon_hover = L.icon({
+    iconUrl: '/static/img/icons/selected.png',
+    iconSize: [24, 24],
+    iconAnchor: [12, 16],
+    popupAnchor: [-3, -76]
+});
+
+// Default click_s
+var click_s = {
+  target: {
+    options: {strain: "",
+              release: "",
+              title: "",
+              isotype: "",
+              landscape: "",
+              loc: "",
+              comma: "",
+              isotype_ref_strain: "",
+              isolation_date: "",
+              location: "",
+              substrate: "",
+              sampled_by: "",
+              elevation: ""},
+    setIcon: function(){},
+  },
+  latlng: { lat: "", lng: ""},
+}
+
+
+function set_panel_from_search(m) {
+  click_s.target.setIcon(icon_norm)
+  s = m.layer.options
+  $(".strain").text(s.strain);
+  $(".isotype").html("<strong><a href='/strains/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".isotype_ref_strain").text(s.isotype_ref_strain);
+  $(".release").text(s.release);
+  $(".isolation_date").text(s.isolation_date);
+  $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
+  $(".elevation").text(s.elevation.toPrecision(4));
+  $(".landscape").text(s.landscape);
+  $(".substrate").text(s.substrate);
+  $(".sampled_by").text(s.sampled_by);
+}
+
+function set_panel_content(m) {
+  // Propogates side panel with strain information
+  click_s.target.setIcon(icon_norm)
+  s = m.target.options;
+  m.target.setIcon(icon_hover)
+  strain = s.strain;
+  loc = s.loc;
+  isolation_date = s.isolation_date;
+  sampled_by = s.sampled_by;
+  comma = s.comma;
+  elevation = s.elevation
+  latlng = m.latlng.lat + comma + m.latlng;
+  $(".strain").text(s.strain);
+  $(".isotype").html("<strong><a href='/strains/isotype/" + s.isotype + "/'>" + s.isotype + "</a></strong>");
+  $(".release").text(s.release);
+  $(".isotype_ref_strain").text(s.isotype_ref_strain);
+  $(".isolation_date").text(s.isolation_date);
+  $(".comma").text(s.comma)
+  $(".latlng").text(m.latlng.lat + s.comma + m.latlng.lng);
+  $(".elevation").text(elevation);
+  $(".landscape").text(s.landscape);
+  $(".substrate").text(s.substrate);
+  $(".sampled_by").text(s.sampled_by);
+}
+
+function set_click_locked_content(m) {
+  // Propogates side panel with click-locked content.
+  click_s.target.setIcon(icon_norm)
+  click_s = m;
+  set_panel_content(click_s)
+}
+
+function restore_click_locked_content(m) {
+  // Propogates side panel with click-locked content.
+  m.target.setIcon(icon_norm)
+  click_s.target.setIcon(icon_norm)
+  set_panel_content(click_s)
+}
+
+
+  MB_ATTR = 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, METI, TomTom, 2012';
+  MB_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+  OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  OSM_ATTRIB = '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+  var southWest = L.latLng(-90, -180),
+    northEast = L.latLng(90, 180),
+    bounds = L.latLngBounds(southWest, northEast);
+
+  var map = L.map('map', {minZoom:2, maxBounds: bounds}).setView([20, -100], 2);
+  L.tileLayer(MB_URL, {attribution: MB_ATTR, id: 'mapbox.streets', continuousWorld: false, worldCopyJump: true}).addTo(map);
+  strain_info = [];
+  strain_names = [];
+  markers = [];
+
+function naturalCompare(a, b) {
+    var ax = [], bx = [];
+    a = a.strain
+    b = b.strain
+
+    a.replace(/(\d+)|(\D+)/g, function(_, $1, $2) { ax.push([$1 || Infinity, $2 || ""]) });
+    b.replace(/(\d+)|(\D+)/g, function(_, $1, $2) { bx.push([$1 || Infinity, $2 || ""]) });
+    
+    while(ax.length && bx.length) {
+        var an = ax.shift();
+        var bn = bx.shift();
+        var nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+        if(nn) return nn;
+    }
+
+    return ax.length - bx.length;
+}
+
+
+ data = {{ strain_listing|tojson|safe }}
+ data.sort(naturalCompare)
+ strain_info = data;
+ data.forEach(function(d) {
+  if (d.latitude) {
+    strain_names.push(d.strain);
+    m = L.marker([d.latitude, d.longitude], { icon: icon_norm,
+                                        strain: d.strain,
+                                        title: d.strain,
+                                        isotype: d.isotype,
+                                        isotype_ref_strain: d.isotype_ref_strain,
+                                        search_field: `${d.strain} (${d.isotype})`,
+                                        isolation_date : d.isolation_date,
+                                        release: String(d.release).replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3"),
+                                        elevation: d.elevation + " m" ,
+                                        landscape: d.landscape,
+                                        substrate: d.substrate,
+                                        comma: ",  ",
+                                        sampled_by: d.sampled_by }).addTo(map)
+                                      .on("click", set_click_locked_content)
+                                      .on('mouseover', set_panel_content)
+                                      .on('mouseout', restore_click_locked_content)
+    markers.push(m);
+  }
+});
+
+var strain_layer = L.layerGroup(markers);
+var search_control = new L.Control.Search({layer: strain_layer,
+                                      propertyName: 'search_field',
+                                      initial: false,
+                                      collapsed: false,
+                                      position: 'topright',
+                                      tooltipLimit: 100,
+                                      casesensitive: true,
+                                      textPlaceholder :'Strain (Isotype)',
+                                      zoom: 5,
+                                      animateLocation: false,
+                                      markerLocation: false,
+                                      markerIcon: icon_hover });
+search_control.on('search_locationfound', set_panel_from_search);
+map.addControl(search_control);
+$('.search-input').width(100);
+
+$(document).ready(function() {
+
+    (function($) {
+        $('[data-toggle="tooltip"]').tooltip()
+
+        var patterns = [];
+        $('#filter').keyup(function() {
+            $('.searchable tr').hide();
+            console.log($(this).val());
+            $(this).val().split(',').forEach(function(r) {
+                var rex = new RegExp(r, "i");
+                $('.searchable tr').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            })  
+        })
+
+    }(jQuery));
+});
+
+</script>
+
+{% endblock %}

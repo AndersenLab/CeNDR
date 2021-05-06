@@ -1,0 +1,33 @@
+{% extends "_layouts/default.html" %}
+{% from "macros.html" import render_field %}
+
+{% block content %}
+
+<form id='form-submit' method="POST" action="update">
+  <div class="row">
+    <div class='col-md-3'>
+    </div> <!-- /col-md-3 -->
+    <div class='col-md-6'>
+      {{ form.csrf_token }}
+      <input hidden name="jwt_csrf_token" value="{{ jwt_csrf_token }}">
+      {{ render_field(form.full_name) }}
+      {{ render_field(form.email) }}
+      {{ render_field(form.password) }}
+      {{ render_field(form.confirm_password) }}</td>
+    </div> <!-- /col-md-6 -->
+  </div> <!-- /row -->
+
+  <div class="row">
+    <div class='col-md-3'>
+    </div> <!-- /col-md-3 -->
+    <div class='col-md-6' align="center">
+      <button id='save-btn' type='submit' value="Save" class="btn btn-primary btn-block">
+        <span class="glyphicon glyphicon-save" aria-hidden="true"></span> 
+        Save 
+      </button>
+    </div> <!-- /col-md-6 -->
+  </div> <!-- /row -->
+  
+</form>
+
+{% endblock %}

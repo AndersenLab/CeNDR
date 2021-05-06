@@ -7,13 +7,10 @@ Utility functions for running the task
 
 """
 import os
-import arrow
 import json
-import pandas as pd
-from io import StringIO
 from gcloud import datastore, storage
-from logzero import logger
 
+from base.constants import GOOGLE_CLOUD_BUCKET
 
 def get_item(kind, name):
     """
@@ -121,7 +118,7 @@ class trait_m(datastore_model):
             Stores uploaded files.
         """
         gs = storage.Client(project='andersen-lab')
-        cendr_bucket = gs.get_bucket("elegansvariation.org")
+        cendr_bucket = gs.get_bucket(GOOGLE_CLOUD_BUCKET)
         for fname in file_list:
             base_name = os.path.basename(fname)
             report_base = f"reports/{self.REPORT_VERSION}/{self.name}/{base_name}"
