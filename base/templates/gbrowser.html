@@ -102,7 +102,7 @@ th {
           <label><input type="checkbox" checked class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
         </div>
       {% endfor %}
-      {% for i in ["phyloP", "phastCons", "Variants", "Dust", "Repeat Masker", "Divergent Regions Summary" ] %}
+      {% for i in ["phyloP", "phastCons", "Dust", "Repeat Masker", "Divergent Regions Summary" ] %}
         <div class="checkbox">
           <label><input type="checkbox" class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
         </div>
@@ -140,10 +140,6 @@ th {
       <div class="col-md-4">
 
         <h5>Isotype (reference strain) <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
-
-        <div class="checkbox">
-            <label><input type="checkbox" class="list-all-strains" value="list-all-strains" />List all strain genotypes </label>
-        </div>
 
         <form class="form-inline pull-xs-right">
 
@@ -190,51 +186,6 @@ th {
 <div id="browser"></div>
 
 
-<div class="row">
-  <div class="col-md-10">
-  </div> {# /col-md-10 #}
-  <div class="col-md-2  btn-mid-row">
-    <button id='download' class="btn btn-primary btn-block">Download</button>
-  </div> {# /col-md-10 #}
-</div> {# /row #}
-
-<div class="row">
-  <div class="col-md-12 col-lg-12">
-    <div class='panel'>
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <span class="label gt-0 PASS">Passing REF</span>&nbsp;
-          <span class="label gt-2 PASS">Passing ALT</span>&nbsp;&nbsp;&nbsp;<small><strong>Note: </strong> The genome browser now only shows hard-filtered variants: </small>
-          <strong><a href='{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#variant-filters'> Details </a></strong>
-        </div>
-      </div>
-    </div>
-  </div> {# /col-lg-12 #}
-</div> {# /row #}
-
-<div class="row">
-  <div class="col-md-12 col-lg-12">
-<table style='border-radius: 5px' class="table table-hover table-striped table-condensed table-bordered table-responsive" id="variants">
-    <thead>
-      <tr>
-        <th>CHROM:POS</th>
-        <th>REF / ALT</th>
-        <th>Filter</th>
-        <th><span class='tooltip-item' data-toggle='tooltip' title='Allele Frequency'>AF</span></th>
-        <th>Gene Name</th>
-        <th>WormBase ID</th>
-        <th>Sequence</th>
-        <th>Coding Change</th>
-        <th>Biotype</th>
-        <th>Annotation</th>
-        <th>Impact</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-</table>
-
-      </div>
-  </div>
 {% endblock %}
 
 {% block script %}
@@ -285,18 +236,6 @@ var trackset = {"Genes": {
                   searchable: false
                 },
               {% endfor %}
-                "Variants": {
-                  name: "Variants",
-                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz",
-                  indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/variation/WI.{{ DATASET_RELEASE }}.hard-filter.isotype.vcf.gz.tbi",
-                  order: Number.MAX_VALUE,
-                  height: 500,
-                  displayMode: "SQUISHED",
-                  color: "#000000",
-                  homvarColor: "#0066ff",
-                  homrefColor: "#c2c2d6",
-                  visibilityWindow: 20000
-                },
                 "phastCons": {
                   name: "phastCons",
                   url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans.phastcons.bw",
@@ -399,13 +338,11 @@ $(document).ready(function () {
                           Bind browser events
                         */
                         browser.on('trackdragend', function(reference_frame, label) {
-                          refresh_variants();
                         });
 
                         // Detect track changes
                         $(".track-select").on("change", function() {
                           reload_tracks();
-                          setTimeout(refresh_variants, 1000);
                         });
 
                       });
@@ -423,7 +360,6 @@ function process_gene_search() {
            method: "GET",
            contentType: 'application/xml',
            }).done(function(msg) {
-            console.log(msg)
             row = Array();
             $.each(msg, function(i,row) {
                 if ("chrom" in row) {
@@ -447,8 +383,6 @@ function process_gene_search() {
 // Make links work!
 $(".container-fluid").on("click", ".ortholink", function() {
   igv.getBrowser().search($(this).attr("link"))
-  // Update tables and URL
-  refresh_variants();
 });
 
 
@@ -476,140 +410,6 @@ function draw_gt_set(genotype_set, genotype_val) {
 
 }
 
-var xhr;
-function refresh_variants(download = false) {
-    region = $(".igv-search-container > input").val();
-    if (/[IVXMtDNA]+:[0-9,]+-[0-9,]+/g.exec(region) != null) {
-      chrom = region.split(":")[0];
-      start = region.split(":")[1].split("-")[0].replace(/,/g, "");
-      end = region.split(":")[1].split("-")[1].replace(/,/g, "");
-      release = {{ DATASET_RELEASE }};
-
-      sample_tracks = [];
-      $(".sample-track:checked").each(function(i, e) { sample_tracks.push(e.value) })
-
-      variant_annotation = $("input[name='variant-annotation']:checked").val()
-
-      data = {'chrom': chrom,
-              'start': parseInt(start),
-              'end': parseInt(end),
-              'release': release,
-              'variant_impact': ['ALL'],
-              'sample_tracks': sample_tracks.join('_'),
-              'list-all-strains': $('.list-all-strains').prop('checked'),
-              'variant-annotation': variant_annotation
-             }
-
-      if (download == true) {
-          data['output'] = 'tsv';
-          url =  "{{ url_for('api_variant.variant_query') }}?" + $.param(data);
-          window.open(url, sprintf("%s_%s_%s.csv", chrom, start, end));
-      } else {
-
-        $("#variants > tbody").html("");
-        data['output'] = 'json';
-        data =  $.param(data);
-
-        if(xhr) {
-          xhr.abort();
-        }
-
-        // Check that strains are selected otherwise abort
-
-        xhr = $.ajax({
-          url: "{{ url_for('api_variant.variant_query') }}",
-          data: data,
-          method: "GET",
-          contentType: "application/json",
-          success: function(msg) {
-              console.log(msg)
-              $.each(msg, function(k, rec) {
-                var is_first = true;
-                var td_rowspan = 1;
-                if (rec["ANN"].length == 0) {
-                  rec["ANN"] = [{ effect: "", gene_id: null}]
-                }
-                $.each(rec['ANN'], function(annk, ann) {
-                        if (ann["gene_id"] != null)
-                        {
-                          ann["gene_id"] = `<a href='/gene/${ann["gene_id"]}'>${ann["gene_id"]}</a>`;
-                        }
-                        impact = ""
-
-                        items = [ann.gene_name,
-                                 ann.gene_id,
-                                 ann.feature_id,
-                                 ann.aa_change,
-                                 ann.transcript_biotype,
-                                 ann.effect.split("&").join(", "),
-                                 impact];
-
-                        if (is_first) {
-                            td_rowspan = rec['ANN'].length;
-                            variant_items = [`${rec["CHROM"]}:${Number(rec["POS"]).toLocaleString('en')}`,
-                                             `${rec["REF"]} / ${rec["ALT"].join(",")}`,
-                                             rec["FILTER"],
-                                             rec["AF"]]
-                            is_first = false;
-                            rowspan_td = `<td class='bold' rowspan=${td_rowspan}>`;
-                            variant_items = rowspan_td + variant_items.join(`</td>${rowspan_td}`) + "</td>"
-                        } else {
-                            variant_items = ""
-                        }
-
-                        additional_fields = [ann.gene_name + ": " , ann.filter]
-                        if (rec['FILTER'] != "PASS") {
-                          fail_variant_class = 'class="warning"'
-                        } else {
-                          fail_variant_class = ""
-                        }
-                        $("#variants > tbody").append(`<tr ${fail_variant_class}>${variant_items}<td>${items.join("</td><td>")}</td></tr>`);
-                });
-
-                if ($(".list-all-strains").prop('checked') == true) {
-                    gt_panel = $(".isotype-item").map(function () {return this.value;}).get();
-                } else {
-                    gt_panel = $(".isotype-item:checked").map(function () {return this.value;}).get();
-                }
-
-                if (gt_panel.length > 0) {
-                  gts = rec["GT"].filter(function(i) { return gt_panel.includes(i["SAMPLE"]) });
-                    // Append genotypes
-                    $("#variants > tbody").append(
-                      `<tr><td style='border-top:none;' colspan='11'>
-                        <div class='row'>
-                          <div class='col-md-12 gt_set'>
-                              <h5>Reference</h5>
-                              ${draw_gt_set(gts, 0)}
-                              <h5>Alternative</h5>
-                              ${draw_gt_set(gts, 2)}
-                              <h5>Other</h5>
-                              ${draw_gt_set(gts, 1)}
-                              ${draw_gt_set(gts, 3)}
-                          </div>
-                        </div>
-                      </td></tr>`);
-                    // enable tooltips
-                    $('.ttop').tooltip();
-                }
-
-              });
-
-            // Enable links
-            $("#variants a").on("click", function() {
-                window.location = $(this).attr('href');
-            })
-
-          }
-        }) {# /ajax #}
-        
-        } // End if else logic for download
-    } // Test for region
-}
-
-$("#download").click(function() {
-  refresh_variants(download=true);
-});
 
 var typingTimer;                //timer identifier
 var doneTypingInterval = 1000;  //time in ms (5 seconds)
@@ -622,21 +422,10 @@ $("#gene-search").on("input", function(e) {
 })
 
 
-$(".igvNavigationSearchInput").on("input paste", function() {
-  setTimeout(refresh_variants, 100);
-});
-
-$(".igvNavigationSearchInput").keypress(function(e) {
-  if(e.which == 13) {
-    setTimeout(refresh_variants, 100);
-  }
-});
-
 
 
 // Initial load
 setTimeout(reload_tracks, 500);
-setTimeout(refresh_variants, 1000);
 
 });
 
