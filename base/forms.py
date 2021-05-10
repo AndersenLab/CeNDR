@@ -166,8 +166,10 @@ class heritability_form(Form):
 
 
 #
-# Perform Mapping Form
+# Variant Browser Forms
 #
+class vbrowser_form(Form):
+  pass
 
 
 class TraitData(HiddenField):

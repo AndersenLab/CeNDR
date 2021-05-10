@@ -652,3 +652,48 @@ article {
 .dataTables-menu-top {
   padding-bottom: 10px;
 }
+
+
+.strain-vb {
+  font-family: 'Roboto', sans-serif;
+  padding-top:20px;
+}
+
+.strain-checkbox {
+  padding: 6px;
+  height: 500px;
+}
+
+.strain-btn {
+  padding-top:10px;
+}
+
+.strain-list {
+  display: inline-block;
+  font-weight: 400;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%);
+  width: 100%;
+  text-align:left;
+  border: 1px solid rgba(0,0,0,.2);
+}
+
+.strain-filter {
+  width: 100%;
+  font-weight: 400;
+  border-top:0px;
+  border-left:0px;
+  border-right:0px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom: 1px solid rgba(0,0,0,.2);
+}
+
+.variant-browser-navtab {
+  font-family: 'Roboto', sans-serif;
+  font-size: 25px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}

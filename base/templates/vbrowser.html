@@ -1,0 +1,345 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block custom_head %}
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css" />
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="row">
+
+   {# nav tabs #}
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="gene-tab active col-md-4 text-center">
+      <a href="#gene-tab" role="tab" data-toggle="tab" class="variant-browser-navtab">
+       Gene Search
+      </a>
+    </li>
+    <li role="presentation" class="interval-tab col-md-4 text-center pull-right">
+      <a href="#interval-tab" role="tab" data-toggle="tab" class="variant-browser-navtab">
+        Interval Search
+      </a>
+    </li>
+  </ul>
+
+  <div class="row">
+
+{# strain select list #}
+    <div class="col-md-1"></div>
+    <div class="col-md-2">
+      <div class="strain-vb">
+
+        <h4 class="text-center">Available Strains</h4>
+
+        <div class="pre-scrollable strain-list">
+
+          <input id="select-filter" type="text" class="strain-filter" placeholder=" Search" action="#" autocomplete="off">
+
+          <form>
+            <div class="form-group">
+              <div class="strain-checkbox">
+                <div class="strain-entry select-searchable">
+                  <input class="add-chk" type="checkbox" name="add_all" id="add_all"/> 
+                  <label for="add_all"><strong> Select All </strong></label>
+                </div>
+                <br>
+              {% for strain in strain_listing %}
+                <div class="strain-entry select-searchable">
+                  <input class="add-chk" type="checkbox" name="add_{{strain}}" id="add_{{strain}}"/> 
+                  <label for="add_{{strain}}"> {{ strain }} </label>
+                </div>
+              {% endfor %}
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="strain-btn">
+          <button class="btn btn-primary btn-block text-center" id="add-strains-btn">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
+            Add Strains
+          </button>
+        </div>
+
+      </div> {# / strain-vb #}
+    </div> {# /col-md-2 #}
+    <div class="col-md-1"></div>
+
+
+  {#- Tab panes -#}
+
+    <div class="col-md-4 text-center">
+      <div class="tab-content">
+
+        <div class="tab-pane active" role="tabpanel" id="gene-tab">
+
+          <h3><label for="gene"> Gene </label></h3>
+          <small>Search by WBGeneID, alphanumeric name (F37A4.8), or gene name (isw-1)</small>
+          <p></p>
+          
+          <form id='form-submit-gene' method='post'>
+            <div class="form-group">
+              <input name="gene" id="gene" class="form-control text-center" placeholder="isw-1">
+            </div>
+          </form>
+
+          <div class="strain-btn btn-mid-row">
+            <button class="btn btn-primary btn-block text-center" id="search-gene-btn">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
+              Search
+            </button>
+          </div>
+
+        </div>
+
+        <div class="tab-pane" role="tabpanel" id="interval-tab">
+
+          <h3><label for="interval"> Interval </label></h3>
+          <small>Search using the format [chromosome:START-STOP]</small>
+          <p></p>
+
+
+          <form id='form-submit-interval' method='post'>
+            <div class="form-group">
+              <input name="interval" id="interval" class="form-control text-center" placeholder="III:11,746,923-11,750,250">
+            </div>
+          </form>
+  
+
+          <div class="strain-btn btn-mid-row">
+            <button class="btn btn-primary btn-block text-center" id="search-interval-btn">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
+              Search
+            </button>
+          </div>
+
+        </div>
+
+      </div> {# /tabcontent #}
+    </div> {# /col-md-4 #}
+      
+
+{# strain deselect list #}
+    <div class="col-md-1"></div>
+    <div class="col-md-2">
+      <div class="strain-vb">
+        <h4 class="text-center">Selected Strains</h4>
+
+        <div class="pre-scrollable strain-list">
+
+          <input id="deselect-filter" type="text" class="strain-filter" placeholder=" Search" action="#" autocomplete="off">
+
+          <form>
+            <div class="form-group">
+              <div class="strain-checkbox">
+                <div class="strain-entry deselect-searchable">
+                  <input class="sub-chk" type="checkbox" name="sub_all" id="sub_all"/> 
+                  <label for="sub_all"><strong> Remove All </strong></label>
+                </div>
+                <br>
+              {% for strain in strain_listing %}
+                <div class="strain-entry deselect-searchable div-chk" id="div-{{strain}}" style="display:none;">
+                  <input class="sub-chk" type="checkbox" name="sub_{{strain}}" id="sub_{{strain}}"/> 
+                  <label for="sub_{{strain}}"> {{ strain }} </label>
+                </div>
+              {% endfor %}
+              </div>
+            </div>
+
+          </form>
+
+        </div>
+
+        <div class="strain-btn">
+          <button class="btn btn-primary btn-block text-center" id="sub-strains-btn">
+            <span class="glyphicon glyphicon-minus" aria-hidden="true"></span> 
+            Remove Strains
+          </button>
+        </div>
+
+      </div> {# / strain-select-vb #}
+    </div> {# /col-md-2 #}
+    <div class="col-md-1"></div>
+
+      
+</div> {# /row #}
+
+<div class="row">
+
+  <table id='variant-table' class='strain-table strain-vb table-striped table-hover table-compact' style='font-size:8px;width:100%;table-layout:fixed;'>
+    <thead>
+      <tr class="header">
+    {% for colname in column_names %}
+        <th class='data-{{colname}}'><strong> {{colname}} </strong></th>
+    {% endfor %}
+      </tr>
+    </thead>
+  
+    <tbody>
+        <tr>
+      {% for colname in column_names %}
+          <td class="data-{{colname}}"> </td>
+      {% endfor %}
+        </tr>
+    </tbody>
+  </table>
+
+</div>
+
+
+
+
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+let query_strains = [];
+let strains_to_add = [];
+let strains_to_remove = [];
+let results = {};
+
+function updateQueryStrains(strains) {
+  $(".div-chk").each(function(i, e) {
+    const name = e.id.substring(4);
+    if (strains.includes(name)) {
+      e.style.display = "block";
+    }
+    else {
+      e.style.display = "none";
+    }
+  });
+}
+
+
+function populateDataTable(data) {
+  console.log("populating data table...");
+  // clear the table before populating it with more data
+  $("#variant-table").DataTable().clear();
+  console.log(data);
+  var length = Object.keys(data).length;
+  for(var i = 0; i < length; i++) {
+    $("#variant-table").dataTable().fnAddData([
+    {% for colname in column_names %}
+      data.{{colname}}[i],
+    {% endfor %}
+    ]);
+  }
+}
+
+
+$(document).ready(function() {
+
+
+  (function($) {
+
+    const csrf_token = "{{ form.csrf_token._value() }}"
+
+    $('#select-filter').keyup(function() {
+        $('.select-searchable').hide();
+        console.log($(this).val());
+        $(this).val().split(',').forEach(function(r) {
+            var rex = new RegExp(r, "i");
+            $('.select-searchable').filter(function() {
+                return rex.test($(this).text());
+            }).show();
+        });
+    });
+
+    $('#deselect-filter').keyup(function() {
+      $('.deselect-searchable').hide();
+      console.log($(this).val());
+      $(this).val().split(',').forEach(function(r) {
+          var rex = new RegExp(r, "i");
+          $('.deselect-searchable').filter(function() {
+              return rex.test($(this).text());
+          }).show();
+      });
+    });
+
+    $("#add-strains-btn").click(function() {
+      strains_to_add = [];
+      const selected = document.querySelectorAll('input[class=add-chk]:checked');
+      selected.forEach(function(currentValue, currentIndex, listObj) {
+        name = currentValue.name.substring(4);
+        strains_to_add.push(name);
+      });
+      /* union of checklist and strain query list to avoid duplicates */
+      query_strains = query_strains.concat(strains_to_add.filter((item) => query_strains.indexOf(item) < 0));
+      updateQueryStrains(query_strains);
+    });
+
+    $("#sub-strains-btn").click(function() {
+      strains_to_remove = [];
+      const selected = document.querySelectorAll('input[class=sub-chk]:checked');
+      selected.forEach(function(currentValue, currentIndex, listObj) {
+        name = currentValue.name.substring(4);
+        strains_to_remove.push(name);
+      });
+
+      /* Set difference to remove strains */
+      query_strains = query_strains.filter(x => !strains_to_remove.includes(x));
+      updateQueryStrains(query_strains);
+      document.getElementById('sub_all').checked = false;
+    });
+
+    $("#add_all").change(function() {
+      const result = $(this).prop('checked');
+      $(".add-chk").each(function(i, e) {
+        e.checked = result;
+      });
+    });
+
+    $("#sub_all").change(function() {
+      const result = $(this).prop('checked');
+      $(".sub-chk").each(function(i, e) {
+        e.checked = result;
+      });
+    });
+
+    $("#search-interval-btn").on("click", function(e) {
+      $("#search-interval-btn").addClass("disabled");
+      const data = {
+        query_type: 'interval',
+        query: $("#interval").val(),
+        strains: query_strains
+      };
+
+      $.ajax({
+				type: "POST",
+        contentType: 'application/json',
+        dataType: 'json',
+				url: "{{ url_for('data.vbrowser_query') }}",
+				data: JSON.stringify(data),
+				success:function(result) {
+          $("#search-interval-btn").removeClass("disabled")
+          populateDataTable(result);
+				},
+        error:function(error) {
+          $("#search-interval-btn").removeClass("disabled")
+        }
+		  });
+    
+    });
+
+
+    $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrf_token);
+          }
+      }
+    });
+
+  }(jQuery));
+});
+
+
+</script>
+{% endblock %}
+

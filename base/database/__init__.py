@@ -35,7 +35,7 @@ def initialize_sqlite_database(sel_wormbase_version,
                                strain_only=False):
     """Create a static sqlite database
     Args:
-         sel_wormbase_version - e.g. WS245
+         sel_wormbase_version - e.g. WS276
 
     Generate an sqlite database
     """
