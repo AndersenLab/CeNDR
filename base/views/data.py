@@ -1,3 +1,5 @@
+import json
+from flask import request, jsonify
 import requests
 import os
 
@@ -8,7 +10,8 @@ from flask import make_response, render_template, Blueprint, send_file
 from base.constants import BAM_BAI_DOWNLOAD_SCRIPT_NAME, GOOGLE_CLOUD_BUCKET
 from base.config import config
 from base.extensions import cache
-from base.models import Strain
+from base.forms import vbrowser_form
+from base.models import Strain, StrainAnnotatedVariants
 from base.utils.gcloud import list_release_files, generate_download_signed_url_v4, download_file
 from base.utils.jwt_utils import jwt_required
 from base.views.api.api_strain import get_isotypes, query_strains
@@ -192,18 +195,74 @@ def download_bam_url(blob_name=''):
 
 
 # ============= #
-#   Browser     #
+#   GBrowser    #
 # ============= #
 
-@data_bp.route('/browser')
-@data_bp.route('/browser/<int:release>')
-@data_bp.route('/browser/<int:release>/<region>')
-@data_bp.route('/browser/<int:release>/<region>/<query>')
-def browser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", query=None):
+@data_bp.route('/gbrowser')
+@data_bp.route('/gbrowser/<int:release>')
+@data_bp.route('/gbrowser/<int:release>/<region>')
+@data_bp.route('/gbrowser/<int:release>/<region>/<query>')
+def gbrowser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", query=None):
     VARS = {'title': "Genome Browser",
             'DATASET_RELEASE': int(release),
             'strain_listing': get_isotypes(),
             'region': region,
             'query': query,
             'fluid_container': False}
-    return render_template('browser.html', **VARS)
+    return render_template('gbrowser.html', **VARS)
+
+
+# ============= #
+#   VBrowser    #
+# ============= #
+
+
+@data_bp.route('/vbrowser')
+def vbrowser():
+  title = 'Variant Browser'
+  form = vbrowser_form()
+  selected_release = config['DATASET_RELEASE']
+  strain_listing = query_strains()
+  columns = [
+    {'id': 'chrom', 'name': 'Chromosome'},
+    {'id': 'pos', 'name': 'Position'},
+    {'id': 'ref_seq', 'name': 'Ref Sequence'},
+    {'id': 'alt_seq', 'name': 'Alt Sequence'},
+    {'id': 'consequence', 'name': 'Consequence'},
+    {'id': 'gene_id', 'name': 'Gene ID'},
+    {'id': 'transcript', 'name': 'Transcript'},
+    {'id': 'biotype', 'name': 'Biotype'},
+    {'id': 'strand', 'name': 'Strand'},
+    {'id': 'amino_acid_change', 'name': 'Amino Acid Change'},
+    {'id': 'dna_change', 'name': 'DNA Change'},
+    {'id': 'strains', 'name': 'Strains'},
+    {'id': 'blosum', 'name': 'BLOSUM'},
+    {'id': 'grantham', 'name': 'Grantham'},
+    {'id': 'percent_protein', 'name': 'Percent Protein'},
+    {'id': 'gene', 'name': 'Gene'},
+    {'id': 'variant_impact', 'name': 'Variant Impact'},
+    {'id': 'divergent', 'name': 'Divergent'}
+  ]
+  return render_template('vbrowser.html', **locals())
+
+
+@data_bp.route('/vbrowser/query', methods=['POST'])
+def vbrowser_query():
+  title = 'Variant Browser'
+  selected_release = config['DATASET_RELEASE']
+  payload = json.loads(request.data)
+
+  query_type = payload.get('query_type')
+  query = payload.get('query')
+
+  is_valid = StrainAnnotatedVariants.verify_query(type=query_type, query=query)
+  if is_valid:
+    data = StrainAnnotatedVariants.run_query(type=query_type, q=query)
+    return jsonify(data)
+
+  return jsonify({})
+
+
+
+
+
