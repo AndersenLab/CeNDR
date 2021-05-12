@@ -776,26 +776,26 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
       strains affected, and severity of impact
 
   """
-  __tablename__ = 'v3'
-  idx = db.Column(db.String(), index=True, primary_key=True)
-  chrom = db.Column(db.String(), index=True)
+  __tablename__ = 'variant_annotation'
+  id = db.Column(db.Integer, primary_key=True)
+  chrom = db.Column(db.String(7), index=True)
   pos = db.Column(db.Integer(), index=True)
-  ref_seq = db.Column(db.String(), index=True)
-  alt_seq =db.Column(db.String(), index=True)
-  consequence = db.Column(db.String(), index=True)
-  wormbase_id = db.Column(db.String(), index=True)
-  transcript = db.Column(db.String(), index=True)
-  biotype = db.Column(db.String(), index=True)
-  strand = db.Column(db.String(), index=True)
-  amino_acid_change = db.Column(db.String(), index=True)
-  dna_change = db.Column(db.String(), index=True)
-  strains = db.Column(db.String(), index=True)
-  blosum = db.Column(db.String(), index=True)
-  grantham = db.Column(db.String(), index=True)
-  percent_protein = db.Column(db.Float(), index=True)
-  gene = db.Column(db.String(), index=True)
-  variant_impact = db.Column(db.String(), index=True)
-  divergent = db.Column(db.String(), index=True)
+  ref_seq = db.Column(db.String(), nullable=True)
+  alt_seq =db.Column(db.String(), nullable=True)
+  consequence = db.Column(db.String(), nullable=True)
+  gene_id = db.Column(db.String(), index=True, nullable=True)
+  transcript = db.Column(db.String(), index=True, nullable=True)
+  biotype = db.Column(db.String(), nullable=True)
+  strand = db.Column(db.String(1), nullable=True)
+  amino_acid_change = db.Column(db.String(), nullable=True)
+  dna_change = db.Column(db.String(), nullable=True)
+  strains = db.Column(db.String(), nullable=True)
+  blosum = db.Column(db.Integer(), nullable=True)
+  grantham = db.Column(db.Integer(), nullable=True)
+  percent_protein = db.Column(db.Float(), nullable=True)
+  gene = db.Column(db.String(), index=True, nullable=True)
+  variant_impact = db.Column(db.String(), nullable=True)
+  divergent = db.Column(db.Integer(), nullable=True)
 
   @classmethod
   def generate_interval_sql(cls, type, interval):
@@ -812,21 +812,19 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
 
   ''' TODO: implement input checks here and in the browser form'''
   @classmethod
-  def verify_query(cls, type, query, strains):
+  def verify_query(cls, type, query):
     return True
 
   @classmethod
-  def run_query(cls, type, q, strains):
+  def run_query(cls, type, q):
       result = {}
       # todo handle errors/no results better
       if type == 'interval':
         query = cls.generate_interval_sql(type, q)
         df = pd.read_sql_query(query, db.engine)
         
-
-      result = df[['idx', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'wormbase_id', 'transcript', 'biotype', 'strand', \
-                  'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', \
-                  'variant_impact', 'divergent']].dropna(how='any') \
+      result = df[['id', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'gene_id', 'transcript', 'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent']].dropna(how='all') \
+                                                 .fillna(value="") \
                                                  .agg(list) \
                                                  .to_dict()
       return result

@@ -64,6 +64,9 @@ class URLS:
     #
     BAM_URL_PREFIX = f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/bam"
 
+    # Variant Annotation CSV
+    STRAIN_VARIANT_ANNOTATION_URL = "https://storage.googleapis.com/elegansvariation.org/db/WI.20210121.strain-annotation.bcsq.20210401.csv"
+
     """
        Wormbase URLs
     """
