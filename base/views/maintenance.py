@@ -37,7 +37,7 @@ def cleanup_cache():
 @maintenance_bp.route('/create_bam_bai_download_script', methods=['GET'])
 def create_bam_bai_download_script():
   if verify_req_origin(request):
-    strain_listing = query_strains(release=config["DATASET_RELEASE"], is_sequenced=True)
+    strain_listing = query_strains(is_sequenced=True)
     joined_strain_list = ''
     for strain in strain_listing:
       joined_strain_list += strain.strain + ','

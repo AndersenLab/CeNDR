@@ -222,10 +222,27 @@ def vbrowser():
   title = 'Variant Browser'
   form = vbrowser_form()
   selected_release = config['DATASET_RELEASE']
-  strain_listing = query_strains(release=selected_release)
-  column_names = ['chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'wormbase_id', 'transcript',\
-                'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', \
-                'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent'];
+  strain_listing = query_strains()
+  columns = [
+    {'id': 'chrom', 'name': 'Chromosome'},
+    {'id': 'pos', 'name': 'Position'},
+    {'id': 'ref_seq', 'name': 'Ref Sequence'},
+    {'id': 'alt_seq', 'name': 'Alt Sequence'},
+    {'id': 'consequence', 'name': 'Consequence'},
+    {'id': 'gene_id', 'name': 'Gene ID'},
+    {'id': 'transcript', 'name': 'Transcript'},
+    {'id': 'biotype', 'name': 'Biotype'},
+    {'id': 'strand', 'name': 'Strand'},
+    {'id': 'amino_acid_change', 'name': 'Amino Acid Change'},
+    {'id': 'dna_change', 'name': 'DNA Change'},
+    {'id': 'strains', 'name': 'Strains'},
+    {'id': 'blosum', 'name': 'BLOSUM'},
+    {'id': 'grantham', 'name': 'Grantham'},
+    {'id': 'percent_protein', 'name': 'Percent Protein'},
+    {'id': 'gene', 'name': 'Gene'},
+    {'id': 'variant_impact', 'name': 'Variant Impact'},
+    {'id': 'divergent', 'name': 'Divergent'}
+  ]
   return render_template('vbrowser.html', **locals())
 
 
@@ -237,11 +254,10 @@ def vbrowser_query():
 
   query_type = payload.get('query_type')
   query = payload.get('query')
-  strains = payload.get('strains')
 
-  is_valid = StrainAnnotatedVariants.verify_query(type=query_type, query=query, strains=strains)
+  is_valid = StrainAnnotatedVariants.verify_query(type=query_type, query=query)
   if is_valid:
-    data = StrainAnnotatedVariants.run_query(type=query_type, q=query, strains=strains)
+    data = StrainAnnotatedVariants.run_query(type=query_type, q=query)
     return jsonify(data)
 
   return jsonify({})

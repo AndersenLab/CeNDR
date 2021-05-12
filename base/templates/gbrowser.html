@@ -119,21 +119,27 @@ th {
       </div>
       <div class="col-md-6">
 
-      <h5>Gene Search</h5>
+        <h5>Gene Search</h5>
         <input type="text" class="form-control" id="gene-search" placeholder="Gene Search (e.g. trt-1)">
-      <div id="loading-search-table" style="display:none; margin-top:20px;"><div class="spinner"><div class="bounce1"></div><div class="bounce2"></div><div class="bounce3"></div></div></div>
+        <div id="loading-search-table" style="display:none; margin-top:20px;">
+          <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+          </div>
+        </div>
 
-      <table id="search-table" class='table table-striped' style="display: none;">
-      <thead>
-      <tr>
-        <th><em>C. elegans Gene</em></th>
-        <th>Symbol/ID</th>
-        <th>Species</th>
-        <th>Source</th>
-      </tr>
-      </thead>
-    <tbody id="orthologs"></tbody>
-    </table>
+        <table id="search-table" class='table table-striped' style="display: none;">
+          <thead>
+            <tr>
+              <th><em>C. elegans Gene</em></th>
+              <th>Symbol/ID</th>
+              <th>Species</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody id="orthologs"></tbody>
+        </table>
 
       </div>
 
@@ -142,17 +148,13 @@ th {
         <h5>Isotype (reference strain) <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
 
         <form class="form-inline pull-xs-right">
-
           <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360" autocomplete="off">
-
         </form>
 
         <table id='browser_strain_list' class="table table-striped table-hover table-condensed">
 
           <tbody class="searchable">
-
-            {% for strain in strain_listing %}
-
+          {% for strain in strain_listing %}
             <tr>
               <td>
                 {{ strain.isotype }} ({{ strain.strain }})
@@ -168,9 +170,7 @@ th {
                   BAM</label>
               </td>
             </tr>
-
-            {% endfor %}
-
+          {% endfor %}
           </tbody>
 
         </table>
@@ -420,8 +420,6 @@ $("#gene-search").on("input", function(e) {
   clearTimeout(typingTimer);
   typingTimer = setTimeout(process_gene_search, doneTypingInterval);
 })
-
-
 
 
 // Initial load

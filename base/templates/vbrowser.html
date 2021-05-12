@@ -7,191 +7,177 @@
 {% endblock %}
 
 
+{% block style %}
+<style>
+
+table.dataTable thead .sorting_asc {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_asc.png") no-repeat center left;
+}
+table.dataTable thead .sorting_desc {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_desc.png") no-repeat center left;
+}
+table.dataTable thead .sorting {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_both.png") no-repeat center left;
+}
+
+mark {
+  background-color: inherit;
+}
+
+.hl-mark {
+  background-color: yellow;
+}
+
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="row">
+  <div class="col-md-8">
 
-   {# nav tabs #}
-  <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="gene-tab active col-md-4 text-center">
-      <a href="#gene-tab" role="tab" data-toggle="tab" class="variant-browser-navtab">
-       Gene Search
-      </a>
-    </li>
-    <li role="presentation" class="interval-tab col-md-4 text-center pull-right">
-      <a href="#interval-tab" role="tab" data-toggle="tab" class="variant-browser-navtab">
-        Interval Search
-      </a>
-    </li>
-  </ul>
+    {# search boxes row #}
+    <div class="row">
 
-  <div class="row">
+      {# Gene Search Block #}
+      <div class="col-md-8 text-center">
 
-{# strain select list #}
-    <div class="col-md-1"></div>
-    <div class="col-md-2">
-      <div class="strain-vb">
-
-        <h4 class="text-center">Available Strains</h4>
-
-        <div class="pre-scrollable strain-list">
-
-          <input id="select-filter" type="text" class="strain-filter" placeholder=" Search" action="#" autocomplete="off">
-
-          <form>
-            <div class="form-group">
-              <div class="strain-checkbox">
-                <div class="strain-entry select-searchable">
-                  <input class="add-chk" type="checkbox" name="add_all" id="add_all"/> 
-                  <label for="add_all"><strong> Select All </strong></label>
-                </div>
-                <br>
-              {% for strain in strain_listing %}
-                <div class="strain-entry select-searchable">
-                  <input class="add-chk" type="checkbox" name="add_{{strain}}" id="add_{{strain}}"/> 
-                  <label for="add_{{strain}}"> {{ strain }} </label>
-                </div>
-              {% endfor %}
-              </div>
-            </div>
-          </form>
+        <h3><label for="gene-search"> Gene </label></h3>
+        <form id='form-submit-gene' method='post'>
+          <div class="form-group">
+            <input name="gene-search" id="gene-search" class="form-control text-center" placeholder="isw-1">
+          </div>
+        </form>
+        <small id="gene-search-label">Search by WBGeneID, alphanumeric name (F37A4.8), or gene name (isw-1)</small>
+        <div id="loading-search-table" style="display:none; margin-top:20px;">
+          <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+          </div>
         </div>
 
-        <div class="strain-btn">
-          <button class="btn btn-primary btn-block text-center" id="add-strains-btn">
-            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
-            Add Strains
+        <table id="search-table" class='table table-striped' style="display:none;width:100%">
+          <thead>
+            <tr>
+              <th>Gene</th>
+              <th>Name</th>
+              <th>ID</th>
+            </tr>
+          </thead>
+          <tbody id="orthologs"></tbody>
+        </table>
+
+      </div> {# /col-md-8 #}
+
+      {# Interval Search Block #}
+      <div class="col-md-4 text-center">
+        <h3><label for="interval"> Interval </label></h3>
+        <form id='form-submit-interval' method='post'>
+          <div class="form-group">
+            <input name="interval" id="interval" class="form-control text-center" placeholder="III:11,746,923-11,750,250">
+          </div>
+        </form>
+        <small>Search using the format [chromosome:START-STOP]</small>
+        <div class="btn-mid-row">
+          <button class="btn btn-primary btn-block" id="search-interval-btn">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
+            Search
           </button>
         </div>
+      </div> {# /col-md-4 #}
 
-      </div> {# / strain-vb #}
-    </div> {# /col-md-2 #}
-    <div class="col-md-1"></div>
+    </div> {# /row #}
+  </div> {# /col-md-8 #}
 
+  {# Column select list block #}
+  <div class="col-md-2">
+    <h5 class="text-center">Columns</h5>
 
-  {#- Tab panes -#}
-
-    <div class="col-md-4 text-center">
-      <div class="tab-content">
-
-        <div class="tab-pane active" role="tabpanel" id="gene-tab">
-
-          <h3><label for="gene"> Gene </label></h3>
-          <small>Search by WBGeneID, alphanumeric name (F37A4.8), or gene name (isw-1)</small>
-          <p></p>
-          
-          <form id='form-submit-gene' method='post'>
-            <div class="form-group">
-              <input name="gene" id="gene" class="form-control text-center" placeholder="isw-1">
+    <div class="chk-select-list" id="col-select">
+      <form>
+        <div class="form-group">
+          <div class="select-checkbox">
+            <div class="col-entry">
+              <input class="toggle-col-chk" type="checkbox" name="toggle_all_cols" id="toggle_all_cols" checked/> 
+              <strong><label id="toggle_all_cols_label" for="toggle_all_cols"> Select All </label> </strong>
             </div>
-          </form>
-
-          <div class="strain-btn btn-mid-row">
-            <button class="btn btn-primary btn-block text-center" id="search-gene-btn">
-              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
-              Search
-            </button>
-          </div>
-
-        </div>
-
-        <div class="tab-pane" role="tabpanel" id="interval-tab">
-
-          <h3><label for="interval"> Interval </label></h3>
-          <small>Search using the format [chromosome:START-STOP]</small>
-          <p></p>
-
-
-          <form id='form-submit-interval' method='post'>
-            <div class="form-group">
-              <input name="interval" id="interval" class="form-control text-center" placeholder="III:11,746,923-11,750,250">
+            <br>
+          {% for col in columns %}
+            <div class="col-entry">
+              <input class="toggle-col-chk" type="checkbox" name="toggle_{{ col['id'] }}" id="toggle_{{ col['id'] }}" data-column="{{loop.index0}}" checked/> 
+              <label for="toggle_{{ col['id'] }}"> {{ col['name'] }} </label>
             </div>
-          </form>
-  
-
-          <div class="strain-btn btn-mid-row">
-            <button class="btn btn-primary btn-block text-center" id="search-interval-btn">
-              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
-              Search
-            </button>
+          {% endfor %}
           </div>
-
         </div>
+      </form>
+    </div> {# /col-list #}
+  </div> {# /col-md-2 #}
 
-      </div> {# /tabcontent #}
-    </div> {# /col-md-4 #}
-      
+  {# strain select list block #}
+  <div class="col-md-2">
+      <h5 class="text-center">Strains</h5>
 
-{# strain deselect list #}
-    <div class="col-md-1"></div>
-    <div class="col-md-2">
-      <div class="strain-vb">
-        <h4 class="text-center">Selected Strains</h4>
+      <div class="pre-scrollable chk-select-list sticky" id="strain-select">
 
-        <div class="pre-scrollable strain-list">
+        <input id="strain-filter" type="text" class="chk-select-filter" placeholder="Search" action="#" autocomplete="off">
 
-          <input id="deselect-filter" type="text" class="strain-filter" placeholder=" Search" action="#" autocomplete="off">
-
-          <form>
-            <div class="form-group">
-              <div class="strain-checkbox">
-                <div class="strain-entry deselect-searchable">
-                  <input class="sub-chk" type="checkbox" name="sub_all" id="sub_all"/> 
-                  <label for="sub_all"><strong> Remove All </strong></label>
-                </div>
-                <br>
-              {% for strain in strain_listing %}
-                <div class="strain-entry deselect-searchable div-chk" id="div-{{strain}}" style="display:none;">
-                  <input class="sub-chk" type="checkbox" name="sub_{{strain}}" id="sub_{{strain}}"/> 
-                  <label for="sub_{{strain}}"> {{ strain }} </label>
-                </div>
-              {% endfor %}
+        <form>
+          <div class="form-group">
+            <div class="select-checkbox">
+              <div class="strain-entry select-searchable">
+                <input class="toggle-strain-chk" type="checkbox" name="toggle_all_strains" id="toggle_all_strains" checked/> 
+                <strong><label id="toggle_all_strains_label" for="toggle_all_strains"> Select All </label></strong>
               </div>
+              <br>
+            {% for strain in strain_listing %}
+              <div class="strain-entry select-searchable">
+                <input class="toggle-strain-chk" type="checkbox" data-column="{{strain}}" id="toggle_{{strain}}" checked/> 
+                <label for="toggle_{{strain}}"> {{ strain }} </label>
+              </div>
+            {% endfor %}
             </div>
+          </div>
+        </form>
+      </div> {# /strain-list #}
+  </div> {# /col-md-2 #}
 
-          </form>
 
-        </div>
-
-        <div class="strain-btn">
-          <button class="btn btn-primary btn-block text-center" id="sub-strains-btn">
-            <span class="glyphicon glyphicon-minus" aria-hidden="true"></span> 
-            Remove Strains
-          </button>
-        </div>
-
-      </div> {# / strain-select-vb #}
-    </div> {# /col-md-2 #}
-    <div class="col-md-1"></div>
-
-      
 </div> {# /row #}
 
 <div class="row">
+  <div class="col-md-12">
+    <div id="loading-variant-table" style="display:none; margin-top:20px;">
+      <div class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+    </div>
 
-  <table id='variant-table' class='strain-table strain-vb table-striped table-hover table-compact' style='font-size:8px;width:100%;table-layout:fixed;'>
-    <thead>
-      <tr class="header">
-    {% for colname in column_names %}
-        <th class='data-{{colname}}'><strong> {{colname}} </strong></th>
-    {% endfor %}
-      </tr>
-    </thead>
-  
-    <tbody>
-        <tr>
-      {% for colname in column_names %}
-          <td class="data-{{colname}}"> </td>
-      {% endfor %}
-        </tr>
-    </tbody>
-  </table>
-
-</div>
-
-
-
-
+    <div id='result-table' style="display:none;">
+      <table id='variant-table' class='table-striped table-hover table-compact' style='font-size:8px; width:100%'>
+        <thead>
+          <tr class="header">
+        {% for col in columns %}
+            <th class="data-{{col['id']}} sorting"><strong> {{ col['name'] }} </strong></th>
+        {% endfor %}
+          </tr>
+        </thead>
+      
+        <tbody>
+            <tr>
+          {% for col in columns %}
+              <td class="data-{{col['id']}}"> </td>
+          {% endfor %}
+            </tr>
+        </tbody>
+      </table>
+    </div>
+    
+  </div> {# /col-md-12 #}
+</div> {# /row #}
 
 
 {% endblock %}
@@ -199,50 +185,177 @@
 {% block script %}
 <script>
 
-let query_strains = [];
-let strains_to_add = [];
-let strains_to_remove = [];
-let results = {};
+const doneTypingInterval = 1000;  //time in ms (5 seconds)
+const col_max_len = 20;
+const strains_per_row = 10;
 
-function updateQueryStrains(strains) {
-  $(".div-chk").each(function(i, e) {
-    const name = e.id.substring(4);
-    if (strains.includes(name)) {
-      e.style.display = "block";
+let typingTimer;                //timer identifier
+
+let dTable = null;
+const selected_strains = new Set();
+const strains_col = 11;
+
+let toggle_strain_lock = false;
+
+function init_selected_strain_set() {
+{% for strain in strain_listing %}
+  selected_strains.add('{{strain}}');
+{% endfor %}
+}
+
+function filter_rows_by_strains() {
+  $("#result-table").fadeOut();
+  $("#loading-variant-table").fadeIn();
+  /* build regex from strain set and filter */
+  let r = '|';
+  selected_strains.forEach(function(s) {
+    if (s) {
+      r += `${s},|`
     }
-    else {
-      e.style.display = "none";
-    }
+  });
+  if (r === '|') {
+    r = '^$';  /* prevent matching all with empty regex */
+  }
+  var rex = new RegExp(r);
+  $('#variant-table').dataTable().fnFilter(rex, strains_col, true, false);
+  $('#variant-table').DataTable().draw();
+  highlight_selected_strains();
+  $("#loading-variant-table").fadeOut();  
+  $("#result-table").fadeIn();
+}
+
+function highlight_selected_strains() {
+  $("mark").removeClass('hl-mark');
+  selected_strains.forEach(function(s) {
+    $(`.mark_${s}`).addClass('hl-mark');
   });
 }
 
+function process_gene_search() {
+  $("#loading-search-table").fadeOut();
+  var gene = $('#gene-search').val();
+  if (gene.length == 0) {
+    $("#search-table").fadeOut();
+  } else {
+    $("#orthologs").html("");
+    $.ajax({
+         url: "/api/gene/browser-search/" + gene,
+         method: "GET",
+         contentType: 'application/xml',
+         }).done(function(msg) {
+          row = Array();
+          $.each(msg, function(i,row) {
+            const position = row["chrom"] + ":" + row["start"] + "-" + row["end"];
+            const link = `<a onclick="set_position('${position}')" link='${position}' class='ortholink'>${row['gene_id']}</a>`;
+            const result = [row['homolog_gene'] || row["gene_symbol"], row['sequence_name'], link]
+            const table_data = "<tr><td>" + result.join("</td><td>") + "</td></tr>";
+            $("#orthologs").append(table_data);
+          });
+          $("#search-table").fadeIn();
+        });
+  }
+}
 
-function populateDataTable(data) {
-  console.log("populating data table...");
+function set_position(pos) {
+  $('#interval').val(pos);
+  $('#search-interval-btn').click();
+}
+
+function chunk_substr(str, size) {
+  let numChunks = Math.ceil(str.length / size)
+  let chunks = new Array(numChunks)
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substr(o, size)
+  }
+  return chunks
+}
+
+
+function processCol(col, id) {
+  return (id !== 'strains' && typeof col === 'string' && col.length > col_max_len) ? chunk_substr(col, col_max_len).join('<br/>') : col;
+}
+
+
+function populateDataTable() {
   // clear the table before populating it with more data
-  $("#variant-table").DataTable().clear();
-  console.log(data);
-  var length = Object.keys(data).length;
-  for(var i = 0; i < length; i++) {
-    $("#variant-table").dataTable().fnAddData([
-    {% for colname in column_names %}
-      data.{{colname}}[i],
-    {% endfor %}
+  dTable.clear();
+  const variants = Object.keys(result_data.id);
+  for(v of variants) {
+    $('#variant-table').dataTable().fnAddData([
+  {% for col in columns %}
+      processCol(result_data.{{ col['id'] }}[v], "{{ col['id'] }}"),
+  {% endfor %}
     ]);
   }
+  filter_rows_by_strains();
+  dTable.columns.adjust().draw();
+}
+
+
+function renderStrainsCol(data, type, row) {
+  let result = '<mark></mark>';
+  let strains = data.split(',');
+  let i = 0;
+  for(s of strains) {
+    if ((++i % strains_per_row) === 0) {
+      result += '<br/>'
+    }
+    result += `<mark class="mark_${s}">${s},</mark>`;
+  }
+  return result;
+}
+
+
+function init_data_table() {
+  dTable = $('#variant-table').DataTable( {
+    destroy: true,
+    paging: true,
+    scrollX: true,
+    pageLength: 100,
+    dom:"ltipr",
+    columnDefs: [
+  {% for col in columns %}
+  {% if col['id'] == 'strains' %}
+      { 
+        "name": "{{ col['id'] }}", 
+        "mRender": renderStrainsCol,
+        "targets": {{ loop.index0 }} 
+      },
+  {% else %}
+      { 
+        "name": "{{ col['id'] }}", 
+        "targets": {{ loop.index0 }} 
+      },
+  {% endif %}
+  {% endfor %}
+    ],
+    order: [[ 1, "asc" ]]
+  });
 }
 
 
 $(document).ready(function() {
 
-
   (function($) {
 
-    const csrf_token = "{{ form.csrf_token._value() }}"
+    init_selected_strain_set();
+    init_data_table();
+    
+    const csrf_token = "{{ form.csrf_token._value() }}";
 
-    $('#select-filter').keyup(function() {
+    const height = $('#col-select').height() + 'px';
+    $('.pre-scrollable').css('max-height', height);
+
+    /* Gene ortholog search */
+    $("#gene-search").on("input", function(e) {
+      $("#loading-search-table").fadeIn();
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(process_gene_search, doneTypingInterval);
+    })
+
+    /* Strain search */
+    $('#strain-filter').keyup(function() {
         $('.select-searchable').hide();
-        console.log($(this).val());
         $(this).val().split(',').forEach(function(r) {
             var rex = new RegExp(r, "i");
             $('.select-searchable').filter(function() {
@@ -251,64 +364,73 @@ $(document).ready(function() {
         });
     });
 
-    $('#deselect-filter').keyup(function() {
-      $('.deselect-searchable').hide();
-      console.log($(this).val());
-      $(this).val().split(',').forEach(function(r) {
-          var rex = new RegExp(r, "i");
-          $('.deselect-searchable').filter(function() {
-              return rex.test($(this).text());
-          }).show();
+    /* select/deselect all strains checkbox handler */
+    $("#toggle_all_strains").change(function(e) {
+      toggle_strain_lock = true;
+      const state = $(this).prop('checked');
+
+      $(".toggle-strain-chk").each(function(i, e) {
+        e.checked = state;
       });
+      if (state) {
+        init_selected_strain_set();
+      } else {
+        selected_strains.clear();
+      }
+      setTimeout(filter_rows_by_strains, 50); /* allow checkbox to be clicked before processing */
+      setTimeout(function() { 
+        toggle_strain_lock = false;
+      }, 50);
     });
 
-    $("#add-strains-btn").click(function() {
-      strains_to_add = [];
-      const selected = document.querySelectorAll('input[class=add-chk]:checked');
-      selected.forEach(function(currentValue, currentIndex, listObj) {
-        name = currentValue.name.substring(4);
-        strains_to_add.push(name);
-      });
-      /* union of checklist and strain query list to avoid duplicates */
-      query_strains = query_strains.concat(strains_to_add.filter((item) => query_strains.indexOf(item) < 0));
-      updateQueryStrains(query_strains);
+    /* strain checkbox handler */
+    $(".toggle-strain-chk").change(function() {
+      if (!toggle_strain_lock) {
+        const state = $(this).prop('checked');
+        const strain = $(this).attr('data-column');
+        if (!state) {
+          selected_strains.delete(strain);
+        } else {
+          selected_strains.add(strain);
+        }
+
+        setTimeout(filter_rows_by_strains, 50); /* allow checkbox to be clicked before processing */
+      }
     });
 
-    $("#sub-strains-btn").click(function() {
-      strains_to_remove = [];
-      const selected = document.querySelectorAll('input[class=sub-chk]:checked');
-      selected.forEach(function(currentValue, currentIndex, listObj) {
-        name = currentValue.name.substring(4);
-        strains_to_remove.push(name);
-      });
 
-      /* Set difference to remove strains */
-      query_strains = query_strains.filter(x => !strains_to_remove.includes(x));
-      updateQueryStrains(query_strains);
-      document.getElementById('sub_all').checked = false;
+    /* select/deselect all columns handler */
+    $("#toggle_all_cols").change(function(e) {
+      const state = $(this).prop('checked');
+      $(".toggle-col-chk").each(function(i, e) {
+        e.checked = state;
+      });
+      for (let i = 0; i < {{ columns.__len__() }}; i++) {
+        const column = dTable.column(i);
+        column.visible(state);
+      }
+      dTable.columns.adjust().draw();
     });
 
-    $("#add_all").change(function() {
-      const result = $(this).prop('checked');
-      $(".add-chk").each(function(i, e) {
-        e.checked = result;
-      });
+    /* columns checkbox handler */
+    $(".toggle-col-chk").change(function() {
+      const state = $(this).prop('checked');
+      const val = $(this).attr('data-column');
+      const column = dTable.column( $(this).attr('data-column') );
+      column.visible(state);
+      dTable.columns.adjust().draw();
     });
 
-    $("#sub_all").change(function() {
-      const result = $(this).prop('checked');
-      $(".sub-chk").each(function(i, e) {
-        e.checked = result;
-      });
-    });
 
     $("#search-interval-btn").on("click", function(e) {
+      $('#interval').addClass("disabled");
       $("#search-interval-btn").addClass("disabled");
       const data = {
         query_type: 'interval',
-        query: $("#interval").val(),
-        strains: query_strains
+        query: $("#interval").val()
       };
+      $("#result-table").fadeOut();
+      $("#loading-variant-table").fadeIn();
 
       $.ajax({
 				type: "POST",
@@ -317,16 +439,19 @@ $(document).ready(function() {
 				url: "{{ url_for('data.vbrowser_query') }}",
 				data: JSON.stringify(data),
 				success:function(result) {
-          $("#search-interval-btn").removeClass("disabled")
-          populateDataTable(result);
+          $("#search-interval-btn").removeClass("disabled");
+          $('#interval').removeClass("disabled");
+          result_data = result;
+          populateDataTable();
 				},
         error:function(error) {
-          $("#search-interval-btn").removeClass("disabled")
+          console.error(error);
+          $('#interval').removeClass("disabled");
+          $("#search-interval-btn").removeClass("disabled");
         }
 		  });
     
     });
-
 
     $.ajaxSetup({
       beforeSend: function(xhr, settings) {
