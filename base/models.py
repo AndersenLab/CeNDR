@@ -831,7 +831,7 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
       start = int(range.split('-')[0])
       stop = int(range.split('-')[1])
 
-      q = f'SELECT * FROM {cls.__tablename__} WHERE chrom="{chrom}" AND pos > {start} AND pos < {stop};'
+      q = f"SELECT * FROM {cls.__tablename__} WHERE chrom='{chrom}' AND pos > {start} AND pos < {stop};"
       return q
 
   ''' TODO: implement input checks here and in the browser form'''
