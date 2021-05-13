@@ -64,10 +64,10 @@ def get_config(APP_CONFIG):
   config.update(props)
   config['cloud_config'] = cc
     
-  DB_USER = config['PSQL_DB_USERNAME']
-  DB_PASS = config['PSQL_DB_PASSWORD']
-  CONNECTION = config['PSQL_DB_CONNECTION_NAME']
-  DB = config['PSQL_DB_NAME']
+  DB_USER = APP_CONFIG_VARS['PSQL_DB_USERNAME']
+  DB_PASS = APP_CONFIG_VARS['PSQL_DB_PASSWORD']
+  CONNECTION = APP_CONFIG_VARS['PSQL_DB_CONNECTION_NAME']
+  DB = APP_CONFIG_VARS['PSQL_DB_NAME']
 
   config['SQLALCHEMY_DATABASE_URI'] = f'postgres+psycopg2://{DB_USER}:{DB_PASS}@/{DB}?unix_socket=/cloudsql/{CONNECTION}'
 
