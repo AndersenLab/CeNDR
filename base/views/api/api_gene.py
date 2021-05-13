@@ -54,12 +54,12 @@ def lookup_gene(query=""):
     result = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus == query,
                                                   WormbaseGeneSummary.sequence_name == query,
                                                   WormbaseGeneSummary.gene_id == query)) \
-                                           .first()
+                                                .first()
     if not result:
         result = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus.startswith(query),
-                                                          WormbaseGeneSummary.sequence_name.startswith(query),
-                                                          WormbaseGeneSummary.gene_id.startswith(query))) \
-                                               .first()
+                                                      WormbaseGeneSummary.sequence_name.startswith(query),
+                                                      WormbaseGeneSummary.gene_id.startswith(query))) \
+                                                    .first()
     return result
 
 
