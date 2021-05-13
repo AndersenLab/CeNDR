@@ -1,12 +1,12 @@
+beta_settings:
+  cloud_sql_instances: andersen-lab:us-central1:cendr
+
 runtime: custom
 service: dev
 env: flex
 entrypoint: gunicorn -b :$PORT main:app
 runtime_config:
   python_version: 3
-
-beta_settings:
-  cloud_sql_instances: "andersen-lab:us-central1:cendr"
 
 api_version: 1
 threadsafe: true
