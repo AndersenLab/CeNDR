@@ -544,20 +544,25 @@ class WormbaseGeneSummary(DictSerializable, db.Model):
     interval = db.column_property(func.format("%s:%s-%s", chrom, start, end))
     arm_or_center = db.Column(db.String(12), index=True)
 
-    gene_id_constraint = db.UniqueConstraint(gene_id)
+    _gene_id_constraint = db.UniqueConstraint(gene_id)
+
+
+    def to_json(self):
+      return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+
 
     @classmethod
     def resolve_gene_id(cls, query):
-        """
-            query - a locus name or transcript ID
-            output - a wormbase gene ID
+      """
+          query - a locus name or transcript ID
+          output - a wormbase gene ID
 
-            Example:
-            WormbaseGene.resolve_gene_id('pot-2') --> WBGene00010195
-        """
-        result = cls.query.filter(or_(cls.locus == query, cls.sequence_name == query)).first()
-        if result:
-            return result.gene_id
+          Example:
+          WormbaseGene.resolve_gene_id('pot-2') --> WBGene00010195
+      """
+      result = cls.query.filter(or_(cls.locus == query, cls.sequence_name == query)).first()
+      if result:
+        return result.gene_id
 
 
 class Strain(DictSerializable, db.Model):
