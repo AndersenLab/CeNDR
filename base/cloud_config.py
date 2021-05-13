@@ -181,16 +181,10 @@ class CloudConfig:
     # Set the most recent release
     DATASET_RELEASE, WORMBASE_VERSION = RELEASES[0]
 
-    # SQLITE DATABASE
-    SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{SQLITE_PATH}".replace('base/', '')
-    
     return {'DATASET_RELEASE': DATASET_RELEASE,
             'WORMBASE_VERSION': WORMBASE_VERSION,
-            'RELEASES': RELEASES,
-            'SQLALCHEMY_DATABASE_URI': SQLALCHEMY_DATABASE_URI,
-            'SQLITE_PATH': SQLITE_PATH}
-
+            'RELEASES': RELEASES}
+            
   def get_external_content(self):
     releases = self.cc['releases']
     current_release = releases[0]
