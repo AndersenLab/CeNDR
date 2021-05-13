@@ -6,7 +6,7 @@ runtime_config:
   python_version: 3
 
 beta_settings:
-  cloud_sql_instances: andersen-lab:us-central1:cendr
+  cloud_sql_instances: "andersen-lab:us-central1:cendr"
 
 api_version: 1
 threadsafe: true
