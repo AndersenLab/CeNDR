@@ -41,6 +41,12 @@ def get_config(APP_CONFIG):
   config = dict()
   BASE_VARS = load_yaml("env_config/base.yaml")
   APP_CONFIG_VARS = load_yaml(f"env_config/{APP_CONFIG}.yaml")
+      
+  DB_USER = APP_CONFIG_VARS['PSQL_DB_USERNAME']
+  DB_PASS = APP_CONFIG_VARS['PSQL_DB_PASSWORD']
+  CONNECTION = APP_CONFIG_VARS['PSQL_DB_CONNECTION_NAME']
+  DB = APP_CONFIG_VARS['PSQL_DB_NAME']
+  
   config.update(BASE_VARS)
   config.update(APP_CONFIG_VARS)
 
@@ -63,11 +69,6 @@ def get_config(APP_CONFIG):
   props = cc.get_properties()
   config.update(props)
   config['cloud_config'] = cc
-    
-  DB_USER = APP_CONFIG_VARS['PSQL_DB_USERNAME']
-  DB_PASS = APP_CONFIG_VARS['PSQL_DB_PASSWORD']
-  CONNECTION = APP_CONFIG_VARS['PSQL_DB_CONNECTION_NAME']
-  DB = APP_CONFIG_VARS['PSQL_DB_NAME']
 
   config['SQLALCHEMY_DATABASE_URI'] = f'postgres+psycopg2://{DB_USER}:{DB_PASS}@/{DB}?unix_socket=/cloudsql/{CONNECTION}'
 
