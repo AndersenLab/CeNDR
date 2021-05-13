@@ -703,19 +703,25 @@ class Strain(DictSerializable, db.Model):
 
     @classmethod
     def release_summary(cls, release):
-        """
-            Returns isotype and strain count for a data release.
+      """
+          Returns isotype and strain count for a data release.
 
-            Args:
-                release - the data release
-        """
-        counts = {'strain_count': cls.query.filter((cls.release <= release) & (cls.issues == False)).count(),
-                  'strain_count_sequenced': cls.query.filter((cls.release <= release) & (cls.issues == False) & (cls.sequenced == True)).count(),
-                  'isotype_count': cls.query.filter((cls.release <= release) & (cls.issues == False) & (cls.isotype != None)).group_by(cls.isotype).count()}
-        return counts
+          Args:
+              release - the data release
+      """
+      release = int(release)
+      strain_count = cls.query.filter((cls.release <= release) & (cls.issues == False)).count()
+      strain_count_sequenced = cls.query.filter((cls.release <= release) & (cls.issues == False) & (cls.sequenced == True)).count()
+      isotype_count = cls.query.with_entities(cls.isotype).filter((cls.isotype != None), (cls.release <= release), (cls.issues == False)).group_by(cls.isotype).count()
+      
+      return {
+        'strain_count': strain_count,
+        'strain_count_sequenced': strain_count_sequenced,
+        'isotype_count': isotype_count
+      }
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+      return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class WormbaseGene(DictSerializable, db.Model):
