@@ -61,6 +61,6 @@ ADD . /app
 RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask
 
 # Download the database; GAE_VERSION set as dummy variable
-RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask download_db
+# RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask download_db
 
 CMD gunicorn -b :$PORT main:app
