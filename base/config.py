@@ -1,6 +1,8 @@
 # Application Configuration
 import os
 import yaml
+
+from logzero import logger
 from base.utils.data_utils import json_encoder
 from base.constants import DEFAULT_CLOUD_CONFIG
 from base.cloud_config import CloudConfig
@@ -41,12 +43,14 @@ def get_config(APP_CONFIG):
   config = dict()
   BASE_VARS = load_yaml("env_config/base.yaml")
   APP_CONFIG_VARS = load_yaml(f"env_config/{APP_CONFIG}.yaml")
-      
+
+  logger.log(f'APP_CONFIG: {APP_CONFIG}')  
   DB_USER = APP_CONFIG_VARS['PSQL_DB_USERNAME']
   DB_PASS = APP_CONFIG_VARS['PSQL_DB_PASSWORD']
   CONNECTION = APP_CONFIG_VARS['PSQL_DB_CONNECTION_NAME']
   DB = APP_CONFIG_VARS['PSQL_DB_NAME']
-  
+  logger.log('WHY IS THIS OUT OF DATE')
+
   config.update(BASE_VARS)
   config.update(APP_CONFIG_VARS)
 
