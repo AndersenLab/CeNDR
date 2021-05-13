@@ -44,7 +44,6 @@ def get_config(APP_CONFIG):
   config.update(BASE_VARS)
   config.update(APP_CONFIG_VARS)
 
-  config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{SQLITE_PATH}".replace("base/", "")
   config['json_encoder'] = json_encoder
   config.update({"CENDR_VERSION": CENDR_VERSION,
                   "APP_CONFIG": APP_CONFIG,
@@ -65,6 +64,8 @@ def get_config(APP_CONFIG):
   config.update(props)
   config['cloud_config'] = cc
     
+  config['SQLALCHEMY_DATABASE_URI'] = APP_CONFIG_VARS['SQLALCHEMY_DATABASE_URI']
+
   return config
 
 

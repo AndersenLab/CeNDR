@@ -219,37 +219,16 @@ def gbrowser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", 
 
 @data_bp.route('/vbrowser')
 def vbrowser():
-  title = 'Variant Browser'
+  title = 'Variant Annotation'
   form = vbrowser_form()
-  selected_release = config['DATASET_RELEASE']
   strain_listing = query_strains()
-  columns = [
-    {'id': 'chrom', 'name': 'Chromosome'},
-    {'id': 'pos', 'name': 'Position'},
-    {'id': 'ref_seq', 'name': 'Ref Sequence'},
-    {'id': 'alt_seq', 'name': 'Alt Sequence'},
-    {'id': 'consequence', 'name': 'Consequence'},
-    {'id': 'gene_id', 'name': 'Gene ID'},
-    {'id': 'transcript', 'name': 'Transcript'},
-    {'id': 'biotype', 'name': 'Biotype'},
-    {'id': 'strand', 'name': 'Strand'},
-    {'id': 'amino_acid_change', 'name': 'Amino Acid Change'},
-    {'id': 'dna_change', 'name': 'DNA Change'},
-    {'id': 'strains', 'name': 'Strains'},
-    {'id': 'blosum', 'name': 'BLOSUM'},
-    {'id': 'grantham', 'name': 'Grantham'},
-    {'id': 'percent_protein', 'name': 'Percent Protein'},
-    {'id': 'gene', 'name': 'Gene'},
-    {'id': 'variant_impact', 'name': 'Variant Impact'},
-    {'id': 'divergent', 'name': 'Divergent'}
-  ]
+  columns = StrainAnnotatedVariants.column_details
   return render_template('vbrowser.html', **locals())
 
 
 @data_bp.route('/vbrowser/query', methods=['POST'])
 def vbrowser_query():
-  title = 'Variant Browser'
-  selected_release = config['DATASET_RELEASE']
+  title = 'Variant Annotation'
   payload = json.loads(request.data)
 
   query_type = payload.get('query_type')

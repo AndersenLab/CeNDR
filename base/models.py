@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import datetime
 import requests
+
 from io import StringIO
 from flask import Markup, url_for
 from flask_sqlalchemy import SQLAlchemy
@@ -522,6 +523,43 @@ class Metadata(DictSerializable, db.Model):
     value = db.Column(db.String)																								
 
 
+class WormbaseGeneSummary(DictSerializable, db.Model):
+    """
+        This is a condensed version of the WormbaseGene model;
+        It is constructed out of convenience and only defines the genes
+        (not exons/introns/etc.)
+    """
+    __tablename__ = "wormbase_gene_summary"
+    id = db.Column(db.Integer, primary_key=True)
+    chrom = db.Column(db.String(7), index=True)
+    chrom_num = db.Column(db.Integer(), index=True)
+    start = db.Column(db.Integer(), index=True)
+    end = db.Column(db.Integer(), index=True)
+    locus = db.Column(db.String(30), index=True)
+    gene_id = db.Column(db.String(25), unique=True, index=True)
+    gene_id_type = db.Column(db.String(15), index=False)
+    sequence_name = db.Column(db.String(30), index=True)
+    biotype = db.Column(db.String(30), nullable=True)
+    gene_symbol = db.column_property(func.coalesce(locus, sequence_name, gene_id))
+    interval = db.column_property(func.format("%s:%s-%s", chrom, start, end))
+    arm_or_center = db.Column(db.String(12), index=True)
+
+    gene_id_constraint = db.UniqueConstraint(gene_id)
+
+    @classmethod
+    def resolve_gene_id(cls, query):
+        """
+            query - a locus name or transcript ID
+            output - a wormbase gene ID
+
+            Example:
+            WormbaseGene.resolve_gene_id('pot-2') --> WBGene00010195
+        """
+        result = cls.query.filter(or_(cls.locus == query, cls.sequence_name == query)).first()
+        if result:
+            return result.gene_id
+
+
 class Strain(DictSerializable, db.Model):
     __tablename__ = "strain"
     species_id_method = db.Column(db.String(50), nullable=True)
@@ -706,53 +744,19 @@ class WormbaseGene(DictSerializable, db.Model):
         return f"{self.gene_id}:{self.feature} [{self.seqname}:{self.start}-{self.end}]"
 
 
-class WormbaseGeneSummary(DictSerializable, db.Model):
-    """
-        This is a condensed version of the WormbaseGene model;
-        It is constructed out of convenience and only defines the genes
-        (not exons/introns/etc.)
-    """
-    __tablename__ = "wormbase_gene_summary"
-    id = db.Column(db.Integer, primary_key=True)
-    chrom = db.Column(db.String(7), index=True)
-    chrom_num = db.Column(db.Integer(), index=True)
-    start = db.Column(db.Integer(), index=True)
-    end = db.Column(db.Integer(), index=True)
-    locus = db.Column(db.String(30), index=True)
-    gene_id = db.Column(db.String(25), index=True)
-    gene_id_type = db.Column(db.String(15), index=False)
-    sequence_name = db.Column(db.String(30), index=True)
-    biotype = db.Column(db.String(30), nullable=True)
-    gene_symbol = db.column_property(func.coalesce(locus, sequence_name, gene_id))
-    interval = db.column_property(func.printf("%s:%s-%s", chrom, start, end))
-    arm_or_center = db.Column(db.String(12), index=True)
-
-    @classmethod
-    def resolve_gene_id(cls, query):
-        """
-            query - a locus name or transcript ID
-            output - a wormbase gene ID
-
-            Example:
-            WormbaseGene.resolve_gene_id('pot-2') --> WBGene00010195
-        """
-        result = cls.query.filter(or_(cls.locus == query, cls.sequence_name == query)).first()
-        if result:
-            return result.gene_id
-
-
 class Homologs(DictSerializable, db.Model):
     """
         The homologs database combines
     """
     __tablename__ = "homologs"
     id = db.Column(db.Integer, primary_key=True)
-    gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False, index=True)
-    gene_name = db.Column(db.String(40), index=True)
-    homolog_species = db.Column(db.String(50), index=True)
+    gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), nullable=True, index=True)
+    gene_name = db.Column(db.String(60), index=True)
+    homolog_species = db.Column(db.String(60), index=True)
     homolog_taxon_id = db.Column(db.Integer, index=True, nullable=True)  # If available
-    homolog_gene = db.Column(db.String(50), index=True)
-    homolog_source = db.Column(db.String(40))
+    homolog_gene = db.Column(db.String(60), index=True)
+    homolog_source = db.Column(db.String(60))
+    is_ortholog = db.Column(db.Boolean(), index=True, nullable=True)
 
     gene_summary = db.relationship("WormbaseGeneSummary", backref='homologs', lazy='joined')
 
@@ -781,9 +785,9 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
   chrom = db.Column(db.String(7), index=True)
   pos = db.Column(db.Integer(), index=True)
   ref_seq = db.Column(db.String(), nullable=True)
-  alt_seq =db.Column(db.String(), nullable=True)
+  alt_seq = db.Column(db.String(), nullable=True)
   consequence = db.Column(db.String(), nullable=True)
-  gene_id = db.Column(db.String(), index=True, nullable=True)
+  gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), index=True, nullable=True)
   transcript = db.Column(db.String(), index=True, nullable=True)
   biotype = db.Column(db.String(), nullable=True)
   strand = db.Column(db.String(1), nullable=True)
@@ -795,7 +799,28 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
   percent_protein = db.Column(db.Float(), nullable=True)
   gene = db.Column(db.String(), index=True, nullable=True)
   variant_impact = db.Column(db.String(), nullable=True)
-  divergent = db.Column(db.Integer(), nullable=True)
+  divergent = db.Column(db.Boolean(), nullable=True)
+
+  column_details = [
+    {'id': 'chrom', 'name': 'Chromosome'},
+    {'id': 'pos', 'name': 'Position'},
+    {'id': 'ref_seq', 'name': 'Ref Sequence'},
+    {'id': 'alt_seq', 'name': 'Alt Sequence'},
+    {'id': 'consequence', 'name': 'Consequence'},
+    {'id': 'gene_id', 'name': 'Gene ID'},
+    {'id': 'transcript', 'name': 'Transcript'},
+    {'id': 'biotype', 'name': 'Biotype'},
+    {'id': 'strand', 'name': 'Strand'},
+    {'id': 'amino_acid_change', 'name': 'Amino Acid Change'},
+    {'id': 'dna_change', 'name': 'DNA Change'},
+    {'id': 'strains', 'name': 'Strains'},
+    {'id': 'blosum', 'name': 'BLOSUM'},
+    {'id': 'grantham', 'name': 'Grantham'},
+    {'id': 'percent_protein', 'name': 'Percent Protein'},
+    {'id': 'gene', 'name': 'Gene'},
+    {'id': 'variant_impact', 'name': 'Variant Impact'},
+    {'id': 'divergent', 'name': 'Divergent'}
+  ]
 
   @classmethod
   def generate_interval_sql(cls, type, interval):
@@ -809,7 +834,6 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
       q = f'SELECT * FROM {cls.__tablename__} WHERE chrom="{chrom}" AND pos > {start} AND pos < {stop};'
       return q
 
-
   ''' TODO: implement input checks here and in the browser form'''
   @classmethod
   def verify_query(cls, type, query):
@@ -817,16 +841,16 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
 
   @classmethod
   def run_query(cls, type, q):
-      result = {}
-      # todo handle errors/no results better
-      if type == 'interval':
-        query = cls.generate_interval_sql(type, q)
-        df = pd.read_sql_query(query, db.engine)
-        
-      result = df[['id', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'gene_id', 'transcript', 'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent']].dropna(how='all') \
-                                                 .fillna(value="") \
-                                                 .agg(list) \
-                                                 .to_dict()
-      return result
+    result = {}
+    # todo handle errors/no results better
+    if type == 'interval':
+      query = cls.generate_interval_sql(type, q)
+      df = pd.read_sql_query(query, db.engine)
+      
+    result = df[['id', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'gene_id', 'transcript', 'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent']].dropna(how='all') \
+              .fillna(value="") \
+              .agg(list) \
+              .to_dict()
+    return result
 
 
