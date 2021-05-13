@@ -74,7 +74,7 @@ def get_config(APP_CONFIG):
   config.update(props)
   config['cloud_config'] = cc
 
-  config['SQLALCHEMY_DATABASE_URI'] = f'postgres+psycopg2://{DB_USER}:{DB_PASS}@/{DB}?unix_socket=/cloudsql/{CONNECTION}'
+  config['SQLALCHEMY_DATABASE_URI'] = f'postgres+psycopg2://{DB_USER}:{DB_PASS}@/{DB}?host=/cloudsql/{CONNECTION}'
 
   return config
 
