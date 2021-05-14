@@ -354,12 +354,15 @@ function init_data_table() {
   });
 
   dTable.on('column-reorder', function (e, settings, details) {
-    
     if (strains_col != details.mapping[strains_col]) {
       strains_col = details.mapping[strains_col];
-      setTimeout(highlight_selected_strains, 500);
+      setTimeout(highlight_selected_strains, 250);
     }
   });
+
+  dTable.on('page.dt', function () {
+    setTimeout(highlight_selected_strains, 250);
+} );
 
 }
 
