@@ -196,7 +196,6 @@ let typingTimer;                //timer identifier
 
 let dTable = null;
 const selected_strains = new Set();
-let strains_col = 11;
 
 let toggle_strain_lock = false;
 
@@ -274,7 +273,7 @@ function filter_rows_by_strains() {
   }
   var rex = new RegExp(r);
   hideTable();
-  $('#variant-table').dataTable().fnFilter(rex, strains_col, true, false);
+  $('#variant-table').dataTable().fnFilter(rex, 'strains:name', true, false);
   $('#variant-table').DataTable().draw();
   highlight_selected_strains();
   showTable();
@@ -354,10 +353,8 @@ function init_data_table() {
   });
 
   dTable.on('column-reorder', function (e, settings, details) {
-    if (strains_col != details.mapping[strains_col]) {
-      strains_col = details.mapping[strains_col];
-      setTimeout(highlight_selected_strains, 250);
-    }
+
+    setTimeout(highlight_selected_strains, 250);
   });
 
   dTable.on('page.dt', function () {
