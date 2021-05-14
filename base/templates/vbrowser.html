@@ -4,6 +4,8 @@
 {% block custom_head %}
     <link rel="stylesheet" href="//cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css" />
     <script type="text/javascript" src="//cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.3/css/colReorder.dataTables.min.css" />
+    <script type="text/javascript" src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
 {% endblock %}
 
 
@@ -22,6 +24,7 @@ table.dataTable thead .sorting {
 
 mark {
   background-color: inherit;
+  font-size: 8px;
 }
 
 .hl-mark {
@@ -75,16 +78,16 @@ mark {
         <h3><label for="interval"> Interval </label></h3>
         <form id='form-submit-interval' method='post'>
           <div class="form-group">
-            <input name="interval" id="interval" class="form-control text-center" placeholder="III:11,746,923-11,750,250">
+            <input name="interval" id="interval" class="form-control text-center" placeholder="III:11,746,923-11,750,250" pattern="(I|II|III|IV|V|X|MtDNA):[0-9,]+-[0-9,]+">
+          </div>
+          <small>Search using the format [chromosome:START-STOP]</small>
+          <div class="btn-mid-row">
+            <button class="btn btn-primary btn-block" id="search-interval-btn">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
+              Search
+            </button>
           </div>
         </form>
-        <small>Search using the format [chromosome:START-STOP]</small>
-        <div class="btn-mid-row">
-          <button class="btn btn-primary btn-block" id="search-interval-btn">
-            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
-            Search
-          </button>
-        </div>
       </div> {# /col-md-4 #}
 
     </div> {# /row #}
@@ -157,7 +160,7 @@ mark {
     </div>
 
     <div id='result-table' style="display:none;">
-      <table id='variant-table' class='table-striped table-hover table-compact' style='font-size:8px; width:100%'>
+      <table id='variant-table' class='table-striped table-hover table-compact' style='width:100%'>
         <thead>
           <tr class="header">
         {% for col in columns %}
@@ -193,7 +196,8 @@ let typingTimer;                //timer identifier
 
 let dTable = null;
 const selected_strains = new Set();
-const strains_col = 11;
+let strains_col = 11;
+let col_map = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17];
 
 let toggle_strain_lock = false;
 
@@ -201,34 +205,6 @@ function init_selected_strain_set() {
 {% for strain in strain_listing %}
   selected_strains.add('{{strain}}');
 {% endfor %}
-}
-
-function filter_rows_by_strains() {
-  $("#result-table").fadeOut();
-  $("#loading-variant-table").fadeIn();
-  /* build regex from strain set and filter */
-  let r = '|';
-  selected_strains.forEach(function(s) {
-    if (s) {
-      r += `${s},|`
-    }
-  });
-  if (r === '|') {
-    r = '^$';  /* prevent matching all with empty regex */
-  }
-  var rex = new RegExp(r);
-  $('#variant-table').dataTable().fnFilter(rex, strains_col, true, false);
-  $('#variant-table').DataTable().draw();
-  highlight_selected_strains();
-  $("#loading-variant-table").fadeOut();  
-  $("#result-table").fadeIn();
-}
-
-function highlight_selected_strains() {
-  $("mark").removeClass('hl-mark');
-  selected_strains.forEach(function(s) {
-    $(`.mark_${s}`).addClass('hl-mark');
-  });
 }
 
 function process_gene_search() {
@@ -270,6 +246,47 @@ function chunk_substr(str, size) {
   return chunks
 }
 
+function hideTable() {
+  $("#result-table").fadeOut();
+  $("#loading-variant-table").fadeIn();
+}
+
+function showTable() {
+  $("#loading-variant-table").fadeOut();  
+  $("#result-table").fadeIn();
+}
+
+function disableForm() {
+  $('#interval').addClass("disabled");
+  $("#search-interval-btn").addClass("disabled");
+}
+
+function enableForm() {
+  $("#search-interval-btn").removeClass("disabled");
+  $('#interval').removeClass("disabled");
+}
+
+function filter_rows_by_strains() {
+  /* build regex from strain set and filter */
+  let r = '|';
+  selected_strains.forEach(function(s) { if (s) { r += `${s},|` } });
+  if (r === '|') {
+    r = '^$';  /* prevent matching all with empty regex */
+  }
+  var rex = new RegExp(r);
+  hideTable();
+  $('#variant-table').dataTable().fnFilter(rex, strains_col, true, false);
+  $('#variant-table').DataTable().draw();
+  highlight_selected_strains();
+  showTable();
+}
+
+function highlight_selected_strains() {
+  $("mark").removeClass('hl-mark');
+  selected_strains.forEach(function(s) {
+    $(`.mark_${s}`).addClass('hl-mark');
+  });
+}
 
 function processCol(col, id) {
   return (id !== 'strains' && typeof col === 'string' && col.length > col_max_len) ? chunk_substr(col, col_max_len).join('<br/>') : col;
@@ -279,6 +296,10 @@ function processCol(col, id) {
 function populateDataTable() {
   // clear the table before populating it with more data
   dTable.clear();
+  if (Object.keys(result_data).length == 0){
+    dTable.columns.adjust().draw();
+    return;
+  }
   const variants = Object.keys(result_data.id);
   for(v of variants) {
     $('#variant-table').dataTable().fnAddData([
@@ -307,7 +328,8 @@ function renderStrainsCol(data, type, row) {
 
 
 function init_data_table() {
-  dTable = $('#variant-table').DataTable( {
+  dTable = $('#variant-table').DataTable({
+    colReorder: true,
     destroy: true,
     paging: true,
     scrollX: true,
@@ -331,6 +353,18 @@ function init_data_table() {
     ],
     order: [[ 1, "asc" ]]
   });
+
+  dTable.on('column-reorder', function (e, settings, details) {
+    let temp = col_map[details.from]
+    col_map[details.from] = col_map[details.to];
+    col_map[details.to] = temp;
+
+    if (strains_col != details.mapping[strains_col]) {
+      strains_col = details.mapping[strains_col];
+      setTimeout(highlight_selected_strains, 500);
+    }
+  });
+
 }
 
 
@@ -398,7 +432,6 @@ $(document).ready(function() {
       }
     });
 
-
     /* select/deselect all columns handler */
     $("#toggle_all_cols").change(function(e) {
       const state = $(this).prop('checked');
@@ -415,22 +448,26 @@ $(document).ready(function() {
     /* columns checkbox handler */
     $(".toggle-col-chk").change(function() {
       const state = $(this).prop('checked');
-      const val = $(this).attr('data-column');
-      const column = dTable.column( $(this).attr('data-column') );
+      const colIndex = $(this).attr('data-column');
+      const idx = col_map.indexOf(parseInt(colIndex));
+      const column = dTable.column(idx);
       column.visible(state);
       dTable.columns.adjust().draw();
     });
 
-
     $("#search-interval-btn").on("click", function(e) {
-      $('#interval').addClass("disabled");
-      $("#search-interval-btn").addClass("disabled");
+      e.preventDefault();
+      disableForm();
+      form = document.getElementById('form-submit-interval');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        enableForm();
+        return;
+      }
       const data = {
-        query_type: 'interval',
         query: $("#interval").val()
       };
-      $("#result-table").fadeOut();
-      $("#loading-variant-table").fadeIn();
+      hideTable();
 
       $.ajax({
 				type: "POST",
@@ -439,15 +476,14 @@ $(document).ready(function() {
 				url: "{{ url_for('data.vbrowser_query') }}",
 				data: JSON.stringify(data),
 				success:function(result) {
-          $("#search-interval-btn").removeClass("disabled");
-          $('#interval').removeClass("disabled");
+          enableForm();
           result_data = result;
           populateDataTable();
+          showTable();
 				},
         error:function(error) {
           console.error(error);
-          $('#interval').removeClass("disabled");
-          $("#search-interval-btn").removeClass("disabled");
+          enableForm();
         }
 		  });
     
