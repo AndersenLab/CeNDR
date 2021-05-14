@@ -231,12 +231,11 @@ def vbrowser_query():
   title = 'Variant Annotation'
   payload = json.loads(request.data)
 
-  query_type = payload.get('query_type')
   query = payload.get('query')
 
-  is_valid = StrainAnnotatedVariants.verify_query(type=query_type, query=query)
+  is_valid = StrainAnnotatedVariants.verify_interval_query(q=query)
   if is_valid:
-    data = StrainAnnotatedVariants.run_query(type=query_type, q=query)
+    data = StrainAnnotatedVariants.run_interval_query(q=query)
     return jsonify(data)
 
   return jsonify({})
