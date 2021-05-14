@@ -1,11 +1,10 @@
-from flask import request
+from flask import request, Blueprint
 from base.models import Homologs, WormbaseGeneSummary
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_, func
 from base.views.api.api_variant import variant_query
 from logzero import logger
 
-from flask import Blueprint
 
 api_gene_bp = Blueprint('api_gene',
                      __name__,
@@ -84,6 +83,8 @@ def query_gene(query=""):
                                                        WormbaseGeneSummary.gene_id.startswith(query))) \
                                            .limit(10) \
                                            .all()
+
+    results = [x.to_json() for x in results]
     return results
 
 
