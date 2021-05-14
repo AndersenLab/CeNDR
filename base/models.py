@@ -544,7 +544,7 @@ class WormbaseGeneSummary(DictSerializable, db.Model):
     interval = db.column_property(func.format("%s:%s-%s", chrom, start, end))
     arm_or_center = db.Column(db.String(12), index=True)
 
-    _gene_id_constraint = db.UniqueConstraint(gene_id)
+    __gene_id_constraint__ = db.UniqueConstraint(gene_id)
 
 
     def to_json(self):
@@ -749,7 +749,12 @@ class WormbaseGene(DictSerializable, db.Model):
     protein_id = db.Column(db.String(30), nullable=True, index=True)
     arm_or_center = db.Column(db.String(12), index=True)
 
-    gene_summary = db.relationship("WormbaseGeneSummary", backref='gene_components')
+    __gene_summary__ = db.relationship("WormbaseGeneSummary", backref='wormbase_gene', lazy='joined')
+
+
+    def to_json(self):
+      return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+
 
     def __repr__(self):
         return f"{self.gene_id}:{self.feature} [{self.seqname}:{self.start}-{self.end}]"
@@ -769,15 +774,19 @@ class Homologs(DictSerializable, db.Model):
     homolog_source = db.Column(db.String(60))
     is_ortholog = db.Column(db.Boolean(), index=True, nullable=True)
 
-    gene_summary = db.relationship("WormbaseGeneSummary", backref='homologs', lazy='joined')
+    __gene_summary__ = db.relationship("WormbaseGeneSummary", backref='homologs', lazy='joined')
+
+
+    def to_json(self):
+      return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+
 
     def unnest(self):
         """
             Used with the gene API - returns
             an unnested homolog datastructure combined with the wormbase gene summary model.
         """
-        self.__dict__.update(self.gene_summary.__dict__)
-        self.__dict__['gene_summary'] = None
+        self.__dict__.update(self.__gene_summary__.__dict__)
         return self
 
     def __repr__(self):
