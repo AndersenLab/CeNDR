@@ -353,7 +353,6 @@ function init_data_table() {
   });
 
   dTable.on('column-reorder', function (e, settings, details) {
-
     setTimeout(highlight_selected_strains, 250);
   });
 
@@ -455,7 +454,7 @@ $(document).ready(function() {
       e.preventDefault();
       disableForm();
       form = document.getElementById('form-submit-interval');
-      if (!form.checkValidity()) {
+      if (!form.checkValidity() || $("#interval").val().length == 0) {
         form.reportValidity();
         enableForm();
         return;
