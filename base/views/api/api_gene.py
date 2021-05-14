@@ -27,10 +27,10 @@ def query_homolog(query=""):
     """
     query = request.args.get('query') or query
     query = query.lower()
-    results = Homologs.query.filter(func.lower(Homologs.homolog_gene)==query) \
+    results = Homologs.query.filter((func.lower(Homologs.homolog_gene)).startswith(query)) \
                               .limit(10) \
                               .all()
-    results = [x.unnest() for x in results]
+    results = [x.unnest().to_json() for x in results]
     return results
 
 
@@ -100,7 +100,7 @@ def combined_search(query=""):
         results (list): List of dictionaries describing the homolog.
 
     """
-    return query_gene(query) + query_homolog(query)
+    return (query_gene(query) + query_homolog(query))[0:10]
 
 
 
