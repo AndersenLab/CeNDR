@@ -49,15 +49,16 @@ def lookup_gene(query=""):
 
     """
     query = request.args.get('query') or query
+    query = str(query).lower()
     # First identify exact match
-    result = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus == query,
-                                                  WormbaseGeneSummary.sequence_name == query,
-                                                  WormbaseGeneSummary.gene_id == query)) \
+    result = WormbaseGeneSummary.query.filter(or_(func.lower(WormbaseGeneSummary.locus) == query,
+                                                  func.lower(WormbaseGeneSummary.sequence_name) == query,
+                                                  func.lower(WormbaseGeneSummary.gene_id) == query)) \
                                                 .first()
     if not result:
-        result = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus.startswith(query),
-                                                      WormbaseGeneSummary.sequence_name.startswith(query),
-                                                      WormbaseGeneSummary.gene_id.startswith(query))) \
+        result = WormbaseGeneSummary.query.filter(or_(func.lower(WormbaseGeneSummary.locus).startswith(query),
+                                                      func.lower(WormbaseGeneSummary.sequence_name).startswith(query),
+                                                      func.lower(WormbaseGeneSummary.gene_id).startswith(query))) \
                                                     .first()
     return result
 
@@ -78,11 +79,12 @@ def query_gene(query=""):
 
     """
     query = request.args.get('query') or query
-    results = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus.startswith(query),
-                                                       WormbaseGeneSummary.sequence_name.startswith(query),
-                                                       WormbaseGeneSummary.gene_id.startswith(query))) \
-                                           .limit(10) \
-                                           .all()
+    query = str(query).lower()
+    results = WormbaseGeneSummary.query.filter(or_(func.lower(WormbaseGeneSummary.locus).startswith(query),
+                                                   func.lower(WormbaseGeneSummary.sequence_name).startswith(query),
+                                                   func.lower(WormbaseGeneSummary.gene_id).startswith(query))) \
+                                              .limit(10) \
+                                              .all()
 
     results = [x.to_json() for x in results]
     return results
