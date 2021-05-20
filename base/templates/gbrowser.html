@@ -73,7 +73,7 @@ th {
 }
 
 #variants {
-  font-size: 12px;
+  font-size: 1.0rem;
 }
 
 </style>
@@ -82,20 +82,15 @@ th {
 
 
 {% block content %}
-<div class="row btn-top-row">
-  <div class='col-md-10'></div>
-  <div class='col-md-2'>
-    <a class="btn btn-primary btn-block" href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}" role="button">
-      <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> 
-      Help
-    </a>
-  </div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-    <div class="well">
-    <div class="row">
-      <div class="col-md-2">
+
+
+
+<div class="container browser-row well">
+
+  <div class="row">
+
+
+    <div class="col-lg-2 col-lg-offset-1 col-md-3 col-sm-12">
       <h5>Tracks <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}#standard-tracks"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
       {% for i in ["Genes", "Transcripts"] %}
         <div class="checkbox">
@@ -116,75 +111,98 @@ th {
           <label><input type="checkbox" class="track-select normal-track" value="Transposons" />Transposons (<a href="https://andersenlab.org/publications/2017Laricchia.pdf" target='_blank'>Laricchia <em>et al.</em> 2017)</a></label>
         </div>
 
-      </div>
-      <div class="col-md-6">
+    </div> {# /col-lg-2 #}
 
-        <h5>Gene Search</h5>
-        <input type="text" class="form-control" id="gene-search" placeholder="Gene Search (e.g. trt-1)">
-        <div id="loading-search-table" style="display:none; margin-top:20px;">
-          <div class="spinner">
-            <div class="bounce1"></div>
-            <div class="bounce2"></div>
-            <div class="bounce3"></div>
-          </div>
-        </div>
 
-        <table id="search-table" class='table table-striped' style="display: none;">
-          <thead>
-            <tr>
-              <th><em>C. elegans Gene</em></th>
-              <th>Symbol/ID</th>
-              <th>Species</th>
-              <th>Source</th>
-            </tr>
-          </thead>
-          <tbody id="orthologs"></tbody>
-        </table>
 
-      </div>
+    
 
-      <div class="col-md-4">
+    <div class="col-lg-4 col-md-5 col-sm-12 ">
 
-        <h5>Isotype (reference strain) <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
-
-        <form class="form-inline pull-xs-right">
-          <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360" autocomplete="off">
-        </form>
-
-        <table id='browser_strain_list' class="table table-striped table-hover table-condensed">
-
-          <tbody class="searchable">
-          {% for strain in strain_listing %}
-            <tr>
-              <td>
-                {{ strain.isotype }} ({{ strain.strain }})
-              </td>
-              <td>
-                  <label>
-                  <input type="checkbox" class="track-select isotype-item sample-track" value="{{ strain.strain }}" />
-                  VCF</label>
-              </td>
-              <td>
-                  <label>
-                  <input type="checkbox" class="track-select sample-track-alignment" value="{{ strain.strain }}_bam" />
-                  BAM</label>
-              </td>
-            </tr>
-          {% endfor %}
-          </tbody>
-
-        </table>
+      <h5>Gene Search</h5>
+      <input type="text" class="form-control" id="gene-search" style="margin-bottom: 5px;" placeholder="Gene Search (e.g. trt-1)">
+      <div id="loading-search-table" style="display:none; margin-top:20px;">
+        <div class="spinner">
+          <div class="bounce1"></div>
+          <div class="bounce2"></div>
+          <div class="bounce3"></div>
         </div>
       </div>
 
+      <table id="g-search-table" class='table table-striped' style="display: none;">
+        <thead>
+          <tr>
+            <th><em>C. elegans Gene</em></th>
+            <th>Symbol/ID</th>
+            <th>Species</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody id="orthologs"></tbody>
+      </table>
 
+    </div> {# /col-lg-4 #}
+
+
+
+
+    <div class="col-lg-4 col-md-4 col-sm-12 ">
+
+      <h5>Isotype (reference strain) <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+
+      <form class="form-inline pull-xs-right">
+        <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360" autocomplete="off">
+      </form>
+
+      <table id='browser_strain_list' class="table table-striped table-hover table-condensed">
+
+        <tbody class="searchable">
+        {% for strain in strain_listing %}
+          <tr>
+            <td>
+              {{ strain.isotype }} ({{ strain.strain }})
+            </td>
+            <td>
+                <label>
+                <input type="checkbox" class="track-select isotype-item sample-track" value="{{ strain.strain }}" />
+                VCF</label>
+            </td>
+            <td>
+                <label>
+                <input type="checkbox" class="track-select sample-track-alignment" value="{{ strain.strain }}_bam" />
+                BAM</label>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+
+      </table>
+    </div> {# /col-lg-4 #}
+
+    
+
+  </div> {# /row #}
+
+  <div class="row">
+
+  
+    <div class='col-lg-2 col-lg-offset-9 col-md-4 col-md-offset-8 col-sm-offset-4 col-sm-4 col-xs-8 col-xs-offset-2'>
+      <a class="btn btn-primary btn-block" href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}" role="button">
+        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> 
+        Help
+      </a>
     </div>
-</div>{# Close col #}
-</div>{# Close row #}
+  </div> {# /row #}
+  
+
+</div> {# /container #}
 
 
-<div id="browser"></div>
-
+  <div class="row igv-browser-row">
+    <div class="col-lg-12 col-md-12">
+      <div id="browser"></div>
+    </div>
+  </div>
 
 {% endblock %}
 
@@ -330,7 +348,7 @@ $(document).ready(function () {
           fastaURL: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.genomic.fa",
         },
         locus: "{{ region }}",
-        tracks: []
+        tracks: [],
       };
       var browser = igv.createBrowser(div, options)
                       .then(function(browser) {
@@ -352,7 +370,7 @@ function process_gene_search() {
     $("#loading-search-table").fadeOut();
     var gene = $('#gene-search').val();
     if (gene.length == 0) {
-      $("#search-table").fadeOut();
+      $("#g-search-table").fadeOut();
     } else {
       $("#orthologs").html("");
       $.ajax({
@@ -375,7 +393,7 @@ function process_gene_search() {
                 position = row["chrom"] + ":" + row["start"];
               $("#orthologs").append(result);
             });
-            $("#search-table").fadeIn();
+            $("#g-search-table").fadeIn();
             });
     }
 }

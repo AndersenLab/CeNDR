@@ -54,7 +54,8 @@ def choose_login(error=None):
 
 @auth_bp.route("/login/basic", methods=["GET", "POST"])
 def basic_login():
-  page_title = "Login"
+  title = "Login"
+  disable_parent_breadcrumb = True
   form = basic_login_form(request.form)
   if request.method == 'POST' and form.validate():
     username = slugify(request.form.get("username"))

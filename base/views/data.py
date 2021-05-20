@@ -208,7 +208,7 @@ def gbrowser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", 
             'strain_listing': get_isotypes(),
             'region': region,
             'query': query,
-            'fluid_container': False}
+            'fluid_container': True}
     return render_template('gbrowser.html', **VARS)
 
 
@@ -223,6 +223,7 @@ def vbrowser():
   form = vbrowser_form()
   strain_listing = query_strains()
   columns = StrainAnnotatedVariants.column_details
+  fluid_container = True
   return render_template('vbrowser.html', **locals())
 
 

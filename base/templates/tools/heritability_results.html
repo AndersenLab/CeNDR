@@ -71,9 +71,11 @@
 </div>{# /row #}
 
 <div class="row">
+  <div class="col-md-12">
     {% if data %}
       <div id="svgchartarea" class='col-md-12'></div>
     {% endif %}
+  </div>
 </div>{# /row #}
 
 <div class="row">
@@ -88,21 +90,20 @@
   {% endif %}
 </div>{# /row #}
 
-<div class="row btn-mid-row">
-  <div class='col-md-3'></div>
-  <div class='col-md-2'>
+<div class="row">
+  <div class='col-md-2 col-md-offset-3 col-sm-4 col-sm-offset-0 col-xs-8 col-xs-offset-2 btn-mid-row'>
     <a class="btn btn-primary btn-block" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
       <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span> 
       View Data
     </a>
   </div>
-  <div class='col-md-2'>
+  <div class='col-md-2 col-sm-4 col-sm-offset-0 col-xs-8 col-xs-offset-2  btn-mid-row'>
     <a class="btn btn-primary btn-block" onClick="window.open('https://storage.googleapis.com/elegansvariation.org/reports/heritability/{{ data_hash }}/data.tsv')" role="button">
       <span class="glyphicon glyphicon-download" aria-hidden="true"></span> 
       Download Data
     </a>
   </div>
-  <div class='col-md-2'>
+  <div class='col-md-2 col-sm-4 col-sm-offset-0 col-xs-8 col-xs-offset-2 btn-mid-row'>
     <a class="btn btn-primary btn-block"  onClick="getPDF()" role="button">
       <span class="glyphicon glyphicon-stats" aria-hidden="true"></span> 
       Download PDF

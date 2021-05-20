@@ -125,6 +125,7 @@ def indel_primer():
     VARS = {"title": "Pairwise Indel Finder",
             "strains": SV_STRAINS,
             "chroms": CHROM_NUMERIC.keys(),
+            "fluid_container": True,
             "form": form}
     return render_template('tools/indel_primer.html', **VARS)
 

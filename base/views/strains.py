@@ -74,10 +74,8 @@ def external_links():
     """
         Strain issues shows latest data releases table of strain issues
     """
-    VARS = {
-        'title': 'External Links'
-        }
-    return render_template('strain/external_links.html', **VARS)
+    title = 'External Links'
+    return render_template('strain/external_links.html', **locals())
 
 
 #
@@ -143,7 +141,7 @@ def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
 @strains_bp.route('/catalog', methods=['GET', 'POST'])
 @cache.memoize(50)
 def strains_catalog():
-    flash(Markup("Strain mapping sets 7 and 8 will not be available until later this year."), category="warning")
+    flash(Markup("Strain mapping sets 9 and 10 will not be available until later this year."), category="warning")
     VARS = {"title": "Strain Catalog",
             "warning": request.args.get('warning'),
             "strain_listing": get_strains(),

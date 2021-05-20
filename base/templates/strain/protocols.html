@@ -1,23 +1,27 @@
 {% extends "_layouts/default.html" %}
 
 {% block content %}
+
+{% for section in protocols %}
+
 <div class="row">
-    <div class="col-md-12">
-        <div class="col-md-8">
-        {% for section in protocols %}
-            <h4>{{ section }}</h4>
-            {% for protocol in protocols[section] %}
-                    <h5>
-                        <a href="{{ gs_static('protocols/' + protocol.link) }}"><img src="{{ url_for('static', filename='img/logos/pdf.png') }}"></a> &nbsp; 
-                        <a href="{{ gs_static('protocols/' + protocol.link) }}">{{ protocol.name|safe }}</a>
-                    </h5>
-                {% endfor %}
-                {% if section == 'Maintenance' %}
-                    For common methods of <i>C. elegans</i> maintenance, see the WormBook chapter <a href="http://www.wormbook.org/chapters/www_strainmaintain/strainmaintain.html">here</a>.
-                {% endif %}
-                <br></br>
-            {% endfor %}
-        </div>
-    </div>
+
+  <div class="col-md-12">
+    <h4>{{ section }}</h4>
+    {% for protocol in protocols[section] %}
+      <h5>
+        <a href="{{ gs_static('protocols/' + protocol.link) }}"><img src="{{ url_for('static', filename='img/logos/pdf.png') }}"></a> &nbsp; 
+        <a href="{{ gs_static('protocols/' + protocol.link) }}">{{ protocol.name|safe }}</a>
+      </h5>
+    {% endfor %}
+    {% if section == 'Maintenance' %}
+      For common methods of <i>C. elegans</i> maintenance, see the WormBook chapter <a href="http://www.wormbook.org/chapters/www_strainmaintain/strainmaintain.html">here</a>.
+    {% endif %}
+      <br />
+  </div>
+
 </div>
+
+{% endfor %}
+
 {% endblock %}

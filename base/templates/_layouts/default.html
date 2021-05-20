@@ -29,27 +29,25 @@
 
                           {# BREADCRUMB #}
                           {% if request.blueprint and request.path != "/" %}
+
                           <ol class="breadcrumb">
                               <li><a href="/">Home</a></li>
-                                {% if title %}
-                                {% if title.lower() != request.blueprint.lower() %}
+
+                                {% if request.blueprint != "primary" %}
+                                  {% if disable_parent_breadcrumb %}
+                                  <li>{{ request.blueprint|title }}</li>
+                                  {% else %}
+                                  <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
+                                  {% endif %}
                                 {% endif %}
-                                    {% if request.blueprint == 'user' and is_logged_in%}
-                                    {# Direct to user profile #}
-                                    <li>Profile</li>
-                                    {% else %}
-                                    {% if request.blueprint != "primary" %}
-                                    <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
-                                    {% endif %}
-                                    {% endif %}
+                                {% if title %}
+                                  <li><strong>{{ title }}</strong></li>
                                 {% endif %}
                                 {% if subtitle %}
-                                    <li>{{ title }}</li>
-                                    <li><strong>{{ subtitle }}</strong></li>
-                                {% else %}
-                                    <li><strong>{{ title }}</strong></li>
+                                  <li><strong>{{ subtitle }}</strong></li>
                                 {% endif %}
                             </ol>
+
                             {% endif %}
                         </div>
                     </div>
@@ -74,10 +72,10 @@
                     );
                 </script>
                 
-                {% include "_includes/footer.html" %} 
             </div>
         </div><!-- closes wrap-->
     </div><!-- closes page-content-->
     {% if config.DEBUG %}{{ session }}{% endif %}
+    {% include "_includes/footer.html" %} 
     </body>
 </html>

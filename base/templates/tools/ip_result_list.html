@@ -28,15 +28,15 @@ table.dataTable thead .sorting {
 
 <div class="row">
   <div class="col-md-12">
-    <table id='ip-table' class='strain-table table-striped table-hover table-compact' style='width:100%;table-layout:fixed;'>
+    <table id='ip-table' class='strain-table table-striped table-hover table-compact' style='width:100%;'>
       <thead>
         <tr class="header">
-          <th style='width:25%' class='data-site sorting'><strong> Site </strong></th>
-          <th style='width:13%' class='data-s1 sorting'><strong> Strain 1 </strong></th>
-          <th style='width:13%' class='data-s2 sorting'><strong> Strain 2 </strong></th>
-          <th style='width:9%'  class='data-empty ordering'><strong> Empty </strong></th>
-          <th style='width:15%' class='data-status ordering'><strong> Status </strong></th>
-          <th style='width:25%' class='data-date ordering'><strong> Date </strong></th>
+          <th class='data-site sorting'><strong> Site </strong></th>
+          <th class='data-s1 sorting'><strong> Strain 1 </strong></th>
+          <th class='data-s2 sorting'><strong> Strain 2 </strong></th>
+          <th class='data-empty ordering'><strong> Empty </strong></th>
+          <th class='data-status ordering'><strong> Status </strong></th>
+          <th class='data-date ordering'><strong> Date </strong></th>
         </tr>
       </thead>
 
@@ -86,12 +86,12 @@ table.dataTable thead .sorting {
       pageLength: 25,
       aaSorting: [ [5,'desc'] ],
       aoColumns: [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
+        {"width":"25%"},
+        {"width":"13%"},
+        {"width":"13%"},
+        {"width":"9%"},
+        {"width":"15%"},
+        {"width":"25%"}
       ],
       dom:"tipr"
     });

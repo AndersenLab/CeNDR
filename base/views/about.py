@@ -32,7 +32,8 @@ def about():
     """
         About us Page - Gives an overview of CeNDR
     """
-    title = "About"
+    title = "About CeNDR"
+    disable_parent_breadcrumb = True
     strain_listing = get_isotypes(known_origin=True)
     return render_template('about/about.html', **locals())
 
@@ -43,9 +44,10 @@ def getting_started():
         Getting Started - provides information on how to get started
         with CeNDR
     """
-    VARS = {"title": "Getting Started",
-            "strain_listing": get_isotypes(known_origin=True)}
-    return render_template('about/getting_started.html', **VARS)
+    title = "Getting Started"
+    strain_listing = get_isotypes(known_origin=True)
+    disable_parent_breadcrumb = True
+    return render_template('about/getting_started.html', **locals())
 
 
 @about_bp.route('/committee/')
@@ -54,12 +56,14 @@ def committee():
         Scientific Panel Page
     """
     title = "Scientific Advisory Committee"
+    disable_parent_breadcrumb = True
     committee_data = load_yaml("advisory-committee.yaml")
     return render_template('about/committee.html', **locals())
 
 @about_bp.route('/collaborators/')
 def collaborators():
     title = "Collaborators"
+    disable_parent_breadcrumb = True
     collaborator_data = load_yaml("collaborators.yaml")
     return render_template('about/collaborators.html', **locals())
 
@@ -70,6 +74,7 @@ def staff():
         Staff Page
     """
     title = "Staff"
+    disable_parent_breadcrumb = True
     staff_data = load_yaml("staff.yaml")
     return render_template('about/staff.html', **locals())
 
@@ -81,6 +86,7 @@ def donate():
         Process donation
     """
     title = "Donate"
+    disable_parent_breadcrumb = True
     form = donation_form(request.form)
 
     # Autofill email
@@ -112,6 +118,7 @@ def donate():
 @about_bp.route('/funding/')
 def funding():
     title = "Funding"
+    disable_parent_breadcrumb = True
     funding_set = load_yaml('funding.yaml')
     return render_template('about/funding.html', **locals())
 
@@ -167,6 +174,7 @@ def statistics():
     n_users = get_unique_users()
 
     VARS = {'title': title,
+            'disable_parent_breadcrumb': True,
             'strain_collection_plot': strain_collection_plot,
             'report_summary_plot': report_summary_plot,
             'weekly_visits_plot': weekly_visits_plot,
@@ -185,6 +193,7 @@ def publications():
         List of publications that have referenced CeNDR
     """
     title = "Publications"
+    disable_parent_breadcrumb = True
     csv_prefix = config['GOOGLE_SHEET_PREFIX']
     sheet_id = config['CENDR_PUBLICATIONS_STRAIN_SHEET']
     csv_export_suffix = 'export?format=csv&id={}&gid=0'.format(sheet_id)
