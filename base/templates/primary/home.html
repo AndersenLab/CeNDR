@@ -1,112 +1,181 @@
 {% extends "_layouts/default.html" %}
 
 {% block content %}
-<div class="row home-main-container">
-    <div class="home-top-container">
-        <div class="left-container">
-            <div class="cendr-globe-logo">
-                <img src="/static/img/logo.png" alt="Andersen Lab Logo" class="pull-left hidden-xs" />
-                <p style="text-align:center; position:relative; left:10px;" class="visible-xs"><img src="/static/img/logo.png" alt="CeNDR Logo" style="margin-right:40px; max-height:150px; margin: auto; display: inline; margin-bottom:20px;" class=" img-responsive" /></p>
-            </div>
-            <div class="welcome-message">
-                <h1 class="hidden-xs lead">
-                  <strong>Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</strong>
-                </h1>
-                <div class="visible-xs lead" style="font-size: 1.4em; text-align: center;">
-                  <strong>Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</strong>
-                </div>
-                <a href="{{ url_for('about.getting_started') }}" type="button" class="btn-get-started">Get Started</a>
-            </div>
+
+{# Get Started/WormVideo #}
+<div class="row" style="background-color:#E4E0EE;">
+  
+  <div class="col-lg-4 col-lg-offset-2 col-md-6 welcome-col text-center" style="margin-top:1.8rem;margin-bottom:1.8rem;">
+    <img src="/static/img/logo.png" alt="CeNDR Logo" class="image-responsive welcome-logo" />
+    <h2><strong>Welcome to the <em>Caenorhabditis elegans</em> Natural Diversity Resource</strong></h2>
+    <span>
+      <button href="{{ url_for('about.getting_started') }}" class="btn btn-alt"> Get Started </button>
+    </span>
+  </div> {# /col-md-6 #}
+
+  <div class="col-lg-5 col-md-6 text-center welcome-col">
+    <video autoplay="true" muted="true" loop>
+      <source src="https://storage.googleapis.com/elegansvariation.org/static/video/CeNDR-Web-Video-looped.mp4" type="video/mp4">
+    </video>
+  </div> {# /col-md-6 #}
+
+</div> {# /row #}
+
+
+{# 4 major services header #}
+<div class="row">
+  <div class="col-lg-8 col-lg-offset-2 col-md-12 text-center" style="margin-top:5.0rem;">
+    <h2><strong>The <i>Caenorhabditis elegans</i> Natural Diversity Resource <br>provides four major services:</strong></h2>
+  </div>
+</div> {# /row #}
+
+
+
+{# 4 major services buttons #}
+<div class="row" style="padding-bottom:5.0rem;">
+
+  <div class="col-lg-2 col-lg-offset-2 col-md-3 col-sm-6 col-xs-6 welcome-col text-center">
+    <h3>Collection, maintenance, and distribution of wild strains</h3>
+    <span>
+      <button href="{{ url_for('strains.strains_list') }}" class="btn btn-nu"> Strains </button>
+    </span>
+  </div> {# /col-lg-2 #}
+
+  <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 welcome-col text-center">
+    <h3>Organization and dissemination of whole-genome sequences and variant data</h3>
+    <span>
+      <button href="{{ url_for('data.data') }}" class="btn btn-nu"> Data </button>
+    </span>
+  </div> {# /col-lg-2 #}
+
+  <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 welcome-col text-center">
+    <h3>Facilitation of genetic mappings to empower researchers in quantitative genetics</h3>
+    <span>
+      <button href="{{ url_for('mapping.mapping') }}" class="btn btn-nu"> Mapping </button>
+    </span>
+  </div> {# /col-lg-2 #}
+
+  <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 welcome-col text-center">
+    <h3>Utilities to enable the study of natural variation from genotyping to heritability</h3>
+    <span>
+      <button href="{{ url_for('tools.tools') }}" class="btn btn-nu"> Tools </button>
+    </span>
+  </div> {# /col-lg-2 #}
+
+</div> {# /row #}
+
+
+
+{# please cite cendr section#}
+<div class="row" style="background-color:#F0F0F0;">
+
+  <div class="col-md-8 col-md-offset-2 text-center" style="margin-top: 5.0rem;">
+    <h2>Please cite the CeNDR publication</h2>
+  </div>
+</div> {# /col-md-12 #}
+
+
+
+
+{# please cite cendr article section#}
+<div class="row welcome-cendr-article-row">
+
+  <div class="col-lg-2 col-lg-offset-3 col-md-4 col-md-offset-1 col-sm-4 text-center">
+    <div class="welcome-article-img">
+      <a href="http://andersenlab.org/publications/2016CookOxford.pdf" target="_blank">
+        <img src="/static/img/2016CookOxford.thumb.png" class="image-responsive" alt="2016CookOxford" />
+      </a>
+    </div>
+  </div> {# /col-lg-2 #}
+
+  <div class="col-lg-5 col-md-5 col-sm-8 text-left">
+    <div class="welcome-article-txt">
+      <strong>CeNDR, the <em> Caenorhabditis elegans</em> natural diversity resource</strong><br />Cook DE, Zdraljevic S, Roberts JP, Andersen EC
+      <br>
+      (2016 Oct 3) <em>Nucleic Acids Research</em>
+      <br />[ <a href="http://nar.oxfordjournals.org/content/early/2016/10/03/nar.gkw893.full">Article on Nucleic Acids Research</a> | <a title="Document Object Identifier; Takes you to the Journal Website" href="https://dx.doi.org/10.1093/nar/gkw893" target="_blank">DOI</a> | <a href="https://www.ncbi.nlm.nih.gov/pubmed/27701074" target="_blank">Pubmed</a> ]
+      <br /><br />
+      <em>Please reference this article if you use strains, data, and/or mappings from CeNDR.</em>
+    </div>
+  </div> {# /col-lg-6 #}
+
+</div> {# /row #}
+
+
+
+{# mailing list signup #}
+<div class="row welcome-mailing-list-row text-center">
+
+  <div class="col-lg-4 col-lg-offset-2 col-md-6 col-sm-12 col-xs-12 text-center">
+    <h2>Signup for our mailing list</h2>
+  </div> {# /col-lg-4 #}
+
+  <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
+    <form action="https://elegansvariation.us17.list-manage.com/subscribe/post?u=57ac68003daa4fada64672c12&amp;id=5983a0c891" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="form validate form-inline" target="_blank" novalidate>
+        <div class="form-group center-block">
+          <div class="input-group center-block">
+            <input type="email" value="" name="EMAIL" placeholder='email' class="required email form-control" id="mce-EMAIL" />  
+            <span class="input-group-btn">
+              <button type="submit" name="subscribe" class="btn btn-subscribe"> Subscribe </button>
+            </span>
+          </div>
+
+          <div id="mce-responses" class="clear">
+            <div class="response" id="mce-error-response" style="display:none"></div>
+            <div class="response" id="mce-success-response" style="display:none"></div>
+          </div> <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
+          <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_57ac68003daa4fada64672c12_5983a0c891" tabindex="-1" value=""></div>
+
         </div>
-        <video class="video-homepage-content" controls autoplay="true" muted="true" loop>
-            <source src="https://storage.googleapis.com/elegansvariation.org/static/video/CeNDR-Web-Video-looped.mp4" type="video/mp4">
-        </video>
-    </div>
-    <div class="homepage-major-services">
-        <h2>The <i>Caenorhabditis elegans</i> Natural Diversity Resource <br>provides four major services:</h2>
-        <ul class="services-container">
-            <li>
-                <h3>Collection, maintenance, <br>and distribution of <br>wild strains</h3>
-                <a href="{{ url_for('strains.strains_list') }}">Strains</a>
-            </li>
-            <li>
-                <h3>Organization and dissemination of whole-genome sequences and variant data</h3>
-                <a href="{{ url_for('data.data') }}">Data</a>
-            </li>
-            <li>
-                <h3>Facilitation of genetic mappings to empower researchers in quantitative genetics</h3>
-                <a href="{{ url_for('mapping.mapping') }}">Mapping</a>
-            </li>
-            <li>
-                <h3>Utilities to enable the study of natural variation from genotyping to heritability</h3>
-                <a href="{{ url_for('tools.tools') }}">Tools</a>
-            </li>
-        </ul>
-    </div>
+    </form>
+  </div> {# /col-lg-4 #}
 
-    <div class="cendr-publication-container">
+</div> {# /row #}
 
-        <h2>Please cite the CeNDR publication</h2>
 
-        <div class="pub">
-            <div class="pub-img"></div>
-            <div class="pub-img-small">
-                <a href="http://andersenlab.org/publications/2016CookOxford.pdf" class="thumbnail" target="_blank">
-                    <img src="/static/img/2016CookOxford.thumb.png" alt="2016CookOxford">
-                </a>
-            </div>
-            <div class="cendr-publication-info">
-                <strong>CeNDR, the <em> Caenorhabditis elegans</em> natural diversity resource</strong><br />Cook DE, Zdraljevic S, Roberts JP, Andersen EC
-                <br>
-                (2016 Oct 3) <em>Nucleic Acids Research</em>
-                <br />[ <a href="http://nar.oxfordjournals.org/content/early/2016/10/03/nar.gkw893.full">Article on Nucleic Acids Research</a> | <a title="Document Object Identifier; Takes you to the Journal Website" href="https://dx.doi.org/10.1093/nar/gkw893" target="_blank">DOI</a> | <a href="https://www.ncbi.nlm.nih.gov/pubmed/27701074" target="_blank">Pubmed</a> ]
-                <br /><br />
-                <em>Please reference this article if you use strains, data, and/or mappings from CeNDR.</em>
-            </div>
-        </div>{# /pub #}
-    </div>
+{# news section #}
 
-    <div class="mailing-list-container">
+<div class="row welcome-news-title-row">
 
-        {# Begin MailChimp Signup Form #}
-        <h4>Signup for our mailing list</h4>
-        <div id="mc_embed_signup">
-            <form action="https://elegansvariation.us17.list-manage.com/subscribe/post?u=57ac68003daa4fada64672c12&amp;id=5983a0c891" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="form validate form-inline" target="_blank" novalidate>
-                <div id="mc_embed_signup_scroll">
+    {% if files %}
+    <div class="col-lg-12 text-center">
+      <h2>News <a href="{{ url_for('primary.feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a>
+        <a href="{{ url_for('primary.news_item') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
+        <a href="{{ url_for('primary.help_item' , filename = 'Change-Log') }}" type="button" style="background-color: #f4e5fe; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">Change Log</a>
+      </h2>
+    </div> {# /col-lg-12 #}
 
-                    <div class="form-group">
-                        <input type="email" value="" name="EMAIL" placeholder='email' class="required email form-control" id="mce-EMAIL">
-                        <input type="submit" value="Subscribe" name="subscribe" class="btn btn-primary">
-                    </div>
-                    <div id="mce-responses" class="clear">
-                        <div class="response" id="mce-error-response" style="display:none"></div>
-                        <div class="response" id="mce-success-response" style="display:none"></div>
-                    </div> <!-- real people should not fill this in and expect good things - do not remove this or risk form bot signups-->
-                    <div style="position: absolute; left: -5000px;" aria-hidden="true"><input type="text" name="b_57ac68003daa4fada64672c12_5983a0c891" tabindex="-1" value=""></div>
-                </div>
-            </form>
-        </div>{# /mc-embed-signup #}
-    </div>
+</div> {# /row #}
 
-    <div class="news-homepage-container">
-        {% if files %}
-        <div>
-            <h4>News <a href="{{ url_for('primary.feed') }}" type="button" style="background-color: #FFA500; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">RSS</a>
-                <a href="{{ url_for('primary.news_item') }}" type="button" class="btn btn-primary btn-xs">Archive</a>
-                <a href="{{ url_for('primary.help_item' , filename = 'Change-Log') }}" type="button" style="background-color: #f4e5fe; border: 1px solid black; color: black;" class="btn btn-primary btn-xs">Change Log</a>
-            </h4>
-            <ul class="news-listing">
-                {% for f in files%}
 
-                <li class="list-group-item-heading"><a href="{{ url_for('primary.news_item', filename = f.strip('.md')) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> <small>{{ f[:10] }}</small></li>
-                </a>
+<div class="row welcome-news-content-row">
 
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
+  <div class="col-lg-6 col-lg-offset-3">
 
-    </div>
+    <ul class="list-group row">
+
+      {% for f in files%}
+      <ul class="list-group-item list-group-news-item col-xs-6 text-center">
+        <a href="{{ url_for('primary.news_item', filename = f.strip('.md')) }}">{{ f[11:].strip(".md").replace("-", " ") }}</a> 
+        <small>{{ f[:10] }}</small>
+      </ul>
+      {% endfor %}
+
+    </ul>
+
+
+  </div>
+      
+
+{% endif %}
+
+
+
+
+
+</div>
+
+
 </div>
 
 

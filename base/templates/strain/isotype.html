@@ -26,21 +26,21 @@
                 {% endif %}
             </div>{# col-md-6 #}
             <div class="col-md-12">
+              <div class="row">
             {% for i in isotype %}
                 {% if i.strain_photo_url() %}
-                    <row>
-                        <div class="col-md-4">
+                        <div class="col-lg-4 col-md-6 col-sm-6 col-xs-6">
                             <a href="{{ i.strain_photo_url() }}" src="_blank">
-                                <figure class="figure" style="padding:10px">
-                                    <img class="figure-img img-fluid img-thumbnail" src="{{ i.strain_thumbnail_url() }}" name="{{ i.strain }}">
+                                <figure class="figure" style="padding:10px;">
+                                    <img class="figure-img img-fluid img-thumbnail image-responsive" src="{{ i.strain_thumbnail_url() }}" name="{{ i.strain }}" style="width:100%;">
                                     <figcaption class="figure-caption text-center">{{ i.strain }}</figcaption>
                                 </figure>
                             </a>
                         </div>
-                    </row>
                 {% endif %}
             {% endfor %}
-            </div>{# /col-md-6 #}
+            </div> {# /row #}
+          </div> {# /col-md-12 #}
         </div>{# row #}        
     </div>{# col-md-8 #}
 

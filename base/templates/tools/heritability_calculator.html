@@ -6,77 +6,73 @@
 
 {% block content %}
 
+<div class="well instruction-well">
 
-<div class="row">
-  <div class="col-md-12">
-  <p>
-	This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild
-	isolates. The broad-sense heritability is the amount of trait variance that comes from genetic differences in the
-	assayed group of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental)
-    variance.
-  </p>
-  <p>
-	To obtain the best estimate of heritability, please measure a set of at least five wild strains in three
-	independent assays. These assays should use different nematode growths, synchronizations, bacterial food
-	preparations, and any other experimental condition. You should measure trait variance across as many
-	different experimental conditions (in one block) as you would typically encounter in a large experiment.
-  </p>
-  <p>
-	Please organize your data in a long format, where each row is an independent observation of one strain in one
-	  trait. The columns of the data set should be:
-  </p>
-  <ol>
-    <li><strong>AssayNumber</strong> - a numeric indicator of independent assays.</li>
-    <li><strong>Strain</strong> - one of the CeNDR isotype reference strain names.</li>
-    <li><strong>TraitName</strong> - a user-supplied name of a trait with no spaces (<i>e.g.</i> BroodSize).</li>
-    <li><strong>Replicate</strong> - independent measures of a trait within one independent assay. You
-      can think of this column as a numerical value for a technical replicate.</li>
-    <li><strong>Value</strong> - the measured output of the trait (<i>e.g.</i> 297 for BroodSize).</li>
-  </ol>
+  <div class="row">
+    <div class="col-md-12 row-margin-top">
+    <p>
+    This tool will calculate the broad-sense heritability for your trait of interest using a set of <i>C. elegans</i> wild
+    isolates. The broad-sense heritability is the amount of trait variance that comes from genetic differences in the
+    assayed group of strains. Generally, it is the ratio of genetic variance to total (genetic plus environmental) variance.
+    </p>
+    <p>
+    To obtain the best estimate of heritability, please measure a set of at least five wild strains in three
+    independent assays. These assays should use different nematode growths, synchronizations, bacterial food
+    preparations, and any other experimental condition. You should measure trait variance across as many
+    different experimental conditions (in one block) as you would typically encounter in a large experiment.
+    </p>
+    <p>
+    Please organize your data in a long format, where each row is an independent observation of one strain in one trait. The columns of the data set should be:
+    </p>
+    <ol>
+      <li><strong>AssayNumber</strong> - a numeric indicator of independent assays.</li>
+      <li><strong>Strain</strong> - one of the CeNDR isotype reference strain names.</li>
+      <li><strong>TraitName</strong> - a user-supplied name of a trait with no spaces (<i>e.g.</i> BroodSize).</li>
+      <li><strong>Replicate</strong> - independent measures of a trait within one independent assay. You
+        can think of this column as a numerical value for a technical replicate.</li>
+      <li><strong>Value</strong> - the measured output of the trait (<i>e.g.</i> 297 for BroodSize).</li>
+    </ol>
 
-<p>NA values will not be used in broad-sense heritability calculations.</p>
+  <p>NA values will not be used in broad-sense heritability calculations.</p>
 
-  </div>{# /col-md-12 #}
-</div>{# /row #}
+    </div>{# /col-md-12 #}
+  </div>{# /row #}
 
 
 {% if hide_form == True %}
 
 <div class="row">
-  <div class="col-md-3"></div> {# /col-md-3 #}
-  <div class="col-md-3">
+  <div class="col-md-3 col-md-offset-3 col-sm-5 col-sm-offset-1 col-xs-8 col-xs-offset-2 row-margin-bottom btn-mid-row">
     <a id='create' value="create" type='submit' href="{{ url_for('heritability.heritability_create') }}" class="btn btn-primary btn-block">
       <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> 
       New Calculation
     </a>
   </div> {# /col-md-3 #}
-  <div class="col-md-3">
+  <div class="col-md-3 col-sm-5 col-sm-offset-0 col-xs-8 col-xs-offset-2 row-margin-bottom btn-mid-row">
     <a id='create' value="create" type='submit' href="{{ url_for('heritability.heritability_result_list') }}" class="btn btn-primary btn-block">
       <span class="glyphicon glyphicon-list" aria-hidden="true"></span> 
       My Reports
     </a>
   </div> {# /col-md-3 #}
-  <div class="col-md-3"></div> {# /col-md-3 #}
 
 </div>{# /row #}
 
+</div> {# /well #}
+
 {% else %}
+</div> {# /well #}
+
 
 <div class="row">
 
-  <div class='col-md-3'>
-  </div>{#/ col-md-3 #}
-
-  <div class='col-md-3'></div> {# /col-md-3 #}
-
-  <div class='col-md-3'>
+  <div class='col-md-3 col-md-offset-6 col-sm-offset-0 col-sm-6 row-margin-top'>
     <a id='set-example' value="set-example" type='submit' class="btn btn-primary btn-block">
       <span class="glyphicon glyphicon-import" aria-hidden="true"></span> 
       Load sample data
     </a>
   </div> {# /col-md-3 #}
 
-  <div class="col-md-3">
+  <div class="col-md-3 col-sm-6 row-margin-top">
     <a id='hcalc' value="hcalc" type='submit' class="btn btn-primary btn-block">
       <span class="glyphicon glyphicon-flash" aria-hidden="true"></span> 
       Calculate Heritability

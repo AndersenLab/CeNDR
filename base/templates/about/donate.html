@@ -3,9 +3,11 @@
 {% from "macros.html" import render_field %}
 
   <div class="row">
+
     <div class="col-md-6">
       {{ render_markdown("donate.md") }}
-    </div>
+    </div> {# /col-md-6 #}
+
     <div class="col-md-6">
       <div class="panel panel-default">
         <div class="panel-heading">Donate</div>
@@ -19,9 +21,9 @@
             {{ form.recaptcha }}
           <br />
           <button id='donate_amount' type='submit' value="Checkout" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Donate</button>
-      </form>
+        </form>
+      </div>
     </div>
-  </div>
-</div>
-</div>
+  </div> {# /col-md-6 #}
+</div> {# /row #}
 {% endblock %}

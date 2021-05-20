@@ -27,8 +27,11 @@ table.dataTable thead .sorting {
 {{ render_dataTable_top_menu() }}
 
 <div class="row">
+
   <div class="col-md-12">
-    <table id='h2-table' class='strain-table table-striped table-hover table-compact' style='width:100%'>
+
+    <table id='h2-table' class='table table-hover table-striped table-compact strain-table' style="width: 100%;">
+
       <thead>
         <tr class="header">
           <th class='data-label sorting'><strong> Label </strong></th>
@@ -61,8 +64,8 @@ table.dataTable thead .sorting {
 
     </table>
 
-  </div> <!-- /col-md-12 -->
-</div> <!-- /row -->
+  </div> {# /col #}
+</div> {# /row #}
 
 
 {% endblock %}
@@ -76,12 +79,13 @@ table.dataTable thead .sorting {
     const dTable = $('#h2-table').DataTable( {
       paging: true,
       pageLength: 25,
+      autoWidth: true,
       aaSorting: [ [3,'desc'] ],
       aoColumns: [
-        null,
-        null,
-        null,
-        null
+        {"width": "25%"},
+        {"width": "25%"},
+        {"width": "25%"},
+        {"width": "25%"}
       ],
       dom:"tipr"
     });

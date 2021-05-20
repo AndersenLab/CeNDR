@@ -224,7 +224,7 @@ td.isotype-item label {
 #browser_strain_list thead, #browser_strain_list tbody { display: block; }
 
 #browser_strain_list tbody {
-    height: 240px;       /* Just for the demo          */
+    height: 15.0rem;       /* Just for the demo          */
     overflow-y: auto;    /* Trigger vertical scroll    */
     overflow-x: hidden;  /* Hide the horizontal scroll */
 }
@@ -238,19 +238,39 @@ td.isotype-item label {
   display: block;
 }
 
-#search-table {
-  max-height: 500px;
+#g-search-table {
+  max-height: 15.0rem;
   width: 100%;
   display: block;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
-#search-table td, th {
+#g-search-table td, th {
   width: 25%;
   width: 1px solid #999999;
 }
 
-#search-table a {
+#g-search-table a {
+  cursor: pointer;
+}
+
+
+#v-search-table {
+  max-height: 15.0rem;
+  width: 100%;
+  display: block;
+  table-layout: fixed;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#v-search-table td, th {
+  width: 40%;
+  width: 1px solid #999999;
+}
+
+#v-search-table a {
   cursor: pointer;
 }
 
@@ -276,19 +296,20 @@ td.isotype-item label {
     overflow-x: hidden;
 }
 
+@media (min-width: 900px) {
+  .dropdown:hover .dropdown-menu {
+      right: 100;
+      left: auto;
+      display: block;
+      position: absolute;
+  }
+}
+
 .dropdown-menu .sub-menu {
-    left: 100%;
+    left: 0%;
     position: absolute;
     top: 0;
     visibility: hidden;
-}
-
-.dropdown-menu li:hover .sub-menu {
-    visibility: visible;
-}
-
-.dropdown:hover .dropdown-menu {
-    display: block;
 }
 
 .nav-tabs .dropdown-menu, .nav-pills .dropdown-menu, .navbar .dropdown-menu {
@@ -304,6 +325,7 @@ td.isotype-item label {
     left: -7px;
     top: 10px;
 }
+
 .navbar .sub-menu:after {
     border-top: 6px solid transparent;
     border-left: none;
@@ -629,14 +651,15 @@ article {
 }
 
 .btn-mid-row {
-  padding:40px 0px;
+  padding-top: 2.0rem;
+  padding-bottom: 2.0rem;
 }
 
 .btn-top-row {
-  padding-top: 0px;
-  padding-bottom: 40px;
-  padding-left: 0px;
-  padding-right: 0px;
+  padding-top: 0.0rem;
+  padding-bottom: 1.0rem;
+  padding-left: 0.0rem;
+  padding-right: 0.0rem;
 }
 
 .dataTables_filter {
@@ -661,6 +684,7 @@ article {
 
 .select-checkbox {
   padding: 6px;
+  background-color: #fff;
 }
 
 .strain-btn {
@@ -668,6 +692,7 @@ article {
 }
 
 .chk-select-list {
+  background-color: #fff;
   display: inline-block;
   font-weight: 400;
   font-size:0.8em;
@@ -689,4 +714,272 @@ article {
   padding-left: 5px;
   padding-right: 5px;
   border-bottom: 1px solid rgba(0,0,0,.2);
+}
+
+.root-nav {
+  margin: 1.0rem;
+  margin-left: 0.5rem;
+}
+
+.cendr-brand-txt {
+  font-size:50px;
+}
+
+.cendr-brand-txt a {
+  text-decoration:none;
+}
+
+.nu-brand-logo img {
+  height: 28px;
+  padding-bottom: 6px;
+}
+
+.row-padding-bottom {
+  padding-bottom:20px;
+}
+
+.icon-padding {
+  width: 100%;
+  padding: 10%;
+  padding-bottom: 20%;
+}
+
+.nopadding {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.nu-footer {
+  background: #4e2a84;
+}
+
+.nu-footer-col {
+  background: #4e2a84;
+  float: left;
+  height:400px;
+  padding-bottom: 48px;
+  padding-top: 48px;
+}
+
+.nu-footer-col img {
+  margin-bottom: 20px;
+  max-width: 170px;
+}
+
+.nu-footer-col ul {
+  display: inline-block;
+  text-align: center;
+}
+
+.nu-footer-col li, .nu-footer-col p {
+  text-align: left;
+  font-size: 0.8em;
+  color: #FFFFFF;
+  padding-bottom: 1.0rem !important;
+  margin-bottom: unset !important;
+}
+
+.nu-footer-col a {
+  color: #FFFFFF;
+  text-decoration: underline;
+}
+
+.nu-footer-col-2 span {
+  color: #FFFFFF;
+  padding-left: 2.5rem;
+  margin-top: 1.0rem;
+  margin-right: -4.5rem;
+  font-size: 1.5rem;
+  float:left;
+}
+
+.nu-footer-col-2 ul {
+  display: inline-block;
+  text-align: center;
+}
+
+.nu-footer-col-2 li {
+  padding-left: 4.5rem;
+  text-align: left;
+  font-size: 0.8em;
+  color: #FFFFFF;
+}
+
+.nu-footer-col-3 i {
+  color: #FFFFFF;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.nu-footer-col-3 img {
+  color: #FFFFFF;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+
+.nu-footer-col-3 table {
+  width: 100%;
+}
+
+.nu-footer-col-3-title {
+  text-align: center;
+  font-size: 0.8em;
+  color: #FFFFFF;
+  padding-top: 0.5rem;
+  padding-bottom: 1.0rem !important;
+  margin-bottom: unset !important;
+}
+
+.welcome-logo {
+  max-width: 30%;
+  max-height: 150px;
+}
+
+.welcome-col button {
+  width: 50%;
+  margin: 1.0rem;
+}
+
+.welcome-col h2 {
+  display: inline-block;
+  font-size: 1.7rem;
+  margin: 1.0rem;
+}
+
+.welcome-col h3 {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 300;
+  margin-top: 3.0rem;
+  height: 4.0rem;
+}
+
+.welcome-col video {
+  width: 100%;
+  max-height: 400px;
+  border: 0px;
+  margin-bottom: -3px;
+}
+
+.btn-nu {
+  background-color: #401F68;
+  color: #ffffff;
+}
+
+.btn-alt {
+  background-color:#FFC400;
+  color: #000000;
+}
+
+.welcome-article-img {
+  margin: 0.5rem;
+  margin-bottom:1.0rem;
+}
+
+.welcome-article-txt {
+  margin: 0.5rem;
+}
+
+.welcome-cendr-article-row {
+  background-color:#F0F0F0; 
+  padding-top:1.0rem; 
+  padding-bottom:5.0rem;
+}
+
+.welcome-mailing-list-row {
+  background-color: #401F68;
+  color: #fff;
+  padding-top: 5.0rem;
+  padding-bottom: 5.0rem;
+}
+
+.welcome-mailing-list-row  h2{
+  color: #fff;
+  font-size: 2.1rem;
+  margin: 1.0rem;
+}
+
+.welcome-mailing-list-row .form-group {
+  width: 70%;
+}
+
+
+.welcome-mailing-list-row .input-group {
+  margin-bottom: 1.0rem;
+  margin-top: 1.0rem;
+  font-size: 2.1rem;
+  width: 100%;
+}
+
+.welcome-mailing-list-row input {
+  border-radius: 0 0 0 0;
+}
+
+.welcome-mailing-list-row button {
+  background: #FFC400;
+  color: #000;
+  border-radius: 0 0 0 0;
+  width: 100%;
+}
+
+.btn-subscribe {
+  margin-left: 0px;
+}
+
+.welcome-news-title-row {
+  padding-top: 5.0rem;
+  padding-bottom: 1.5rem;
+}
+
+.welcome-news-content-row {
+  padding-bottom: 5.0rem;
+}
+
+.welcome-news-row h2 {
+  color: #000;
+  font-size: 2.1rem;
+  margin: 1.0rem;
+}
+
+.list-group-news-item {
+  border: none;
+}
+
+.browser-row {
+  background-color: #B6ACD1;
+  padding-bottom: 2.0rem;
+  font-size: 0.9rem;
+}
+
+.browser-row table {
+  margin-top: 1.0rem;
+  background-color: #F0F0F0;
+}
+
+.browser-row h5 {
+  margin-top: 2.0rem;
+  font-size: 1.2rem;
+}
+
+.igv-browser-row {
+  margin-top: 3.0rem;
+  margin-bottom: 3.0rem;
+}
+
+.row-margin {
+  margin-top: 2.0rem;
+  margin-bottom: 2.0rem;
+}
+
+.row-margin-top {
+  margin-top: 2.0rem;
+}
+
+.row-margin-bottom {
+  margin-bottom: 2.0rem;
+}
+
+.instruction-well {
+  background-color: #B6ACD1;
 }
