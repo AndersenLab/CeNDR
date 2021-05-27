@@ -36,7 +36,7 @@ def create_h2_task(data_hash, ds_id, ds_kind):
       This is designed to be run in the background on the server.
       It will run a heritability analysis on google cloud run
   """
-  hr = h2calc_ds(data_hash)
+  hr = h2calc_ds(ds_id)
 
   # Perform h2 request
   queue = config['HERITABILITY_CALC_TASK_QUEUE']
