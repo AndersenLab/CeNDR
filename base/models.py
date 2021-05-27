@@ -384,6 +384,30 @@ class markdown_ds(datastore_model):
       super(markdown_ds, self).save(*args, **kwargs)
 
 
+class ns_calc_ds(datastore_model):
+  """
+    The NemaScan Task Model - metadata for NemaScan nextflow pipeline
+    execution tasks executed by Google Life Sciences
+  """
+  kind = 'ns_calc'
+  kind = '{}{}'.format(config['DS_PREFIX'], kind)
+
+
+  def __init__(self, *args, **kwargs):
+    super(ns_calc_ds, self).__init__(*args, **kwargs)
+
+  def query_by_username(self, username, keys_only=False):
+    filters = [('username', '=', username)]
+    results = query_item(self.kind, filters=filters, keys_only=keys_only)
+    return results
+
+  def save(self, *args, **kwargs):
+    now = arrow.utcnow().datetime
+    self.modified_on = now
+    if not self._exists:
+      self.created_on = now
+    super(ns_calc_ds, self).save(*args, **kwargs)
+
 
 class h2calc_ds(datastore_model):
     """
