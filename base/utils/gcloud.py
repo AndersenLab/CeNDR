@@ -162,21 +162,27 @@ def get_cendr_bucket():
     return gs.get_bucket(GOOGLE_CLOUD_BUCKET)
 
 
-def upload_file(blob, obj, as_string = False):
+def upload_file(blob, obj, as_string = False, as_file_obj = False):
     """
-        Upload a file to the CeNDR bucket
+      Upload a file to the CeNDR bucket
 
-        Args:
-            blob - The name of the blob (server-side)
-            fname - The filename to upload (client-side)
+      Args:
+          blob - The name of the blob (server-side)
+          fname - The filename to upload (client-side)
     """
     logger.info(f"Uploading: {blob} --> {obj}")
     cendr_bucket = get_cendr_bucket()
     blob = cendr_bucket.blob(blob)
+
     if as_string:
-        blob.upload_from_string(obj)
-    else:
-        blob.upload_from_filename(obj)
+      blob.upload_from_string(obj)
+      return blob
+
+    if as_file_obj:
+      blob.upload_from_file(obj)
+      return blob
+
+    blob.upload_from_filename(obj)
     return blob
 
 
@@ -312,5 +318,7 @@ def add_task(queue, url, payload, delay_seconds=None, task_name=None):
     eType = str(type(e).__name__)
     if eType == 'AlreadyExists':
       response = 'SCHEDULED'
+    else:
+      response = None
     
   return response
