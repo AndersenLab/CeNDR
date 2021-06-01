@@ -12,8 +12,7 @@ import click
 from click import secho
 from base.utils.gcloud import get_item
 from base.utils.data_utils import zipdir
-from base.database import (initialize_sqlite_database,
-                           download_sqlite_database)
+from base.database import initialize_postgres_database
 from base import constants
 from subprocess import Popen, PIPE
 
@@ -23,19 +22,21 @@ secho(f"gunicorn {gunicorn.SERVER_SOFTWARE}", fg="green")
 @click.command(help="Initialize the database")
 @click.argument("wormbase_version", default=constants.WORMBASE_VERSION)
 def initdb(wormbase_version=constants.WORMBASE_VERSION):
-    initialize_sqlite_database(wormbase_version)
+    initialize_postgres_database(wormbase_version)
 
 
 @click.command(help="Updates the strain table of the database")
 @click.argument("wormbase_version", default=constants.WORMBASE_VERSION)
 def update_strains(wormbase_version):
-    initialize_sqlite_database(wormbase_version, strain_only=True)
+    initialize_postgres_database(wormbase_version, strain_only=True)
 
 
-@click.command(help="Download the database (used in docker container)")
-def download_db():
+# Todo: allow downloading postgres dump/local db in docker container
+# or just link to .sql in cloud storage (even better!)
+#@click.command(help="Download the database (used in docker container)")
+#def download_db():
     # Downloads the latest SQLITE database
-    download_sqlite_database()
+    #download_sqlite_database()
 
 
 @click.command(help="Update credentials")

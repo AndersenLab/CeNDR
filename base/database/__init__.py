@@ -16,7 +16,7 @@ from base.models import (StrainAnnotatedVariants, db,
                          WormbaseGene,
                          WormbaseGeneSummary)
 # ETL Pipelines - fetch and format data for
-# input into the sqlite database
+# input into the postgres database
 from base.database.etl_homologene import fetch_homologene
 from base.database.etl_strains import fetch_andersen_strains
 from base.database.etl_wormbase import (fetch_gene_gff_summary,
@@ -32,78 +32,123 @@ def download_fname(download_path: str, download_url: str):
                       download_url.split("/")[-1])
 
 
-def initialize_sqlite_database(sel_wormbase_version,
+def initialize_postgres_database(sel_wormbase_version,
                                strain_only=False):
-  """Create a static sqlite database
+  """Create a postgres database
   Args:
         sel_wormbase_version - e.g. WS276
 
-  Generate an sqlite database
+  Generate a postgres database
   """
-  start = arrow.utcnow()
   console.log("Initializing Database")
-
   DATASET_RELEASE = config['DATASET_RELEASE']
-  SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{sel_wormbase_version}.db"
-  SQLITE_BASENAME = os.path.basename(SQLITE_PATH)
 
   # Download wormbase files
   if strain_only is False:
-    if os.path.exists(SQLITE_PATH):
-      os.remove(SQLITE_PATH)
-
-    if not os.path.exists(DOWNLOAD_PATH):
-      os.makedirs(DOWNLOAD_PATH)
-
-    # Parallel URL download
-    console.log("Downloading Wormbase Data")
-    GENE_GFF_URL = URLS.GENE_GFF_URL.format(WB=sel_wormbase_version)
-    GENE_GTF_URL = URLS.GENE_GTF_URL.format(WB=sel_wormbase_version)
-    download([URLS.STRAIN_VARIANT_ANNOTATION_URL,
-              GENE_GFF_URL,
-              GENE_GTF_URL,
-              URLS.GENE_IDS_URL,
-              URLS.HOMOLOGENE_URL,
-              URLS.ORTHOLOG_URL,
-              URLS.TAXON_ID_URL],
-              DOWNLOAD_PATH)
-
-    sva_fname = download_fname(DOWNLOAD_PATH,URLS.STRAIN_VARIANT_ANNOTATION_URL)
-    gff_fname = download_fname(DOWNLOAD_PATH, GENE_GFF_URL)
-    gtf_fname = download_fname(DOWNLOAD_PATH, GENE_GTF_URL)
-    gene_ids_fname = download_fname(DOWNLOAD_PATH, URLS.GENE_IDS_URL)
-    homologene_fname = download_fname(DOWNLOAD_PATH, URLS.HOMOLOGENE_URL)
-    ortholog_fname = download_fname(DOWNLOAD_PATH, URLS.ORTHOLOG_URL)
+    f = download_external_data(sel_wormbase_version)
 
   from base.application import create_app
   app = create_app()
   app.app_context().push()
-  app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{SQLITE_BASENAME}"
+  app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://admin:password@localhost/cendr'
 
   if strain_only is True:
-    db.metadata.drop_all(bind=db.engine, checkfirst=True, tables=[Strain.__table__])
-    db.metadata.create_all(bind=db.engine, tables=[Strain.__table__])
+    reset_tables(app, db, tables=[Strain.__table__])
   else:
-    db.create_all(app=app)
-  db.session.commit()
+    reset_tables(app, db)
 
-  console.log(f"Created {SQLITE_PATH}")
-
-  ################
-  # Load Strains #
-  ################
-  console.log('Loading strains...')
-  db.session.bulk_insert_mappings(Strain, fetch_andersen_strains())
-  db.session.commit()
-  console.log(f"Inserted {Strain.query.count()} strains")
-
+  load_strains(db)
   if strain_only is True:
     console.log('Finished loading strains')
     return
 
-  ################
-  # Set metadata #
-  ################
+  load_metadata(db, sel_wormbase_version)
+  load_genes(db, f)
+  load_homologs(db, f)
+  load_orthologs(db, f)
+  load_variant_annotation(db, f)
+  generate_gene_dict()
+
+
+#################################
+# Print task execution duration #
+# ###############################
+def print_timer(start):
+  diff = int((arrow.utcnow() - start).total_seconds())
+  console.log(f"{diff} seconds")
+
+
+##########################
+# Download external data #
+##########################
+def download_external_data(sel_wormbase_version):
+  if not os.path.exists(DOWNLOAD_PATH):
+      os.makedirs(DOWNLOAD_PATH)
+
+  # Parallel URL download
+  console.log("Downloading Wormbase Data")
+  GENE_GFF_URL = URLS.GENE_GFF_URL.format(WB=sel_wormbase_version)
+  GENE_GTF_URL = URLS.GENE_GTF_URL.format(WB=sel_wormbase_version)
+  download([URLS.STRAIN_VARIANT_ANNOTATION_URL,
+            GENE_GFF_URL,
+            GENE_GTF_URL,
+            URLS.GENE_IDS_URL,
+            URLS.HOMOLOGENE_URL,
+            URLS.ORTHOLOG_URL,
+            URLS.TAXON_ID_URL],
+            DOWNLOAD_PATH)
+
+  fnames = {
+    "sva": download_fname(DOWNLOAD_PATH,URLS.STRAIN_VARIANT_ANNOTATION_URL),
+    "gff": download_fname(DOWNLOAD_PATH, GENE_GFF_URL),
+    "gtf": download_fname(DOWNLOAD_PATH, GENE_GTF_URL),
+    "gene_ids": download_fname(DOWNLOAD_PATH, URLS.GENE_IDS_URL),
+    "homologene": download_fname(DOWNLOAD_PATH, URLS.HOMOLOGENE_URL),
+    "ortholog": download_fname(DOWNLOAD_PATH, URLS.ORTHOLOG_URL)
+  }
+  return fnames
+
+
+################
+# Reset Tables #
+################
+def reset_tables(app, db, tables = None):
+  start = arrow.utcnow()
+  if tables is None:
+    console.log('Dropping all tables...')
+    db.drop_all(app=app)
+    console.log('Creating all tables...')
+    db.create_all(app=app)
+  else:
+    console.log(f'Dropping tables: ${tables}')
+    db.metadata.drop_all(bind=db.engine, checkfirst=True, tables=tables)
+    console.log(f'Creating tables: ${tables}')
+    db.metadata.create_all(bind=db.engine, tables=tables)
+
+  db.session.commit()
+  print_timer(start)
+
+
+
+################
+# Load Strains #
+################
+def load_strains(db): 
+  start = arrow.utcnow()
+  console.log('Loading strains...')
+  andersen_strains = fetch_andersen_strains()
+  db.session.bulk_insert_mappings(Strain, andersen_strains)
+  db.session.commit()
+  console.log(f"Inserted {Strain.query.count()} strains")
+  print_timer(start)
+
+
+
+################
+# Set metadata #
+################
+def load_metadata(db, sel_wormbase_version):
+  start = arrow.utcnow()
   console.log('Inserting metadata')
   metadata = {}
   metadata.update(vars(constants))
@@ -126,71 +171,77 @@ def initialize_sqlite_database(sel_wormbase_version,
         db.session.add(key_val)
 
   db.session.commit()
+  print_timer(start)
 
-  ##############
-  # Load Genes #
-  ##############
+
+##############
+# Load Genes #
+##############
+def load_genes(db, f):
+  start = arrow.utcnow()
   console.log('Loading summary gene table')
-  genes = fetch_gene_gff_summary(gff_fname)
-  db.session.bulk_insert_mappings(WormbaseGeneSummary, genes)
+  gene_summary = fetch_gene_gff_summary(f['gff'])
+  db.session.bulk_insert_mappings(WormbaseGeneSummary, gene_summary)
   db.session.commit()
+  print_timer(start)
 
+  start = arrow.utcnow()
   console.log('Loading gene table')
-  db.session.bulk_insert_mappings(WormbaseGene, fetch_gene_gtf(gtf_fname, gene_ids_fname))
-  gene_summary = db.session.query(WormbaseGene.feature, db.func.count(WormbaseGene.feature)) \
+  genes = fetch_gene_gtf(f['gtf'], f['gene_ids'])
+  db.session.bulk_insert_mappings(WormbaseGene, genes)
+  db.session.commit();
+  
+  results = db.session.query(WormbaseGene.feature, db.func.count(WormbaseGene.feature)) \
                             .group_by(WormbaseGene.feature) \
                             .all()
-  gene_summary = '\n'.join([f"{k}: {v}" for k, v in gene_summary])
-  console.log(f"============\nGene Summary\n------------\n{gene_summary}\n============")
+  result_summary = '\n'.join([f"{k}: {v}" for k, v in results])
+  console.log(f"============\nGene Summary\n------------\n{result_summary}\n============\n")
+  print_timer(start)
 
-  ######################################
-  # Load Strain Variant Annotated Data #
-  ######################################
-  console.log('\nLoading strain variant annotated csv')
-  sva_data = fetch_strain_variant_annotation_data(sva_fname)
+
+###############################
+#        Load homologs        #
+###############################
+def load_homologs(db, f):
+  start = arrow.utcnow()
+  console.log('Loading homologs from homologene')
+  homologene = fetch_homologene(f['homologene'])
+  db.session.bulk_insert_mappings(Homologs, homologene)
+  db.session.commit()
+  print_timer(start)
+  
+
+###############################
+#       Load Orthologs        #
+###############################
+def load_orthologs(db, f):
+  start = arrow.utcnow()
+  console.log('Loading orthologs from WormBase')
+  orthologs = fetch_orthologs(f['ortholog'])
+  db.session.bulk_insert_mappings(Homologs, orthologs)
+  db.session.commit()
+  print_timer(start)
+
+
+######################################
+# Load Strain Variant Annotated Data #
+######################################
+def load_variant_annotation(db, f):
+  start = arrow.utcnow()
+  console.log('Loading strain variant annotated csv')
+  sva_data = fetch_strain_variant_annotation_data(f['sva'])
   db.session.bulk_insert_mappings(StrainAnnotatedVariants, sva_data)
   db.session.commit()
+  print_timer(start)
 
-  ###############################
-  # Load homologs and orthologs #
-  ###############################
-  console.log('Loading homologs from homologene')
-  db.session.bulk_insert_mappings(Homologs, fetch_homologene(homologene_fname))
-  db.session.commit()
-
-  console.log('Loading orthologs from WormBase')
-  db.session.bulk_insert_mappings(Homologs, fetch_orthologs(ortholog_fname))
-  db.session.commit()
-
-  #############
-  # Upload DB #
-  #############
-
-  # Upload the file using todays date for archiving purposes
-  #console.log(f"Uploading Database ({SQLITE_BASENAME})")
-  #upload_file(f"db/{SQLITE_BASENAME}", SQLITE_PATH)
-
-  diff = int((arrow.utcnow() - start).total_seconds())
-  console.log(f"{diff} seconds")
-
-  # =========================== #
-  #   Generate gene id dict     #
-  # =========================== #
-  # Create a gene dictionary to match wormbase IDs to either the locus name
-  # or a sequence id
+# =========================== #
+#   Generate gene id dict     #
+# =========================== #
+# Create a gene dictionary to match wormbase IDs to either the locus name
+# or a sequence id
+def generate_gene_dict():
+  start = arrow.utcnow()
+  console.log('Generating gene_dict.pkl')
   gene_dict = {x.gene_id: x.locus or x.sequence_name for x in WormbaseGeneSummary.query.all()}
   pickle.dump(gene_dict, open("base/static/data/gene_dict.pkl", 'wb'))
-
-
-def download_sqlite_database():
-  DATASET_RELEASE = config['DATASET_RELEASE']
-  WORMBASE_VERSION = config['WORMBASE_VERSION']
-  SQLITE_FILE = f"cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
-  blob_path = f"db/{SQLITE_FILE}"
-  file_path = f"base/{SQLITE_FILE}"
-  storage_client = storage.Client.from_service_account_json('env_config/client-secret.json')
-  bucket = storage_client.bucket(GOOGLE_CLOUD_BUCKET)
-  blob = bucket.blob(blob_path)
-  console.log(f"Downloading DB file STARTED: {SQLITE_FILE}")
-  blob.download_to_file(open(file_path, 'wb'))
-  console.log(f"Downloading DB file COMPLETE: {SQLITE_FILE}")
+  print_timer(start)

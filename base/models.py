@@ -807,6 +807,7 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
   ref_seq = db.Column(db.String(), nullable=True)
   alt_seq = db.Column(db.String(), nullable=True)
   consequence = db.Column(db.String(), nullable=True)
+  target_consequence = db.Column(db.Integer(), nullable=True)
   gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), index=True, nullable=True)
   transcript = db.Column(db.String(), index=True, nullable=True)
   biotype = db.Column(db.String(), nullable=True)
@@ -820,6 +821,9 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
   gene = db.Column(db.String(), index=True, nullable=True)
   variant_impact = db.Column(db.String(), nullable=True)
   divergent = db.Column(db.Boolean(), nullable=True)
+
+  __gene_summary__ = db.relationship("WormbaseGeneSummary", backref='variant_annotation', lazy='joined')
+
 
   column_details = [
     {'id': 'chrom', 'name': 'Chromosome'},
