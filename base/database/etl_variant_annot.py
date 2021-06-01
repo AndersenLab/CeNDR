@@ -34,7 +34,7 @@ def fetch_strain_variant_annotation_data(sva_fname: str):
           logger.info(f"Processed {line_count} lines;")
         
         target_consequence = None
-        consequence = row[4]if row[4] else None
+        consequence = row[4] if row[4] else None
         pattern = '^@[0-9]*$'
         alt_target = re.match(pattern, consequence)
         if alt_target:
