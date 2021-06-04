@@ -2,13 +2,12 @@ import os
 import arrow
 import pickle
 from rich.console import Console
-from google.cloud import storage
 
 from base import constants
 from base.constants import URLS, GOOGLE_CLOUD_BUCKET
 from base.config import config
 from base.utils.data_utils import download
-from base.utils.gcloud import upload_file
+from base.utils.decorators import timeit
 from base.models import (StrainAnnotatedVariants, db,
                          Strain,
                          Homologs,
@@ -24,14 +23,14 @@ from base.database.etl_wormbase import (fetch_gene_gff_summary,
                                         fetch_orthologs)
 from base.database.etl_variant_annot import fetch_strain_variant_annotation_data
 
-console = Console()
 DOWNLOAD_PATH = ".download"
+console = Console()
 
 def download_fname(download_path: str, download_url: str):
   return os.path.join(download_path,
                       download_url.split("/")[-1])
 
-
+@timeit
 def initialize_postgres_database(sel_wormbase_version,
                                strain_only=False):
   """Create a postgres database
@@ -63,25 +62,20 @@ def initialize_postgres_database(sel_wormbase_version,
     return
 
   load_metadata(db, sel_wormbase_version)
-  load_genes(db, f)
+  load_genes_summary(db, f)
+  load_genes_table(db, f)
   load_homologs(db, f)
   load_orthologs(db, f)
   load_variant_annotation(db, f)
   generate_gene_dict()
 
 
-#################################
-# Print task execution duration #
-# ###############################
-def print_timer(start):
-  diff = int((arrow.utcnow() - start).total_seconds())
-  console.log(f"{diff} seconds")
-
-
 ##########################
 # Download external data #
 ##########################
+@timeit
 def download_external_data(sel_wormbase_version):
+  console.log('Downloading External Data...')
   if not os.path.exists(DOWNLOAD_PATH):
       os.makedirs(DOWNLOAD_PATH)
 
@@ -112,8 +106,8 @@ def download_external_data(sel_wormbase_version):
 ################
 # Reset Tables #
 ################
+@timeit
 def reset_tables(app, db, tables = None):
-  start = arrow.utcnow()
   if tables is None:
     console.log('Dropping all tables...')
     db.drop_all(app=app)
@@ -126,27 +120,25 @@ def reset_tables(app, db, tables = None):
     db.metadata.create_all(bind=db.engine, tables=tables)
 
   db.session.commit()
-  print_timer(start)
 
 
 
 ################
 # Load Strains #
 ################
+@timeit
 def load_strains(db): 
-  start = arrow.utcnow()
   console.log('Loading strains...')
   andersen_strains = fetch_andersen_strains()
   db.session.bulk_insert_mappings(Strain, andersen_strains)
   db.session.commit()
   console.log(f"Inserted {Strain.query.count()} strains")
-  print_timer(start)
-
 
 
 ################
 # Set metadata #
 ################
+@timeit
 def load_metadata(db, sel_wormbase_version):
   start = arrow.utcnow()
   console.log('Inserting metadata')
@@ -158,6 +150,7 @@ def load_metadata(db, sel_wormbase_version):
                     "WORMBASE_VERSION": sel_wormbase_version,
                     "RELEASES": config['RELEASES'],
                     "DATE": arrow.utcnow()})
+
   for k, v in metadata.items():
     if not k.startswith("_"):
       # For nested constants:
@@ -171,21 +164,21 @@ def load_metadata(db, sel_wormbase_version):
         db.session.add(key_val)
 
   db.session.commit()
-  print_timer(start)
 
 
 ##############
 # Load Genes #
 ##############
-def load_genes(db, f):
-  start = arrow.utcnow()
+@timeit
+def load_genes_summary(db, f):
   console.log('Loading summary gene table')
   gene_summary = fetch_gene_gff_summary(f['gff'])
   db.session.bulk_insert_mappings(WormbaseGeneSummary, gene_summary)
   db.session.commit()
-  print_timer(start)
 
-  start = arrow.utcnow()
+
+@timeit
+def load_genes_table(db, f):
   console.log('Loading gene table')
   genes = fetch_gene_gtf(f['gtf'], f['gene_ids'])
   db.session.bulk_insert_mappings(WormbaseGene, genes)
@@ -196,52 +189,47 @@ def load_genes(db, f):
                             .all()
   result_summary = '\n'.join([f"{k}: {v}" for k, v in results])
   console.log(f"============\nGene Summary\n------------\n{result_summary}\n============\n")
-  print_timer(start)
 
 
 ###############################
 #        Load homologs        #
 ###############################
+@timeit
 def load_homologs(db, f):
-  start = arrow.utcnow()
   console.log('Loading homologs from homologene')
   homologene = fetch_homologene(f['homologene'])
   db.session.bulk_insert_mappings(Homologs, homologene)
   db.session.commit()
-  print_timer(start)
   
 
 ###############################
 #       Load Orthologs        #
 ###############################
+@timeit
 def load_orthologs(db, f):
-  start = arrow.utcnow()
   console.log('Loading orthologs from WormBase')
   orthologs = fetch_orthologs(f['ortholog'])
   db.session.bulk_insert_mappings(Homologs, orthologs)
   db.session.commit()
-  print_timer(start)
 
 
 ######################################
 # Load Strain Variant Annotated Data #
 ######################################
+@timeit
 def load_variant_annotation(db, f):
-  start = arrow.utcnow()
   console.log('Loading strain variant annotated csv')
   sva_data = fetch_strain_variant_annotation_data(f['sva'])
   db.session.bulk_insert_mappings(StrainAnnotatedVariants, sva_data)
   db.session.commit()
-  print_timer(start)
 
 # =========================== #
 #   Generate gene id dict     #
 # =========================== #
 # Create a gene dictionary to match wormbase IDs to either the locus name
 # or a sequence id
+@timeit
 def generate_gene_dict():
-  start = arrow.utcnow()
   console.log('Generating gene_dict.pkl')
   gene_dict = {x.gene_id: x.locus or x.sequence_name for x in WormbaseGeneSummary.query.all()}
   pickle.dump(gene_dict, open("base/static/data/gene_dict.pkl", 'wb'))
-  print_timer(start)
