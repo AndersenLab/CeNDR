@@ -15,6 +15,8 @@ from tempfile import NamedTemporaryFile
 from base.models import WormbaseGeneSummary
 from base.constants import URLS
 
+C_ELEGANS_PREFIX = 'CELE_'
+C_ELEGANS_HOMOLOG_ID = 6239
 
 def fetch_taxon_ids():
     """
@@ -59,11 +61,11 @@ def fetch_homologene(homologene_fname: str):
     taxon_ids = fetch_taxon_ids()
 
     # First, fetch records with a homolog ID that possesses a C. elegans gene.
-    elegans_set = dict([[int(x[0]), x[3]] for x in response_csv if x[1] == '6239'])
+    elegans_set = dict([[int(x[0]), x[3]] for x in response_csv if x[1] == str(C_ELEGANS_HOMOLOG_ID)])
 
     # Remove CELE_ prefix from some gene names
     for k, v in elegans_set.items():
-      elegans_set[k] = v.replace('CELE_', '')
+      elegans_set[k] = v.replace(C_ELEGANS_PREFIX, '')
 
     idx = 0
     count = 0
@@ -71,7 +73,7 @@ def fetch_homologene(homologene_fname: str):
       idx += 1
       tax_id = int(line[1])
       homolog_id = int(line[0])
-      if homolog_id in elegans_set.keys() and tax_id != 6239:
+      if homolog_id in elegans_set.keys() and tax_id != int(C_ELEGANS_HOMOLOG_ID):
         # Try to resolve the wormbase WB ID if possible.
         gene_name = elegans_set[homolog_id]
         gene_id = WormbaseGeneSummary.resolve_gene_id(gene_name)
