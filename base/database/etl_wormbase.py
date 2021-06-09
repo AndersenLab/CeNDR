@@ -8,6 +8,7 @@ CeNDR database
 Author: Daniel E. Cook (danielecook@gmail.com)
 """
 
+from base.models import WormbaseGeneSummary
 import csv
 import gzip
 from logzero import logger
@@ -46,7 +47,11 @@ def fetch_gene_gtf(gtf_fname: str, gene_ids_fname: str):
     gene_gtf.frame = gene_gtf.frame.apply(lambda x: x if x != "." else None)
     gene_gtf.exon_number = gene_gtf.exon_number.apply(lambda x: x if x != "" else None)
     gene_gtf['arm_or_center'] = gene_gtf.apply(lambda row: arm_or_center(row['chrom'], row['pos']), axis=1)
+    idx = 0
     for row in gene_gtf.to_dict('records'):
+        idx += 1
+        if idx % 100000 == 0:
+          logger.info(f"Processed {idx} lines")
         yield row
 
 
@@ -98,17 +103,25 @@ def fetch_orthologs(orthologs_fname: str):
     """
     csv_out = list(csv.reader(open(orthologs_fname, 'r'), delimiter='\t'))
 
+    idx = 0
+    count = 0
     for line in csv_out:
-        size_of_line = len(line)
-        if size_of_line < 2:
-            continue
-        elif size_of_line == 2:
-            wb_id, locus_name = line
-        else:
-            yield {'gene_id': wb_id,
-                   'gene_name': locus_name,
-                   'homolog_species': line[0],
-                   'homolog_taxon_id': None,
-                   'homolog_gene': line[2],
-                   'homolog_source': line[3],
-                   'is_ortholog': line[0] == 'Caenorhabditis elegans'}
+      idx += 1
+      size_of_line = len(line)
+      if size_of_line < 2:
+        continue
+      elif size_of_line == 2:
+        wb_id, locus_name = line
+      else:
+        ref = WormbaseGeneSummary.query.filter(WormbaseGeneSummary.gene_id == wb_id).first()
+        if idx % 10000 == 0:
+          logger.info(f'Processed {idx} records yielding {count} inserts')
+        if ref:
+          count += 1
+          yield {'gene_id': wb_id,
+                 'gene_name': locus_name,
+                 'homolog_species': line[0],
+                 'homolog_taxon_id': None,
+                 'homolog_gene': line[2],
+                 'homolog_source': line[3],
+                 'is_ortholog': line[0] == 'Caenorhabditis elegans'}
