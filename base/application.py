@@ -16,8 +16,7 @@ from base.utils.text_utils import render_markdown
 from base.manage import (initdb,
                          update_strains,
                          update_credentials,
-                         decrypt_credentials,
-                         download_db)
+                         decrypt_credentials)
 
 # --------- #
 #  Routing  #
@@ -108,8 +107,7 @@ def register_commands(app):
     for command in [initdb,
                     update_strains,
                     update_credentials,
-                    decrypt_credentials,
-                    download_db]:
+                    decrypt_credentials]:
         app.cli.add_command(command)
 
 
