@@ -1,0 +1,28 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+
+    {% if not result %}
+        <meta http-equiv="refresh" content="60; url={{ request.path }}">
+    {% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+{% if data and not result %}
+
+<div class="row">
+    <div class='col-md-2'></div>
+    <div class='col-md-8'>
+        <p class='text-info text-center'>
+            <strong>
+                The genome-wide association mapping is currently being run. Please check back in a few minutes for results.
+                This page will reload automatically.
+            </strong>
+        </p>
+    </div> {# /col-md-8 #}
+</div>{# /row #}
+
+{% else %}
