@@ -17,7 +17,7 @@ from base.config import config
 from base.models import trait_ds, ns_calc_ds
 from base.forms import file_upload_form
 from base.utils.data_utils import unique_id, hash_it
-from base.utils.gcloud import check_blob, query_item, delete_item, upload_file, add_task
+from base.utils.gcloud import check_blob, list_files, query_item, delete_item, upload_file, add_task
 from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
 from base.utils.plots import pxg_plot, plotly_distplot
 
@@ -78,9 +78,13 @@ def schedule_mapping():
   file = request.files['file']
   data_hash = hash_it(file, length=32)
   data_blob = f"reports/nemascan/{data_hash}/data.tsv"
-  # if check_blob(data_blob):
-    # todo: handle file already existing
-  
+  results_path = f"reports/nemascan/{data_hash}/results/"
+  results = list_files(results_path)
+  # if there is anything in the results directory, don't schedule the task
+  # (could be running, failed, etc.. need to check result directory in more detail to confirm state)
+  if len(results) > 0:
+    return redirect(url_for('mapping.mapping_result', id=id))
+
   result = upload_file(data_blob, file, as_file_obj=True)
   if not result:
     ns.status = 'ERROR UPLOADING'
@@ -97,15 +101,28 @@ def schedule_mapping():
   # Schedule task
   create_ns_task(data_hash, id, ns.kind)
 
-  return redirect(url_for('mapping.mapping_status', id=id))
+  return redirect(url_for('mapping.mapping_report', id=id))
 
 
-
-@mapping_bp.route('/mapping/status/<id>', methods=['GET', 'POST'])
+@mapping_bp.route('/mapping/report/all', methods=['GET', 'POST'])
 @jwt_required()
-def mapping_status(id):
-  return "MAPPING STATUS"
+def mapping_result_list(id):
+  title = 'Genetic Mapping Results'
+  user = get_current_user()
+  items = ns_calc_ds().query_by_username(user.name)
+  items = sorted(items, key=lambda x: x['created_on'], reverse=True)
+  return render_template('mapping_result.html', **locals())
 
+
+
+@mapping_bp.route('/mapping/report/<id>', methods=['GET'])
+@jwt_required()
+def mapping_report(id):
+  title = 'Genetic Mapping Report'
+  user = get_current_user()
+  ns = ns_calc_ds(id)
+
+  return render_template('mapping_result.html', **locals())
 
 
 @mapping_bp.route('/mapping/perform-mapping/', methods=['GET', 'POST'])
