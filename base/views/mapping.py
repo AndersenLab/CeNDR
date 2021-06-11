@@ -16,7 +16,7 @@ from base.constants import BIOTYPES, TABLE_COLORS
 from base.config import config
 from base.models import trait_ds, ns_calc_ds
 from base.forms import file_upload_form
-from base.utils.data_utils import unique_id, hash_it
+from base.utils.data_utils import unique_id, hash_file_upload
 from base.utils.gcloud import check_blob, list_files, query_item, delete_item, upload_file, add_task
 from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
 from base.utils.plots import pxg_plot, plotly_distplot
@@ -76,7 +76,7 @@ def schedule_mapping():
 
   # Upload file to cloud bucket
   file = request.files['file']
-  data_hash = hash_it(file, length=32)
+  data_hash = hash_file_upload(file, length=32)
   data_blob = f"reports/nemascan/{data_hash}/data.tsv"
   results_path = f"reports/nemascan/{data_hash}/results/"
   results = list_files(results_path)
