@@ -27,9 +27,6 @@ RELEASES = [("20210121", "WS276"), ("20200815", "WS276"), ("20180527", "WS263"),
 # The most recent release
 DATASET_RELEASE, WORMBASE_VERSION = RELEASES[0]
 
-# SQLITE DATABASE
-SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
-
 def load_yaml(path):
   return yaml.load(open(path), Loader=yaml.SafeLoader)
 
@@ -49,6 +46,7 @@ def get_config(APP_CONFIG):
   DB_PASS = APP_CONFIG_VARS['PSQL_DB_PASSWORD']
   CONNECTION = APP_CONFIG_VARS['PSQL_DB_CONNECTION_NAME']
   DB = APP_CONFIG_VARS['PSQL_DB_NAME']
+
 
   config.update(BASE_VARS)
   config.update(APP_CONFIG_VARS)

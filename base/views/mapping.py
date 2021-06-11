@@ -5,19 +5,20 @@ import urllib
 import pandas as pd
 import simplejson as json
 
-from base.constants import BIOTYPES, TABLE_COLORS
-from base.models import trait_ds
 from datetime import date
 from flask import render_template, request, redirect, url_for, abort
 from slugify import slugify
-from base.forms import mapping_submission_form
 from logzero import logger
 from flask import session, flash, Blueprint, g
-from base.utils.data_utils import unique_id
+
+
+from base.constants import BIOTYPES, TABLE_COLORS
 from base.config import config
-
-from base.utils.gcloud import query_item, delete_item
-
+from base.models import trait_ds, ns_calc_ds
+from base.forms import file_upload_form
+from base.utils.data_utils import unique_id, hash_it
+from base.utils.gcloud import check_blob, list_files, query_item, delete_item, upload_file, add_task
+from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
 from base.utils.plots import pxg_plot, plotly_distplot
 
 
@@ -34,68 +35,107 @@ class CustomEncoder(json.JSONEncoder):
             return str(o)
         return super(CustomEncoder, self).default(o)
 
+def create_ns_task(data_hash, ds_id, ds_kind):
+  """
+      Creates a Cloud Task to schedule the pipeline for execution
+      by the NemaScan service
+  """
+  ns = ns_calc_ds(ds_id)
+
+  # schedule nemascan request
+  queue = config['NEMASCAN_PIPELINE_TASK_QUEUE']
+  url = config['NEMASCAN_PIPELINE_URL']
+  data = {'hash': data_hash, 'ds_id': ds_id, 'ds_kind': ds_kind}
+  result = add_task(queue, url, data, task_name=data_hash)
+
+  # Update report status
+  ns.status = 'SCHEDULED' if result else 'FAILED'
+  ns.save()
+
+
+@mapping_bp.route('/upload', methods = ['POST'])
+@jwt_required()
+def schedule_mapping():
+  '''
+    Uploads the users file and schedules the nemascan pipeline task
+    tracking metadata in an associated datastore entry
+  '''
+  form = file_upload_form(request.form)
+  if not form.validate_on_submit():
+    flash("You must include a description of your data and a TSV file to upload", "error")
+    return redirect(url_for('mapping.mapping'))
+
+  # Store report metadata in datastore
+  user = get_current_user()
+  id = unique_id()
+  ns = ns_calc_ds(id)
+  ns.label = request.form.get('label')
+  ns.username = user.name
+  ns.status = 'NEW'
+  ns.save()
+
+  # Upload file to cloud bucket
+  file = request.files['file']
+  data_hash = hash_it(file, length=32)
+  data_blob = f"reports/nemascan/{data_hash}/data.tsv"
+  results_path = f"reports/nemascan/{data_hash}/results/"
+  results = list_files(results_path)
+  # if there is anything in the results directory, don't schedule the task
+  # (could be running, failed, etc.. need to check result directory in more detail to confirm state)
+  if len(results) > 0:
+    return redirect(url_for('mapping.mapping_result', id=id))
+
+  result = upload_file(data_blob, file, as_file_obj=True)
+  if not result:
+    ns.status = 'ERROR UPLOADING'
+    ns.save()
+    flash("There was an error uploading your data")
+    return redirect(url_for('mapping.mapping'))
+
+  # Update report status
+  ns.filename = file.filename
+  ns.data_hash = data_hash
+  ns.status = 'RECEIVED'
+  ns.save()
+
+  # Schedule task
+  create_ns_task(data_hash, id, ns.kind)
+
+  return redirect(url_for('mapping.mapping_report', id=id))
+
+
+@mapping_bp.route('/mapping/report/all', methods=['GET', 'POST'])
+@jwt_required()
+def mapping_result_list(id):
+  title = 'Genetic Mapping Results'
+  user = get_current_user()
+  items = ns_calc_ds().query_by_username(user.name)
+  items = sorted(items, key=lambda x: x['created_on'], reverse=True)
+  return render_template('mapping_result.html', **locals())
+
+
+
+@mapping_bp.route('/mapping/report/<id>', methods=['GET'])
+@jwt_required()
+def mapping_report(id):
+  title = 'Genetic Mapping Report'
+  user = get_current_user()
+  ns = ns_calc_ds(id)
+
+  return render_template('mapping_result.html', **locals())
+
 
 @mapping_bp.route('/mapping/perform-mapping/', methods=['GET', 'POST'])
+@jwt_required()
 def mapping():
-    """
-        This is the mapping submission page.
-    """
-    form = mapping_submission_form(request.form)
+  """
+      This is the mapping submission page.
+  """
+  title = 'Perform Mapping'
+  jwt_csrf_token = (get_jwt() or {}).get("csrf")
+  form = file_upload_form()
 
-    VARS = {'title': 'Perform Mapping',
-            'form': form}
-
-    # todo: replace session user id and props with datastore user and props
-    user = session.get('user')
-    if form.validate_on_submit() and user:
-        transaction = g.ds.transaction()
-        transaction.begin()
-
-        # Now generate and run trait tasks
-        report_name = form.report_name.data
-        report_slug = slugify(report_name)
-        trait_list = list(form.trait_data.processed_data.columns[2:])
-        now = arrow.utcnow().datetime
-        trait_set = []
-        secret_hash = unique_id()[0:8]
-        for trait_name in trait_list:
-            trait = trait_ds()
-            trait_data = form.trait_data.processed_data[['ISOTYPE', 'STRAIN', trait_name]].dropna(how='any') \
-                                                                                          .to_csv(index=False,
-                                                                                                  sep="\t",
-                                                                                                  na_rep="NA")
-            trait.__dict__.update({
-               'report_name': report_name,
-               'report_slug': report_slug,
-               'trait_name': trait_name,
-               'trait_list': list(form.trait_data.processed_data.columns[2:]),
-               'trait_data': trait_data,
-               'n_strains': int(form.trait_data.processed_data.STRAIN.count()),
-               'created_on': now,
-               'status': 'queued',
-               'is_public': form.is_public.data == 'true',
-               'CENDR_VERSION': CENDR_VERSION,
-               'REPORT_VERSION': REPORT_VERSION,
-               'DATASET_RELEASE': DATASET_RELEASE,
-               'WORMBASE_VERSION': WORMBASE_VERSION,
-               'username': user['username'],
-               'user_id': user['user_id'],
-               'user_email': user['user_email']
-            })
-            if trait.is_public is False:
-                trait.secret_hash = secret_hash
-            trait.run_task()
-            trait_set.append(trait)
-        # Update the report to contain the set of the
-        # latest task runs
-        transaction.commit()
-
-        flash("Successfully submitted mapping!", 'success')
-        return redirect(url_for('mapping.report_view',
-                                report_slug=report_slug,
-                                trait_name=trait_list[0]))
-
-    return render_template('mapping.html', **VARS)
+  return render_template('mapping.html', **locals())
 
 
 @mapping_bp.route("/report/<report_slug>/")

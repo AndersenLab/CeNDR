@@ -1,183 +1,79 @@
 {% extends "_layouts/default.html" %}
 
 {% block content %}
-<div class='alert alert-warning'>
-    <strong>Note</strong><br />
-    The genome-wide association mapping portal is temporarily closed as we update the underlying algorithms,
-    strain sets, and variant data. Please check out <a href="https://github.com/AndersenLab/NemaScan">NemaScan</a> as we work to improve <i>C. elegans</i> association mappings.
-</div>
-    {% if session.get('user') and False %}
-    <form method="POST" action=".">
-        <div class="row">
-            <div class="col-md-6">
-
-                {% from "macros.html" import render_field %}
-
-                {{ form.csrf_token }}
-
-                {{ render_field(form.report_name, autocomplete='off') }}
-
-                {{ render_field(form.description, placeholder='In this experiment...') }}
-
-                {{ render_field(form.is_public) }}
-
-                {{ form.trait_data }}
-
-                <div class="alert alert-info">
-                    Reports are now stored in your <a href=''>user profile</a>.
-                </div>
-
-                <small class="text-muted avail_url"></small>
-                    <strong>Browser Compatibility</strong> 
-                    <p>This submission page may not work with every browser. We have tested this page and found it to work with:</p>
-                    <ul>
-                        <li>Google Chrome</li>
-                        <li>Firefox</li>
-                        <li>Safari</li>
-                    </ul>
-            </div>
 
 
-            <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading"><em>C. elegans</em> association mapping</div>
-                    <div class="panel-body">
-                    <h4>Directions</h4>
-                    <ol>
-                      <li>Enter the required information to the left. </li>
-                      <li>Enter strain name and phenotype data below by dragging and dropping from your spreadsheet. Strain names must be approved names from this site. Names in red need to be edited to match strains in the collection.</li>
-                      <li>Click submit to map your trait</li>
-                      <li>Mappings can take up to 15 minutes. Please be patient. Up to five traits can be mapped in parallel at this time.</li>
-                      <li><a href="{{ url_for('primary.contact') }}">Contact us</a> with problems, questions, or suggestions.</li>
-                    </ol>
-                    <hr />
-                    <h4>DISCLAIMER</h4>
-                     <p>Although strains from other sources might have the same name as strains used in this resource, genotypes might be confused or names altered. For best association mapping results, please use the strains created as a part of this resource. All sequenced strains are the same as those sent through this resource. Additionally, association mapping results need to be analyzed with care. Allele frequency skews, small sample sizes, or phenotypes similar to genomic positions can cause spurious mapping results, among other issues. Please be critical of mapping data.</p>
-                    </div>{# / panel-body #}
-                </div>{# /panel #}
-            </div>{# /col-md-6 #}
-        </div>{# /row #}
+
+<div class="well instruction-well">
 
 
-        <div class="row">
-              <div class="col-md-12">
+  {#   Mapping instructions #}
+  <div class="row">
+
+    <div class="col-md-12 row-margin-top">
+      <p>
+        This portal will use your data to perform a genome-wide association mapping. Please enter your data using the format shown in the example data file [LINK to example data] and upload the comma-separated file below. This process will take your quantitative trait data for the set of strains that you scored and test for correlations of genotype and phenotype at over 50,000 loci across the C. elegans genome. You will be linked to a report for the mapping experiment along with links to download the data. This mapping portal uses NemaScan [LINK to github project] and can only map one quantitative trait at a time. 
+      </p>
+      <p>
+        Good luck hunting!
+      </p>
+    </div>{# /col #}
+
+  </div>{# /row #}
 
 
-                <label>Data</label><br />
-                Put strain names in the first column (Column A), and up to five traits in columns B-F.<br />
-                    <div id="entry"></div>
-                                <small class="text-muted">Copy and Paste your dataset into the table above.</small>
-                                <br />
-                                <br />
-              </div>{# /col-md-12 #}
-        </div>{# /row #}
 
+{# Data upload form #}
+  <form id="form-submit" action="{{ url_for('mapping.schedule_mapping') }}" method="post" onsubmit="disableButton()" class="form form-inline" enctype="multipart/form-data">
+    <div class="form-group" style="width:100%">
 
-        <div class="row">
-            <div class="col-md-12">
-            {% if form.trait_data.errors %}
-            <h4>ERRORS</h4>
-            <p>Please fix the errors in your data before submitting again.</p>
-                <ul>
-                    {% for error in form.trait_data.errors %}
-                            <li class='text-danger'>{{ error|safe|e }}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            </div>{# /col-md-12 #}
-        </div>{# /row #}
+      <div class="row">
 
-        <div class='row'>
-            <div class="col-md-6">
-                <div id="errors" class="text-danger"></div>
-            </div>{# /col-md-6 #}
-        </div>{# /row #}
+        <div class="col-lg-8 col-lg-offset-2 text-center">
+          {{ form.csrf_token }}
+          <input hidden name="jwt_csrf_token" value="{{ jwt_csrf_token }}">
+          <input id="label" name="label" type="text" class="form-control input-margin" placeholder="Description" style="width:100%" required />
+        </div> {# /col #}
 
-        <div class='row'>
-            <br />
-            <div class='col-md-10'>
-                <br />
-                <strong>If you are not redirected to a reports page after clicking the submit button, please notify us of the issue via the feedback form.</strong>
-            </div>
-            <div class='col-md-2'>
-                <button type="submit" style="margin-top: 15px;" class="btn btn-primary btn-lg btn-block submit">Submit</button>
-            </div>{#/ col-md-12 #}
-        </div>{#/ row #}
-    </form>
-    {% else %}
-        {#<strong>Please <a href='{{ url_for("auth.choose_login") }}'>login</a> to perform a mapping.</strong>#}
-    {% endif %}
+      </div> {# /row #}
+
+      <div class="row">
+
+        <div class="col-lg-8 col-lg-offset-2 text-center">
+          <input id="file" name="file" type="file" accept=".tsv" class="form-control input-margin" style="width:100%" required /> 
+        </div> {# /col #}
+
+      </div> {# /row #}
+      
+      <div class="row">
+
+        <div class="col-lg-4 col-lg-offset-4 text-center">
+          <span class="input-group-btn text-center">
+            <button type="submit" id="submit-btn" class="btn btn-primary input-margin" style="width:100%"> Start NemaScan </button>
+          </span>
+        </div> {# /col #}
+
+      </div> {# /row #}
+    </div> {# /form-group #}
+
+  </form>
+
+</div> {# /well #}
+
 
 {% endblock %}
 
 
 {% block script %}
 
-{% if session.get('user') %}
 <script>
 
-{% if form.trait_data.data %}
-    var data = {{ form.trait_data.data|safe }}
-{% else %}
-    var data = [
-        ["STRAIN", "", "", "", "", ""],
-    ];
-{% endif %}
-
-
-error_list = {{ form.trait_data.error_items|default("[]")|safe }}
-
-
-function dataValidator(instance, td, row, col, prop, value, cellProperties) {
-    Handsontable.renderers.TextRenderer.apply(this, arguments);
-
-    if (row === 0 && col === 0) {
-        cellProperties.readOnly = true;
-    }
-    if (row === 0) {
-        td.style.fontWeight = 'bold';
-        td.style.backgroundColor = '#EAEAEA';
-    }
-
-    if (error_list.indexOf(String(value).trim()) >= 0) {
-        td.style.background = '#FC6666';
-        td.style.fontWeight = 'bold';
-    }
+function disableButton() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerText = 'Loading...'
 }
 
-var container = document.getElementById('entry');
-var hot = new Handsontable(container, {
-    data: data,
-    rowHeaders: function(index) {
-        if (index == 0) {
-            return ""
-        } else {
-            return index
-        }
-    },
-    colHeaders: true,
-    columnSorting: true,
-    stretchH: 'all',
-    colWidths: 150,
-    maxCols: 6,
-    manualColumnResize: true,
-    contextMenu: true,
-    fixedRowsTop: 1,
-    minSpareRows: 5,
-    minSpareCols: 1,
-    cells: function (row, col, prop) {
-        var cellProperties = {};
-        cellProperties.renderer = dataValidator;
-        return cellProperties;
-    }
-});
-
-// Form submission
-$("form").submit(function(e) {
-    document.getElementById('trait_data').value = JSON.stringify(hot.getData());
-    return true;
-   });  
 </script>
-{% endif %}
 
 {% endblock %}

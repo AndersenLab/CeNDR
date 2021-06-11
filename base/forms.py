@@ -15,9 +15,16 @@ from wtforms import (StringField,
                      FieldList,
                      HiddenField,
                      RadioField)
+
 from wtforms.fields.simple import PasswordField
-from wtforms.validators import Required, Length, Email, DataRequired, EqualTo, Optional
-from wtforms.validators import ValidationError
+from wtforms.validators import (Required, 
+                                Length, 
+                                Email, 
+                                DataRequired, 
+                                EqualTo, 
+                                Optional,
+                                ValidationError)
+
 from wtforms.fields.html5 import EmailField
 
 from base.constants import PRICES, USER_ROLES, SHIPPING_OPTIONS, PAYMENT_OPTIONS
@@ -33,6 +40,10 @@ from logzero import logger
 class MultiCheckboxField(SelectMultipleField):
   widget = widgets.ListWidget(prefix_label=False)
   option_widget = widgets.CheckboxInput() 
+
+
+class file_upload_form(FlaskForm):
+  pass
 
 
 class basic_login_form(FlaskForm):
