@@ -49,8 +49,10 @@ def initialize_postgres_database(sel_wormbase_version,
   from base.application import create_app
   app = create_app()
   app.app_context().push()
+
   app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://admin:password@localhost/cendr'
 
+  
   if strain_only is True:
     reset_tables(app, db, tables=[Strain.__table__])
   else:
@@ -222,6 +224,7 @@ def load_variant_annotation(db, f):
   sva_data = fetch_strain_variant_annotation_data(f['sva'])
   db.session.bulk_insert_mappings(StrainAnnotatedVariants, sva_data)
   db.session.commit()
+
 
 # =========================== #
 #   Generate gene id dict     #
