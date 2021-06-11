@@ -7,7 +7,6 @@ queue:
     min_backoff_seconds: 10
     max_backoff_seconds: 60
     max_doublings: 2
-
 - name: ipcalc
   max_concurrent_requests: 1
   rate: 1/s
@@ -16,7 +15,6 @@ queue:
     min_backoff_seconds: 10
     max_backoff_seconds: 60
     max_doublings: 2
-
 - name: nscalc
   max_concurrent_requests: 1
   rate: 1/s
