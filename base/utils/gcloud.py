@@ -214,7 +214,9 @@ def list_files(prefix):
         Lists files with a given prefix
     """
     cendr_bucket = get_cendr_bucket()
-    return cendr_bucket.list_blobs(prefix=prefix)
+    items = cendr_bucket.list_blobs(prefix=prefix)
+    return list(items)
+
 
 
 def list_release_files(prefix):
