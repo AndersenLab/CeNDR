@@ -27,9 +27,6 @@ RELEASES = [("20210121", "WS276"), ("20200815", "WS276"), ("20180527", "WS263"),
 # The most recent release
 DATASET_RELEASE, WORMBASE_VERSION = RELEASES[0]
 
-# SQLITE DATABASE
-SQLITE_PATH = f"base/cendr.{DATASET_RELEASE}.{WORMBASE_VERSION}.db"
-
 def load_yaml(path):
   return yaml.load(open(path), Loader=yaml.SafeLoader)
 
