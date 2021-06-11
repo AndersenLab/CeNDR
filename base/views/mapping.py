@@ -93,7 +93,6 @@ def schedule_mapping():
     return redirect(url_for('mapping.mapping'))
 
   # Update report status
-  ns.filename = file.filename
   ns.data_hash = data_hash
   ns.status = 'RECEIVED'
   ns.save()
