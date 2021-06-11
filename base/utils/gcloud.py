@@ -209,12 +209,19 @@ def check_blob(fname):
     return cendr_bucket.get_blob(fname)
 
 
+def list_files(prefix):
+    """
+        Lists files with a given prefix
+    """
+    cendr_bucket = get_cendr_bucket()
+    return cendr_bucket.list_blobs(prefix=prefix)
+
+
 def list_release_files(prefix):
     """
         Lists files with a given prefix
         from the current dataset release
     """
-
     cendr_bucket = get_cendr_bucket()
     items = cendr_bucket.list_blobs(prefix=prefix)
     return list([f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/{x.name}" for x in items])
