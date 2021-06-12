@@ -84,7 +84,7 @@ def schedule_mapping():
   local_path = os.path.join(uploads_dir, f'{id}.tsv')
   file.save(local_path)
 
-  data_hash = hash_file_upload(file, length=32)
+  data_hash = hash_file_upload(local_path, length=32)
   data_blob = f"reports/nemascan/{data_hash}/data.tsv"
   results_path = f"reports/nemascan/{data_hash}/results/"
   results = list_files(results_path)
