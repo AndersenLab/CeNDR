@@ -100,10 +100,18 @@ def hash_it(object, length=10):
     return hashlib.sha1(str(object).encode('utf-8')).hexdigest()[0:length]
 
 
-def hash_file_upload(file, length=10):
+def hash_file_upload(filename, length=10):
   ''' Computes the sha1 hash of a file upload (FileStorage object) '''
-  logger.debug(file)
-  return hashlib.sha1(file.read()).hexdigest()[0:length]
+  logger.debug(filename)
+  BLOCKSIZE = 65536
+  hasher = hashlib.sha1()
+  with open(filename, 'rb') as afile:
+    buf = afile.read(BLOCKSIZE)
+    while len(buf) > 0:
+      hasher.update(buf)
+      buf = afile.read(BLOCKSIZE)
+  
+  return hasher.hexdigest()[0:length]
 
 
 def hash_password(password):
