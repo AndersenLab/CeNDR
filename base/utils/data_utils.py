@@ -100,6 +100,12 @@ def hash_it(object, length=10):
     return hashlib.sha1(str(object).encode('utf-8')).hexdigest()[0:length]
 
 
+def hash_file_upload(file, length=10):
+  ''' Computes the sha1 hash of a file upload (FileStorage object) '''
+  logger.debug(file)
+  return hashlib.sha1(file.read()).hexdigest()[0:length]
+
+
 def hash_password(password):
     h = hashlib.md5(password.encode())
     return h.hexdigest()

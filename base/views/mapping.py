@@ -4,6 +4,7 @@ import arrow
 import urllib
 import pandas as pd
 import simplejson as json
+import os
 
 from datetime import date
 from flask import render_template, request, redirect, url_for, abort
@@ -16,7 +17,7 @@ from base.constants import BIOTYPES, TABLE_COLORS
 from base.config import config
 from base.models import trait_ds, ns_calc_ds
 from base.forms import file_upload_form
-from base.utils.data_utils import unique_id, hash_it
+from base.utils.data_utils import unique_id, hash_file_upload
 from base.utils.gcloud import check_blob, list_files, query_item, delete_item, upload_file, add_task
 from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
 from base.utils.plots import pxg_plot, plotly_distplot
@@ -26,6 +27,10 @@ mapping_bp = Blueprint('mapping',
                        __name__,
                        template_folder='mapping')
 
+
+# Create a directory in a known location to save files to.
+uploads_dir = os.path.join('./', 'uploads')
+os.makedirs(uploads_dir, exist_ok=True)
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, o):
@@ -76,7 +81,10 @@ def schedule_mapping():
 
   # Upload file to cloud bucket
   file = request.files['file']
-  data_hash = hash_it(file, length=32)
+  local_path = os.path.join(uploads_dir, f'{id}.tsv')
+  file.save(local_path)
+
+  data_hash = hash_file_upload(file, length=32)
   data_blob = f"reports/nemascan/{data_hash}/data.tsv"
   results_path = f"reports/nemascan/{data_hash}/results/"
   results = list_files(results_path)
@@ -85,7 +93,7 @@ def schedule_mapping():
   if len(results) > 0:
     return redirect(url_for('mapping.mapping_result', id=id))
 
-  result = upload_file(data_blob, file, as_file_obj=True)
+  result = upload_file(data_blob, local_path)
   if not result:
     ns.status = 'ERROR UPLOADING'
     ns.save()
@@ -93,7 +101,6 @@ def schedule_mapping():
     return redirect(url_for('mapping.mapping'))
 
   # Update report status
-  ns.filename = file.filename
   ns.data_hash = data_hash
   ns.status = 'RECEIVED'
   ns.save()
