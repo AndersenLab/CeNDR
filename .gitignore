@@ -101,3 +101,5 @@ invoke
 .vscode/launch.json
 cloud_functions/heritability_run/strain_data.tsv
 base/bam_bai_signed_download_script.sh
+
+uploads/
