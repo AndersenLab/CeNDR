@@ -142,11 +142,11 @@ def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
 @cache.memoize(50)
 def strains_catalog():
     flash(Markup("Strain mapping sets 9 and 10 will not be available until later this year."), category="warning")
-    VARS = {"title": "Strain Catalog",
-            "warning": request.args.get('warning'),
-            "strain_listing": get_strains(),
-            "strain_sets": Strain.strain_sets() }
-    return render_template('strain/strain_catalog.html', **VARS)
+    title = "Strain Catalog"
+    warning = request.args.get('warning')
+    strain_listing = get_strains()
+    strain_sets = Strain.strain_sets()
+    return render_template('strain/strain_catalog.html', **locals())
 
 #
 # Strain Submission

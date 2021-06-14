@@ -19,7 +19,7 @@
         </div>
         <div class="col-md-2">
             <div id="checkout" style="z-index:1000000" data-offset-top="170" data-spy="affix">
-                <button type="submit" value="Checkout" class="btn btn-primary btn-block" id="checkoutBox">
+                <button type="submit" value="Checkout" class="btn nu-alt-btn btn-block" id="checkoutBox">
                     <span class="glyphicon glyphicon-shopping-cart" aria-hidden="true"></span> Order
                 </button>
             </div>
@@ -74,7 +74,7 @@
                     <tr>
                         <td>
                             {# REVERT - enable mapping set 7 and 8 #}
-                            <input id="set-{{ i }}" type="checkbox" name="items-{{ i + 1000 }}" {% if i>= 7 %}disabled{% endif %} value="set_{{ i }}" class="styled-checkbox" />
+                            <input id="set-{{ i }}" type="checkbox" name="items-{{ i + 1000 }}" value="set_{{ i }}" class="styled-checkbox" />
                             <label for="set-{{ i }}">&nbsp;</label>
                         </td>
                         <td><strong><label for="set-{{ i }}">Mapping Set {{ i }}</label></strong></td>
