@@ -17,7 +17,7 @@ from base.constants import BIOTYPES, GOOGLE_CLOUD_BUCKET, TABLE_COLORS
 from base.config import config
 from base.models import trait_ds, ns_calc_ds
 from base.forms import file_upload_form
-from base.utils.data_utils import unique_id, hash_file_upload
+from base.utils.data_utils import unique_id, hash_file_contents
 from base.utils.gcloud import check_blob, list_files, query_item, delete_item, upload_file, add_task
 from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
 from base.utils.plots import pxg_plot, plotly_distplot
@@ -26,6 +26,10 @@ from base.utils.plots import pxg_plot, plotly_distplot
 mapping_bp = Blueprint('mapping',
                        __name__,
                        template_folder='mapping')
+
+DATA_BLOB_PATH = 'reports/nemascan/{data_hash}/data.tsv'
+REPORT_BLOB_PATH = 'reports/nemascan/{data_hash}/results/Reports/NemaScan_Report_'
+RESULT_BLOB_PATH = 'reports/nemascan/{data_hash}/results/'
 
 
 # Create a directory in a known location to save files to.
@@ -51,12 +55,42 @@ def create_ns_task(data_hash, ds_id, ds_kind):
   queue = config['NEMASCAN_PIPELINE_TASK_QUEUE']
   url = config['NEMASCAN_PIPELINE_URL']
   data = {'hash': data_hash, 'ds_id': ds_id, 'ds_kind': ds_kind}
-  result = add_task(queue, url, data, task_name=data_hash)
+  result = add_task(queue, url, data, task_name=ds_id)
 
   # Update report status
-  ns.status = 'SCHEDULED' if result else 'FAILED'
-  ns.save()
+  if result:
+    ns.status = 'SCHEDULED'
+  else:
+    ns.status = 'FAILED'
+    
+  return result
 
+
+def is_data_cached(data_hash):
+  # Check if the file already exists in google storage (matching hash)
+  data_blob = DATA_BLOB_PATH.format(data_hash=data_hash)
+  data_exists = list_files(data_blob)
+  if len(data_exists) > 0:
+    return True
+  return False
+
+def is_result_cached(ns):
+  if ns.status == 'COMPLETE' and len(ns.report_path) > 0:
+    return True
+  
+  # check if there is a report on GS, just to be sure
+  data_blob = REPORT_BLOB_PATH.format(data_hash=ns.data_hash)    
+  result = list_files(data_blob)
+  if len(result) > 0:
+    for x in result:
+      if x.name.endswith('.html'):
+        report_path = GOOGLE_CLOUD_BUCKET + '/' + x.name
+        ns.report_path = report_path
+        ns.status = 'COMPLETE'
+        ns.save()
+        return True
+  else:
+    return False
 
 @mapping_bp.route('/mapping/upload', methods = ['POST'])
 @jwt_required()
@@ -79,21 +113,24 @@ def schedule_mapping():
   ns.status = 'NEW'
   ns.save()
 
-  # Upload file to cloud bucket
+  # Save uploaded file to server temporarily
   file = request.files['file']
   local_path = os.path.join(uploads_dir, f'{id}.tsv')
   file.save(local_path)
 
-  # Read trait from file (also verify first row)
+  # Read first line from tsv
   with open(local_path, 'r') as f:
     csv_reader = csv.reader(f, delimiter='\t')
     csv_headings = next(csv_reader)
+
+  # Check first line for column headers (strain, {TRAIT})
   if csv_headings[0] != 'strain' or len(csv_headings) != 2 or len(csv_headings[1]) == 0:
+    os.remove(local_path)
     flash("Please make sure that your data file exactly matches the sample format")
     return redirect(url_for('mapping.mapping'))
 
   trait = csv_headings[1]
-  data_hash = hash_file_upload(local_path, length=32)
+  data_hash = hash_file_contents(local_path, length=32)
 
   # Update report status
   ns.data_hash = data_hash
@@ -101,16 +138,12 @@ def schedule_mapping():
   ns.status = 'RECEIVED'
   ns.save()
 
-  # Check if the file already exists in google storage (matching hash)
-  data_blob = f"reports/nemascan/{data_hash}/data.tsv"
-  data_exists = list_files(data_blob)
-  # if there is anything in the results directory, don't schedule the task
-  # (could be running, failed, etc.. need to check result directory in more detail to confirm state)
-  if len(data_exists) > 0:
+  if is_data_cached(data_hash):
     flash('It looks like that data has already been uploaded - You will be redirected to the saved results', 'danger')
     return redirect(url_for('mapping.mapping_report', id=id))
 
   # Upload file to google storage
+  data_blob = DATA_BLOB_PATH.format(data_hash=data_hash)
   result = upload_file(data_blob, local_path)
   if not result:
     ns.status = 'ERROR UPLOADING'
@@ -119,10 +152,14 @@ def schedule_mapping():
     return redirect(url_for('mapping.mapping'))
 
   # Schedule task
-  create_ns_task(data_hash, id, ns.kind)
+  task_result = create_ns_task(data_hash, id, ns.kind)
     
   # Delete copy stored locally on server
   os.remove(local_path) 
+
+  if not task_result: 
+    flash("There was an error scheduling your calculations...")
+    redirect(url_for('mapping.mapping'))
 
   return redirect(url_for('mapping.mapping_report', id=id))
 
@@ -154,17 +191,7 @@ def mapping_report(id):
     result = True
   else:
     # check if there is a report on GS, just to be sure
-    data_blob = f"reports/nemascan/{data_hash}/results/Reports/NemaScan_Report_"
-    result = list_files(data_blob)
-    if len(result) > 0:
-      for x in result:
-        if x.name.endswith('.html'):
-          # Store report URL in DS
-          report_path = GOOGLE_CLOUD_BUCKET + '/' + x.name
-          ns.report_path = report_path
-          ns.status = 'COMPLETE'
-          result = True
-          ns.save()
+    result = is_result_cached(ns)
 
   return render_template('mapping_result.html', **locals())
 
@@ -176,8 +203,9 @@ def mapping_results(id):
   subtitle = 'Result Files'
   user = get_current_user()
   ns = ns_calc_ds(id)
-  
-  data_blob = f"reports/nemascan/{ns.data_hash}/results/"
+  result = is_result_cached(ns)
+
+  data_blob = RESULT_BLOB_PATH.format(data_hash=ns.data_hash)
   blobs = list_files(data_blob)
   file_list = []
   for blob in blobs:
@@ -185,6 +213,7 @@ def mapping_results(id):
       "name": blob.name.rsplit('/', 2)[1] + '/' + blob.name.rsplit('/', 2)[2],
       "url": blob.public_url
     })
+    
   return render_template('mapping_result_files.html', **locals())
 
 
