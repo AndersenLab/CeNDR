@@ -13,22 +13,22 @@
 
   <div class="row">
     <div class="col-lg-2 col-lg-offset-3 col-md-4 col-sm-4 btn-mid-row">
-      <a class="btn btn-nu btn-block" href="https://storage.googleapis.com/elegansvariation.org/reports/nemascan/{{ data_hash }}/data.tsv" role="button">
+      <a class="btn btn-block btn-nu " href="https://storage.googleapis.com/elegansvariation.org/reports/nemascan/{{ data_hash }}/data.tsv" role="button">
         <span class="glyphicon glyphicon-download" aria-hidden="true"></span> 
         Download Data
       </a>
     </div>
     <div class='col-lg-2 col-md-4 col-sm-4 btn-mid-row'>
-      <a class="btn btn-nu btn-block" href="{{ url_for('mapping.mapping_results', id=id) }}" role="button">
+      <a class="btn btn-block btn-nu " href="{{ url_for('mapping.mapping_results', id=id) }}" role="button">
         <span class="glyphicon glyphicon-download" aria-hidden="true"></span> 
         View Result Files
       </a>
     </div>
     <div class='col-lg-2 col-md-4 col-sm-4 btn-mid-row'>
     {% if report_path %}
-      <a class="btn btn-nu btn-block" href="https://storage.googleapis.com/{{ report_path }}" role="button">
+      <a class="btn btn-block btn-nu " href="https://storage.googleapis.com/{{ report_path }}" role="button">
     {% else %}
-      <a class="btn btn-nu btn-block" href="" role="button" disabled>
+      <a class="btn btn-block btn-nu " href="" role="button" disabled>
     {% endif %}
         <span class="glyphicon glyphicon-stats" aria-hidden="true"></span> 
         Download Report
