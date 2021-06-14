@@ -34,16 +34,13 @@
 		
   <div class='row row-margin'>
     <div class='col-md-4 col-md-offset-4 my-results-btn'>
-      <a role="button" class="btn btn-primary btn-block" href='{{ url_for("indel_primer.indel_primer_result_list") }}' >
+      <a role="button" class="btn nu-alt-btn btn-block" href='{{ url_for("indel_primer.indel_primer_result_list") }}' >
         <span class="glyphicon glyphicon-list" aria-hidden="true"></span>
         My Indel Primer Results
       </a>
     </div> {# /col #}
   </div> {# /row #}
 
-</div>{# /container #}
-
-<div class="container">
 
 	<div class='row row-margin'>
 		<form id='form-submit' method="POST">
@@ -55,7 +52,7 @@
 			<div class='col-lg-2 col-md-2 col-sm-4 col-xs-6'>{{ render_field(form.stop, placeholder="2,029,217") }}</div>
 			<div class='col-lg-2 col-md-2 col-sm-4 col-xs-6'>
 				<label>&nbsp;</label> <br />
-				<button id='find_indels' type='submit' value="submit" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Find Indels</button>
+				<button id='find_indels' type='submit' value="submit" class="btn nu-alt-btn btn-block"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Find Indels</button>
 			</div>
 		</form>
 	</div>
