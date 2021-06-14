@@ -159,8 +159,8 @@ def heritability_result(id):
   data = data.to_dict('records')
   trait = data[0]['TraitName']
   # Get trait and set title
-  title = f"Heritability Results: {trait}"
-
+  subtitle = trait
+  
   if result:
     hr.status = 'COMPLETE'
     hr.save()

@@ -1,0 +1,15 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block content %}
+
+{% for file in file_list %}
+
+<p>
+  <a href="{{ file.url }}"> {{ file.name }}</a>
+</p>
+
+{% endfor %}
+
+
+{% endblock %}

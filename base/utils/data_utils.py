@@ -100,8 +100,8 @@ def hash_it(object, length=10):
     return hashlib.sha1(str(object).encode('utf-8')).hexdigest()[0:length]
 
 
-def hash_file_upload(filename, length=10):
-  ''' Computes the sha1 hash of a file upload (FileStorage object) '''
+def hash_file_contents(filename, length=10):
+  ''' Computes the sha1 hash of a file's contents  '''
   logger.debug(filename)
   BLOCKSIZE = 65536
   hasher = hashlib.sha1()

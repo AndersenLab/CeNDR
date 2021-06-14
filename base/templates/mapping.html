@@ -47,11 +47,18 @@
       
       <div class="row">
 
-        <div class="col-lg-4 col-lg-offset-4 text-center">
+        <div class="col-lg-3 col-lg-offset-2 text-center">
           <span class="input-group-btn text-center">
-            <button type="submit" id="submit-btn" class="btn btn-primary input-margin" style="width:100%"> Start NemaScan </button>
+            <a id="result-list-btn" class="btn nu-alt-btn btn-block input-margin" style="width:100%" href="{{ url_for('mapping.mapping_result_list') }}"> My Mapping Reports </a>
           </span>
         </div> {# /col #}
+
+        <div class="col-lg-3 col-lg-offset-2 text-center">
+          <span class="input-group-btn text-center">
+            <button type="submit" id="submit-btn" class="btn nu-alt-btn btn-block input-margin" style="width:100%"> Run NemaScan Mapping</button>
+          </span>
+        </div> {# /col #}
+
 
       </div> {# /row #}
     </div> {# /form-group #}
