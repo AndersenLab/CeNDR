@@ -1,6 +1,6 @@
 import decimal
 import re
-import arrow
+import csv
 import urllib
 import pandas as pd
 import simplejson as json
@@ -13,7 +13,7 @@ from logzero import logger
 from flask import session, flash, Blueprint, g
 
 
-from base.constants import BIOTYPES, TABLE_COLORS
+from base.constants import BIOTYPES, GOOGLE_CLOUD_BUCKET, TABLE_COLORS
 from base.config import config
 from base.models import trait_ds, ns_calc_ds
 from base.forms import file_upload_form
@@ -58,7 +58,7 @@ def create_ns_task(data_hash, ds_id, ds_kind):
   ns.save()
 
 
-@mapping_bp.route('/upload', methods = ['POST'])
+@mapping_bp.route('/mapping/upload', methods = ['POST'])
 @jwt_required()
 def schedule_mapping():
   '''
@@ -84,15 +84,33 @@ def schedule_mapping():
   local_path = os.path.join(uploads_dir, f'{id}.tsv')
   file.save(local_path)
 
+  # Read trait from file (also verify first row)
+  with open(local_path, 'r') as f:
+    csv_reader = csv.reader(f, delimiter='\t')
+    csv_headings = next(csv_reader)
+  if csv_headings[0] != 'strain' or len(csv_headings) != 2 or len(csv_headings[1]) == 0:
+    flash("Please make sure that your data file exactly matches the sample format")
+    return redirect(url_for('mapping.mapping'))
+
+  trait = csv_headings[1]
   data_hash = hash_file_upload(local_path, length=32)
+
+  # Update report status
+  ns.data_hash = data_hash
+  ns.trait = trait
+  ns.status = 'RECEIVED'
+  ns.save()
+
+  # Check if the file already exists in google storage (matching hash)
   data_blob = f"reports/nemascan/{data_hash}/data.tsv"
-  results_path = f"reports/nemascan/{data_hash}/results/"
-  results = list_files(results_path)
+  data_exists = list_files(data_blob)
   # if there is anything in the results directory, don't schedule the task
   # (could be running, failed, etc.. need to check result directory in more detail to confirm state)
-  if len(results) > 0:
-    return redirect(url_for('mapping.mapping_result', id=id))
+  if len(data_exists) > 0:
+    flash('It looks like that data has already been uploaded - You will be redirected to the saved results', 'danger')
+    return redirect(url_for('mapping.mapping_report', id=id))
 
+  # Upload file to google storage
   result = upload_file(data_blob, local_path)
   if not result:
     ns.status = 'ERROR UPLOADING'
@@ -100,36 +118,74 @@ def schedule_mapping():
     flash("There was an error uploading your data")
     return redirect(url_for('mapping.mapping'))
 
-  # Update report status
-  ns.data_hash = data_hash
-  ns.status = 'RECEIVED'
-  ns.save()
-
   # Schedule task
   create_ns_task(data_hash, id, ns.kind)
+    
+  # Delete copy stored locally on server
+  os.remove(local_path) 
 
   return redirect(url_for('mapping.mapping_report', id=id))
 
 
 @mapping_bp.route('/mapping/report/all', methods=['GET', 'POST'])
 @jwt_required()
-def mapping_result_list(id):
-  title = 'Genetic Mapping Results'
+def mapping_result_list():
+  title = 'Genetic Mapping'
+  subtitle = 'Report List'
   user = get_current_user()
   items = ns_calc_ds().query_by_username(user.name)
   items = sorted(items, key=lambda x: x['created_on'], reverse=True)
-  return render_template('mapping_result.html', **locals())
+  return render_template('mapping_result_list.html', **locals())
 
 
-
-@mapping_bp.route('/mapping/report/<id>', methods=['GET'])
+@mapping_bp.route('/mapping/report/<id>/', methods=['GET'])
 @jwt_required()
 def mapping_report(id):
-  title = 'Genetic Mapping Report'
+  title = 'Genetic Mapping'
   user = get_current_user()
   ns = ns_calc_ds(id)
+  fluid_container = True
+  subtitle = ns.label +': ' + ns.trait
+
+  # check if DS entry has complete status
+  data_hash = ns.data_hash
+  if (ns.status == 'COMPLETE' and len(ns.report_path) > 0):
+    report_path = ns.report_path
+    result = True
+  else:
+    # check if there is a report on GS, just to be sure
+    data_blob = f"reports/nemascan/{data_hash}/results/Reports/NemaScan_Report_"
+    result = list_files(data_blob)
+    if len(result) > 0:
+      for x in result:
+        if x.name.endswith('.html'):
+          # Store report URL in DS
+          report_path = GOOGLE_CLOUD_BUCKET + '/' + x.name
+          ns.report_path = report_path
+          ns.status = 'COMPLETE'
+          result = True
+          ns.save()
 
   return render_template('mapping_result.html', **locals())
+
+
+@mapping_bp.route('/mapping/results/<id>/', methods=['GET'])
+@jwt_required()
+def mapping_results(id):
+  title = 'Genetic Mapping'
+  subtitle = 'Result Files'
+  user = get_current_user()
+  ns = ns_calc_ds(id)
+  
+  data_blob = f"reports/nemascan/{ns.data_hash}/results/"
+  blobs = list_files(data_blob)
+  file_list = []
+  for blob in blobs:
+    file_list.append({
+      "name": blob.name.rsplit('/', 2)[1] + '/' + blob.name.rsplit('/', 2)[2],
+      "url": blob.public_url
+    })
+  return render_template('mapping_result_files.html', **locals())
 
 
 @mapping_bp.route('/mapping/perform-mapping/', methods=['GET', 'POST'])

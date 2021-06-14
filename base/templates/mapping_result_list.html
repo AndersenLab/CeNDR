@@ -49,7 +49,7 @@ table.dataTable thead .sorting {
               <td class='data-trait'> {{ item.trait }} </td>
               <td class='data-status'>
                 {% if item.status == 'COMPLETE' %}
-                <a href="{{ url_for('mapping.mapping_result', id=item.key.name) }}">
+                <a href="{{ url_for('mapping.mapping_report', id=item.key.name) }}">
                   {{ item.status }}
                 </a>
                 {% else %}
