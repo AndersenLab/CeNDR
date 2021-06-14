@@ -572,7 +572,7 @@ class WormbaseGeneSummary(DictSerializable, db.Model):
 
 
     def to_json(self):
-      return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+      return {k: v for k, v in self._asdict().items() if not k.startswith("_")}
 
 
     @classmethod
@@ -632,7 +632,7 @@ class Strain(DictSerializable, db.Model):
         return self.strain
 
     def to_json(self):
-        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+        return {k: v for k, v in self._asdict().items() if not k.startswith("_")}
 
     def strain_photo_url(self):
         # Checks if photo exists and returns URL if it does
