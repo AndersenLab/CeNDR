@@ -11,22 +11,6 @@
 
 {% block content %}
 
-{% if not result %}
-
-<div class="row">
-    <div class='col-md-12'>
-        <p class='text-info text-center'>
-            <strong>
-                The genome-wide association mapping is currently being run. Please check back in a few minutes for results.
-            </strong>
-        </p>
-    </div> {# /col-md-12 #}
-</div>{# /row #}
-
-{% else %}
-
-  {% if report_path %}
-
   <div class="row">
     <div class="col-lg-2 col-lg-offset-3 col-md-4 col-sm-4 btn-mid-row">
       <a class="btn btn-nu btn-block" href="https://storage.googleapis.com/elegansvariation.org/reports/nemascan/{{ data_hash }}/data.tsv" role="button">
@@ -41,7 +25,11 @@
       </a>
     </div>
     <div class='col-lg-2 col-md-4 col-sm-4 btn-mid-row'>
+    {% if report_path %}
       <a class="btn btn-nu btn-block" href="https://storage.googleapis.com/{{ report_path }}" role="button">
+    {% else %}
+      <a class="btn btn-nu btn-block" href="" role="button" disabled>
+    {% endif %}
         <span class="glyphicon glyphicon-stats" aria-hidden="true"></span> 
         Download Report
       </a>
@@ -49,24 +37,34 @@
   </div>{# /row #}
 
 
+{% if result %}
+
   <div class="row">
     <div class="col-md-12 text-center" >
       <div id="report_frame" width="100%" height="800px" ></div>
     </div>
   </div> {# /row #}
 
+{% else %}
 
-  {% endif %}
-
+  <div class="row">
+    <div class='col-md-12'>
+        <p class='text-info text-center'>
+          <strong>
+              The genome-wide association mapping is currently being run - please check back in a few hours for results.
+          </strong>
+        </p>
+    </div> {# /col-md-12 #}
+  </div>{# /row #}
 
 {% endif %}
 
 {% endblock %}
 
+
 {% block script %}
 
 <script>
-
 
 function createIFrame(iframeContent) {
   iFrameContainer = document.getElementById('report_frame');
