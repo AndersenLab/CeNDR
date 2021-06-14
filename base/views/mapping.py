@@ -178,7 +178,7 @@ def mapping_result_list():
 @mapping_bp.route('/mapping/report/<id>/', methods=['GET'])
 @jwt_required()
 def mapping_report(id):
-  title = 'Genetic Mapping'
+  title = 'Genetic Mapping Report'
   user = get_current_user()
   ns = ns_calc_ds(id)
   fluid_container = True
@@ -199,11 +199,11 @@ def mapping_report(id):
 @mapping_bp.route('/mapping/results/<id>/', methods=['GET'])
 @jwt_required()
 def mapping_results(id):
-  title = 'Genetic Mapping'
-  subtitle = 'Result Files'
+  title = 'Genetic Mapping Results'
   user = get_current_user()
   ns = ns_calc_ds(id)
   result = is_result_cached(ns)
+  subtitle = ns.label + ': ' + ns.trait
 
   data_blob = RESULT_BLOB_PATH.format(data_hash=ns.data_hash)
   blobs = list_files(data_blob)
@@ -226,7 +226,6 @@ def mapping():
   title = 'Perform Mapping'
   jwt_csrf_token = (get_jwt() or {}).get("csrf")
   form = file_upload_form()
-
   return render_template('mapping.html', **locals())
 
 
