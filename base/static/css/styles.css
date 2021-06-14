@@ -640,10 +640,12 @@ article {
 
 .alert-danger {
   background-color: #FFC520;
+  color: black;
 }
 
 .alert-warning {
   background-color: #FFC520;
+  color: black;
 }
 
 .page-title-txt {
@@ -991,4 +993,5 @@ article {
 
 .nu-alt-btn {
   background-color: #FFA500;
+  color: #000000;  
 }
