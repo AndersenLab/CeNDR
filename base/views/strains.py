@@ -39,10 +39,10 @@ def strains_map():
     """
         Redirect base route to the strain list page
     """
-    VARS = {
-        'title': 'Strain Map',
-        'strain_listing': get_strains()}
-    return render_template('strain/strains_map.html', **VARS)
+    title = 'Strain Map'
+    strains = get_strains()
+    strain_listing = [s.to_json() for s in strains]
+    return render_template('strain/strains_map.html', **locals())
 
 @strains_bp.route('/isotype_list')
 @cache.memoize(50)
