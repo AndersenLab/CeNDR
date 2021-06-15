@@ -142,8 +142,39 @@ mark {
       </div> {# /strain-list #}
   </div> {# /col-md-2 #}
 
+</div> {# /row #}
+
+<div class="row">
+  <div class="col-lg-4 col-lg-offset-8 col-sm-8 col-sm-offset-2 col-xs-12">
+
+    <h3 class="text-center">Variant Impact</h3>
+
+      <form class="form-inline impact-chk-group">
+          <div class="row">
+
+          <div class="col-xs-6 form-group text-center">
+            <div class="impact-entry select-checkbox">
+              <input class="toggle-impact-chk" type="checkbox" name="impact_high" id="impact_high" checked/> 
+              <strong><label id="impact_high_label" for="impact_high"> High </label> </strong>
+            </div>
+          </div> {# /form group #}
+
+          <div class="col-xs-6 form-group text-center">
+            <div class="impact-entry select-checkbox">
+              <input class="toggle-impact-chk" type="checkbox" name="impact_low" id="impact_low" checked/> 
+              <strong><label id="impact_low_label" for="impact_low"> Low </label> </strong>
+            </div>
+          </div> {# /form group #}
+
+        </div> {#/ row #}
+      
+      </form>
+
+    </div> {# /col #}
 
 </div> {# /row #}
+
+
 </div> {# /container #}
 
 <div class="row">
@@ -191,6 +222,9 @@ let typingTimer;                //timer identifier
 
 let dTable = null;
 const selected_strains = new Set();
+
+let impactHigh = true;
+let impactLow = true; 
 
 let toggle_strain_lock = false;
 
@@ -272,6 +306,18 @@ function filter_rows_by_strains() {
   $('#variant-table').DataTable().draw();
   highlight_selected_strains();
   showTable();
+}
+
+function filter_rows_by_impact() {
+    /* build regex from strain set and filter */
+    let r = "Linker";
+    if (impactHigh) {
+      r += "|HIGH";
+    } 
+    if (impactLow) {
+      r += "|LOW";
+    }
+    $('#variant-table').dataTable().fnFilter(r, 'variant_impact:name', true, false);
 }
 
 function highlight_selected_strains() {
@@ -385,6 +431,17 @@ $(document).ready(function() {
                 return rex.test($(this).text());
             }).show();
         });
+    });
+
+    /* Filter by impact */
+    $("#impact_high").change(function(e) {
+      impactHigh = $(this).prop('checked');
+      setTimeout(filter_rows_by_impact, 50);
+    });
+
+    $("#impact_low").change(function(e) {
+      impactLow = $(this).prop('checked');
+      setTimeout(filter_rows_by_impact, 50);
     });
 
     /* select/deselect all strains checkbox handler */
