@@ -15,6 +15,7 @@ from base.utils.query import get_mappings_summary, get_weekly_visits, get_unique
 from base.config import config
 from base.models import Strain
 from base.forms import donation_form
+from base.extensions import cache
 from base.views.api.api_strain import get_isotypes
 from base.utils.google_sheets import add_to_order_ws
 from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
@@ -28,24 +29,28 @@ about_bp = Blueprint('about',
 
 
 @about_bp.route('/')
+@cache.memoize(50)
 def about():
     """
         About us Page - Gives an overview of CeNDR
     """
     title = "About CeNDR"
     disable_parent_breadcrumb = True
-    strain_listing = get_isotypes(known_origin=True)
+    isotypes = get_isotypes(known_origin=True)
+    strain_listing = [s.to_json() for s in isotypes]
     return render_template('about/about.html', **locals())
 
 
 @about_bp.route('/getting_started/')
+@cache.memoize(50)
 def getting_started():
     """
         Getting Started - provides information on how to get started
         with CeNDR
     """
     title = "Getting Started"
-    strain_listing = get_isotypes(known_origin=True)
+    isotypes = get_isotypes(known_origin=True)
+    strain_listing = [s.to_json() for s in isotypes]
     disable_parent_breadcrumb = True
     return render_template('about/getting_started.html', **locals())
 
