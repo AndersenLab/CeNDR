@@ -110,8 +110,6 @@ def schedule_mapping():
   ns = ns_calc_ds(id)
   ns.label = request.form.get('label')
   ns.username = user.name
-  ns.status = 'NEW'
-  ns.save()
 
   # Save uploaded file to server temporarily
   file = request.files['file']
@@ -126,7 +124,7 @@ def schedule_mapping():
   # Check first line for column headers (strain, {TRAIT})
   if csv_headings[0] != 'strain' or len(csv_headings) != 2 or len(csv_headings[1]) == 0:
     os.remove(local_path)
-    flash("Please make sure that your data file exactly matches the sample format")
+    flash("Please make sure that your data file exactly matches the sample format", 'error')
     return redirect(url_for('mapping.mapping'))
 
   trait = csv_headings[1]
