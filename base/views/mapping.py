@@ -181,16 +181,11 @@ def mapping_report(id):
   ns = ns_calc_ds(id)
   fluid_container = True
   subtitle = ns.label +': ' + ns.trait
-
   # check if DS entry has complete status
-  data_hash = ns.data_hash
-  if (ns.status == 'COMPLETE' and len(ns.report_path) > 0):
+  result = is_result_cached(ns)
+  if result:
     report_path = ns.report_path
-    result = True
-  else:
-    # check if there is a report on GS, just to be sure
-    result = is_result_cached(ns)
-
+  
   return render_template('mapping_result.html', **locals())
 
 
