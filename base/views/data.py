@@ -227,8 +227,8 @@ def vbrowser():
   return render_template('vbrowser.html', **locals())
 
 
-@data_bp.route('/vbrowser/query', methods=['POST'])
-def vbrowser_query():
+@data_bp.route('/vbrowser/query/interval', methods=['POST'])
+def vbrowser_query_interval():
   title = 'Variant Annotation'
   payload = json.loads(request.data)
 
@@ -243,5 +243,18 @@ def vbrowser_query():
 
 
 
+@data_bp.route('/vbrowser/query/position', methods=['POST'])
+def vbrowser_query_position():
+  title = 'Variant Annotation'
+  payload = json.loads(request.data)
+
+  query = payload.get('query')
+
+  is_valid = StrainAnnotatedVariants.verify_position_query(q=query)
+  if is_valid:
+    data = StrainAnnotatedVariants.run_position_query(q=query)
+    return jsonify(data)
+
+  return jsonify({})
 
 

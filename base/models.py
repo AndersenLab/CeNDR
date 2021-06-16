@@ -855,6 +855,7 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
     {'id': 'ref_seq', 'name': 'Ref Sequence'},
     {'id': 'alt_seq', 'name': 'Alt Sequence'},
     {'id': 'consequence', 'name': 'Consequence'},
+    {'id': 'target_consequence', 'name': 'Target Consequence'},
     {'id': 'gene_id', 'name': 'Gene ID'},
     {'id': 'transcript', 'name': 'Transcript'},
     {'id': 'biotype', 'name': 'Biotype'},
@@ -881,6 +882,7 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
     q = f"SELECT * FROM {cls.__tablename__} WHERE chrom='{chrom}' AND pos > {start} AND pos < {stop};"
     return q
 
+
   ''' TODO: implement input checks here and in the browser form'''
   @classmethod
   def verify_interval_query(cls, q):
@@ -888,13 +890,14 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
     match = re.search(query_regex, q) 
     return True if match else False
 
+
   @classmethod
   def run_interval_query(cls, q):
     q = cls.generate_interval_sql(q)
     df = pd.read_sql_query(q, db.engine)
 
     try:  
-      result = df[['id', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'gene_id', 'transcript', 'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent']].dropna(how='all') \
+      result = df[['id', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'target_consequence', 'gene_id', 'transcript', 'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent']].dropna(how='all') \
                 .fillna(value="") \
                 .agg(list) \
                 .to_dict()
@@ -902,4 +905,34 @@ class StrainAnnotatedVariants(DictSerializable, db.Model):
       result = {}
     return result
 
+  
+  @classmethod
+  def generate_position_sql(cls, pos):
+    pos = pos.replace(',','')
+    chrom = pos.split(':')[0]
+    pos = int(pos.split(':')[1])
 
+    q = f"SELECT * FROM {cls.__tablename__} WHERE chrom='{chrom}' AND pos = {pos};"
+    return q
+
+
+  @classmethod
+  def verify_position_query(cls, q):
+    query_regex = "^(I|II|III|IV|V|X|MtDNA):[0-9,]+$"
+    match = re.search(query_regex, q) 
+    return True if match else False
+
+
+  @classmethod
+  def run_position_query(cls, q):
+    q = cls.generate_position_sql(q)
+    df = pd.read_sql_query(q, db.engine)
+
+    try:  
+      result = df[['id', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'target_consequence', 'gene_id', 'transcript', 'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent']].dropna(how='all') \
+                .fillna(value="") \
+                .agg(list) \
+                .to_dict()
+    except ValueError:
+      result = {}
+    return result

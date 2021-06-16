@@ -179,7 +179,7 @@ class heritability_form(Form):
 #
 # Variant Browser Forms
 #
-class vbrowser_form(Form):
+class vbrowser_form(FlaskForm):
   pass
 
 

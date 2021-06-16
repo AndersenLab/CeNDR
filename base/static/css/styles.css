@@ -1009,3 +1009,8 @@ article {
   width: 100%;
   border: 1px solid rgba(0,0,0,.2);
 }
+
+.list-group-nu .list-group-item.active, .list-group-item:focus, .list-group-item:hover {
+  background-color: #401F68 !important;
+  border: none;
+}

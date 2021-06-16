@@ -24,7 +24,7 @@ table.dataTable thead .sorting {
 
 mark {
   background-color: inherit;
-  font-size: 8px;
+  font-size: 0.8rem;
 }
 
 .hl-mark {
@@ -228,6 +228,8 @@ let impactLow = true;
 
 let toggle_strain_lock = false;
 
+let cachedTargets = {};
+
 function init_selected_strain_set() {
 {% for strain in strain_listing %}
   selected_strains.add('{{strain}}');
@@ -264,13 +266,17 @@ function set_position(pos) {
   $('#search-interval-btn').click();
 }
 
-function chunk_substr(str, size) {
-  let numChunks = Math.ceil(str.length / size)
-  let chunks = new Array(numChunks)
-  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
-    chunks[i] = str.substr(o, size)
+function chunk_substr(data, size) {
+  if (typeof data === 'string' && data.length > col_max_len) {
+    let numChunks = Math.ceil(data.length / size)
+    let chunks = new Array(numChunks)
+    for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+      chunks[i] = data.substr(o, size)
+    }
+    return chunks.join('<br/>')
+  } else {
+    return data;
   }
-  return chunks
 }
 
 function hideTable() {
@@ -328,8 +334,94 @@ function highlight_selected_strains() {
 }
 
 function processCol(col, id) {
-  return (id !== 'strains' && typeof col === 'string' && col.length > col_max_len) ? chunk_substr(col, col_max_len).join('<br/>') : col;
+  if (id == 'strains') {
+    return col
+  }
+  return chunk_substr(col, col_max_len)
 }
+
+function renderTargetConsequenceCol(data, type, row) {
+  if (data) {
+    return `<button class="btn-alt" onClick="expandTargetConsequence(this, ${data});"><span class='glyphicon glyphicon-collapse-down'></span>${data}</button>`;
+  }
+  return '';
+}
+
+function renderTargetConsequenceTable(data) {
+  let result = "<div class='instruction-well'><table class='table table-striped table-condensed table-hover' style='width:80%;margin-left:10%;font-size:0.8rem;'><thead>";
+  const numRows = Object.keys(data.id).length;
+  for (i of columnList) {
+    result += `<th>${i.name}</th>`;
+  }
+  result += "</thead><tbody>";
+  for (let j = 0; j < numRows; j++) { 
+    result += "<tr>";
+    for (k of columnList) {
+      let val = data[k.id][j] || "";
+      let processedVal;
+      if (k.id === "strains") {
+        processedVal =  renderStrainsCol(val, null, null);
+      } else {
+        processedVal = chunk_substr(val, col_max_len);
+      }
+      result += `<td>${processedVal}</td>`;
+    }
+    result += "</tr>";
+  }
+  result += "</tbody></table></div>";
+  return result;
+}
+
+function fetchTargetConsequence(el, q) {
+  const tr = el.closest('tr');
+  const row = dTable.row(tr);
+
+  if (cachedTargets[q]) {
+    row.child(renderTargetConsequenceTable(cachedTargets[q])).show();
+    highlight_selected_strains();
+  } else {
+    $.ajax({
+      type: "POST",
+      contentType: 'application/json',
+      dataType: 'json',
+      url: "{{ url_for('data.vbrowser_query_position') }}",
+      data: JSON.stringify({query: q}),
+      success:function(result) {
+        cachedTargets[q] = result;
+        row.child(renderTargetConsequenceTable(result)).show();
+        highlight_selected_strains();
+      },
+      error:function(error) {
+        console.error(error);
+      }
+    });
+  }
+}
+
+function expandTargetConsequence(el, pos) {
+  const tr = el.closest('tr');
+  const row = dTable.row(tr);
+  const chrom = dTable.cell(tr, 'chrom:name').data();
+  const query = chrom + ":" + pos;
+  if ( row.child.isShown() ) {
+      // This row is already open - close it
+      row.child.hide();
+  }
+  else {
+      // Open this row
+      //row.child( format(row.data()) ).show();
+      fetchTargetConsequence(el, query)
+  }
+}
+
+const columnList = [
+{% for col in columns %}
+{
+  "id": "{{ col['id'] }}",
+  "name": "{{ col['name'] }}"
+},
+{% endfor %}
+];
 
 
 function populateDataTable() {
@@ -381,6 +473,12 @@ function init_data_table() {
         "mRender": renderStrainsCol,
         "targets": {{ loop.index0 }} 
       },
+  {% elif col['id'] == 'target_consequence' %}
+      { 
+        "name": "{{ col['id'] }}", 
+        "mRender": renderTargetConsequenceCol,
+        "targets": {{ loop.index0 }} 
+      },
   {% else %}
       { 
         "name": "{{ col['id'] }}", 
@@ -398,7 +496,7 @@ function init_data_table() {
 
   dTable.on('page.dt', function () {
     setTimeout(highlight_selected_strains, 250);
-} );
+  });
 
 }
 
@@ -519,10 +617,11 @@ $(document).ready(function() {
 				type: "POST",
         contentType: 'application/json',
         dataType: 'json',
-				url: "{{ url_for('data.vbrowser_query') }}",
+				url: "{{ url_for('data.vbrowser_query_interval') }}",
 				data: JSON.stringify(data),
 				success:function(result) {
           enableForm();
+          cachedTargets = {};
           result_data = result;
           populateDataTable();
           showTable();
