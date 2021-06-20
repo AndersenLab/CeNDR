@@ -14,7 +14,7 @@ from base.forms import vbrowser_form
 from base.models import Strain, StrainAnnotatedVariants
 from base.utils.gcloud import list_release_files, generate_download_signed_url_v4, download_file
 from base.utils.jwt_utils import jwt_required
-from base.views.api.api_strain import get_isotypes, query_strains
+from base.views.api.api_strain import get_isotypes, query_strains, get_distinct_isotypes
 
 
 data_bp = Blueprint('data',
@@ -221,7 +221,7 @@ def gbrowser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", 
 def vbrowser():
   title = 'Variant Annotation'
   form = vbrowser_form()
-  strain_listing = query_strains()
+  strain_listing = get_distinct_isotypes()
   columns = StrainAnnotatedVariants.column_details
   fluid_container = True
   return render_template('vbrowser.html', **locals())

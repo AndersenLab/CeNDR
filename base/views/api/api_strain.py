@@ -125,3 +125,16 @@ def get_isotypes(known_origin=False, list_only=False):
     if list_only:
         result = [x.isotype for x in result]
     return result
+
+
+
+@api_strain_bp.route('/distinct-isotypes')
+@jsonify_request
+def get_distinct_isotypes():
+    """
+        Returns a list of unique values in the isotype column of the Strains table
+    """
+    result = Strain.query.with_entities(Strain.isotype).filter(Strain.isotype != None).distinct().all()
+    result = [x.isotype for x in result]
+    return result
+    
