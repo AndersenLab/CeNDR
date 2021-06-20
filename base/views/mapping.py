@@ -1,26 +1,21 @@
 import decimal
-import re
 import csv
-import urllib
-import pandas as pd
 import simplejson as json
 import os
 
 from datetime import date
 from flask import render_template, request, redirect, url_for, abort
-from slugify import slugify
 from logzero import logger
 from flask import session, flash, Blueprint, g
 
 
-from base.constants import BIOTYPES, GOOGLE_CLOUD_BUCKET, TABLE_COLORS
+from base.constants import GOOGLE_CLOUD_BUCKET
 from base.config import config
-from base.models import trait_ds, ns_calc_ds
+from base.models import ns_calc_ds, gls_op_ds
 from base.forms import file_upload_form
 from base.utils.data_utils import unique_id, hash_file_contents
-from base.utils.gcloud import check_blob, list_files, query_item, delete_item, upload_file, add_task
+from base.utils.gcloud import list_files, upload_file, add_task
 from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
-from base.utils.plots import pxg_plot, plotly_distplot
 
 
 mapping_bp = Blueprint('mapping',
@@ -77,6 +72,13 @@ def is_data_cached(data_hash):
 def is_result_cached(ns):
   if ns.status == 'COMPLETE' and len(ns.report_path) > 0:
     return True
+
+  # Check the datastore entry for the GLS pipeline execution
+  glsOp = gls_op_ds(ns.data_hash)
+  if hasattr(glsOp, 'error'):
+    ns.status = 'ERROR'
+    ns.save()
+    return False
   
   # check if there is a report on GS, just to be sure
   data_blob = REPORT_BLOB_PATH.format(data_hash=ns.data_hash)    
@@ -90,6 +92,9 @@ def is_result_cached(ns):
         ns.save()
         return True
   else:
+    if hasattr(glsOp, 'done'):
+      ns.status = 'DONE'
+      ns.save()
     return False
 
 @mapping_bp.route('/mapping/upload', methods = ['POST'])
@@ -169,6 +174,13 @@ def mapping_result_list():
   subtitle = 'Report List'
   user = get_current_user()
   items = ns_calc_ds().query_by_username(user.name)
+  # check for status changes
+  for x in items:
+    x = ns_calc_ds(x)
+    prevStatus = x.status
+    if prevStatus != 'COMPLETE' and prevStatus != 'ERROR' and prevStatus != 'DONE':
+      is_result_cached(x)
+
   items = sorted(items, key=lambda x: x['created_on'], reverse=True)
   return render_template('mapping_result_list.html', **locals())
 

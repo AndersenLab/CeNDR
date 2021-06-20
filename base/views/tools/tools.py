@@ -10,6 +10,6 @@ tools_bp = Blueprint('tools',
 
 @tools_bp.route('/')
 def tools():
-    VARS = {"title": "Tools"}
-    return render_template('tools/tools.html', **VARS)
+  disable_parent_breadcrumb = True
+  return render_template('tools/tools.html', **locals())
 

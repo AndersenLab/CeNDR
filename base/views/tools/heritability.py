@@ -52,6 +52,7 @@ def create_h2_task(data_hash, ds_id, ds_kind):
 @heritability_bp.route('/heritability')
 def heritability():
   title = "Heritability Calculator"
+  alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
   form = heritability_form()
   hide_form = True
   strain_list = []
@@ -65,6 +66,7 @@ def heritability_create():
       This endpoint is used to create a heritability job.
   """
   title = "Heritability Calculator"
+  alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
   jwt_csrf_token = (get_jwt() or {}).get("csrf")
   form = heritability_form()
   strain_data = get_strains()
@@ -136,6 +138,7 @@ def submit_h2():
 @jwt_required()
 def heritability_result(id):
   title = "Heritability Results"
+  alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
   user = get_current_user()
   hr = h2calc_ds(id)
   ready = False
@@ -178,6 +181,7 @@ def heritability_result(id):
 @jwt_required()
 def heritability_result_list():
   title = "Heritability Results"
+  alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
   user = get_current_user()
   items = h2calc_ds().query_by_username(user.name)
   items = sorted(items, key=lambda x: x['created_on'], reverse=True)

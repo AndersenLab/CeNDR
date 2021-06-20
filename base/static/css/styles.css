@@ -1,5 +1,9 @@
 /* @override 
   http://localhost:4000/assets/css/styles.css */
+/* line 64, ../sass/custom-styles.scss */
+a {
+  color: #401F68;
+}
 
 
 #variant_summary_table tr td:nth-child(2), #variant_summary_table tr td:nth-child(3) {
@@ -1010,7 +1014,44 @@ article {
   border: 1px solid rgba(0,0,0,.2);
 }
 
-.list-group-nu .list-group-item.active, .list-group-item:focus, .list-group-item:hover {
+.list-group-item:focus a, .list-group-item:hover a, .list-group-item.active a {
+  color: white !important;
+}
+
+
+.list-group-item.active, .list-group-item:focus, .list-group-item:hover {
   background-color: #401F68 !important;
+  color: white !important;
+  text-decoration: none;
   border: none;
+}
+
+
+.menu-card {
+  box-shadow: 0px 0px 45px 0px rgb(0 0 0 / 30%);
+  border: 0;
+  border-radius: 8px;
+  margin: 1.0rem;
+  padding: 1.0rem;
+  background-color:rgb(204, 196, 223) !important;
+
+}
+.menu-card .card-img-top {
+  margin: 15px auto 0;
+  width: 215px;
+  height: 215px;
+  border: 1px solid #eee;
+  border-radius: 50%;
+}
+.menu-card .card {
+  border: 0;
+}
+
+.menu-card .card .card-body {
+  text-align: center;
+}
+
+.menu-card .card-text {
+  height: 6.0rem;
+  font-size: 0.9rem;
 }

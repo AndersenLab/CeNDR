@@ -5,26 +5,34 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class='col-md-3'>
-    <div class="thumbnail img-responsive" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px">
-      <a href="{{ url_for('indel_primer.indel_primer') }}"><img src="/static/img/primer_tool.png" style="border-radius: 5px 5px 0px 0px;"></a>
-      <div class="caption">
-        <p><a href="{{ url_for('indel_primer.indel_primer') }}" class="btn btn-primary btn-block" role="button">Pairwise Indel Finder</a></p>
-        <p>Design primers for regions with indels.</p>
-      </div>
-    </div>
-  </div>
-  <div class='col-md-3'>
-    <div class="thumbnail img-responsive" style="border: 1px solid black; padding: 0; border-radius: 5px; min-height: 425px">
-      <a href="{{ url_for('heritability.heritability') }}"><img src="/static/img/heritability.png" style="border-radius: 5px 5px 0px 0px;"></a>
-      <div class="caption">
-        <p><a href="{{ url_for('heritability.heritability') }}" class="btn btn-primary btn-block" role="button">Heritability Calculator</a></p>
-        <p>Calculate broad-sense heritability.</p>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
+<div class="row row-margin">
+  
+  <div class="text-center col-lg-4 col-lg-offset-1 col-md-6 col-sm-6 col-xs-12">
+    <a href="{{ url_for('indel_primer.indel_primer') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Pairwise_Indel_Finder.png" alt="Pairwise Indel Finder">
+        <div class="card-body">
+          <h4 class="card-title">Pairwise Indel Finder</h4>
+          <p class="card-text text-center">Compare any two wild C. elegans strains for insertion-deletion (indel) variants that can be genotyped using PCR</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+  
+  
+  <div class="text-center col-lg-4 col-lg-offset-2 col-md-6 col-sm-6 col-xs-12">
+    <a href="{{ url_for('heritability.heritability') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Heritability_Calculator.png" alt="Heritability Calculator">
+        <div class="card-body">
+          <h4 class="card-title">Heritability Calculator</h4>
+          <p class="card-text text-center">Calculate the broad-sense heritability fdsaffhsdfasdf asdfor your trait of interest using a set of C. elegans wild isolates</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
 
+</div> {# /row #}
+
+{% endblock %}
 

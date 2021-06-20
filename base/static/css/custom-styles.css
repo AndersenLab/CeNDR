@@ -127,15 +127,6 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
-/* line 64, ../sass/custom-styles.scss */
-a {
-  color: #401F68;
-  transition: all 1.0s ease;
-}
-/* line 68, ../sass/custom-styles.scss */
-a:hover {
-  transition: all .6s ease;
-}
 
 /* line 75, ../sass/custom-styles.scss */
 .content ul li {
@@ -771,6 +762,7 @@ header #latest-update-top div .read-more-btn:hover {
 }
 /* line 752, ../sass/custom-styles.scss */
 .strain-table tbody tr td .view-strain-link {
+  color:rgba(64, 31, 104, 0.8);
   text-align: left;
   padding: 0;
 }

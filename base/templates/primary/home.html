@@ -38,14 +38,14 @@
   <div class="col-lg-2 col-lg-offset-2 col-md-3 col-sm-6 col-xs-6 welcome-col text-center">
     <h3>Collection, maintenance, and distribution of wild strains</h3>
     <span>
-      <a href="{{ url_for('strains.strains_list') }}" class="btn btn-nu welcome-col-btn" role="button"> Strains </a>
+      <a href="{{ url_for('strains.strains') }}" class="btn btn-nu welcome-col-btn" role="button"> Strains </a>
     </span>
   </div> {# /col-lg-2 #}
 
   <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 welcome-col text-center">
     <h3>Organization and dissemination of whole-genome sequences and variant data</h3>
     <span>
-      <a href="{{ url_for('data.data') }}" class="btn btn-nu welcome-col-btn" role="button"> Data </a>
+      <a href="{{ url_for('data.data_landing') }}" class="btn btn-nu welcome-col-btn" role="button"> Data </a>
     </span>
   </div> {# /col-lg-2 #}
 
@@ -108,16 +108,16 @@
 <div class="row welcome-mailing-list-row text-center">
 
   <div class="col-lg-4 col-lg-offset-2 col-md-6 col-sm-12 col-xs-12 text-center">
-    <h2>Signup for our mailing list</h2>
+    <h2>Sign up for our mailing list</h2>
   </div> {# /col-lg-4 #}
 
   <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
-    <form action="https://elegansvariation.us17.list-manage.com/subscribe/post?u=57ac68003daa4fada64672c12&amp;id=5983a0c891" method="post" id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="form validate form-inline" target="_blank" novalidate>
+    <form  id="mc-embedded-subscribe-form" name="mc-embedded-subscribe-form" class="form validate form-inline" target="_blank" novalidate>
         <div class="form-group center-block">
           <div class="input-group center-block">
             <input type="email" value="" name="EMAIL" placeholder='email' class="required email form-control" id="mce-EMAIL" />  
             <span class="input-group-btn">
-              <button type="submit" name="subscribe" class="btn btn-subscribe"> Subscribe </button>
+              <button name="subscribe" class="btn btn-subscribe" disabled> Subscribe </button>
             </span>
           </div>
 

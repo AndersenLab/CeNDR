@@ -9,6 +9,7 @@ import pandas as pd
 from cyvcf2 import VCF
 from flask import (Blueprint,
                    flash,
+                   url_for,
                    jsonify,
                    render_template,
                    request,
@@ -109,6 +110,7 @@ class pairwise_indel_form(Form):
 @jwt_required()
 def indel_primer_result_list():
   title = "Indel Primer Results"
+  alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
   user = get_current_user()
   items = ip_calc_ds().query_by_username(user.name)
   items = sorted(items, key=lambda x: x['created_on'], reverse=True)
@@ -122,12 +124,13 @@ def indel_primer():
         Main view
     """
     form = pairwise_indel_form(request.form)
-    VARS = {"title": "Pairwise Indel Finder",
-            "strains": SV_STRAINS,
-            "chroms": CHROM_NUMERIC.keys(),
-            "fluid_container": True,
-            "form": form}
-    return render_template('tools/indel_primer.html', **VARS)
+    title = "Pairwise Indel Finder"
+    strains = SV_STRAINS,
+    chroms = CHROM_NUMERIC.keys(),
+    fluid_container = True
+    alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
+    
+    return render_template('tools/indel_primer.html', **locals())
 
 
 def overlaps(s1, e1, s2, e2):
@@ -244,6 +247,7 @@ def submit_indel_primer():
 @indel_primer_bp.route("/indel_primer/result/<id>/tsv/<filename>")
 @jwt_required()
 def pairwise_indel_query_results(id, filename = None):
+    alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
     user = get_current_user()
     ip = ip_calc_ds(id)
 

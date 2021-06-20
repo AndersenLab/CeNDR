@@ -1,0 +1,52 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+
+
+<div class="row row-margin">
+
+ 
+  <div class="text-center col-lg-4 col-md-6 col-sm-6">
+    <a href="{{ url_for('data.data') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Genome_Data.png" alt="Genomic Data">
+        <div class="card-body">
+          <h4 class="card-title">Genomic Data</h4>
+          <p class="card-text text-center">Genotypes from whole-genome sequences and reduced representation (RAD) sequencing</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+  
+  <div class="text-center col-lg-4 col-md-6 col-sm-6">
+    <a href="{{ url_for('data.gbrowser') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Genome_Browser.png" alt="Genome Browser">
+        <div class="card-body">
+          <h4 class="card-title">Genome Browser</h4>
+          <p class="card-text text-center">Use the IGV browser to compare strain variant data</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+  
+  
+  <div class="text-center col-lg-4 col-md-6 col-sm-6">
+    <a href="{{ url_for('data.vbrowser') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Variant_Annotation.png" alt="Variant Annotation">
+        <div class="card-body">
+          <h4 class="card-title">Variant Annotation</h4>
+          <p class="card-text text-center">Search and sort genetic variants and their consequences by strain</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+
+
+</div> {# /row #}
+
+
+
+{% endblock %}
+
