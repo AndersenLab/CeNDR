@@ -409,6 +409,17 @@ class ns_calc_ds(datastore_model):
     super(ns_calc_ds, self).save(*args, **kwargs)
 
 
+class gls_op_ds(datastore_model):
+  """
+    The Google Lifesciences Operation Model - metadata for pipeline
+    task executed by Google Life Sciences
+  """
+  kind = 'gls_operation'
+
+  def __init__(self, *args, **kwargs):
+    super(gls_op_ds, self).__init__(*args, **kwargs)
+    
+
 class h2calc_ds(datastore_model):
     """
         The Heritability Calculation Task Model - for creating and retrieving
