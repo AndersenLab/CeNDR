@@ -9,7 +9,6 @@ install:
 - export VERSION_NUM=1-7-0
 - export APP_CONFIG=master
 - export CLOUD_CONFIG=1
-- if [ "${TRAVIS_BRANCH}" != "master" ]; then export APP_CONFIG=development; fi;
 - export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
 - export GOOGLE_APPLICATION_CREDENTIALS=env_config/client-secret.json
 - export GOOGLE_CLOUD_BUCKET=${GOOGLE_CLOUD_BUCKET}
