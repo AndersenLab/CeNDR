@@ -36,6 +36,8 @@
                                 {% if request.blueprint != "primary" %}
                                   {% if disable_parent_breadcrumb %}
                                   <li>{{ request.blueprint|title }}</li>
+                                  {% elif alt_parent_breadcrumb %}
+                                  <li><a href='{{ alt_parent_breadcrumb["url"] }}'>{{ alt_parent_breadcrumb["title"] }}</a></li>
                                   {% else %}
                                   <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
                                   {% endif %}

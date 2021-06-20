@@ -1,0 +1,81 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+
+
+<div class="row row-margin">
+
+ 
+  <div class="text-center col-lg-4 col-md-6 col-sm-6">
+    <a href="{{ url_for('strains.strains_catalog') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Strain_Catalog.png" alt="Strain Purchase Catalog">
+        <div class="card-body">
+          <h4 class="card-title">Strain Catalog</h4>
+          <p class="card-text text-center">Individual and pre-defined sets of strains can be ordered for heritability and genetic mapping experiments</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+  
+  <div class="text-center col-lg-4 col-md-6 col-sm-6">
+    <a href="{{ url_for('strains.strains_list') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Isotype_List.png" alt="Strain Isotype List">
+        <div class="card-body">
+          <h4 class="card-title">Isotype List</h4>
+          <p class="card-text text-center">A list of strains and isotypes which have been included in a genomic data release</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+
+  
+  <div class="text-center col-lg-4 col-md-6 col-sm-6">
+    <a href="{{ url_for('strains.strains_map') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Strain_Map.png" alt="Strain Distribution Map">
+        <div class="card-body">
+          <h4 class="card-title">Strain Map</h4>
+          <p class="card-text text-center">A map of the locations where samples of wild isolates have been found</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+
+
+  
+  <div class="text-center col-lg-4 col-md-6 col-sm-6">
+    <a href="{{ url_for('strains.strains_issues') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Strain_Issues.png" alt="Strain Naming Issues">
+        <div class="card-body">
+          <h4 class="card-title">Strain Issues</h4>
+          <p class="card-text text-center">A list of existing strain identifiers with issues related to their identification or analysis</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+
+
+
+  <div class="text-center col-lg-4 col-md-6 col-sm-6">
+    <a href="{{ url_for('strains.protocols') }}" style="text-decoration: none;">
+      <div class="menu-card">
+        <img class="card-img-top" src="https://storage.googleapis.com/elegansvariation.org/static/img/resource/Protocols.png" alt="Nematode protocols">
+        <div class="card-body">
+          <h4 class="card-title">Protocols</h4>
+          <p class="card-text text-center">Scientific protocols for isolation and maintenance of nematode samples</p>
+        </div>
+      </div> {# /card #}
+    </a>
+  </div> {#/col #}
+
+
+
+</div> {# /row #}
+
+
+
+{% endblock %}
+

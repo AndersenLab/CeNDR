@@ -31,7 +31,8 @@ def strains():
     """
         Redirect base route to the strain list page
     """
-    return redirect(url_for('strains.strains_map'))
+    disable_parent_breadcrumb = True
+    return render_template('strain/strains.html', **locals())
 
 @strains_bp.route('/map')
 @cache.memoize(50)

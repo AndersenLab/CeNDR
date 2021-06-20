@@ -5,7 +5,7 @@ import os
 
 from datetime import timedelta
 from simplejson.errors import JSONDecodeError
-from flask import make_response, render_template, Blueprint, send_file
+from flask import make_response, render_template, Blueprint, send_file, url_for
 
 from base.constants import BAM_BAI_DOWNLOAD_SCRIPT_NAME, GOOGLE_CLOUD_BUCKET
 from base.config import config
@@ -60,6 +60,13 @@ def generate_v2_file_list(selected_release):
   
   return f
 
+@data_bp.route('/')
+def data_landing():
+  disable_parent_breadcrumb = True
+  return render_template('data_landing.html', **locals())
+
+
+
 
 @data_bp.route('/release/latest')
 @data_bp.route('/release/<string:selected_release>')
@@ -78,6 +85,7 @@ def data(selected_release=None):
     
     # Post-2020 releases keep strain-level bams separate.
     title = "Genomic Data"
+    alt_parent_breadcrumb = {"title": "Data", "url": url_for('data.data_landing')}
     sub_page = selected_release
     strain_listing = query_strains(release=selected_release)
     release_summary = Strain.release_summary(selected_release)
@@ -92,6 +100,7 @@ def data(selected_release=None):
 def data_v01(selected_release):
     # Legacy releases (Pre 20200101)
     title = "Genomic Data"
+    alt_parent_breadcrumb = {"title": "Data", "url": url_for('data.data_landing')}
     subtitle = selected_release
     strain_listing = query_strains(release=selected_release)
     # Fetch variant data
@@ -128,6 +137,7 @@ def alignment_data(selected_release=None):
     
     # Post-2020 releases
     title = "Alignment Data"
+    alt_parent_breadcrumb = {"title": "Data", "url": url_for('data.data_landing')}
     strain_listing = query_strains(release=selected_release)
     RELEASES = config["RELEASES"]
     DATASET_RELEASE, WORMBASE_VERSION = list(filter(lambda x: x[0] == selected_release, RELEASES))[0]
@@ -152,6 +162,7 @@ def strain_issues(selected_release=None):
     
     # Post-2020 releases
     title = "Strain Issues"
+    alt_parent_breadcrumb = {"title": "Data", "url": url_for('data.data_landing')}
     strain_listing_issues = query_strains(release=selected_release, issues=True)
     RELEASES = config["RELEASES"]
     DATASET_RELEASE, WORMBASE_VERSION = list(filter(lambda x: x[0] == selected_release, RELEASES))[0]
@@ -208,6 +219,10 @@ def gbrowser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", 
             'strain_listing': get_isotypes(),
             'region': region,
             'query': query,
+            'alt_parent_breadcrumb': {
+              "title": "Data", 
+              "url": url_for('data.data_landing')
+            },
             'fluid_container': True}
     return render_template('gbrowser.html', **VARS)
 
@@ -220,6 +235,7 @@ def gbrowser(release=config["DATASET_RELEASE"], region="III:11746923-11750250", 
 @data_bp.route('/vbrowser')
 def vbrowser():
   title = 'Variant Annotation'
+  alt_parent_breadcrumb = {"title": "Data", "url": url_for('data.data_landing')}
   form = vbrowser_form()
   strain_listing = get_distinct_isotypes()
   columns = StrainAnnotatedVariants.column_details
