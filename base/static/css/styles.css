@@ -5,6 +5,17 @@ a {
   color: #401F68;
 }
 
+.txt-link, p>a, td>a{
+  color: #4e2a84;
+  text-decoration: none;
+  border-bottom: 1px dashed #b6acd1;
+  padding-bottom: .08rem;
+  font-weight: bold;
+}
+
+.txt-link:hover, p>a:hover, td>a:hover{
+  border-bottom: 1px solid #4e2a84;
+}
 
 #variant_summary_table tr td:nth-child(2), #variant_summary_table tr td:nth-child(3) {
   text-align: right;
