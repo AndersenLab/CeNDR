@@ -464,7 +464,13 @@ processed_data <- process_phenotypes(data, summarize_replicates = "none") %>%
     dplyr::rename(Strain = strain, Value = phenotype, TraitName = trait)
 
 # Run H2 calculation
-result <- H2.calc(processed_data, boot = T, type = "broad") 
+result <- NULL
+result <- H2.calc(processed_data, boot = T, type = "broad", reps = 500) 
+
+# if result doesn't converge, just give point estimate...
+if(is.null(result)) {
+    result <- H2.calc(processed_data, boot = F, type = "broad")
+}
 
 # add timepoint data
 result$hash <- hash
