@@ -197,23 +197,7 @@ header #top-nav .login-topnav a.nav-link:hover {
   color: #FFFFFF;
   text-decoration: none;
 }
-/* line 147, ../sass/custom-styles.scss */
-header .navbar-static-top {
-  background: #401F68 !important;
-  margin-bottom: 0;
-  border-bottom: 0;
-}
-/* line 156, ../sass/custom-styles.scss */
-header .navbar-nav li.dropdown > a,
-header .navbar-nav li.nav-item > a {
-  color: #FFFFFF;
-  font-size: 1.1em;
-}
-/* line 160, ../sass/custom-styles.scss */
-header .navbar-nav li.dropdown > a:hover,
-header .navbar-nav li.nav-item > a:hover {
-  color: rgba(255, 255, 255, 0.6);
-}
+
 /* line 167, ../sass/custom-styles.scss */
 header #latest-update-top {
   background: #FFC400;
