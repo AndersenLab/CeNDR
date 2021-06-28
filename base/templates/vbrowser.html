@@ -86,6 +86,12 @@ mark {
             </button>
           </div>
         </form>
+        <div class="btn-bottom-row" style="width: 50%; margin-left: 25%;">
+          <button class="btn nu-alt-btn btn-block disabled" id="download-result-btn" onClick="onDownload();">
+            <span class="glyphicon glyphicon-download" aria-hidden="true"></span> 
+            Download Results
+          </button>
+        </div>
       </div> {# /col-lg-4 #}
 
 
@@ -228,7 +234,26 @@ let impactLow = true;
 
 let toggle_strain_lock = false;
 
+let result_data = {};
 let cachedTargets = {};
+
+
+function download(content, fileName, contentType) {
+  const a = document.createElement("a");
+  const file = new Blob([content], { type: contentType });
+  a.href = URL.createObjectURL(file);
+  a.download = fileName;
+  a.click();
+}
+
+function onDownload(){
+  const jsonData = {
+    target_consequences: cachedTargets,
+    variants: result_data
+  };
+  download(JSON.stringify(jsonData), ".json", "text/plain");
+}
+
 
 function init_selected_strain_set() {
 {% for strain in strain_listing %}
@@ -620,6 +645,7 @@ $(document).ready(function() {
 				url: "{{ url_for('data.vbrowser_query_interval') }}",
 				data: JSON.stringify(data),
 				success:function(result) {
+          $("#download-result-btn").removeClass("disabled");
           enableForm();
           cachedTargets = {};
           result_data = result;
