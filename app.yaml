@@ -4,7 +4,7 @@ beta_settings:
 runtime: custom
 service: default
 env: flex
-entrypoint: gunicorn -b :$PORT main:app
+entrypoint: gunicorn -b :$PORT main:app --ssl-version TLSv1_2
 runtime_config:
   python_version: 3
 

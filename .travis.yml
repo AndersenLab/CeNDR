@@ -6,7 +6,7 @@ env:
 install:
 - openssl aes-256-cbc -K $encrypted_86f5a1ab1ccf_key -iv $encrypted_86f5a1ab1ccf_iv -in env_config.zip.enc -out env_config.zip -d
 - unzip -qo env_config.zip
-- export VERSION_NUM=1-7-0c
+- export VERSION_NUM=1-7-0d
 - export APP_CONFIG=master
 - export CLOUD_CONFIG=1
 - export GAE_VERSION=${APP_CONFIG}-${VERSION_NUM}
