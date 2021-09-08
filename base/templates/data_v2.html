@@ -126,7 +126,7 @@ body, html{
                         {% endif %}
                             <br />
                         {% if f.get('soft_filter_isotype_vcf_gz_tbi') %} 
-                            <a href="{{ f.get('soft_filter_isotype_vcf_gz') }}"> WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.tbi </a>
+                            <a href="{{ f.get('soft_filter_isotype_vcf_gz_tbi') }}"> WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.tbi </a>
                         {% else %}
                             WI.{{ selected_release }}.soft-filter.isotype.vcf.gz.tbi is not included in this release
                         {% endif %}
