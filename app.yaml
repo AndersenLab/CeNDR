@@ -2,7 +2,7 @@ beta_settings:
   cloud_sql_instances: andersen-lab:us-central1:cendr
 
 runtime: custom
-service: default
+service: dev
 env: flex
 entrypoint: gunicorn -b :$PORT main:app --ssl-version TLSv1_2
 runtime_config:
