@@ -2,9 +2,9 @@ beta_settings:
   cloud_sql_instances: andersen-lab:us-central1:cendr
 
 runtime: custom
-service: dev
+service: default
 env: flex
-entrypoint: gunicorn -b :$PORT main:app
+entrypoint: gunicorn -b :$PORT main:app --ssl-version TLSv1_2
 runtime_config:
   python_version: 3
 
@@ -36,15 +36,15 @@ resources:
 
 liveness_check:
   path: "/liveness_check"
-  check_interval_sec: 30
-  timeout_sec: 4
+  check_interval_sec: 60
+  timeout_sec: 10
   failure_threshold: 2
   success_threshold: 2
 
 readiness_check:
   path: "/readiness_check"
-  check_interval_sec: 5
-  timeout_sec: 4
+  check_interval_sec: 120
+  timeout_sec: 10
   failure_threshold: 2
   success_threshold: 2
   app_start_timeout_sec: 300

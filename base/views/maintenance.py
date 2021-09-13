@@ -71,12 +71,12 @@ def generate_bam_bai_download_script(joined_strain_list):
     bam_path = 'bam/{}.bam'.format(strain)
     bam_signed_url = generate_download_signed_url_v4(bam_path, expiration=expiration)
     if bam_signed_url:
-      f.write('\nwget "{}"'.format(bam_signed_url))
+      f.write('\nwget -O "{}.bam" "{}"'.format(strain, bam_signed_url))
     
     bai_path = 'bam/{}.bam.bai'.format(strain)
     bai_signed_url = generate_download_signed_url_v4(bai_path, expiration=expiration)
     if bai_signed_url:
-      f.write('\nwget "{}"'.format(bai_signed_url))
+      f.write('\nwget -O "{}.bam.bai" "{}"'.format(strain, bai_signed_url))
 
   f.close()
   upload_file(blobPath, f"{BAM_BAI_DOWNLOAD_SCRIPT_NAME}")
