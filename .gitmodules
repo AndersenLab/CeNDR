@@ -10,3 +10,6 @@
 [submodule "external/ipcalc"]
 	path = external/ipcalc
 	url = https://github.com/AndersenLab/ipcalc
+[submodule "external/dockerfile"]
+	path = external/dockerfile
+	url = https://github.com/AndersenLab/dockerfile
