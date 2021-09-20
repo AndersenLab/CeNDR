@@ -13,3 +13,6 @@
 [submodule "external/dockerfile"]
 	path = external/dockerfile
 	url = https://github.com/AndersenLab/dockerfile
+[submodule "external/NemaScan"]
+	path = external/NemaScan
+	url = https://github.com/AndersenLab/NemaScan
