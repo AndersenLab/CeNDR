@@ -55,3 +55,33 @@
 </table>
 
 {% endmacro %}
+
+
+{% macro render_dataTable_top_menu(pages=True, filter=True) %}
+
+<div class="row dataTables-menu-top">
+  <div class="col-md-2">
+    {% if pages %}
+    <form class="form-inline">
+      <div class="form-group" style="text-align:center">
+        <label for="page-length"> Show: </label>
+        <select name="page-length" id="page-length" class="form-control">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="25" selected>25</option>
+          <option value="100">100</option>
+        </select>
+      </div>
+    </form>
+    {% endif %}
+  </div> {# /col-md-2 #}
+  <div class="col-md-6"></div>
+  <div class="col-md-4">
+    {% if filter %}
+    <input id="filter" type="text" class="form-control pull-right" placeholder="Search">
+    {% endif %}
+  </div> {# /col-md-2 #}
+</div> {# /row #}
+
+
+{% endmacro %}

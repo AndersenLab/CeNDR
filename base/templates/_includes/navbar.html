@@ -1,99 +1,129 @@
 <header>
 
-<nav class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation" style="z-index:5000;{% if config.DEBUG %}background-color:blue;{% endif %}">
-  <div class="container{% if fluid_container %}-fluid{% endif %}">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/">CeNDR</a>
-    </div>
+  <div class="row nu-brand-row">
+    <div class="col-lg-12 col-xs-12">
+      <a href="https://northwestern.edu"><img class="nu-brand-img" src="/static/img/northwestern-logo.svg"></a>
+    </div> {# /col-md-2 #}
+  </div> {# /row #}
 
 
-<!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+  <div class="row cendr-brand-row">
+    <div class="col-lg-12 col-xs-12 cendr-brand-txt">
+      <a href="/"> CeNDR </a>
+    </div> {# /col-md-2 #}
+  </div> {# /row #}
 
 
-      <ul class="nav navbar-nav navbar-right" >
-        <li class="dropdown">
-          <a href="{{ url_for("about.about") }}" role="button" aria-haspopup="true" aria-expanded="false">About<span class="caret"></span></a>
-          <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="{{ url_for("about.about") }}">About CeNDR</a></li>
-            <li><a href="{{ url_for("about.statistics") }}">Statistics</a></li>
-            <li><a href="{{ url_for("about.staff") }}">Staff</a></li>
-            <li><a href="{{ url_for("about.committee") }}">Scientific Advisory Committee</a></li>
-            <li><a href="{{ url_for("about.collaborators") }}">Collaborators</a></li>
-            <li><a href="{{ url_for("about.donate") }}">Donate</a></li>
-            <li><a href="{{ url_for("about.funding") }}">Funding</a></li>
-            <li><a href="{{ url_for("about.publications") }}">Publications</a></li>
-          </ul>
-        </li>
+  <nav class="navbar navbar-default navbar-inverse navbar-static-top" role="navigation" style="z-index:5000;{% if config.DEBUG %}background-color:blue;{% endif %}">
+  
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only"> Toggle navigation </span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+      </div>
 
-        <li class="dropdown">
-          <a href="{{ url_for("strain.map_page")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Strains<span class="caret"></span></a>
-          <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="{{ url_for("strain.map_page")}}">Global Strain Map</a></li>
-            <li><a href="{{ url_for("strain.strain_catalog")}}">Strain Catalog</a></li>
-            <li><a href="{{ url_for("strain.protocols") }}">Protocols</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="{{ url_for("strain.strain_submission_page") }}">Submit Strains</a></li>
-          </ul>
-        </li>
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
-        <li class="dropdown">
-        <a href="{{ url_for("data.data")}}" role="button" role="button" aria-haspopup="true" aria-expanded="false">Data<span class="caret"></span></a>
-        <ul class="dropdown-menu dropdown-menu-left">
-          <li><a href="{{ url_for("data.browser") }}">Variant Browser</a></li>
-          <li><a href="{{ url_for("data.data") }}">Releases</a></li>
-         {#<li><a href="{{ url_for('docs') }}">API</a></li>#}
+        <ul class="nav navbar-nav navbar-right">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> About <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="{{ url_for('about.about') }}"> About CeNDR </a></li>
+              <li><a href="{{ url_for('about.statistics') }}"> Statistics </a></li>
+              <li><a href="{{ url_for('about.staff') }}"> Staff </a></li>
+              <li><a href="{{ url_for('about.committee') }}"> Scientific Advisory Committee </a></li>
+              <li><a href="{{ url_for('about.collaborators') }}"> Collaborators </a></li>
+              <li><a href="{{ url_for('about.donate') }}"> Donate </a></li>
+              <li><a href="{{ url_for('about.funding') }}"> Funding </a></li>
+              <li><a href="{{ url_for('about.publications') }}"> Publications </a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Strains <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="{{ url_for('strains.strains_catalog')}}"> Strain Catalog </a></li>
+              <li><a href="{{ url_for('strains.strains_list')}}"> Isotype List </a></li>
+              <li><a href="{{ url_for('strains.strains_map')}}"> Strain Map </a></li>
+              <li><a href="{{ url_for('strains.strains_issues')}}"> Strain Issues </a></li>
+              <li><a href="{{ url_for('strains.protocols') }}"> Protocols </a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="{{ url_for('strains.strains_submission_page') }}"> Submit Strains </a></li>
+              <li><a href="{{ url_for('strains.external_links')}}"> External Links </a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Data <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="{{ url_for('data.data') }}"> Genomic Data </a></li>
+              <li><a href="{{ url_for('data.gbrowser') }}"> Genome Browser </a></li>
+              <li><a href="{{ url_for('data.vbrowser') }}"> Variant Annotation </a></li>
+              {#<li><a href="{{ url_for('docs') }}">API</a></li>#}
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Genetic Mapping <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="{{ url_for('mapping.mapping')}}"> Perform Mapping </a></li>
+            </ul>
+          </li>
+
+          <li class="dropdown">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Tools <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="{{ url_for('indel_primer.indel_primer')}}"> Pairwise Indel Finder </a></li>
+              <li><a href="{{ url_for('heritability.heritability')}}"> Heritability Calculator </a></li>
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a href="{{ url_for('primary.outreach') }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false"> Outreach </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="{{ url_for('primary.help_item') }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false"> Help </a>
+          </li>
+
+          <li class="nav-item">
+            <a href="{{ url_for('primary.contact') }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false"> Contact Us </a>
+          </li>
+
+          {% if session["is_logged_in"] %}
+          <li class="dropdown">
+            <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Account <span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="{{ url_for('user.user_profile') }}" class='nav-link' role='button'> My Profile </a></li>
+              <li><a href="{{ url_for('auth.logout') }}" class='nav-link' role='button'> Logout </a></li>
+            </ul>
+          </li>
+
+          {% else %}
+          <li class="nav-item">
+            <a href="{{ url_for('auth.choose_login') }}" class='nav-link' role='button'> Login </a>
+          </li>
+
+          {% endif %}
+
         </ul>
-        </li>
+      </div><!-- /.navbar-collapse -->
+    </div><!-- /.container-fluid -->
+  </nav>
 
-        <li class="dropdown">
-          <a href="{{ url_for("mapping.mapping")}}" role="button" aria-haspopup="true" aria-expanded="false">Genetic Mapping<span class="caret"></span></a>
-          <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="{{ url_for("mapping.mapping")}}">Perform Mapping</a></li>
-          </ul>
-        </li>
-
-        <li class="dropdown">
-          <a href="{{ url_for("tools.tools")}}" role="button" aria-haspopup="true" aria-expanded="false">Tools<span class="caret"></span></a>
-          <ul class="dropdown-menu dropdown-menu-left">
-            <li><a href="{{ url_for("indel_primer.indel_primer")}}">Pairwise indel finder</a></li>
-            <li><a href="{{ url_for("heritability.heritability")}}">Heritability calculator</a></li>
-          </ul>
-        </li>
-
-        <li class="nav-item">
-          <a href="{{ url_for("primary.outreach") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Outreach</a>
-        </li>
-
-        <li class="nav-item">
-          <a href="{{ url_for("primary.help_item") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Help</a>
-        </li>
-        
-        <li class="nav-item">
-          <a href="{{ url_for("primary.contact") }}" class="nav-link" role="button" aria-haspopup="true" aria-expanded="false">Contact Us</a>
-        </li>
-        {% if user %}
-            <li class="dropdown">
-              <a href="{{ url_for('user.user', username=user['username']) }}" role="button" aria-haspopup="true" aria-expanded="false">{{ user['username'] }}<span class="caret"></span></a>
-              <ul class="dropdown-menu dropdown-menu-left">
-                <li><a href="{{ url_for('auth.logout') }}" class='nav-link' role='button'>Logout</a></li>
-              </ul>
-            </li>
-        {% else %}
-        <li class="nav-item">
-            <a href='{{ url_for('auth.choose_login') }}' class='nav-link' role='button'>Login</a>
-        </li>
-        {% endif %}
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
-</nav>
+  <div id="snackbar">
+    <div id="messages">
+    {% for category, msg in get_flashed_messages(with_categories=true) %}
+      <div class="flash-{{ category }} alert alert-dismissable alert-{{ category }} flash-banner">
+        <p class="snackbar-msg-txt snackbar-msg-txt-{{ category }}">{{ msg }}</p>
+      </div>
+    {% endfor %}
+    </div>
+  </div>
 
 </header>

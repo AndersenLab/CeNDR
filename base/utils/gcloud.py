@@ -1,11 +1,17 @@
 import json
+import datetime
+import googleapiclient.discovery
+
 from flask import g
-from base.utils.data_utils import dump_json
 from gcloud import datastore, storage
 from logzero import logger
-import googleapiclient.discovery
 from google.oauth2 import service_account
+from google.cloud import tasks_v2
+from google.protobuf import timestamp_pb2
+import requests
 
+from base.constants import GOOGLE_CLOUD_BUCKET, GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION
+from base.utils.data_utils import dump_json
 
 def google_datastore(open=False):
     """
@@ -14,12 +20,12 @@ def google_datastore(open=False):
         Args:
             open - Return the client without storing it in the g object.
     """
-    client = datastore.Client(project='andersen-lab')
-    if open:
-        return client
-    if not hasattr(g, 'ds'):
-        g.ds = client
-    return g.ds
+    if (g and open == False):
+      if not hasattr(g, 'ds'):
+        g.ds = datastore.Client(project=GOOGLE_CLOUD_PROJECT_ID)
+      return g.ds
+
+    return datastore.Client(project=GOOGLE_CLOUD_PROJECT_ID)
 
 
 def delete_item(item):
@@ -27,6 +33,42 @@ def delete_item(item):
     batch = ds.batch()
     batch.delete(item.key)
     batch.commit()
+
+
+def delete_by_ref(kind, id):
+    ds = google_datastore()
+    key = ds.key(kind, id)
+    batch = ds.batch()
+    batch.delete(key)
+    batch.commit()
+
+
+def delete_items_by_query(kind, filters=None, projection=()):
+    """
+        Deletes all items that are returned by a query. 
+        Items are deleted in page-sized batches as the results are being returned
+        Returns the number of items deleted
+    """
+    # filters:
+    # [("var_name", "=", 1)]
+    ds = google_datastore()
+    query = ds.query(kind=kind, projection=projection)
+    deleted_items = 0
+    if filters:
+        for var, op, val in filters:
+            query.add_filter(var, op, val)
+
+    query = query.fetch()
+    while True:
+        data, more, cursor = query.next_page()
+        keys = []
+        for entity in data:
+            keys.append(entity.key)
+        ds.delete_multi(keys)
+        deleted_items += len(keys)
+        if more is False:
+            break
+    return deleted_items
 
 
 def store_item(kind, name, **kwargs):
@@ -48,7 +90,7 @@ def store_item(kind, name, **kwargs):
     ds.put(m)
 
 
-def query_item(kind, filters=None, projection=(), order=None, limit=None):
+def query_item(kind, filters=None, projection=(), order=None, limit=None, keys_only=False):
     """
         Filter items from google datastore using a query
     """
@@ -56,6 +98,8 @@ def query_item(kind, filters=None, projection=(), order=None, limit=None):
     # [("var_name", "=", 1)]
     ds = google_datastore()
     query = ds.query(kind=kind, projection=projection)
+    if keys_only:
+        query.keys_only()
     if order:
         query.order = order
     if filters:
@@ -101,12 +145,13 @@ def google_storage(open=False):
         Args:
             open - Return the client without storing it in the g object.
     """
-    client = storage.Client(project='andersen-lab')
-    if open:
-        return client
-    if not hasattr(g, 'gs'):
-        g.gs = client
-    return g.gs
+    if (g and open == False):
+      if not hasattr(g, 'gs'):
+        g.gs = storage.Client.from_service_account_json('env_config/client-secret.json')
+      return g.gs
+
+    return storage.Client.from_service_account_json('env_config/client-secret.json')
+
 
 
 def get_cendr_bucket():
@@ -114,24 +159,30 @@ def get_cendr_bucket():
         Returns the CeNDR bucket
     """
     gs = google_storage()
-    return gs.get_bucket("elegansvariation.org")
+    return gs.get_bucket(GOOGLE_CLOUD_BUCKET)
 
 
-def upload_file(blob, obj, as_string = False):
+def upload_file(blob, obj, as_string = False, as_file_obj = False):
     """
-        Upload a file to the CeNDR bucket
+      Upload a file to the CeNDR bucket
 
-        Args:
-            blob - The name of the blob (server-side)
-            fname - The filename to upload (client-side)
+      Args:
+          blob - The name of the blob (server-side)
+          fname - The filename to upload (client-side)
     """
     logger.info(f"Uploading: {blob} --> {obj}")
     cendr_bucket = get_cendr_bucket()
     blob = cendr_bucket.blob(blob)
+
     if as_string:
-        blob.upload_from_string(obj)
-    else:
-        blob.upload_from_filename(obj)
+      blob.upload_from_string(obj)
+      return blob
+
+    if as_file_obj:
+      blob.upload_from_file(obj)
+      return blob
+
+    blob.upload_from_filename(obj)
     return blob
 
 
@@ -158,15 +209,24 @@ def check_blob(fname):
     return cendr_bucket.get_blob(fname)
 
 
+def list_files(prefix):
+    """
+        Lists files with a given prefix
+    """
+    cendr_bucket = get_cendr_bucket()
+    items = cendr_bucket.list_blobs(prefix=prefix)
+    return list(items)
+
+
+
 def list_release_files(prefix):
     """
         Lists files with a given prefix
         from the current dataset release
     """
-
     cendr_bucket = get_cendr_bucket()
     items = cendr_bucket.list_blobs(prefix=prefix)
-    return list([f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items])
+    return list([f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/{x.name}" for x in items])
 
 
 def google_analytics():
@@ -177,3 +237,97 @@ def google_analytics():
                                                       scopes=['https://www.googleapis.com/auth/analytics.readonly'])
     return googleapiclient.discovery.build('analyticsreporting', 'v4', credentials=credentials)
 
+
+def generate_download_signed_url_v4(blob_path, expiration=datetime.timedelta(minutes=15)):
+    """Generates a v4 signed URL for downloading a blob. """
+    cendr_bucket = get_cendr_bucket()
+
+    try: 
+      blob = cendr_bucket.blob(blob_path)
+      url = blob.generate_signed_url(
+        expiration=expiration,
+        method="GET"
+      )
+      return url
+
+    except Exception as inst:
+      print(type(inst))
+      print(inst.args)
+      print(inst)
+      return None
+
+
+def generate_upload_signed_url_v4(blob_name, content_type="application/octet-stream"):
+    """Generates a v4 signed URL for uploading a blob using HTTP PUT. """
+    cendr_bucket = get_cendr_bucket()
+    try:
+      blob = cendr_bucket.blob(blob_name)
+      url = blob.generate_signed_url(
+        expiration=datetime.timedelta(minutes=15),
+        method="PUT",
+        content_type=content_type
+      )
+    except:
+      return None
+    return url
+
+
+def google_task(open=False):
+    """
+        Fetch google datastore credentials
+
+        Args:
+            open - Return the client without storing it in the g object.
+    """
+    client = tasks_v2.CloudTasksClient()
+    if open:
+      return client
+    if g:
+      if not hasattr(g, 'tc'):
+        g.tc = client
+      return g.tc
+    return client
+
+
+def add_task(queue, url, payload, delay_seconds=None, task_name=None):
+  client = google_task()
+  parent = client.queue_path(GOOGLE_CLOUD_PROJECT_ID, GOOGLE_CLOUD_LOCATION, queue)
+  
+  task = {
+    "http_request": { 
+      "http_method": tasks_v2.HttpMethod.POST,
+      "url": url,
+    }
+  }
+
+  if payload is not None:
+    if isinstance(payload, dict):
+      payload = json.dumps(payload)
+      task["http_request"]["headers"] = {"Content-type": "application/json"}
+
+    converted_payload = payload.encode()
+    task["http_request"]["body"] = converted_payload
+
+
+  if delay_seconds is not None:
+    # Convert "seconds from now" into an rfc3339 datetime string then into a Timestamp protobuf.
+    d = datetime.datetime.utcnow() + datetime.timedelta(seconds=delay_seconds)
+    timestamp = timestamp_pb2.Timestamp()
+    timestamp.FromDatetime(d)
+    task["schedule_time"] = timestamp
+
+  if task_name is not None:
+    task["name"] = f"{parent}/tasks/{task_name}"
+
+  try:
+    response = client.create_task(request={"parent": parent, "task": task})
+    logger.debug("Created task {}".format(response.name))
+  except Exception as e:
+    logger.error(f"Failed to create task {e}")
+    eType = str(type(e).__name__)
+    if eType == 'AlreadyExists':
+      response = 'SCHEDULED'
+    else:
+      response = None
+    
+  return response

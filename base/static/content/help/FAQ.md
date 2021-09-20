@@ -31,7 +31,7 @@ Or use this bibtex entry
 
 ### What are hyper-divergent regions? How should I use variants that fall within these regions? 
 
-Hyper-divergent regions are genomic intervals that contain sequences not found in the N2 reference strain. They were identified by high levels of variation and low coverage from read alignments. For a more full description, please read [this paper](https://andersenlab.org/publications/2020LeebioRxiv.pdf). We highly recommend that you use the variant browser and view the BAM files for strains of interest. We also released a genomic view track to see where we have classified divergent regions. If you find that your region of interest overlaps with a hyper-divergent region, then we recommend taking any variants as preliminary. Long-read sequencing is required to identify the actual genomic sequences in this region.
+Hyper-divergent regions are genomic intervals that contain sequences not found in the N2 reference strain. They were identified by high levels of variation and low coverage from read alignments. For a more full description, please read [this paper](https://andersenlab.org/publications/2020LeebioRxiv.pdf). We highly recommend that you use the genome browser and view the BAM files for strains of interest. We also released a genomic view track to see where we have classified divergent regions. If you find that your region of interest overlaps with a hyper-divergent region, then we recommend taking any variants as preliminary. Long-read sequencing is required to identify the actual genomic sequences in this region.
 
 ### How much confidence do we have in the indel variants?
 
@@ -45,7 +45,7 @@ __[See our filter optimization report for further details](/static/reports/filte
 
 ### How are strains grouped by isotype? <a name='strain-groups'></a>
 
-In 2012, we [published](http://dx.doi.org/10.1038/ng.1050) genome-wide variant data from reduced representation sequencing of approximately 10% of the C. elegans genome (RAD-seq). Using these data, we grouped strains into isotypes. We also found many strains that were mislabeled as wild isolates but were instead N2 derivatives, recombinants from laboratory experiments, and mutagenesis screen isolates (detailed in <a href="#strain-issues">Strain issues</a>). These strains were not characterized further. For the isotypes, we chose one strain to be the isotype reference strain. This strain can be ordered through CeNDR [here]({{ url_for('strain.strain_catalog') }}).
+In 2012, we [published](http://dx.doi.org/10.1038/ng.1050) genome-wide variant data from reduced representation sequencing of approximately 10% of the C. elegans genome (RAD-seq). Using these data, we grouped strains into isotypes. We also found many strains that were mislabeled as wild isolates but were instead N2 derivatives, recombinants from laboratory experiments, and mutagenesis screen isolates (detailed in [Strain issues]{{ url_for('strains.strains_issues') }}). These strains were not characterized further. For the isotypes, we chose one strain to be the isotype reference strain. This strain can be ordered through CeNDR [here]({{ url_for('strains.strains_catalog') }}).
 
 After 2012, with advances in genome sequencing, we transitioned our sequencing to whole-genome short-read sequencing.
 All isotype reference strains were resequenced whole-genome.  The other strains within an isotype were not,

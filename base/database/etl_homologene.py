@@ -8,11 +8,15 @@ Author: Daniel E. Cook (danielecook@gmail.com)
 import re
 import tarfile
 import csv
+
+from logzero import logger
 from urllib.request import urlretrieve
 from tempfile import NamedTemporaryFile
 from base.models import WormbaseGeneSummary
 from base.constants import URLS
 
+C_ELEGANS_PREFIX = 'CELE_'
+C_ELEGANS_HOMOLOG_ID = 6239
 
 def fetch_taxon_ids():
     """
@@ -57,19 +61,31 @@ def fetch_homologene(homologene_fname: str):
     taxon_ids = fetch_taxon_ids()
 
     # First, fetch records with a homolog ID that possesses a C. elegans gene.
-    elegans_set = dict([[int(x[0]), x[3]] for x in response_csv if x[1] == '6239'])
+    elegans_set = dict([[int(x[0]), x[3]] for x in response_csv if x[1] == str(C_ELEGANS_HOMOLOG_ID)])
 
+    # Remove CELE_ prefix from some gene names
+    for k, v in elegans_set.items():
+      elegans_set[k] = v.replace(C_ELEGANS_PREFIX, '')
+
+    idx = 0
+    count = 0
     for line in response_csv:
-        tax_id = int(line[1])
-        homolog_id = int(line[0])
-        if homolog_id in elegans_set.keys() and tax_id != 6239:
-            # Try to resolve the wormbase WB ID if possible.
-            gene_name = elegans_set[homolog_id]
-            gene_id = WormbaseGeneSummary.resolve_gene_id(gene_name) or line[2]
-            yield {'gene_id': gene_id,
-                   'gene_name': gene_name,
-                   'homolog_species': taxon_ids[tax_id],
-                   'homolog_taxon_id': tax_id,
-                   'homolog_gene': line[3],
-                   'homolog_source': "Homologene",
-                   'is_ortholog': False}
+      idx += 1
+      tax_id = int(line[1])
+      homolog_id = int(line[0])
+      if homolog_id in elegans_set.keys() and tax_id != int(C_ELEGANS_HOMOLOG_ID):
+        # Try to resolve the wormbase WB ID if possible.
+        gene_name = elegans_set[homolog_id]
+        gene_id = WormbaseGeneSummary.resolve_gene_id(gene_name)
+        ref = WormbaseGeneSummary.query.filter(WormbaseGeneSummary.gene_id == gene_id).first()
+        if idx % 10000 == 0:
+          logger.info(f'Processed {idx} records yielding {count} inserts')
+        if ref:
+          count += 1
+          yield {'gene_id': gene_id,
+                  'gene_name': gene_name,
+                  'homolog_species': taxon_ids[tax_id],
+                  'homolog_taxon_id': tax_id,
+                  'homolog_gene': line[3],
+                  'homolog_source': "Homologene",
+                  'is_ortholog': False }

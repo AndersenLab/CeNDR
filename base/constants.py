@@ -6,15 +6,29 @@ very infrequently (if ever).
 
 Author: Daniel E. Cook (danielecook@gmail.com)
 """
-from base.config import WORMBASE_VERSION
+import os
+
+WORMBASE_VERSION = 'WS276'
+
+STRAIN_PHOTO_PATH = 'photos/Celegans/'
+
+USER_ROLES = [('user', 'User'), ('admin', 'Admin')]
+BAM_BAI_DOWNLOAD_SCRIPT_NAME = "bam_bai_signed_download_script.sh"
 
 
 class PRICES:
-    DIVERGENT_SET = 160
-    STRAIN_SET = 640
-    STRAIN = 15
-    SHIPPING = 65
+  DIVERGENT_SET = 160
+  STRAIN_SET = 640
+  STRAIN = 15
+  SHIPPING = 65
 
+
+SHIPPING_OPTIONS = [('UPS', 'UPS'),
+                    ('FEDEX', 'FEDEX'),
+                    ('Flat Rate Shipping', '${} Flat Fee'.format(PRICES.SHIPPING))]
+
+PAYMENT_OPTIONS = [('check', 'Check'),
+                   ('credit_card', 'Credit Card')]
 
 # Maps chromosome in roman numerals to integer
 CHROM_NUMERIC = {"I": 1,
@@ -24,6 +38,12 @@ CHROM_NUMERIC = {"I": 1,
                  "V": 5,
                  "X": 6,
                  "MtDNA": 7}
+
+
+
+GOOGLE_CLOUD_BUCKET = 'elegansvariation.org'
+GOOGLE_CLOUD_PROJECT_ID = 'andersen-lab'
+GOOGLE_CLOUD_LOCATION = 'us-central1'
 
 # WI Strain Info Dataset
 GOOGLE_SHEETS = {"orders": "1BCnmdJNRjQR3Bx8fMjD_IlTzmh3o7yj8ZQXTkk6tTXM",
@@ -39,35 +59,31 @@ class URLS:
         URLs are stored here so they can be easily integrated into the database
         for provenance purposes.
     """
+    #
+    # BAMs are now hosted on google cloud buckets
+    #
+    BAM_URL_PREFIX = f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/bam"
 
-    #
-    # AWS URLS
-    #
-    BAM_URL_PREFIX = "https://s3.us-east-2.amazonaws.com/elegansvariation.org/bam"
+    # Variant Annotation CSV
+    STRAIN_VARIANT_ANNOTATION_URL = "https://storage.googleapis.com/elegansvariation.org/db/WI.20210121.strain-annotation.bcsq.20210401.csv"
 
     """
        Wormbase URLs
     """
-
     # Gene GTF
-    GENE_GTF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_VERSION}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_VERSION}.canonical_geneset.gtf.gz"
-
+    GENE_GTF_URL = "ftp://ftp.wormbase.org/pub/wormbase/releases/{WB}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WB}.canonical_geneset.gtf.gz"
     # GENE GFF_URL
-    GENE_GFF_URL = f"ftp://ftp.wormbase.org/pub/wormbase/releases/{WORMBASE_VERSION}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WORMBASE_VERSION}.annotations.gff3.gz"
-
+    GENE_GFF_URL = "ftp://ftp.wormbase.org/pub/wormbase/releases/{WB}/species/c_elegans/PRJNA13758/c_elegans.PRJNA13758.{WB}.annotations.gff3.gz"
     # Maps wormbase ID to locus name
     GENE_IDS_URL = "ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/annotation/geneIDs/c_elegans.PRJNA13758.current.geneIDs.txt.gz"
-
     # Lists C. elegans orthologs
     ORTHOLOG_URL = "ftp://ftp.wormbase.org/pub/wormbase/species/c_elegans/PRJNA13758/annotation/orthologs/c_elegans.PRJNA13758.current_development.orthologs.txt"
 
     #
     # Ortholog URLs
     #
-
     # Homologene
     HOMOLOGENE_URL = 'https://ftp.ncbi.nih.gov/pub/HomoloGene/current/homologene.data'
-
     # Taxon IDs
     TAXON_ID_URL = 'ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz'
 
@@ -92,3 +108,10 @@ BIOTYPES = {
 TABLE_COLORS = {"LOW": 'success',
                 "MODERATE": 'warning',
                 "HIGH": 'danger'}
+
+
+DEFAULT_CLOUD_CONFIG = 'default'
+
+REPORT_VERSIONS = ['', 'v1', 'v2']
+REPORT_V1_FILE_LIST = ['methods.md']
+REPORT_V2_FILE_LIST = ['alignment_report.html', 'concordance_report.html', 'gatk_report.html', 'methods.md', 'reads_mapped_by_strain.tsv', 'release_notes.md']

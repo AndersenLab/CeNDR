@@ -1,0 +1,106 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" />
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+{% endblock %}
+
+{% block style %}
+<style>
+
+table.dataTable thead .sorting_asc {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_asc.png") no-repeat center left;
+}
+table.dataTable thead .sorting_desc {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_desc.png") no-repeat center left;
+}
+table.dataTable thead .sorting {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_both.png") no-repeat center left;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% from "macros.html" import render_dataTable_top_menu %}
+{{ render_dataTable_top_menu() }}
+
+<div class="row">
+
+  <div class="col-md-12">
+
+    <table id='h2-table' class='table table-hover table-striped table-compact strain-table' style="width: 100%;">
+
+      <thead>
+        <tr class="header">
+          <th class='data-label sorting'><strong> Label </strong></th>
+          <th class='data-trait sorting'><strong> Trait </strong></th>
+          <th class='data-status sorting'><strong> Status </strong></th>
+          <th class='data-date sorting'><strong> Date </strong></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for item in items %}
+          <tr>
+            {% if item %}
+              <td class='data-label'> {{ item.label }} </td>
+              <td class='data-trait'> {{ item.trait }} </td>
+              <td class='data-status'>
+                {% if item.status == 'COMPLETE' %}
+                <a href="{{ url_for('heritability.heritability_result', id=item.key.name) }}">
+                  {{ item.status }}
+                </a>
+                {% else %}
+                {{ item.status }}
+                {% endif %}
+              </td>
+            {% endif %}
+            <td class='data-date' data-order="{{ item.created_on }}"> {{ item.created_on|date_format }} </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+
+    </table>
+
+  </div> {# /col #}
+</div> {# /row #}
+
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+
+  $(document).ready(function(){
+
+    const dTable = $('#h2-table').DataTable( {
+      paging: true,
+      pageLength: 25,
+      autoWidth: true,
+      aaSorting: [ [3,'desc'] ],
+      aoColumns: [
+        {"width": "25%"},
+        {"width": "25%"},
+        {"width": "25%"},
+        {"width": "25%"}
+      ],
+      dom:"tipr"
+    });
+
+    $('#filter').keyup(function(){  
+      dTable.search($(this).val()).draw();
+    });
+
+    $('#page-length').change(function(){  
+      dTable.page.len($(this).val()).draw();
+    });
+
+  });
+
+</script>
+
+
+{% endblock %}

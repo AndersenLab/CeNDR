@@ -61,7 +61,7 @@ target/
 #Random
 *.DS_Store
 
-*.json
+package-lock.json
 
 tmp/
 
@@ -72,6 +72,10 @@ mapping_worker/.envrc
 
 env_config/
 env_config.zip
+env_config_mti/
+env_config_mti.zip
+env_config_al/
+env_config_al.zip
 
 
 .python-version
@@ -93,3 +97,9 @@ photos/*
 
 # Heritability run go tool
 invoke
+
+.vscode/launch.json
+cloud_functions/heritability_run/strain_data.tsv
+base/bam_bai_signed_download_script.sh
+
+uploads/

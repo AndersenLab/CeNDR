@@ -4,7 +4,7 @@ Nematode Isolation:
     link: SamplingIsolationC.elegansNaturalHabitat.pdf
 
   - name: Isolating wild strains in the laboratory
-    link: IsolatingWildIsolates.pdf
+    link: 20210430_IdentifyingWildIsolates.pdf
 
   - name: Shipping Strains
     link: ShippingStrains.pdf
@@ -14,7 +14,10 @@ Maintenance:
     link: FreezingThawingWeb.pdf
 
   - name: Cleaning Worms
-    link: CleaningWorms.pdf
+    link: 2021_CleaningWorms.pdf
 
   - name: Chunking Worms
     link: ChunkingWorms.pdf
+
+  - name: Soft Agar Freezing Protocol
+    link: 20200620_SoftAgarFreezing&Thawing.pdf

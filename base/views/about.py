@@ -15,11 +15,13 @@ from base.utils.query import get_mappings_summary, get_weekly_visits, get_unique
 from base.config import config
 from base.models import Strain
 from base.forms import donation_form
+from base.extensions import cache
 from base.views.api.api_strain import get_isotypes
 from base.utils.google_sheets import add_to_order_ws
 from base.utils.email import send_email, DONATE_SUBMISSION_EMAIL
 from base.utils.data_utils import load_yaml, chicago_date, hash_it
 from base.utils.plots import time_series_plot
+from base.utils.jwt_utils import jwt_required, get_current_user
 
 about_bp = Blueprint('about',
                      __name__,
@@ -27,25 +29,30 @@ about_bp = Blueprint('about',
 
 
 @about_bp.route('/')
+@cache.memoize(50)
 def about():
     """
         About us Page - Gives an overview of CeNDR
     """
-    title = "About"
-
-    strain_listing = get_isotypes(known_origin=True)
+    title = "About CeNDR"
+    disable_parent_breadcrumb = True
+    isotypes = get_isotypes(known_origin=True)
+    strain_listing = [s.to_json() for s in isotypes]
     return render_template('about/about.html', **locals())
 
 
 @about_bp.route('/getting_started/')
+@cache.memoize(50)
 def getting_started():
     """
         Getting Started - provides information on how to get started
         with CeNDR
     """
-    VARS = {"title": "Getting Started",
-            "strain_listing": get_isotypes(known_origin=True)}
-    return render_template('about/getting_started.html', **VARS)
+    title = "Getting Started"
+    isotypes = get_isotypes(known_origin=True)
+    strain_listing = [s.to_json() for s in isotypes]
+    disable_parent_breadcrumb = True
+    return render_template('about/getting_started.html', **locals())
 
 
 @about_bp.route('/committee/')
@@ -54,12 +61,14 @@ def committee():
         Scientific Panel Page
     """
     title = "Scientific Advisory Committee"
+    disable_parent_breadcrumb = True
     committee_data = load_yaml("advisory-committee.yaml")
     return render_template('about/committee.html', **locals())
 
 @about_bp.route('/collaborators/')
 def collaborators():
     title = "Collaborators"
+    disable_parent_breadcrumb = True
     collaborator_data = load_yaml("collaborators.yaml")
     return render_template('about/collaborators.html', **locals())
 
@@ -70,21 +79,25 @@ def staff():
         Staff Page
     """
     title = "Staff"
+    disable_parent_breadcrumb = True
     staff_data = load_yaml("staff.yaml")
     return render_template('about/staff.html', **locals())
 
 
 @about_bp.route('/donate/', methods=['GET', 'POST'])
+@jwt_required(optional=True)
 def donate():
     """
         Process donation
     """
     title = "Donate"
+    disable_parent_breadcrumb = True
     form = donation_form(request.form)
 
     # Autofill email
-    if session.get('user') and not form.email.data:
-        form.email.data = session.get('user')['user_email']
+    user = get_current_user()
+    if user and hasattr(user, 'email') and not form.email.data:
+      form.email.data = user.email
 
     if form.validate_on_submit():
         # order_number is generated as a unique string
@@ -110,6 +123,7 @@ def donate():
 @about_bp.route('/funding/')
 def funding():
     title = "Funding"
+    disable_parent_breadcrumb = True
     funding_set = load_yaml('funding.yaml')
     return render_template('about/funding.html', **locals())
 
@@ -165,6 +179,7 @@ def statistics():
     n_users = get_unique_users()
 
     VARS = {'title': title,
+            'disable_parent_breadcrumb': True,
             'strain_collection_plot': strain_collection_plot,
             'report_summary_plot': report_summary_plot,
             'weekly_visits_plot': weekly_visits_plot,
@@ -183,8 +198,12 @@ def publications():
         List of publications that have referenced CeNDR
     """
     title = "Publications"
-    req = requests.get(
-        "https://docs.google.com/spreadsheets/d/1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs/export?format=csv&id=1ghJG6E_9YPsHu0H3C9s_yg_-EAjTUYBbO15c3RuePIs&gid=0")
+    disable_parent_breadcrumb = True
+    csv_prefix = config['GOOGLE_SHEET_PREFIX']
+    sheet_id = config['CENDR_PUBLICATIONS_STRAIN_SHEET']
+    csv_export_suffix = 'export?format=csv&id={}&gid=0'.format(sheet_id)
+    url = '{}/{}/{}'.format(csv_prefix, sheet_id, csv_export_suffix)
+    req = requests.get(url)
     df = pd.read_csv(StringIO(req.content.decode("UTF-8")))
     df['pmid'] = df['pmid'].astype(int)
     df = df.sort_values(by='pmid', ascending=False)

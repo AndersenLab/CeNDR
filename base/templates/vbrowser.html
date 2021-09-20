@@ -1,0 +1,677 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block custom_head %}
+    <link rel="stylesheet" href="//cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css" />
+    <script type="text/javascript" src="//cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/colreorder/1.5.3/css/colReorder.dataTables.min.css" />
+    <script type="text/javascript" src="https://cdn.datatables.net/colreorder/1.5.3/js/dataTables.colReorder.min.js"></script>
+{% endblock %}
+
+
+{% block style %}
+<style>
+
+table.dataTable thead .sorting_asc {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_asc.png") no-repeat center left;
+}
+table.dataTable thead .sorting_desc {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_desc.png") no-repeat center left;
+}
+table.dataTable thead .sorting {
+  background: url("http://cdn.datatables.net/1.10.0/images/sort_both.png") no-repeat center left;
+}
+
+mark {
+  background-color: inherit;
+  font-size: 0.8rem;
+}
+
+.hl-mark {
+  background-color: yellow;
+}
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container browser-row well">
+
+<div class="row">
+      {# Gene Search Block #}
+      <div class="col-lg-4 col-lg-offset-0 col-md-10 col-md-offset-1 col-sm-8 col-sm-offset-2 col-xs-12 text-center">
+
+        <h3><label for="gene-search"> Gene </label></h3>
+        <form id='form-submit-gene' method='post'>
+          <div class="form-group">
+            <input name="gene-search" id="gene-search" class="form-control text-center" placeholder="isw-1">
+          </div>
+        </form>
+        <small id="gene-search-label">Search by WBGeneID, alphanumeric name (F37A4.8), or gene name (isw-1)</small>
+        <div id="loading-search-table" style="display:none; margin-top:20px; ">
+          <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+          </div>
+        </div>
+
+        <table id="v-search-table" class='table table-striped' style="display:none; table-layout:fixed;">
+          <thead>
+            <tr>
+              <th>Gene</th>
+              <th>Name</th>
+              <th>ID</th>
+            </tr>
+          </thead>
+          <tbody id="orthologs"></tbody>
+        </table>
+
+      </div> {# /col-lg-4 #}
+
+      {# Interval Search Block #}
+      <div class="col-lg-4 col-lg-offset-0 col-md-10 col-md-offset-1 col-sm-8 col-sm-offset-2 col-xs-12 text-center">
+        <h3><label for="interval"> Interval </label></h3>
+        <form id='form-submit-interval' method='post'>
+          <div class="form-group">
+            <input name="interval" id="interval" class="form-control text-center" placeholder="III:11,746,923-11,750,250" pattern="(I|II|III|IV|V|X|MtDNA):[0-9,]+-[0-9,]+">
+          </div>
+          <small>Search using the format [chromosome:START-STOP]</small>
+          <div class="btn-mid-row" style="width: 50%; margin-left: 25%;">
+            <button class="btn nu-alt-btn btn-block" id="search-interval-btn">
+              <span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
+              Search
+            </button>
+          </div>
+        </form>
+        <div class="btn-bottom-row" style="width: 50%; margin-left: 25%;">
+          <button class="btn nu-alt-btn btn-block disabled" id="download-result-btn" onClick="onDownload();">
+            <span class="glyphicon glyphicon-download" aria-hidden="true"></span> 
+            Download Results
+          </button>
+        </div>
+      </div> {# /col-lg-4 #}
+
+
+  {# Column select list block #}
+  <div class="col-lg-2 col-lg-offset-0 col-md-4 col-md-offset-2 col-sm-6 col-xs-6">
+    <h3 class="text-center">Columns</h3>
+
+    <div class="chk-select-list" id="col-select">
+      <form>
+        <div class="form-group">
+          <div class="select-checkbox">
+            <div class="col-entry">
+              <input class="toggle-col-chk" type="checkbox" name="toggle_all_cols" id="toggle_all_cols" checked/> 
+              <strong><label id="toggle_all_cols_label" for="toggle_all_cols"> Select All </label> </strong>
+            </div>
+            <br>
+          {% for col in columns %}
+            <div class="col-entry">
+              <input class="toggle-col-chk" type="checkbox" name="toggle_{{ col['id'] }}" id="toggle_{{ col['id'] }}" data-column="{{ col['id'] }}" checked/> 
+              <label for="toggle_{{ col['id'] }}"> {{ col['name'] }} </label>
+            </div>
+          {% endfor %}
+          </div>
+        </div>
+      </form>
+    </div> {# /col-list #}
+  </div> {# /col-md-2 #}
+
+  {# strain select list block #}
+  <div class="col-lg-2 col-md-4 col-sm-6 col-xs-6">
+      <h3 class="text-center">Strains</h3>
+
+      <div class="pre-scrollable chk-select-list sticky" id="strain-select">
+
+        <input id="strain-filter" type="text" class="chk-select-filter" placeholder="Search" action="#" autocomplete="off">
+
+        <form>
+          <div class="form-group">
+            <div class="select-checkbox">
+              <div class="strain-entry select-searchable">
+                <input class="toggle-strain-chk" type="checkbox" name="toggle_all_strains" id="toggle_all_strains" checked/> 
+                <strong><label id="toggle_all_strains_label" for="toggle_all_strains"> Select All </label></strong>
+              </div>
+              <br>
+            {% for strain in strain_listing %}
+              <div class="strain-entry select-searchable">
+                <input class="toggle-strain-chk" type="checkbox" data-column="{{strain}}" id="toggle_{{strain}}" checked/> 
+                <label for="toggle_{{strain}}"> {{ strain }} </label>
+              </div>
+            {% endfor %}
+            </div>
+          </div>
+        </form>
+      </div> {# /strain-list #}
+  </div> {# /col-md-2 #}
+
+</div> {# /row #}
+
+<div class="row">
+  <div class="col-lg-4 col-lg-offset-8 col-sm-8 col-sm-offset-2 col-xs-12">
+
+    <h3 class="text-center">Variant Impact</h3>
+
+      <form class="form-inline impact-chk-group">
+          <div class="row">
+
+          <div class="col-xs-6 form-group text-center">
+            <div class="impact-entry select-checkbox">
+              <input class="toggle-impact-chk" type="checkbox" name="impact_high" id="impact_high" checked/> 
+              <strong><label id="impact_high_label" for="impact_high"> High </label> </strong>
+            </div>
+          </div> {# /form group #}
+
+          <div class="col-xs-6 form-group text-center">
+            <div class="impact-entry select-checkbox">
+              <input class="toggle-impact-chk" type="checkbox" name="impact_low" id="impact_low" checked/> 
+              <strong><label id="impact_low_label" for="impact_low"> Low </label> </strong>
+            </div>
+          </div> {# /form group #}
+
+        </div> {#/ row #}
+      
+      </form>
+
+    </div> {# /col #}
+
+</div> {# /row #}
+
+
+</div> {# /container #}
+
+<div class="row">
+    <div id="loading-variant-table" style="display:none; margin-top:20px;">
+      <div class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+    </div>
+
+    <div id='result-table' style="display:none; width: 100%;">
+      <table id='variant-table' class='table-striped table-hover table-compact'>
+        <thead>
+          <tr class="header">
+        {% for col in columns %}
+            <th class="data-{{col['id']}} sorting"><strong> {{ col['name'] }} </strong></th>
+        {% endfor %}
+          </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+          {% for col in columns %}
+              <td class="data-{{col['id']}}"> </td>
+          {% endfor %}
+            </tr>
+        </tbody>
+      </table>
+    </div>
+    
+</div> {# /row #}
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+const doneTypingInterval = 1000;  //time in ms (5 seconds)
+const col_max_len = 20;
+const strains_per_row = 10;
+
+let typingTimer;                //timer identifier
+
+let dTable = null;
+const selected_strains = new Set();
+
+let impactHigh = true;
+let impactLow = true; 
+
+let toggle_strain_lock = false;
+
+let result_data = {};
+let cachedTargets = {};
+
+
+function download(content, fileName, contentType) {
+  const a = document.createElement("a");
+  const file = new Blob([content], { type: contentType });
+  a.href = URL.createObjectURL(file);
+  a.download = fileName;
+  a.click();
+}
+
+function onDownload(){
+  const jsonData = {
+    target_consequences: cachedTargets,
+    variants: result_data
+  };
+  download(JSON.stringify(jsonData), ".json", "text/plain");
+}
+
+
+function init_selected_strain_set() {
+{% for strain in strain_listing %}
+  selected_strains.add('{{strain}}');
+{% endfor %}
+}
+
+function process_gene_search() {
+  $("#loading-search-table").fadeOut();
+  var gene = $('#gene-search').val();
+  if (gene.length == 0) {
+    $("#v-search-table").fadeOut();
+  } else {
+    $("#orthologs").html("");
+    $.ajax({
+         url: "/api/gene/browser-search/" + gene,
+         method: "GET",
+         contentType: 'application/xml',
+         }).done(function(msg) {
+          row = Array();
+          $.each(msg, function(i,row) {
+            const position = row["chrom"] + ":" + row["start"] + "-" + row["end"];
+            const link = `<a onclick="set_position('${position}')" link='${position}' class='ortholink'>${row['gene_id']}</a>`;
+            const result = [row['homolog_gene'] || row["gene_symbol"], row['sequence_name'], link]
+            const table_data = "<tr><td>" + result.join("</td><td>").slice(0,-4) + "</tr>";
+            $("#orthologs").append(table_data);
+          });
+          $("#v-search-table").fadeIn();
+        });
+  }
+}
+
+function set_position(pos) {
+  $('#interval').val(pos);
+  $('#search-interval-btn').click();
+}
+
+function chunk_substr(data, size) {
+  if (typeof data === 'string' && data.length > col_max_len) {
+    let numChunks = Math.ceil(data.length / size)
+    let chunks = new Array(numChunks)
+    for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+      chunks[i] = data.substr(o, size)
+    }
+    return chunks.join('<br/>')
+  } else {
+    return data;
+  }
+}
+
+function hideTable() {
+  $("#result-table").fadeOut();
+  $("#loading-variant-table").fadeIn();
+}
+
+function showTable() {
+  $("#loading-variant-table").fadeOut();  
+  $("#result-table").fadeIn();
+}
+
+function disableForm() {
+  $('#interval').addClass("disabled");
+  $("#search-interval-btn").addClass("disabled");
+}
+
+function enableForm() {
+  $("#search-interval-btn").removeClass("disabled");
+  $('#interval').removeClass("disabled");
+}
+
+function filter_rows_by_strains() {
+  /* build regex from strain set and filter */
+  let r = '|';
+  selected_strains.forEach(function(s) { if (s) { r += `${s},|` } });
+  if (r === '|') {
+    r = '^$';  /* prevent matching all with empty regex */
+  }
+  var rex = new RegExp(r);
+  hideTable();
+  $('#variant-table').dataTable().fnFilter(rex, 'strains:name', true, false);
+  $('#variant-table').DataTable().draw();
+  highlight_selected_strains();
+  showTable();
+}
+
+function filter_rows_by_impact() {
+    /* build regex from strain set and filter */
+    let r = "Linker";
+    if (impactHigh) {
+      r += "|HIGH";
+    } 
+    if (impactLow) {
+      r += "|LOW";
+    }
+    $('#variant-table').dataTable().fnFilter(r, 'variant_impact:name', true, false);
+}
+
+function highlight_selected_strains() {
+  $("mark").removeClass('hl-mark');
+  selected_strains.forEach(function(s) {
+    $(`.mark_${s}`).addClass('hl-mark');
+  });
+}
+
+function processCol(col, id) {
+  if (id == 'strains') {
+    return col
+  }
+  return chunk_substr(col, col_max_len)
+}
+
+function renderTargetConsequenceCol(data, type, row) {
+  if (data) {
+    return `<button class="btn-alt" onClick="expandTargetConsequence(this, ${data});"><span class='glyphicon glyphicon-collapse-down'></span>${data}</button>`;
+  }
+  return '';
+}
+
+function renderTargetConsequenceTable(data) {
+  let result = "<div class='instruction-well'><table class='table table-striped table-condensed table-hover' style='width:80%;margin-left:10%;font-size:0.8rem;'><thead>";
+  const numRows = Object.keys(data.id).length;
+  for (i of columnList) {
+    result += `<th>${i.name}</th>`;
+  }
+  result += "</thead><tbody>";
+  for (let j = 0; j < numRows; j++) { 
+    result += "<tr>";
+    for (k of columnList) {
+      let val = data[k.id][j] || "";
+      let processedVal;
+      if (k.id === "strains") {
+        processedVal =  renderStrainsCol(val, null, null);
+      } else {
+        processedVal = chunk_substr(val, col_max_len);
+      }
+      result += `<td>${processedVal}</td>`;
+    }
+    result += "</tr>";
+  }
+  result += "</tbody></table></div>";
+  return result;
+}
+
+function fetchTargetConsequence(el, q) {
+  const tr = el.closest('tr');
+  const row = dTable.row(tr);
+
+  if (cachedTargets[q]) {
+    row.child(renderTargetConsequenceTable(cachedTargets[q])).show();
+    highlight_selected_strains();
+  } else {
+    $.ajax({
+      type: "POST",
+      contentType: 'application/json',
+      dataType: 'json',
+      url: "{{ url_for('data.vbrowser_query_position') }}",
+      data: JSON.stringify({query: q}),
+      success:function(result) {
+        cachedTargets[q] = result;
+        row.child(renderTargetConsequenceTable(result)).show();
+        highlight_selected_strains();
+      },
+      error:function(error) {
+        console.error(error);
+      }
+    });
+  }
+}
+
+function expandTargetConsequence(el, pos) {
+  const tr = el.closest('tr');
+  const row = dTable.row(tr);
+  const chrom = dTable.cell(tr, 'chrom:name').data();
+  const query = chrom + ":" + pos;
+  if ( row.child.isShown() ) {
+      // This row is already open - close it
+      row.child.hide();
+  }
+  else {
+      // Open this row
+      //row.child( format(row.data()) ).show();
+      fetchTargetConsequence(el, query)
+  }
+}
+
+const columnList = [
+{% for col in columns %}
+{
+  "id": "{{ col['id'] }}",
+  "name": "{{ col['name'] }}"
+},
+{% endfor %}
+];
+
+
+function populateDataTable() {
+  // clear the table before populating it with more data
+  dTable.clear();
+  if (Object.keys(result_data).length == 0){
+    dTable.columns.adjust().draw();
+    return;
+  }
+  const variants = Object.keys(result_data.id);
+  for(v of variants) {
+    $('#variant-table').dataTable().fnAddData([
+  {% for col in columns %}
+      processCol(result_data.{{ col['id'] }}[v], "{{ col['id'] }}"),
+  {% endfor %}
+    ]);
+  }
+  filter_rows_by_strains();
+  dTable.columns.adjust().draw();
+}
+
+
+function renderStrainsCol(data, type, row) {
+  let result = '<mark></mark>';
+  let strains = data.split(',');
+  let i = 0;
+  for(s of strains) {
+    if ((++i % strains_per_row) === 0) {
+      result += '<br/>'
+    }
+    result += `<mark class="mark_${s}">${s},</mark>`;
+  }
+  return result;
+}
+
+
+function init_data_table() {
+  dTable = $('#variant-table').DataTable({
+    colReorder: true,
+    destroy: true,
+    paging: true,
+    pageLength: 100,
+    dom:"ltipr",
+    columnDefs: [
+  {% for col in columns %}
+  {% if col['id'] == 'strains' %}
+      { 
+        "name": "{{ col['id'] }}", 
+        "mRender": renderStrainsCol,
+        "targets": {{ loop.index0 }} 
+      },
+  {% elif col['id'] == 'target_consequence' %}
+      { 
+        "name": "{{ col['id'] }}", 
+        "mRender": renderTargetConsequenceCol,
+        "targets": {{ loop.index0 }} 
+      },
+  {% else %}
+      { 
+        "name": "{{ col['id'] }}", 
+        "targets": {{ loop.index0 }} 
+      },
+  {% endif %}
+  {% endfor %}
+    ],
+    order: [[ 1, "asc" ]]
+  });
+
+  dTable.on('column-reorder', function (e, settings, details) {
+    setTimeout(highlight_selected_strains, 250);
+  });
+
+  dTable.on('page.dt', function () {
+    setTimeout(highlight_selected_strains, 250);
+  });
+
+}
+
+
+$(document).ready(function() {
+
+  (function($) {
+
+    init_selected_strain_set();
+    init_data_table();
+    
+    const csrf_token = "{{ form.csrf_token._value() }}";
+
+    const height = $('#col-select').height() + 'px';
+    $('.pre-scrollable').css('max-height', height);
+
+    /* Gene ortholog search */
+    $("#gene-search").on("input", function(e) {
+      $("#loading-search-table").fadeIn();
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(process_gene_search, doneTypingInterval);
+    })
+
+    /* Strain search */
+    $('#strain-filter').keyup(function() {
+        $('.select-searchable').hide();
+        $(this).val().split(',').forEach(function(r) {
+            var rex = new RegExp(r, "i");
+            $('.select-searchable').filter(function() {
+                return rex.test($(this).text());
+            }).show();
+        });
+    });
+
+    /* Filter by impact */
+    $("#impact_high").change(function(e) {
+      impactHigh = $(this).prop('checked');
+      setTimeout(filter_rows_by_impact, 50);
+    });
+
+    $("#impact_low").change(function(e) {
+      impactLow = $(this).prop('checked');
+      setTimeout(filter_rows_by_impact, 50);
+    });
+
+    /* select/deselect all strains checkbox handler */
+    $("#toggle_all_strains").change(function(e) {
+      toggle_strain_lock = true;
+      const state = $(this).prop('checked');
+
+      $(".toggle-strain-chk").each(function(i, e) {
+        e.checked = state;
+      });
+      if (state) {
+        init_selected_strain_set();
+      } else {
+        selected_strains.clear();
+      }
+      setTimeout(filter_rows_by_strains, 50); /* allow checkbox to be clicked before processing */
+      setTimeout(function() { 
+        toggle_strain_lock = false;
+      }, 50);
+    });
+
+    /* strain checkbox handler */
+    $(".toggle-strain-chk").change(function() {
+      if (!toggle_strain_lock) {
+        const state = $(this).prop('checked');
+        const strain = $(this).attr('data-column');
+        if (!state) {
+          selected_strains.delete(strain);
+        } else {
+          selected_strains.add(strain);
+        }
+
+        setTimeout(filter_rows_by_strains, 50); /* allow checkbox to be clicked before processing */
+      }
+    });
+
+    /* select/deselect all columns handler */
+    $("#toggle_all_cols").change(function(e) {
+      const state = $(this).prop('checked');
+      $(".toggle-col-chk").each(function(i, e) {
+        e.checked = state;
+      });
+      for (let i = 0; i < {{ columns.__len__() }}; i++) {
+        const column = dTable.column(i);
+        column.visible(state);
+      }
+      dTable.columns.adjust().draw();
+    });
+
+    /* columns checkbox handler */
+    $(".toggle-col-chk").change(function() {
+      const state = $(this).prop('checked');
+      const colName = $(this).attr('data-column') + ':name';
+      const column = dTable.column(colName);
+      
+      column.visible(state);
+      dTable.columns.adjust().draw();
+    });
+
+    $("#search-interval-btn").on("click", function(e) {
+      e.preventDefault();
+      disableForm();
+      form = document.getElementById('form-submit-interval');
+      if (!form.checkValidity() || $("#interval").val().length == 0) {
+        form.reportValidity();
+        enableForm();
+        return;
+      }
+      const data = {
+        query: $("#interval").val()
+      };
+      hideTable();
+
+      $.ajax({
+				type: "POST",
+        contentType: 'application/json',
+        dataType: 'json',
+				url: "{{ url_for('data.vbrowser_query_interval') }}",
+				data: JSON.stringify(data),
+				success:function(result) {
+          $("#download-result-btn").removeClass("disabled");
+          enableForm();
+          cachedTargets = {};
+          result_data = result;
+          populateDataTable();
+          showTable();
+				},
+        error:function(error) {
+          console.error(error);
+          enableForm();
+        }
+		  });
+    
+    });
+
+    $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrf_token);
+          }
+      }
+    });
+
+  }(jQuery));
+});
+
+
+</script>
+{% endblock %}
+

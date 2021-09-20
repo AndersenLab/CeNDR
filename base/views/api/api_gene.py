@@ -1,11 +1,10 @@
-from flask import request
+from flask import request, Blueprint
 from base.models import Homologs, WormbaseGeneSummary
 from base.utils.decorators import jsonify_request
 from sqlalchemy import or_, func
 from base.views.api.api_variant import variant_query
 from logzero import logger
 
-from flask import Blueprint
 
 api_gene_bp = Blueprint('api_gene',
                      __name__,
@@ -28,10 +27,10 @@ def query_homolog(query=""):
     """
     query = request.args.get('query') or query
     query = query.lower()
-    results = Homologs.query.filter(func.lower(Homologs.homolog_gene)==query) \
+    results = Homologs.query.filter((func.lower(Homologs.homolog_gene)).startswith(query)) \
                               .limit(10) \
                               .all()
-    results = [x.unnest() for x in results]
+    results = [x.unnest().to_json() for x in results]
     return results
 
 
@@ -50,16 +49,17 @@ def lookup_gene(query=""):
 
     """
     query = request.args.get('query') or query
+    query = str(query).lower()
     # First identify exact match
-    result = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus == query,
-                                                  WormbaseGeneSummary.sequence_name == query,
-                                                  WormbaseGeneSummary.gene_id == query)) \
-                                           .first()
+    result = WormbaseGeneSummary.query.filter(or_(func.lower(WormbaseGeneSummary.locus) == query,
+                                                  func.lower(WormbaseGeneSummary.sequence_name) == query,
+                                                  func.lower(WormbaseGeneSummary.gene_id) == query)) \
+                                                .first()
     if not result:
-        result = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus.startswith(query),
-                                                          WormbaseGeneSummary.sequence_name.startswith(query),
-                                                          WormbaseGeneSummary.gene_id.startswith(query))) \
-                                               .first()
+        result = WormbaseGeneSummary.query.filter(or_(func.lower(WormbaseGeneSummary.locus).startswith(query),
+                                                      func.lower(WormbaseGeneSummary.sequence_name).startswith(query),
+                                                      func.lower(WormbaseGeneSummary.gene_id).startswith(query))) \
+                                                    .first()
     return result
 
 
@@ -79,11 +79,14 @@ def query_gene(query=""):
 
     """
     query = request.args.get('query') or query
-    results = WormbaseGeneSummary.query.filter(or_(WormbaseGeneSummary.locus.startswith(query),
-                                                       WormbaseGeneSummary.sequence_name.startswith(query),
-                                                       WormbaseGeneSummary.gene_id.startswith(query))) \
-                                           .limit(10) \
-                                           .all()
+    query = str(query).lower()
+    results = WormbaseGeneSummary.query.filter(or_(func.lower(WormbaseGeneSummary.locus).startswith(query),
+                                                   func.lower(WormbaseGeneSummary.sequence_name).startswith(query),
+                                                   func.lower(WormbaseGeneSummary.gene_id).startswith(query))) \
+                                              .limit(10) \
+                                              .all()
+
+    results = [x.to_json() for x in results]
     return results
 
 
@@ -99,7 +102,7 @@ def combined_search(query=""):
         results (list): List of dictionaries describing the homolog.
 
     """
-    return query_gene(query) + query_homolog(query)
+    return (query_gene(query) + query_homolog(query))[0:10]
 
 
 

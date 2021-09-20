@@ -6,29 +6,19 @@
       {% block style %}{% endblock %}
     </head>
     <body>
-    {% set user = session.get('user') or None %}
     {% include "_includes/navbar.html" %}
 
     <div class="page-content">
         <div class="wrap">
             <div class="container{% if fluid_container %}-fluid{% endif %}">
                 <div class='content'>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div id="messages-wrap">
-                              <div id="messages">
-                                {% for category, msg in get_flashed_messages(with_categories=true) %}
-                                <div class="flash-{{ category }} alert alert-dismissable alert-{{ category }} flash-banner">
-                                    <p>{{ msg }}</p>
-                                </div>
-                                {% endfor %}
-                              </div>
-                            </div>{# /messages-wrap #}
-
+                    <div>
+                        <div>
+                      
                             <div id="alert"></div>
                             {% if request.blueprint %}
                                 {% if title %}
-                                    <h2>{{ title }} {% if subtitle %} <small>{{ subtitle }}</small>{% endif %}</h2>
+                                    <h2 class='page-title-txt'>{{ title }} {% if subtitle %} <small>{{ subtitle }}</small>{% endif %}</h2>
                                 {% endif %}
                             {% endif %}
                             {% if warning %}
@@ -39,27 +29,27 @@
 
                           {# BREADCRUMB #}
                           {% if request.blueprint and request.path != "/" %}
+
                           <ol class="breadcrumb">
                               <li><a href="/">Home</a></li>
-                                {% if title %}
-                                {% if title.lower() != request.blueprint.lower() %}
+
+                                {% if request.blueprint != "primary" %}
+                                  {% if disable_parent_breadcrumb %}
+                                  <li>{{ request.blueprint|title }}</li>
+                                  {% elif alt_parent_breadcrumb %}
+                                  <li><a href='{{ alt_parent_breadcrumb["url"] }}'>{{ alt_parent_breadcrumb["title"] }}</a></li>
+                                  {% else %}
+                                  <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
+                                  {% endif %}
                                 {% endif %}
-                                    {% if request.blueprint == 'user' and session.get('user')%}
-                                    {# Direct to user profile #}
-                                    <li>User</li>
-                                    {% else %}
-                                    {% if request.blueprint != "primary" %}
-                                    <li><a href='{{ url_for(request.blueprint + "." + request.blueprint) }}'>{{ request.blueprint|title }}</a></li>
-                                    {% endif %}
-                                    {% endif %}
+                                {% if title %}
+                                  <li><strong>{{ title }}</strong></li>
                                 {% endif %}
                                 {% if subtitle %}
-                                    <li>{{ title }}</li>
-                                    <li><strong>{{ subtitle }}</strong></li>
-                                {% else %}
-                                    <li><strong>{{ title }}</strong></li>
+                                  <li><strong>{{ subtitle }}</strong></li>
                                 {% endif %}
                             </ol>
+
                             {% endif %}
                         </div>
                     </div>
@@ -84,10 +74,10 @@
                     );
                 </script>
                 
-                {% include "_includes/footer.html" %} 
             </div>
         </div><!-- closes wrap-->
     </div><!-- closes page-content-->
-    {% if config.DEBUG %}{{ user }}{% endif %}
+    {% if config.DEBUG %}{{ session }}{% endif %}
+    {% include "_includes/footer.html" %} 
     </body>
 </html>

@@ -1,0 +1,90 @@
+{% extends "_layouts/default.html" %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-8"></div>
+  <div class="col-md-4">
+    <input id="filter" type="text" class="form-control" placeholder="Enter Strain Name" action="#" autocomplete="off">
+  </div> {# /col-md-4 #}
+</div>  {# /row #}
+
+<div class="row">
+  <table class="table table-hover table-striped strain-table" style="table-layout: fixed">
+    <thead>
+      <tr>
+        <th style="width: 20%;"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name of strain we distribute as a representative of an isotype.">
+            Reference Strain
+        </span></th>
+        <th style="width: 20%;"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Name assigned to a group of strains that share the same genome-wide haplotype.">
+            Isotype
+        </span></th>
+        <th style="width: 20%;"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Individually isolated strains; If strains are assigned to the same isotype they are > 99.93% genetically identical">
+            Strains
+        </span></th>
+        <th style="width: 20%;"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Date of original release">
+            Release
+        </span></th>
+        <th style="width: 20%;"><span class="tooltip-item" data-toggle="tooltip"  data-placement="bottom" title="Previous names assigned to a strain or alternative names">
+          Alternative Names
+      </span></th>
+      </tr>
+    </thead>
+
+    <tbody class="searchable">
+    {% for isotype, strains in strain_listing|groupby('isotype') %}
+      <tr>
+        <td>
+          {% set isotype_loop_index = loop.index %}
+          <label for="items-{{ isotype_loop_index }}">{{ strains[0].reference_strain }}</label>
+        </td>
+        <td>
+          <a href="{{ url_for('strains.isotype_page', isotype_name=isotype) }}">{{ isotype }}</a>
+        </td>
+        <td>
+          {{ strains|join(", ") }}
+        </td>
+        <td>
+          {{ strains[0]['release'] }}
+        </td>
+        {% if strains[0].previous_names %}
+        <td>{{ strains[0].previous_names.replace(',', '|').split('|') | join(', ') }}</td>
+      {% else %}
+        <td></td>
+      {% endif %}
+      </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+  </div> {# /row #}
+
+
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+
+$(document).ready(function() {
+
+    (function($) {
+
+        var patterns = [];
+        $('#filter').keyup(function() {
+            $('.searchable tr').hide();
+            console.log($(this).val());
+            $(this).val().split(',').forEach(function(r) {
+                var rex = new RegExp(r, "i");
+                $('.searchable tr').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            })  
+        })
+
+    }(jQuery));
+});
+
+</script>
+
+{% endblock %}

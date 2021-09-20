@@ -1,0 +1,24 @@
+queue:
+- name: h2calc
+  max_concurrent_requests: 1
+  rate: 1/s
+  retry_parameters:
+    task_retry_limit: 2
+    min_backoff_seconds: 10
+    max_backoff_seconds: 60
+    max_doublings: 2
+- name: ipcalc
+  max_concurrent_requests: 1
+  rate: 1/s
+  retry_parameters:
+    task_retry_limit: 2
+    min_backoff_seconds: 10
+    max_backoff_seconds: 60
+    max_doublings: 2
+- name: nscalc
+  max_concurrent_requests: 1
+  rate: 0.01/s
+  retry_parameters:
+    task_retry_limit: 1
+    min_backoff_seconds: 300
+    max_backoff_seconds: 3000

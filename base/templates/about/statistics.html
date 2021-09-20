@@ -7,45 +7,42 @@
 {% block content %}
 
 <div class='row'>
-    <div class='col-md-6'>
-        <h4>Strains collected over time</h4>
-        {{ strain_collection_plot|safe }}
-    </div>
 
-    <div class='col-md-6'>
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h1 class='panel-title'>Numbers</h1>
-    </div>
-    <table class='table table-striped table-hover'>
+  <div class='col-md-6'>
+    <h4> Strains collected over time </h4>
+    {{ strain_collection_plot|safe }}
+  </div> {# /col-md-6 #}
+
+  <div class='col-md-6'>
+    <div class="panel panel-default">
+      <table class='table table-striped table-hover'>
         <tbody>
-            <tr>
-                <td><strong>Strains</strong></td>
-                <td>{{ n_strains }}</td>
-            </tr>
-            <tr>
-                <td><strong>Isotypes</strong></td>
-                <td>{{ n_isotypes }}</td>
-            </tr>
-            <tr>
-                <td><strong>Unique Mapping Pipeline Users</strong></td>
-                <td>{{ n_users }}</td>
-            </td>
-            <tr>
-                <td><strong>Reports</strong></td>
-                <td>{{ n_reports }}</td>
-            </tr>
-            <tr>
-                <td><strong>Traits</strong></td>
-                <td>{{ n_traits }}</td>
-            </tr>
+          <tr>
+            <td><strong>Strains</strong></td>
+            <td>{{ n_strains }}</td>
+          </tr>
+          <tr>
+            <td><strong>Isotypes</strong></td>
+            <td>{{ n_isotypes }}</td>
+          </tr>
+          <tr>
+            <td><strong>Unique Mapping Pipeline Users</strong></td>
+            <td>{{ n_users }}</td>
+          </tr>
+          <tr>
+            <td><strong>Reports</strong></td>
+            <td>{{ n_reports }}</td>
+          </tr>
+          <tr>
+            <td><strong>Traits</strong></td>
+            <td>{{ n_traits }}</td>
+          </tr>
         </tbody>
-    </table>
-</div>
-
+      </table>
     </div>
+  </div> {# /col-md-6 #}
         
-</div>
+</div>  {# /row #}
 
 <div class='row'>
     <div class='col-md-6'>

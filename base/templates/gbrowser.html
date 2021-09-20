@@ -1,0 +1,483 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+
+<!-- jQuery UI CSS -->
+<link rel="stylesheet" type="text/css"
+      href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+<!-- IGV CSS -->
+
+<!-- jQuery JS -->
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+<script>$.widget.bridge('uitooltip', $.ui.tooltip);</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha256-KXn5puMvxCw+dAYznun+drMdG1IFl3agK0p/pqT9KAo=" crossorigin="anonymous"></script>
+
+<script type="text/javascript" src="//igv.org/web/release/2.6.2/dist/igv.min.js"></script>
+
+{% endblock %}
+
+{% block style %}
+<style>
+
+.label {
+  width: 80px;
+  height: 18px;
+  line-height: 12px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.gt-3 {
+    background-color: white;
+    border: 1px dotted black;
+    color: black;
+}
+
+.gt-0.PASS {
+  background-color: rgba(194,194,214,1.0);
+  border: 1px solid black;
+  color: black;
+}
+
+.gt-2.PASS {
+  background-color: rgba(0, 102, 255,1.0);
+  border: 1px solid black;
+  color: white;
+}
+
+.gt-0:not(.PASS) {
+  background-color: rgba(194,194,214,0.25);
+  border: 1px dotted black;
+  color: black;
+}
+
+.gt-2:not(.PASS) {
+  background-color: rgba(0, 102, 255,0.25);
+  border: 1px dotted black;
+  color: black;
+}
+
+.het {
+  background-color: #ffff00;
+  color: black;
+}
+
+.gt_set {
+  border-right: 1px dotted #b3b3b3;
+}
+
+th {
+  white-space: nowrap;
+}
+
+#variants {
+  font-size: 1.0rem;
+}
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+
+<div class="container browser-row well">
+
+  <div class="row">
+
+
+    <div class="col-lg-2 col-lg-offset-1 col-md-3 col-sm-12">
+      <h5>Tracks <a href="{{ url_for('primary.help_item', filename = 'Variant-Prediction') }}#standard-tracks"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+      {% for i in ["Genes", "Transcripts"] %}
+        <div class="checkbox">
+          <label><input type="checkbox" checked class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
+        </div>
+      {% endfor %}
+      {% for i in ["phyloP", "phastCons", "Dust", "Repeat Masker", "Divergent Regions Summary" ] %}
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="{{ i }}" />{{ i }}</label>
+        </div>
+      {% endfor %}
+
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="Divergent Regions" />Divergent Regions Strain<br /> (<a href="https://andersenlab.org/publications/2020LeebioRxiv.pdf"  target='_blank'>Lee <em>et al.</em> 2020)</a></label>
+        </div>
+              
+        <div class="checkbox">
+          <label><input type="checkbox" class="track-select normal-track" value="Transposons" />Transposons (<a href="https://andersenlab.org/publications/2017Laricchia.pdf" target='_blank'>Laricchia <em>et al.</em> 2017)</a></label>
+        </div>
+
+    </div> {# /col-lg-2 #}
+
+
+
+    
+
+    <div class="col-lg-4 col-md-5 col-sm-12 ">
+
+      <h5>Gene Search</h5>
+      <input type="text" class="form-control" id="gene-search" style="margin-bottom: 5px;" placeholder="Gene Search (e.g. trt-1)">
+      <div id="loading-search-table" style="display:none; margin-top:20px;">
+        <div class="spinner">
+          <div class="bounce1"></div>
+          <div class="bounce2"></div>
+          <div class="bounce3"></div>
+        </div>
+      </div>
+
+      <table id="g-search-table" class='table table-striped' style="display: none;">
+        <thead>
+          <tr>
+            <th><em>C. elegans Gene</em></th>
+            <th>Symbol/ID</th>
+            <th>Species</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody id="orthologs"></tbody>
+      </table>
+
+    </div> {# /col-lg-4 #}
+
+
+
+
+    <div class="col-lg-4 col-md-4 col-sm-12 ">
+
+      <h5>Isotype (reference strain) <a href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}#ind-strains"><span class="glyphicon glyphicon-question-sign"></span></a></h5>
+
+      <form class="form-inline pull-xs-right">
+        <input class="form-control" id="filter" type="text" style="width:100%;  margin-bottom: 5px;" placeholder="e.g. JU360" autocomplete="off">
+      </form>
+
+      <table id='browser_strain_list' class="table table-striped table-hover table-condensed">
+
+        <tbody class="searchable">
+        {% for strain in strain_listing %}
+          <tr>
+            <td>
+              {{ strain.isotype }} ({{ strain.strain }})
+            </td>
+            <td>
+                <label>
+                <input type="checkbox" class="track-select isotype-item sample-track" value="{{ strain.strain }}" />
+                VCF</label>
+            </td>
+            <td>
+                <label>
+                <input type="checkbox" class="track-select sample-track-alignment" value="{{ strain.strain }}_bam" />
+                BAM</label>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+
+      </table>
+    </div> {# /col-lg-4 #}
+
+    
+
+  </div> {# /row #}
+
+  <div class="row">
+
+  
+    <div class='col-lg-2 col-lg-offset-9 col-md-4 col-md-offset-8 col-sm-offset-4 col-sm-4 col-xs-8 col-xs-offset-2'>
+      <a class="btn nu-alt-btn btn-block" href="{{ url_for('primary.help_item', filename = 'Variant-Browser') }}" role="button">
+        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> 
+        Help
+      </a>
+    </div>
+  </div> {# /row #}
+  
+
+</div> {# /container #}
+
+
+  <div class="row igv-browser-row">
+    <div class="col-lg-12 col-md-12">
+      <div id="browser"></div>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block script %}
+
+
+<script type="text/javascript">
+
+var tracks = [];
+var trackset = {"Genes": {
+                  name: "Genes",
+                  displayMode: "EXPANDED",
+                  order: 1,
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_gene.WS276.bed.gz",
+                  indexed: false,
+                  searchable: false,
+                  color: "#5c5cd6",
+                  height: 65
+                },
+                "Transcripts": {
+                  name: "Transcripts",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans_transcripts_WS276.bed.gz",
+                  indexed: true,
+                  order: 2,
+                  color: "#a366ff",
+                  displayMode: "SQUISHED",
+                  searchable: false
+                },
+              {% for strain in strain_listing %}
+                {{ strain.strain }} : {
+                  name: "{{ strain.strain }}",
+                  url: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/strain/vcf/{{ strain.strain }}.{{ DATASET_RELEASE }}.vcf.gz",
+                  indexURL: "//storage.googleapis.com/elegansvariation.org/releases/{{ DATASET_RELEASE }}/strain/vcf/{{ strain.strain }}.{{ DATASET_RELEASE }}.vcf.gz.tbi",
+                  order: 100,
+                  displayMode: "EXPANDED",
+                  color: "#ffffff",
+                  homvarColor: "#0066ff",
+                  homrefColor: "#c2c2d6",
+                  visibilityWindow: 20000,
+                  searchable: false
+                },
+                {{ strain }}_bam : {
+                  id: "{{ strain.strain }}_bam",
+                  name: "{{ strain.strain }}_bam",
+                  url: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam",
+                  indexURL: "//storage.googleapis.com/elegansvariation.org/bam/{{ strain }}.bam.bai",
+                  order: 100,
+                  visibilityWindow: 20000,
+                  searchable: false
+                },
+              {% endfor %}
+                "phastCons": {
+                  name: "phastCons",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans.phastcons.bw",
+                  order: 6,
+                  displayMode: "SQUISHED",
+                  color: "#000000",
+                  visibilityWindow: 20000
+                },
+                "phyloP": {
+                  name: "phyloP",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/elegans.phylop.bw",
+                  order: 6,
+                  displayMode: "SQUISHED",
+                  color: "#000000",
+                  visibilityWindow: 20000
+                },
+                "Transposons": {
+                  name: "Transposons",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/laricchia2017.tes_cendr.bed.gz",
+                  order: 6,
+                  displayMode: "EXPANDED",
+                  color: "#34CB80",
+                  visibilityWindow: 20000000
+                },
+                "Divergent Regions Summary": {
+                  name: "Divergent Regions Summary",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_all.bed.gz",
+                  order: 6,
+                  height: 40,
+                  displayMode: "EXPANDED",
+                  color: "#CB3466",
+                  visibilityWindow: 20000000
+                },
+                "Divergent Regions": {
+                  name: "Divergent Regions",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/lee2020.divergent_regions_strain.bed.gz",
+                  order: 6,
+                  height: 200,
+                  displayMode: "EXPANDED",
+                  color: "#9B4763",
+                  visibilityWindow: 20000000
+                },
+                "Dust": {
+                  name: "Dust",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.dust.bed.gz",
+                  order: 6,
+                  displayMode: "SQUISHED",
+                  color: "#583E1A",
+                  visibilityWindow: 20000000
+                },
+                "Repeat Masker": {
+                  name: "Repeat Masker",
+                  url: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.repeat_masker.bed.gz",
+                  order: 6,
+                  displayMode: "SQUISHED",
+                  color: "#CB8C34",
+                  visibilityWindow: 20000000
+                }
+};
+
+function reload_tracks() {
+  $('.track-select').each(function(i, obj) {
+    const track_name = $(this).attr("value");
+    if ($(this).prop("checked") == true){
+      if (!tracks.includes(track_name)) {
+        tracks.push(track_name);
+        igv.getBrowser().loadTrack(trackset[track_name]);
+      }
+    } else {
+      igv.getBrowser().removeTrackByName(track_name);
+      i = tracks.indexOf(track_name);
+      while(i != -1) {
+        tracks.splice(i, 1);
+        i = tracks.indexOf(track_name);
+      }
+    }                          
+  });
+}
+
+$(document).ready(function () {
+  var div = $("#browser")[0], 
+      options = {
+        search: {
+          url: "/api/browser/search/$FEATURE$",
+          coords: 1,
+          resultsField: 'result'
+        },
+        showNavigation: true,
+        showKaryo: false,
+        reference: {
+          id: "WS276",
+          fastaURL: "//storage.googleapis.com/elegansvariation.org/browser_tracks/c_elegans.PRJNA13758.WS276.genomic.fa",
+        },
+        locus: "{{ region }}",
+        tracks: [],
+      };
+      var browser = igv.createBrowser(div, options)
+                      .then(function(browser) {
+                        /*
+                          Bind browser events
+                        */
+                        browser.on('trackdragend', function(reference_frame, label) {
+                        });
+
+                        // Detect track changes
+                        $(".track-select").on("change", function() {
+                          reload_tracks();
+                        });
+
+                      });
+
+
+function process_gene_search() {
+    $("#loading-search-table").fadeOut();
+    var gene = $('#gene-search').val();
+    if (gene.length == 0) {
+      $("#g-search-table").fadeOut();
+    } else {
+      $("#orthologs").html("");
+      $.ajax({
+           url: "/api/gene/browser-search/" + gene,
+           method: "GET",
+           contentType: 'application/xml',
+           }).done(function(msg) {
+            row = Array();
+            $.each(msg, function(i,row) {
+                if ("chrom" in row) {
+                   link = row["chrom"] + ":" + row["start"] + "-" + row["end"];
+                } else {
+                    link = row["locus"];
+                }
+                gene_name = `<a onclick="set_position('${link}')" link='${link}' class='ortholink'>${row["locus"]}</a>`;
+                homolog_species = row["homolog_species"] || "<em>C. elegans</em>";
+                homolog_source = row["homolog_source"] || "Wormbase";
+                result = [gene_name, row['homolog_gene'] || row["gene_symbol"], homolog_species, row["homolog_source"] || "Wormbase"]  ;
+                result = "<tr><td>" + result.join("</td><td>") + "</td></tr>";
+                position = row["chrom"] + ":" + row["start"];
+              $("#orthologs").append(result);
+            });
+            $("#g-search-table").fadeIn();
+            });
+    }
+}
+
+// Make links work!
+$(".container-fluid").on("click", ".ortholink", function() {
+  igv.getBrowser().search($(this).attr("link"))
+});
+
+
+function gt_label(gt) {
+  // Generates a genotype label
+  r = ""
+  classes = [];
+  classes.push(`gt-${gt["GT"]}`);
+  FT = gt["FT"].split(";").join(" ");
+  classes.push(FT);
+  tt = "";
+  if (gt['FT'] != ['PASS']) {
+      tt = ` data-placement='bottom' title='${FT}' `;
+  }
+  r += `<div class='label ttop ${classes.join(" ")}' ${tt} >`;
+  r += gt["SAMPLE"] + " : " + gt["TGT"];
+  r += "</div>";
+  return r
+}
+
+function draw_gt_set(genotype_set, genotype_val) {
+    return genotype_set.filter(function(gt) { return gt['GT'] == genotype_val })
+                       .map( gt_label )
+                       .join(" ");
+
+}
+
+
+var typingTimer;                //timer identifier
+var doneTypingInterval = 1000;  //time in ms (5 seconds)
+
+// Ortholog search
+$("#gene-search").on("input", function(e) {
+  $("#loading-search-table").fadeIn();
+  clearTimeout(typingTimer);
+  typingTimer = setTimeout(process_gene_search, doneTypingInterval);
+})
+
+
+// Initial load
+setTimeout(reload_tracks, 500);
+
+});
+
+set_position = function(coord) {
+  // Sets browser position based on input
+  igv.getBrowser().search(coord);
+}
+
+$(document).ready(function() {
+
+    (function($) {
+        var patterns = [];
+        $('#filter').keyup(function() {
+            $('.searchable tr').hide();
+            $(this).val().split(',').forEach(function(r) {
+                var rex = new RegExp(r, "i");
+                $('.searchable tr').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            })
+        })
+
+    }(jQuery));
+
+
+    $('#filter').keydown(function(event) {
+        if (event.keyCode == 13) {
+            event.preventDefault();
+            return false;
+        }
+    });
+
+});
+
+</script>
+
+
+
+{% endblock %}

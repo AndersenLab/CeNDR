@@ -14,11 +14,11 @@ function zip_index {
 # one called elegans_genes on wormbase.
 # Add parenthetical gene name for transcripts.
 mkdir -p browser
-curl ftp://ftp.wormbase.org/pub/wormbase/releases/WS253/MULTI_SPECIES/hub/elegans/elegans_genes_WS253.bb > elegans_genes_WS253.bb
-BigBedToBed elegans_genes_WS253.bb tmp.bed
-sortBed -i tmp.bed > browser/elegans_transcripts_WS253.bed
-bgzip -f browser/elegans_transcripts_WS253.bed
-tabix browser/elegans_transcripts_WS253.bed.gz
+curl ftp://ftp.wormbase.org/pub/wormbase/releases/WS276/MULTI_SPECIES/hub/elegans/elegans_genes_WS276.bb > elegans_genes_WS276.bb
+BigBedToBed elegans_genes_WS276.bb tmp.bed
+sortBed -i tmp.bed > browser/elegans_transcripts_WS276.bed
+bgzip -f browser/elegans_transcripts_WS276.bed
+tabix browser/elegans_transcripts_WS276.bed.gz
 rm tmp.bed
 
 # Generate Gene Track BED File

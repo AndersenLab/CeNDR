@@ -6,7 +6,6 @@ indexes:
   - name: created_on
     direction: desc
 
-
 - kind: trait
   properties:
   - name: report_slug
@@ -33,5 +32,11 @@ indexes:
 - kind: trait
   properties:
   - name: user_id
+  - name: created_on
+    direction: desc
+
+- kind: data-config
+  properties:
+  - name: created_by
   - name: created_on
     direction: desc

@@ -1,0 +1,18 @@
+[submodule "external/generate-thumbnails"]
+	path = external/generate-thumbnails
+	url = https://github.com/AndersenLab/generate-thumbnails
+[submodule "external/h2calc"]
+	path = external/h2calc
+	url = https://github.com/AndersenLab/h2calc
+[submodule "external/nscalc"]
+	path = external/nscalc
+	url = https://github.com/AndersenLab/nscalc
+[submodule "external/ipcalc"]
+	path = external/ipcalc
+	url = https://github.com/AndersenLab/ipcalc
+[submodule "external/dockerfile"]
+	path = external/dockerfile
+	url = https://github.com/AndersenLab/dockerfile
+[submodule "external/NemaScan"]
+	path = external/NemaScan
+	url = https://github.com/AndersenLab/NemaScan

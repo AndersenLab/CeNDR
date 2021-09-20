@@ -1,10 +1,10 @@
 - name: Northwestern
   url: https://www.northwestern.edu
-  image: NU.jpg
+  image: NU.jpeg
 - name: NSF
   url: https://www.nsf.gov
   image: nsf.png
   description: NSF - Collections in Support of Biological Research Grant (1930382)
 - name: Weinberg
   url: https://www.weinberg.northwestern.edu/
-  image: weinberg.png
+  image: weinberg.jpeg

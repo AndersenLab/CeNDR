@@ -16,6 +16,11 @@ tabix \
 graphviz \
 libgraphviz-dev \
 pkg-config \
+libxml2 \
+xmlsec1 \
+libxml2-dev \
+libxmlsec1-dev \
+libxmlsec1-openssl \
 && rm -rf /var/lib/apt/lists/*
 
 ENV BCFTOOLS_BIN="bcftools-1.10.tar.bz2" \
@@ -56,6 +61,6 @@ ADD . /app
 RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask
 
 # Download the database; GAE_VERSION set as dummy variable
-RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask download_db
+# RUN FLASK_APP=main:app GAE_VERSION=blank-blank flask download_db
 
 CMD gunicorn -b :$PORT main:app

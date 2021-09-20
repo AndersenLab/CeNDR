@@ -1,4 +1,4 @@
-# Variant Browser
+# Genome Browser
 
 
 <style>
@@ -65,15 +65,15 @@ th {
 
 The `Genes` and `Transcripts` tracks are displayed by default.
 
-##### Genes 
+#### Genes 
 
 Shows _C. elegans_ genes.
 
-##### Transcripts
+#### Transcripts
 
 Shows transcripts of genes.
 
-##### phyloP
+#### phyloP
 
 The UCSC genome browser provides a [good explanation](https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg19&g=cons46way) of the `phyloP` and `phastCons` tracks and how to interpret them.
 
@@ -88,15 +88,15 @@ phyloP (phylogenetic P-values) are designed to detect lineage-specific selection
 * _Onchocerca volvulus_
 * _Brugia malayi_
 
-##### phastCons
+#### phastCons
 
 phastCons scores range from 0-1 and represent the probability that each nucleotide belongs to a conserved element.
 
-##### Transposons
+#### Transposons
 
 The transposons track shows transposon calls from [Laricchia _et al._ 2017](https://andersenlab.org/publications/2017Laricchia.pdf). Each call lists the transposon type and __isotype__.
 
-##### Divergent Regions
+#### Divergent Regions
 
 Hyper-divergent regions are genomic intervals that contain sequences not found in the N2 reference strain. They were identified by high levels of variation and low coverage from read alignments. For a complete description, please see [_Lee et al._ 2020](https://andersenlab.org/publications/2020LeebioRxiv.pdf).
 
@@ -106,7 +106,7 @@ Two divergent tracks are available:
 * __Divergent Regions Strain__ - Divergent region intervals for individual strains.
 
 
-##### Variants
+#### Variants
 
 The variants track shows variation across the species for all isotypes sequenced. Variants are colored according to the legend:
 
@@ -114,20 +114,6 @@ The variants track shows variation across the species for all isotypes sequenced
   <div class="legend-box" style="background-color: #c2c2d6;"></div> <strong>Reference</strong>&nbsp;&nbsp;
   <div class="legend-box" style="background-color: #0066ff;"></div> <strong>Alternate</strong>
 </div>
-
-<a name="variant-effects"></a>
-### Variant Effects
-
-There are three tracks (LOW, MODERATE, HIGH) that can be used to show variants and their predicted impacts as annotated by [SnpEff](https://snpeff.sourceforge.net/). The tracks are color coded based on severity as follows:
-
-<div class='text-center'>
-  <label><div class="legend-box" style="background-color: #66d866;"> </div> LOW</label>&nbsp;&nbsp;
-  <label><div class="legend-box" style="background-color: #ffd33f;"></div> MODERATE</label>
-  <label><div class="legend-box" style="background-color: #ff3f3f;"></div> HIGH</label>
-</div>
-
-
-These annotations can be used to assess what functional affects a given variant may have and are grouped into LOW, MODERATE, and HIGH impact variants. More information on variant predictions is available on the [Variant Prediction](/help/Variant-Prediction/) page.
 
 <a name="ind-strains"></a>
 ### Strain Specific Tracks

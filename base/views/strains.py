@@ -19,39 +19,71 @@ from os.path import basename
 from base.config import config
 from logzero import logger
 
-strain_bp = Blueprint('strain',
+strains_bp = Blueprint('strains',
                       __name__,
                       template_folder='strain')
-
 #
-# Global Strain Map
+# Strain List Page
 #
-@strain_bp.route('/')
-def strain():
-    """
-        Redirect base route to the global strain map
-    """
-    return redirect(url_for('strain.map_page'))
-
-
-@strain_bp.route('/global-strain-map')
+@strains_bp.route('/')
 @cache.memoize(50)
-def map_page():
+def strains():
     """
-        Global strain map shows the locations of all wild isolates
-        within the SQLite database.
+        Redirect base route to the strain list page
     """
-    VARS = {'title': "Global Strain Map",
-            'strain_listing': dump_json(get_strains(known_origin=True))}
-    return render_template('strain/global_strain_map.html', **VARS)
+    disable_parent_breadcrumb = True
+    return render_template('strain/strains.html', **locals())
+
+@strains_bp.route('/map')
+@cache.memoize(50)
+def strains_map():
+    """
+        Redirect base route to the strain list page
+    """
+    title = 'Strain Map'
+    strains = get_strains()
+    strain_listing = [s.to_json() for s in strains]
+    return render_template('strain/strains_map.html', **locals())
+
+@strains_bp.route('/isotype_list')
+@cache.memoize(50)
+def strains_list():
+    """
+        Strain list of all wild isolates
+        within the SQLite database and a table of all strains
+    """
+    VARS = {
+        'title': 'Isotype List',
+        'strain_listing': get_strains()}
+    return render_template('strain/strains_list.html', **VARS)
+
+@strains_bp.route('/issues')
+@cache.memoize(50)
+def strains_issues():
+    """
+        Strain issues shows latest data releases table of strain issues
+    """
+    VARS = {
+        'title': 'Strain Issues',
+        'strain_listing_issues': get_strains(issues=True)}
+    return render_template('strain/strain_issues.html', **VARS)
+
+
+@strains_bp.route('/external-links')
+@cache.memoize(50)
+def external_links():
+    """
+        Strain issues shows latest data releases table of strain issues
+    """
+    title = 'External Links'
+    return render_template('strain/external_links.html', **locals())
 
 
 #
 # Strain Data
 #
-
-@strain_bp.route('/CelegansStrainData.tsv')
-def strain_data_tsv():
+@strains_bp.route('/CelegansStrainData.tsv')
+def strains_data_tsv():
     """
         Dumps strain dataset; Normalizes lat/lon on the way out.
     """
@@ -72,8 +104,8 @@ def strain_data_tsv():
 #
 # Isotype View
 #
-@strain_bp.route('/isotype/<isotype_name>/')
-@strain_bp.route('/isotype/<isotype_name>/<release>')
+@strains_bp.route('/isotype/<isotype_name>/')
+@strains_bp.route('/isotype/<isotype_name>/<release>')
 @cache.memoize(50)
 def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
     """
@@ -107,23 +139,23 @@ def isotype_page(isotype_name, release=config['DATASET_RELEASE']):
 # Strain Catalog
 #
 
-@strain_bp.route('/catalog', methods=['GET', 'POST'])
+@strains_bp.route('/catalog', methods=['GET', 'POST'])
 @cache.memoize(50)
-def strain_catalog():
-    flash(Markup("Strain mapping sets 7 and 8 will not be available until later this year."), category="warning")
-    VARS = {"title": "Strain Catalog",
-            "warning": request.args.get('warning'),
-            "strain_listing": get_strains(),
-            "strain_sets": Strain.strain_sets() }
-    return render_template('strain/strain_catalog.html', **VARS)
+def strains_catalog():
+    flash(Markup("Strain mapping sets 9 and 10 will not be available until later this year."), category="warning")
+    title = "Strain Catalog"
+    warning = request.args.get('warning')
+    strain_listing = get_strains()
+    strain_sets = Strain.strain_sets()
+    return render_template('strain/strain_catalog.html', **locals())
 
 #
 # Strain Submission
 #
 
 
-@strain_bp.route('/submit')
-def strain_submission_page():
+@strains_bp.route('/submit')
+def strains_submission_page():
     """
         Google form for submitting strains
     """
@@ -135,7 +167,7 @@ def strain_submission_page():
 # Protocols
 #
 
-@strain_bp.route("/protocols")
+@strains_bp.route("/protocols")
 @cache.cached(timeout=50)
 def protocols():
     title = "Protocols"

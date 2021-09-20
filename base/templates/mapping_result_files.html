@@ -1,0 +1,29 @@
+{% extends "_layouts/default.html" %}
+
+
+{% block content %}
+
+{% if len(file_list) == 0 %}
+
+<div class="row">
+  <div class='col-md-12'>
+      <p class='text-info text-center'>
+          <strong>
+              The genome-wide association mapping hasn't started yet. Please check back in a few hours for results.
+          </strong>
+      </p>
+  </div> {# /col-md-12 #}
+</div>{# /row #}
+
+{% endif %}
+
+{% for file in file_list %}
+
+<p>
+  <a href="{{ file.url }}"> {{ file.name }}</a>
+</p>
+
+{% endfor %}
+
+
+{% endblock %}

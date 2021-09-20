@@ -27,7 +27,7 @@
         <p><a href="http://biobits.org/samtools_primer.html" target="_blank">Learn about alignment data</a></p>
             <h4>Downloading All Alignment Data</h4>
             <p>You can download all alignment data using the script below. Before this script will work, you need to download and install <strong>wget</strong>. We recommend using <a href="http://brew.sh">Homebrew</a> for this installation (Unix/Mac OS), or <a href="http://www.cygwin.com/">Cygwin</a> on windows. See the <a href="{{ url_for( "primary.help_item",filename="FAQ")}}">FAQ</a> for details on installing <strong>wget</strong>.</p>
-            <p><a href="{{ url_for("data.download_script") }}">download_bams.sh</a></p>
+            <p><a href="{{ url_for("data.download_script", selected_release=selected_release) }}">download_bams.sh</a></p>
         <h3>Methods</h3>
         <p>Information regarding alignment, variant calling, and annotation are available <a href="{{ url_for('primary.help_item', filename = "Methods") }}">here</a>.
     </div>
@@ -60,7 +60,7 @@
                 Strain Data including isolation location, isotype information, and more is available for download.
                 <br />
                 <br />
-                <a href="{{ url_for('strain.strain_data_tsv') }}" type="button" class="btn btn-default btn-block btn-success">Download Strain Data</a>
+                <a href="{{ url_for('strains.strains_data_tsv') }}" type="button" class="btn btn-default btn-block btn-success">Download Strain Data</a>
             </div>
         </div>
         <h4>Included Variants</h4>
@@ -109,7 +109,7 @@
                     {% endif %}
                 {% endfor %}
             </td>
-            <td><a href="{{ url_for('strain.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a></td>
+            <td><a href="{{ url_for('strains.isotype_page', isotype_name=isotype, release = selected_release) }}">{{ isotype }}</a></td>
             <td>{% for strain in strains %} {{ strain }} {% endfor %}
             </td>
             <td>

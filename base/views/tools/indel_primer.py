@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 from cyvcf2 import VCF
 from flask import (Blueprint,
+                   flash,
+                   url_for,
                    jsonify,
                    render_template,
                    request,
@@ -17,12 +19,14 @@ from flask_wtf import Form
 from logzero import logger
 from wtforms import IntegerField, SelectField
 from wtforms.validators import Required, ValidationError
-
-from base.config import config
-from base.utils.gcloud import check_blob, upload_file
-from base.utils.data_utils import hash_it
-from base.constants import CHROM_NUMERIC
 from threading import Thread
+
+from base.constants import CHROM_NUMERIC, GOOGLE_CLOUD_BUCKET 
+from base.config import config
+from base.models import ip_calc_ds
+from base.utils.gcloud import add_task, check_blob, upload_file
+from base.utils.data_utils import hash_it, unique_id
+from base.utils.jwt_utils import jwt_required, get_jwt, get_current_user
 
 # Tools blueprint
 indel_primer_bp = Blueprint('indel_primer',
@@ -39,8 +43,9 @@ MAX_SV_SIZE = 500
 # Initial load of strain list from sv_data
 # This is run when the server is started.
 # NOTE: Tabix cannot make requests over https!
-SV_BED_URL = "http://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.bed.gz"
-SV_VCF_URL = "https://storage.googleapis.com/elegansvariation.org/tools/pairwise_indel_primer/sv.20200815.vcf.gz"
+SV_BED_URL = f"http://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/tools/pairwise_indel_primer/sv.20200815.bed.gz"
+SV_VCF_URL = f"http://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/tools/pairwise_indel_primer/sv.20200815.vcf.gz"
+
 SV_STRAINS = VCF(SV_VCF_URL).samples
 SV_COLUMNS = ["CHROM",
               "START",
@@ -100,17 +105,32 @@ class pairwise_indel_form(Form):
     stop = FlexIntegerField('Stop', default="2,039,217", validators=[Required()])
 
 
+
+@indel_primer_bp.route("/pairwise_indel_finder/ip/all")
+@jwt_required()
+def indel_primer_result_list():
+  title = "Indel Primer Results"
+  alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
+  user = get_current_user()
+  items = ip_calc_ds().query_by_username(user.name)
+  items = sorted(items, key=lambda x: x['created_on'], reverse=True)
+  return render_template('tools/ip_result_list.html', **locals())
+
+
 @indel_primer_bp.route('/pairwise_indel_finder', methods=['GET'])
+@jwt_required()
 def indel_primer():
     """
         Main view
     """
     form = pairwise_indel_form(request.form)
-    VARS = {"title": "Pairwise Indel Finder",
-            "strains": SV_STRAINS,
-            "chroms": CHROM_NUMERIC.keys(),
-            "form": form}
-    return render_template('tools/indel_primer.html', **VARS)
+    title = "Pairwise Indel Finder"
+    strains = SV_STRAINS,
+    chroms = CHROM_NUMERIC.keys(),
+    fluid_container = True
+    alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
+    
+    return render_template('tools/indel_primer.html', **locals())
 
 
 def overlaps(s1, e1, s2, e2):
@@ -118,6 +138,7 @@ def overlaps(s1, e1, s2, e2):
 
 
 @indel_primer_bp.route("/pairwise_indel_finder/query_indels", methods=["POST"])
+@jwt_required()
 def pairwise_indel_finder_query():
     form = pairwise_indel_form()
     if form.validate_on_submit():
@@ -154,61 +175,88 @@ def pairwise_indel_finder_query():
         return jsonify(results=[])
     return jsonify({"errors": form.errors})
 
+def create_ip_task(id, data_hash, site, strain1, strain2, vcf_url):
+  """
+      This is designed to be run in the background on the server.
+      It will run a heritability analysis on google cloud run
+  """
+  logger.debug("Submitting Indel Primer Job")
+  ip = ip_calc_ds(id)
 
-def indel_primer_task(data_hash, site, strain1, strain2, vcf_url):
-    """
-        This is designed to be run in the background on the server.
-        It will run a an indel_primer request using google cloud run
-    """
-    # Perform indel_primer_request
-    logger.info("Submitting Primer Task")
-    result = requests.post(config['INDEL_PRIMER_URL'], data={'hash': data_hash,
-                                                             'site': site,
-                                                             'strain1': strain1,
-                                                             'strain2': strain2,
-                                                             'vcf_url': vcf_url.replace("https", "http")})
-    logger.debug(result)
+  # Perform ip request
+  queue = config['INDEL_PRIMER_TASK_QUEUE']
+  url = config['INDEL_PRIMER_URL']
+  data = { 'hash': data_hash,
+           'site': site,
+           'strain1': strain1,
+           'strain2': strain2,
+           'vcf_url': vcf_url.replace("https", "http"),
+           'ds_id': id,
+           'ds_kind': ip.kind }
+           
+  result = add_task(queue, url, data, task_name=data_hash)
+
+  # Update report status
+  ip.status = 'SCHEDULED' if result else 'FAILED'
+  ip.save()
 
 
 @indel_primer_bp.route('/pairwise_indel_finder/submit', methods=["POST"])
+@jwt_required()
 def submit_indel_primer():
     """
         This endpoint is used to submit an indel primer job.
         The endpoint request is executed as a background task to keep the job alive.
     """
     data = request.get_json()
+    user = get_current_user()
+    id = unique_id()
+    ip = ip_calc_ds(id)
+    ip.username = user.name
 
     # Generate an ID for the data based on its hash
     data_hash = hash_it(data, length=32)
     data['date'] = str(arrow.utcnow())
+    ip.data_hash = data_hash
+    ip.site = data.get('site')
+    ip.strain1 = data.get('strain_1')
+    ip.strain2 = data.get('strain_2')
+    ip.save()
 
     # Check whether analysis has previously been run and if so - skip
     result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
     if result:
-        return jsonify({'thread_name': 'done',
-                        'started': True,
-                        'data_hash': data_hash})
+      ip.status = 'COMPLETE'
+      ip.save()
+      return jsonify({'thread_name': 'done',
+                      'started': True,
+                      'data_hash': data_hash,
+                      'id': id})
 
-    logger.debug("Submitting Indel Primer Job")
     # Upload query information
     data_blob = f"reports/indel_primer/{data_hash}/input.json"
     upload_file(data_blob, json.dumps(data), as_string=True)
+    create_ip_task(id=id, data_hash=data_hash, site=data.get('site'), strain1=data.get('strain_1'), strain2=data.get('strain_2'), vcf_url=SV_VCF_URL)
 
-    thread = Thread(target=indel_primer_task, args=(data_hash,
-                                                    data['site'],
-                                                    data['strain_1'],
-                                                    data['strain_2'],
-                                                    SV_VCF_URL))
-    thread.daemon = True
-    thread.start()
-    return jsonify({'thread_name': str(thread.name),
-                    'started': True,
-                    'data_hash': data_hash})
+    return jsonify({'started': True,
+                    'data_hash': data_hash,
+                    'id': id })
 
 
-@indel_primer_bp.route("/indel_primer/result/<data_hash>")
-@indel_primer_bp.route("/indel_primer/result/<data_hash>/tsv/<filename>")
-def pairwise_indel_query_results(data_hash, filename = None):
+@indel_primer_bp.route("/indel_primer/result/<id>")
+@indel_primer_bp.route("/indel_primer/result/<id>/tsv/<filename>")
+@jwt_required()
+def pairwise_indel_query_results(id, filename = None):
+    alt_parent_breadcrumb = {"title": "Tools", "url": url_for('tools.tools')}
+    user = get_current_user()
+    ip = ip_calc_ds(id)
+
+    if (not ip._exists) or (ip.username != user.name):
+      flash('You do not have access to that report', 'danger')
+      abort(401)
+
+    data_hash = ip.data_hash
+
     title = "Indel Primer Results"
     data = check_blob(f"reports/indel_primer/{data_hash}/input.json")
     result = check_blob(f"reports/indel_primer/{data_hash}/results.tsv")
@@ -216,7 +264,6 @@ def pairwise_indel_query_results(data_hash, filename = None):
 
     if data is None:
         return abort(404, description="Indel primer report not found")
-    logger.debug(data.download_as_string().decode("utf-8"))
     data = json.loads(data.download_as_string().decode('utf-8'))
     logger.info(data)
     # Get trait and set title
@@ -235,6 +282,9 @@ def pairwise_indel_query_results(data_hash, filename = None):
         # Check for no results
         empty = True if len(result) == 0 else False
         ready = True
+        ip.status = 'COMPLETE'
+        ip.empty = empty
+        ip.save()
         if empty is False:
             # left primer
             result['left_primer_start'] = result.amplicon_region.apply(lambda x: x.split(":")[1].split("-")[0]).astype(int)

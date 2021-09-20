@@ -1,23 +1,27 @@
 import os
+import re
 import arrow
 import json
 import pandas as pd
 import numpy as np
 import datetime
 import requests
+
 from io import StringIO
 from flask import Markup, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import or_, func
-from logzero import logger
+from werkzeug.security import safe_str_cmp
 
-from base.constants import URLS
+from base.config import config
+from base.constants import GOOGLE_CLOUD_BUCKET, STRAIN_PHOTO_PATH
+from base.extensions import sqlalchemy
 from base.utils.gcloud import get_item, store_item, query_item, get_cendr_bucket, check_blob
 from base.utils.aws import get_aws_client
+from base.utils.data_utils import hash_password, unique_id
 from gcloud.datastore.entity import Entity
 from collections import defaultdict
 from botocore.exceptions import ClientError
-from base.config import DATASET_RELEASE
 
 db = SQLAlchemy()
 
@@ -83,6 +87,7 @@ class trait_ds(datastore_model):
         If a task is re-run the report will only display the latest version.
     """
     kind = 'trait'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
 
     def __init__(self, *args, **kwargs):
         """
@@ -233,9 +238,9 @@ class trait_ds(datastore_model):
             The URL schema changed from REPORT_VERSION v1 to v2.
         """
         if self.REPORT_VERSION == 'v2':
-            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.gs_path}"
+            return f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/reports/{self.gs_path}"
         elif self.REPORT_VERSION == 'v1':
-            return f"https://storage.googleapis.com/elegansvariation.org/reports/{self.gs_path}"
+            return f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/reports/{self.gs_path}"
 
     def get_gs_as_dataset(self, fname):
         """
@@ -260,7 +265,7 @@ class trait_ds(datastore_model):
 
         cendr_bucket = get_cendr_bucket()
         items = cendr_bucket.list_blobs(prefix=f"reports/{self.gs_path}")
-        return {os.path.basename(x.name): f"https://storage.googleapis.com/elegansvariation.org/{x.name}" for x in items}
+        return {os.path.basename(x.name): f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/{x.name}" for x in items}
 
     def file_url(self, fname):
         """
@@ -276,6 +281,7 @@ class mapping_ds(datastore_model):
         The mapping/peak interval model
     """
     kind = 'mapping'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
     
     def __init__(self, *args, **kwargs):
         super(mapping_ds, self).__init__(*args, **kwargs)
@@ -287,14 +293,35 @@ class user_ds(datastore_model):
         information on users.
     """
     kind = 'user'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
     
     def __init__(self, *args, **kwargs):
         super(user_ds, self).__init__(*args, **kwargs)
 
+
+    def set_properties(self, **kwargs):
+        if 'username' in kwargs:
+            self.username = kwargs.get('username')
+        if 'full_name' in kwargs:
+            self.full_name = kwargs.get('full_name')
+        if 'password' in kwargs:
+            self.set_password(kwargs.get('password'), kwargs.get('salt'))
+        if 'email' in kwargs:
+            self.set_email(kwargs.get('email'))
+        if 'roles' in kwargs:
+            self.roles = kwargs.get('roles')
+
+    def save(self, *args, **kwargs):
+        now = arrow.utcnow().datetime
+        if not self._exists:
+            self.created_on = now
+        self.modified_on = now
+        super(user_ds, self).save(*args, **kwargs)
+
     def reports(self):
-        filters = [('user_id', '=', self.user_id)]
+        filters = [('user_id', '=', self.name)]
         # Note this requires a composite index defined very precisely.
-        results = query_item('trait', filters=filters, order=['user_id', '-created_on'])
+        results = query_item(self.kind, filters=filters, order=['user_id', '-created_on'])
         results = sorted(results, key=lambda x: x['created_on'], reverse=True)
         results_out = defaultdict(list)
         for row in results:
@@ -302,16 +329,225 @@ class user_ds(datastore_model):
         # Generate report objects
         return results_out
 
+    def get_all(self, keys_only=False):
+        results = query_item(self.kind, keys_only=keys_only)
+        return results
+
+    def set_password(self, password, salt):
+        # calling set_password with self.password 
+        if hasattr(self, 'password'):
+            if (len(password) > 0) and (password != self.password):
+                self.password = hash_password(password + salt)
+        else:
+            self.password = hash_password(password + salt)
+
+    def set_email(self, email):
+        if hasattr(self, 'email'):
+            if not safe_str_cmp(email, self.email):
+                self.email = email
+                self.email_confirmation_code = unique_id()
+                self.verified_email = False
+        else:
+            self.email = email
+            self.email_confirmation_code = unique_id()
+            self.verified_email = False
+
+    def check_password(self, password, salt):
+        return safe_str_cmp(self.password, hash_password(password + salt))
+    
+
+class markdown_ds(datastore_model):
+    """
+        The Markdown model - for creating and retrieving
+        documents uploaded to the site
+    """
+    kind = 'markdown'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
+    
+    def __init__(self, *args, **kwargs):
+      super(markdown_ds, self).__init__(*args, **kwargs)
+
+    def get_all(self, keys_only=False):
+      results = query_item(self.kind, keys_only=keys_only)
+      return results
+
+    def query_by_type(self, type, keys_only=False):
+      filters = [('type', '=', type)]
+      results = query_item(self.kind, filters=filters, keys_only=keys_only)
+      return results
+
+    def save(self, *args, **kwargs):
+      now = arrow.utcnow().datetime
+      self.modified_on = now
+      if not self._exists:
+        self.created_on = now
+      super(markdown_ds, self).save(*args, **kwargs)
+
+
+class ns_calc_ds(datastore_model):
+  """
+    The NemaScan Task Model - metadata for NemaScan nextflow pipeline
+    execution tasks executed by Google Life Sciences
+  """
+  kind = 'ns_calc'
+  kind = '{}{}'.format(config['DS_PREFIX'], kind)
+
+
+  def __init__(self, *args, **kwargs):
+    super(ns_calc_ds, self).__init__(*args, **kwargs)
+
+  def query_by_username(self, username, keys_only=False):
+    filters = [('username', '=', username)]
+    results = query_item(self.kind, filters=filters, keys_only=keys_only)
+    return results
+
+  def save(self, *args, **kwargs):
+    now = arrow.utcnow().datetime
+    self.modified_on = now
+    if not self._exists:
+      self.created_on = now
+    super(ns_calc_ds, self).save(*args, **kwargs)
+
+
+class gls_op_ds(datastore_model):
+  """
+    The Google Lifesciences Operation Model - metadata for pipeline
+    task executed by Google Life Sciences
+  """
+  kind = 'gls_operation'
+
+  def __init__(self, *args, **kwargs):
+    super(gls_op_ds, self).__init__(*args, **kwargs)
+    
+
+class h2calc_ds(datastore_model):
+    """
+        The Heritability Calculation Task Model - for creating and retrieving
+        data and status information about a heritability calculation task 
+        executed in Google Cloud Run
+    """
+    kind = 'h2calc'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
+
+    
+    def __init__(self, *args, **kwargs):
+      super(h2calc_ds, self).__init__(*args, **kwargs)
+
+    def query_by_username(self, username, keys_only=False):
+      filters = [('username', '=', username)]
+      results = query_item(self.kind, filters=filters, keys_only=keys_only)
+      return results
+
+    def save(self, *args, **kwargs):
+      now = arrow.utcnow().datetime
+      self.modified_on = now
+      if not self._exists:
+        self.created_on = now
+      super(h2calc_ds, self).save(*args, **kwargs)
+
+
+
+class ip_calc_ds(datastore_model):
+    """
+        The Indel Primer Calculation Task Model - for creating and retrieving
+        data and status information about an indel primer calculation task 
+        executed in Google Cloud Run
+    """
+    kind = 'ip_calc'
+    kind = '{}{}'.format(config['DS_PREFIX'], kind)
+
+    
+    def __init__(self, *args, **kwargs):
+      super(ip_calc_ds, self).__init__(*args, **kwargs)
+
+    def query_by_username(self, username, keys_only=False):
+      filters = [('username', '=', username)]
+      results = query_item(self.kind, filters=filters, keys_only=keys_only)
+      return results
+
+    def save(self, *args, **kwargs):
+      now = arrow.utcnow().datetime
+      self.modified_on = now
+      if not self._exists:
+        self.created_on = now
+      super(ip_calc_ds, self).save(*args, **kwargs)
+
+
+class data_report_ds(datastore_model):
+  """
+      The Data Report model - for creating and retrieving
+      releases of genomic data
+  """
+  kind = 'data-report'
+  kind = '{}{}'.format(config['DS_PREFIX'], kind)
+
+  def init(self):
+    self.dataset = ''
+    self.wormbase = ''
+    self.version = ''
+    self.initialized = False
+    self.published_on = ''
+    self.publish = False
+    self.created_on = arrow.utcnow().datetime
+    self.report_synced_on = ''
+    self.db_synced_on = ''
+
+  def __init__(self, *args, **kwargs):
+    super(data_report_ds, self).__init__(*args, **kwargs)
+
+  def get_all(self, keys_only=False):
+    results = query_item(self.kind, keys_only=keys_only)
+    return results
+
+  def list_bucket_dirs():
+    """
+        Lists 'directories' in GCP Bucket 'data_reports' (unique blob prefixes matching date format)
+    """
+    cendr_bucket = get_cendr_bucket()
+    items = cendr_bucket.list_blobs(prefix=f"data_reports/")
+    dirs = []
+    pattern = r"^(data_reports\/)([0-9]{8})/"
+    for i in items:
+      match = re.search(pattern, i.name)
+      if match:
+        dir = match.group(2)
+        if not dir in dirs:
+          dirs.append(dir)
+      
+    return dirs
+
+  def save(self, *args, **kwargs):
+    now = arrow.utcnow().datetime
+    self.modified_on = now
+    super(data_report_ds, self).save(*args, **kwargs)
+
+
+class config_ds(datastore_model):
+  """
+      The Data Config model - Config stored in the cloud
+      for the site's data sources
+  """
+  kind = 'config'
+  kind = '{}{}'.format(config['DS_PREFIX'], kind)
+
+  def __init__(self, *args, **kwargs):
+    super(config_ds, self).__init__(*args, **kwargs)
+
+  def save(self, *args, **kwargs):
+    now = arrow.utcnow().datetime
+    self.modified_on = now
+    if not self._exists:
+      self.created_on = now
+    super(config_ds, self).save(*args, **kwargs)
 
 class DictSerializable(object):
-    def _asdict(self):
-        result = {}
-        for key in self.__mapper__.c.keys():
-            result[key] = getattr(self, key)
-        return result
+  def _asdict(self):
+    result = {}
+    for key in self.__mapper__.c.keys():
+      result[key] = getattr(self, key)
+    return result
 
 # --------- Break datastore here ---------#
-
 
 class Metadata(DictSerializable, db.Model):
     """
@@ -320,6 +556,48 @@ class Metadata(DictSerializable, db.Model):
     __tablename__ = "metadata"
     key = db.Column(db.String(50), index=True, primary_key=True)
     value = db.Column(db.String)																								
+
+
+class WormbaseGeneSummary(DictSerializable, db.Model):
+    """
+        This is a condensed version of the WormbaseGene model;
+        It is constructed out of convenience and only defines the genes
+        (not exons/introns/etc.)
+    """
+    __tablename__ = "wormbase_gene_summary"
+    id = db.Column(db.Integer, primary_key=True)
+    chrom = db.Column(db.String(7), index=True)
+    chrom_num = db.Column(db.Integer(), index=True)
+    start = db.Column(db.Integer(), index=True)
+    end = db.Column(db.Integer(), index=True)
+    locus = db.Column(db.String(30), index=True)
+    gene_id = db.Column(db.String(25), unique=True, index=True)
+    gene_id_type = db.Column(db.String(15), index=False)
+    sequence_name = db.Column(db.String(30), index=True)
+    biotype = db.Column(db.String(30), nullable=True)
+    gene_symbol = db.column_property(func.coalesce(locus, sequence_name, gene_id))
+    interval = db.column_property(func.format("%s:%s-%s", chrom, start, end))
+    arm_or_center = db.Column(db.String(12), index=True)
+
+    __gene_id_constraint__ = db.UniqueConstraint(gene_id)
+
+
+    def to_json(self):
+      return {k: v for k, v in self._asdict().items() if not k.startswith("_")}
+
+
+    @classmethod
+    def resolve_gene_id(cls, query):
+      """
+          query - a locus name or transcript ID
+          output - a wormbase gene ID
+
+          Example:
+          WormbaseGene.resolve_gene_id('pot-2') --> WBGene00010195
+      """
+      result = cls.query.filter(or_(cls.locus == query, cls.sequence_name == query)).first()
+      if result:
+        return result.gene_id
 
 
 class Strain(DictSerializable, db.Model):
@@ -365,12 +643,19 @@ class Strain(DictSerializable, db.Model):
         return self.strain
 
     def to_json(self):
-        return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+        return {k: v for k, v in self._asdict().items() if not k.startswith("_")}
 
     def strain_photo_url(self):
         # Checks if photo exists and returns URL if it does
         try:
-            return check_blob(f"photos/isolation/{self.strain}.jpg").public_url
+            return check_blob(f"{STRAIN_PHOTO_PATH}{self.strain}.jpg").public_url
+        except AttributeError:
+            return None
+
+    def strain_thumbnail_url(self):
+        # Checks if thumbnail exists and returns URL if it does
+        try:
+            return check_blob(f"{STRAIN_PHOTO_PATH}{self.strain}.thumb.jpg").public_url
         except AttributeError:
             return None
 
@@ -378,13 +663,16 @@ class Strain(DictSerializable, db.Model):
         """
             Return bam / bam_index url set
         """
-
+        bam_file=self.strain + '.bam'
+        bai_file=self.strain + '.bam.bai'
+        bam_download_link = url_for('data.download_bam_url', blob_name=bam_file)
+        bai_download_link = url_for('data.download_bam_url', blob_name=bai_file)
         url_set = Markup(f"""
-                        <a href="{URLS.BAM_URL_PREFIX}/strain/{self.strain}.bam">
+                        <a href="{ bam_download_link }" target="_blank">
                             BAM
                         </a>
                         /
-                        <a href="{URLS.BAM_URL_PREFIX}/strain/{self.strain}.bam.bai">
+                        <a href="{ bai_download_link }" target="_blank">
                             bai
                         </a>
                    """.strip())
@@ -404,13 +692,16 @@ class Strain(DictSerializable, db.Model):
         """
             Return bam / bam_index url set
         """
-
+        bam_file=self.isotype + '.bam'
+        bai_file=self.isotype + '.bam.bai'
+        bam_download_link = url_for('data.download_bam_url', blob_name=bam_file)
+        bai_download_link = url_for('data.download_bam_url', blob_name=bai_file)
         url_set = Markup(f"""
-                        <a href="{URLS.BAM_URL_PREFIX}/{self.isotype}.bam">
+                        <a href="{ bam_download_link }" target="_blank">
                             BAM
                         </a>
                         /
-                        <a href="{URLS.BAM_URL_PREFIX}/{self.isotype}.bam.bai">
+                        <a href="{ bai_download_link }" target="_blank">
                             bai
                         </a>
                    """.strip())
@@ -452,19 +743,25 @@ class Strain(DictSerializable, db.Model):
 
     @classmethod
     def release_summary(cls, release):
-        """
-            Returns isotype and strain count for a data release.
+      """
+          Returns isotype and strain count for a data release.
 
-            Args:
-                release - the data release
-        """
-        counts = {'strain_count': cls.query.filter((cls.release <= release) & (cls.issues == False)).count(),
-                  'strain_count_sequenced': cls.query.filter((cls.release <= release) & (cls.issues == False) & (cls.sequenced == True)).count(),
-                  'isotype_count': cls.query.filter((cls.release <= release) & (cls.issues == False) & (cls.isotype != None)).group_by(cls.isotype).count()}
-        return counts
+          Args:
+              release - the data release
+      """
+      release = int(release)
+      strain_count = cls.query.filter((cls.release <= release) & (cls.issues == False)).count()
+      strain_count_sequenced = cls.query.filter((cls.release <= release) & (cls.issues == False) & (cls.sequenced == True)).count()
+      isotype_count = cls.query.with_entities(cls.isotype).filter((cls.isotype != None), (cls.release <= release), (cls.issues == False)).group_by(cls.isotype).count()
+      
+      return {
+        'strain_count': strain_count,
+        'strain_count_sequenced': strain_count_sequenced,
+        'isotype_count': isotype_count
+      }
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+      return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
 class WormbaseGene(DictSerializable, db.Model):
@@ -487,45 +784,15 @@ class WormbaseGene(DictSerializable, db.Model):
     protein_id = db.Column(db.String(30), nullable=True, index=True)
     arm_or_center = db.Column(db.String(12), index=True)
 
-    gene_summary = db.relationship("WormbaseGeneSummary", backref='gene_components')
+    __gene_summary__ = db.relationship("WormbaseGeneSummary", backref='wormbase_gene', lazy='joined')
+
+
+    def to_json(self):
+      return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+
 
     def __repr__(self):
         return f"{self.gene_id}:{self.feature} [{self.seqname}:{self.start}-{self.end}]"
-
-
-class WormbaseGeneSummary(DictSerializable, db.Model):
-    """
-        This is a condensed version of the WormbaseGene model;
-        It is constructed out of convenience and only defines the genes
-        (not exons/introns/etc.)
-    """
-    __tablename__ = "wormbase_gene_summary"
-    id = db.Column(db.Integer, primary_key=True)
-    chrom = db.Column(db.String(7), index=True)
-    chrom_num = db.Column(db.Integer(), index=True)
-    start = db.Column(db.Integer(), index=True)
-    end = db.Column(db.Integer(), index=True)
-    locus = db.Column(db.String(30), index=True)
-    gene_id = db.Column(db.String(25), index=True)
-    gene_id_type = db.Column(db.String(15), index=False)
-    sequence_name = db.Column(db.String(30), index=True)
-    biotype = db.Column(db.String(30), nullable=True)
-    gene_symbol = db.column_property(func.coalesce(locus, sequence_name, gene_id))
-    interval = db.column_property(func.printf("%s:%s-%s", chrom, start, end))
-    arm_or_center = db.Column(db.String(12), index=True)
-
-    @classmethod
-    def resolve_gene_id(cls, query):
-        """
-            query - a locus name or transcript ID
-            output - a wormbase gene ID
-
-            Example:
-            WormbaseGene.resolve_gene_id('pot-2') --> WBGene00010195
-        """
-        result = cls.query.filter(or_(cls.locus == query, cls.sequence_name == query)).first()
-        if result:
-            return result.gene_id
 
 
 class Homologs(DictSerializable, db.Model):
@@ -534,23 +801,149 @@ class Homologs(DictSerializable, db.Model):
     """
     __tablename__ = "homologs"
     id = db.Column(db.Integer, primary_key=True)
-    gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), nullable=False, index=True)
-    gene_name = db.Column(db.String(40), index=True)
-    homolog_species = db.Column(db.String(50), index=True)
+    gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), nullable=True, index=True)
+    gene_name = db.Column(db.String(60), index=True)
+    homolog_species = db.Column(db.String(60), index=True)
     homolog_taxon_id = db.Column(db.Integer, index=True, nullable=True)  # If available
-    homolog_gene = db.Column(db.String(50), index=True)
-    homolog_source = db.Column(db.String(40))
+    homolog_gene = db.Column(db.String(60), index=True)
+    homolog_source = db.Column(db.String(60))
+    is_ortholog = db.Column(db.Boolean(), index=True, nullable=True)
 
-    gene_summary = db.relationship("WormbaseGeneSummary", backref='homologs', lazy='joined')
+    __gene_summary__ = db.relationship("WormbaseGeneSummary", backref='homologs', lazy='joined')
+
+
+    def to_json(self):
+      return {k: v for k, v in self.__dict__.items() if not k.startswith("_")}
+
 
     def unnest(self):
         """
             Used with the gene API - returns
             an unnested homolog datastructure combined with the wormbase gene summary model.
         """
-        self.__dict__.update(self.gene_summary.__dict__)
-        self.__dict__['gene_summary'] = None
+        self.__dict__.update(self.__gene_summary__.__dict__)
         return self
 
     def __repr__(self):
         return f"homolog: {self.gene_name} -- {self.homolog_gene}"
+
+
+class StrainAnnotatedVariants(DictSerializable, db.Model):
+  """
+      The Strain Annotated Variant table combines several features linked to variants:
+      Genetic location, base pairs affected, consequences of reading, gene information, 
+      strains affected, and severity of impact
+
+  """
+  __tablename__ = 'variant_annotation'
+  id = db.Column(db.Integer, primary_key=True)
+  chrom = db.Column(db.String(7), index=True)
+  pos = db.Column(db.Integer(), index=True)
+  ref_seq = db.Column(db.String(), nullable=True)
+  alt_seq = db.Column(db.String(), nullable=True)
+  consequence = db.Column(db.String(), nullable=True)
+  target_consequence = db.Column(db.Integer(), nullable=True)
+  gene_id = db.Column(db.ForeignKey('wormbase_gene_summary.gene_id'), index=True, nullable=True)
+  transcript = db.Column(db.String(), index=True, nullable=True)
+  biotype = db.Column(db.String(), nullable=True)
+  strand = db.Column(db.String(1), nullable=True)
+  amino_acid_change = db.Column(db.String(), nullable=True)
+  dna_change = db.Column(db.String(), nullable=True)
+  strains = db.Column(db.String(), nullable=True)
+  blosum = db.Column(db.Integer(), nullable=True)
+  grantham = db.Column(db.Integer(), nullable=True)
+  percent_protein = db.Column(db.Float(), nullable=True)
+  gene = db.Column(db.String(), index=True, nullable=True)
+  variant_impact = db.Column(db.String(), nullable=True)
+  divergent = db.Column(db.Boolean(), nullable=True)
+
+  __gene_summary__ = db.relationship("WormbaseGeneSummary", backref='variant_annotation', lazy='joined')
+
+
+  column_details = [
+    {'id': 'chrom', 'name': 'Chromosome'},
+    {'id': 'pos', 'name': 'Position'},
+    {'id': 'ref_seq', 'name': 'Ref Sequence'},
+    {'id': 'alt_seq', 'name': 'Alt Sequence'},
+    {'id': 'consequence', 'name': 'Consequence'},
+    {'id': 'target_consequence', 'name': 'Target Consequence'},
+    {'id': 'gene_id', 'name': 'Gene ID'},
+    {'id': 'transcript', 'name': 'Transcript'},
+    {'id': 'biotype', 'name': 'Biotype'},
+    {'id': 'strand', 'name': 'Strand'},
+    {'id': 'amino_acid_change', 'name': 'Amino Acid Change'},
+    {'id': 'dna_change', 'name': 'DNA Change'},
+    {'id': 'strains', 'name': 'Strains'},
+    {'id': 'blosum', 'name': 'BLOSUM'},
+    {'id': 'grantham', 'name': 'Grantham'},
+    {'id': 'percent_protein', 'name': 'Percent Protein'},
+    {'id': 'gene', 'name': 'Gene'},
+    {'id': 'variant_impact', 'name': 'Variant Impact'},
+    {'id': 'divergent', 'name': 'Divergent'}
+  ]
+
+  @classmethod
+  def generate_interval_sql(cls, interval):
+    interval = interval.replace(',','')
+    chrom = interval.split(':')[0]
+    range = interval.split(':')[1]
+    start = int(range.split('-')[0])
+    stop = int(range.split('-')[1])
+
+    q = f"SELECT * FROM {cls.__tablename__} WHERE chrom='{chrom}' AND pos > {start} AND pos < {stop};"
+    return q
+
+
+  ''' TODO: implement input checks here and in the browser form'''
+  @classmethod
+  def verify_interval_query(cls, q):
+    query_regex = "^(I|II|III|IV|V|X|MtDNA):[0-9,]+-[0-9,]+$"
+    match = re.search(query_regex, q) 
+    return True if match else False
+
+
+  @classmethod
+  def run_interval_query(cls, q):
+    q = cls.generate_interval_sql(q)
+    df = pd.read_sql_query(q, db.engine)
+
+    try:  
+      result = df[['id', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'target_consequence', 'gene_id', 'transcript', 'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent']].dropna(how='all') \
+                .fillna(value="") \
+                .agg(list) \
+                .to_dict()
+    except ValueError:
+      result = {}
+    return result
+
+  
+  @classmethod
+  def generate_position_sql(cls, pos):
+    pos = pos.replace(',','')
+    chrom = pos.split(':')[0]
+    pos = int(pos.split(':')[1])
+
+    q = f"SELECT * FROM {cls.__tablename__} WHERE chrom='{chrom}' AND pos = {pos};"
+    return q
+
+
+  @classmethod
+  def verify_position_query(cls, q):
+    query_regex = "^(I|II|III|IV|V|X|MtDNA):[0-9,]+$"
+    match = re.search(query_regex, q) 
+    return True if match else False
+
+
+  @classmethod
+  def run_position_query(cls, q):
+    q = cls.generate_position_sql(q)
+    df = pd.read_sql_query(q, db.engine)
+
+    try:  
+      result = df[['id', 'chrom', 'pos', 'ref_seq', 'alt_seq', 'consequence', 'target_consequence', 'gene_id', 'transcript', 'biotype', 'strand', 'amino_acid_change', 'dna_change', 'strains', 'blosum', 'grantham', 'percent_protein', 'gene', 'variant_impact', 'divergent']].dropna(how='all') \
+                .fillna(value="") \
+                .agg(list) \
+                .to_dict()
+    except ValueError:
+      result = {}
+    return result

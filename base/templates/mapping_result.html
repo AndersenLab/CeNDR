@@ -1,0 +1,100 @@
+{% extends "_layouts/default.html" %}
+
+{% block custom_head %}
+
+    {% if not result %}
+        <meta http-equiv="refresh" content="30; url={{ url_for('mapping.mapping_result_list') }}">
+    {% endif %}
+
+{% endblock %}
+
+
+{% block content %}
+
+  <div class="row">
+    <div class="col-lg-2 col-lg-offset-3 col-md-4 col-sm-4 btn-mid-row">
+      <a class="btn btn-block btn-nu " href="https://storage.googleapis.com/elegansvariation.org/reports/nemascan/{{ data_hash }}/data.tsv" role="button">
+        <span class="glyphicon glyphicon-download" aria-hidden="true"></span> 
+        Download Data
+      </a>
+    </div>
+    <div class='col-lg-2 col-md-4 col-sm-4 btn-mid-row'>
+      <a class="btn btn-block btn-nu " href="{{ url_for('mapping.mapping_results', id=id) }}" role="button">
+        <span class="glyphicon glyphicon-download" aria-hidden="true"></span> 
+        View Result Files
+      </a>
+    </div>
+    <div class='col-lg-2 col-md-4 col-sm-4 btn-mid-row'>
+    {% if report_path %}
+      <a class="btn btn-block btn-nu " href="https://storage.googleapis.com/{{ report_path }}" role="button">
+    {% else %}
+      <a class="btn btn-block btn-nu " href="" role="button" disabled>
+    {% endif %}
+        <span class="glyphicon glyphicon-stats" aria-hidden="true"></span> 
+        Download Report
+      </a>
+    </div>
+  </div>{# /row #}
+
+
+{% if result %}
+
+  <div class="row">
+    <div class="col-md-12 text-center" >
+      <div id="report_frame" width="100%" height="800px" ></div>
+    </div>
+  </div> {# /row #}
+
+{% else %}
+
+  <div class="row">
+    <div class='col-md-12'>
+        <p class='text-info text-center'>
+          <strong>
+              The genome-wide association mapping is currently being run - please check back in a few hours for results.
+          </strong>
+        </p>
+    </div> {# /col-md-12 #}
+  </div>{# /row #}
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+
+function createIFrame(iframeContent) {
+  iFrameContainer = document.getElementById('report_frame');
+  let iFrame = document.createElement("iframe");
+  iFrame.src = "about:blank";
+  
+  iFrameContainer.innerHTML = ""; // (optional) Totally Clear it if needed
+  iFrame.width = "100%";
+  iFrame.height = "800px";
+  iFrameContainer.appendChild(iFrame);
+  let iFrameDoc = iFrame.contentWindow && iFrame.contentWindow.document;
+  if (!iFrameDoc) {
+    console.log("iFrame security.");
+    return;
+  }
+  iFrameDoc.write(iframeContent);
+  iFrameDoc.close();
+  return iframeContent
+}
+
+async function getReport() {
+  report = await fetch("https://storage.googleapis.com/{{ report_path }}")
+    .then(r => r.blob())
+    .then(r => r.text())
+    .then(r => createIFrame(r));
+}
+
+getReport();
+
+</script>
+
+
+{% endblock %}

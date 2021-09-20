@@ -1,31 +1,40 @@
+from datetime import datetime
 import os
 import json
 import requests
+
 from os.path import basename
-from base.config import config
 from flask import Flask, render_template
 from flask_wtf.csrf import CSRFProtect
-from base.utils.text_utils import render_markdown
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.exceptions import HTTPException
 
+
+from base.constants import GOOGLE_CLOUD_BUCKET
+from base.config import config
+from base.utils.text_utils import render_markdown
 from base.manage import (initdb,
                          update_strains,
                          update_credentials,
-                         decrypt_credentials,
-                         download_db)
+                         decrypt_credentials)
 
 # --------- #
 #  Routing  #
 # --------- #
 from base.views.about import about_bp
 from base.views.primary import primary_bp
-from base.views.strains import strain_bp
+from base.views.strains import strains_bp
 from base.views.order import order_bp
 from base.views.data import data_bp
 from base.views.mapping import mapping_bp
 from base.views.gene import gene_bp
 from base.views.user import user_bp
+from base.views.maintenance import maintenance_bp
+from base.views.admin.admin import admin_bp
+from base.views.admin.users import users_bp
+from base.views.admin.data import data_admin_bp
+
+
 
 # Tools
 from base.views.tools import (tools_bp,
@@ -42,9 +51,9 @@ from base.views.api.api_variant import api_variant_bp
 from base.views.api.api_data import api_data_bp
 
 # Auth
-from base.auth import (auth_bp,
-                       google_bp,
-                       github_bp)
+from base.views.auth import (auth_bp, 
+                             google_bp, 
+                             saml_bp)
 
 
 # ---- End Routing ---- #
@@ -54,7 +63,8 @@ from base.extensions import (markdown,
                              cache,
                              debug_toolbar,
                              sslify,
-                             sqlalchemy)
+                             sqlalchemy,
+                             jwt)
 
 # Template filters
 from base.filters import (comma, format_release)
@@ -86,7 +96,7 @@ def configure_ssl(app):
         # Running on server
         app.debug = False
         # Ignore leading slash of urls; skips must use start of path
-        sslify(app)
+        sslify(app, skips=['tasks'])
     elif app.config['DEBUG']:
         debug_toolbar(app)
         app.config['PRESERVE_CONTEXT_ON_EXCEPTION'] = True
@@ -97,8 +107,7 @@ def register_commands(app):
     for command in [initdb,
                     update_strains,
                     update_credentials,
-                    decrypt_credentials,
-                    download_db]:
+                    decrypt_credentials]:
         app.cli.add_command(command)
 
 
@@ -110,20 +119,26 @@ def register_template_filters(app):
 def register_extensions(app):
     markdown(app)
     cache.init_app(app, config={'CACHE_TYPE': 'base.utils.cache.datastore_cache'})
-    sqlalchemy(app)
-    CSRFProtect(app)
-    app.config['csrf'] = CSRFProtect(app)
-
+    sqlalchemy.init_app(app)
+    # protect all routes (except the ones listed) from cross site request forgery
+    csrf = CSRFProtect(app)
+    csrf.exempt(auth_bp)
+    csrf.exempt(saml_bp)
+    csrf.exempt(maintenance_bp)
+    app.config['csrf'] = csrf
+    jwt.init_app(app)
 
 def register_blueprints(app):
     """Register blueprints with the Flask application."""
     app.register_blueprint(primary_bp, url_prefix='')
     app.register_blueprint(about_bp, url_prefix='/about')
-    app.register_blueprint(strain_bp, url_prefix='/strain')
+    app.register_blueprint(strains_bp, url_prefix='/strains')
     app.register_blueprint(order_bp, url_prefix='/order')
     app.register_blueprint(data_bp, url_prefix='/data')
     app.register_blueprint(mapping_bp, url_prefix='')
     app.register_blueprint(gene_bp, url_prefix='/gene')
+
+    # User
     app.register_blueprint(user_bp, url_prefix='/user')
     
     # Tools
@@ -138,33 +153,51 @@ def register_blueprints(app):
     app.register_blueprint(api_data_bp, url_prefix='/api')
 
     # Auth
-    app.register_blueprint(auth_bp, url_prefix='')
+    app.register_blueprint(auth_bp, url_prefix='/auth')
+    app.register_blueprint(saml_bp, url_prefix='/saml')
     app.register_blueprint(google_bp, url_prefix='/login')
-    app.register_blueprint(github_bp, url_prefix='/login')
 
-    # Healthchecks
+    # Admin
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(users_bp, url_prefix='/admin/users')
+    app.register_blueprint(data_admin_bp, url_prefix='/admin/data')
+
+    # Healthchecks/Maintenance
+    app.register_blueprint(maintenance_bp, url_prefix='/tasks')
     app.register_blueprint(check_bp, url_prefix='')
 
 
 def gs_static(url, prefix='static'):
-    return f"https://storage.googleapis.com/elegansvariation.org/{prefix}/{url}"
+    return f"https://storage.googleapis.com/{GOOGLE_CLOUD_BUCKET}/{prefix}/{url}"
 
 
 def configure_jinja(app):
     # Injects "contexts" into templates
     @app.context_processor
     def inject():
-        return dict(version=os.environ.get("GAE_VERSION", "-9-9-9").split("-", 1)[1].replace("-", "."),
-                    json=json,
-                    list=list,
-                    str=str,
-                    int=int,
-                    len=len,
-                    gs_static=gs_static,
-                    basename=basename,
-                    render_markdown=render_markdown)
+      return dict(version=os.environ.get("GAE_VERSION", "-9-9-9").split("-", 1)[1].replace("-", "."),
+                  json=json,
+                  list=list,
+                  str=str,
+                  int=int,
+                  len=len,
+                  gs_static=gs_static,
+                  basename=basename,
+                  render_markdown=render_markdown)
 
+    # Datetime filters for Jinja
+    @app.template_filter('date_format')
+    def _jinja2_filter_datetime(date, fmt=None):
+      if fmt:
+        return date.strftime(fmt)
+      else:
+        return date.strftime('%c')
 
+'''
+2021-04-14 17:26:51.348674+00:00
+
+'%Y-%m-%d %H:%M:%S.%f+%z'
+'''
 def register_errorhandlers(app):
 
     def render_error(e="generic"):

@@ -1,0 +1,64 @@
+{% extends "_layouts/default.html" %}
+{% from "macros.html" import render_field %}
+
+{% block content %}
+
+<div class="row">
+  <div class='col-md-2'></div> 
+  <div class='col-md-8' align="center">
+
+
+
+
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="main active" ><a href="#main" role="tab" data-toggle="tab">Profile</a></li>
+    <li role="presentation" class="h2results" ><a href="{{ url_for('heritability.heritability_result_list') }}" role="tab">Heritability Results</a></li>
+    <li role="presentation" class="ip-results" ><a href="{{ url_for('indel_primer.indel_primer_result_list') }}" role="tab">Indel Primer Results</a></li>
+    <li role="presentation" class="ip-results" ><a href="{{ url_for('mapping.mapping_result_list') }}" role="tab">Genetic Mapping Results</a></li>
+
+  </ul>
+
+  <!-- Tab panes -->
+  <div class="tab-content">
+
+    <div role="tabpanel" class="tab-pane active" id="main">
+          <table class='table table-striped table-condensed'>
+            <tr><td>Username</td><td>{{ user.username }}</td></tr>
+            <tr><td>Full Name</td><td>{{ user.full_name }}</td></tr>
+            <tr><td>Email</td><td>{{ user.email }}</td></tr>
+            <tr><td>Verified</td><td>{{ user.verified_email }}</td></tr>
+            <tr><td>Password</td><td>************</td></tr>
+            <tr><td>Roles</td><td>{{ user.roles }}</td></tr>
+            <tr><td>Registered</td><td>{{ user.created_on }}</td></tr>
+            <tr><td>Last Modified</td><td>{{ user.modified_on }}</td></tr>
+            <tr><td>Last Login</td><td>{{ user.last_login }}</td></tr>
+          </table>
+
+          <div class="row">
+            <div class='col-md-3'></div> {# /col-md-3 >#}
+            <div class='col-md-6' align="center">
+              <button id='edit-btn' type='submit' class="btn btn-nu btn-block"
+                onClick='window.location.href="{{ url_for( 'user.user_update') }}";'
+              {% if user['user_type'] != 'LOCAL' %}
+                disabled>
+              {% else %} 
+                >
+              {% endif %}
+                <span class="glyphicon glyphicon-edit" aria-hidden="true"></span> 
+                  Edit 
+              </button>
+            </div> <!-- /col-md-6 -->
+          </div> <!-- /row -->
+
+    </div>
+
+  </div>{# Tab Set #}
+
+
+</div> <!-- /row -->
+
+
+
+
+{% endblock %}

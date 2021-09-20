@@ -16,11 +16,9 @@ def gene(gene_name=""):
     if not gene_name:
         redirect(url_for('gene.gene', gene_name='pot-2'))
 
-
     gene_record = lookup_gene(gene_name)
-
     if gene_record is None:
-        return render_template('404.html'), 404
+        return render_template('errors/404.html'), 404
 
     # Gene Variants
     variants = gene_variants(gene_record.gene_id)

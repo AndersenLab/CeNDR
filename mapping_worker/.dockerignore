@@ -1,7 +1,0 @@
-df.tsv
-data/
-Rplots.pdf
-figures/
-mapping.Rdata
-interval.Rdata
-*vcf.gz
