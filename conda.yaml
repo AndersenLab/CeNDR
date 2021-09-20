@@ -1,0 +1,11 @@
+name: cendr
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.8.2
+  - diagrams
+  - flask-jwt-extended=4.1.0
+  - flask=1.1.2
+  - xmlsec
